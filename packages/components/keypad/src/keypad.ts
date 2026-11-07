@@ -1,6 +1,5 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { styleMap } from 'lit/directives/style-map.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -216,6 +215,34 @@ export class Keypad extends LitElement {
 
   protected override updated() {
     this.syncFormState()
+    this.fitAmount()
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    this.resizeObserver?.observe(this)
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.resizeObserver?.disconnect()
+  }
+
+  /** A narrower keypad fits a long amount again. */
+  private readonly resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => this.fitAmount())
+
+  /**
+   * Shrinks an amount wider than the display just enough to fit, rather than clip the digits being typed. Measured,
+   * not estimated from the character count: digit widths differ from font to font.
+   */
+  private fitAmount() {
+    const display = this.renderRoot?.querySelector<HTMLElement>('.display--amount')
+    if (!display) return
+    display.style.removeProperty('font-size')
+    const { scrollWidth, clientWidth } = display
+    if (scrollWidth <= clientWidth || !clientWidth) return
+    const size = parseFloat(getComputedStyle(display).fontSize)
+    display.style.fontSize = `${Math.floor(size * (clientWidth / scrollWidth) * 100) / 100}px`
   }
 
   /** The value the keys could have typed: digits, one point with an amount, within the lengths. */
@@ -346,12 +373,10 @@ export class Keypad extends LitElement {
       </div>`
     }
     const amount = this.formatAmount()
-    // The length lets the CSS shrink a long amount to the width, rather than clip the digits being typed.
     return html`<output
       class="display display--amount ${this.value ? '' : 'display--empty'} ${invalid ? 'display--invalid' : ''}"
       part="display"
       aria-live="polite"
-      style=${styleMap({ '--_chars': String(Math.max(1, amount.length)) })}
       >${amount}</output
     >`
   }
