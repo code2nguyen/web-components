@@ -1,5 +1,6 @@
 import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { SignaturePad } from '../src/signature-pad'
 
 const pad = (page: Page) => page.locator('c2-signature-pad').first()
 const surface = (page: Page) => page.getByRole('img').first()
@@ -30,14 +31,14 @@ test('an empty pad is a named image that says it is not signed, with a hint and 
   await expect(pad(page).locator('[part="placeholder"]')).toHaveText('Sign here')
   await expect(page.getByRole('button', { name: 'Undo' })).toHaveAttribute('aria-disabled', 'true')
   await expect(page.getByRole('button', { name: 'Clear' })).toHaveAttribute('aria-disabled', 'true')
-  expect(await pad(page).evaluate((element) => element.isEmpty)).toBe(true)
+  expect(await pad(page).evaluate((element: SignaturePad) => element.isEmpty)).toBe(true)
   await accessible(page)
 })
 
 test('a stroke draws a smooth path, hides the hint and fires input and change once', async ({ page, renderScenario }) => {
   await renderScenario('<form><c2-signature-pad name="signature"></c2-signature-pad></form>')
   // Both events, counted apart; each sees the new signature already in the form.
-  await pad(page).evaluate((element) => {
+  await pad(page).evaluate((element: SignaturePad) => {
     const seen: string[] = []
     for (const type of ['input', 'change'])
       element.addEventListener(type, () => seen.push(`${type}:${new FormData(element.closest('form')!).has('signature')}`))
@@ -46,12 +47,12 @@ test('a stroke draws a smooth path, hides the hint and fires input and change on
   await watch(pad(page), 'change')
   await sign(page, scribble)
   await expect(paths(page)).toHaveCount(1)
-  expect(await pad(page).evaluate((element) => (element as HTMLElement & { seen?: string[] }).seen)).toEqual(['input:true', 'change:true'])
+  expect(await pad(page).evaluate((element: SignaturePad) => (element as HTMLElement & { seen?: string[] }).seen)).toEqual(['input:true', 'change:true'])
   await expect(paths(page)).toHaveAttribute('d', /^M[\d.]+ [\d.]+(Q[\d. ]+)+L[\d.]+ [\d.]+$/)
   await expect(pad(page).locator('[part="placeholder"]')).toHaveCount(0)
   await expect(surface(page)).toHaveAccessibleDescription('Signed')
   expect(await events(page)).toHaveLength(1)
-  const strokes = await pad(page).evaluate((element) => element.strokes)
+  const strokes = await pad(page).evaluate((element: SignaturePad) => element.strokes)
   expect(strokes).toHaveLength(1)
   expect(strokes[0].length).toBeGreaterThan(4)
 
@@ -103,7 +104,7 @@ test('strokes set from code show a saved signature, and it exports as SVG, a dat
     ],
   })
   await expect(paths(page)).toHaveCount(2)
-  const svg = await pad(page).evaluate((element) => element.toSVG())
+  const svg = await pad(page).evaluate((element: SignaturePad) => element.toSVG())
   const width = Math.round((await pad(page).locator('[part="pad"]').boundingBox())!.width)
   expect(svg).toContain(`width="${width}"`)
   expect(svg).toContain('stroke="rgb(10, 20, 30)" stroke-width="3"')
@@ -113,11 +114,11 @@ test('strokes set from code show a saved signature, and it exports as SVG, a dat
       .evaluate((path) => getComputedStyle(path).stroke),
   ).toBe('rgb(240, 240, 240)')
   expect(svg.match(/<path /g)).toHaveLength(2)
-  expect(await pad(page).evaluate((element) => element.toDataURL())).toMatch(/^data:image\/png;base64,/)
-  expect(await pad(page).evaluate((element) => element.toDataURL('image/jpeg'))).toMatch(/^data:image\/jpeg;base64,/)
-  expect(await pad(page).evaluate(async (element) => (await element.toBlob())?.type)).toBe('image/png')
+  expect(await pad(page).evaluate((element: SignaturePad) => element.toDataURL())).toMatch(/^data:image\/png;base64,/)
+  expect(await pad(page).evaluate((element: SignaturePad) => element.toDataURL('image/jpeg'))).toMatch(/^data:image\/jpeg;base64,/)
+  expect(await pad(page).evaluate(async (element: SignaturePad) => (await element.toBlob())?.type)).toBe('image/png')
   // Not a stroke: ignored.
-  await pad(page).evaluate(async (element) => {
+  await pad(page).evaluate(async (element: SignaturePad) => {
     element.setAttribute('strokes', '[[[1, 2]], "nope", [[3, "x"]]]')
     await element.updateComplete
   })
@@ -127,16 +128,16 @@ test('strokes set from code show a saved signature, and it exports as SVG, a dat
 test('it is a form control: submits SVG under its name, required asks for a signature, reset restores the first drawing', async ({ page, renderScenario }) => {
   await renderScenario(`<form><c2-signature-pad name="signature" required strokes='[[[20, 20], [60, 40]]]'></c2-signature-pad></form>`)
   const data = () => page.locator('form').evaluate((form: HTMLFormElement) => Object.fromEntries(new FormData(form)) as Record<string, string>)
-  const valid = () => pad(page).evaluate((element) => element.checkValidity())
+  const valid = () => pad(page).evaluate((element: SignaturePad) => element.checkValidity())
   expect((await data()).signature).toMatch(/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg".*<path d="M20 20L60 40"\/>.*<\/svg>$/)
   expect(await valid()).toBe(true)
 
   await page.getByRole('button', { name: 'Clear' }).click()
   expect(await data()).toEqual({})
   expect(await valid()).toBe(false)
-  expect(await pad(page).evaluate((element) => element.validationMessage)).toBe('Sign in the box.')
+  expect(await pad(page).evaluate((element: SignaturePad) => element.validationMessage)).toBe('Sign in the box.')
   // Reporting it moves focus to the pad's first button, where the browser shows the message.
-  await pad(page).evaluate((element) => element.reportValidity())
+  await pad(page).evaluate((element: SignaturePad) => element.reportValidity())
   await expect(page.getByRole('button', { name: 'Undo' })).toBeFocused()
 
   await sign(page, scribble)
@@ -151,7 +152,7 @@ test('readonly shows the signature without buttons and takes no strokes; disable
   await expect(page.getByRole('button')).toHaveCount(0)
   await sign(page, scribble)
   await expect(paths(page)).toHaveCount(1)
-  await pad(page).evaluate((element) => element.setAttribute('disabled', ''))
+  await pad(page).evaluate((element: SignaturePad) => element.setAttribute('disabled', ''))
   expect(await page.locator('form').evaluate((form: HTMLFormElement) => [...new FormData(form).keys()])).toEqual([])
 })
 
@@ -163,7 +164,7 @@ test('draws in its own pixels under a scaled ancestor', async ({ page, renderSce
     [0.5, 0.5],
     [0.75, 0.5],
   ])
-  const [first] = await pad(page).evaluate((element) => element.strokes[0])
+  const [first] = await pad(page).evaluate((element: SignaturePad) => element.strokes[0])
   // The middle of a 400 × 200 pad, whatever its size on screen.
   expect(first[0]).toBeCloseTo(200, -1)
   expect(first[1]).toBeCloseTo(100, -1)
@@ -183,11 +184,11 @@ test('a locked pad lets the page pan, takes focus itself when it has no buttons,
   const touchAction = (locator: ReturnType<typeof pad>) => locator.locator('[part="pad"]').evaluate((element) => getComputedStyle(element).touchAction)
   expect(await touchAction(pad(page))).toBe('auto')
   expect(await touchAction(page.locator('#drawing'))).toBe('none')
-  expect(await pad(page).evaluate((element) => element.checkValidity())).toBe(true)
-  await pad(page).evaluate((element) => element.focus())
+  expect(await pad(page).evaluate((element: SignaturePad) => element.checkValidity())).toBe(true)
+  await pad(page).evaluate((element: SignaturePad) => element.focus())
   await expect(surface(page)).toBeFocused()
   // Hidden buttons are skipped too.
-  await page.locator('#drawing').evaluate((element) => {
+  await page.locator('#drawing').evaluate((element: SignaturePad) => {
     element.style.setProperty('--c2-signature-pad__actions--display', 'none')
     element.focus()
   })
@@ -196,7 +197,7 @@ test('a locked pad lets the page pan, takes focus itself when it has no buttons,
 
 test('removing its own disabled inside a disabled fieldset keeps it disabled', async ({ page, renderScenario }) => {
   await renderScenario('<form><fieldset disabled><c2-signature-pad name="signature" disabled></c2-signature-pad></fieldset></form>')
-  await pad(page).evaluate((element) => element.removeAttribute('disabled'))
+  await pad(page).evaluate((element: SignaturePad) => element.removeAttribute('disabled'))
   await expect(page.getByRole('button')).toHaveCount(0)
   await sign(page, scribble)
   await expect(paths(page)).toHaveCount(0)

@@ -1,10 +1,11 @@
 import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { AngleSlider } from '../src/angle-slider'
 
 const slider = (page: Page) => page.locator('c2-angle-slider').first()
 const handle = (page: Page) => page.getByRole('slider').first()
 const events = async (page: Page) => JSON.parse((await slider(page).getAttribute('data-events')) ?? '[]') as unknown[]
-const value = (page: Page) => slider(page).evaluate((element) => element.value)
+const value = (page: Page) => slider(page).evaluate((element: AngleSlider) => element.value)
 
 /** Presses the dial at `degrees` clockwise from the top, `reach` of the way from the centre to the edge. */
 async function pointAt(page: Page, degrees: number, reach = 0.8) {
@@ -126,7 +127,7 @@ test('the sweep variable reshapes the arc and the values it maps to', async ({ p
 
 test('formatValue names the value for the middle and for assistive technology; the default slot replaces the middle', async ({ page, renderScenario }) => {
   await renderScenario('<c2-angle-slider mode="arc" min="16" max="28" value="21"></c2-angle-slider><c2-angle-slider id="icon"><span>N</span></c2-angle-slider>')
-  await slider(page).evaluate(async (element) => {
+  await slider(page).evaluate(async (element: AngleSlider) => {
     element.formatValue = (v) => `${v} °C`
     await element.updateComplete
   })
@@ -146,7 +147,7 @@ test('it is a form control: submits under its name, resets, and a disabled one n
   await page.locator('form').evaluate((form: HTMLFormElement) => form.reset())
   expect(await value(page)).toBe(45)
 
-  await slider(page).evaluate((element) => element.toggleAttribute('disabled', true))
+  await slider(page).evaluate((element: AngleSlider) => element.toggleAttribute('disabled', true))
   await expect(handle(page)).toHaveAttribute('aria-disabled', 'true')
   await press(page, 180)
   expect(await value(page)).toBe(45)
@@ -175,6 +176,6 @@ test('in forced colours the dial paints itself in system colours', async ({ page
 
 test('removing its own disabled inside a disabled fieldset keeps it disabled', async ({ page, renderScenario }) => {
   await renderScenario('<form><fieldset disabled><c2-angle-slider name="heading" disabled></c2-angle-slider></fieldset></form>')
-  await slider(page).evaluate((element) => element.removeAttribute('disabled'))
+  await slider(page).evaluate((element: AngleSlider) => element.removeAttribute('disabled'))
   await expect(handle(page)).toHaveAttribute('aria-disabled', 'true')
 })

@@ -1,10 +1,11 @@
 import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { Keypad } from '../src/keypad'
 
 const keypad = (page: Page) => page.locator('c2-keypad').first()
 const display = (page: Page) => keypad(page).locator('[part="display"]')
 const key = (page: Page, name: string) => keypad(page).getByRole('button', { name, exact: true })
-const value = (page: Page) => keypad(page).evaluate((element) => element.value)
+const value = (page: Page) => keypad(page).evaluate((element: Keypad) => element.value)
 const events = async (page: Page, selector = 'c2-keypad') => JSON.parse((await page.locator(selector).first().getAttribute('data-events')) ?? '[]') as unknown[]
 
 async function tap(page: Page, ...keys: string[]) {
@@ -63,11 +64,11 @@ test('a PIN shows a dot per digit, says how many are typed, fires complete once 
   await tap(page, '1', '2', '3')
   await expect(keypad(page).locator('.dot--filled')).toHaveCount(3)
   await expect(keypad(page).getByRole('status')).toHaveText('3 of 6 digits entered')
-  expect(await keypad(page).evaluate((element) => element.validationMessage)).toBe('Enter all 6 digits.')
+  expect(await keypad(page).evaluate((element: Keypad) => element.validationMessage)).toBe('Enter all 6 digits.')
   await tap(page, '4', '5', '6', '7')
   expect(await value(page)).toBe('123456')
   expect(await events(page)).toEqual([{ value: '123456' }])
-  expect(await keypad(page).evaluate((element) => element.checkValidity())).toBe(true)
+  expect(await keypad(page).evaluate((element: Keypad) => element.checkValidity())).toBe(true)
   await accessible(page)
 })
 
@@ -107,7 +108,7 @@ test('it is a form control: submits under its name, required asks for a value, r
   expect(await data()).toEqual({ amount: '12' })
   await tap(page, 'Delete', 'Delete')
   expect(await data()).toEqual({})
-  expect(await keypad(page).evaluate((element) => element.validationMessage)).toBe('Enter a value.')
+  expect(await keypad(page).evaluate((element: Keypad) => element.validationMessage)).toBe('Enter a value.')
   await page.locator('form').evaluate((form: HTMLFormElement) => form.reset())
   expect(await value(page)).toBe('12')
   // A value set from code is kept to what the keys could type; a comma in it is a thousands separator.
@@ -116,7 +117,7 @@ test('it is a form control: submits under its name, required asks for a value, r
   await props(keypad(page), { value: '1,250.50' })
   expect(await value(page)).toBe('1250.50')
 
-  await keypad(page).evaluate((element) => element.setAttribute('disabled', ''))
+  await keypad(page).evaluate((element: Keypad) => element.setAttribute('disabled', ''))
   await expect(key(page, '5')).toBeDisabled()
   expect(await data()).toEqual({})
 })
@@ -144,7 +145,7 @@ test('a disabled keypad turns off its biometric key too', async ({ page, renderS
   const faceId = page.getByRole('button', { name: 'Face ID' })
   await faceId.click({ force: true })
   await expect(faceId).not.toHaveAttribute('data-pressed')
-  await keypad(page).evaluate((element) => element.removeAttribute('disabled'))
+  await keypad(page).evaluate((element: Keypad) => element.removeAttribute('disabled'))
   await faceId.click()
   await expect(faceId).toHaveAttribute('data-pressed', '1')
 })
