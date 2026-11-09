@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-signature-pad</title>
+    <script type="module" src="/src/signature-pad.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 32px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-signature-pad label="Your signature" style="width: 420px"></c2-signature-pad>
+    <c2-signature-pad
+      label="Signature"
+      readonly
+      style="width: 420px"
+      strokes="[[[30,140],[48,96],[62,74],[72,90],[76,128],[82,148],[94,118],[108,88],[120,104],[126,132],[140,120],[156,98],[170,108],[178,128],[196,112],[214,102],[232,118]]]"
+    ></c2-signature-pad>
+  </body>
+</html>

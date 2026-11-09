@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-angle-slider</title>
+    <script type="module" src="/src/angle-slider.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 32px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-angle-slider label="Gradient angle" value="135" step="15"></c2-angle-slider>
+    <c2-angle-slider label="Volume" mode="arc" min="0" max="100" value="60"></c2-angle-slider>
+    <c2-angle-slider
+      label="Temperature"
+      mode="arc"
+      min="16"
+      max="28"
+      step="0.5"
+      value="21.5"
+      style="--c2-angle-slider__fill--color: #f97316; --c2-angle-slider__track--width: 14px"
+    ></c2-angle-slider>
+    <c2-angle-slider label="Rotation" value="90" disabled></c2-angle-slider>
+  </body>
+</html>

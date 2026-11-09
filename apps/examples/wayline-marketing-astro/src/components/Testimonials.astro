@@ -1,0 +1,37 @@
+---
+import { testimonials } from '../data/site'
+
+// Three columns of every quote, each starting at a different one and scrolling at its own speed, the middle one the
+// other way. A column needs more quotes than fit in its height, or its loop shows a gap before the first comes round.
+const columns = [0, 2, 4].map((start) => [...testimonials.slice(start), ...testimonials.slice(0, start)])
+---
+
+<section class="container" aria-labelledby="testimonials-title">
+  <div class="section-head">
+    <p class="eyebrow">Customers</p>
+    <h2 id="testimonials-title">Teams that stopped copying and pasting</h2>
+  </div>
+  <div class="quote-columns">
+    {
+      columns.map((quotes, index) => (
+        <c2-marquee
+          class={`quote-column quote-column--${index}`}
+          orientation="vertical"
+          reverse={index === 1}
+          inert={index > 0 ? '' : undefined}
+          aria-label={`What customers say, column ${index + 1}`}
+        >
+          {quotes.map((item) => (
+            <figure class="quote">
+              <blockquote>{item.quote}</blockquote>
+              <figcaption>
+                <strong>{item.name}</strong>
+                <span>{item.role}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </c2-marquee>
+      ))
+    }
+  </div>
+</section>

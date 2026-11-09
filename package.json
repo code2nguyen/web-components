@@ -101,6 +101,7 @@
         "./packages/components/accordion:build",
         "./packages/components/action-bar:build",
         "./packages/components/address-field:build",
+        "./packages/components/angle-slider:build",
         "./packages/components/app-shell:build",
         "./packages/components/attachment:build",
         "./packages/components/audio-player:build",
@@ -112,6 +113,7 @@
         "./packages/components/banner:build",
         "./packages/components/bar-list:build",
         "./packages/components/barcode:build",
+        "./packages/components/beam:build",
         "./packages/components/border-beam:build",
         "./packages/components/bottom-nav:build",
         "./packages/components/breadcrumb:build",
@@ -151,6 +153,7 @@
         "./packages/components/date-time-picker:build",
         "./packages/components/description-list:build",
         "./packages/components/details:build",
+        "./packages/components/device-frame:build",
         "./packages/components/diff-viewer:build",
         "./packages/components/distribution-bar:build",
         "./packages/components/duration-input:build",
@@ -185,6 +188,7 @@
         "./packages/components/kanban:build",
         "./packages/components/kbd:build",
         "./packages/components/key-value-editor:build",
+        "./packages/components/keypad:build",
         "./packages/components/label:build",
         "./packages/components/link-button:build",
         "./packages/components/list-item:build",
@@ -193,6 +197,7 @@
         "./packages/components/log-viewer:build",
         "./packages/components/markdown:build",
         "./packages/components/marker:build",
+        "./packages/components/marquee:build",
         "./packages/components/mask-input:build",
         "./packages/components/masonry:build",
         "./packages/components/master-detail:build",
@@ -251,6 +256,7 @@
         "./packages/components/sheet:build",
         "./packages/components/shortcut:build",
         "./packages/components/side-nav:build",
+        "./packages/components/signature-pad:build",
         "./packages/components/skeleton:build",
         "./packages/components/skip-link:build",
         "./packages/components/slider:build",
@@ -317,7 +323,8 @@
         "./apps/examples/observability-nextjs:build",
         "./apps/examples/orders-admin-angular:build",
         "./apps/examples/support-inbox-vue:build",
-        "./apps/examples/trading-dashboard-react:build"
+        "./apps/examples/trading-dashboard-react:build",
+        "./apps/examples/wayline-marketing-astro:build"
       ]
     },
     "ui:build": {

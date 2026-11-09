@@ -1,0 +1,42 @@
+---
+// The theme (tokens, dark mode and every component's mapping) comes from one import; the site's own styles build on
+// the same --c2-theme--* tokens, so the page and the components switch theme together.
+import '@c2n/components/theme.css'
+import '../styles/site.css'
+
+interface Props {
+  title: string
+  description: string
+}
+
+const { title, description } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} type="image/svg+xml" />
+    <script is:inline>
+      // The docs site embeds this page in an iframe and passes its own resolved theme through `?theme=`; it is
+      // applied before the first paint. Without it the theme follows prefers-color-scheme.
+      ;(function () {
+        try {
+          var theme = new URLSearchParams(location.search).get('theme')
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme
+        } catch (e) {
+          /* the prefers-color-scheme fallback still applies */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      import '../scripts/site.ts'
+    </script>
+  </body>
+</html>

@@ -3941,4 +3941,141 @@ selectors:
       },
     ],
   },
+  'c2-marquee': {
+    html: `<c2-marquee aria-label="Customers" style="width:320px"><span>Northwind</span><span>Contoso</span><span>Fabrikam</span><span>Tailspin</span><span>Litware</span><span>Proseware</span></c2-marquee>`,
+    presets: [
+      {
+        name: 'Logo wall',
+        description: 'Slower, wider spacing and soft edges, for a row of customer logos.',
+        css: { '--c2-marquee--speed': '28', '--c2-marquee__item--gap': '48px', '--c2-marquee__viewport--fade': '56px' },
+      },
+      { name: 'Ticker', description: 'A fast, tight strip for prices or headlines.', css: { '--c2-marquee--speed': '70', '--c2-marquee__item--gap': '20px' } },
+      { name: 'Reverse', description: 'Moves toward the end instead of the start.', attributes: { reverse: '' } },
+    ],
+  },
+  'c2-device-frame': {
+    html: `<c2-device-frame url="example.com" style="width:320px"><p style="margin:0;padding:20px 16px">Your product here.</p></c2-device-frame>`,
+    presets: [
+      {
+        name: 'Window dots',
+        description: 'Red, amber and green window controls with a deeper shadow.',
+        css: {
+          '--c2-device-frame__close-dot--color': '#ff5f57',
+          '--c2-device-frame__minimize-dot--color': '#febc2e',
+          '--c2-device-frame__zoom-dot--color': '#28c840',
+          '--c2-device-frame__frame--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.25)',
+        },
+      },
+      { name: 'Phone', description: 'A phone with a camera island.', attributes: { device: 'phone' }, css: { '--c2-device-frame__phone--width': '200px' } },
+      {
+        name: 'Flat phone',
+        description: 'A light, thin bezel with no island or shadow.',
+        attributes: { device: 'phone' },
+        css: {
+          '--c2-device-frame__phone--width': '200px',
+          '--c2-device-frame__bezel--width': '6px',
+          '--c2-device-frame__bezel--color': '#d4d4d8',
+          '--c2-device-frame__island--width': '0',
+          '--c2-device-frame__frame--box-shadow': 'none',
+        },
+      },
+    ],
+  },
+  'c2-beam': {
+    html: `<div style="position:relative;display:flex;justify-content:space-between;align-items:center;width:300px;height:120px"><span id="beam-preset-a" style="padding:8px 12px;border:1px solid #e4e4e7;border-radius:8px">Client</span><span id="beam-preset-b" style="padding:8px 12px;border:1px solid #e4e4e7;border-radius:8px">Server</span><c2-beam from="beam-preset-a" to="beam-preset-b"></c2-beam></div>`,
+    presets: [
+      {
+        name: 'Violet',
+        description: 'A violet-to-pink light on the default line.',
+        css: { '--c2-beam__beam--color-from': '#7c3aed', '--c2-beam__beam--color-to': '#ec4899' },
+      },
+      {
+        name: 'Bold',
+        description: 'A thick, long light on a thick, soft track.',
+        css: { '--c2-beam__track--width': '4px', '--c2-beam__beam--width': '4px', '--c2-beam__beam--length': '35' },
+      },
+      { name: 'Curved return', description: 'Bends the line and sends the light back.', attributes: { curvature: '30', reverse: '' } },
+    ],
+  },
+  'c2-angle-slider': {
+    html: `<c2-angle-slider label="Temperature" mode="arc" min="16" max="28" step="0.5" value="21.5"></c2-angle-slider>`,
+    presets: [
+      {
+        name: 'Thermostat',
+        description: 'A large, thick, warm arc with a ringed handle.',
+        css: {
+          '--c2-angle-slider--size': '190px',
+          '--c2-angle-slider__arc--sweep': '260',
+          '--c2-angle-slider__track--width': '14px',
+          '--c2-angle-slider__fill--color': '#f97316',
+          '--c2-angle-slider__thumb--size': '26px',
+          '--c2-angle-slider__thumb--border': '4px solid #f97316',
+          '--c2-angle-slider__value--font-size': '40px',
+        },
+      },
+      {
+        name: 'Knob',
+        description: 'A small 300 degree knob for a toolbar or a mixer.',
+        css: {
+          '--c2-angle-slider--size': '96px',
+          '--c2-angle-slider__arc--sweep': '300',
+          '--c2-angle-slider__track--width': '6px',
+          '--c2-angle-slider__thumb--size': '14px',
+          '--c2-angle-slider__value--font-size': '16px',
+        },
+      },
+    ],
+  },
+  'c2-keypad': {
+    html: `<c2-keypad display="pin" length="6" value="123"></c2-keypad>`,
+    presets: [
+      {
+        name: 'Passcode',
+        description: 'Round keys spaced like a phone lock screen.',
+        css: {
+          '--c2-keypad--width': '200px',
+          '--c2-keypad__key--height': '60px',
+          '--c2-keypad__key--border-radius': '999px',
+          '--c2-keypad__key--font-size': '26px',
+          '--c2-keypad__key--font-weight': '400',
+          '--c2-keypad__keys--gap': '10px',
+        },
+      },
+      {
+        name: 'Bare keys',
+        description: 'Keys without a fill until they are hovered or pressed.',
+        css: {
+          '--c2-keypad__key--background': 'transparent',
+          '--c2-keypad__key__hover--background': 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff))',
+          '--c2-keypad__keys--gap': '0px',
+        },
+      },
+    ],
+  },
+  'c2-signature-pad': {
+    html: `<c2-signature-pad label="Signature"></c2-signature-pad>`,
+    presets: [
+      {
+        name: 'Line only',
+        description: 'No box, a heavy baseline to sign on, and no buttons.',
+        css: {
+          '--c2-signature-pad--border': '0',
+          '--c2-signature-pad--background': 'transparent',
+          '--c2-signature-pad__baseline--inset': '0px',
+          '--c2-signature-pad__baseline--border': '2px solid var(--c2-theme--color-on-surface, #18181b)',
+          '--c2-signature-pad__actions--display': 'none',
+        },
+      },
+      {
+        name: 'Marker',
+        description: 'A thick blue marker in a dashed, rounded box.',
+        css: {
+          '--c2-signature-pad__stroke--color': '#2563eb',
+          '--c2-signature-pad__stroke--width': '5px',
+          '--c2-signature-pad--border-radius': '14px',
+          '--c2-signature-pad__baseline--border': '0',
+        },
+      },
+    ],
+  },
 }

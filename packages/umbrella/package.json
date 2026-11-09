@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -81,6 +81,10 @@
       "types": "./dist/address-field.d.ts",
       "default": "./dist/address-field.js"
     },
+    "./angle-slider": {
+      "types": "./dist/angle-slider.d.ts",
+      "default": "./dist/angle-slider.js"
+    },
     "./app-shell": {
       "types": "./dist/app-shell.d.ts",
       "default": "./dist/app-shell.js"
@@ -132,6 +136,10 @@
     "./barcode": {
       "types": "./dist/barcode.d.ts",
       "default": "./dist/barcode.js"
+    },
+    "./beam": {
+      "types": "./dist/beam.d.ts",
+      "default": "./dist/beam.js"
     },
     "./border-beam": {
       "types": "./dist/border-beam.d.ts",
@@ -441,6 +449,10 @@
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
     },
+    "./device-frame": {
+      "types": "./dist/device-frame.d.ts",
+      "default": "./dist/device-frame.js"
+    },
     "./diff-viewer": {
       "types": "./dist/diff-viewer.d.ts",
       "default": "./dist/diff-viewer.js"
@@ -609,6 +621,10 @@
       "types": "./dist/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
     },
+    "./keypad": {
+      "types": "./dist/keypad.d.ts",
+      "default": "./dist/keypad.js"
+    },
     "./label": {
       "types": "./dist/label.d.ts",
       "default": "./dist/label.js"
@@ -640,6 +656,10 @@
     "./marker": {
       "types": "./dist/marker.d.ts",
       "default": "./dist/marker.js"
+    },
+    "./marquee": {
+      "types": "./dist/marquee.d.ts",
+      "default": "./dist/marquee.js"
     },
     "./mask-input": {
       "types": "./dist/mask-input.d.ts",
@@ -905,6 +925,10 @@
       "types": "./dist/side-nav.d.ts",
       "default": "./dist/side-nav.js"
     },
+    "./signature-pad": {
+      "types": "./dist/signature-pad.d.ts",
+      "default": "./dist/signature-pad.js"
+    },
     "./skeleton": {
       "types": "./dist/skeleton.d.ts",
       "default": "./dist/skeleton.js"
@@ -1152,10 +1176,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.22",
-    "@c2n/phosphor-icons": "1.0.22",
-    "@c2n/task-icons": "1.0.22",
-    "@c2n/theme": "1.0.22",
+    "@c2n/core": "1.0.23",
+    "@c2n/phosphor-icons": "1.0.23",
+    "@c2n/task-icons": "1.0.23",
+    "@c2n/theme": "1.0.23",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1253,6 +1277,7 @@
     "@c2n/accordion": "*",
     "@c2n/action-bar": "*",
     "@c2n/address-field": "*",
+    "@c2n/angle-slider": "*",
     "@c2n/app-shell": "*",
     "@c2n/attachment": "*",
     "@c2n/audio-player": "*",
@@ -1264,6 +1289,7 @@
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
     "@c2n/barcode": "*",
+    "@c2n/beam": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",
     "@c2n/breadcrumb": "*",
@@ -1305,6 +1331,7 @@
     "@c2n/date-time-picker": "*",
     "@c2n/description-list": "*",
     "@c2n/details": "*",
+    "@c2n/device-frame": "*",
     "@c2n/diff-viewer": "*",
     "@c2n/distribution-bar": "*",
     "@c2n/duration-input": "*",
@@ -1339,6 +1366,7 @@
     "@c2n/kanban": "*",
     "@c2n/kbd": "*",
     "@c2n/key-value-editor": "*",
+    "@c2n/keypad": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",
@@ -1347,6 +1375,7 @@
     "@c2n/log-viewer": "*",
     "@c2n/markdown": "*",
     "@c2n/marker": "*",
+    "@c2n/marquee": "*",
     "@c2n/mask-input": "*",
     "@c2n/masonry": "*",
     "@c2n/master-detail": "*",
@@ -1405,6 +1434,7 @@
     "@c2n/sheet": "*",
     "@c2n/shortcut": "*",
     "@c2n/side-nav": "*",
+    "@c2n/signature-pad": "*",
     "@c2n/skeleton": "*",
     "@c2n/skip-link": "*",
     "@c2n/slider": "*",

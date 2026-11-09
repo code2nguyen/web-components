@@ -96,6 +96,26 @@ test('resolving folds the thread to its first comment; reopening unfolds it', as
   expect(await events(page)).toEqual([{ resolved: true }, { resolved: false }])
 })
 
+test('edit and delete are icon buttons shown while their comment is hovered or holds focus', async ({ page, renderScenario }) => {
+  await renderScenario(scenario())
+  const edit = page.getByRole('button', { name: "Edit Ben Ito's comment" })
+  const remove = page.getByRole('button', { name: "Delete Ben Ito's comment" })
+  await expect(edit).toHaveText('')
+  await expect(edit).toHaveAttribute('title', "Edit Ben Ito's comment")
+  await expect(remove).toHaveAttribute('title', "Delete Ben Ito's comment")
+  await page.mouse.move(0, 0)
+  await expect(edit).toHaveCSS('opacity', '0')
+  await expect(remove).toHaveCSS('opacity', '0')
+  await page.getByRole('article').nth(1).hover()
+  await expect(edit).toHaveCSS('opacity', '1')
+  await expect(remove).toHaveCSS('opacity', '1')
+  await page.mouse.move(0, 0)
+  await expect(edit).toHaveCSS('opacity', '0')
+  await edit.focus()
+  await expect(edit).toHaveCSS('opacity', '1')
+  await expect(remove).toHaveCSS('opacity', '1')
+})
+
 test('no-resolve drops the Resolve button but a resolved thread still folds; each action has a part of its own', async ({ page, renderScenario }) => {
   await renderScenario(scenario('no-resolve'))
   await expect(page.getByRole('button', { name: "Edit Ben Ito's comment" })).toBeVisible()
