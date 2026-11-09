@@ -2,6 +2,8 @@
 
 [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the c2n web components to AI agents: component APIs (attributes, slots, events, native CSS parts, CSS variables with their theme tokens), usage and gallery examples, curated presets, the `@c2n/theme` tokens, variant code generation and the application workflow guides. Everything is bundled in `data/registry.json`, so it works offline in any project.
 
+[![c2n Web Components MCP server](https://mcprush.com/badge/c2n-web-components-mcp/card.svg)](https://mcprush.com/to/c2n-web-components-mcp?ref=badge)
+
 ## Use
 
 The server uses stdio and can be launched by any MCP host:

@@ -295,6 +295,19 @@ test('hovering a node opens its card with the status and details, and leaving cl
   await expect(card).toBeHidden()
 })
 
+test("every status reads on the card: the line under the marker is text, which the light status colours can't carry", async ({ page, renderScenario }) => {
+  const statuses = ['success', 'error', 'warning', 'running', 'current', 'pending', 'skipped'] as const
+  const nodes: FlowNode[] = statuses.map((status) => ({ id: status, label: status, status }))
+  const edges: FlowEdge[] = statuses.slice(1).map((status, index) => ({ source: statuses[index], target: status }))
+  await renderScenario(flow({ nodes, edges, attributes: 'open-delay="0" close-delay="0"' }))
+  const card = page.locator('c2-flow .card')
+  for (const status of statuses) {
+    await node(page, status).hover()
+    await expect(card.locator('.card-title')).toHaveText(status)
+    await accessible(page)
+  }
+})
+
 test('no-card keeps the card closed', async ({ page, renderScenario }) => {
   await renderScenario(flow({ attributes: 'open-delay="0" no-card' }))
   await node(page, 'test').hover()

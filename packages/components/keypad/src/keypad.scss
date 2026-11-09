@@ -1,0 +1,179 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-keypad,
+  $theme: (
+    width: 280px,
+    keys--gap: 8px,
+    key--height: 64px,
+    key--background: #f4f4f5,
+    key__hover--background: #e4e4e7,
+    key__active--background: #d4d4d8,
+    key--color: #18181b,
+    key--border: none,
+    key--border-radius: 14px,
+    key--font-size: 24px,
+    key--font-weight: 500,
+    key__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    display--gap: 24px,
+    display--color: #18181b,
+    display__empty--color: #71717a,
+    display__error--color: #dc2626,
+    display--font-size: 40px,
+    display--font-weight: 600,
+    dot--size: 14px,
+    dot--gap: 16px,
+    dot--border: 2px solid #71717a,
+    dot__filled--color: #18181b,
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.keypad {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(display--gap);
+}
+
+.keypad--disabled {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+.display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(#{css.cssVar(display--font-size)} * 1.25);
+  color: css.cssVar(display--color);
+}
+
+.display--amount {
+  /* A block, not a flex row: a centred line that overflows clips at its end, with an ellipsis. Before that, the
+     component shrinks the font of a long amount until it fits (fitAmount). */
+  display: block;
+  overflow: hidden;
+  font-size: css.cssVar(display--font-size);
+  text-align: center;
+  font-weight: css.cssVar(display--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.display--empty {
+  color: css.cssVar(display__empty--color);
+}
+
+.display--invalid {
+  color: css.cssVar(display__error--color);
+}
+
+.dots {
+  display: flex;
+  gap: css.cssVar(dot--gap);
+}
+
+.dot {
+  box-sizing: border-box;
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border: css.cssVar(dot--border);
+  border-radius: 50%;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.dot--filled {
+  border-color: css.cssVar(dot__filled--color);
+  background-color: css.cssVar(dot__filled--color);
+  transform: scale(1.1);
+}
+
+.display--invalid .dot {
+  border-color: css.cssVar(display__error--color);
+}
+
+.display--invalid .dot--filled {
+  background-color: css.cssVar(display__error--color);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: css.cssVar(keys--gap);
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: css.cssVar(key--height);
+  padding: 0;
+  border: css.cssVar(key--border);
+  border-radius: css.cssVar(key--border-radius);
+  background: css.cssVar(key--background);
+  color: css.cssVar(key--color);
+  font: inherit;
+  font-size: css.cssVar(key--font-size);
+  font-weight: css.cssVar(key--font-weight);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease;
+}
+
+.key:hover:not(:disabled) {
+  background: css.cssVar(key__hover--background);
+}
+
+.key:active:not(:disabled) {
+  background: css.cssVar(key__active--background);
+}
+
+.key:focus-visible {
+  outline: css.cssVar(key__focus--outline);
+  outline-offset: 2px;
+}
+
+.key:disabled {
+  cursor: default;
+}
+
+.start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: css.cssVar(key--height);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .key {
+    transition: none;
+  }
+}

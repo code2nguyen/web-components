@@ -1,0 +1,52 @@
+---
+title: 'Angle Slider'
+description: 'A round knob to pick a direction on a full circle, or a value along an arc like a thermostat or volume dial, by drag or keys.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { AngleSlider } from '@c2n/components/angle-slider'
+
+`c2-angle-slider` is a knob: drag the handle around the dial, press anywhere on it, or use the keys. In `angle` mode it picks a direction, such as a gradient angle, a rotation or a wind heading. In `arc` mode it picks a value along an open arc, like a thermostat, a volume or a gain dial.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/angle-slider'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/angle-slider
+<div data-label="Angle">
+  <c2-angle-slider label="Gradient angle" value="135" step="15"></c2-angle-slider>
+</div>
+<div data-label="Arc">
+  <c2-angle-slider label="Volume" mode="arc" min="0" max="100" value="60"></c2-angle-slider>
+</div>
+<div data-label="Disabled">
+  <c2-angle-slider label="Rotation" value="90" disabled></c2-angle-slider>
+</div>
+```
+
+### Angle and arc
+
+In `angle` mode (the default) the dial is a full circle. The value grows clockwise from `0` at the top up to `max` (360 by default), where it comes round to `min` again, and a line from the centre points at the handle. The arrow keys wrap past either end, so 0 is one step from 359.
+
+In `arc` mode the dial is an open arc with its gap at the bottom. `min` sits at the left end and `max` at the right end, and the arc fills up to the handle. A press in the gap picks the nearer end, and the keys stop at the ends. How far the arc reaches is CSS: `--c2-angle-slider__arc--sweep` takes a number of degrees (270 by default, centred on the top).
+
+### Value
+
+`value` is kept between `min` and `max` and snapped to `step`. While the user drags or presses a key, `input` fires at every step. `change` fires when the pointer is released, or after a key. Setting `value` from code fires neither.
+
+The value shows in the middle of the dial. An angle gets a degree sign; set the `formatValue` property to show a unit of your own, such as `` (v) => `${v} °C` ``. It also gives the text screen readers read. Put your own markup in the default slot to replace the middle, or hide it with `--c2-angle-slider__value--display: none`.
+
+### In a form
+
+Under a `name`, the form receives the value. Inside a `c2-form-field`, the field's label names the slider and its hint describes it. `disabled`, on the slider or on an enclosing `fieldset`, stops it moving and leaves it out of the form.
+
+### Keyboard
+
+The handle is a `slider` with one tab stop. Right and Up add a `step`, Left and Down take one off, Page Up and Page Down move a tenth of the range, and Home goes to `min`. End goes to `max` in `arc` mode; in `angle` mode, where `max` comes round to `min`, it goes to the last step before it.

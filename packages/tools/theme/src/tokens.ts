@@ -11,6 +11,8 @@
 
 export const TOKEN_PREFIX = '--c2-theme--'
 
+const STRONG_VARIANT = 'color-mix(in srgb, var(--c2-theme--color-on-surface-variant, #71717a) 65%, var(--c2-theme--color-on-surface, #18181b))'
+
 export type TokenCategory = 'color' | 'font' | 'radius' | 'border' | 'focus' | 'disabled' | 'motion' | 'shadow' | 'chart'
 
 export interface TokenDef {
@@ -41,6 +43,16 @@ export const tokens: TokenDef[] = [
   token('color-surface-container', 'color', '#f4f4f5', 'Hover surface for rows and icon buttons.', '#27272a'),
   token('color-on-surface', 'color', '#18181b', 'Primary text colour.', '#f4f4f5'),
   token('color-on-surface-variant', 'color', '#71717a', 'Secondary text, placeholders, icons, supporting text.', '#a1a1aa'),
+  // Secondary text that sits on a container surface (a neutral badge, an unselected segment, an action button): the
+  // variant reaches only 4.38:1 on `color-surface-container`. Derived from the two text roles (#52525b by default) so a
+  // theme that sets them gets this one too; repeated as the dark value so a nested `data-theme` resolves it locally.
+  token(
+    'color-on-surface-variant-strong',
+    'color',
+    STRONG_VARIANT,
+    'Secondary text that must stay readable on container surfaces: neutral badges, unselected segments, text actions. Follows the two text roles.',
+    STRONG_VARIANT,
+  ),
   token('color-outline', 'color', '#d4d4d8', 'Resting border colour of inputs, cards and lists.', '#3f3f46'),
   token('color-outline-variant', 'color', '#e4e4e7', 'Hairline dividers and light borders.', '#27272a'),
   token('color-outline-strong', 'color', '#a1a1aa', 'Border colour on hover.', '#52525b'),

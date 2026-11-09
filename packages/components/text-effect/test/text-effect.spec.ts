@@ -1,5 +1,6 @@
 import { test, expect, accessible, props, watch } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
+import type { TextEffect } from '../src/text-effect'
 
 const effect = (page: Page, selector = 'c2-text-effect') => page.locator(selector)
 const shown = (page: Page, selector?: string) => effect(page, selector).locator('[part="text"]')
@@ -59,8 +60,19 @@ test('scramble resolves into the text and ends; reveal rises word by word and en
   await renderScenario(
     `<c2-text-effect id="s" effect="scramble" ${FAST}>Deployed</c2-text-effect> <c2-text-effect id="r" ${FAST}>Your team's second brain</c2-text-effect>`,
   )
-  await watch(effect(page, '#s'), 'effect-end')
-  await watch(effect(page, '#r'), 'effect-end')
+  // At these timings both effects can end before a listener attached in a later call, so each one is played again
+  // in the same task that starts listening: only the replay's end is recorded.
+  await page.evaluate(() =>
+    document.querySelectorAll<TextEffect>('c2-text-effect').forEach((element) => {
+      const ends: null[] = []
+      element.setAttribute('data-events', '[]')
+      element.addEventListener('effect-end', () => {
+        ends.push(null)
+        element.setAttribute('data-events', JSON.stringify(ends))
+      })
+      element.replay()
+    }),
+  )
   await expect.poll(() => shown(page, '#s').textContent()).toBe('Deployed')
   await expect.poll(() => events(page, '#s')).toEqual([null])
   await expect(shown(page, '#r').locator('.piece')).toHaveCount(4)

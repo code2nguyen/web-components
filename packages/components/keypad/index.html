@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-keypad</title>
+    <script type="module" src="/src/keypad.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 32px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-keypad label="Amount to send" currency="USD"></c2-keypad>
+    <c2-keypad display="pin" length="6"><button slot="start" type="button">Face ID</button></c2-keypad>
+    <div>
+      <input id="code" aria-label="Code" />
+      <c2-keypad display="none" for="code"></c2-keypad>
+    </div>
+  </body>
+</html>

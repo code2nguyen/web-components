@@ -1,0 +1,53 @@
+---
+title: 'Signature Pad'
+description: 'A box to sign in with a mouse, a pen or a finger, with undo and clear, that exports the signature as SVG or an image.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SignaturePad } from '@c2n/components/signature-pad'
+
+`c2-signature-pad` takes a handwritten signature, as in DocuSign or a delivery app's proof of receipt. Each stroke is kept as the points the pointer passed through and drawn as a smooth SVG path, so the signature stays sharp at any size and exports as vector or bitmap.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/signature-pad'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/signature-pad
+<div data-label="Empty">
+  <c2-signature-pad label="Your signature"></c2-signature-pad>
+</div>
+<div data-label="Signed, read only">
+  <c2-signature-pad
+    label="Customer signature"
+    readonly
+    strokes="[[[30,140],[48,96],[62,74],[72,90],[76,128],[82,148],[94,118],[108,88],[120,104],[126,132],[140,120],[156,98],[170,108],[178,128],[196,112],[214,102],[232,118]],[[246,96],[262,128],[278,92],[294,124],[318,104]]]"
+  ></c2-signature-pad>
+</div>
+```
+
+### Drawing
+
+A press starts a stroke and lifting the pointer ends it; a tap leaves a dot. An empty pad shows a hint over the baseline: set `placeholder` to change "Sign here". **Undo** takes the last stroke away and **Clear** empties the pad. `undo()` and `clear()` do the same from code, without firing events. Hide the buttons with `--c2-signature-pad__actions--display: none`.
+
+After each stroke, Undo and Clear, `input` then `change` fire. `isEmpty` says whether there is anything to submit.
+
+### Strokes and export
+
+`strokes` holds the drawing: an array of strokes, each an array of `[x, y]` points in CSS pixels from the top left corner. Store it to keep the signature editable, and set it, as a property or as a JSON attribute, to show a saved one. `readonly` shows it without letting it change.
+
+To keep the signature as a picture, `toSVG()` returns a standalone SVG document the size of the pad, in the ink's thickness. Exports and the form value draw the ink in `--c2-signature-pad__export__stroke--color` (near-black by default), not the colour on screen: in a dark theme the screen ink is light, but a signature goes on a white document. `toDataURL(type?)` and `toBlob(type?)` draw it as an image at the screen's pixel density. PNG and WebP keep a transparent background; JPEG gets a white one.
+
+### In a form
+
+Under a `name`, the form receives the signature as SVG markup. `required` makes an empty pad invalid. Inside a `c2-form-field`, the field's label names the pad unless `label` is set, and its hint describes it. A `readonly` pad never asks for a signature, even when `required`.
+
+### Accessibility
+
+The pad is an image named by `label` (or the field's label), and it says whether it is signed. A signature cannot be drawn from the keyboard, so a form that asks for one should also accept a typed name.

@@ -1,0 +1,49 @@
+---
+import Icon from './Icon.astro'
+import { plans } from '../data/site'
+
+const price = (amount: number) => `$${amount}`
+---
+
+<section class="container" id="pricing" aria-labelledby="pricing-title">
+  <div class="section-head">
+    <p class="eyebrow">Pricing</p>
+    <h2 id="pricing-title">Pay for the people, not the tasks</h2>
+    <c2-button-group class="billing" appearance="segmented" selection="single" value="monthly" aria-label="Billing period">
+      <c2-button value="monthly">Monthly</c2-button>
+      <c2-button value="yearly">Yearly · save 20%</c2-button>
+    </c2-button-group>
+  </div>
+
+  <div class="plans">
+    {
+      plans.map((plan) => (
+        <c2-card class:list={['plan', { 'plan--highlighted': plan.highlighted }]}>
+          <div slot="header" class="plan__head">
+            <h3>{plan.name}</h3>
+            {plan.highlighted && <c2-badge tone="primary">Most popular</c2-badge>}
+          </div>
+          <p class="plan__description">{plan.description}</p>
+          <p class="plan__price">
+            <span class="plan__amount" data-monthly={price(plan.monthly)} data-yearly={price(plan.yearly)}>
+              {price(plan.monthly)}
+            </span>
+            <span class="plan__unit">{plan.unit}</span>
+          </p>
+          <ul class="plan__features">
+            {plan.features.map((feature) => (
+              <li>
+                <Icon name="check" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <c2-button slot="footer" class:list={['plan__cta', plan.highlighted ? 'cta' : 'outline']} data-signup data-plan={plan.id} data-plan-name={plan.name}>
+            {plan.monthly === 0 ? 'Start free' : `Try ${plan.name} free`}
+          </c2-button>
+        </c2-card>
+      ))
+    }
+  </div>
+  <p class="fine-print billing-note" aria-live="polite" data-billing-note>Billed monthly. Cancel at any time.</p>
+</section>
