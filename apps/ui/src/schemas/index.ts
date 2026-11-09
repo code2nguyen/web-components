@@ -54,6 +54,16 @@ export const guideSchema = z.object({
   order: z.number().default(100),
 })
 
+/** Blog articles (`src/content/blogs/<id>.md`): long-form articles in the AI-assisted application development series. */
+export const blogSchema = z.object({
+  title: z.string(),
+  description: z.string().default(''),
+  /** Article order in the series. */
+  order: z.number().default(100),
+  /** Drafts are available in development and are omitted from production builds until published. */
+  status: z.enum(['draft', 'published']).default('draft'),
+})
+
 export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'nextjs', 'angular', 'vue', 'sveltekit'] as const
 
 export type ExampleFramework = (typeof EXAMPLE_FRAMEWORKS)[number]

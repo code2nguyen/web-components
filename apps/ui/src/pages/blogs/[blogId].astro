@@ -1,0 +1,392 @@
+---
+import Main from '../../layouts/Main.astro'
+import { getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('blogs', ({ data }) => data.status === 'published' || import.meta.env.DEV)
+  return entries.map((entry) => ({
+    params: { blogId: entry.id },
+    props: { blog: entry },
+  }))
+}
+
+const { blog } = Astro.props
+const { Content } = await render(blog)
+const base = import.meta.env.BASE_URL
+---
+
+<Main title={`${blog.data.title} · c2n`} description={blog.data.description} section="blogs">
+  <c2-scroll-progress class="article__progress" label="Article reading progress"></c2-scroll-progress>
+  <article class="article">
+    <header class="article__header">
+      <a class="article__back" href={`${base}/blogs/`}>Blogs</a>
+      <p class="article__eyebrow">
+        Building applications in the AI era · Article {String(blog.data.order).padStart(2, '0')} of 7 · {blog.data.status === 'draft' ? 'Draft' : 'Published'}
+      </p>
+      <h1>{blog.data.title}</h1>
+      <p class="article__dek">{blog.data.description}</p>
+      <figure class="article__illustration">
+        <img
+          src={`${base}/images/blog-ai-foundation.svg`}
+          alt="Reusable components, architecture, business knowledge, AI skills, and specialist agents forming the foundation for an AI-built application."
+          width="1200"
+          height="520"
+        />
+        <figcaption>Give the agent a foundation it can build on, then compose features from reusable parts.</figcaption>
+      </figure>
+      <aside class="article__takeaway" aria-label="Article key idea">
+        <p class="article__takeaway-label">The key idea</p>
+        <p class="article__takeaway-text">
+          For large applications, <c2-highlight class="article__highlight" query="build the foundation"
+            >build the foundation before asking AI to compose the app.</c2-highlight
+          >
+        </p>
+      </aside>
+    </header>
+
+    <div class="article__body">
+      <Content />
+    </div>
+
+    <footer class="article__footer">
+      <a href={`${base}/blogs/`}>← Back to the article series</a>
+      <span>Next: Build Reusable Components with AI, Then Compose the Application</span>
+    </footer>
+  </article>
+</Main>
+
+<script>
+  import '@c2n/components/highlight'
+  import '@c2n/components/scroll-progress'
+</script>
+
+<style lang="scss">
+  .article {
+    max-width: 1320px;
+    --article-content-width: 880px;
+    margin: 0 auto;
+    padding: 48px var(--site-gutter) 104px;
+  }
+
+  .article__progress {
+    position: fixed;
+    inset: var(--site-header-height) 0 auto;
+    z-index: 999;
+    --c2-scroll-progress--thickness: 3px;
+    --c2-scroll-progress__track--color: transparent;
+    --c2-scroll-progress__fill--color: var(--site-color-primary);
+  }
+
+  .article__header {
+    max-width: var(--article-content-width);
+    margin: 0 auto 52px;
+  }
+
+  .article__back,
+  .article__footer a {
+    color: var(--site-color-primary);
+    font-size: 0.9rem;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .article__eyebrow {
+    margin: 28px 0 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .article__header h1 {
+    max-width: 100%;
+    margin: 0 0 16px;
+    font-size: clamp(2.15rem, 4vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .article__dek {
+    margin: 0;
+    color: var(--site-color-on-surface-variant);
+    font-size: 1.15rem;
+    line-height: 1.65;
+    max-width: 100%;
+  }
+
+  .article__illustration {
+    margin: 34px 0 22px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: 22px;
+      box-shadow: var(--site-elevation-1);
+    }
+
+    figcaption {
+      margin: 10px 4px 0;
+      color: var(--site-color-on-surface-muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+  }
+
+  .article__takeaway {
+    padding: 20px 24px 22px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-left: 4px solid var(--site-color-primary);
+    border-radius: 0 14px 14px 0;
+    background: var(--site-color-primary-soft);
+  }
+
+  .article__takeaway-label {
+    margin: 0 0 6px;
+    color: var(--site-color-primary);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .article__takeaway-text {
+    margin: 0;
+    font-size: 1.13rem;
+    font-weight: 600;
+    line-height: 1.55;
+  }
+
+  .article__highlight {
+    --c2-highlight__mark--color: var(--site-color-on-primary-container);
+    --c2-highlight__mark--background-color: var(--site-color-primary-container);
+    --c2-highlight__mark--font-weight: 700;
+    --c2-highlight__mark--padding: 0.04em 0.12em;
+    --c2-highlight__mark--border-radius: 5px;
+  }
+
+  .article__body {
+    min-width: 0;
+    max-width: var(--article-content-width);
+    margin: 0 auto;
+    font-size: 1.2rem;
+    line-height: 1.82;
+
+    p {
+      margin: 0 0 1.45em;
+    }
+
+    h2 {
+      margin: 2.45em 0 0.72em;
+      font-size: 1.9rem;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 2em 0 0.6em;
+      font-size: 1.4rem;
+      line-height: 1.3;
+    }
+
+    a {
+      color: var(--site-color-primary);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.16em;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.35em;
+      margin: 0 0 1.6em;
+    }
+
+    li {
+      padding-left: 0.25em;
+      margin: 0.5em 0;
+    }
+
+    li::marker {
+      color: var(--site-color-primary);
+      font-weight: 700;
+    }
+
+    blockquote {
+      margin: 2em 0;
+      padding: 4px 0 4px 22px;
+      border-left: 3px solid var(--site-color-primary);
+      color: var(--site-color-on-surface-variant);
+      font-size: 1.12rem;
+    }
+  }
+
+  .article__body p:first-child {
+    color: var(--site-color-on-surface);
+    font-size: 1.32rem;
+    line-height: 1.75;
+  }
+
+  .article__body :global(.article-cycle) {
+    position: relative;
+    left: calc(50% - 440px);
+    width: min(880px, calc(100vw - var(--site-gutter) - var(--site-gutter)));
+    margin: 34px 0 42px;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: 20px;
+      box-shadow: var(--site-elevation-1);
+    }
+
+    figcaption {
+      margin: 11px 4px 0;
+      color: var(--site-color-on-surface-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+
+  @media (max-width: 928px) {
+    .article__body :global(.article-cycle) {
+      left: 0;
+    }
+  }
+
+  .article__body :global(.article-cycle-grid) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 30px 0 36px;
+  }
+
+  .article__body :global(.article-cycle-stage),
+  .article__body :global(.article-tool) {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 14px;
+    background: var(--site-color-surface-container-1);
+  }
+
+  .article__body :global(.article-cycle-stage h3),
+  .article__body :global(.article-tool h3) {
+    margin: 0 0 14px;
+    font-size: 1.08rem;
+    line-height: 1.35;
+  }
+
+  .article__body :global(.article-cycle-stage p),
+  .article__body :global(.article-tool p) {
+    margin: 0 0 12px;
+    font-size: 0.94rem;
+    line-height: 1.62;
+  }
+
+  .article__body :global(.article-cycle-stage p:last-child),
+  .article__body :global(.article-tool p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .article__body :global(.article-comparison-label) {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .article__body :global(.article-tool-list) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 26px 0 32px;
+  }
+
+  .article__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: var(--article-content-width);
+    margin: 56px auto 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--site-color-outline-variant);
+    color: var(--site-color-on-surface-muted);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 640px) {
+    .article {
+      padding-top: 36px;
+    }
+
+    .article__header {
+      margin-bottom: 40px;
+    }
+
+    .article__header h1 {
+      font-size: clamp(2rem, 8vw, 2.5rem);
+    }
+
+    .article__illustration {
+      margin: 28px 0 18px;
+
+      img {
+        border-radius: 14px;
+      }
+    }
+
+    .article__takeaway {
+      padding: 16px 18px 18px;
+    }
+
+    .article__body {
+      font-size: 1.1rem;
+
+      h2 {
+        font-size: 1.62rem;
+      }
+    }
+
+    .article__body :global(.article-cycle-grid),
+    .article__body :global(.article-tool-list) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .article__body :global(.article-cycle-stage),
+    .article__body :global(.article-tool) {
+      padding: 17px;
+    }
+
+    .article__body :global(.article-cycle) {
+      margin: 26px 0 32px;
+
+      img {
+        border-radius: 14px;
+      }
+    }
+
+    .article__body p:first-child {
+      font-size: 1.2rem;
+    }
+
+    .article__footer {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+</style>

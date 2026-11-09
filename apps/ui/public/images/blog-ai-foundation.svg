@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="title description">
+  <title id="title">Build the foundation, then compose the application</title>
+  <desc id="description">Reusable components, architecture, business knowledge, AI skills and specialist agents come together to support a coherent application.</desc>
+  <defs>
+    <linearGradient id="canvas" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fbff" />
+      <stop offset="1" stop-color="#eef4ff" />
+    </linearGradient>
+    <linearGradient id="product" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#f4f7fc" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#15315b" flood-opacity="0.10" />
+    </filter>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#9db9e7" opacity="0.35" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="520" rx="28" fill="url(#canvas)" />
+  <path d="M0 368C170 300 240 425 408 370s258-130 401-42 248 20 391-79v271H0Z" fill="#e7effd" opacity="0.72" />
+  <rect width="1200" height="520" rx="28" fill="url(#dots)" opacity="0.55" />
+
+  <text x="72" y="73" fill="#2563eb" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2.8">A STRONGER START FOR AI-BUILT APPLICATIONS</text>
+  <text x="72" y="115" fill="#172033" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="-0.7">Give the agent a foundation to build on.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="68" y="163" width="410" height="284" rx="22" fill="#fff" stroke="#d7e2f3" />
+  </g>
+  <text x="98" y="202" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.8">THE FOUNDATION</text>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="96" y="222" width="354" height="42" rx="11" fill="#eaf2ff" />
+    <rect x="96" y="222" width="5" height="42" rx="2.5" fill="#2563eb" />
+    <circle cx="122" cy="243" r="9" fill="#2563eb" opacity="0.16" />
+    <path d="M118 243h8m-4-4v8" stroke="#2563eb" stroke-width="2" stroke-linecap="round" />
+    <text x="144" y="248" fill="#1e3a8a" font-size="16" font-weight="700">Reusable components</text>
+
+    <rect x="96" y="273" width="354" height="42" rx="11" fill="#f3edff" />
+    <rect x="96" y="273" width="5" height="42" rx="2.5" fill="#8b5cf6" />
+    <circle cx="122" cy="294" r="9" fill="#8b5cf6" opacity="0.17" />
+    <path d="M118 291h8m-8 4h8m-8 4h5" stroke="#7543db" stroke-width="1.7" stroke-linecap="round" />
+    <text x="144" y="299" fill="#5b38a7" font-size="16" font-weight="700">Global architecture</text>
+
+    <rect x="96" y="324" width="354" height="42" rx="11" fill="#fff5db" />
+    <rect x="96" y="324" width="5" height="42" rx="2.5" fill="#e9ad22" />
+    <circle cx="122" cy="345" r="9" fill="#e9ad22" opacity="0.22" />
+    <path d="M118 344h8m-6-4v8" stroke="#9a6b00" stroke-width="1.7" stroke-linecap="round" />
+    <text x="144" y="350" fill="#745100" font-size="16" font-weight="700">Business knowledge</text>
+
+    <rect x="96" y="375" width="354" height="42" rx="11" fill="#ffecea" />
+    <rect x="96" y="375" width="5" height="42" rx="2.5" fill="#f16f68" />
+    <circle cx="122" cy="396" r="9" fill="#f16f68" opacity="0.2" />
+    <path d="m119 396 2 2 4-5" fill="none" stroke="#c4514c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="144" y="401" fill="#993d3a" font-size="16" font-weight="700">AI skills + specialist agents</text>
+  </g>
+
+  <path d="M498 300h103m-17-17 17 17-17 17" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="548" cy="300" r="31" fill="#fff" stroke="#d7e2f3" />
+  <path d="M538 300h20m-8-8 8 8-8 8" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+
+  <g filter="url(#shadow)">
+    <rect x="632" y="163" width="500" height="284" rx="22" fill="url(#product)" stroke="#d7e2f3" />
+  </g>
+  <text x="666" y="202" fill="#64748b" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.8">COMPOSED APPLICATION</text>
+
+  <g>
+    <rect x="666" y="221" width="432" height="194" rx="15" fill="#fff" stroke="#e1e8f2" />
+    <path d="M666 236a15 15 0 0 1 15-15h402a15 15 0 0 1 15 15v23H666Z" fill="#f8fafc" />
+    <circle cx="687" cy="240" r="4" fill="#ef7770" />
+    <circle cx="702" cy="240" r="4" fill="#efc94c" />
+    <circle cx="717" cy="240" r="4" fill="#62b48f" />
+    <rect x="759" y="233" width="236" height="13" rx="6.5" fill="#e9eef6" />
+
+    <rect x="687" y="281" width="92" height="112" rx="10" fill="#f1f5fb" />
+    <rect x="700" y="294" width="52" height="7" rx="3.5" fill="#9bb6de" />
+    <rect x="700" y="312" width="63" height="7" rx="3.5" fill="#c8d5e9" />
+    <rect x="700" y="330" width="55" height="7" rx="3.5" fill="#c8d5e9" />
+    <rect x="700" y="348" width="61" height="7" rx="3.5" fill="#c8d5e9" />
+    <rect x="700" y="369" width="43" height="12" rx="6" fill="#dce9ff" />
+
+    <text x="802" y="297" fill="#172033" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">A feature built from shared parts</text>
+    <rect x="802" y="311" width="253" height="7" rx="3.5" fill="#dfe6f0" />
+    <rect x="802" y="326" width="211" height="7" rx="3.5" fill="#e7ecf4" />
+    <rect x="802" y="351" width="121" height="39" rx="9" fill="#eaf2ff" stroke="#c7dcff" />
+    <rect x="937" y="351" width="118" height="39" rx="9" fill="#f5f1ff" stroke="#e2d7ff" />
+    <circle cx="822" cy="370" r="7" fill="#2563eb" />
+    <rect x="837" y="366" width="62" height="7" rx="3.5" fill="#77a3e5" />
+    <circle cx="957" cy="370" r="7" fill="#8b5cf6" />
+    <rect x="972" y="366" width="57" height="7" rx="3.5" fill="#b29bec" />
+  </g>
+
+  <rect x="847" y="431" width="70" height="28" rx="14" fill="#eaf2ff" />
+  <text x="882" y="450" text-anchor="middle" fill="#1e3a8a" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">REUSE</text>
+  <rect x="925" y="431" width="84" height="28" rx="14" fill="#f3edff" />
+  <text x="967" y="450" text-anchor="middle" fill="#5b38a7" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">COMPOSE</text>
+  <rect x="1017" y="431" width="78" height="28" rx="14" fill="#fff5db" />
+  <text x="1056" y="450" text-anchor="middle" fill="#745100" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="700">IMPROVE</text>
+</svg>
