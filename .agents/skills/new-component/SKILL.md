@@ -21,14 +21,16 @@ From `$ARGUMENTS` and the conversation, determine:
 
 If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
 
-Then settle the four foundation decisions (AGENTS.md, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
+Then settle the six foundation decisions (AGENTS.md, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
 
-| Decision         | Write down                                                                                                                                                                        |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Presentation** | The parts and states that get `--c2-<name>__<part>[__<state>]--<property>` variables. No attribute for a look.                                                                    |
-| **Extension**    | Which regions are named slots (icons, toolbar, footer, `empty`/`loading`/`error`) and which per-item content takes a `render<Part>` function.                                     |
-| **Data**         | Collection components only: the declarative form (child elements and/or a JSON attribute), the in-memory property, the `dataSource` interface, and which wins when two are given. |
-| **Gallery**      | The list of cards: one per feature above, and which of them need an `<Name>ExamplesRuntime.astro` because the feature is property-only.                                           |
+| Decision         | Write down                                                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Presentation** | The parts and states that get `--c2-<name>__<part>[__<state>]--<property>` variables. No attribute for a look.                                                                             |
+| **Extension**    | Which regions are named slots (icons, toolbar, footer, `empty`/`loading`/`error`) and which per-item content takes a `render<Part>` function.                                              |
+| **Data**         | Collection components only: the declarative form (child elements and/or a JSON attribute), the in-memory property, the `dataSource` interface, and which wins when two are given.          |
+| **Actions**      | Complex components: the action zones (`toolbar`, `actions`, `footer` slots) the app fills, and the methods and events those actions use. Which actions, if any, must be built in, and why. |
+| **Text**         | Every string the component draws or announces, as a key in `src/messages.ts`.                                                                                                              |
+| **Gallery**      | The list of cards: one per feature above, and which of them need an `<Name>ExamplesRuntime.astro` because the feature is property-only.                                                    |
 
 ## 2. Run the generator (non-interactive)
 
@@ -61,6 +63,8 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - Declare every public CSS variable in the SCSS `$theme` map (`part--css-property`, `part__state--css-property`) and read it with `css.cssVar(...)`. Mirror **every** entry as a `@cssproperty {type} [--c2-<name>__part--prop=default]` JSDoc line, or it will not appear in the API table / inspector. Document `@slot` and `@event` the same way; use `@internalcomponent` / `@slotcomponent` for composed children.
 - Reuse the library's default literals so `@c2n/theme` maps the variables automatically: accent `rgb(2, 101, 220)`, text `#18181b` / `#71717a`, borders `1px solid #bcbcc6` (resting) / `#a1a1aa` (hover) / `#e4e4e7` (hairline), radii 4/6/8/14/999px, font sizes 12/14px, weights 500/600, focus outline `2px solid rgba(2, 101, 220, 0.4)`, disabled opacity `0.38`.
 - **Extension points** (foundation rule 2): a named `<slot>` with a built-in default for each author-written region, its wrapping element exported as a CSS part named after the slot (`part="footer"`, documented with `@csspart`), and for content repeated per item an `@property({ attribute: false }) render<Part>?: <Class><Part>Renderer` whose exported type is `(context: <Class><Part>Context) => unknown`. The component keeps the item's container, ARIA, keyboard and selection; the renderer returns content only. See `packages/components/virtual-list/src/virtual-list-types.ts`.
+- **Action zones** (foundation rule 5): give a complex component `toolbar`/`actions`/`footer` slots and the public methods and events an app's own buttons need, instead of built-in buttons behind flags. Build an action in only when the widget's own pattern requires it, and keep it replaceable through a slot.
+- **Text** (foundation rule 6): no string literal in the template. Each label, `aria-label`, announcement and message is a key in `src/messages.ts` rendered with `this.msg.t(…)`; a text property defaults to empty and falls back to its message.
 - **Data** (foundation rule 3, collection components): the declarative form (child elements read on `slotchange`, and/or a `jsonPropertyConverter` attribute) and the in-memory property feed one internal model; `@property({ attribute: false }) dataSource?: <Class>DataSource` (one async `get<Things>(request)` returning the items and `total`) replaces it for remote or paged data, with `loading`/`empty`/`error` slots and superseded responses dropped. Say in the JSDoc which form wins. See `TableDataSource` in `packages/components/table/src/table-types.ts`.
 - Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
@@ -111,7 +115,7 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 
 ## Checklist to report
 
-- foundation decisions met: presentation only through CSS variables, extension through slots and `render<Part>` functions, declarative + in-memory + `dataSource` data for a collection component, and a gallery card for every feature (property-only ones through `<Name>ExamplesRuntime.astro`)
+- foundation decisions met: presentation only through CSS variables, extension through slots and `render<Part>` functions, declarative + in-memory + `dataSource` data for a collection component, action zones instead of built-in commands, all text through message keys, and a gallery card for every feature (property-only ones through `<Name>ExamplesRuntime.astro`)
 - `packages/components/<name>/` (or `open-packages/<name>/`) scaffolded, implemented, built, `custom-elements.json` generated
 - the package stays private (`"private": true`): it ships only inside `@c2n/components`; `npm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency

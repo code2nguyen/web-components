@@ -128,13 +128,15 @@ Consequences:
 
 ## Component foundation
 
-Four rules hold for every component, new or updated. They decide the shape of the public API before any code is written, and a change that adds a feature applies them to that feature.
+Six rules hold for every component, new or updated. They decide the shape of the public API before any code is written, and a change that adds a feature applies them to that feature.
 
 | Concern      | Mechanism                                                                 | Not                                                    |
 | ------------ | ------------------------------------------------------------------------- | ------------------------------------------------------ |
 | Presentation | `--c2-*` CSS variables                                                    | a `size`/`color`/`variant` attribute for a look        |
 | Extension    | named slots (wrapper exported as a `part`), then `render<Part>` functions | a flag or enum per content variation, a forked copy    |
 | Data         | declarative markup **and** an in-memory property, plus a `dataSource`     | a property-only API, or a fetch built into the element |
+| Actions      | an action zone: a named slot the app fills, plus methods and events       | a built-in button, flag and event per command          |
+| Text         | message tokens in `src/messages.ts`, translated by the app                | a string literal in the template                       |
 | Proof        | a live card in the component's gallery (`apps/ui/src/content/gallery/`)   | a feature that exists only in the API table            |
 
 1. **Presentation is customizable through CSS variables.** Everything a designer may want to change (size, spacing, colour, typography, border, radius, shadow, motion) is a documented `--c2-<name>__<part>[__<state>]--<property>` variable with its default in the `$theme` map. "Theming convention" below has the grammar and the attribute/variable split.
@@ -161,7 +163,15 @@ Four rules hold for every component, new or updated. They decide the shape of th
    - A `dataSource` card uses an in-page source that resolves after a short delay, never the network, and shows the loading state and at least one further page.
    - Adding a feature to an existing component adds its card in the same change. If a feature cannot be shown in a card, say why in the pull request.
 
-**Scope.** Rule 1 and rule 4 apply to every component. Rule 2 applies wherever the component draws content the author may want to replace. Rule 3 applies to components that display a collection (lists, tables, trees, boards, charts, pickers); a button or a badge has no data form. Bringing an existing component up to these rules is additive: removing or renaming a public attribute, slot or property is still a breaking change that needs explicit sign-off.
+5. **A complex component offers action zones instead of building the actions in.** When a component has room for commands (a toolbar, a header, a footer, a row's trailing edge), make that room a named slot (`toolbar`, `actions`, `footer`; `header-actions` when there are several) and let the application put its own buttons, menus and filters there. Do not grow a built-in button with a flag to show it, a label property and an event for each command an app might want.
+   - The component supplies what an action needs to do its work: public methods (`expandAll()`, `clearSelection()`), properties the action can set, and events that report the state an action reflects (`selection-change`, `sort-change`). An action in the zone is then a `c2-button` and one line of the app's code.
+   - Build an action in only when the component cannot work without it or it is part of the widget's own keyboard and ARIA pattern (a dialog's close button, a column's sort toggle, a tree row's expander). A built-in action stays replaceable through a slot.
+   - For an action per item, give the item an `actions` slot when items are authored in markup, or a narrow renderer (`renderActions` on `c2-tree`) when they come from data.
+   - The zone is a slot like any other: hidden when empty, its wrapper exported as a `part`. Reference: `c2-table` and `c2-virtual-list` (`toolbar`, `footer`), and the `actions` slot of `c2-page-header`, `c2-dash-card`, `c2-banner` and `c2-tree-item`.
+
+6. **Text a component draws is translatable through message tokens.** A component that shows or announces any text of its own (a label, a placeholder, an `aria-label`, a live-region announcement, a validation message, default slot content) lists each string under a key in `src/messages.ts`, registers it with `defineMessages('<package>', en)` and renders it with `this.msg.t('<key>', …args)` through a `LocalizeController`; an app translates by supplying the same keys with `addTranslations`. No string literal reaches the template. A text property keeps an empty default and falls back to its message, so setting it still overrides one instance. "Built-in text is in English, and translatable" under "Component conventions" has the details. The gallery shows it: one card under a `lang` other than English.
+
+**Scope.** Rule 1 and rule 4 apply to every component. Rule 5 applies to components with more than one region; rule 6 to any component that draws text of its own. Rule 2 applies wherever the component draws content the author may want to replace. Rule 3 applies to components that display a collection (lists, tables, trees, boards, charts, pickers); a button or a badge has no data form. Bringing an existing component up to these rules is additive: removing or renaming a public attribute, slot or property is still a breaking change that needs explicit sign-off.
 
 ## Theming convention
 

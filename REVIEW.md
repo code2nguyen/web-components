@@ -28,6 +28,9 @@ below in full.
   Lit renders). A renderer must not take over the item's container, ARIA state or keyboard handling.
 - **The element wrapping a slot carries a `part`** named after the slot and an `@csspart` line. A slotted region with
   no part cannot be laid out or framed from outside.
+- **Commands belong to the app.** A new built-in button with a flag, a label property and an event should be an action
+  zone (a `toolbar`, `actions` or `footer` slot) plus the method or event the app's own button needs, unless the
+  widget's own keyboard or ARIA pattern requires the action.
 - **A collection component takes data declaratively, in memory and from a `dataSource`.** Flag a new one that is
   property-only (it cannot be written in HTML or rendered on the server), one that fetches by itself, and two data
   forms given at once with no documented winner.
