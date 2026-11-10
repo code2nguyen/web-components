@@ -16,7 +16,7 @@ Items are grouped by domain. Priority **P1** means other items depend on it or i
 
 ## Round three: the long list
 
-A third round, researched on 2026-11-07, looked at enterprise applications domain by domain (finance, human resources, operations, sales and support, IT and security, regulated sectors) and swept the catalogs the first two rounds did not read. Its 410 candidates, numbered 239 to 648, are in [`COMPONENT-CANDIDATES.md`](COMPONENT-CANDIDATES.md), each checked against the 272 `c2-*` elements on `develop` and against every row of this file. They stay there until they are selected: a row accepted from that list moves here. The same file lists the decisions of rounds one and two that the new research argues against.
+A third round, researched on 2026-11-07, looked at enterprise applications domain by domain (finance, human resources, operations, sales and support, IT and security, regulated sectors) and swept the catalogs the first two rounds did not read. Its 410 candidates, numbered 239 to 648, are in [`COMPONENT-CANDIDATES.md`](COMPONENT-CANDIDATES.md), each checked against the 272 `c2-*` elements on `develop` and against every row of this file. Each one carries a recommendation that prefers extending an existing component over adding a package, as long as the host's bundle size and render path are not harmed: 232 of the 410 go through a component that already exists, 101 are compositions for the blocks collection and 77 need a new package. They stay there until they are selected: a row accepted from that list moves here. The same file lists the decisions of rounds one and two that the new research argues against.
 
 ## Already in flight (excluded)
 
