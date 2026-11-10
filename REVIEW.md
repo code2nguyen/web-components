@@ -23,6 +23,12 @@ below in full.
 - **Presentation goes through CSS variables, not attributes.** A new `@property` for a size, colour, spacing or
   duration should be a `--c2-<prefix>__<part>[__<state>]--<property>` variable instead. Never both.
 - Variable names follow that grammar exactly: the docs site parses it.
+- **Content varies through slots and renderer functions, not flags.** A new attribute that only switches what an item
+  shows should be a named slot or a `render<Part>` property (`attribute: false`, one context object, returns anything
+  Lit renders). A renderer must not take over the item's container, ARIA state or keyboard handling.
+- **A collection component takes data declaratively, in memory and from a `dataSource`.** Flag a new one that is
+  property-only (it cannot be written in HTML or rendered on the server), one that fetches by itself, and two data
+  forms given at once with no documented winner.
 
 ## 2. SSR, hydration and frameworks
 
@@ -68,6 +74,9 @@ below in full.
 
 ## 5. Docs site and examples
 
+- **A new feature has a gallery card** in `apps/ui/src/content/gallery/<id>.mdx`: a fence when markup can reach it, an
+  `<Name>ExamplesRuntime.astro` plus a code fence when it is property-only (a renderer, a `dataSource`). A feature
+  visible only in the API table is a finding.
 - Docs and code samples import from `@c2n/components/<name>`, never `@c2n/<name>`. `apps/ui` never mixes a workspace
   import with the bundle.
 - The site's chrome uses `c2-*` components (`npm run check:dogfood`). Box styles left on a host after replacing a native

@@ -126,6 +126,42 @@ Consequences:
 - After changing a component's public surface, rebuild that package so its `custom-elements.json` is regenerated; committed manifests are checked in.
 - A new published component must be added by hand (or by plop) to `apps/ui/src/store/component-manifests.ts` in both the import list and the `normalizedManifests` array.
 
+## Component foundation
+
+Four rules hold for every component, new or updated. They decide the shape of the public API before any code is written, and a change that adds a feature applies them to that feature.
+
+| Concern      | Mechanism                                                               | Not                                                    |
+| ------------ | ----------------------------------------------------------------------- | ------------------------------------------------------ |
+| Presentation | `--c2-*` CSS variables                                                  | a `size`/`color`/`variant` attribute for a look        |
+| Extension    | named slots, then `render<Part>` functions                              | a flag or enum per content variation, a forked copy    |
+| Data         | declarative markup **and** an in-memory property, plus a `dataSource`   | a property-only API, or a fetch built into the element |
+| Proof        | a live card in the component's gallery (`apps/ui/src/content/gallery/`) | a feature that exists only in the API table            |
+
+1. **Presentation is customizable through CSS variables.** Everything a designer may want to change (size, spacing, colour, typography, border, radius, shadow, motion) is a documented `--c2-<name>__<part>[__<state>]--<property>` variable with its default in the `$theme` map. "Theming convention" below has the grammar and the attribute/variable split.
+
+2. **Content is extensible through slots, then renderer functions.** Never grow an attribute per content variation.
+   - **A slot** for a region the author writes once in markup: icons, a toolbar, a footer, the `empty`/`loading`/`error` states. Give it a built-in default, hide the region when the slot is empty, and document it with `@slot`.
+   - **A renderer function** for content repeated per item of data, which a slot cannot express: `@property({ attribute: false }) render<Part>?: <Class><Part>Renderer`, named `renderItem`, `renderCell`, `renderLabel`… The type is exported next to the class as `(context: <Class><Part>Context) => unknown` (anything Lit can render: a `TemplateResult`, a string, a node). It takes **one context object** (`{ item, index, … }`), so a field can be added later without breaking callers. With no renderer set, the built-in rendering is the default.
+   - The component keeps what makes the item work: its container element, role and ARIA state, keyboard handling, selection, virtualization. The renderer supplies the content only (`c2-autocomplete` still creates each `c2-list-item`; `renderItem` fills it).
+   - When a component has several replaceable parts, offer the narrow renderers beside the whole-item one (`c2-tree`: `renderItem`, `renderLabel`, `renderIcon`, `renderActions`), so the common case does not rebuild the whole row.
+   - Reference: `c2-virtual-list` (`renderItem`), `c2-table-column` (`renderCell`, `renderHeader`), `c2-tree`, `c2-steps`.
+
+3. **A component that displays a collection takes its data three ways**, all feeding one internal model:
+   - **Declarative**: child elements (`c2-table-column`, `c2-tree-item`, `c2-step`, `c2-list-item`) and/or a JSON attribute through `jsonPropertyConverter` (`rows`, `items`, `data`). This is the form that works in plain HTML, in a server render and in an MDX fence, so it must cover the common case on its own.
+   - **In memory**: the same array assigned to the property.
+   - **Data source**, for data that is large, remote or paged: `@property({ attribute: false }) dataSource?: <Class>DataSource`, an exported interface with one async method (`getRows(request)`, `getItems(request)`). The request carries the window (`start`, `count`) and whatever the component delegates to the source (`sort`, `search`); the result carries the items and the `total`. The component never fetches by itself and knows no URL.
+   - With a `dataSource`, the component owns the loading, empty and error states (each replaceable through its slot), drops a response a newer request has superseded, and warns once in the console about a feature it cannot honour without the whole dataset (`c2-table` ignores `group-by`).
+   - When two forms are given at once, one wins, and the property's JSDoc says which (`c2-table`: column children win over `columns`; `dataSource` is used instead of `rows`).
+   - Reference: `c2-table` (`rows`, `columns` or `c2-table-column`, `dataSource`), `c2-virtual-list`, `c2-tree` (`items` or `c2-tree-item`, `loadChildren`), the charts (`data`, `c2-chart-series`, `dataSource`).
+
+4. **Every feature is demoable in the gallery of the Astro app.** A feature is done when a reader can see it work at `/components/<id>/gallery`: each variable group worth restyling, each slot, each renderer, each data form has a card (the Docs usage card covers only the overview).
+   - A feature reachable from markup (attributes, slots, CSS variables, declarative data) is a plain ` ```html tag=MdxCodeBlock,label=… ` fence.
+   - A property-only feature (a renderer, a `dataSource`) cannot be written in a fence. Mark the element in the fence with `data-<name>-example="<case>"`, assign the property from `apps/ui/src/components/<Name>ExamplesRuntime.astro` (a `<script>` that finds those elements; `AutocompleteExamplesRuntime.astro` and `KanbanExamplesRuntime.astro` are the pattern), render that component once in the gallery MDX, and show the code a consumer writes in a ` ```ts tag=CodeBlock ` fence under the grid.
+   - A `dataSource` card uses an in-page source that resolves after a short delay, never the network, and shows the loading state and at least one further page.
+   - Adding a feature to an existing component adds its card in the same change. If a feature cannot be shown in a card, say why in the pull request.
+
+**Scope.** Rule 1 and rule 4 apply to every component. Rule 2 applies wherever the component draws content the author may want to replace. Rule 3 applies to components that display a collection (lists, tables, trees, boards, charts, pickers); a button or a badge has no data form. Bringing an existing component up to these rules is additive: removing or renaming a public attribute, slot or property is still a breaking change that needs explicit sign-off.
+
 ## Theming convention
 
 Every component is themed exclusively through CSS custom properties generated by `packages/sass/css-variable.scss`. A component's SCSS opens with:
