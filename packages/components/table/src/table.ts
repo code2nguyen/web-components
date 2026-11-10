@@ -187,6 +187,9 @@ const rowKeysConverter = {
   },
 }
 
+/** Keys of the open tree rows: unset until written, like `expanded-groups`, and stored as strings, like `value`. */
+const rowKeysOrUnsetConverter = { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }
+
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value
   if (typeof value === 'string' && value.trim() !== '') return Number(value)
@@ -772,7 +775,7 @@ export class Table extends LitElement {
    * Keys of the open rows of a tree. While unset, every row follows `tree-expanded`; the first toggle writes the full
    * list here. `;`-separated in the attribute.
    */
-  @property({ converter: { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }, attribute: 'expanded-rows' }) expandedRows?: string[]
+  @property({ converter: rowKeysOrUnsetConverter, attribute: 'expanded-rows' }) expandedRows?: string[]
 
   /** Starts every parent row of a tree open while `expandedRows` is unset. */
   @property({ type: Boolean, attribute: 'tree-expanded' }) treeExpanded = false

@@ -724,8 +724,8 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 </style>
 <c2-table client:only="lit" class="tree-accounts" row-key="id" children-field="children" tree-expanded sortable rows='[{"id":"1000","name":"Assets","children":[{"id":"1100","name":"Current assets","children":[{"id":"1110","name":"Cash and equivalents","balance":184200},{"id":"1120","name":"Accounts receivable","balance":96450},{"id":"1130","name":"Inventory","balance":61300}]},{"id":"1200","name":"Fixed assets","children":[{"id":"1210","name":"Equipment","balance":142000},{"id":"1220","name":"Accumulated depreciation","balance":-38600}]}]},{"id":"2000","name":"Liabilities","children":[{"id":"2100","name":"Accounts payable","balance":72900},{"id":"2200","name":"Accrued expenses","balance":18450},{"id":"2300","name":"Long-term debt","balance":120000}]},{"id":"3000","name":"Equity","children":[{"id":"3100","name":"Share capital","balance":200000},{"id":"3200","name":"Retained earnings","balance":34000}]}]'>
   <c2-table-column field="id" header="No." width="80px"></c2-table-column>
-  <c2-table-column field="name" header="Account" width="minmax(200px, 2fr)" group-column summary-label="Balance sheet total"></c2-table-column>
-  <c2-table-column field="balance" header="Balance" width="140px" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>
+  <c2-table-column field="name" header="Account" width="minmax(200px, 2fr)" group-column></c2-table-column>
+  <c2-table-column field="balance" header="Balance" width="140px" align="end" format="currency" rollup="sum"></c2-table-column>
 </c2-table>
 ```
 
