@@ -130,17 +130,18 @@ Consequences:
 
 Four rules hold for every component, new or updated. They decide the shape of the public API before any code is written, and a change that adds a feature applies them to that feature.
 
-| Concern      | Mechanism                                                               | Not                                                    |
-| ------------ | ----------------------------------------------------------------------- | ------------------------------------------------------ |
-| Presentation | `--c2-*` CSS variables                                                  | a `size`/`color`/`variant` attribute for a look        |
-| Extension    | named slots, then `render<Part>` functions                              | a flag or enum per content variation, a forked copy    |
-| Data         | declarative markup **and** an in-memory property, plus a `dataSource`   | a property-only API, or a fetch built into the element |
-| Proof        | a live card in the component's gallery (`apps/ui/src/content/gallery/`) | a feature that exists only in the API table            |
+| Concern      | Mechanism                                                                 | Not                                                    |
+| ------------ | ------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Presentation | `--c2-*` CSS variables                                                    | a `size`/`color`/`variant` attribute for a look        |
+| Extension    | named slots (wrapper exported as a `part`), then `render<Part>` functions | a flag or enum per content variation, a forked copy    |
+| Data         | declarative markup **and** an in-memory property, plus a `dataSource`     | a property-only API, or a fetch built into the element |
+| Proof        | a live card in the component's gallery (`apps/ui/src/content/gallery/`)   | a feature that exists only in the API table            |
 
 1. **Presentation is customizable through CSS variables.** Everything a designer may want to change (size, spacing, colour, typography, border, radius, shadow, motion) is a documented `--c2-<name>__<part>[__<state>]--<property>` variable with its default in the `$theme` map. "Theming convention" below has the grammar and the attribute/variable split.
 
 2. **Content is extensible through slots, then renderer functions.** Never grow an attribute per content variation.
    - **A slot** for a region the author writes once in markup: icons, a toolbar, a footer, the `empty`/`loading`/`error` states. Give it a built-in default, hide the region when the slot is empty, and document it with `@slot`.
+   - **The element that wraps a slot exports a CSS part.** A slot has no box of its own, so the wrapper is the only place a consumer can style the region: its layout, padding, a border, a sticky position. Give it a `part` named after the slot (`<div class="footer" part="footer"><slot name="footer"></slot></div>`), the default slot's wrapper a part named for its role (`content`, `items`), and document each with `@csspart`. Variables remain the first choice for everything the component foresaw; the part is the hook for what it did not. A renderer's output sits in the shadow root too, so it may carry its own `part` (`` html`<span part="badge">…</span>` ``) for the page to style. A part name is public API: renaming one is a breaking change.
    - **A renderer function** for content repeated per item of data, which a slot cannot express: `@property({ attribute: false }) render<Part>?: <Class><Part>Renderer`, named `renderItem`, `renderCell`, `renderLabel`… The type is exported next to the class as `(context: <Class><Part>Context) => unknown` (anything Lit can render: a `TemplateResult`, a string, a node). It takes **one context object** (`{ item, index, … }`), so a field can be added later without breaking callers. With no renderer set, the built-in rendering is the default.
    - The component keeps what makes the item work: its container element, role and ARIA state, keyboard handling, selection, virtualization. The renderer supplies the content only (`c2-autocomplete` still creates each `c2-list-item`; `renderItem` fills it).
    - When a component has several replaceable parts, offer the narrow renderers beside the whole-item one (`c2-tree`: `renderItem`, `renderLabel`, `renderIcon`, `renderActions`), so the common case does not rebuild the whole row.
