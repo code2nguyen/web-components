@@ -119,6 +119,7 @@
         "./packages/components/breadcrumb:build",
         "./packages/components/button-group:build",
         "./packages/components/button:build",
+        "./packages/components/camera-capture:build",
         "./packages/components/card-input:build",
         "./packages/components/card:build",
         "./packages/components/carousel:build",

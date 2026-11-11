@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-camera-capture</title>
+    <script type="module" src="/src/camera-capture.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Document</h2>
+      <c2-camera-capture guide="document" crop></c2-camera-capture>
+    </section>
+    <section>
+      <h2>Identity check, auto-capture</h2>
+      <c2-camera-capture
+        shots='[{"id":"front","label":"Front","guide":"card"},{"id":"back","label":"Back","guide":"card"},{"id":"selfie","label":"Selfie","guide":"face","facing":"user"}]'
+        crop
+        auto-capture
+      ></c2-camera-capture>
+    </section>
+    <section>
+      <h2>Actions</h2>
+      <c2-camera-capture>
+        <button slot="actions" type="button">Upload a file</button>
+      </c2-camera-capture>
+    </section>
+    <script type="module">
+      for (const camera of document.querySelectorAll('c2-camera-capture'))
+        camera.addEventListener('complete', (event) => console.log('complete', event.detail.photos))
+    </script>
+  </body>
+</html>

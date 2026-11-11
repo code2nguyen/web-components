@@ -1,0 +1,201 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import CameraCaptureExamplesRuntime from '../../components/CameraCaptureExamplesRuntime.astro'
+
+import { CameraCapture } from '@c2n/components/camera-capture'
+
+## Presets
+
+Looks and jobs for `c2-camera-capture`. The guide's shape and colours, the stage's shape and the shutter set the style. Every card but the first films a pretend scene through `streamSource` (the code is under the grid), so the gallery never asks for your camera.
+
+<CameraCaptureExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-camera-capture></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Document
+<c2-camera-capture guide="document" crop data-camera-capture-example="document"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Bank card
+<c2-camera-capture guide="card" crop data-camera-capture-example="card"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Selfie
+<c2-camera-capture guide="face" facing="user" data-camera-capture-example="face"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Identity check
+<c2-camera-capture
+  shots='[{"id":"front","label":"Front","guide":"card"},{"id":"back","label":"Back","guide":"card","hint":"Turn the card over."},{"id":"selfie","label":"Selfie","guide":"face","facing":"user"}]'
+  crop
+  auto-capture
+  data-camera-capture-example="shots"
+  data-camera-capture-scenes="card,card-back,face"
+></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Receipt auto-capture
+<style>
+  .camera-receipt {
+    --c2-camera-capture__stage--aspect-ratio: 3 / 4;
+    --c2-camera-capture__guide__document--aspect-ratio: 0.42;
+    --c2-camera-capture__guide--border-radius: 4px;
+    --c2-camera-capture--width: 320px;
+  }
+</style>
+<c2-camera-capture class="camera-receipt" guide="document" crop auto-capture steady-time="900" data-camera-capture-example="receipt"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Actions
+<style>
+  .camera-action {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+  }
+</style>
+<c2-camera-capture guide="document" data-camera-capture-example="document">
+  <c2-button slot="actions" class="camera-action">Upload a file</c2-button>
+</c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Own idle screen
+<style>
+  .camera-own-idle {
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+    font-size: 14px;
+  }
+  .camera-own-idle strong {
+    font-size: 16px;
+  }
+</style>
+<c2-camera-capture guide="card" data-camera-capture-example="manual">
+  <div slot="idle" class="camera-own-idle">
+    <strong>Add your bank card</strong>
+    <span>Lay the card on a dark surface, then open the camera.</span>
+    <c2-button data-camera-capture-start>Open camera</c2-button>
+  </div>
+</c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Corner marks
+<style>
+  .camera-corners {
+    --c2-camera-capture__stage--aspect-ratio: 16 / 9;
+    --c2-camera-capture__guide--width: 70%;
+  }
+  .camera-corners svg {
+    overflow: visible;
+    color: #ffffff;
+  }
+</style>
+<c2-camera-capture class="camera-corners" guide="card" data-camera-capture-example="card">
+  <svg slot="guide" viewBox="0 0 100 63" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M0 14V0h14M86 0h14v14M100 49v14H86M14 63H0V49" vector-effect="non-scaling-stroke" />
+  </svg>
+</c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Rounded
+<style>
+  .camera-rounded {
+    --c2-camera-capture__stage--border-radius: 24px;
+    --c2-camera-capture__guide--border-color: #fde68a;
+    --c2-camera-capture__guide__ready--border-color: #22c55e;
+    --c2-camera-capture__guide__scrim--color: rgba(15, 23, 42, 0.6);
+    --c2-camera-capture__shutter--background: #0f766e;
+    --c2-camera-capture__shutter__hover--background: #115e59;
+    --c2-camera-capture__accept--background: #0f766e;
+    --c2-camera-capture__accept__hover--background: #115e59;
+    --c2-camera-capture__hint--border-radius: 8px;
+  }
+</style>
+<c2-camera-capture class="camera-rounded" guide="document" data-camera-capture-example="document"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Access denied
+<c2-camera-capture data-camera-capture-example="denied"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Own error screen
+<style>
+  .camera-own-error {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    max-width: 32ch;
+    font-size: 14px;
+  }
+</style>
+<c2-camera-capture data-camera-capture-example="denied">
+  <div slot="error" class="camera-own-error">
+    <strong>No camera? No problem.</strong>
+    <span>Upload a photo of your receipt instead.</span>
+    <c2-button>Choose a file</c2-button>
+  </div>
+</c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Own summary
+<style>
+  .camera-own-done {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 8px;
+    height: 100%;
+    font-size: 14px;
+    text-align: center;
+  }
+  .camera-own-done strong {
+    font-size: 16px;
+  }
+</style>
+<c2-camera-capture guide="document" crop auto-capture steady-time="600" data-camera-capture-example="finish">
+  <div slot="done" class="camera-own-done">
+    <strong>Receipt added</strong>
+    <span>We will match it to your card payment.</span>
+  </div>
+</c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Own quality rules
+<c2-camera-capture guide="document" data-camera-capture-example="strict"></c2-camera-capture>
+```
+
+```html tag=MdxCodeBlock,label=Français
+<div lang="fr">
+  <c2-camera-capture guide="card" data-camera-capture-example="card"></c2-camera-capture>
+</div>
+```
+
+</GalleryGrid>
+
+The "Own quality rules" card asks for a brighter picture than the built-in rule, and keeps the others:
+
+```ts tag=CodeBlock
+import { assessFrame } from '@c2n/components/camera-capture'
+
+camera.assessFrame = (metrics, context) => (metrics.brightness < 150 ? 'dark' : assessFrame(metrics, context))
+```
+
+A pretend camera for a demo or a test is a canvas: `captureStream()` turns what it draws into a video track.
+
+```ts tag=CodeBlock
+import type { CameraStreamSource } from '@c2n/components/camera-capture'
+
+const canvas = document.createElement('canvas')
+canvas.width = 640
+canvas.height = 480
+setInterval(() => drawScene(canvas.getContext('2d')!), 1000 / 15)
+
+const demoCamera: CameraStreamSource = async () => canvas.captureStream(15)
+document.querySelector('c2-camera-capture')!.streamSource = demoCamera
+```

@@ -20,6 +20,7 @@ import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
+import cameraCapture from '@c2n/camera-capture/custom-elements.json'
 import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
@@ -239,6 +240,7 @@ export const componentManifests = (function () {
     breadcrumb,
     button,
     buttonGroup,
+    cameraCapture,
     card,
     cardInput,
     carousel,
