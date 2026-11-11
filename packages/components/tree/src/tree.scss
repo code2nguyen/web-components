@@ -28,6 +28,9 @@
 
     empty--color: #71717a,
     empty--padding: 18px,
+    drop-indicator--color: rgb(2, 101, 220),
+    drop-indicator--height: 2px,
+    drop-indicator--border-radius: 999px,
   )
 );
 
@@ -72,4 +75,32 @@
   color: css.cssVar(empty--color);
   padding: css.cssVar(empty--padding);
   text-align: center;
+}
+
+// The drop indicator and the live region are added by the reordering module, positioned against the host.
+:host([reorderable]) {
+  position: relative;
+}
+
+.drop-indicator {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  block-size: css.cssVar(drop-indicator--height);
+  margin-top: calc(#{css.cssVar(drop-indicator--height)} / -2);
+  background: css.cssVar(drop-indicator--color);
+  border-radius: css.cssVar(drop-indicator--border-radius);
+}
+
+.drop-indicator[hidden] {
+  display: none;
+}
+
+.live {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -99,6 +99,8 @@ export interface TreeItem {
  * @cssproperty {opacity} [--c2-tree-item__actions--opacity=0] - Opacity of the trailing actions at rest. Set `1` to always show them.
  * @cssproperty {opacity} [--c2-tree-item__actions__hover--opacity=1] - Opacity of the trailing actions while the row is hovered or focused.
  * @cssproperty {pixel} [--c2-tree-item__checkbox--margin-inline-end=2px] - Space after the selection checkbox.
+ * @cssproperty {opacity} [--c2-tree-item__dragging--opacity=0.4] - Opacity of a row, and its subtree, while it is dragged in a `reorderable` tree.
+ * @cssproperty {color} [--c2-tree-item__drop-target--background=#edf1fe] - Background of the row a dragged row would land under.
  */
 @customElement('c2-tree-item')
 export class TreeItem extends LitElement {
@@ -161,6 +163,12 @@ export class TreeItem extends LitElement {
 
   /** Whether the parent `c2-tree` tracks selection at all, so a leaf knows whether to claim `aria-selected`. */
   @property({ attribute: false }) selectable = true
+
+  /** Whether the row is being dragged. Written by a `reorderable` parent `c2-tree`. */
+  @property({ attribute: false }) dragging = false
+
+  /** Whether a dragged row would land under this one. Written by a `reorderable` parent `c2-tree`. */
+  @property({ attribute: false }) dropTarget = false
 
   @query('slot[name="label"]') private labelSlot?: HTMLSlotElement
 
@@ -309,12 +317,13 @@ export class TreeItem extends LitElement {
       <span class="actions" part="actions"><slot name="actions"></slot></span>
     `
 
+    const rowClass = classMap({ row: true, 'is-dragging': this.dragging, 'is-drop-target': this.dropTarget })
     // The link wraps the whole row so the click target matches the highlight, which is what a navigation tree
     // wants. `tabindex="-1"` keeps the tree's roving tabindex on the host, exactly as `c2-list-item` does.
     const row =
       this.href && !this.disabled
         ? html`<a
-            class="row"
+            class=${rowClass}
             part="row"
             href=${this.href}
             target=${ifDefined(this.target || undefined)}
@@ -322,7 +331,7 @@ export class TreeItem extends LitElement {
             tabindex="-1"
             >${content}</a
           >`
-        : html`<div class="row" part="row">${content}</div>`
+        : html`<div class=${rowClass} part="row">${content}</div>`
 
     return html`
       ${row} ${this.expanded ? html`<div class="group" part="group" role="group"><slot @slotchange=${this.#handleChildSlotChange}></slot></div>` : nothing}

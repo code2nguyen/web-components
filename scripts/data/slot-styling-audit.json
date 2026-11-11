@@ -1381,6 +1381,27 @@
       "reason": "The error-summary-heading slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-form-list",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["rows"],
+      "reason": "The rows part wraps the default slot and owns the layout of the rows (gap through --c2-form-list--gap)."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer part wraps the footer slot and owns its placement."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty part wraps the empty slot and owns its presentation."
+    },
+    {
       "tag": "c2-form-field",
       "slot": "default",
       "decision": "assigned-content",
