@@ -2,20 +2,8 @@ import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
+import { toggleDescriptionState } from './custom-state.js'
 import styles from './description-value.scss?inline'
-
-/**
- * Adds or removes a custom state; a browser without custom states, or the server shim, just skips it.
- * @internal
- */
-export function toggleDescriptionState(internals: ElementInternals, name: string, on: boolean) {
-  try {
-    if (on) internals.states.add(name)
-    else internals.states.delete(name)
-  } catch {
-    /* unsupported */
-  }
-}
 
 /**
  * One value of a `c2-description-item` that has several, such as a plan's price in each of three plans. Values line

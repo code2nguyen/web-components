@@ -126,16 +126,21 @@ export class DescriptionList extends LitElement {
 
   /**
    * Marks values of the items with several: `max` or `min` the best numeric value of each item, `different` every
-   * value that differs from the first column. An item's own `highlight` overrides it. Numbers are read from each
-   * value's `value` attribute, else from its text.
+   * value that differs from the first column. An item's own `highlight` overrides it. The number compared is the
+   * first one in each value's `value` attribute, else in its text (`1,240.50` reads as 1240.5); set `value` when the
+   * text holds several numbers, a unit to convert or a decimal comma. A highlighted value in the selected column shows
+   * the highlight.
    */
   @property() highlight: DescriptionHighlight = ''
 
   /** Hides the items whose `c2-description-value`s are all equal. Items with a single value always show. */
   @property({ type: Boolean, attribute: 'differences-only' }) differencesOnly = false
 
-  /** Index of the selected value column, whose values carry the `selected` state. */
-  @property({ type: Number, attribute: 'selected-column' }) selectedColumn?: number
+  /**
+   * Index of the selected value column, whose values carry the `selected` state; `null` when none is. While the
+   * values stack the column names hide, so a narrow layout selects through this property rather than the buttons.
+   */
+  @property({ type: Number, attribute: 'selected-column' }) selectedColumn: number | null = null
 
   /** Turns the column names of `value-labels` into toggle buttons that set `selected-column`. */
   @property({ type: Boolean, attribute: 'column-selectable' }) columnSelectable = false
@@ -188,8 +193,8 @@ export class DescriptionList extends LitElement {
   }
 
   private selectColumn(column: number) {
-    this.selectedColumn = this.selectedColumn === column ? undefined : column
-    this.dispatchEvent(new CustomEvent('selection-change', { detail: { column: this.selectedColumn ?? null } }))
+    this.selectedColumn = this.selectedColumn === column ? null : column
+    this.dispatchEvent(new CustomEvent('selection-change', { detail: { column: this.selectedColumn } }))
   }
 
   private renderValueHeader() {

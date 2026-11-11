@@ -237,6 +237,8 @@ test('differences-only hides the items whose values are all equal', async ({ pag
   await expect(items.nth(0)).toBeVisible()
   await expect(items.nth(1)).toBeHidden()
   await expect(items.nth(2)).toBeVisible()
+  // A single value has nothing to differ from, so it always shows.
+  await expect(items.nth(3)).toBeVisible()
   // `different` marks what changed: the After column, never the baseline.
   await expect.poll(() => states(page.locator('c2-description-item[label="Status"] c2-description-value'), 'highlighted')).toEqual([false, true])
   // A value edited to match shows the item no more; turning the filter off shows every item.
@@ -246,8 +248,8 @@ test('differences-only hides the items whose values are all equal', async ({ pag
     .evaluate((value) => (value.textContent = '€1,200.00'))
   await expect(items.nth(2)).toBeHidden()
   await page.locator('c2-description-list').evaluate((list) => list.removeAttribute('differences-only'))
-  await expect(items).toHaveCount(3)
-  for (let index = 0; index < 3; index++) await expect(items.nth(index)).toBeVisible()
+  await expect(items).toHaveCount(4)
+  for (let index = 0; index < 4; index++) await expect(items.nth(index)).toBeVisible()
 })
 
 test('column-selectable turns the column names into toggle buttons that select a column', async ({ page, scenario }) => {

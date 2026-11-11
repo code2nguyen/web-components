@@ -48,6 +48,7 @@ const markup: Record<string, string> = {
     <c2-description-item label="Status"><c2-description-value>Open</c2-description-value><c2-description-value>Closed</c2-description-value></c2-description-item>
     <c2-description-item label="Owner"><c2-description-value>Ada</c2-description-value><c2-description-value>Ada</c2-description-value></c2-description-item>
     <c2-description-item label="Amount"><c2-description-value>€1,200.00</c2-description-value><c2-description-value>€1,450.00</c2-description-value></c2-description-item>
+    <c2-description-item label="Note"><c2-description-value>Call back on Monday</c2-description-value></c2-description-item>
   </c2-description-list>`,
   'rich-label': `<c2-description-list aria-label="Customer">
     <c2-description-item label="Plain"><span slot="label">Status <abbr title="Updated hourly">*</abbr></span><strong>Active</strong>

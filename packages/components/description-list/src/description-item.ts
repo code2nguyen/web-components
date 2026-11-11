@@ -6,7 +6,8 @@ import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import './description-value.js'
-import { toggleDescriptionState, type DescriptionValue } from './description-value.js'
+import type { DescriptionValue } from './description-value.js'
+import { toggleDescriptionState } from './custom-state.js'
 import styles from './description-item.scss?inline'
 
 export { DescriptionValue } from './description-value.js'
@@ -19,10 +20,11 @@ interface ListSettings {
   valueLabels?: string[]
   highlight?: DescriptionHighlight
   differencesOnly?: boolean
-  selectedColumn?: number
+  selectedColumn?: number | null
 }
 
-const toNumber = (key: string) => (/\d/.test(key) ? parseFloat(key.replace(/[^\d.-]/g, '')) : NaN)
+/** The first number in a value's text, `1,240.50` included; NaN when there is none. */
+const toNumber = (key: string) => parseFloat(/-?\d[\d,]*(\.\d+)?/.exec(key)?.[0].replace(/,/g, '') ?? '')
 
 /**
  * One label and value pair of a `c2-description-list`. The label comes from the `label` attribute, or from the
@@ -186,7 +188,7 @@ export class DescriptionItem extends LitElement {
     const keys = values.map((value) => (value.value ?? value.textContent ?? '').replace(/\s+/g, ' ').trim())
     const different = new Set(keys).size > 1
     toggleDescriptionState(this.internals, 'different', different)
-    toggleDescriptionState(this.internals, 'filtered', !!list.differencesOnly && values.length > 0 && !different)
+    toggleDescriptionState(this.internals, 'filtered', !!list.differencesOnly && values.length > 1 && !different)
     if (!values.length) return
     const tops = values.map((value) => Math.round(value.getBoundingClientRect().top))
     const stacked = tops.some((top) => top !== tops[0])
