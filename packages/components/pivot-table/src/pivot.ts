@@ -17,7 +17,8 @@ export interface PivotValue {
   format?: Intl.NumberFormatOptions
   /**
    * Makes this a computed value: the cell is worked out from two other values of the same cell (subtotals and totals
-   * included), named by their `field` in `of`, rather than aggregated from the records.
+   * included), named by their `field` in `of`, rather than aggregated from the records. An operand may be a computed
+   * value listed earlier.
    */
   compute?: PivotCompute
   /** The fields of the two values a computed value reads, `[a, b]`. */
@@ -31,7 +32,8 @@ export interface PivotConfig {
   values: PivotValue[]
   /**
    * Row groups whose numbers count with the opposite sign, by field: `{ "section": ["Expenses"] }`. The sign flips
-   * before aggregation, so the group shows negative and subtracts in every subtotal and total above it.
+   * before aggregation, so the group shows negative and subtracts in every subtotal and total above it. A record in
+   * several listed groups flips once.
    */
   invertSigns?: Record<string, string[]>
 }
@@ -169,15 +171,17 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
   const columnPaths: string[][] = []
   const seenRows = new Set<string>()
   const seenColumns = new Set<string>()
-  // A computed value reads the first aggregated value of each field it names.
-  const operands = values.map((value) =>
-    value.compute ? (value.of ?? []).slice(0, 2).map((field) => values.findIndex((other) => !other.compute && other.field === field)) : null,
+  // A computed value reads the first value of each field it names: an aggregated one, or a computed one listed before it.
+  const operands = values.map((value, index) =>
+    value.compute
+      ? (value.of ?? []).slice(0, 2).map((field) => values.findIndex((other, at) => other.field === field && (!other.compute || at < index)))
+      : null,
   )
-  const inverted = Object.entries(config.invertSigns ?? {}).filter(([, groups]) => Array.isArray(groups) && groups.length)
+  const inverted = Object.entries(config.invertSigns ?? {}).map(([field, groups]) => [field, ([] as unknown[]).concat(groups ?? []).map(String)] as const)
 
   ;(Array.isArray(data) ? data : []).forEach((record, recordIndex) => {
-    let sign = 1
-    for (const [field, groups] of inverted) if (groups.includes(groupLabel(fieldValue(record, field)))) sign = -sign
+    // A record in any listed group counts negative once, however many fields name it.
+    const sign = inverted.some(([field, groups]) => groups.includes(groupLabel(fieldValue(record, field)))) ? -1 : 1
     const rowPath = rows.map((field) => groupLabel(fieldValue(record, field)))
     const columnPath = columns.map((field) => groupLabel(fieldValue(record, field)))
     const rowKey = rowPath.join(SEP)
@@ -217,7 +221,7 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
     if (!accumulators || !value) return null
     const pair = operands[valueIndex]
     if (!pair) return accumulators[valueIndex].result(value.aggregate)
-    const [a, b] = pair.map((index) => (index >= 0 ? accumulators[index].result(values[index].aggregate) : null))
+    const [a, b] = pair.map((index): number | null => (index >= 0 ? cell(rowPath, columnPath, index) : null))
     if (a === null || b === null || b === undefined) return null
     if (value.compute === 'difference') return a - b
     if (!b) return null

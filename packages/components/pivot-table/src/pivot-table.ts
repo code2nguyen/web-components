@@ -183,7 +183,7 @@ export class PivotTable extends LitElement {
   /** The layout as configured now. */
   get config(): PivotConfig {
     const config: PivotConfig = { rows: [...this.rows], columns: [...this.columns], values: this.values.map((value) => ({ ...value })) }
-    if (this.invertSigns && Object.keys(this.invertSigns).length) config.invertSigns = this.invertSigns
+    if (this.invertSigns && Object.keys(this.invertSigns).length) config.invertSigns = JSON.parse(JSON.stringify(this.invertSigns))
     return config
   }
 
@@ -242,12 +242,12 @@ export class PivotTable extends LitElement {
 
   private valueLabel(value: PivotValue | undefined): string {
     if (!value) return ''
-    if (value.label) return value.label
+    if (value.label != null) return value.label
     if (value.compute) {
       const [a = '', b = ''] = value.of ?? []
       return this.msg.t('computedOf', this.msg.t(value.compute), this.fieldLabel(a), this.fieldLabel(b))
     }
-    return value.label ?? this.msg.t('valueOf', this.msg.t(value.aggregate ?? 'sum'), this.fieldLabel(value.field))
+    return this.msg.t('valueOf', this.msg.t(value.aggregate ?? 'sum'), this.fieldLabel(value.field))
   }
 
   private keyOf(path: readonly string[]): string {
@@ -693,7 +693,8 @@ export class PivotTable extends LitElement {
       heat = `--_heat: ${(share * 100).toFixed(1)}%`
       hot = share > 0.55
     }
-    const computed = value !== null && value !== 0 && this.values[column.value]?.compute ? (value < 0 ? 'negative' : 'positive') : ''
+    // Coloured by what is shown: a variance that rounds to zero is neither.
+    const computed = value !== null && this.values[column.value]?.compute && /[1-9]/.test(text) ? (value < 0 ? 'negative' : 'positive') : ''
     return html`<td
       part="cell"
       role="gridcell"

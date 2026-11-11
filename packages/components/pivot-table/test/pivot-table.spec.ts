@@ -342,3 +342,24 @@ test('configurable: a computed value chip shows its computation and offers only 
   // It is not a field of the data, so it does not come back to the unused fields.
   await expect(table(page).locator('.zone').first().locator('.chip-label')).toHaveText(['account'])
 })
+
+test('regressions: a record in two inverted groups flips once, a group may be named as a string, a computed value may read an earlier one', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-pivot-table></c2-pivot-table>`)
+  const out = await page.evaluate((data) => {
+    type Result = { cell(r: string[], c: string[], v: number): number | null }
+    const { pivot } = (window as unknown as { pivotApi: { pivot: (data: unknown[], config: object) => Result } }).pivotApi
+    const values = [
+      { field: 'actual' },
+      { field: 'budget' },
+      { field: 'variance', compute: 'difference', of: ['actual', 'budget'] },
+      { field: 'share', compute: 'ratio', of: ['variance', 'budget'] },
+    ]
+    const twice = pivot(data, { rows: ['section'], columns: [], values, invertSigns: { section: ['Expenses'], account: ['Payroll'] } })
+    const shorthand = pivot(data, { rows: ['section'], columns: [], values, invertSigns: { section: 'Expenses' } })
+    return { twice: twice.cell(['Expenses'], [], 0), shorthand: shorthand.cell([], [], 0), share: twice.cell([], [], 3) }
+  }, LEDGER)
+  expect(out).toEqual({ twice: -600, shorthand: 600, share: -50 / 650 })
+})
