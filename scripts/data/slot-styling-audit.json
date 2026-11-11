@@ -1906,6 +1906,27 @@
       "reason": "The picker slot projects a consumer-owned c2-emoji-picker into the popup; style it through its own --c2-emoji-picker variables."
     },
     {
+      "tag": "c2-form-list",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["rows"],
+      "reason": "The rows wrapper is exported as the rows part, which owns the list's layout and spacing; each row's own markup is the author's."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer action zone's wrapper is exported as the footer part, which owns its layout."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty-state wrapper is exported as the empty part, which owns its spacing and alignment."
+    },
+    {
       "tag": "c2-recurrence-editor",
       "slot": "footer",
       "decision": "part",
