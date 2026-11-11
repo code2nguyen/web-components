@@ -13,6 +13,10 @@
       "types": "./types/src/list-item-context.d.ts",
       "default": "./dist/list-item-context.js"
     },
+    "./list-group.js": {
+      "types": "./types/src/list-group.d.ts",
+      "default": "./dist/list-group.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

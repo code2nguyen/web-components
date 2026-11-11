@@ -75,7 +75,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
-- **List Item** — `c2-list-item` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
+- **List Item** — `c2-list-item, c2-list-group` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own, as the option of list and select, or as a navigation link with collapsible groups.
 - **Marker** — `c2-marker` · `@c2n/components/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
 - **Math** — `c2-math` · `@c2n/components/math` — TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.
 - **Mermaid** — `c2-mermaid` · `@c2n/components/mermaid` — Mermaid text diagrams drawn in your theme colours, loaded on demand and safe for untrusted sources.
@@ -174,7 +174,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
 - **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
-- **Form** — `c2-form` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
+- **Form** — `c2-form, c2-form-list` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
 - **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
@@ -184,7 +184,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
 - **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
-- **Month Picker** — `c2-month-picker` · `@c2n/components/month-picker` — Pick a month, or a year: billing periods, reports and card expiry.
+- **Month Picker** — `c2-month-picker` · `@c2n/components/month-picker` — Pick a month, a quarter, a half-year or a year: billing periods, fiscal reports and card expiry.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.

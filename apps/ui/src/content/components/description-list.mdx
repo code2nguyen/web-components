@@ -18,6 +18,8 @@ A label can also have several values: give the item one `c2-description-value` p
 
 The column names are yours to style: `--c2-description-list__value-header--*` sets the header row (bold 14px in the on-surface colour by default) and `--c2-description-value__caption--*` the names beside stacked values. To drop them, set `--c2-description-list__value-header--display: none` to remove the header row while stacked values keep their names, set `--c2-description-value__caption--display: none` to show stacked values without names, or leave `value-labels` out for neither.
 
+Values in columns can also be compared, which turns the list into a comparison matrix or the two versions of a record. `highlight="max"` or `highlight="min"` marks the best value of each item, read from the value's `value` attribute or else the number in its text (an item's own `highlight` overrides the list's, so a price can ask for `min` among rows that want `max`), and `highlight="different"` marks every value that differs from the first column, such as what changed between Before and After. `differences-only` hides the items whose values are all equal. `column-selectable` turns the column names into toggle buttons that set `selected-column` and fire `selection-change`, for picking a plan or awarding a bid. Items whose values differ carry the custom state `different` for page styles (`c2-description-item:state(different)`), and `--c2-description-value__highlighted--*` and `--c2-description-value__selected--*` style the marked values.
+
 The list is exposed as a `list` and each item as a `listitem` holding a `term` and its `definition`, or one `definition` per `c2-description-value`, each read with its column name. Give the list an `aria-label` when a page has several.
 
 ## Import
@@ -84,6 +86,20 @@ import '@c2n/components/description-list'
       <c2-description-value>Community</c2-description-value>
       <c2-description-value>Email</c2-description-value>
       <c2-description-value><c2-badge tone="primary">24/7</c2-badge></c2-description-value>
+    </c2-description-item>
+  </c2-description-list>
+</div>
+<div data-label="Compared values">
+  <c2-description-list class="usage-list grouped" aria-label="Plans compared" value-labels="Starter;Pro;Enterprise" label-heading="Feature" highlight="max" column-selectable>
+    <c2-description-item label="Price" highlight="min">
+      <c2-description-value>€9</c2-description-value>
+      <c2-description-value>€20 / month</c2-description-value>
+      <c2-description-value>Custom</c2-description-value>
+    </c2-description-item>
+    <c2-description-item label="Seats">
+      <c2-description-value>1</c2-description-value>
+      <c2-description-value>10</c2-description-value>
+      <c2-description-value>50</c2-description-value>
     </c2-description-item>
   </c2-description-list>
 </div>

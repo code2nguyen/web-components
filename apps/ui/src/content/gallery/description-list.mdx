@@ -7,10 +7,11 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { DescriptionList, DescriptionItem, DescriptionValue } from '@c2n/components/description-list'
 import { Badge } from '@c2n/components/badge'
+import { Timeline, TimelineItem } from '@c2n/components/timeline'
 
 ## Presets
 
-`--c2-description-list__grid--*` decides the columns: the most there may be, the narrowest one may get, and the gaps. `--c2-description-item__label--width` switches a label from above its value to beside it, and the `__container`, `__label` and `__value` parts of the item carry the dividers, padding and type. Set item variables on the list and every item picks them up. Items with several `c2-description-value` children line up in columns named by `value-labels`; `--c2-description-item__value-column--*` sizes them, and below the minimum column width the values stack with their column names. `--c2-description-list__value-header--*` styles the column names (`--display: none` removes the row) and `--c2-description-value__caption--*` the names beside stacked values.
+`--c2-description-list__grid--*` decides the columns: the most there may be, the narrowest one may get, and the gaps. `--c2-description-item__label--width` switches a label from above its value to beside it, and the `__container`, `__label` and `__value` parts of the item carry the dividers, padding and type. Set item variables on the list and every item picks them up. Items with several `c2-description-value` children line up in columns named by `value-labels`; `--c2-description-item__value-column--*` sizes them, and below the minimum column width the values stack with their column names. `--c2-description-list__value-header--*` styles the column names (`--display: none` removes the row) and `--c2-description-value__caption--*` the names beside stacked values. `highlight` marks the best value of each item (`max`, `min` on an item that wants the lowest) or what changed from the first column (`different`), `differences-only` hides the rows that are all equal, and `column-selectable` makes the column names buttons that select a column; `--c2-description-value__highlighted--*` and `__selected--*` style the marked values.
 
 <GalleryGrid columns="1">
 
@@ -173,6 +174,115 @@ import { Badge } from '@c2n/components/badge'
     <c2-description-value class="down">+0.3 pt</c2-description-value>
   </c2-description-item>
 </c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Comparison matrix
+<style>
+  .dl-compare {
+    width: 100%;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-list__value-header--padding-bottom: 12px;
+    --c2-description-item__label--width: 140px;
+    --c2-description-item__container--padding: 12px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-item__value--font-weight: 400;
+  }
+</style>
+<c2-description-list class="dl-compare" aria-label="Plans" value-labels="Starter;Pro;Enterprise" label-heading="Pick a plan" highlight="max" column-selectable selected-column="1">
+  <c2-description-item label="Price" highlight="min">
+    <c2-description-value>€9 / month</c2-description-value>
+    <c2-description-value>€20 / month</c2-description-value>
+    <c2-description-value>Custom</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Seats">
+    <c2-description-value>1</c2-description-value>
+    <c2-description-value>10</c2-description-value>
+    <c2-description-value>50</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Storage">
+    <c2-description-value value="5">5 GB</c2-description-value>
+    <c2-description-value value="100">100 GB</c2-description-value>
+    <c2-description-value value="2000">2 TB</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Single sign-on">
+    <c2-description-value>Included</c2-description-value>
+    <c2-description-value>Included</c2-description-value>
+    <c2-description-value>Included</c2-description-value>
+  </c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Record diff
+<style>
+  .dl-diff {
+    width: 100%;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__label--width: 140px;
+    --c2-description-item__container--padding: 10px 0;
+    --c2-description-item__container--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-description-item__value--font-weight: 400;
+    --c2-description-value__highlighted--background-color: light-dark(#dcfce7, #14361f);
+    --c2-description-value__highlighted--color: light-dark(#166534, #86efac);
+  }
+</style>
+<c2-description-list class="dl-diff" aria-label="Changes to opportunity" value-labels="Before;After" label-heading="Field" highlight="different" differences-only>
+  <c2-description-item label="Stage">
+    <c2-description-value>Proposal</c2-description-value>
+    <c2-description-value>Negotiation</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Owner">
+    <c2-description-value>Ada Lovelace</c2-description-value>
+    <c2-description-value>Ada Lovelace</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Amount">
+    <c2-description-value>€12,000</c2-description-value>
+    <c2-description-value>€14,500</c2-description-value>
+  </c2-description-item>
+  <c2-description-item label="Close date">
+    <c2-description-value>Oct 31, 2026</c2-description-value>
+    <c2-description-value>Oct 31, 2026</c2-description-value>
+  </c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Field history
+<style>
+  .dl-history {
+    width: 100%;
+  }
+  .dl-history c2-description-list {
+    margin-top: 8px;
+    --c2-description-list__value-header--font-size: 12px;
+    --c2-description-list__value-header--padding-bottom: 4px;
+    --c2-description-item__label--width: 96px;
+    --c2-description-item__container--padding: 6px 0;
+    --c2-description-value__content--outset: 2px;
+    --c2-description-list__grid--row-gap: 0px;
+    --c2-description-item__value--font-weight: 400;
+  }
+</style>
+<c2-timeline class="dl-history" aria-label="History">
+  <c2-timeline-item label="Grace Hopper" timestamp="Nov 10, 14:32">
+    <c2-description-list aria-label="Changes by Grace Hopper" value-labels="Before;After" highlight="different">
+      <c2-description-item label="Stage">
+        <c2-description-value>Proposal</c2-description-value>
+        <c2-description-value>Negotiation</c2-description-value>
+      </c2-description-item>
+      <c2-description-item label="Amount">
+        <c2-description-value>€12,000</c2-description-value>
+        <c2-description-value>€14,500</c2-description-value>
+      </c2-description-item>
+    </c2-description-list>
+  </c2-timeline-item>
+  <c2-timeline-item label="Ada Lovelace" timestamp="Nov 3, 09:05">
+    <c2-description-list aria-label="Changes by Ada Lovelace" value-labels="Before;After" highlight="different">
+      <c2-description-item label="Owner">
+        <c2-description-value>Alan Turing</c2-description-value>
+        <c2-description-value>Ada Lovelace</c2-description-value>
+      </c2-description-item>
+    </c2-description-list>
+  </c2-timeline-item>
+</c2-timeline>
 ```
 
 ```html tag=MdxCodeBlock,label=No header row

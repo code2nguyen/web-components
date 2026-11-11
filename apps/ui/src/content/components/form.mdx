@@ -7,7 +7,9 @@ category: 'Inputs'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Form } from '@c2n/components/form'
+import FormListExamplesRuntime from '../../components/FormListExamplesRuntime.astro'
+
+import { Form, FormList } from '@c2n/components/form'
 import { FormField } from '@c2n/components/form-field'
 import { TextField } from '@c2n/components/text-field'
 import { Select } from '@c2n/components/select'
@@ -19,6 +21,8 @@ import { Button } from '@c2n/components/button'
 
 `valid-submit` carries the `FormData`, a plain `values` object and `waitUntil(promise)`: while the promise is pending the form is in `:state(submitting)` and a `c2-button` submitter shows its `running` spinner. A promise that resolves makes the current values the new pristine state; one that rejects with `{ name: message }` shows those errors on their fields. Server errors can also come from the `errors` attribute or `setErrors()`; each clears when the user edits its control. `dirty-change` fires when the values start or stop differing from the pristine state, and `warn-unsaved` asks before the page unloads while they do.
 
+`c2-form-list` repeats a group of fields: put the row markup in a `<template>`, and "Add another" appends a copy. Any element in a row with `data-action="remove"`, `"duplicate"`, `"move-up"` or `"move-down"` acts on that row and is disabled where it cannot (`min`, `max`, the first and last row), and `data-row-number` shows the row's position. With a `name`, each control's name gets its row index (`contacts.0.email`), so the rows submit with the form; `value` reads and writes them as an array of objects. The rows are ordinary children of the native form, so validation, the error summary and dirty tracking cover them, and a reset restores the rows the list started with.
+
 `necessity` and `validate-on` set the defaults of every field inside. The form is a grid of its children: `--c2-form--columns` gives it columns and `--c2-form-field--grid-column: 1 / -1` spans a field across them.
 
 ## Import
@@ -27,6 +31,8 @@ import { Button } from '@c2n/components/button'
 import '@c2n/components/form'
 import '@c2n/components/form-field'
 ```
+
+`@c2n/components/form` registers `c2-form-list` too; `@c2n/components/form/form-list` loads it alone.
 
 ## Usage
 
@@ -50,6 +56,35 @@ import '@c2n/components/form-field'
     --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .team {
+    width: min(560px, 100%);
+  }
+  .team .member {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+    min-width: 0;
+    margin: 0;
+    padding: 12px 14px 14px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+  .team legend {
+    padding: 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .team .remove {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .team .actions {
+    display: flex;
+    justify-content: flex-end;
   }
 </style>
 <div data-label="Press Save to see the summary">
@@ -81,6 +116,31 @@ import '@c2n/components/form-field'
     </form>
   </c2-form>
 </div>
+<div data-label="Repeat a group with c2-form-list">
+  <c2-form class="team">
+    <form>
+      <c2-form-list client:only="lit" name="members" min="1" max="4">
+        <template>
+          <fieldset class="member">
+            <legend>Member <span data-row-number></span></legend>
+            <c2-form-field label="Name"><c2-text-field name="name" required></c2-text-field></c2-form-field>
+            <c2-form-field label="Email"><c2-text-field name="email" type="email"></c2-text-field></c2-form-field>
+            <c2-button class="remove" data-action="remove">Remove</c2-button>
+          </fieldset>
+        </template>
+        <fieldset class="member">
+          <legend>Member <span data-row-number></span></legend>
+          <c2-form-field label="Name"><c2-text-field name="name" required value="Ada Lovelace"></c2-text-field></c2-form-field>
+          <c2-form-field label="Email"><c2-text-field name="email" type="email" value="ada@example.com"></c2-text-field></c2-form-field>
+          <c2-button class="remove" data-action="remove">Remove</c2-button>
+        </fieldset>
+      </c2-form-list>
+      <div class="actions">
+        <c2-button type="submit">Invite</c2-button>
+      </div>
+    </form>
+  </c2-form>
+</div>
 ```
 
 ### Saving
@@ -99,4 +159,11 @@ form.addEventListener('dirty-change', (event) => {
 
 // Checks across fields, after every control passes its own constraints.
 form.validator = (values) => (values.password === values.confirm ? {} : { confirm: 'The passwords do not match.' })
+
+// The rows of a c2-form-list as an array, keyed by the template's names.
+const members = document.querySelector('c2-form-list')!
+members.value = [{ name: 'Ada Lovelace', email: 'ada@example.com' }, { name: 'Grace Hopper' }]
+members.addEventListener('rows-change', (event) => console.log(event.detail.action, event.detail.value))
 ```
+
+<FormListExamplesRuntime />

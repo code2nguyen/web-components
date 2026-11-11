@@ -51,7 +51,8 @@ export interface ListItem {
  * Interactive content placed in a row (a delete button in `suffix-icon`, a checkbox in `prefix-icon`) keeps its own
  * events: clicking it neither selects the row nor fires the row's `click`, the original event bubbles on with the
  * control as its `target`, and Enter / Space activate the control instead of the row.
- * With `href` the row is a link. In a multiple-selection list, adjacent selected rows lose the corner radius between
+ * With `href` the row is a link; `current` marks the link of the page the reader is on (`aria-current="page"`), as a
+ * navigation list does for the current route, and draws it with the `current` variables. In a multiple-selection list, adjacent selected rows lose the corner radius between
  * them (the list sets `joinedBefore` / `joinedAfter`, exposed as `:state(joined-before)` / `:state(joined-after)`) so a run of
  * selected rows reads as one block.
  *
@@ -116,6 +117,15 @@ export interface ListItem {
  * @cssproperty {color} [--c2-list-item__selected__hover--background=#e2e9fd]
  * @cssproperty {color} --c2-list-item__selected__description--color - Defaults to the description colour.
  *
+ * @cssproperty {border} --c2-list-item__current--border-top - Defaults to the selected border.
+ * @cssproperty {border} --c2-list-item__current--border-bottom - Defaults to the selected border.
+ * @cssproperty {border} --c2-list-item__current--border-right - Defaults to the selected border.
+ * @cssproperty {border} --c2-list-item__current--border-left - Defaults to the selected border; a coloured left border is the accent-bar idiom.
+ * @cssproperty {color} --c2-list-item__current--color - Defaults to the selected colour.
+ * @cssproperty {color} --c2-list-item__current--background - Defaults to the selected background.
+ * @cssproperty {color} --c2-list-item__current__hover--background - Defaults to `current--background` when that is set, else to the selected hover background.
+ * @cssproperty {font-weight} --c2-list-item__current--font-weight - Defaults to the row's font weight.
+ *
  * @cssproperty {outline} [--c2-list-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-list-item__focus--outline-offset=-2px]
  *
@@ -154,6 +164,12 @@ export class ListItem extends LitElement {
 
   /** Makes the row a link. Selection still works when the row sits in a list. */
   @property() href: string | undefined = undefined
+
+  /**
+   * Marks the row as the current page of a navigation list: announced as `aria-current="page"` and drawn with the
+   * `--c2-list-item__current--*` variables, which default to the selected look. Independent of `selected`.
+   */
+  @property({ type: Boolean, reflect: true }) current = false
 
   /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target: string | undefined = undefined
@@ -291,6 +307,7 @@ export class ListItem extends LitElement {
     this.internals.ariaSelected = role === 'option' ? String(this.selected) : null
     this.internals.ariaPressed = role === 'button' ? String(this.selected) : null
     this.internals.ariaDisabled = this.disabled ? 'true' : null
+    this.internals.ariaCurrent = this.current ? 'page' : null
     // Standalone rows are tab stops themselves; in a list the list assigns the roving tabindex.
     if (!inList) this.tabIndex = this.disabled ? -1 : 0
     else if (this.disabled) this.tabIndex = -1
