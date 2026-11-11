@@ -126,7 +126,8 @@ const wholeNumber = (text: string, min: number, max: number): number | null => {
  * @slot footer - An action zone below the summary: the app's own buttons (Save, Cancel). Hidden while empty.
  *
  * @csspart editor - The group around every row, the summary and the footer.
- * @csspart rows - The grid of labelled rows.
+ * @csspart rows - The column of labelled rows.
+ * @csspart row - One row: its label and its controls, which wrap below the label when the row is narrow.
  * @csspart label - The label at the start of each row.
  * @csspart weekdays - The row of weekday toggles.
  * @csspart weekday - One weekday toggle.
@@ -147,9 +148,9 @@ const wholeNumber = (text: string, min: number, max: number): number | null => {
  * @cssproperty {pixel} [--c2-recurrence-editor__rows--column-gap=16px] - Space between a row's label and its controls.
  * @cssproperty {color} [--c2-recurrence-editor__label--color=#71717a] - The colour of the row labels and units.
  * @cssproperty {font-weight} [--c2-recurrence-editor__label--font-weight=500] - The weight of the row labels.
- * @cssproperty {pixel} [--c2-recurrence-editor__label--min-width=56px] - The narrowest the label column gets.
+ * @cssproperty {pixel} [--c2-recurrence-editor__label--min-width=56px] - The narrowest a row label gets, which lines the controls up.
  * @cssproperty {pixel} [--c2-recurrence-editor__controls--gap=8px] - Space between the controls of a row.
- * @cssproperty {pixel} [--c2-recurrence-editor__select--min-width=160px] - The narrowest a select gets.
+ * @cssproperty {pixel} [--c2-recurrence-editor__select--min-width=160px] - The narrowest a select gets, unless the row is narrower.
  * @cssproperty {pixel} [--c2-recurrence-editor__number--width=96px] - The width of a number field.
  * @cssproperty {pixel} [--c2-recurrence-editor__weekdays--gap=6px] - Space between two weekday toggles.
  * @cssproperty {pixel} [--c2-recurrence-editor__weekday--size=32px] - The width and height of a weekday toggle.
@@ -563,8 +564,10 @@ export class RecurrenceEditor extends LitElement {
   }
 
   private row(label: string, content: unknown) {
-    return html`<span class="label" part="label" aria-hidden="true">${label}</span>
-      <div class="controls">${content}</div>`
+    return html`<div class="row" part="row">
+      <span class="label" part="label" aria-hidden="true">${label}</span>
+      <div class="controls">${content}</div>
+    </div>`
   }
 
   private renderInterval(rule: RecurrenceRule) {

@@ -3,6 +3,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import RecurrenceEditorExamplesRuntime from '../../components/RecurrenceEditorExamplesRuntime.astro'
 
+import { Button } from '@c2n/components/button'
 import { RecurrenceEditor } from '@c2n/components/recurrence-editor'
 
 ## Presets
@@ -85,9 +86,7 @@ Looks and jobs for `c2-recurrence-editor`. The weekday toggles are drawn by `--c
 ```
 
 ```html tag=MdxCodeBlock,label=En français
-<div lang="fr">
-  <c2-recurrence-editor start="2026-11-16" value="FREQ=MONTHLY;BYDAY=1MO;COUNT=6" preview-count="3"></c2-recurrence-editor>
-</div>
+<c2-recurrence-editor lang="fr" start="2026-11-16" value="FREQ=MONTHLY;BYDAY=1MO;COUNT=6" preview-count="3"></c2-recurrence-editor>
 ```
 
 </GalleryGrid>

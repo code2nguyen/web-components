@@ -1906,6 +1906,13 @@
       "reason": "The picker slot projects a consumer-owned c2-emoji-picker into the popup; style it through its own --c2-emoji-picker variables."
     },
     {
+      "tag": "c2-recurrence-editor",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer action zone's wrapper is exported as the footer part, which owns its layout and spacing."
+    },
+    {
       "tag": "c2-sankey-chart",
       "slot": "actions",
       "decision": "part",

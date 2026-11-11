@@ -51,7 +51,6 @@
   font-size: css.cssVar(font-size);
   font-family: css.cssVar(font-family);
   line-height: css.cssVar(line-height);
-  container-type: inline-size;
 }
 
 :host([hidden]) {
@@ -65,24 +64,35 @@
   min-width: 0;
 }
 
-.editor.disabled {
+// The inner controls dim themselves while disabled; only the editor's own parts are dimmed here.
+.editor.disabled :is(.label, .unit, .weekdays, .summary, .occurrences) {
   opacity: css.cssVar(disabled--opacity);
 }
 
 .rows {
-  display: grid;
-  grid-template-columns: minmax(css.cssVar(label--min-width), max-content) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(rows--row-gap);
+}
+
+// A row is its label and its controls side by side; on a narrow editor the controls wrap below the label.
+.row {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: css.cssVar(rows--row-gap) css.cssVar(rows--column-gap);
+  gap: 4px css.cssVar(rows--column-gap);
 }
 
 .label {
+  flex: 0 0 auto;
+  min-width: css.cssVar(label--min-width);
   color: css.cssVar(label--color);
   font-weight: css.cssVar(label--font-weight);
 }
 
 .controls {
   display: flex;
+  flex: 1 1 200px;
   flex-wrap: wrap;
   align-items: center;
   gap: css.cssVar(controls--gap);
@@ -90,7 +100,7 @@
 }
 
 .controls c2-select {
-  min-width: css.cssVar(select--min-width);
+  min-width: min(#{css.cssVar(select--min-width)}, 100%);
 }
 
 .controls c2-number-input {
@@ -189,23 +199,4 @@
 
 .footer[hidden] {
   display: none;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-@container (max-width: 420px) {
-  .rows {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-  }
-  .label:not(:first-child) {
-    margin-top: 8px;
-  }
 }
