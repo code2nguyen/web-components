@@ -1,0 +1,108 @@
+---
+/**
+ * Property-only features of the recurrence-editor gallery: `renderOccurrence` on the elements marked
+ * `data-recurrence-example="countdown"`, and the French an app adds for the card under `lang="fr"`.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { RecurrenceEditor } from '@c2n/components/recurrence-editor'
+  import '@c2n/components/recurrence-editor'
+
+  addTranslations({
+    fr: {
+      'recurrence-editor': {
+        group: 'Récurrence',
+        repeatLabel: 'Répéter',
+        everyLabel: 'Tous les',
+        onLabel: 'Le',
+        inLabel: 'En',
+        atLabel: 'À',
+        endsLabel: 'Fin',
+        nextLabel: 'Prochaines',
+        frequencyNone: 'Ne se répète pas',
+        frequencyMinutely: 'À la minute',
+        frequencyHourly: 'Toutes les heures',
+        frequencyDaily: 'Tous les jours',
+        frequencyWeekly: 'Toutes les semaines',
+        frequencyMonthly: 'Tous les mois',
+        frequencyYearly: 'Tous les ans',
+        unitMinutely: { one: 'minute', other: 'minutes' },
+        unitHourly: { one: 'heure', other: 'heures' },
+        unitDaily: { one: 'jour', other: 'jours' },
+        unitWeekly: { one: 'semaine', other: 'semaines' },
+        unitMonthly: 'mois',
+        unitYearly: { one: 'an', other: 'ans' },
+        modeDay: 'Jour du mois',
+        modeWeekday: 'Jour de la semaine du mois',
+        modeLastDay: 'Dernier jour du mois',
+        ordinal: { '1': 'premier', '2': 'deuxième', '3': 'troisième', '4': 'quatrième', '-1': 'dernier' },
+        intervalName: 'Intervalle',
+        weekdaysName: 'Jours de la semaine',
+        modeName: 'Répéter le',
+        dayName: 'Jour du mois',
+        ordinalName: 'Quelle semaine',
+        weekdayName: 'Jour de la semaine',
+        monthName: 'Mois',
+        timeName: 'Heure',
+        minuteName: 'Minute après l’heure',
+        minuteUnit: 'après l’heure',
+        endName: 'Fin',
+        untilName: 'Date de fin',
+        countName: 'Nombre d’occurrences',
+        valueMissing: 'Choisissez une fréquence',
+        endNever: 'Jamais',
+        endUntil: 'Le',
+        endCount: 'Après',
+        countUnit: { one: 'occurrence', other: 'occurrences' },
+        summaryNone: 'Ne se répète pas',
+        summaryMinutely: { one: 'Toutes les minutes', other: 'Toutes les {0} minutes' },
+        summaryHourly: { one: 'Toutes les heures', other: 'Toutes les {0} heures' },
+        summaryDaily: { one: 'Tous les jours', other: 'Tous les {0} jours' },
+        summaryWeekly: { one: 'Toutes les semaines', other: 'Toutes les {0} semaines' },
+        summaryMonthly: { one: 'Tous les mois', other: 'Tous les {0} mois' },
+        summaryYearly: { one: 'Tous les ans', other: 'Tous les {0} ans' },
+        summaryWeekdays: 'Tous les jours de semaine',
+        summaryOnDays: 'le {0}',
+        summaryOnDay: 'le {0}',
+        summaryOnLastDay: 'le dernier jour',
+        summaryOnNth: 'le {0} {1}',
+        summaryOnDate: 'le {0}',
+        summaryOnLastDayOf: 'le dernier jour de {0}',
+        summaryOnNthOf: 'le {0} {1} de {2}',
+        summaryAt: 'à {0}',
+        summaryAtMinute: 'à {0} min après l’heure',
+        summaryCount: { one: 'une fois', other: '{0} fois' },
+        summaryUntil: 'jusqu’au {0}',
+        summaryWithEnd: '{0}, {1}',
+        noOccurrences: 'Plus d’occurrences',
+        occurrencesName: 'Prochaines occurrences',
+      },
+    },
+  })
+
+  const initialized = new WeakSet<RecurrenceEditor>()
+  const start = Date.parse('2026-11-16T00:00')
+
+  function setup(editor: RecurrenceEditor) {
+    if (initialized.has(editor)) return
+    initialized.add(editor)
+    if (editor.dataset.recurrenceExample === 'countdown') {
+      editor.renderOccurrence = ({ date, label }) => {
+        const days = Math.round((date.getTime() - start) / 86_400_000)
+        return html`${label} <strong>${days === 0 ? 'start' : `+${days}d`}</strong>`
+      }
+    }
+  }
+
+  function setupAll() {
+    document.querySelectorAll<RecurrenceEditor>('c2-recurrence-editor[data-recurrence-example]').forEach(setup)
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

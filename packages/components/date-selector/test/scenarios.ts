@@ -19,9 +19,23 @@ if (scenario === 'constrained') {
   subject.max = '2026-09-20'
 }
 if (scenario === 'disabled') subject.disabled = true
+if (scenario === 'single' || scenario === 'multiple') {
+  subject.mode = scenario
+  subject.from = ''
+  subject.value = scenario === 'single' ? '2026-09-10' : '2026-09-10,2026-09-03'
+}
+if (scenario === 'multiple-empty') {
+  subject.mode = 'multiple'
+  subject.from = ''
+}
+if (scenario === 'marked') subject.setAttribute('marked', '2026-09-10;2026-09-14')
+if (scenario === 'render-day') {
+  subject.marked = ['2026-09-14']
+  subject.renderDay = ({ day, marked }) => (day % 5 === 0 ? `$${day * 10}` : marked ? 'event' : undefined)
+}
 subject.addEventListener('change', (event) => {
-  const { from, to } = (event as CustomEvent<{ from: string; to: string }>).detail
-  output.value = `${from}/${to}`
+  const { from, to, value } = (event as CustomEvent<{ from: string; to: string; value?: string }>).detail
+  output.value = value === undefined ? `${from}/${to}` : `value:${value}`
 })
 document.querySelector('form')!.addEventListener('submit', (event) => {
   event.preventDefault()

@@ -7,9 +7,11 @@ category: 'Data display'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Highlight } from '@c2n/components/highlight'
+import { Highlight, FindBar } from '@c2n/components/highlight'
 
 `c2-highlight` draws its text with every match of `query` wrapped in a `<mark>`, the way a search result list, a command palette or a filtered table shows why a row matched. Matching ignores letter case unless `match-case` is set; `ignore-accents` lets `cafe` match `café`, `whole-word` skips matches inside longer words, and `words` splits the query on spaces and marks each word on its own. Assign an array to the `query` property to highlight several terms at once. `active-index` singles out one match for a find bar that steps through them, and the number of matches is the read-only `matchCount` property, the `match-change` event and the `:state(matched)` custom state. The same matcher is exported as `findMatches(text, query, options)` for code that filters the items it highlights.
+
+`c2-find-bar`, in the same package, is the find bar that drives them: point its `for` at one `c2-highlight` or at an element holding several, and it sets their query, counts the matches across all of them ("2 of 7"), steps through them with Enter and Shift+Enter and scrolls the current one into view. Its match case and whole word toggles set the same options on the highlights, Escape fires `close` and clears them, and the `replace` attribute adds a replace row that fires `replace` for the application to change its text. Its `actions` slot takes extra commands.
 
 ## Import
 
@@ -31,6 +33,16 @@ import '@c2n/components/highlight'
 </div>
 <div data-label="Ignore accents">
   <c2-highlight query="creme brulee" ignore-accents>Crème brûlée with a crème fraîche topping.</c2-highlight>
+</div>
+<div data-label="Find bar">
+  <div style="display:grid;gap:12px;max-width:420px">
+    <c2-find-bar for="highlight-usage-find" value="tart"></c2-find-bar>
+    <div id="highlight-usage-find" style="display:grid;gap:4px;font-size:14px">
+      <c2-highlight>Apple tart with almond cream</c2-highlight>
+      <c2-highlight>Lemon tart, torched meringue</c2-highlight>
+      <c2-highlight>Tarte Tatin and crème fraîche</c2-highlight>
+    </div>
+  </div>
 </div>
 <div data-label="Current match">
   <c2-highlight query="the" active-index="1">The quick fox jumps over the lazy dog and then the cat.</c2-highlight>

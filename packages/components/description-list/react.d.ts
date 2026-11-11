@@ -31,6 +31,9 @@ declare module 'react' {
       'c2-description-list': Omit<C2Props<DescriptionList>, 'valueLabels'> & {
         'value-labels'?: Attribute
         'label-heading'?: Attribute
+        'differences-only'?: Attribute
+        'selected-column'?: Attribute
+        'column-selectable'?: Attribute
         valueLabels?: DescriptionList['valueLabels'] | string
       }
       'c2-description-value': C2Props<DescriptionValue>

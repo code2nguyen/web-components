@@ -74,6 +74,7 @@ export const componentPreviews: Record<string, string> = {
   </c2-button-group>
   <c2-button-group><c2-button>Save</c2-button><c2-button>Publish</c2-button></c2-button-group>
 </div>`,
+  'camera-capture': `<c2-camera-capture guide="card" style="--c2-camera-capture--width:220px;--c2-camera-capture__screen--font-size:12px"></c2-camera-capture>`,
   'candlestick-chart': `<c2-candlestick-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="date" legend="none" data='[{"date":"M","open":248.3,"close":256.1,"low":248.1,"high":256.6},{"date":"T","open":255.9,"close":254.4,"low":253.6,"high":257.3},{"date":"W","open":255.2,"close":252.3,"low":251,"high":255.7},{"date":"T","open":253.2,"close":256.9,"low":252.4,"high":257.2},{"date":"F","open":254.1,"close":255.5,"low":253.1,"high":257.6}]'></c2-candlestick-chart>`,
   card: `<c2-card style="width:220px">
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>
@@ -255,6 +256,9 @@ price: .price
   'image-annotator': `<c2-image-annotator readonly style="width:280px" src="/web-components/images/image-invoice-screen.svg" shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":5},{"id":"b","type":"arrow","x":520,"y":200,"w":-140,"h":-20,"color":"#e11d48","stroke":6},{"id":"c","type":"redact","x":436,"y":96,"w":70,"h":18,"color":"#000000","stroke":4},{"id":"d","type":"number","x":276,"y":246,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":5}]'></c2-image-annotator>`,
   'image-compare': `<c2-image-compare style="width:240px" position="45"><img slot="before" src="/web-components/images/compare-before.svg" alt="Room before" width="800" height="500" /><img slot="after" src="/web-components/images/compare-after.svg" alt="Room after" width="800" height="500" /></c2-image-compare>`,
   'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
+  'import-mapper': `<c2-import-mapper style="width:300px;--c2-import-mapper--padding:10px;--c2-import-mapper--font-size:12px;--c2-import-mapper__cell--padding:4px 8px" view="preview" fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email","type":"email"}]' csv="Full name,E-mail
+Ada Lovelace,ada@analytical.io
+Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'in-view': `<c2-in-view style="--c2-in-view__hidden--opacity: 0; --c2-in-view__hidden--transform: translateY(12px)"><div style="padding: 16px 24px; border-radius: 8px; background: var(--c2-theme--color-surface-container, #f4f4f5)">Revealed on scroll</div></c2-in-view>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
@@ -420,6 +424,7 @@ price: .price
 </c2-radio-group>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
   'reaction-bar': `<c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'></c2-reaction-bar>`,
+  'recurrence-editor': `<c2-recurrence-editor style="width:320px" start="2026-11-16" value="FREQ=WEEKLY;BYDAY=MO,WE,FR" preview-count="0"></c2-recurrence-editor>`,
   'relative-time': `<div class="preview-row"><span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span><span>Renews <c2-relative-time format="short" date="2027-03-01T00:00:00Z"></c2-relative-time></span></div>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>

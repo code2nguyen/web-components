@@ -12,6 +12,15 @@ const markup: Record<string, string> = {
   prevented: `<c2-banner dismissible close-label="Dismiss notice" message="Accept the terms to continue."></c2-banner><output>0</output>`,
   actions: `<c2-banner variant="warning" heading="Trial ending">Your trial ends in 3 days.<button slot="actions" type="button">Upgrade</button></c2-banner>`,
   narrow: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
+  callout: `<p>Before the callout.</p>
+    <c2-banner callout variant="warning" heading="Warning" dismissible close-label="Dismiss notice">
+      <p>Deleting a project removes its builds.</p>
+      <ul><li>Preview links stop working.</li></ul>
+      <p>Export what you need first.</p>
+      <button slot="actions" type="button">Export</button>
+    </c2-banner>
+    <c2-banner id="note" callout variant="info" no-icon message="A note without an icon."></c2-banner>
+    <c2-banner id="off" callout="false" variant="warning" heading="Off" message="Still a banner."></c2-banner>`,
   'no-icon': `<c2-banner no-icon message="No icon here."></c2-banner>`,
   positions: `<c2-banner id="top" position="top" variant="info" message="Pinned to the top."></c2-banner>
     <div style="height:2000px"></div>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-recurrence-editor</title>
+    <script type="module" src="/src/recurrence-editor.ts"></script>
+    <script type="module">
+      import '@c2n/time-input'
+      for (const editor of document.querySelectorAll('c2-recurrence-editor')) {
+        const output = editor.nextElementSibling
+        const show = () => (output.textContent = `${editor.value || '(empty)'}  ·  cron: ${editor.cron ?? '—'}`)
+        editor.addEventListener('input', show)
+        customElements
+          .whenDefined('c2-recurrence-editor')
+          .then(() => editor.updateComplete)
+          .then(show)
+      }
+    </script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+        max-width: 560px;
+      }
+      output {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: #71717a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Weekly, every 2 weeks, 10 times</h3>
+    <c2-recurrence-editor start="2026-11-16" value="FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE;COUNT=10"></c2-recurrence-editor>
+    <output></output>
+
+    <h3>Monthly on the third Tuesday</h3>
+    <c2-recurrence-editor start="2026-11-17" value="FREQ=MONTHLY;BYDAY=3TU;UNTIL=20271231"></c2-recurrence-editor>
+    <output></output>
+
+    <h3>Cron</h3>
+    <c2-recurrence-editor format="cron" value="30 9 * * 1-5"></c2-recurrence-editor>
+    <output></output>
+
+    <h3>Calendar event with "Does not repeat"</h3>
+    <c2-recurrence-editor frequencies="none daily weekly monthly yearly" with-time start="2026-11-16T10:00"></c2-recurrence-editor>
+    <output></output>
+  </body>
+</html>

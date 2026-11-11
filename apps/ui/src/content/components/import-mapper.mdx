@@ -1,0 +1,81 @@
+---
+title: 'Import Mapper'
+description: 'The mapping step of a spreadsheet import: match each column of the file to a field, check the required ones, then preview the rows with their errors.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ImportMapper } from '@c2n/components/import-mapper'
+
+`c2-import-mapper` is the step between "choose a file" and "import" in a CSV or spreadsheet import. Each column of the file is a row with its header, its first values and a field picker, already filled by matching the header to the fields' keys, labels and `aliases` ("E-mail address" finds Email). A summary lists the required fields and whether a column is mapped to each. A field maps from one column at a time: picking it for a second column takes it from the first, and the change is announced.
+
+Set `view="preview"` to show the rows as they will be imported: one column per mapped field, each invalid cell tinted with its message under the value (`required`, `type` such as `email`, `number` or `date`, `options`, `pattern`, and a `validate` function for your own rules), and a pager. `errors-only` keeps only the rows to fix.
+
+Give it the file as `csv` text (it detects the delimiter and reads quoted cells), as `columns` and `rows` from a spreadsheet library, or as `columns` and a `dataSource` for a file too large to hold in memory. The element never reads the file itself and has no buttons of its own: put Preview, Back and Import in the `toolbar` or `footer` slot, switch `view`, and read `mapping`, `missing`, `validate()` and `records()`.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/import-mapper'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/import-mapper
+<style>
+  .import-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+</style>
+<div data-label="Map the columns">
+  <c2-import-mapper
+    class="import-demo"
+    label="Import contacts"
+    fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"company","label":"Company","aliases":["organization"]},{"key":"phone","label":"Phone"},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+    csv="Full name,E-mail address,Organization,Signed up,Notes
+Ada Lovelace,ada@analytical.io,Analytical Engines,2024-03-01,VIP
+Grace Hopper,grace(at)navy.mil,US Navy,2024-13-01,
+Alan Turing,alan@bletchley.org,Bletchley Park,2024-05-17,Call back"
+  ></c2-import-mapper>
+</div>
+<div data-label="Preview the rows">
+  <c2-import-mapper
+    class="import-demo"
+    label="Import contacts"
+    view="preview"
+    fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"company","label":"Company","aliases":["organization"]},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+    csv="Full name,E-mail address,Organization,Signed up
+Ada Lovelace,ada@analytical.io,Analytical Engines,2024-03-01
+Grace Hopper,grace(at)navy.mil,US Navy,2024-13-01
+Alan Turing,alan@bletchley.org,Bletchley Park,2024-05-17"
+  ></c2-import-mapper>
+</div>
+```
+
+A typical flow reads the file from `c2-upload`, maps, previews and imports:
+
+```ts tag=CodeBlock
+import type { ImportMapper } from '@c2n/components/import-mapper'
+
+const mapper = document.querySelector<ImportMapper>('c2-import-mapper')!
+mapper.fields = [
+  { key: 'email', label: 'Email', required: true, type: 'email' },
+  { key: 'plan', label: 'Plan', options: ['free', 'pro', 'team'] },
+  { key: 'seats', label: 'Seats', type: 'integer', validate: (value) => (Number(value) > 500 ? 'At most 500 seats' : null) },
+]
+
+upload.addEventListener('files-selected', async ({ detail }) => {
+  mapper.csv = await detail.files[0].text() // for .xlsx, set `columns` and `rows` from your spreadsheet library
+})
+mapper.addEventListener('mapping-change', ({ detail }) => {
+  previewButton.disabled = detail.missing.length > 0
+})
+previewButton.addEventListener('click', () => (mapper.view = 'preview'))
+importButton.addEventListener('click', () => {
+  const { valid } = mapper.validate()
+  if (valid) save(mapper.records()) // [{ email: '…', plan: 'pro', seats: '12' }, …]
+})
+```

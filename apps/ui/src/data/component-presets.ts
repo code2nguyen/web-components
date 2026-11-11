@@ -754,6 +754,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-recurrence-editor': {
+    html: `<c2-recurrence-editor style="width:min(100%, 480px)" start="2026-11-16" value="FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE;COUNT=10" preview-count="3"></c2-recurrence-editor>`,
+    presets: [
+      {
+        name: 'Square teal days',
+        description: 'Rounded-square weekday toggles in teal, for a scheduling sidebar.',
+        css: {
+          '--c2-recurrence-editor__weekday--border-radius': '6px',
+          '--c2-recurrence-editor__weekday--size': '36px',
+          '--c2-recurrence-editor__weekday__selected--background': '#0f766e',
+          '--c2-recurrence-editor__weekday__selected--border': '1px solid #0f766e',
+        },
+      },
+      {
+        name: 'Plain sentence',
+        description: 'The summary as bold text with no box, as in an invoice form.',
+        css: {
+          '--c2-recurrence-editor__summary--background': 'transparent',
+          '--c2-recurrence-editor__summary--padding': '0',
+          '--c2-recurrence-editor__summary--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Tighter rows and smaller toggles for a popover.',
+        css: {
+          '--c2-recurrence-editor__rows--row-gap': '8px',
+          '--c2-recurrence-editor--gap': '10px',
+          '--c2-recurrence-editor__weekday--size': '28px',
+          '--c2-recurrence-editor__label--min-width': '44px',
+        },
+        attributes: { 'preview-count': '0' },
+      },
+    ],
+  },
   'c2-relative-time': {
     html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
     presets: [
@@ -1111,6 +1146,44 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-image-cropper__handle--background': '#18181b',
           '--c2-image-cropper__handle--border': '2px solid #ffffff',
           '--c2-image-cropper__handle--box-shadow': 'none',
+        },
+      },
+    ],
+  },
+  'c2-import-mapper': {
+    html: `<c2-import-mapper style="width: 560px" label="Import contacts" fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email"},{"key":"phone","label":"Phone"}]' csv="Full name,E-mail,Phone #,Notes
+Ada Lovelace,ada@analytical.io,+44 20 7946 0000,VIP
+Alan Turing,alan@bletchley.org,,Call back"></c2-import-mapper>`,
+    presets: [
+      {
+        name: 'Borderless',
+        description: 'No frame or summary panel, for a mapper inside a dialog or a wizard step.',
+        css: {
+          '--c2-import-mapper--border': 'none',
+          '--c2-import-mapper--padding': '0',
+          '--c2-import-mapper__summary--background-color': 'transparent',
+          '--c2-import-mapper__summary--padding': '0',
+        },
+      },
+      {
+        name: 'Dense',
+        description: 'Shorter rows, two samples per column and a narrower picker for long files.',
+        attributes: { 'sample-count': '2' },
+        css: {
+          '--c2-import-mapper--font-size': '13px',
+          '--c2-import-mapper__column--min-height': '40px',
+          '--c2-import-mapper__column--padding': '4px 0',
+          '--c2-import-mapper__picker--width': '180px',
+        },
+      },
+      {
+        name: 'Square chips',
+        description: 'Square required-field chips and plain samples.',
+        css: {
+          '--c2-import-mapper__field--border-radius': '4px',
+          '--c2-import-mapper__sample--background-color': 'transparent',
+          '--c2-import-mapper__sample--border-radius': '0',
+          '--c2-import-mapper__badge--background-color': 'transparent',
         },
       },
     ],
@@ -4074,6 +4147,41 @@ selectors:
           '--c2-signature-pad__stroke--width': '5px',
           '--c2-signature-pad--border-radius': '14px',
           '--c2-signature-pad__baseline--border': '0',
+        },
+      },
+    ],
+  },
+  'c2-camera-capture': {
+    html: `<c2-camera-capture guide="card"></c2-camera-capture>`,
+    presets: [
+      {
+        name: 'Receipt',
+        description: 'An upright stage and a long, narrow guide for a till receipt.',
+        css: {
+          '--c2-camera-capture__stage--aspect-ratio': '3 / 4',
+          '--c2-camera-capture__guide__document--aspect-ratio': '0.42',
+          '--c2-camera-capture__guide--border-radius': '4px',
+        },
+        attributes: { guide: 'document' },
+      },
+      {
+        name: 'Wide',
+        description: 'A 16:9 stage with a narrower guide and rounded corners.',
+        css: {
+          '--c2-camera-capture__stage--aspect-ratio': '16 / 9',
+          '--c2-camera-capture__stage--border-radius': '24px',
+          '--c2-camera-capture__guide--width': '60%',
+        },
+      },
+      {
+        name: 'Teal',
+        description: 'A teal shutter and Use photo button, and a deeper scrim around the guide.',
+        css: {
+          '--c2-camera-capture__shutter--background': '#0f766e',
+          '--c2-camera-capture__shutter__hover--background': '#115e59',
+          '--c2-camera-capture__accept--background': '#0f766e',
+          '--c2-camera-capture__accept__hover--background': '#115e59',
+          '--c2-camera-capture__guide__scrim--color': 'rgba(15, 23, 42, 0.6)',
         },
       },
     ],

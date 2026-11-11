@@ -114,10 +114,19 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Renders the summary cell body instead of the formatted value. Property only. */
   @property({ attribute: false }) renderSummary?: TableSummaryRenderer
 
+  /**
+   * In a tree (`children-field`), what a parent row shows in this column: `sum`, `avg`, `min`, `max` or `count` of the
+   * leaf rows under it, or a function of those rows (property only). The parent's own value is not used.
+   */
+  @property({ type: String }) rollup?: TableSummaryAggregate | TableSummaryFunction
+
   /** Client-side sort comparator for this column's values. Property only. */
   @property({ attribute: false }) comparator?: (a: unknown, b: unknown) => number
 
-  /** Puts the group tree (chevron, group label and count, indentation) in this column while the table is grouped. Defaults to the first column. */
+  /**
+   * Puts the group tree (chevron, group label and count, indentation) in this column while the table is grouped, and
+   * each row's chevron and indentation in a tree (`children-field`). Defaults to the first column.
+   */
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
 
   override connectedCallback() {

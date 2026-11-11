@@ -81,7 +81,7 @@ const api: TableBenchApi = {
     marked = []
     const start = performance.now()
     main.innerHTML = `
-      <c2-table id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36">
+      <c2-table id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36"${options.childrenField !== undefined ? ` children-field="${options.childrenField}"` : ''}>
         <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
         <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
         <c2-table-column field="status" header="Status" width="120px"></c2-table-column>

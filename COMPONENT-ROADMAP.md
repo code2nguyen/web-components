@@ -14,6 +14,10 @@ The roadmap adds 168 new primitives to c2n, taking it from 127 `c2-*` elements t
 
 Items are grouped by domain. Priority **P1** means other items depend on it or it appears in almost every app, **P2** means common in business apps, and **P3** means specialized.
 
+## Round three: the long list
+
+A third round, researched on 2026-11-07, looked at enterprise applications domain by domain (finance, human resources, operations, sales and support, IT and security, regulated sectors) and swept the catalogs the first two rounds did not read. Its 410 candidates, numbered 239 to 648, are in [`COMPONENT-CANDIDATES.md`](COMPONENT-CANDIDATES.md), each checked against the 272 `c2-*` elements on `develop` and against every row of this file. Each one carries a recommendation that prefers extending an existing component over adding a package, as long as the host's bundle size and render path are not harmed: 232 of the 410 go through a component that already exists, 104 are compositions for the blocks collection and 74 need a new package. On 2026-11-10 the maintainer accepted those recommendations. The work is scheduled in [`COMPONENT-ACTION-PLAN.md`](COMPONENT-ACTION-PLAN.md): one track per package, in numbered steps that separate sessions can run in parallel. The same file lists the decisions of rounds one and two that the new research argues against.
+
 ## Already in flight (excluded)
 
 When the roadmap was researched on 2026-10-04, four open PRs were adding components, so they were left off: `c2-working-indicator` ([#182](https://github.com/code2nguyen/web-components/pull/182)), `c2-kanban` ([#151](https://github.com/code2nguyen/web-components/pull/151)), `@c2n/gantt` ([#141](https://github.com/code2nguyen/web-components/pull/141)) and `@c2n/google-map` ([#129](https://github.com/code2nguyen/web-components/pull/129)). All four have since shipped. Because of `@c2n/google-map`, map primitives (markers, routes, geo pickers) are left off too.
@@ -50,7 +54,6 @@ Domain patterns with no design-system home come from the products that made them
 | 5   | `c2-choice-card`   | Card-sized radio or checkbox for plan, shipping or payment choices | Chakra radio/checkbox card, Carbon options tile; Stripe and Vercel plan pickers | P2       | Reject: covered by `c2-radio` card styling (container border, checked states, description slot) in `c2-radio-group`                                                                 |
 | 14  | `c2-transfer-list` | Move items between two lists (roles, permissions)                  | antd Transfer, PrimeVue PickList                                                | P3       | Proposed                                                                                                                                                                            |
 | 15  | `c2-mention-input` | `@user` and `#tag` suggestions inside text                         | antd Mentions; Slack, GitHub                                                    | P2       | Reject: extend instead: give `c2-textarea` and `c2-text-field` the `triggers` API `c2-rich-text-editor` already has (`"@ #"` + a `trigger` event), with an optional suggestion list |
-| 22  | `c2-cron-input`    | Build a recurring schedule, output a cron expression               | Vercel cron jobs, GitHub Actions schedules                                      | P3       | Proposed                                                                                                                                                                            |
 
 ### B. Data display
 

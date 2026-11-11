@@ -1,0 +1,481 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-camera-capture,
+  $theme: (
+    width: 480px,
+    stage--aspect-ratio: #{'4 / 3'},
+    stage--background: #18181b,
+    stage--color: #fafafa,
+    stage__muted--color: #a1a1aa,
+    stage--border-radius: 8px,
+    guide--width: 82%,
+    guide__face--width: 52%,
+    guide--height: 86%,
+    guide__document--aspect-ratio: 0.707,
+    guide__card--aspect-ratio: 1.586,
+    guide__face--aspect-ratio: 0.75,
+    guide--border-radius: 14px,
+    guide--border-width: 3px,
+    guide--border-color: #ffffff,
+    guide__ready--border-color: #16a34a,
+    guide__scrim--color: rgba(0, 0, 0, 0.45),
+    hint--background: rgba(24, 24, 27, 0.72),
+    hint__issue--background: rgba(180, 83, 9, 0.92),
+    hint--color: #fafafa,
+    hint--font-size: 14px,
+    hint--border-radius: 999px,
+    hint--display: block,
+    shot--color: #71717a,
+    shot__current--color: #18181b,
+    mark__done--background: #16a34a,
+    mark__done--color: #ffffff,
+    shot--font-size: 12px,
+    shot__current--font-weight: 600,
+    screen--font-size: 14px,
+    controls--padding: #{'12px 0 0'},
+    controls--gap: 12px,
+    shutter--size: 60px,
+    shutter--background: rgb(2, 101, 220),
+    shutter__hover--background: rgb(1, 84, 184),
+    shutter--ring-color: #ffffff,
+    shutter__progress--color: #16a34a,
+    switch--size: 40px,
+    button--background: #ffffff,
+    button__hover--background: #f4f4f5,
+    button--color: #18181b,
+    button--border: 1px solid #bcbcc6,
+    button--border-radius: 6px,
+    button--height: 36px,
+    button--font-size: 14px,
+    button--font-weight: 500,
+    accept--background: rgb(2, 101, 220),
+    accept__hover--background: rgb(1, 84, 184),
+    accept--color: #ffffff,
+    thumbnail--border-radius: 6px,
+    thumbnail--min-width: 140px,
+    thumbnail__button--height: 28px,
+    thumbnail__button--font-size: 12px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.camera {
+  position: relative;
+}
+
+/* The list of required shots */
+.shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.shot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: css.cssVar(shot--color);
+  font-size: css.cssVar(shot--font-size);
+  line-height: 20px;
+}
+
+.shot__mark {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.shot--current {
+  color: css.cssVar(shot__current--color);
+  font-weight: css.cssVar(shot__current--font-weight);
+}
+
+.shot--done .shot__mark {
+  border-color: css.cssVar(mark__done--background);
+  background: css.cssVar(mark__done--background);
+  color: css.cssVar(mark__done--color);
+}
+
+/* The picture */
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: css.cssVar(stage--border-radius);
+  background: css.cssVar(stage--background);
+  color: css.cssVar(stage--color);
+  isolation: isolate;
+}
+
+/* The stage's shape is a minimum: a screen with more text than a short stage holds makes it taller, not cut off. */
+.stage::before {
+  content: '';
+  grid-area: 1 / 1;
+  aspect-ratio: css.cssVar(stage--aspect-ratio);
+}
+
+.video,
+.preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview {
+  object-fit: contain;
+  background: css.cssVar(stage--background);
+}
+
+.video--mirrored {
+  transform: scaleX(-1);
+}
+
+.guide-area {
+  --_ratio: #{css.cssVar(guide__card--aspect-ratio)};
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: css.cssVar(guide--width);
+  height: css.cssVar(guide--height);
+  transform: translate(-50%, -50%);
+  container-type: size;
+  pointer-events: none;
+}
+
+.guide-area--document {
+  --_ratio: #{css.cssVar(guide__document--aspect-ratio)};
+}
+
+.guide-area--face {
+  --_ratio: #{css.cssVar(guide__face--aspect-ratio)};
+
+  width: css.cssVar(guide__face--width);
+}
+
+/* The largest box of the guide's shape that fits the area: its width, or its height times the ratio. */
+.guide {
+  box-sizing: border-box;
+  width: min(100cqw, 100cqh * var(--_ratio));
+  aspect-ratio: var(--_ratio);
+}
+
+.frame {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: css.cssVar(guide--border-width) solid css.cssVar(guide--border-color);
+  border-radius: css.cssVar(guide--border-radius);
+  box-shadow: 0 0 0 100vmax css.cssVar(guide__scrim--color);
+  transition: border-color 150ms ease;
+}
+
+.guide--face .frame {
+  border-radius: 50%;
+}
+
+.guide--ready .frame {
+  border-color: css.cssVar(guide__ready--border-color);
+}
+
+::slotted([slot='guide']) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hint {
+  display: css.cssVar(hint--display);
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  box-sizing: border-box;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 6px 14px;
+  transform: translateX(-50%);
+  border-radius: css.cssVar(hint--border-radius);
+  background: css.cssVar(hint--background);
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+  line-height: 20px;
+  text-align: center;
+  white-space: normal;
+  width: max-content;
+}
+
+.hint--issue {
+  background: css.cssVar(hint__issue--background);
+}
+
+/* Idle, starting and error screens */
+.screen {
+  position: relative;
+  grid-area: 1 / 1;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+
+  ::slotted(*) {
+    max-width: 100%;
+  }
+
+  /* The slot lays out its own fallback: `display: contents` on a slot keeps the fallback in WebKit's accessibility tree. */
+  slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+  }
+}
+
+.screen__icon {
+  display: inline-grid;
+  color: css.cssVar(stage__muted--color);
+
+  svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.screen__text {
+  max-width: 36ch;
+  margin: 0;
+  font-size: css.cssVar(screen--font-size);
+  line-height: 20px;
+}
+
+.screen__text--muted {
+  color: css.cssVar(stage__muted--color);
+}
+
+/* Summary */
+.done {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+.thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, #{css.cssVar(thumbnail--min-width)}), 1fr));
+  gap: 12px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thumbnail {
+  position: relative;
+  display: flex;
+  min-height: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    min-height: 80px;
+    object-fit: contain;
+    border-radius: css.cssVar(thumbnail--border-radius);
+  }
+
+  .button {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+  }
+}
+
+/* Controls */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: css.cssVar(controls--gap);
+  padding: css.cssVar(controls--padding);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.main-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.side-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: css.cssVar(button--height);
+  padding: 0 16px;
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  background: css.cssVar(button--background);
+  color: css.cssVar(button--color);
+  font: inherit;
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(button__hover--background);
+  }
+}
+
+.button--accept {
+  border-color: transparent;
+  background: css.cssVar(accept--background);
+  color: css.cssVar(accept--color);
+
+  &:hover {
+    background: css.cssVar(accept__hover--background);
+  }
+}
+
+.button--small {
+  height: css.cssVar(thumbnail__button--height);
+  padding: 0 10px;
+  font-size: css.cssVar(thumbnail__button--font-size);
+}
+
+.shutter {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: css.cssVar(shutter--size);
+  height: css.cssVar(shutter--size);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: conic-gradient(css.cssVar(shutter__progress--color) calc(var(--_progress, 0) * 360deg), css.cssVar(shutter--background) 0);
+  cursor: pointer;
+
+  &:hover {
+    background: conic-gradient(css.cssVar(shutter__progress--color) calc(var(--_progress, 0) * 360deg), css.cssVar(shutter__hover--background) 0);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}
+
+.shutter__ring {
+  box-sizing: border-box;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  border: 3px solid css.cssVar(shutter--ring-color);
+  border-radius: 50%;
+}
+
+.switch {
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(switch--size);
+  height: css.cssVar(switch--size);
+  padding: 0;
+  border: css.cssVar(button--border);
+  border-radius: 999px;
+  background: css.cssVar(button--background);
+  color: css.cssVar(button--color);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(button__hover--background);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.button:focus-visible,
+.shutter:focus-visible,
+.switch:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .frame {
+    border-color: CanvasText;
+  }
+
+  .guide--ready .frame {
+    border-color: Highlight;
+  }
+
+  .shutter {
+    border: 2px solid ButtonText;
+  }
+}

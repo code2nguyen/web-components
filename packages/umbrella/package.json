@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -164,6 +164,10 @@
     "./button-group": {
       "types": "./dist/button-group.d.ts",
       "default": "./dist/button-group.js"
+    },
+    "./camera-capture": {
+      "types": "./dist/camera-capture.d.ts",
+      "default": "./dist/camera-capture.js"
     },
     "./card": {
       "types": "./dist/card.d.ts",
@@ -505,6 +509,10 @@
       "types": "./dist/form.d.ts",
       "default": "./dist/form.js"
     },
+    "./form/form-list": {
+      "types": "./dist/form/form-list.d.ts",
+      "default": "./dist/form/form-list.js"
+    },
     "./form-field": {
       "types": "./dist/form-field.d.ts",
       "default": "./dist/form-field.js"
@@ -553,6 +561,10 @@
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
     },
+    "./highlight/find-bar": {
+      "types": "./dist/highlight/find-bar.d.ts",
+      "default": "./dist/highlight/find-bar.js"
+    },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
       "default": "./dist/hover-card.js"
@@ -576,6 +588,10 @@
     "./image-cropper": {
       "types": "./dist/image-cropper.d.ts",
       "default": "./dist/image-cropper.js"
+    },
+    "./import-mapper": {
+      "types": "./dist/import-mapper.d.ts",
+      "default": "./dist/import-mapper.js"
     },
     "./in-view": {
       "types": "./dist/in-view.d.ts",
@@ -640,6 +656,10 @@
     "./list-item": {
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
+    },
+    "./list-item/list-group": {
+      "types": "./dist/list-item/list-group.d.ts",
+      "default": "./dist/list-item/list-group.js"
     },
     "./loading-overlay": {
       "types": "./dist/loading-overlay.d.ts",
@@ -860,6 +880,10 @@
     "./reaction-bar": {
       "types": "./dist/reaction-bar.d.ts",
       "default": "./dist/reaction-bar.js"
+    },
+    "./recurrence-editor": {
+      "types": "./dist/recurrence-editor.d.ts",
+      "default": "./dist/recurrence-editor.js"
     },
     "./relative-time": {
       "types": "./dist/relative-time.d.ts",
@@ -1176,10 +1200,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.23",
-    "@c2n/phosphor-icons": "1.0.23",
-    "@c2n/task-icons": "1.0.23",
-    "@c2n/theme": "1.0.23",
+    "@c2n/core": "1.0.24",
+    "@c2n/phosphor-icons": "1.0.24",
+    "@c2n/task-icons": "1.0.24",
+    "@c2n/theme": "1.0.24",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1295,6 +1319,7 @@
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",
+    "@c2n/camera-capture": "*",
     "@c2n/card": "*",
     "@c2n/card-input": "*",
     "@c2n/carousel": "*",
@@ -1358,6 +1383,7 @@
     "@c2n/image-annotator": "*",
     "@c2n/image-compare": "*",
     "@c2n/image-cropper": "*",
+    "@c2n/import-mapper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
@@ -1418,6 +1444,7 @@
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/reaction-bar": "*",
+    "@c2n/recurrence-editor": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",

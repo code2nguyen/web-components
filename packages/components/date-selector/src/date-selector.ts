@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { queryAll, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -8,10 +8,31 @@ import styles from './date-selector.scss?inline'
 
 export type DateSelectorWeekStart = 'monday' | 'sunday'
 
+/** What a click picks: a `range` of two endpoints, a `single` date, or any number of `multiple` dates. */
+export type DateSelectorMode = 'range' | 'single' | 'multiple'
+
 export interface DateRangeChangeDetail {
   from: string
   to: string
+  /** The new `value`. Present in `single` and `multiple` mode only. */
+  value?: string
 }
+
+/** What `renderDay` receives for each day of the visible months. */
+export interface DateSelectorDayContext {
+  /** The day as `YYYY-MM-DD`. */
+  date: string
+  /** The day of the month, 1 to 31. */
+  day: number
+  selected: boolean
+  disabled: boolean
+  /** Whether the day is listed in `marked`. */
+  marked: boolean
+  today: boolean
+}
+
+/** Draws extra content under a day's number (a price, an event count, a custom marker). */
+export type DateSelectorDayRenderer = (context: DateSelectorDayContext) => unknown
 
 export interface DateSelectorEventMap {
   input: Event
@@ -24,6 +45,12 @@ export interface DateSelector {
 }
 
 const defaultLabel = 'Choose a date range'
+const modeLabels: Record<DateSelectorMode, string> = { range: defaultLabel, single: 'Choose a date', multiple: 'Choose dates' }
+const missingMessages: Record<DateSelectorMode, string> = {
+  range: 'Choose a start and end date',
+  single: 'Choose a date',
+  multiple: 'Choose at least one date',
+}
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}$/
 
@@ -52,12 +79,15 @@ function addDays(date: Date, amount: number): Date {
 
 /**
  * A keyboard-accessible date-range calendar inspired by travel booking pickers. It shows one or two consecutive
- * months, starts a range on the first activation, completes it on the second, and starts over on the third. Dates are
+ * months, starts a range on the first activation, completes it on the second, and starts over on the third. With
+ * `mode="single"` it picks one date into `value`; with `mode="multiple"` each activation toggles a date in `value`
+ * (a comma-separated list). `marked` dates get a dot, and `renderDay` adds content under any day's number. Dates are
  * local-calendar ISO strings (`YYYY-MM-DD`), so they do not shift across time zones. Arrow keys move by day or week,
  * Home/End move within the week, and Page Up/Page Down change month.
  *
  * When `name` is present, the start date is submitted under that name and the end date under `end-name` (or
- * `${name}-end`). `required` requires a complete range. Use `min` and `max` to constrain availability:
+ * `${name}-end`). In `single` mode `value` is submitted under `name`, and in `multiple` mode each date is submitted
+ * under `name`. `required` requires a complete range, or at least one date. Use `min` and `max` to constrain availability:
  * days outside them are disabled, and the month navigation stops at the months that contain them.
  *
  * @tag c2-date-selector
@@ -92,6 +122,13 @@ function addDays(date: Date, amount: number): Date {
  * @cssproperty {pixel} [--c2-date-selector__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-date-selector__disabled--opacity=0.38]
  * @cssproperty {border} [--c2-date-selector__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
+ * @cssproperty {color} [--c2-date-selector__marker--color=#0265dc] - Dot under a `marked` day.
+ * @cssproperty {color} [--c2-date-selector__marker__selected--color=#ffffff] - Dot under a `marked` day that is selected.
+ * @cssproperty {pixel} [--c2-date-selector__marker--size=4px]
+ * @cssproperty {font-size} [--c2-date-selector__day-content--font-size=10px] - Text drawn by `renderDay`.
+ * @cssproperty {color} [--c2-date-selector__day-content--color=#71717a] - Text drawn by `renderDay`.
+ * @csspart marker - The dot under a `marked` day.
+ * @csspart day-content - The wrapper of what `renderDay` returns for a day.
  */
 @customElement('c2-date-selector')
 export class DateSelector extends LitElement {
@@ -102,6 +139,8 @@ export class DateSelector extends LitElement {
   private defaultsCaptured = false
   private defaultFrom = ''
   private defaultTo = ''
+  private defaultValue = ''
+  private markedDates = new Set<string>()
   @state() private disabledByForm = false
   @state() private visibleMonth = beginningOfMonth(new Date())
   @state() private focusDate = ''
@@ -121,6 +160,17 @@ export class DateSelector extends LitElement {
   @property({ type: String }) locale = ''
   /** First day of each calendar week. */
   @property({ attribute: 'week-start', reflect: true }) weekStart: DateSelectorWeekStart = 'monday'
+  /** What a click picks: a `range` (`from`/`to`), one date (`single`) or any number of dates (`multiple`) in `value`. */
+  @property({ reflect: true }) mode: DateSelectorMode = 'range'
+  /**
+   * The selection outside `range` mode: one `YYYY-MM-DD` date in `single` mode, the dates in ascending order separated
+   * by commas in `multiple` mode. Unused in `range` mode, which keeps `from` and `to`.
+   */
+  @property({ type: String, reflect: true }) value = ''
+  /** Dates drawn with a dot (events, availability), as `YYYY-MM-DD`: an array, or `;`-separated / JSON in the attribute. */
+  @property({ converter: arrayPropertyConverter }) marked: string[] = []
+  /** Adds content under each day's number. The day button, its label and its selection stay the component's. */
+  @property({ attribute: false }) renderDay?: DateSelectorDayRenderer
   /** Number of consecutive months shown; clamped to one or two. */
   @property({ type: Number, reflect: true }) months = 2
   /** Form field name for the start date. */
@@ -159,7 +209,8 @@ export class DateSelector extends LitElement {
   formResetCallback() {
     this.from = this.defaultFrom
     this.to = this.defaultTo
-    this.visibleMonth = beginningOfMonth(fromIso(this.from) ?? new Date())
+    this.value = this.defaultValue
+    this.visibleMonth = beginningOfMonth(fromIso(this.isRange ? this.from : (this.selectedDates[0] ?? '')) ?? new Date())
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -168,6 +219,11 @@ export class DateSelector extends LitElement {
 
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state !== 'string') return
+    // A range state always holds a `/` (`from/` or `from/to`); a `value` state never does.
+    if (!state.includes('/')) {
+      this.value = state
+      return
+    }
     const [from, to = ''] = state.split('/')
     this.from = from
     this.to = to
@@ -177,15 +233,28 @@ export class DateSelector extends LitElement {
     if (!this.defaultsCaptured) {
       this.defaultFrom = this.from
       this.defaultTo = this.to
+      if (!this.isRange) this.normalizeValue()
+      this.defaultValue = this.value
       this.defaultsCaptured = true
-      const selected = fromIso(this.from)
+      const selected = fromIso(this.isRange ? this.from : (this.selectedDates[0] ?? ''))
       if (selected) this.visibleMonth = beginningOfMonth(selected)
     }
     if (changed.has('from') || changed.has('to')) this.normalizeRange()
+    if (!this.isRange && (changed.has('value') || changed.has('mode'))) this.normalizeValue()
+    if (changed.has('marked')) this.markedDates = new Set(Array.isArray(this.marked) ? this.marked.map((date) => date.trim()) : [])
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    if (changed.has('from') || changed.has('to') || changed.has('name') || changed.has('endName') || changed.has('required') || changed.has('disabled'))
+    if (
+      changed.has('from') ||
+      changed.has('to') ||
+      changed.has('value') ||
+      changed.has('mode') ||
+      changed.has('name') ||
+      changed.has('endName') ||
+      changed.has('required') ||
+      changed.has('disabled')
+    )
       this.syncFormState()
   }
 
@@ -194,6 +263,13 @@ export class DateSelector extends LitElement {
   }
   private get effectiveLocale() {
     return this.locale || this.ownerDocument?.documentElement.lang || 'en-US'
+  }
+  private get isRange() {
+    return this.mode !== 'single' && this.mode !== 'multiple'
+  }
+  /** The valid dates of `value`, in the order written. */
+  private get selectedDates() {
+    return this.value.split(/[\s,;]+/).filter((date) => fromIso(date))
   }
   private get displayedMonths() {
     return Math.min(2, Math.max(1, Number.isFinite(this.months) ? Math.round(this.months) : 2))
@@ -205,7 +281,25 @@ export class DateSelector extends LitElement {
     if (this.to && (!this.from || this.to < this.from)) this.to = ''
   }
 
+  private normalizeValue() {
+    const dates = [...new Set(this.selectedDates)].sort()
+    const value = (this.mode === 'single' ? dates.slice(0, 1) : dates).join(',')
+    if (value !== this.value) this.value = value
+  }
+
   private syncFormState() {
+    if (!this.isRange) {
+      const dates = this.selectedDates
+      if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null)
+      else {
+        const data = new FormData()
+        for (const date of dates) data.append(this.name, date)
+        this.internals.setFormValue(data, this.value)
+      }
+      if (this.required && dates.length === 0) this.internals.setValidity({ valueMissing: true }, missingMessages[this.mode])
+      else this.internals.setValidity({})
+      return
+    }
     if (this.effectiveDisabled || !this.name || !this.from) this.internals.setFormValue(null)
     else if (this.to) {
       const data = new FormData()
@@ -213,7 +307,7 @@ export class DateSelector extends LitElement {
       data.append(this.endName || `${this.name}-end`, this.to)
       this.internals.setFormValue(data, `${this.from}/${this.to}`)
     } else this.internals.setFormValue(this.from, `${this.from}/`)
-    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, 'Choose a start and end date')
+    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, missingMessages.range)
     else this.internals.setValidity({})
   }
 
@@ -223,7 +317,11 @@ export class DateSelector extends LitElement {
 
   private select(value: string) {
     if (this.isUnavailable(value)) return
-    if (!this.from || this.to) {
+    if (this.mode === 'single') this.value = value
+    else if (this.mode === 'multiple') {
+      const dates = this.selectedDates
+      this.value = (dates.includes(value) ? dates.filter((date) => date !== value) : [...dates, value]).sort().join(',')
+    } else if (!this.from || this.to) {
       this.from = value
       this.to = ''
     } else if (value > this.from) this.to = value
@@ -233,7 +331,8 @@ export class DateSelector extends LitElement {
     }
     this.focusDate = value
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-    this.dispatchEvent(new CustomEvent<DateRangeChangeDetail>('change', { detail: { from: this.from, to: this.to }, bubbles: true, composed: true }))
+    const detail: DateRangeChangeDetail = this.isRange ? { from: this.from, to: this.to } : { from: this.from, to: this.to, value: this.value }
+    this.dispatchEvent(new CustomEvent<DateRangeChangeDetail>('change', { detail, bubbles: true, composed: true }))
   }
 
   /** Whether moving the view by `amount` months would still show a selectable day within `min`/`max`. */
@@ -292,21 +391,25 @@ export class DateSelector extends LitElement {
     return Array.from({ length: 7 }, (_, index) => formatter.format(addDays(start, index)))
   }
 
-  private renderDay(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string) {
+  private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, anchor: string) {
     const value = toIso(date)
     const disabled = this.isUnavailable(value)
-    const selected = value === this.from || value === this.to
-    const inRange = !!this.to && value > this.from && value < this.to
+    const selected = selection ? selection.has(value) : value === this.from || value === this.to
+    const range = !selection && !!this.to
+    const inRange = range && value > this.from && value < this.to
     // The range strip only exists once both ends are picked; a lone start date is just a selected circle.
-    const rangeStart = !!this.to && value === this.from
-    const focusable =
-      !disabled && (this.focusDate ? value === this.focusDate : this.from ? value === this.from : value === today || !this.min || value >= this.min)
+    const rangeStart = range && value === this.from
+    const marked = this.markedDates.has(value)
+    const focusable = !disabled && (this.focusDate ? value === this.focusDate : anchor ? value === anchor : value === today || !this.min || value >= this.min)
+    const content = this.renderDay?.({ date: value, day: date.getDate(), selected, disabled, marked, today: value === today })
+    const hasContent = content !== undefined && content !== null && content !== nothing && content !== '' && content !== false
     return html`<button
-      class="day ${rangeStart ? 'range-start' : ''} ${value === this.to ? 'range-end' : ''} ${inRange ? 'in-range' : ''}"
+      class="day ${rangeStart ? 'range-start' : ''} ${range && value === this.to ? 'range-end' : ''} ${inRange ? 'in-range' : ''} ${hasContent ? 'has-content' : ''}"
       type="button"
       role="gridcell"
       data-date=${value}
       aria-label=${dateLabel.format(date)}
+      aria-describedby=${hasContent ? `content-${value}` : nothing}
       aria-selected=${selected ? 'true' : 'false'}
       aria-current=${value === today ? 'date' : nothing}
       ?disabled=${disabled}
@@ -315,11 +418,15 @@ export class DateSelector extends LitElement {
       @focus=${() => (this.focusDate = value)}
       @keydown=${(event: KeyboardEvent) => this.handleDayKeydown(event, value, column)}
     >
-      <span>${date.getDate()}</span>
+      <span
+        >${date.getDate()}${
+          hasContent ? html`<small class="day-content" id="content-${value}" part="day-content">${content}</small>` : nothing
+        }${marked ? html`<i class="marker" part="marker" aria-hidden="true"></i>` : nothing}</span
+      >
     </button>`
   }
 
-  private renderMonth(month: Date, index: number) {
+  private renderMonth(month: Date, index: number, selection: Set<string> | null, anchor: string) {
     const year = month.getFullYear()
     const monthIndex = month.getMonth()
     const offset = this.weekStart === 'monday' ? (month.getDay() + 6) % 7 : month.getDay()
@@ -331,7 +438,7 @@ export class DateSelector extends LitElement {
       const day = cellIndex - offset + 1
       return day < 1 || day > days
         ? html`<span class="empty" role="gridcell" aria-disabled="true"></span>`
-        : this.renderDay(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today)
+        : this.renderDayCell(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today, selection, anchor)
     })
     return html`<section class="month" aria-label=${monthLabel}>
       <header class="month-header">
@@ -340,7 +447,7 @@ export class DateSelector extends LitElement {
         ${index === this.displayedMonths - 1 ? html`<button class="navigation next" type="button" aria-label="Next month" ?disabled=${!this.canNavigate(1)} @click=${() => this.navigate(1)}><span aria-hidden="true">›</span></button>` : nothing}
       </header>
       <div class="weekdays" aria-hidden="true">${this.weekdayLabels().map((label) => html`<span>${label}</span>`)}</div>
-      <div class="days" role="grid" aria-label=${monthLabel}>
+      <div class="days" role="grid" aria-label=${monthLabel} aria-multiselectable=${this.mode === 'multiple' ? 'true' : nothing}>
         ${Array.from({ length: 6 }, (_, week) => html`<div class="week" role="row">${cells.slice(week * 7, week * 7 + 7)}</div>`)}
       </div>
     </section>`
@@ -348,8 +455,18 @@ export class DateSelector extends LitElement {
 
   override render() {
     // The built-in default name gives way to an enclosing field's label; one the author set still wins.
-    const label = this.ariaLabel === defaultLabel ? this.field.label || this.ariaLabel : this.ariaLabel
+    const label = this.ariaLabel === defaultLabel ? this.field.label || modeLabels[this.isRange ? 'range' : this.mode] : this.ariaLabel
     const invalid = this.field.invalid && !this.effectiveDisabled
+    let selection: Set<string> | null = null
+    let anchor = this.from
+    if (!this.isRange) {
+      const dates = this.selectedDates
+      selection = new Set(dates)
+      // The roving tab stop goes to the first selected day that is shown and enabled, so the grid stays reachable.
+      const first = toIso(this.visibleMonth)
+      const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
+      anchor = dates.find((date) => date >= first && date < after && !this.isUnavailable(date)) ?? ''
+    }
     return html`<div
         class="c2-date-selector ${invalid ? 'error' : ''}"
         role="group"
@@ -357,7 +474,7 @@ export class DateSelector extends LitElement {
         aria-describedby=${this.field.describedBy()}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
       >
-        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index))}
+        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, anchor))}
       </div>
       ${this.field.renderDescription()}`
   }

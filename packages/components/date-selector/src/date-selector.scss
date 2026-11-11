@@ -31,6 +31,11 @@
     focus--outline-offset: 2px,
     disabled--opacity: 0.38,
     error--border: 1px solid #dc2626,
+    marker--color: #0265dc,
+    marker__selected--color: #ffffff,
+    marker--size: 4px,
+    day-content--font-size: 10px,
+    day-content--color: #71717a,
   )
 );
 
@@ -206,6 +211,51 @@ h2 {
   &[aria-selected='true'] span {
     background: css.cssVar(day__selected--background);
     color: css.cssVar(day__selected--color);
+  }
+
+  // A marked day's dot and renderDay content sit under the number without moving it.
+  .marker {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    width: css.cssVar(marker--size);
+    height: css.cssVar(marker--size);
+    border-radius: 50%;
+    background: css.cssVar(marker--color);
+    transform: translateX(-50%);
+  }
+
+  .day-content {
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+    left: 0;
+    overflow: hidden;
+    color: css.cssVar(day-content--color);
+    font-size: css.cssVar(day-content--font-size);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Room for the content line: the number moves up by its height.
+  &.has-content span {
+    box-sizing: border-box;
+    padding-bottom: calc(#{css.cssVar(day-content--font-size)} * 1.2);
+  }
+
+  // With content under the number, the dot moves above it.
+  &.has-content .marker {
+    top: 3px;
+    bottom: auto;
+  }
+
+  &[aria-selected='true'] .marker {
+    background: css.cssVar(marker__selected--color);
+  }
+
+  &[aria-selected='true'] .day-content {
+    color: inherit;
   }
 
   &:focus-visible {

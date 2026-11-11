@@ -20,6 +20,7 @@ import bottomNav from '@c2n/bottom-nav/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import buttonGroup from '@c2n/button-group/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
+import cameraCapture from '@c2n/camera-capture/custom-elements.json'
 import cardInput from '@c2n/card-input/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
@@ -83,6 +84,7 @@ import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
 import imageCompare from '@c2n/image-compare/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
+import importMapper from '@c2n/import-mapper/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
@@ -144,6 +146,7 @@ import quickTimeMenu from '@c2n/quick-time-menu/custom-elements.json'
 import radio from '@c2n/radio/custom-elements.json'
 import rate from '@c2n/rate/custom-elements.json'
 import reactionBar from '@c2n/reaction-bar/custom-elements.json'
+import recurrenceEditor from '@c2n/recurrence-editor/custom-elements.json'
 import relativeTime from '@c2n/relative-time/custom-elements.json'
 import reorderList from '@c2n/reorder-list/custom-elements.json'
 import richTextEditor from '@c2n/rich-text-editor/custom-elements.json'
@@ -239,6 +242,7 @@ export const componentManifests = (function () {
     breadcrumb,
     button,
     buttonGroup,
+    cameraCapture,
     card,
     cardInput,
     carousel,
@@ -302,6 +306,7 @@ export const componentManifests = (function () {
     imageAnnotator,
     imageCompare,
     imageCropper,
+    importMapper,
     inView,
     indicator,
     inlineEdit,
@@ -363,6 +368,7 @@ export const componentManifests = (function () {
     radio,
     rate,
     reactionBar,
+    recurrenceEditor,
     relativeTime,
     reorderList,
     richTextEditor,

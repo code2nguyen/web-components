@@ -1,0 +1,54 @@
+---
+title: 'Camera Capture'
+description: 'A camera viewfinder for documents, cards and faces: a framing guide, quality hints, auto-capture when steady, retake or keep, front/back switch and a list of required shots. Each photo is a Blob.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import CameraCaptureExamplesRuntime from '../../components/CameraCaptureExamplesRuntime.astro'
+
+import { CameraCapture } from '@c2n/components/camera-capture'
+
+`c2-camera-capture` takes a photo with the device's camera, as a bank's cheque deposit, an identity check or a receipt scanner does. It draws a framing guide (`guide="document"`, `card` or `face`), says what is wrong with the picture (too dark, glare, moving, blurry), can take the photo by itself once the picture holds steady (`auto-capture`), and lets the user retake or keep it. `shots` walks the user through several photos in order, each with its own guide and camera. Every photo reaches the app as a `Blob`, in the `capture`, `accept` and `complete` events and in `photos`.
+
+The camera only opens when the user presses **Start camera** (or the app calls `start()`), and closes once the photos are taken or the element leaves the page. The examples on this page film a pretend scene through `streamSource`, so they never ask for your camera; the first row uses the real one.
+
+<CameraCaptureExamplesRuntime />
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/camera-capture'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/camera-capture
+<div data-label="Your camera">
+  <c2-camera-capture guide="document"></c2-camera-capture>
+</div>
+<div data-label="Card guide">
+  <c2-camera-capture guide="card" crop data-camera-capture-example="card"></c2-camera-capture>
+</div>
+<div data-label="Required shots">
+  <c2-camera-capture
+    shots='[{"id":"front","label":"Front of the card","guide":"card"},{"id":"back","label":"Back of the card","guide":"card"},{"id":"selfie","label":"Selfie","guide":"face","facing":"user"}]'
+    crop
+    auto-capture
+    data-camera-capture-example="shots"
+    data-camera-capture-scenes="card,card-back,face"
+  ></c2-camera-capture>
+</div>
+```
+
+Read the photos from the events:
+
+```ts tag=CodeBlock
+const camera = document.querySelector('c2-camera-capture')!
+camera.addEventListener('complete', async (event) => {
+  const body = new FormData()
+  for (const photo of event.detail.photos) body.append(photo.id, photo.blob, `${photo.id}.jpg`)
+  await fetch('/api/verification', { method: 'POST', body })
+})
+```

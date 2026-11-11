@@ -279,3 +279,150 @@ test('chips sit on one row and the editor opens under the part that was clicked'
   expect(box!.y).toBeGreaterThanOrEqual(anchor!.y + anchor!.height)
   expect(Math.abs(box!.x - anchor!.x)).toBeLessThan(2)
 })
+
+// ---- tree layout (`groups`) ------------------------------------------------------------------------------------------
+
+const row = (page: Page, path: string) => page.locator(`c2-filter-builder .row[data-path="${path}"]`)
+const handle = (page: Page, name: string) => page.getByRole('button', { name: `Move ${name}`, exact: true })
+
+test('without groups, the tree module is never loaded', async ({ page, scenario }) => {
+  const requests: string[] = []
+  page.on('request', (request) => requests.push(request.url()))
+  await scenario('group')
+  await addButton(page).click()
+  await item(page, 'Title').click()
+  await page.keyboard.type('x')
+  await page.keyboard.press('Enter')
+  await expect(tree(page)).toContainText('"field":"title"')
+  expect(requests.filter((url) => url.includes('filter-tree'))).toEqual([])
+  await expect(page.locator('c2-filter-builder [part="tree"]')).toHaveCount(0)
+})
+
+test('groups lay a tree out as nested groups, read as a sentence', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  await expect(page.locator('c2-filter-builder .group')).toHaveCount(2)
+  await expect(page.getByRole('group', { name: 'any of the following' })).toBeVisible()
+  await expect(row(page, '1.0').locator('c2-chip')).toContainText('Estimate')
+  await expect(page.locator('c2-filter-builder [part="sentence"]')).toHaveText('Status is To do and (Estimate > 5 pts or Blocked is true)')
+  await expect(page.locator('c2-filter-builder [part="then"]')).toBeHidden()
+  const sentence = await page.evaluate(() => document.querySelector('c2-filter-builder')!.describe())
+  expect(sentence).toBe('Status is To do and (Estimate > 5 pts or Blocked is true)')
+})
+
+test('a group switches between all and any, and can be negated', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  await page.getByRole('button', { name: 'any of the following', exact: true }).click()
+  await expect(tree(page)).toHaveText(
+    '{"op":"and","rules":[{"field":"status","operator":"eq","value":"todo"},{"op":"and","rules":[{"field":"estimate","operator":"gt","value":5},{"field":"blocked","operator":"is_true"}]}]}',
+  )
+  await expect(page.getByRole('button', { name: 'all of the following', exact: true }).nth(1)).toBeFocused()
+  await page.locator('c2-filter-builder .group:not(.is-root) c2-chip.not').getByRole('button').click()
+  await expect(tree(page)).toContainText(
+    '{"op":"and","rules":[{"field":"estimate","operator":"gt","value":5},{"field":"blocked","operator":"is_true"}],"not":true}',
+  )
+  await expect(page.locator('c2-filter-builder [part="sentence"]')).toHaveText('Status is To do and not (Estimate > 5 pts and Blocked is true)')
+  await page.locator('c2-filter-builder .group.is-root > .group-head c2-chip.not').getByRole('button').click()
+  await expect(tree(page)).toContainText('"not":true}],"not":true}')
+})
+
+test('a condition is added inside the group whose button was used', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  await page.locator('c2-filter-builder .group:not(.is-root) .add-rule').click()
+  await expect(search(page)).toBeFocused()
+  await item(page, 'Title').click()
+  await expect(page.locator('c2-filter-builder c2-overlay c2-text-field input')).toBeFocused()
+  await page.keyboard.type('sort')
+  await page.keyboard.press('Enter')
+  await expect(tree(page)).toContainText('{"field":"blocked","operator":"is_true"},{"field":"title","operator":"contains","value":"sort"}]}')
+  await expect(page.getByRole('button', { name: 'Title contains: sort', exact: true })).toBeFocused()
+})
+
+test('a new group stays on screen but out of the tree until it has a condition', async ({ page, scenario }) => {
+  await scenario('tree')
+  await page.getByRole('button', { name: 'Group', exact: true }).click()
+  await expect(page.locator('c2-filter-builder .group')).toHaveCount(2)
+  const add = page.locator('c2-filter-builder .group:not(.is-root) .add-rule')
+  await expect(add).toBeFocused()
+  await expect(tree(page)).toHaveText('')
+  await page.keyboard.press('Enter')
+  await item(page, 'Blocked').click()
+  await expect(tree(page)).toHaveText('{"op":"and","rules":[{"op":"and","rules":[{"field":"blocked","operator":"is_true"}]}]}')
+  await page.getByRole('button', { name: 'Remove group all of the following' }).click()
+  await expect(tree(page)).toHaveText('{"op":"and","rules":[]}')
+  await expect(page.locator('c2-filter-builder .group')).toHaveCount(1)
+  await expect(page.locator('c2-filter-builder .is-root .add-rule')).toBeFocused()
+})
+
+test('the arrow keys on a handle move a condition into, within and out of a group', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  await handle(page, 'Status is To do').focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(tree(page)).toHaveText(
+    '{"op":"and","rules":[{"op":"or","rules":[{"field":"status","operator":"eq","value":"todo"},{"field":"estimate","operator":"gt","value":5},{"field":"blocked","operator":"is_true"}]}]}',
+  )
+  await expect(handle(page, 'Status is To do')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, '0.1').locator('c2-chip')).toContainText('Status')
+  await expect(handle(page, 'Status is To do')).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowDown')
+  await expect(tree(page)).toHaveText(
+    '{"op":"and","rules":[{"op":"or","rules":[{"field":"estimate","operator":"gt","value":5},{"field":"blocked","operator":"is_true"}]},{"field":"status","operator":"eq","value":"todo"}]}',
+  )
+  await expect(handle(page, 'Status is To do')).toBeFocused()
+  // At the edge of the root there is nowhere to go.
+  await page.keyboard.press('ArrowDown')
+  await expect(row(page, '1').locator('c2-chip')).toContainText('Status')
+})
+
+test('dragging a row drops it before or after another, or at the end of a group', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  // Drop on the lower half of the Blocked row: after it, inside the group.
+  const target = row(page, '1.1')
+  const box = (await target.boundingBox())!
+  await row(page, '0').dragTo(target, { targetPosition: { x: 10, y: box.height - 4 } })
+  await expect(tree(page)).toHaveText(
+    '{"op":"and","rules":[{"op":"or","rules":[{"field":"estimate","operator":"gt","value":5},{"field":"blocked","operator":"is_true"},{"field":"status","operator":"eq","value":"todo"}]}]}',
+  )
+  await row(page, '0.0').dragTo(page.locator('c2-filter-builder .is-root > .group-actions'))
+  await expect(tree(page)).toHaveText(
+    '{"op":"and","rules":[{"op":"or","rules":[{"field":"blocked","operator":"is_true"},{"field":"status","operator":"eq","value":"todo"}]},{"field":"estimate","operator":"gt","value":5}]}',
+  )
+  // A group cannot be dropped inside itself.
+  await row(page, '0').dragTo(page.locator('c2-filter-builder .group:not(.is-root) > .group-actions'))
+  await expect(tree(page)).toContainText('{"op":"and","rules":[{"op":"or"')
+  await expect(page.locator('c2-filter-builder [data-drop]')).toHaveCount(0)
+})
+
+test('the then slot adds an action zone after the tree', async ({ page, scenario }) => {
+  await scenario('tree-then')
+  const then = page.locator('c2-filter-builder [part="then"]')
+  await expect(then).toBeVisible()
+  await expect(then).toContainText('Then')
+  await expect(page.getByRole('button', { name: 'Notify the team' })).toBeVisible()
+})
+
+test('labels translate the tree layout', async ({ page, scenario }) => {
+  await scenario('tree-group')
+  await page.evaluate(() => {
+    document.querySelector('c2-filter-builder')!.labels = {
+      or: 'ou',
+      and: 'et',
+      all: 'toutes',
+      any: "l'une",
+      ofTheFollowing: 'des conditions',
+      addGroup: 'Groupe',
+    }
+  })
+  await expect(page.getByRole('button', { name: 'Groupe' }).first()).toBeVisible()
+  await expect(page.getByRole('group', { name: "l'une des conditions" })).toBeVisible()
+  await expect(page.locator('c2-filter-builder [part="sentence"]')).toContainText('et (Estimate > 5 pts ou Blocked is true)')
+})
+
+for (const state of ['tree-group', 'tree-then']) {
+  test(`${state} has no axe violations`, async ({ page, scenario }) => {
+    await scenario(state)
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    expect(results.violations).toEqual([])
+  })
+}

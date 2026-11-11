@@ -6,6 +6,12 @@
     caption--color: #71717a,
     caption--font-size: 12px,
     caption--font-weight: 600,
+    content--border-radius: 4px,
+    content--outset: 4px,
+    highlighted--background-color: #edf1fe,
+    highlighted--color: #18181b,
+    highlighted--font-weight: 600,
+    selected--background-color: #f4f4f5,
   )
 );
 
@@ -50,4 +56,18 @@
 .content {
   flex: 1 1 0;
   min-width: 0;
+  border-radius: css.cssVar(content--border-radius);
+}
+
+// The background reaches past the value through a spread shadow, so a marked value stays aligned with its column.
+:host(:state(selected)) .content {
+  background-color: css.cssVar(selected--background-color);
+  box-shadow: 0 0 0 css.cssVar(content--outset) css.cssVar(selected--background-color);
+}
+
+:host(:state(highlighted)) .content {
+  color: css.cssVar(highlighted--color);
+  font-weight: css.cssVar(highlighted--font-weight);
+  background-color: css.cssVar(highlighted--background-color);
+  box-shadow: 0 0 0 css.cssVar(content--outset) css.cssVar(highlighted--background-color);
 }
