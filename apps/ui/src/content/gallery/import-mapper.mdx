@@ -1,0 +1,236 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ImportMapperExamplesRuntime from '../../components/ImportMapperExamplesRuntime.astro'
+
+import { ImportMapper } from '@c2n/components/import-mapper'
+import { Button } from '@c2n/components/button'
+
+## Presets
+
+Looks and jobs for `c2-import-mapper`. The summary chips (`__field__mapped--*`, `__field__missing--*`), the column row (`__column--*`, `__sample--*`) and the preview's invalid cell (`__cell__invalid--background-color`, `__error--color`) do most of the work. The last cards wire properties from script: the renderers, a `dataSource` and a translation.
+
+<ImportMapperExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-import-mapper
+  label="Import contacts"
+  fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"phone","label":"Phone"},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+  csv="Full name,E-mail address,Phone #,Signed up,Notes
+Ada Lovelace,ada@analytical.io,+44 20 7946 0000,2024-03-01,VIP
+Grace Hopper,grace@navy.mil,,2024-04-12,
+Alan Turing,alan@bletchley.org,+44 161 496 0000,2024-05-17,Call back"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Required field missing
+<c2-import-mapper
+  label="Import products"
+  fields='[{"key":"sku","label":"SKU","required":true,"description":"Unique product code"},{"key":"title","label":"Title","required":true},{"key":"price","label":"Price","required":true,"type":"number"},{"key":"stock","label":"Stock","type":"integer"}]'
+  csv="Product,Cost,Qty on hand
+Desk lamp,49.90,120
+Monitor arm,89.00,35"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Preview with errors
+<c2-import-mapper
+  label="Import invoices"
+  view="preview"
+  fields='[{"key":"number","label":"Invoice","required":true,"pattern":"INV-\\d{4}"},{"key":"customer","label":"Customer","required":true},{"key":"amount","label":"Amount","type":"number"},{"key":"due","label":"Due","type":"date"},{"key":"status","label":"Status","options":["draft","sent","paid"]}]'
+  csv="Invoice;Customer;Amount;Due;Status
+INV-1041;Northwind;1 250,00;2024-07-01;sent
+INV-1042;;980.50;2024-07-15;paid
+INV-104;Contoso;twelve;2024-02-30;overdue
+INV-1044;Fabrikam;310;2024-08-01;draft"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Rows with errors only
+<c2-import-mapper
+  label="Import invoices"
+  view="preview"
+  errors-only
+  page-size="5"
+  fields='[{"key":"number","label":"Invoice","required":true,"pattern":"INV-\\d{4}"},{"key":"customer","label":"Customer","required":true},{"key":"amount","label":"Amount","type":"number"}]'
+  csv="Invoice,Customer,Amount
+INV-1041,Northwind,1250
+INV-1042,,980.50
+INV-104,Contoso,twelve
+INV-1044,Fabrikam,310
+INV-1045,Litware,77"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Actions in the toolbar
+<style>
+  .flow-actions {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-actions span {
+    margin-inline-end: auto;
+    font-weight: 600;
+  }
+  .flow-actions c2-button {
+    --c2-button__container--height: 32px;
+    --c2-button__container--font-size: 13px;
+  }
+  .flow-actions .flow-back {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-import-mapper
+  data-import-mapper-example="flow"
+  label="Import members"
+  fields='[{"key":"email","label":"Email","required":true,"type":"email"},{"key":"name","label":"Name"},{"key":"role","label":"Role","options":["admin","member","viewer"]}]'
+  csv="Email,Full name,Role
+kim@acme.io,Kim Lee,admin
+sam@acme.io,Sam Ortiz,editor
+jo@acme,Jo Park,viewer"
+>
+  <div slot="toolbar" class="flow-actions">
+    <span data-flow-title>Match columns</span>
+    <c2-button class="flow-back" data-flow-back hidden>Back</c2-button>
+    <c2-button data-flow-next>Preview</c2-button>
+  </div>
+</c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Compact and borderless
+<style>
+  .compact-mapper {
+    --c2-import-mapper--border: none;
+    --c2-import-mapper--padding: 0;
+    --c2-import-mapper--gap: 10px;
+    --c2-import-mapper--font-size: 13px;
+    --c2-import-mapper__summary--background-color: transparent;
+    --c2-import-mapper__summary--padding: 0;
+    --c2-import-mapper__column--min-height: 40px;
+    --c2-import-mapper__column--padding: 4px 0;
+    --c2-import-mapper__picker--width: 170px;
+    --c2-import-mapper__sample--background-color: transparent;
+    --c2-import-mapper__badge--background-color: transparent;
+    --c2-import-mapper__field--border-radius: 4px;
+  }
+</style>
+<c2-import-mapper
+  class="compact-mapper"
+  sample-count="2"
+  fields='[{"key":"date","label":"Date","required":true,"type":"date"},{"key":"description","label":"Description","aliases":["memo","payee"]},{"key":"amount","label":"Amount","required":true,"type":"number"}]'
+  csv="Date,Memo,Amount,Balance
+2024-06-03,Coffee beans,-18.40,1203.10
+2024-06-04,Salary,2400.00,3603.10"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Brand colours
+<style>
+  .brand-mapper {
+    --c2-import-mapper--border: 1px solid light-dark(#ddd6fe, #3b2a63);
+    --c2-import-mapper--border-radius: 14px;
+    --c2-import-mapper__summary--background-color: light-dark(#f5f3ff, #1f1636);
+    --c2-import-mapper__badge--background-color: light-dark(#ede9fe, #2e1f52);
+    --c2-import-mapper__badge--color: light-dark(#6d28d9, #b79cf5);
+    --c2-import-mapper__field__mapped--background-color: light-dark(#ede9fe, #2e1f52);
+    --c2-import-mapper__field__mapped--color: light-dark(#5b21b6, #c4b0f7);
+    --c2-import-mapper__arrow--color: light-dark(#8b5cf6, #9b73f6);
+    --c2-select__button--border-top: 1px solid light-dark(#c4b5fd, #4c3a8a);
+    --c2-select__button--border-right: 1px solid light-dark(#c4b5fd, #4c3a8a);
+    --c2-select__button--border-bottom: 1px solid light-dark(#c4b5fd, #4c3a8a);
+    --c2-select__button--border-left: 1px solid light-dark(#c4b5fd, #4c3a8a);
+  }
+</style>
+<c2-import-mapper
+  class="brand-mapper"
+  label="Import leads"
+  fields='[{"key":"company","label":"Company","required":true,"aliases":["account"]},{"key":"contact","label":"Contact","aliases":["lead name"]},{"key":"value","label":"Deal value","type":"number","aliases":["amount"]}]'
+  csv="Account,Lead name,Amount
+Northwind,Nancy Davolio,12000
+Contoso,Kim Abercrombie,8400"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Renderers
+<c2-import-mapper
+  data-import-mapper-example="renderers"
+  label="Import transactions"
+  view="preview"
+  fields='[{"key":"date","label":"Date","type":"date","required":true},{"key":"payee","label":"Payee"},{"key":"amount","label":"Amount","type":"number","required":true}]'
+  csv="Date,Payee,Amount
+2024-06-03,Blue Bottle,-18.40
+2024-06-04,Acme Payroll,2400
+2024-06-05,City Power,-96.12
+2024-06-06,Refund,n/a"
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=Data source
+<c2-import-mapper
+  data-import-mapper-example="data-source"
+  label="Import orders"
+  view="preview"
+  page-size="6"
+  columns='["Order","Customer","Total"]'
+  fields='[{"key":"order","label":"Order","required":true,"type":"integer"},{"key":"customer","label":"Customer","required":true},{"key":"total","label":"Total","type":"number"}]'
+></c2-import-mapper>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .french-mapper {
+    width: 100%;
+  }
+</style>
+<div class="french-mapper" lang="fr">
+  <c2-import-mapper
+    data-import-mapper-example="french"
+    label="Importer des contacts"
+    fields='[{"key":"nom","label":"Nom","required":true,"aliases":["name"]},{"key":"email","label":"E-mail","required":true,"type":"email","aliases":["courriel"]},{"key":"ville","label":"Ville","aliases":["city"]}]'
+    csv="Nom complet,Courriel,Notes
+Marie Curie,marie@sorbonne.fr,Prix Nobel
+Louis Pasteur,louis@pasteur.fr,"
+  ></c2-import-mapper>
+</div>
+```
+
+</GalleryGrid>
+
+The renderer card draws each column's samples and each preview cell from script. The component keeps the cell, its error tint and its message:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { ImportMapper } from '@c2n/components/import-mapper'
+
+const money = new Intl.NumberFormat('en', { style: 'currency', currency: 'USD' })
+mapper.renderSamples = ({ values }) => html`<span>${values.length} values, e.g. <b>${values[0]}</b></span>`
+mapper.renderCell = ({ value, field, error }) =>
+  field.key === 'amount' && !error ? html`<span style="color:${Number(value) < 0 ? '#b91c1c' : '#15803d'}">${money.format(Number(value))}</span>` : value
+```
+
+The data source card reads 240 orders a page at a time, after a short delay, as a server would:
+
+```ts tag=CodeBlock
+mapper.columns = ['Order', 'Customer', 'Total']
+mapper.dataSource = {
+  async getRows({ start, count }) {
+    const { rows, total } = await fetch(`/imports/42/rows?start=${start}&count=${count}`).then((r) => r.json())
+    return { rows, total } // rows: arrays of cells, or records keyed by header
+  },
+}
+```
+
+The French card registers its text once for the app:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'import-mapper': { skip: 'Ne pas importer', auto: 'Associée', pickerLabel: 'Importer la colonne « {0} » comme' /* … */ } } })
+```

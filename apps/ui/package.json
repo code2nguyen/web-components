@@ -106,6 +106,7 @@
     "@c2n/image-annotator": "*",
     "@c2n/image-compare": "*",
     "@c2n/image-cropper": "*",
+    "@c2n/import-mapper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",

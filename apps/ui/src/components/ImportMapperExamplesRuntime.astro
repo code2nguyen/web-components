@@ -1,0 +1,110 @@
+---
+/** Wires the import mapper examples whose API is property-only (renderers, `dataSource`) or needs app code (a translation, the toolbar's buttons). */
+---
+
+<script>
+  import { html } from 'lit'
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { ImportMapper, ImportMapperDataSource } from '@c2n/components/import-mapper'
+  import '@c2n/components/import-mapper'
+  import '@c2n/components/button'
+
+  const initialized = new WeakSet<ImportMapper>()
+
+  addTranslations({
+    fr: {
+      'import-mapper': {
+        mapper: "Correspondance d'import",
+        sourceColumn: 'Colonne du fichier',
+        samples: 'Exemples de valeurs',
+        target: 'Importer comme',
+        skip: 'Ne pas importer',
+        auto: 'Associée',
+        notImported: 'Non importée',
+        pickerLabel: 'Importer la colonne « {0} » comme',
+        noSamples: 'Aucune valeur',
+        required: 'Obligatoire',
+        requiredFields: 'Champs obligatoires',
+        mapped: 'associé',
+        notMapped: 'non associé',
+        allRequiredMapped: 'Tous les champs obligatoires sont associés',
+        missingRequired: '{0} champ(s) obligatoire(s) non associé(s) : {1}',
+        mappedColumns: '{0} colonnes associées sur {1}',
+      },
+    },
+  })
+
+  function setupFlow(mapper: ImportMapper) {
+    const title = mapper.querySelector<HTMLElement>('[data-flow-title]')
+    const back = mapper.querySelector<HTMLElement>('[data-flow-back]')
+    const next = mapper.querySelector<HTMLElement & { disabled: boolean }>('[data-flow-next]')
+    if (!title || !back || !next) return
+    const sync = () => {
+      const preview = mapper.view === 'preview'
+      title.textContent = preview ? 'Check the rows' : 'Match columns'
+      back.hidden = !preview
+      next.textContent = preview ? 'Import' : 'Preview'
+      next.disabled = mapper.missing.length > 0
+    }
+    next.addEventListener('click', () => {
+      if (mapper.view === 'preview') {
+        const { errors } = mapper.validate()
+        title.textContent = errors.length ? `${errors.length} cells to fix first` : `${mapper.records().length} members imported`
+        return
+      }
+      mapper.view = 'preview'
+      sync()
+    })
+    back.addEventListener('click', () => {
+      mapper.view = 'map'
+      sync()
+    })
+    mapper.addEventListener('mapping-change', sync)
+    void mapper.updateComplete.then(sync)
+  }
+
+  function setupRenderers(mapper: ImportMapper) {
+    const money = new Intl.NumberFormat('en', { style: 'currency', currency: 'USD' })
+    mapper.renderSamples = ({ values }) => html`<span>${values.length} values, e.g. <b>${values[0]}</b></span>`
+    mapper.renderCell = ({ value, field, error }) => {
+      if (field.key !== 'amount' || error) return value
+      const amount = Number(value)
+      return html`<span style="font-variant-numeric:tabular-nums;color:${amount < 0 ? 'light-dark(#b91c1c, #f87171)' : 'light-dark(#15803d, #4ade80)'}"
+        >${money.format(amount)}</span
+      >`
+    }
+  }
+
+  const customers = ['Northwind', 'Contoso', 'Fabrikam', 'Litware', 'Adventure Works', 'Tailspin']
+
+  function setupDataSource(mapper: ImportMapper) {
+    const total = 240
+    const source: ImportMapperDataSource = {
+      getRows({ start, count }) {
+        const rows = Array.from({ length: Math.max(0, Math.min(count, total - start)) }, (_, i) => {
+          const index = start + i
+          // Every 17th order has a total the importer cannot read.
+          return [String(1000 + index), customers[index % customers.length], index % 17 === 5 ? 'TBD' : (40 + ((index * 37) % 900)).toFixed(2)]
+        })
+        return new Promise((resolve) => setTimeout(() => resolve({ rows, total }), 700))
+      },
+    }
+    mapper.dataSource = source
+  }
+
+  function setup() {
+    document.querySelectorAll<ImportMapper>('c2-import-mapper[data-import-mapper-example]').forEach((mapper) => {
+      if (initialized.has(mapper)) return
+      initialized.add(mapper)
+      const example = mapper.dataset.importMapperExample
+      if (example === 'flow') setupFlow(mapper)
+      else if (example === 'renderers') setupRenderers(mapper)
+      else if (example === 'data-source') setupDataSource(mapper)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

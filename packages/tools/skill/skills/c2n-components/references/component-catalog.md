@@ -178,6 +178,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Form** — `c2-form, c2-form-list` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
 - **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
+- **Import Mapper** — `c2-import-mapper` · `@c2n/components/import-mapper` — The mapping step of a spreadsheet import: match each column of the file to a field, check the required ones, then preview the rows with their errors.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.

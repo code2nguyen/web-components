@@ -138,6 +138,7 @@
         "../../components/image-compare:build",
         "../../components/image-cropper:build",
         "../../components/image:build",
+        "../../components/import-mapper:build",
         "../../components/in-view:build",
         "../../components/indicator:build",
         "../../components/inline-edit:build",

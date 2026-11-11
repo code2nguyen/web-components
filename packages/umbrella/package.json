@@ -589,6 +589,10 @@
       "types": "./dist/image-cropper.d.ts",
       "default": "./dist/image-cropper.js"
     },
+    "./import-mapper": {
+      "types": "./dist/import-mapper.d.ts",
+      "default": "./dist/import-mapper.js"
+    },
     "./in-view": {
       "types": "./dist/in-view.d.ts",
       "default": "./dist/in-view.js"
@@ -1379,6 +1383,7 @@
     "@c2n/image-annotator": "*",
     "@c2n/image-compare": "*",
     "@c2n/image-cropper": "*",
+    "@c2n/import-mapper": "*",
     "@c2n/in-view": "*",
     "@c2n/indicator": "*",
     "@c2n/inline-edit": "*",
