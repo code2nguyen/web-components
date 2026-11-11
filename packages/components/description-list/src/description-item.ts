@@ -6,10 +6,23 @@ import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import './description-value.js'
-import type { DescriptionValue } from './description-value.js'
+import { toggleDescriptionState, type DescriptionValue } from './description-value.js'
 import styles from './description-item.scss?inline'
 
 export { DescriptionValue } from './description-value.js'
+
+/** How the values of an item with several are compared: the best `max` or `min` number, or what is `different` from the first column. */
+export type DescriptionHighlight = '' | 'max' | 'min' | 'different' | 'none'
+
+/** The comparison settings an item reads from its list. */
+interface ListSettings {
+  valueLabels?: string[]
+  highlight?: DescriptionHighlight
+  differencesOnly?: boolean
+  selectedColumn?: number
+}
+
+const toNumber = (key: string) => (/\d/.test(key) ? parseFloat(key.replace(/[^\d.-]/g, '')) : NaN)
 
 /**
  * One label and value pair of a `c2-description-list`. The label comes from the `label` attribute, or from the
@@ -22,6 +35,10 @@ export { DescriptionValue } from './description-value.js'
  * names those columns. The layout adapts on its own: when the label and the columns no longer fit on one line the
  * columns move under the label, and when the columns themselves no longer fit (each narrower than
  * `--c2-description-item__value-column--min-width`) the values stack, each with its column name as a caption.
+ *
+ * The item compares its values: while they are not all equal it carries the custom state `different`, which a page
+ * can style (`c2-description-item:state(different)`), and the list's `differences-only` hides it while they are.
+ * `highlight` picks the values to mark, overriding the list's.
  *
  * @tag c2-description-item
  *
@@ -76,6 +93,9 @@ export class DescriptionItem extends LitElement {
 
   /** Text shown while the value is empty. An empty string shows nothing. */
   @property({ attribute: 'empty-text' }) emptyText = '—'
+
+  /** Overrides the list's `highlight` for this item, such as `min` for a price in a list that highlights `max`. `none` marks nothing. */
+  @property() highlight: DescriptionHighlight = ''
 
   /**
    * Whether the default slot holds an element or non-blank text. The server cannot see the light DOM, so it renders
@@ -155,17 +175,33 @@ export class DescriptionItem extends LitElement {
     this.groupObserver.observe(group)
   }
 
-  /** Hands each value its column name, and tells it whether the columns wrapped onto rows of their own. */
+  /**
+   * Hands each value its column name, tells it whether the columns wrapped onto rows of their own and whether it is
+   * highlighted or in the selected column, and marks the item as `different` (or filtered out) from its values.
+   */
   private syncValues() {
     const values = this.values
+    // `closest`, not `parentElement`: a framework may wrap the item in an element of its own.
+    const list = (this.parentElement?.closest('c2-description-list') ?? {}) as ListSettings
+    const keys = values.map((value) => (value.value ?? value.textContent ?? '').replace(/\s+/g, ' ').trim())
+    const different = new Set(keys).size > 1
+    toggleDescriptionState(this.internals, 'different', different)
+    toggleDescriptionState(this.internals, 'filtered', !!list.differencesOnly && values.length > 0 && !different)
     if (!values.length) return
     const tops = values.map((value) => Math.round(value.getBoundingClientRect().top))
     const stacked = tops.some((top) => top !== tops[0])
-    // `closest`, not `parentElement`: a framework may wrap the item in an element of its own.
-    const labels = (this.parentElement?.closest('c2-description-list') as { valueLabels?: string[] } | null)?.valueLabels ?? []
+    const labels = list.valueLabels ?? []
+    const mode = this.highlight || list.highlight
+    let marked = keys.map(() => false)
+    if (different && mode === 'different') marked = keys.map((key) => key !== keys[0])
+    else if (different && (mode === 'max' || mode === 'min')) {
+      const numbers = keys.map(toNumber)
+      const best = Math[mode](...numbers.filter((number) => !Number.isNaN(number)))
+      marked = numbers.map((number) => number === best)
+    }
     values.forEach((value, index) => {
       if (typeof value.applyLayout !== 'function') return
-      void value.updateComplete.then(() => value.applyLayout(labels[index] ?? '', stacked))
+      void value.updateComplete.then(() => value.applyLayout(labels[index] ?? '', stacked, marked[index], list.selectedColumn === index))
     })
   }
 

@@ -203,7 +203,93 @@ test('stacked values can drop their column names', async ({ page, scenario }) =>
   expect(Math.round(content!.x)).toBe(Math.round(value!.x))
 })
 
-for (const name of ['default', 'header', 'rich-label', 'groups', 'groups-no-header']) {
+const states = (locator: Locator, name: string) => locator.evaluateAll((els, state) => els.map((el) => el.matches(`:state(${state})`)), name)
+
+test('highlight marks the best value of each item, and an item can ask for the lowest', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('compare')
+  const values = (label: string) => page.locator(`c2-description-item[label="${label}"] c2-description-value`)
+  // Price overrides the list's max with min; text that holds no number takes no part.
+  await expect.poll(() => states(values('Price'), 'highlighted')).toEqual([true, false, false])
+  // A tie marks every best value.
+  await expect.poll(() => states(values('Seats'), 'highlighted')).toEqual([false, true, true])
+  // `value` is compared instead of the text.
+  await expect.poll(() => states(values('Storage'), 'highlighted')).toEqual([false, false, true])
+  // Equal values (whitespace aside) mark nothing and the item is not `different`.
+  await expect.poll(() => states(values('Support'), 'highlighted')).toEqual([false, false, false])
+  expect(await states(page.locator('c2-description-item'), 'different')).toEqual([true, true, true, false, false])
+  await expect(values('Price').first().locator('[part="content"]')).toHaveCSS('font-weight', '600')
+  await expect(values('Price').nth(1).locator('[part="content"]')).toHaveCSS('font-weight', '500')
+
+  // A new comparison value lays the item out again.
+  await values('Storage')
+    .first()
+    .evaluate((value: HTMLElement & { value?: string }) => (value.value = '4096'))
+  await expect.poll(() => states(values('Storage'), 'highlighted')).toEqual([true, false, false])
+  await page.locator('c2-description-list').evaluate((list) => list.setAttribute('highlight', 'min'))
+  await expect.poll(() => states(values('Seats'), 'highlighted')).toEqual([true, false, false])
+})
+
+test('differences-only hides the items whose values are all equal', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('diff')
+  const items = page.locator('c2-description-item')
+  await expect(items.nth(0)).toBeVisible()
+  await expect(items.nth(1)).toBeHidden()
+  await expect(items.nth(2)).toBeVisible()
+  // `different` marks what changed: the After column, never the baseline.
+  await expect.poll(() => states(page.locator('c2-description-item[label="Status"] c2-description-value'), 'highlighted')).toEqual([false, true])
+  // A value edited to match shows the item no more; turning the filter off shows every item.
+  await page
+    .locator('c2-description-item[label="Amount"] c2-description-value')
+    .nth(1)
+    .evaluate((value) => (value.textContent = '€1,200.00'))
+  await expect(items.nth(2)).toBeHidden()
+  await page.locator('c2-description-list').evaluate((list) => list.removeAttribute('differences-only'))
+  await expect(items).toHaveCount(3)
+  for (let index = 0; index < 3; index++) await expect(items.nth(index)).toBeVisible()
+})
+
+test('column-selectable turns the column names into toggle buttons that select a column', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('compare')
+  const list = page.locator('c2-description-list')
+  await list.evaluate((el) => {
+    ;(window as unknown as { events: unknown[] }).events = []
+    el.addEventListener('selection-change', (event) => (window as unknown as { events: unknown[] }).events.push((event as CustomEvent).detail))
+  })
+  const events = () => page.evaluate(() => (window as unknown as { events: unknown[] }).events)
+  const pro = page.getByRole('button', { name: 'Pro' })
+  await expect(page.getByRole('button', { name: 'Starter' })).toHaveAttribute('aria-pressed', 'false')
+  await pro.click()
+  await expect(pro).toHaveAttribute('aria-pressed', 'true')
+  expect(await list.evaluate((el) => el.selectedColumn)).toBe(1)
+  expect(await events()).toEqual([{ column: 1 }])
+  await expect.poll(() => states(page.locator('c2-description-item[label="Price"] c2-description-value'), 'selected')).toEqual([false, true, false])
+
+  // Keyboard: Tab moves between the names, Space and Enter toggle.
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'Enterprise' })).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(pro).toHaveAttribute('aria-pressed', 'false')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Enterprise' })).toHaveAttribute('aria-pressed', 'false')
+  expect(await events()).toEqual([{ column: 1 }, { column: 2 }, { column: null }])
+  await expect.poll(() => states(page.locator('c2-description-value'), 'selected')).toEqual(Array(12).fill(false))
+})
+
+test('the comparison costs nothing when unset: no buttons, no marks, every item shown', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await scenario('groups')
+  await expect(page.locator('c2-description-list [part="value-header"]')).toHaveAttribute('aria-hidden', 'true')
+  await expect(page.locator('c2-description-list .value-header__button')).toHaveCount(0)
+  await expect(page.locator('c2-description-item')).toHaveCount(2)
+  for (const item of await page.locator('c2-description-item').all()) await expect(item).toBeVisible()
+  expect(await states(page.locator('c2-description-value'), 'highlighted')).toEqual(Array(6).fill(false))
+  expect(await states(page.locator('c2-description-value'), 'selected')).toEqual(Array(6).fill(false))
+})
+
+for (const name of ['default', 'header', 'rich-label', 'groups', 'groups-no-header', 'compare', 'diff']) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
     const results = await new AxeBuilder({ page }).include('main').analyze()

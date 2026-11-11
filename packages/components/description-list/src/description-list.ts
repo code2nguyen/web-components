@@ -1,14 +1,33 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { state } from 'lit/decorators.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import './description-item.js'
+import type { DescriptionHighlight } from './description-item.js'
 import styles from './description-list.scss?inline'
 
 export { DescriptionItem, DescriptionValue } from './description-item.js'
+export type { DescriptionHighlight } from './description-item.js'
+
+/** Detail of the `selection-change` event of {@link DescriptionList}. */
+export interface DescriptionListSelectionChangeEventDetail {
+  /** Index of the value column now selected — the new `selected-column` — or `null` when none is. */
+  column: number | null
+}
+
+/** Events fired by {@link DescriptionList}, keyed for `addEventListener`. */
+export interface DescriptionListEventMap {
+  'selection-change': CustomEvent<DescriptionListSelectionChangeEventDetail>
+}
+
+export interface DescriptionList {
+  addEventListener: TypedAddEventListener<DescriptionList, DescriptionListEventMap>
+  removeEventListener: TypedRemoveEventListener<DescriptionList, DescriptionListEventMap>
+}
 
 /**
  * Read-only key/value pairs for a detail page: the Descriptions of antd and the DescriptionList of Polaris. Each
@@ -25,6 +44,14 @@ export { DescriptionItem, DescriptionValue } from './description-item.js'
  * columns in a header row and `label-heading` heads the label column. Style the row through `--c2-description-list__value-header--*`
  * (or the `value-header` part), or hide it with `--c2-description-list__value-header--display: none`. The header hides itself when the values stack,
  * and each value then shows its column name. A list with value columns lays its items out in a single column.
+ *
+ * Items with several values also compare them, for a comparison matrix or the two versions of a record:
+ * `highlight="max"` or `"min"` marks the best value of each item (an item's own `highlight` overrides the list's, so
+ * a price can be `min` in a list of `max`), `highlight="different"` marks every value that differs from the first
+ * column, and `differences-only` hides the items whose values are all equal. Each item whose values differ carries
+ * the custom state `different` (`c2-description-item:state(different)`), and each highlighted value the state
+ * `highlighted`. `selected-column` marks one value column, and `column-selectable` turns the column names into
+ * toggle buttons that select it and fire `selection-change`.
  *
  * The list is exposed as a `list` and every item as a `listitem` holding a `term` and its `definition`.
  *
@@ -44,6 +71,8 @@ export { DescriptionItem, DescriptionValue } from './description-item.js'
  *
  * @csspart header - The header row above the grid. It contains the heading slot and, at its end, the actions slot; hidden while both slots are empty.
  * @csspart grid - The grid the items are laid out in.
+ * @event selection-change - A column name was pressed with `column-selectable` set. `detail.column` is the new `selected-column`, or `null` once it is pressed again. Does not bubble.
+ *
  * @csspart value-header - The row of column names drawn from `value-labels`, aligned with the items' value columns. Hidden while the values stack.
  *
  * @cssproperty {number} [--c2-description-list__grid--columns=3] - Most columns the items flow into.
@@ -72,6 +101,12 @@ export { DescriptionItem, DescriptionValue } from './description-item.js'
  * @cssproperty {padding} [--c2-description-list__value-header--padding-bottom=8px]
  * @cssproperty {border} [--c2-description-list__value-header--border-bottom=1px solid #e4e4e7]
  * @cssproperty {pixel} [--c2-description-list__value-header--margin-bottom=0px]
+ * @cssproperty {border-radius} [--c2-description-list__value-header__cell--border-radius=4px] - Corners of a column name that is a button, drawn around it by `--outset`.
+ * @cssproperty {pixel} [--c2-description-list__value-header__cell--outset=4px] - How far the hover and selected background reaches around a column name, without moving it.
+ * @cssproperty {color} [--c2-description-list__value-header__cell__hover--background-color=#f4f4f5]
+ * @cssproperty {color} [--c2-description-list__value-header__cell__selected--background-color=#f4f4f5] - Matches the selected values' `--c2-description-value__selected--background-color`.
+ * @cssproperty {color} [--c2-description-list__value-header__cell__selected--color=#0265dc]
+ * @cssproperty [--c2-description-list__value-header__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  *
  * @slotcomponent c2-description-item
  */
@@ -88,6 +123,22 @@ export class DescriptionList extends LitElement {
 
   /** Heading of the label column, shown before the `value-labels`. */
   @property({ attribute: 'label-heading' }) labelHeading = ''
+
+  /**
+   * Marks values of the items with several: `max` or `min` the best numeric value of each item, `different` every
+   * value that differs from the first column. An item's own `highlight` overrides it. Numbers are read from each
+   * value's `value` attribute, else from its text.
+   */
+  @property() highlight: DescriptionHighlight = ''
+
+  /** Hides the items whose `c2-description-value`s are all equal. Items with a single value always show. */
+  @property({ type: Boolean, attribute: 'differences-only' }) differencesOnly = false
+
+  /** Index of the selected value column, whose values carry the `selected` state. */
+  @property({ type: Number, attribute: 'selected-column' }) selectedColumn?: number
+
+  /** Turns the column names of `value-labels` into toggle buttons that set `selected-column`. */
+  @property({ type: Boolean, attribute: 'column-selectable' }) columnSelectable = false
 
   @state() private valuesStacked = false
 
@@ -110,8 +161,8 @@ export class DescriptionList extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    // Items read their column names from the list when they lay out their values.
-    if (changed.has('valueLabels')) {
+    // Items read their column names and comparison settings from the list when they lay out their values.
+    if (changed.has('valueLabels') || changed.has('highlight') || changed.has('differencesOnly') || changed.has('selectedColumn')) {
       for (const item of this.querySelectorAll('c2-description-item'))
         if (item.parentElement?.closest('c2-description-list') === this) (item as LitElement).requestUpdate()
     }
@@ -136,14 +187,37 @@ export class DescriptionList extends LitElement {
     this.headerObserver.observe(cells)
   }
 
+  private selectColumn(column: number) {
+    this.selectedColumn = this.selectedColumn === column ? undefined : column
+    this.dispatchEvent(new CustomEvent('selection-change', { detail: { column: this.selectedColumn ?? null } }))
+  }
+
   private renderValueHeader() {
     const labels = this.valueLabels ?? []
     if (!labels.length) return nothing
+    const selectable = this.columnSelectable
+    // A plain header repeats what every value already announces as its caption, so only buttons are exposed.
     return html`
-      <div class=${classMap({ 'value-header': true, 'is-stacked': this.valuesStacked })} part="value-header" aria-hidden="true">
-        <div class="value-header__label">${this.labelHeading}</div>
+      <div class=${classMap({ 'value-header': true, 'is-stacked': this.valuesStacked })} part="value-header" aria-hidden=${selectable ? nothing : 'true'}>
+        <div class="value-header__label" aria-hidden="true">${this.labelHeading}</div>
         <div class="value-header__values" style=${styleMap({ '--_count': String(labels.length) })}>
-          ${labels.map((label) => html`<div class="value-header__cell">${label}</div>`)}
+          ${labels.map((label, index) => {
+            const selected = this.selectedColumn === index
+            return html`<div class=${classMap({ 'value-header__cell': true, 'is-selected': selected })}>
+              ${
+                selectable
+                  ? html`<button
+                      type="button"
+                      class="value-header__button"
+                      aria-pressed=${selected ? 'true' : 'false'}
+                      @click=${() => this.selectColumn(index)}
+                    >
+                      ${label}
+                    </button>`
+                  : label
+              }
+            </div>`
+          })}
         </div>
       </div>
     `
