@@ -202,7 +202,7 @@
   font-weight: css.cssVar(current--font-weight, font-weight);
 
   &:hover {
-    background: css.cssVar(current__hover--background, selected__hover--background, current--background, selected--background);
+    background: css.cssVar(current__hover--background, current--background, selected__hover--background, selected--background);
   }
 }
 

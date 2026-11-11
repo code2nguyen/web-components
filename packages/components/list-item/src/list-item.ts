@@ -123,7 +123,7 @@ export interface ListItem {
  * @cssproperty {border} --c2-list-item__current--border-left - Defaults to the selected border; a coloured left border is the accent-bar idiom.
  * @cssproperty {color} --c2-list-item__current--color - Defaults to the selected colour.
  * @cssproperty {color} --c2-list-item__current--background - Defaults to the selected background.
- * @cssproperty {color} --c2-list-item__current__hover--background - Defaults to the selected hover background.
+ * @cssproperty {color} --c2-list-item__current__hover--background - Defaults to `current--background` when that is set, else to the selected hover background.
  * @cssproperty {font-weight} --c2-list-item__current--font-weight - Defaults to the row's font weight.
  *
  * @cssproperty {outline} [--c2-list-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
