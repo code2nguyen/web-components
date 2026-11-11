@@ -17,6 +17,11 @@ const en = {
   min: 'Min',
   max: 'Max',
   distinct: 'Distinct count',
+  /** A computed value's header when it has no `label`: `{0}` is the computation, `{1}` and `{2}` the two values. */
+  computedOf: (compute: string, a: string, b: string) => `${compute}: ${a} vs ${b}`,
+  difference: 'Difference',
+  'percent-difference': '% difference',
+  ratio: 'Ratio',
   /** The field list's zones. */
   fields: 'Fields',
   rows: 'Rows',
