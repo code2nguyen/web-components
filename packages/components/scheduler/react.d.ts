@@ -23,7 +23,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-scheduler': Omit<C2Props<Scheduler>, 'resources' | 'events'> & {
+      'c2-scheduler': Omit<C2Props<Scheduler>, 'resources' | 'events' | 'bands'> & {
         'day-start'?: Attribute
         'day-end'?: Attribute
         'scroll-time'?: Attribute
@@ -31,10 +31,12 @@ declare module 'react' {
         'snap-minutes'?: Attribute
         'working-hours'?: Attribute
         'time-zone'?: Attribute
+        'summary-heading'?: Attribute
         'hide-header'?: Attribute
         'resource-heading'?: Attribute
         resources?: Scheduler['resources'] | string
         events?: Scheduler['events'] | string
+        bands?: Scheduler['bands'] | string
       }
     }
   }

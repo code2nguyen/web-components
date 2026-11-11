@@ -9,6 +9,10 @@
       "types": "./types/src/form.d.ts",
       "default": "./dist/form.js"
     },
+    "./form-list.js": {
+      "types": "./types/src/form-list.d.ts",
+      "default": "./dist/form-list.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

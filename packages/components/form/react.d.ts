@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Form } from '@c2n/form'
+import type { FormList } from '@c2n/form/form-list.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -27,6 +28,9 @@ declare module 'react' {
         'validate-on'?: Attribute
         'error-summary'?: Attribute
         'warn-unsaved'?: Attribute
+      }
+      'c2-form-list': C2Props<FormList> & {
+        'add-label'?: Attribute
       }
     }
   }

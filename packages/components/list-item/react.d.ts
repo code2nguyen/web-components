@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { ListGroup } from '@c2n/list-item/list-group.js'
 import type { ListItem } from '@c2n/list-item'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-list-group': C2Props<ListGroup>
       'c2-list-item': C2Props<ListItem> & {
         'joined-before'?: Attribute
         'joined-after'?: Attribute
