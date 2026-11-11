@@ -265,7 +265,7 @@ test('column-selectable turns the column names into toggle buttons that select a
   await expect(page.getByRole('button', { name: 'Starter' })).toHaveAttribute('aria-pressed', 'false')
   await pro.click()
   await expect(pro).toHaveAttribute('aria-pressed', 'true')
-  expect(await list.evaluate((el) => el.selectedColumn)).toBe(1)
+  expect(await list.evaluate((el) => (el as HTMLElementTagNameMap['c2-description-list']).selectedColumn)).toBe(1)
   expect(await events()).toEqual([{ column: 1 }])
   await expect.poll(() => states(page.locator('c2-description-item[label="Price"] c2-description-value'), 'selected')).toEqual([false, true, false])
 
