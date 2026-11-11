@@ -76,6 +76,7 @@
         "../../components/breadcrumb:build",
         "../../components/button-group:build",
         "../../components/button:build",
+        "../../components/camera-capture:build",
         "../../components/card-input:build",
         "../../components/card:build",
         "../../components/carousel:build",
