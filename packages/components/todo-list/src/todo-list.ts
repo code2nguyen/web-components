@@ -8,6 +8,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import '@c2n/reorder-list'
 import '@c2n/tabs'
 import '@c2n/progress'
@@ -1170,6 +1171,8 @@ export class TodoList extends LitElement {
   }
 
   private handleEditorKey(event: KeyboardEvent, task: TodoTask): void {
+    // Enter while an IME composes confirms the candidate, not the edit.
+    if (isComposingKey(event)) return
     const inNote = (event.target as HTMLElement).classList.contains('note-input')
     if (event.key === 'Enter' && (!inNote || event.metaKey || event.ctrlKey)) {
       event.preventDefault()

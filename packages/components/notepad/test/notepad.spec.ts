@@ -747,3 +747,12 @@ test('its text follows the nearest lang, and a lang change, without re-creating 
   await expect(page.getByRole('button', { name: 'Paper' })).toBeVisible()
   await expect.poll(validation).toBe('Please write something.')
 })
+
+test('in forced colors, focus draws a system-colour outline round the sheet, whose lift shadow is dropped there', async ({ page, renderScenario }) => {
+  await page.emulateMedia({ forcedColors: 'active' })
+  await renderScenario('<c2-notepad label="Notes"></c2-notepad>')
+  const sheet = page.locator('c2-notepad').locator('.sheet')
+  await expect(sheet).toHaveCSS('outline-style', 'none')
+  await surface(page).click()
+  await expect(sheet).toHaveCSS('outline-style', 'solid')
+})

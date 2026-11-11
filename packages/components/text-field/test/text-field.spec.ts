@@ -146,3 +146,12 @@ test('the clear button is named in the nearest lang and follows a lang change', 
   await page.locator('div[lang]').evaluate((el) => el.setAttribute('lang', 'de'))
   await expect(page.getByRole('button', { name: 'Clear', exact: true })).toBeAttached()
 })
+
+test('an own disabled removed inside a disabled fieldset stays disabled until the fieldset is enabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-text-field name="message" aria-label="Message" disabled></c2-text-field></fieldset></form>')
+  const host = page.locator('c2-text-field')
+  await host.evaluate((element) => element.removeAttribute('disabled'))
+  await expect(page.getByRole('textbox')).toBeDisabled()
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
+  await expect(page.getByRole('textbox')).toBeEnabled()
+})

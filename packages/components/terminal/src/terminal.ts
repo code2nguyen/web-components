@@ -4,6 +4,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import { terminalMessages } from './messages.js'
 import { commonPrefix, parseAnsi, parseArgs } from './terminal-text.js'
 import styles from './terminal.scss?inline'
@@ -191,6 +192,13 @@ export class Terminal extends LitElement {
   private pending: HTMLElement[] = []
   /** The blocks the running command printed, read for the announcement when it ends. */
   private collected: HTMLElement[] = []
+  /**
+   * Whether the screen sits at its end, kept by the scroll event so a print reads no layout. While it does, the output
+   * growing (a print, or a block drawn late by `content-visibility`) pins it there from a ResizeObserver: one scroll
+   * write per frame, after layout, however many prints the frame had.
+   */
+  private atEnd = true
+  private outputObserver?: ResizeObserver
 
   constructor() {
     super()
@@ -215,6 +223,7 @@ export class Terminal extends LitElement {
     this.pending = []
     this.output?.replaceChildren()
     this.lineCount = 0
+    this.atEnd = true
   }
 
   /** Runs a command as if it were typed and entered. Ignored while another command runs. */
@@ -240,7 +249,36 @@ export class Terminal extends LitElement {
     this.internals.ariaLabel = this.heading || this.msg.t('terminal')
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback()
+    // Reconnected: the output exists already and is observed again.
+    if (this.hasUpdated) this.observeOutput()
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.outputObserver?.disconnect()
+  }
+
+  private observeOutput(): void {
+    if (typeof ResizeObserver === 'undefined' || !this.output) return
+    this.outputObserver ??= new ResizeObserver(() => {
+      if (this.atEnd) this.scrollToEnd()
+    })
+    this.outputObserver.observe(this.output)
+  }
+
+  private scrollToEnd(): void {
+    if (this.screen) this.screen.scrollTop = this.screen.scrollHeight
+  }
+
+  private handleScroll = (): void => {
+    const screen = this.screen
+    this.atEnd = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24
+  }
+
   protected override firstUpdated(): void {
+    this.observeOutput()
     if (this.pending.length) {
       for (const block of this.pending) this.lineCount += linesOf(block)
       this.output.append(...this.pending)
@@ -266,7 +304,7 @@ export class Terminal extends LitElement {
             </div>`
           : nothing
       }
-      <div class="screen" part="screen" @click=${this.handleScreenClick}>
+      <div class="screen" part="screen" @click=${this.handleScreenClick} @scroll=${this.handleScroll}>
         <div class="banner"><slot name="banner"></slot></div>
         <div class="output" role="log" aria-live="off" aria-label=${this.heading || this.msg.t('terminal')}></div>
         ${
@@ -338,12 +376,9 @@ export class Terminal extends LitElement {
       this.pending.push(block)
       return
     }
-    const screen = this.screen
-    const atEnd = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24
     this.output.append(block)
     this.lineCount += linesOf(block)
     this.trim()
-    if (atEnd) screen.scrollTop = screen.scrollHeight
   }
 
   /**
@@ -493,7 +528,8 @@ export class Terminal extends LitElement {
       }
     }
     await this.updateComplete
-    if (this.screen) this.screen.scrollTop = this.screen.scrollHeight
+    this.atEnd = true
+    this.scrollToEnd()
   }
 
   private announceOutput(): void {
@@ -565,9 +601,10 @@ export class Terminal extends LitElement {
       return
     }
     if (this.busy) return
+    // While an IME composes, Enter confirms the candidate and the arrows and Tab belong to the IME.
+    if (isComposingKey(event)) return
     switch (event.key) {
       case 'Enter': {
-        if (event.isComposing) return
         event.preventDefault()
         const command = input.value
         input.value = ''

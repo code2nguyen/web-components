@@ -186,10 +186,12 @@ export class Overlay extends LitElement {
     const crossAxis = Number.isFinite(this.crossOffset) ? this.crossOffset! : this.readPixels('--c2-overlay--offset-x', 0)
     const padding = this.readPixels('--c2-overlay--viewport-padding', 8)
 
-    if (this.fitTarget) this.style.width = `${anchor.offsetWidth}px`
-    else this.style.removeProperty('width')
-    if (!this.freeWidth && !this.fitTarget) this.style.minWidth = `${anchor.offsetWidth}px`
-    else this.style.removeProperty('min-width')
+    // The host is the popover itself, the top-layer box floating-ui sizes and places. These writes happen only while it
+    // is open (never in a server render), and `current-placement` and the available-size variables are documented API.
+    // modern-web-ignore: host-style-write the host is the open top-layer box floating-ui sizes to its anchor
+    this.style.width = this.fitTarget ? `${anchor.offsetWidth}px` : ''
+    // modern-web-ignore: host-style-write the host is the open top-layer box floating-ui sizes to its anchor
+    this.style.minWidth = !this.freeWidth && !this.fitTarget ? `${anchor.offsetWidth}px` : ''
 
     const result = computePosition(anchor, this, {
       placement: this.placement,
@@ -201,7 +203,9 @@ export class Overlay extends LitElement {
           padding,
           apply: ({ availableHeight, availableWidth }) => {
             if (generation !== this.positionGeneration) return
+            // modern-web-ignore: host-style-write documented output variable, read on the host by authors to cap content
             this.style.setProperty('--c2-overlay--available-height', `${Math.max(0, Math.floor(availableHeight))}px`)
+            // modern-web-ignore: host-style-write documented output variable, read on the host by authors to cap content
             this.style.setProperty('--c2-overlay--available-width', `${Math.max(0, Math.floor(availableWidth))}px`)
           },
         }),
@@ -210,8 +214,11 @@ export class Overlay extends LitElement {
     const { x, y, placement } = await result
     // Closed, or started again with new options, while this was being computed: a newer placement owns the styles.
     if (generation !== this.positionGeneration) return
+    // modern-web-ignore: host-style-write the host is the open top-layer box floating-ui places
     this.style.left = `${x}px`
+    // modern-web-ignore: host-style-write the host is the open top-layer box floating-ui places
     this.style.top = `${y}px`
+    // modern-web-ignore: host-attribute-write documented `current-placement` output authors style against, written only while open
     this.setAttribute('current-placement', placement)
   }
 

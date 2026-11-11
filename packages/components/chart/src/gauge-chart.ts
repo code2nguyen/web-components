@@ -6,6 +6,7 @@ import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface GaugeChart {
   addEventListener: TypedAddEventListener<GaugeChart, ChartEventMap>
@@ -29,6 +30,10 @@ export interface GaugeChart {
  */
 @customElement('c2-gauge-chart')
 export class GaugeChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'gaugeChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['gauge']
 
   /** Lowest value on the gauge scale. */

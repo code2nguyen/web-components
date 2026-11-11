@@ -24,6 +24,7 @@
     divider--width: 1px,
     divider--color: #e4e4e7,
     scrollbar--color: rgba(0, 0, 0, 0.2),
+    // modern-web-ignore: fixed-overlay-z-index the over-mode navigation is page chrome: an open modal dialog must cover it, not sit under it
     over--position: fixed,
     over--box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18),
     backdrop--background-color: rgba(0, 0, 0, 0.32),
@@ -116,6 +117,7 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
 // ------------------------------------
 // Skip link: out of sight until focused, first in the tab order.
 .skip-link {
+  // modern-web-ignore: fixed-overlay-z-index the skip link is reachable only while the page is not inert, so it never has to show above a modal
   position: fixed;
   top: 8px;
   inset-inline-start: 8px;
@@ -131,13 +133,14 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
   text-decoration: none;
   white-space: nowrap;
 
+  // modern-web-ignore: bare-focus-style the skip link must appear whenever it holds focus, whatever moved it there (a script focusing it too)
   &:not(:focus) {
     clip-path: inset(50%);
     opacity: 0;
     pointer-events: none;
   }
 
-  &:focus {
+  &:focus-visible {
     outline: css.cssVar(skip-link__focus--outline);
     outline-offset: 2px;
   }
@@ -169,6 +172,7 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
   padding: css.cssVar(main--padding);
   background-color: css.cssVar(main--background-color);
 
+  // modern-web-ignore: bare-focus-style removes the outline of a landmark focused only by script (tabindex -1, the skip link target); not a focus indicator
   &:focus {
     outline: none;
   }
@@ -202,6 +206,7 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
     box-shadow $_duration $_easing,
     visibility 0s linear 0s;
 
+  // modern-web-ignore: bare-focus-style removes the outline of a panel focused only by script (tabindex -1) when it opens as an overlay; not a focus indicator
   &:focus {
     outline: none;
   }
@@ -263,6 +268,7 @@ $_divider: css.cssVar(divider--width) solid css.cssVar(divider--color);
     box-shadow $_duration $_easing,
     visibility 0s linear 0s;
 
+  // modern-web-ignore: bare-focus-style removes the outline of a panel focused only by script (tabindex -1) when it opens as an overlay; not a focus indicator
   &:focus {
     outline: none;
   }

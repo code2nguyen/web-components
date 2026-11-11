@@ -420,6 +420,19 @@
   display: none;
 }
 
+// The data table behind `role="img"` on the plot: read by a screen reader only, since the canvas carries no text.
+// Every chart's own root (`.boxplot-a11y-root`, `.sankey-a11y-root`, …) too: the box goes on the wrapper because a
+// `<table>` ignores `width: 1px` and `overflow: hidden` and would widen whatever scrolls around the chart.
+.a11y-root,
+[class$='-a11y-root'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /*
  * Theme probes. `getComputedStyle().getPropertyValue()` hands back the author's text for a `var()` or
  * `color-mix()` chain, which no canvas engine can parse; computed element properties resolve colours and

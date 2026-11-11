@@ -4,7 +4,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ariaKeyShortcuts, formatShortcut, isEditableTarget, registerShortcuts } from '@c2n/core/shortcut-helper.js'
@@ -281,7 +281,7 @@ export class SearchField extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(restored: string | File | FormData | null) {
@@ -420,7 +420,7 @@ export class SearchField extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent) {
-    if (event.isComposing) return
+    if (isComposingKey(event)) return
     const matches = this.recentMatches
     switch (event.key) {
       case 'ArrowDown':

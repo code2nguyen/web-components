@@ -6,6 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { live } from 'lit/directives/live.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/avatar'
 import '@c2n/button'
@@ -668,7 +669,7 @@ export class FilterBuilder extends LitElement {
 
   private handleEditorKeyDown = (event: KeyboardEvent) => {
     // Enter in a text, number or date field commits and closes; the list editors handle Enter themselves.
-    if (event.key !== 'Enter') return
+    if (event.key !== 'Enter' || isComposingKey(event)) return
     const target = event.composedPath()[0] as HTMLElement
     if (target.localName !== 'input') return
     if (this.editingField && isChoiceField(this.editingField)) return

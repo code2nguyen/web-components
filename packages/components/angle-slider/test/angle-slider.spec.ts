@@ -183,3 +183,29 @@ test('removing its own disabled inside a disabled fieldset keeps it disabled', a
   await slider(page).evaluate((element: AngleSlider) => element.removeAttribute('disabled'))
   await expect(handle(page)).toHaveAttribute('aria-disabled', 'true')
 })
+
+// The platform counts a `disabled` attribute as disabled whatever its value, and reports it through
+// `formDisabledCallback`; the property converter reads `disabled="false"` as false, and that is what holds.
+test('disabled="false" outside a disabled fieldset leaves the slider operable', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-angle-slider name="angle" disabled="false"></c2-angle-slider></form>')
+  await expect(handle(page)).not.toHaveAttribute('aria-disabled')
+  await handle(page).focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await value(page)).toBeGreaterThan(0)
+  await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).has('angle'))).toBe(true)
+})
+
+test('an own disabled removed inside a disabled fieldset stays disabled until the fieldset is enabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-angle-slider name="angle" disabled></c2-angle-slider></fieldset></form>')
+  await slider(page).evaluate((element) => element.removeAttribute('disabled'))
+  await expect(handle(page)).toHaveAttribute('aria-disabled', 'true')
+  await handle(page).focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await value(page)).toBe(0)
+
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
+  await expect(handle(page)).not.toHaveAttribute('aria-disabled')
+  await handle(page).focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await value(page)).toBeGreaterThan(0)
+})

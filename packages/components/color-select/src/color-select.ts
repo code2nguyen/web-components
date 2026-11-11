@@ -156,8 +156,11 @@ export class ColorSelect extends LitElement {
   }
 
   private updateColor() {
+    const previous = this._color
     this._color = this.tinyColor.toRgbString()
-    this.setAttribute('color', this._color)
+    // Through the property, so Lit reflects it like any assignment; the setter itself would re-derive the HSV
+    // channels from the RGB string and lose the hue of a grey.
+    this.requestUpdate('color', previous)
   }
 
   private handleHueInputChange(event: Event & { target: TextField }) {

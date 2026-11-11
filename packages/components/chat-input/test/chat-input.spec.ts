@@ -128,3 +128,23 @@ test('fieldset disabled state prevents chat input submission', async ({ page, re
   await expect(page.getByRole('textbox')).toBeDisabled()
   await expect.poll(() => page.locator('form').evaluate((element) => new FormData(element as HTMLFormElement).has('message'))).toBe(false)
 })
+
+/** An Enter that ends an IME composition: flagged `isComposing`, or the legacy `keyCode` 229 some engines send instead. */
+async function imeEnter(target: import('@playwright/test').Locator, legacy: boolean) {
+  await target.evaluate((element, legacy) => {
+    const event = new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', isComposing: !legacy, bubbles: true, composed: true, cancelable: true })
+    if (legacy) Object.defineProperty(event, 'keyCode', { get: () => 229 })
+    element.dispatchEvent(event)
+  }, legacy)
+}
+
+test('an IME Enter (isComposing or keyCode 229) neither submits nor inserts a newline', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-chat-input value="変換中" aria-label="Message"></c2-chat-input>')
+  const host = page.locator('c2-chat-input')
+  await watch(host, 'submit-message')
+  for (const legacy of [false, true]) await imeEnter(page.getByRole('textbox'), legacy)
+  await expect(host).toHaveAttribute('data-events', '[]')
+  await expect(page.getByRole('textbox')).toHaveValue('変換中')
+  await page.getByRole('textbox').press('Enter')
+  await expect(host).toHaveAttribute('data-events', '["変換中"]')
+})

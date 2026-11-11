@@ -6,10 +6,13 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { AttachmentStatus } from '@c2n/attachment'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { uploadMessages } from './messages.js'
 import styles from './upload.scss?inline'
 
 import '@c2n/attachment'
 import '@c2n/button'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export type UploadVariant = 'dropzone' | 'compact'
 
@@ -150,6 +153,7 @@ export class Upload extends LitElement {
   private customValidityMessage = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, uploadMessages)
   @state() private uploadItems: UploadItem[] = []
   @state() private rejections: UploadRejection[] = []
   @state() private dragging = false
@@ -236,7 +240,7 @@ export class Upload extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean): void {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   checkValidity(): boolean {
@@ -506,7 +510,7 @@ export class Upload extends LitElement {
     }
     const missing = this.required && this.uploadItems.length === 0
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? 'Please select a file.' : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     const anchor = (this.renderRoot?.querySelector('.picker') as HTMLElement | null | undefined) ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
@@ -546,7 +550,7 @@ export class Upload extends LitElement {
         class=${classMap({ picker: true, dropzone: true, 'dropzone--dragging': this.dragging })}
         role="button"
         tabindex=${this.effectiveDisabled ? -1 : 0}
-        aria-label=${this.ariaLabel || this.field.label || 'Upload files'}
+        aria-label=${this.ariaLabel || this.field.label || this.msg.t('label')}
         aria-describedby=${this.field.describedBy()}
         aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
@@ -577,7 +581,7 @@ export class Upload extends LitElement {
       <input
         type="file"
         tabindex="-1"
-        aria-label=${this.ariaLabel || this.field.label || 'Upload files'}
+        aria-label=${this.ariaLabel || this.field.label || this.msg.t('label')}
         .accept=${this.accept}
         ?multiple=${this.multiple}
         ?disabled=${this.pickerDisabled}
@@ -592,7 +596,7 @@ export class Upload extends LitElement {
       }
       ${
         this.uploadItems.length
-          ? html`<div part="list" class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label="Selected files">
+          ? html`<div part="list" class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label=${this.msg.t('selectedFiles')}>
               ${this.uploadItems.map(
                 (item) => html`
                   <c2-attachment

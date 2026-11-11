@@ -6,7 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { consume } from '@lit/context'
-import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
 import styles from './radio.scss?inline'
 
@@ -187,7 +187,7 @@ export class Radio extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

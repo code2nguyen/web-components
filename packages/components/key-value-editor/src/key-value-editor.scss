@@ -1,4 +1,5 @@
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-key-value-editor,
   $theme: (
@@ -143,8 +144,9 @@ input {
     border: css.cssVar(field__hover--border);
   }
 
-  &:focus {
+  &:focus-visible {
     border: css.cssVar(field__focus--border);
+    @include focus.forced-colors-ring;
   }
 
   &[aria-invalid='true'] {

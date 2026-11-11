@@ -1,3 +1,4 @@
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-quick-time-menu,
   $theme: (
@@ -201,9 +202,12 @@ c2-overlay:not(:popover-open) .menu {
 }
 
 .item:hover,
-.item:focus-visible,
-.item:focus {
+.item:focus-visible {
   background-color: css.cssVar(item__hover--background-color);
+}
+
+.item:focus-visible {
+  @include focus.forced-colors-ring(2px, -2px);
 }
 
 .item .check {

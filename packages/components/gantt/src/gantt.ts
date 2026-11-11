@@ -300,6 +300,7 @@ export class Gantt extends LitElement {
     })
     this.#resizeObserver.observe(this)
     // Scroll events do not cross the shadow boundary, so the chart's own scroller repositions through its listener.
+    // modern-web-ignore: scroll-listener-visual repositions the open tooltip next to its bar (rAF-throttled, viewport-clamped); moving it to CSS anchor positioning is a separate rewrite
     addEventListener('scroll', this.#schedulePlaceTooltip, { capture: true, passive: true })
     addEventListener('resize', this.#schedulePlaceTooltip, { passive: true })
   }

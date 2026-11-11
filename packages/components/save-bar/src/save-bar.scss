@@ -43,6 +43,7 @@
   display: block;
   position: css.cssVar(position);
   bottom: css.cssVar(inset-bottom);
+  // modern-web-ignore: fixed-overlay-z-index the next line is a comment; the bar is positioned in its own scroll container (fixed only by author choice) and is page chrome a modal should cover
   // Spans its container (or, with `position: fixed`, the viewport) so the bar can centre in it.
   left: 0;
   right: 0;

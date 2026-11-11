@@ -152,6 +152,7 @@ export class TableOfContents extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    // modern-web-ignore: scroll-listener-visual the scroll spy picks the last heading above the `offset` line (and the last one at the page end), which sets aria-current and state, not just a visual; scroll-target-group is Limited availability
     document.addEventListener('scroll', this.handleScroll, { capture: true, passive: true })
     window.addEventListener('resize', this.handleScroll, { passive: true })
     // The first scan waits for the first render, so a server-rendered list hydrates as it was rendered.

@@ -5,6 +5,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -261,9 +262,7 @@ export class InlineEdit extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    // The platform's combined state (own `disabled` attribute or a disabled fieldset): kept whole, so removing the
-    // attribute inside a disabled fieldset still leaves the element disabled.
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -451,7 +450,7 @@ export class InlineEdit extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
-    if (!this.editing || event.defaultPrevented || event.isComposing) return
+    if (!this.editing || event.defaultPrevented || isComposingKey(event)) return
     if (event.key === 'Escape') {
       // A popup inside a slotted control (the `c2-select` menu) closes on Escape first.
       if (event.composedPath().some((node) => node instanceof Element && node !== this && node.matches(':popover-open'))) return

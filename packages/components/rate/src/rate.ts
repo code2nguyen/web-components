@@ -6,6 +6,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './rate.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export interface RateChangeEventDetail {
   value: number
@@ -121,7 +122,7 @@ export class Rate extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean): void {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null): void {

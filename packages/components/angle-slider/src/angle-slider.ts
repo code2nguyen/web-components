@@ -8,6 +8,7 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { angleSliderMessages } from './messages'
 import styles from './angle-slider.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { angleSliderMessages } from './messages'
 
@@ -166,9 +167,7 @@ export class AngleSlider extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    // The state as given: an own `disabled` is combined in `effectiveDisabled`, so removing it inside a disabled
-    // fieldset keeps the control disabled.
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

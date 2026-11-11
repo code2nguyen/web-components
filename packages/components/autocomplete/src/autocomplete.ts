@@ -3,7 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { getFieldValue } from '@c2n/core/data-helper.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -281,7 +281,7 @@ export class Autocomplete extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -531,6 +531,8 @@ export class Autocomplete extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
+    // While an IME composes, Enter confirms the candidate and the arrows move through the IME's own list.
+    if (isComposingKey(event)) return
     const enabledIndexes = this.results.map((item, index) => ({ item, index })).filter(({ item }) => !this.isDisabled(item))
     if (event.key === 'Escape' || event.key === 'Tab') {
       this.close()

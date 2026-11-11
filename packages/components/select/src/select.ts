@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import { ListItem } from '@c2n/list-item'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 import '@c2n/overlay'
@@ -262,7 +262,7 @@ export class Select extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

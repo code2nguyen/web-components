@@ -336,6 +336,7 @@
   border-right: css.cssVar(cell--border-right);
 }
 
+// modern-web-ignore: bare-focus-style removes the UA outline only; the visible ring is the :focus-visible rule below
 .cell:focus {
   outline: none;
 }

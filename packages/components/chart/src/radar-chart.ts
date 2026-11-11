@@ -8,6 +8,7 @@ import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame } from './chart-types.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface RadarChart {
   addEventListener: TypedAddEventListener<RadarChart, ChartEventMap>
@@ -38,6 +39,10 @@ export interface RadarChart {
  */
 @customElement('c2-radar-chart')
 export class RadarChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'radarChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['radar']
 
   /** Lowest value shared by every indicator. */

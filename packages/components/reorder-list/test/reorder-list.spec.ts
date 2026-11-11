@@ -403,6 +403,18 @@ test('supports keyboard pickup, movement, commit, focus retention, and cancellat
   await expect(host.locator('[role="status"]')).toContainText('returned to position 3')
 })
 
+test('announces and describes keyboard reordering in the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-reorder-list editable aria-label="Tâches">${rows}</c2-reorder-list></div>`)
+  const host = page.locator('c2-reorder-list')
+  const firstWrapper = host.locator('.list-item[data-assignment-id]').first()
+  await expect(firstWrapper).toHaveAccessibleDescription(/^Appuyez sur Espace pour saisir un élément/)
+  await firstWrapper.focus()
+  await firstWrapper.press('Space')
+  await expect(host.locator('[role="status"]')).toContainText('First task saisi, position 1 sur 3.')
+  await page.keyboard.press('Escape')
+  await expect(host.locator('[role="status"]')).toContainText('First task revenu à la position 1.')
+})
+
 test('keeps fixed rows at absolute positions while movable rows cross them', async ({ page, renderScenario }) => {
   await renderScenario(`
     <c2-reorder-list editable aria-label="Tasks">

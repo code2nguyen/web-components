@@ -2,6 +2,7 @@ import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { formMessages } from './messages'
@@ -310,7 +311,7 @@ export class Form extends LitElement {
 
   /** Enter in a single-line input submits implicitly. */
   private handleKeydown = (event: KeyboardEvent) => {
-    if (event.key !== 'Enter' || event.isComposing) return
+    if (event.key !== 'Enter' || isComposingKey(event)) return
     const target = event.composedPath()[0]
     if (target instanceof HTMLInputElement) {
       this.lastSubmitter = null

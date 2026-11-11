@@ -4,6 +4,7 @@ import { live } from 'lit/directives/live.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/text-field'
@@ -189,7 +190,7 @@ export class PromoCodeField extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Enter' || event.isComposing) return
+    if (event.key !== 'Enter' || isComposingKey(event)) return
     event.preventDefault()
     void this.apply()
   }

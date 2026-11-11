@@ -3,6 +3,8 @@ import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { bannerMessages } from './messages.js'
 import styles from './banner.scss?inline'
 
 export type BannerVariant = 'neutral' | 'info' | 'success' | 'warning' | 'error'
@@ -93,8 +95,10 @@ export class Banner extends LitElement {
   @property({ type: Boolean, attribute: 'no-icon' }) noIcon = false
   /** Shows a keyboard-accessible dismiss button. */
   @property({ type: Boolean }) dismissible = false
-  /** Accessible name of the dismiss button. */
-  @property({ attribute: 'close-label' }) closeLabel = 'Dismiss'
+  /** Accessible name of the dismiss button. Defaults to "Dismiss" in the nearest `lang` (English, or a language the app adds). */
+  @property({ attribute: 'close-label' }) closeLabel = ''
+
+  private readonly msg = new LocalizeController(this, bannerMessages)
 
   @state() private hasActions = false
 
@@ -152,7 +156,7 @@ export class Banner extends LitElement {
       </div>
       ${
         this.dismissible
-          ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel} @click=${this.dismiss}>
+          ? html`<button type="button" class="close" part="close" aria-label=${this.closeLabel || this.msg.t('dismiss')} @click=${this.dismiss}>
               <slot name="close-icon"
                 ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                   <path d="m6 6 12 12M6 18 18 6"></path></svg

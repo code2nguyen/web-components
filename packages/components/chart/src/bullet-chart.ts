@@ -158,6 +158,11 @@ function withAlpha(color: string, alpha: number): string {
  */
 @customElement('c2-bullet-chart')
 export class BulletChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(bulletStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['custom']

@@ -1,4 +1,5 @@
 @use 'sass:string';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-notepad,
   $theme: (
@@ -251,6 +252,8 @@
 }
 .pad:focus-within .sheet {
   box-shadow: css.cssVar(sheet__focus--box-shadow);
+  // The lift is a shadow, which forced colors drop: draw a system-colour ring there instead.
+  @include focus.forced-colors-ring($offset: 4px);
 }
 
 // ---- bindings ---------------------------------------------------------------------------------------------------

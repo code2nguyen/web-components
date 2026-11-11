@@ -98,3 +98,16 @@ test('End without an upper limit stays; counters after the first draw a divider;
   await expect(page.getByRole('dialog', { name: 'Guests' })).toBeHidden()
   await expect(page.getByRole('textbox', { name: 'Elsewhere' })).toBeFocused()
 })
+
+test('inside a form: each named counter submits its count, reset restores the start, a disabled fieldset leaves it out', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><fieldset><c2-quantity-picker label="Guests" inline>${GUESTS}</c2-quantity-picker></fieldset></form>`)
+  const entries = () => page.locator('form').evaluate((form) => [...new FormData(form as HTMLFormElement).entries()].map(([key, value]) => `${key}=${value}`))
+  await expect.poll(entries).toEqual(['adults=2', 'children=1', 'infants=0'])
+  await page.getByRole('button', { name: 'Increase Infants' }).click()
+  await expect.poll(entries).toEqual(['adults=2', 'children=1', 'infants=1'])
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect.poll(entries).toEqual(['adults=2', 'children=1', 'infants=0'])
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = true))
+  await expect.poll(entries).toEqual([])
+  await expect(page.getByRole('button', { name: 'Increase Infants' })).toBeDisabled()
+})

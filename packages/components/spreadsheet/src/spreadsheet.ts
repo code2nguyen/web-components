@@ -10,6 +10,7 @@ import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { isApplePlatform } from '@c2n/core/shortcut-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import '@c2n/overlay'
 import { spreadsheetMessages } from './messages'
 import { MENU_ICONS } from './menu-icons'
@@ -1484,7 +1485,7 @@ export class Spreadsheet extends LitElement {
   private onEditorKeyDown = (event: KeyboardEvent): void => {
     event.stopPropagation()
     const editing = this.editing
-    if (!editing || event.isComposing) return
+    if (!editing || isComposingKey(event)) return
     const suggestions = this.suggestions()
     if (suggestions.length && ['ArrowDown', 'ArrowUp', 'Tab', 'Enter', 'Escape'].includes(event.key) && !event.altKey) {
       event.preventDefault()
@@ -1872,7 +1873,7 @@ export class Spreadsheet extends LitElement {
   private onRenameKeyDown = (event: KeyboardEvent): void => {
     event.stopPropagation()
     const renaming = this.renaming
-    if (!renaming || event.isComposing) return
+    if (!renaming || isComposingKey(event)) return
     if (event.key === 'Enter') {
       event.preventDefault()
       this.commitRename()

@@ -2483,12 +2483,15 @@ export class Table extends LitElement {
     if (this.dataSource || this.sortModel.length === 0) return items
     const columns = this.resolvedColumns
     const value = (item: T, field: string, column?: TableColumnConfig) => (read ? read(item, field, column) : getFieldValue(item as TableRow, field))
+    // Each sort key's column and comparator, looked up once rather than once per comparison.
+    const keys = this.sortModel.map((entry) => {
+      const column = columns.find((candidate) => candidate.field === entry.field)
+      return { field: entry.field, column, comparator: column?.comparator ?? defaultCompare, sign: entry.direction === 'desc' ? -1 : 1 }
+    })
     return [...items].sort((left, right) => {
-      for (const entry of this.sortModel) {
-        const column = columns.find((candidate) => candidate.field === entry.field)
-        const comparator = column?.comparator ?? defaultCompare
-        const result = comparator(value(left, entry.field, column), value(right, entry.field, column))
-        if (result !== 0) return entry.direction === 'desc' ? -result : result
+      for (const { field, column, comparator, sign } of keys) {
+        const result = comparator(value(left, field, column), value(right, field, column))
+        if (result !== 0) return sign * result
       }
       return 0
     })
@@ -2937,6 +2940,7 @@ export class Table extends LitElement {
       this.#scrollToLine(row)
       return
     }
+    // modern-web-ignore: ime-enter the table renders no text field; keys from controls inside a cell (renderCell inputs) are dropped by #isFromCellControl before this grid handler
     if (groupNode && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault()
       this.#toggleGroup(groupNode)
@@ -2974,6 +2978,7 @@ export class Table extends LitElement {
       case 'PageUp':
         row = Math.max(first, (row === SUMMARY_ROW ? last + 1 : row) - viewportRows)
         break
+      // modern-web-ignore: ime-enter the table renders no text field; keys from controls inside a cell (renderCell inputs) are dropped by #isFromCellControl before this grid handler
       case 'Enter':
       case ' ': {
         event.preventDefault()
@@ -2982,6 +2987,7 @@ export class Table extends LitElement {
           this.#toggleSort(columns[column], event.shiftKey)
           return
         }
+        // modern-web-ignore: ime-enter the table renders no text field; keys from controls inside a cell (renderCell inputs) are dropped by #isFromCellControl before this grid handler
         if (event.key === 'Enter') {
           const index = this.#rowIndexAt(row)
           const data = this.#rowAt(index)
@@ -3022,6 +3028,7 @@ export class Table extends LitElement {
     }
     const origin = event.composedPath()[0]
     if (!(origin instanceof Element) || origin.matches('.cell')) return false
+    // modern-web-ignore: ime-enter not a handler: classifies the key so Enter in a cell's own control (an IME included) is left to that control
     if (event.key === 'Enter' || event.key === ' ') return true
     return origin.matches(
       'input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"]), textarea, select, [contenteditable=""], [contenteditable="true"]',

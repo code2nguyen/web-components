@@ -3,6 +3,7 @@ import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/co
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import { state, query } from 'lit/decorators.js'
 import { guard } from 'lit/directives/guard.js'
 import { defaultEmojis, searchRank, type EmojiData } from './emojis'
@@ -452,7 +453,7 @@ export class EmojiPicker extends LitElement {
     if (event.key === 'ArrowDown' && this.flat.length) {
       event.preventDefault()
       this.focusIndex(0)
-    } else if (event.key === 'Enter' && !event.isComposing && this.query.trim() && this.flat.length) {
+    } else if (event.key === 'Enter' && !isComposingKey(event) && this.query.trim() && this.flat.length) {
       event.preventDefault()
       this.pick(0)
     }

@@ -11,6 +11,7 @@
   cursor: default;
 }
 
+// modern-web-ignore: bare-focus-style this only removes the UA outline; the visible ring is drawn by c2-tabs on ::slotted(c2-tab:focus-visible)
 :host(:focus) {
   // The parent `<c2-tabs>` draws a themeable ring with `:focus-visible`; drop the UA default.
   outline: none;

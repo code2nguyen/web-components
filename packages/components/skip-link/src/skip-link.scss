@@ -1,6 +1,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-skip-link,
   $theme: (
+    // modern-web-ignore: fixed-overlay-z-index a skip link targets the page itself; while a modal is open the page is inert and the link has nowhere to go, so it need not show above the top layer
     position: fixed,
     top: 8px,
     inset-inline-start: 8px,
@@ -52,6 +53,7 @@
   transition-timing-function: ease-out;
 
   // Out of sight but still in the tab order and the accessibility tree.
+  // modern-web-ignore: bare-focus-style the link must show on every focus (keyboard, programmatic, a screen reader's), or a focused control is invisible
   &:not(:focus) {
     clip-path: inset(50%);
     opacity: 0;
@@ -59,7 +61,7 @@
     pointer-events: none;
   }
 
-  &:focus {
+  &:focus-visible {
     outline: css.cssVar(focus--outline);
     outline-offset: css.cssVar(focus--outline-offset);
   }

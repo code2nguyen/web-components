@@ -9,6 +9,7 @@ import '@c2n/overlay'
 import { Quantity, QUANTITY_CHANGE, QUANTITY_SYNC } from './quantity'
 import { quantityPickerMessages } from './messages'
 import styles from './quantity-picker.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { Quantity } from './quantity'
 export { quantityPickerMessages } from './messages'
@@ -53,7 +54,8 @@ export interface QuantityPicker {
  * The panel is a popover under the trigger: Escape, a click outside or "Done" closes it and focus returns to the
  * trigger. Each counter's value is a spinbutton (↑ ↓ Home End), and a change is announced with the new summary.
  * `input` fires on every step and `change` when the panel closes after a change (at once when inline), both with
- * `{ values, total }`. The picker is not form-associated: read `values` or the event detail.
+ * `{ values, total }`. The picker is form-associated: inside a `<form>` each counter with a `name` submits its count
+ * under that name; a form reset restores the counts the counters started with, and a disabled fieldset disables it.
  *
  * @tag c2-quantity-picker
  *
@@ -94,6 +96,7 @@ export interface QuantityPicker {
 @customElement('c2-quantity-picker')
 export class QuantityPicker extends LitElement {
   static override styles = unsafeCSS(styles)
+  static formAssociated = true
 
   /** What is counted ("Guests"): the trigger's caption and the group's name. */
   @property() label = ''
@@ -120,10 +123,15 @@ export class QuantityPicker extends LitElement {
   /** Set after the first update; see `text`. */
   @state() private ready = false
   @state() private announcement = ''
+  @state() private disabledByForm = false
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, quantityPickerMessages)
   private changedSinceOpen = false
+  /** Each counter's count when the picker first saw it: what a form reset restores. */
+  private readonly initialValues = new WeakMap<Quantity, number>()
+  /** Counts from a restored form state, by key, waiting for their counters. */
+  private pendingRestore: Record<string, number> | undefined
 
   constructor() {
     super()
@@ -182,7 +190,52 @@ export class QuantityPicker extends LitElement {
     this.share()
   }
 
+  formResetCallback(): void {
+    for (const counter of this.counters) counter.value = this.initialValues.get(counter) ?? counter.min
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this.disabledByForm = disabledByAncestor(this, disabled)
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null): void {
+    if (typeof state !== 'string' || !state) return
+    try {
+      const values: unknown = JSON.parse(state)
+      if (values && typeof values === 'object') this.pendingRestore = values as Record<string, number>
+    } catch {
+      return
+    }
+    this.applyRestore()
+  }
+
+  private get effectiveDisabled(): boolean {
+    return this.disabled || this.disabledByForm
+  }
+
+  private applyRestore(): void {
+    const values = this.pendingRestore
+    if (!values || !this.counters.length) return
+    this.pendingRestore = undefined
+    for (const counter of this.counters) {
+      const value = values[counter.key]
+      if (typeof value === 'number' && Number.isFinite(value)) counter.value = value
+    }
+  }
+
+  /** Each named counter's count as a form entry; the restore state is every count by key. */
+  private syncFormState(): void {
+    if (this.effectiveDisabled) {
+      this.internals.setFormValue(null)
+      return
+    }
+    const data = new FormData()
+    for (const counter of this.counters) if (counter.name) data.append(counter.name, String(counter.value))
+    this.internals.setFormValue(data, JSON.stringify(this.values))
+  }
+
   protected override updated(changed: PropertyValues<this>): void {
+    this.syncFormState()
     if (changed.has('open') && !this.inline) {
       const overlay = this.renderRoot.querySelector<HTMLElement>('c2-overlay')
       if (overlay && this.open !== overlay.matches(':popover-open')) {
@@ -202,7 +255,7 @@ export class QuantityPicker extends LitElement {
       // The counter draws its own divider: a wrapper around it (Astro's island) may have no box to draw one on.
       counter.divided = index > 0
       counter.room = room
-      counter.locked = this.disabled
+      counter.locked = this.effectiveDisabled
     }
   }
 
@@ -217,6 +270,8 @@ export class QuantityPicker extends LitElement {
       .assignedElements({ flatten: true })
       .flatMap((element) => (element instanceof Quantity ? [element] : [...element.querySelectorAll('c2-quantity')]))
       .filter((element): element is Quantity => element instanceof Quantity)
+    for (const counter of this.counters) if (!this.initialValues.has(counter)) this.initialValues.set(counter, counter.value)
+    this.applyRestore()
   }
 
   protected override firstUpdated(): void {
@@ -282,8 +337,8 @@ export class QuantityPicker extends LitElement {
         aria-haspopup="dialog"
         aria-expanded=${this.open ? 'true' : 'false'}
         aria-label=${this.label ? `${this.label}: ${text}` : nothing}
-        popovertarget=${this.disabled ? nothing : 'panel'}
-        ?disabled=${this.disabled}
+        popovertarget=${this.effectiveDisabled ? nothing : 'panel'}
+        ?disabled=${this.effectiveDisabled}
       >
         ${this.label ? html`<span class="label" aria-hidden="true">${this.label}</span>` : nothing}
         <span class="value"

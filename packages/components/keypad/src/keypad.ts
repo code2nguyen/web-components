@@ -7,6 +7,7 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { keypadMessages } from './messages'
 import styles from './keypad.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { keypadMessages } from './messages'
 
@@ -170,9 +171,7 @@ export class Keypad extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    // The state as given: an own `disabled` is combined in `effectiveDisabled`, so removing it inside a disabled
-    // fieldset keeps the control disabled.
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

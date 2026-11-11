@@ -275,6 +275,7 @@ export class BottomNav extends LitElement {
     this.scroller = target
     this.lastScrollTop = this.readScrollTop(target)
     this.travel = 0
+    // modern-web-ignore: scroll-listener-visual hide-on-scroll needs the scroll direction and travel distance; scroll-state(scrolled) is Limited availability and cannot express the travel threshold
     target.addEventListener('scroll', this.handleScroll, { passive: true })
   }
 

@@ -335,6 +335,8 @@
 /* Preview */
 
 .table-wrap {
+  // The containing block of the visually hidden cell text, so it is clipped here instead of widening the page.
+  position: relative;
   max-height: css.cssVar(table--max-height);
   overflow: auto;
   border: css.cssVar(border);

@@ -9,6 +9,7 @@ import type { EchartsFeature } from './engines/echarts-loader.js'
 import { columnValue } from './chart-data.js'
 import type { ChartFrame, ChartSeriesConfig } from './chart-types.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface CandlestickChart {
   addEventListener: TypedAddEventListener<CandlestickChart, ChartEventMap>
@@ -34,6 +35,10 @@ export interface CandlestickChart {
  */
 @customElement('c2-candlestick-chart')
 export class CandlestickChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'candlestickChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['candlestick', 'grid']
 
   /** Row field containing the opening value. */

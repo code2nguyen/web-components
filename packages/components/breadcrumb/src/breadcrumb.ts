@@ -194,6 +194,7 @@ export class Breadcrumb extends LitElement {
         if (isCurrent) item.setAttribute('selected', '')
         else if (item === last && explicit) item.removeAttribute('selected')
       } else if (isCurrent) {
+        // modern-web-ignore: aria-attribute-on-other-element documented automatic current page: aria-current must sit on the author's own link (no element-reference or internals equivalent), set only when the author marked none
         item.setAttribute('aria-current', 'page')
       } else if (item === last) {
         item.removeAttribute('aria-current')

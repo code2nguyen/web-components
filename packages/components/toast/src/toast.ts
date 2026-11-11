@@ -1,5 +1,5 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -176,8 +176,14 @@ export interface ToastRegion {
   removeEventListener: TypedRemoveEventListener<ToastRegion, ToastRegionEventMap>
 }
 
+/** Elements whose `open` event means a modal dialog was shown (c2-confirm-dialog's inner modal retargets to it). */
+const MODAL_OVERLAYS = new Set(['c2-modal', 'c2-sheet', 'c2-confirm-dialog'])
+
 /**
- * Fixed notification stack with a FIFO overflow queue and independent visible lifetimes.
+ * Fixed notification stack with a FIFO overflow queue and independent visible lifetimes. Where the Popover API exists the
+ * stack is a manual popover in the top layer while it holds toasts, so a toast stays visible above an open `c2-modal` or
+ * `c2-sheet`. It is visible only: a modal dialog makes the rest of the page inert, top layer included, so the toast's
+ * buttons answer again once the dialog closes. An `inline` region stays in the page.
  * @tag c2-toast-region
  * @internalcomponent c2-toast
  * @event {CustomEvent} toast-dismiss - A toast was removed; detail contains id, toast and reason.
@@ -223,6 +229,18 @@ export class ToastRegion extends LitElement {
     (toast) => this.animateExit(toast.id),
   )
   private unsubscribe?: () => void
+  @query('section') private stackElement?: HTMLElement
+  /**
+   * A modal opened after the stack: show the stack again so it is the topmost layer, above the dialog. Only the modal
+   * overlays count (`open` also bubbles from selects, menus and other popups, which must not reshuffle the stack).
+   */
+  private overlayOpened = (event: Event) => {
+    if (!MODAL_OVERLAYS.has((event.target as Element | null)?.localName ?? '')) return
+    const stack = this.stackElement
+    if (!stack?.matches(':popover-open')) return
+    stack.hidePopover()
+    stack.showPopover()
+  }
   private visibilityChanged = () => {
     if (this.ownerDocument.hidden) this.controller.pause('hidden')
     else this.controller.resume('hidden')
@@ -249,6 +267,7 @@ export class ToastRegion extends LitElement {
     this.visibilityChanged()
     this.controller.resume('disconnected')
     this.ownerDocument.addEventListener('visibilitychange', this.visibilityChanged)
+    this.ownerDocument.addEventListener('open', this.overlayOpened)
   }
   override disconnectedCallback() {
     super.disconnectedCallback()
@@ -262,16 +281,33 @@ export class ToastRegion extends LitElement {
     this.controller.resume('focus')
     this.unsubscribe?.()
     this.ownerDocument.removeEventListener('visibilitychange', this.visibilityChanged)
+    this.ownerDocument.removeEventListener('open', this.overlayOpened)
   }
   protected override updated(changed: PropertyValues) {
     if (changed.has('maxVisible')) this.controller.maxVisible = this.maxVisible
     if (!this.renderRoot.querySelector(':focus-within')) this.controller.resume('focus')
     this.updateProgress()
+    this.syncPopover()
     for (const element of this.renderRoot.querySelectorAll('c2-toast')) {
       if (this.entered.has(element)) continue
       this.entered.add(element)
       if (!this.controller.isClosing(element.dataset.toastId!)) this.animateToast(element, this.enterAnimation, false)
     }
+  }
+
+  /** Whether the stack renders as a manual popover: a page-level region where the Popover API exists. */
+  private get usesPopover() {
+    return !isServer && !this.inline && typeof HTMLElement.prototype.showPopover === 'function'
+  }
+
+  /** Keeps the popover stack in the top layer while it holds toasts and out of it when empty. */
+  private syncPopover() {
+    const stack = this.stackElement
+    if (!stack?.hasAttribute('popover')) return
+    const open = stack.matches(':popover-open')
+    const wanted = this.isConnected && this.controller.visible.length > 0
+    if (wanted && !open) stack.showPopover()
+    else if (!wanted && open) stack.hidePopover()
   }
 
   private updateProgress = () => {
@@ -384,6 +420,7 @@ export class ToastRegion extends LitElement {
 
   override render() {
     return html`<section
+      popover=${this.usesPopover ? 'manual' : nothing}
       aria-label=${this.label || this.msg.t('region')}
       @mouseenter=${() => this.controller.pause('hover')}
       @mouseleave=${() => this.controller.resume('hover')}

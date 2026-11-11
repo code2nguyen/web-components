@@ -133,6 +133,7 @@ $_duration: css.cssVar(transition-duration);
 
 // The sub-steps are light DOM projected into a slot inside the `<details>`, and WebKit's closed state does not
 // reach through the slot to hide them. Saying it here makes the disclosure behave the same in every engine.
+// modern-web-ignore: closed-content-display-none the collapse is already a <details>; this only closes WebKit's gap (slotted light DOM shows through a closed one), and content-visibility there would leave a size-contained box; trade-off: find-in-page does not open a collapsed group
 .c2-step__details:not([open]) .c2-step__children {
   display: none;
 }

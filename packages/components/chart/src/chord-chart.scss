@@ -9,11 +9,8 @@
   )
 );
 
-// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
-.plot:focus {
-  outline: none;
-}
-
+// The plot is the chart's tab stop; only keyboard focus draws the ring (the UA ring keys on :focus-visible too, so a
+// pointer click draws none).
 .plot:focus-visible {
   outline: css.cssVar(plot__focus--outline);
   outline-offset: -2px;

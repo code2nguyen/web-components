@@ -67,6 +67,21 @@ test('Escape cancels, a click on the backdrop does not', async ({ page, renderSc
   await expect(dialog).toBeHidden()
 })
 
+test('Escape after an earlier confirm answers false, not the stale confirm', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await launch(page)
+  const dialog = page.getByRole('alertdialog')
+  await page.getByRole('button', { name: 'Publish' }).click()
+  await expect(page.locator('#launch')).toHaveAttribute('data-answer', 'true')
+  await expect(dialog).toBeHidden()
+
+  await page.getByRole('button', { name: 'Launch' }).click()
+  await expect(dialog).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#launch')).toHaveAttribute('data-answer', 'false')
+  await expect(dialog).toBeHidden()
+})
+
 test('preventing confirm keeps the dialog open', async ({ page, renderScenario }) => {
   await renderScenario(markup())
   await page.locator('c2-confirm-dialog').evaluate((dialog) => dialog.addEventListener('confirm', (event) => event.preventDefault()))
@@ -143,4 +158,13 @@ test('confirm() mounts a temporary dialog, resolves with the answer and removes 
   await page.getByRole('button', { name: 'Leave' }).click()
   expect(await answer).toBe(true)
   await expect(page.locator('c2-confirm-dialog')).toHaveCount(0)
+})
+
+test('the default button labels follow the nearest lang; set labels win', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <div lang="fr"><button id="launch">Launch</button><c2-confirm-dialog heading="Publier ?" confirm-label="Publier"></c2-confirm-dialog></div>`)
+  await launch(page)
+  await expect(page.getByRole('alertdialog')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Publier', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Annuler', exact: true })).toBeVisible()
 })

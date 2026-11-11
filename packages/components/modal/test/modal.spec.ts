@@ -48,6 +48,32 @@ test('close returns a value and disconnect releases the scroll lock', async ({ p
   await expect(page.locator('html')).not.toHaveCSS('overflow', 'hidden')
 })
 
+test('Escape after an earlier close(value) reports an empty returnValue', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-modal label="Confirm" open>Content</c2-modal>')
+  const host = page.locator('c2-modal')
+  await watch(host, 'close')
+  await host.evaluate((el) => (el as HTMLElement & { close(value: string): void }).close('x'))
+  await expect(host).toHaveJSProperty('open', false)
+  await props(host, { open: true })
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(host).toHaveAttribute('data-events', '[{"returnValue":"x"},{"returnValue":""}]')
+  await expect(host).toHaveJSProperty('returnValue', '')
+})
+
+test('no-escape blocks the close request on the inner dialog with closedby="none", only while set', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-modal label="Confirm" open no-escape>Content</c2-modal>')
+  const host = page.locator('c2-modal')
+  const dialog = host.locator('dialog')
+  await expect(dialog).toHaveAttribute('closedby', 'none')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await props(host, { noEscape: false })
+  await expect(dialog).not.toHaveAttribute('closedby')
+  await page.keyboard.press('Escape')
+  await expect(host).toHaveJSProperty('open', false)
+})
+
 test('public parts style title, body and conditional footer regions', async ({ page, renderScenario }) => {
   await renderScenario('<c2-modal open><h2 slot="title">Review</h2><p>Body</p><button slot="footer">Save</button></c2-modal>')
   await page.addStyleTag({

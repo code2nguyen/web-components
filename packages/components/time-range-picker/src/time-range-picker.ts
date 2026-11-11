@@ -6,6 +6,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import { isTimeZone, wallClockAt, zoneLabel } from '@c2n/core/zoned-time.js'
 import type { Overlay } from '@c2n/overlay'
 import type { DateRangeChangeDetail } from '@c2n/date-selector'
@@ -478,6 +479,8 @@ export class TimeRangePicker extends LitElement {
   }
 
   private readonly handleSearchKey = (event: KeyboardEvent) => {
+    // A key that confirms an IME candidate (CJK) belongs to the composition, not to the search.
+    if (isComposingKey(event)) return
     if (event.key === 'Enter') {
       // Cancelled so the key does not go on to activate the trigger that takes focus back.
       event.preventDefault()

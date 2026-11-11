@@ -4,7 +4,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { resolveLocale } from '@c2n/core/locale-helper.js'
@@ -21,6 +21,8 @@ import {
   significantNumber,
   type PhoneCountry,
 } from './countries.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { phoneInputMessages } from './messages.js'
 import styles from './phone-input.scss?inline'
 
 export type { PhoneCountry }
@@ -145,6 +147,7 @@ export class PhoneInput extends LitElement {
   private readonly internals = this.attachInternals()
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly fieldContext = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, phoneInputMessages, () => this.locale)
 
   /**
    * The number in E.164 (`+33612345678`), or an empty string. Setting a value with `+` picks its country; a value
@@ -303,7 +306,7 @@ export class PhoneInput extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(restored: string | File | FormData | null) {
@@ -581,7 +584,7 @@ export class PhoneInput extends LitElement {
   }
 
   private handleSearchKeydown(event: KeyboardEvent) {
-    if (event.isComposing) return
+    if (isComposingKey(event)) return
     const options = this.options
     switch (event.key) {
       case 'ArrowDown':
@@ -670,9 +673,9 @@ export class PhoneInput extends LitElement {
     this.internals.setFormValue(this.effectiveDisabled || !value ? null : value, value)
     const anchor = this.input ?? undefined
     if (this.required && !value) {
-      this.internals.setValidity({ valueMissing: true }, 'Please enter a phone number.', anchor)
+      this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), anchor)
     } else if (invalid || (this.pendingText !== undefined && digitsOf(this.pendingText))) {
-      this.internals.setValidity({ patternMismatch: true }, `Please enter a valid phone number for ${this.countryName(this.currentCountry)}.`, anchor)
+      this.internals.setValidity({ patternMismatch: true }, this.msg.t('patternMismatch', this.countryName(this.currentCountry)), anchor)
     } else {
       this.internals.setValidity({})
     }
@@ -769,7 +772,7 @@ export class PhoneInput extends LitElement {
                 type="button"
                 aria-haspopup="listbox"
                 aria-expanded=${this.open ? 'true' : 'false'}
-                aria-label=${`Country: ${countryName} (+${country.dialCode})`}
+                aria-label=${this.msg.t('country', countryName, country.dialCode)}
                 ?disabled=${disabled || this.readonly}
                 @click=${this.handleCountryClick}
                 @keydown=${this.handleCountryKeydown}
@@ -790,7 +793,7 @@ export class PhoneInput extends LitElement {
           type="tel"
           inputmode="tel"
           autocomplete="tel"
-          aria-label=${this.ariaLabel || this.fieldContext.label || 'Phone number'}
+          aria-label=${this.ariaLabel || this.fieldContext.label || this.msg.t('label')}
           aria-describedby=${this.fieldContext.describedBy(fixed && 'country')}
           aria-invalid=${(!!this.significant && !this.valid && this.touched) || this.fieldContext.invalid ? 'true' : nothing}
           placeholder=${this.placeholder || this.exampleNumber || nothing}

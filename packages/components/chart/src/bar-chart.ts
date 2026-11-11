@@ -12,6 +12,7 @@ import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import type { ChartSeriesConfig } from './chart-types.js'
 import { readableOn } from './chart-contrast.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export type { BarStack } from './engines/uplot-paths.js'
 
@@ -49,6 +50,10 @@ const LABEL_OFFSET = 4
  */
 @customElement('c2-bar-chart')
 export class BarChart extends UplotChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'barChart'
+  }
+
   /** Share of each band a bar group occupies, from 0 to 1. */
   @property({ type: Number, attribute: 'bar-width' }) barWidth = 0.6
 

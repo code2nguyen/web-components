@@ -7,6 +7,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { imageMessages } from './messages.js'
 import styles from './image.scss?inline'
 
 /** When the image is fetched: `lazy` near the viewport, `eager` at once, `click` only after the reader asks. */
@@ -121,6 +123,7 @@ function hostOf(src: string): string {
 @customElement('c2-image')
 export class Image extends LitElement {
   static override styles = unsafeCSS(styles)
+  private readonly msg = new LocalizeController(this, imageMessages)
 
   /** Image URL. */
   @property() src = ''
@@ -246,7 +249,7 @@ export class Image extends LitElement {
     return html`<button
       class="preview-trigger"
       type="button"
-      aria-label=${this.alt ? `Open ${this.alt} full screen` : 'Open image full screen'}
+      aria-label=${this.alt ? this.msg.t('openNamedPreview', this.alt) : this.msg.t('openPreview')}
       @click=${this.openPreview}
     >
       ${image}
@@ -257,13 +260,13 @@ export class Image extends LitElement {
     const host = hostOf(this.src)
     return html`<button class="load-button" part="load-button" type="button" @click=${this.handleActivate}>
       <span class="icon">${imageIcon}</span>
-      <span class="load-label"><slot name="load-label">Load image</slot>${host ? html`<span class="host"> · ${host}</span>` : nothing}</span>
+      <span class="load-label"><slot name="load-label">${this.msg.t('load')}</slot>${host ? html`<span class="host"> · ${host}</span>` : nothing}</span>
       ${this.alt ? html`<span class="alt">${this.alt}</span>` : nothing}
     </button>`
   }
 
   private renderPreview() {
-    return html`<c2-modal class="preview" label=${this.alt || 'Image'} ?open=${this.previewOpen} @close=${this.closePreview}>
+    return html`<c2-modal class="preview" label=${this.alt || this.msg.t('image')} ?open=${this.previewOpen} @close=${this.closePreview}>
       <img class="preview-image" src=${this.src} srcset=${ifDefined(this.srcset)} alt=${this.alt} referrerpolicy=${ifDefined(this.referrerPolicy)} />
     </c2-modal>`
   }

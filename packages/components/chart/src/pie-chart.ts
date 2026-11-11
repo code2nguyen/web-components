@@ -10,6 +10,7 @@ import type { ChartFrame } from './chart-types.js'
 import type { ChartAdapter } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface PieChart {
   addEventListener: TypedAddEventListener<PieChart, ChartEventMap>
@@ -36,6 +37,10 @@ export interface PieChart {
  */
 @customElement('c2-pie-chart')
 export class PieChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'pieChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['pie']
 
   /** Hole in the middle, from 0 (a full pie) to 1. Anything above 0 makes it a donut. */

@@ -3,7 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { Fragment, Slice, type Mark, type Node as ProseNode } from 'prosemirror-model'
@@ -500,7 +500,7 @@ export class RichTextEditor extends LitElement {
     this.reset()
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(restored: string | File | FormData | null) {
     if (typeof restored === 'string') this.value = restored

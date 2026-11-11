@@ -144,6 +144,7 @@
   }
 }
 
+// modern-web-ignore: bare-focus-style removes the UA outline only; the visible ring is the :focus-visible rule below
 :host(:focus) {
   outline: none;
 }

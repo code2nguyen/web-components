@@ -443,6 +443,7 @@
   font-weight: css.cssVar(event--font-weight);
   opacity: 0;
 
+  // modern-web-ignore: bare-focus-style the button is invisible until focused, so it must show on any focus (a pointer that lands on it, a screen reader's programmatic focus), not only keyboard-visible focus
   &:focus {
     opacity: 1;
     outline: css.cssVar(focus--outline);

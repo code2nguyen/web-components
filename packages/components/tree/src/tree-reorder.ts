@@ -197,11 +197,13 @@ export function attachReorder(tree: Tree): void {
     if (!item || item.disabled) return
     press = { item, pointerId: event.pointerId, x: event.clientX, y: event.clientY, touch: event.pointerType === 'touch' }
     if (press.touch) press.timer = setTimeout(() => press && begin(press.x), TOUCH_DELAY)
+    // modern-web-ignore: document-pointer-drag the press must survive the pointer leaving the tree before the drag starts (touch long-press); every handler filters on press.pointerId, and capture on the row would retarget clicks away from row links and actions
     document.addEventListener('pointermove', onMove)
     document.addEventListener('pointerup', onUp)
     document.addEventListener('pointercancel', onCancel)
     document.addEventListener('keydown', onEscape, true)
     // Only a drag that has started may stop the page from scrolling under a finger.
+    // modern-web-ignore: document-pointer-drag a non-passive touchmove is the only way to stop scrolling once a long-press drag has begun: touch-action cannot change mid-gesture, and the row must keep scrolling until then
     document.addEventListener('touchmove', onTouchMove, { passive: false })
   })
 

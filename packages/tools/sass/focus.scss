@@ -1,0 +1,13 @@
+// Focus that survives forced colors (Windows High Contrast). The browser repaints every border, background and
+// `box-shadow` there with system colours or drops them, so a focus state drawn only by a border colour, a background
+// tint or a shadow ring disappears. Include this inside the rule of the element that shows focus (the field box, the
+// row, the handle): it adds a real outline in the system `Highlight` colour, and only in forced colors, so the
+// component's own focus look is untouched everywhere else.
+//
+//   .field:focus-within { @include focus.forced-colors-ring; }
+@mixin forced-colors-ring($width: 2px, $offset: 2px) {
+  @media (forced-colors: active) {
+    outline: $width solid Highlight;
+    outline-offset: $offset;
+  }
+}

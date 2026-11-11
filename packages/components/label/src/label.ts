@@ -78,6 +78,7 @@ export class Label extends LitElement {
     const target = this.resolveTarget()
     if (!target || target.hasAttribute('aria-labelledby')) return
     if (!this.id) this.id = `c2-label-${++labelCount}`
+    // modern-web-ignore: aria-attribute-on-other-element documented contract (the label names its `for` target, resolved in the same tree, so the id ref holds); skipped when the author set one, removed on unlink
     target.setAttribute('aria-labelledby', this.id)
     this.linkedTarget = target
   }

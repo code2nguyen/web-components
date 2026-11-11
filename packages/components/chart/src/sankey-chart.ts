@@ -158,6 +158,11 @@ const EDGE = 4
  */
 @customElement('c2-sankey-chart')
 export class SankeyChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(sankeyStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['sankey']

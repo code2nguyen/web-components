@@ -5,6 +5,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/tree'
 import '@c2n/breadcrumb'
@@ -899,6 +900,8 @@ export class FileBrowser extends LitElement {
 
   private onRenameKeydown(event: KeyboardEvent): void {
     event.stopPropagation()
+    // Enter that confirms an IME candidate must not commit the rename.
+    if (isComposingKey(event)) return
     if (event.key === 'Enter') {
       event.preventDefault()
       this.finishRename(true)
@@ -1043,9 +1046,10 @@ export class FileBrowser extends LitElement {
   }
 
   private treeNodes(parent: string, seen = new Set<string>()): TreeNode[] {
+    const collator = collatorFor(this.msg.locale)
     return (this.childrenOf.get(parent) ?? [])
       .filter((entry) => entry.kind === 'folder' && !seen.has(entry.id))
-      .sort((a, b) => a.name.localeCompare(b.name, this.msg.locale, { numeric: true }))
+      .sort((a, b) => collator.compare(a.name, b.name))
       .map((entry) => {
         seen.add(entry.id)
         if (!this.isLoaded(entry.id)) return { value: entry.id, label: entry.name, hasChildren: true }

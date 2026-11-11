@@ -19,7 +19,6 @@
     border-bottom-right-radius: 8px,
 
     box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
-
     padding-top: 4px,
     padding-right: 4px,
     padding-bottom: 4px,
@@ -89,6 +88,7 @@
   padding-bottom: css.cssVar(padding-bottom);
   padding-left: css.cssVar(padding-left);
 
+  // modern-web-ignore: bare-focus-style removes the UA outline of the scrolling surface only; the rows hold the roving focus and draw their own :focus-visible highlight
   &:focus {
     outline: none;
   }

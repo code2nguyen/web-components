@@ -201,3 +201,12 @@ test('the required messages follow the nearest lang', async ({ page, renderScena
   await expect(box).toHaveJSProperty('validationMessage', 'Please check this box.')
   await expect(group).toHaveJSProperty('validationMessage', 'Please select at least one option.')
 })
+
+test('an own disabled removed inside a disabled fieldset stays disabled until the fieldset is enabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-checkbox name="terms" disabled>Accept</c2-checkbox></fieldset></form>')
+  const host = page.locator('c2-checkbox')
+  await host.evaluate((element) => element.removeAttribute('disabled'))
+  await expect(page.getByRole('checkbox')).toBeDisabled()
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
+  await expect(page.getByRole('checkbox')).toBeEnabled()
+})

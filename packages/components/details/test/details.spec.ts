@@ -11,16 +11,21 @@ test('header-content presence follows assignment, insertion, removal and reassig
 })
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import type { Locator } from '@playwright/test'
 import type { Details } from '../src/details'
+
+// Closed content is skipped with `content-visibility: hidden`. Playwright's WebKit visibility check does not ask the
+// browser, and its closed-`<details>` lookup stops at the shadow boundary, so ask `checkVisibility()` directly.
+const shown = (locator: Locator) => expect.poll(() => locator.evaluate((element) => element.checkVisibility()))
 
 test('click and keyboard expand and collapse content', async ({ page, renderScenario }) => {
   await renderScenario('<c2-details label="Shipping"><p>Arrives tomorrow</p></c2-details>')
   const summary = page.locator('summary')
-  await expect(page.getByText('Arrives tomorrow')).not.toBeVisible()
+  await shown(page.getByText('Arrives tomorrow')).toBe(false)
   await summary.click()
   await expect(page.getByText('Arrives tomorrow')).toBeVisible()
   await summary.press('Enter')
-  await expect(page.getByText('Arrives tomorrow')).not.toBeVisible()
+  await shown(page.getByText('Arrives tomorrow')).toBe(false)
   await expect(page.locator('c2-details')).toHaveJSProperty('expanded', false)
   await accessible(page)
 })
@@ -107,7 +112,8 @@ test('content rendered on toggle, after the panel began opening, still slides op
     const content = host.shadowRoot!.querySelector<HTMLElement>('.c2-details-content')!
     const frame = () => new Promise(requestAnimationFrame)
     // From the closed height, so an open that jumps straight to its end fails the steps below.
-    const seen: number[] = [content.getBoundingClientRect().height]
+    // Skipped content (`content-visibility: hidden` while closed) still reports a layout box, but draws nothing.
+    const seen: number[] = [content.checkVisibility() ? content.getBoundingClientRect().height : 0]
     host.shadowRoot!.querySelector<HTMLElement>('summary')!.click()
     await host.updateComplete
     // The slide's clock is held still, so a slow runner (a few frames in the whole duration) sees the same open as a
@@ -135,4 +141,24 @@ test('content rendered on toggle, after the panel began opening, still slides op
   // height between the two is ever drawn. Following it, the panel passes part-way open, and never shrinks on the way.
   expect(heights.some((height) => height > end * 0.25 && height < end * 0.75)).toBe(true)
   expect(Math.min(...steps)).toBeGreaterThanOrEqual(-1)
+})
+
+test('closed content stays rendered for find-in-page, and a browser-opened details becomes expanded', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Shipping"><p>Arrives tomorrow</p></c2-details>')
+  const host = page.locator('c2-details')
+  // Not `display: none`, which would drop the content from find-in-page; it is still hidden from sight.
+  await expect(host.locator('.c2-details-content')).not.toHaveCSS('display', 'none')
+  await shown(page.getByText('Arrives tomorrow')).toBe(false)
+
+  // Find-in-page opens the native details itself; the component follows and re-emits the toggle.
+  const newState = await host.evaluate(
+    (element) =>
+      new Promise<string>((resolve) => {
+        element.addEventListener('toggle', (event) => resolve((event as ToggleEvent).newState), { once: true })
+        element.shadowRoot!.querySelector('details')!.open = true
+      }),
+  )
+  expect(newState).toBe('open')
+  await expect(host).toHaveJSProperty('expanded', true)
+  await expect(page.getByText('Arrives tomorrow')).toBeVisible()
 })

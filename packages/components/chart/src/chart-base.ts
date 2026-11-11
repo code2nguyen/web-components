@@ -8,7 +8,7 @@ import { ChartFrameBuilder, columnValue, type NormalizeContext } from './chart-d
 import { ChartThemeController, PROBE_COLORS, type ChartTheme } from './chart-theme.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import { SERIES_CHANGE_EVENT, SERIES_TAG, type ChartSeries } from './chart-series.js'
-import { chartMessages } from './messages.js'
+import { chartMessages, type ChartKindMessage } from './messages.js'
 import type {
   ChartAnnotation,
   ChartAnnotationEventDetail,
@@ -99,6 +99,13 @@ function annotationEnd(annotation: ChartAnnotation): number | undefined {
 
 /** Pixels a resize must exceed before the engine is told; a canvas resize is a full redraw. */
 const RESIZE_EPSILON = 1
+/** How many rows of data the hidden table lists; the rest are counted, so a 10k-point series does not become a 10k-row table. */
+const ACCESSIBLE_ROW_LIMIT = 100
+/**
+ * How often a live feed refreshes the hidden data table, in milliseconds. Nobody reads it at frame rate, and
+ * rebuilding up to {@link ACCESSIBLE_ROW_LIMIT} rows per frame would cost more than the chart itself.
+ */
+const ACCESSIBLE_REFRESH_MS = 1000
 
 let warnedCollapsedPlot = false
 
@@ -388,8 +395,8 @@ export abstract class ChartBase extends LitElement {
   @state() private themeRevision = 0
 
   protected themeController = new ChartThemeController(this, () => this.handleThemeChange())
-  /** The annotation text. Only a chart that draws annotations watches `lang` for it. */
-  protected readonly chartMsg = this.drawsAnnotations ? new LocalizeController(this, chartMessages, () => this.locale) : undefined
+  /** The text every chart shares: annotation names, the generated summary and data table, the map's zoom buttons. */
+  protected readonly chartMsg = new LocalizeController(this, chartMessages, () => this.locale)
   /** The annotations the current template was rendered from, which `#placeAnnotations` pairs with its boxes. */
   #renderedAnnotations: ChartAnnotation[] = []
   /** Row labels by x value, for the markers' names; rebuilt only when the frame changes. */
@@ -487,6 +494,20 @@ export abstract class ChartBase extends LitElement {
     return false
   }
 
+  /**
+   * Whether the chart uses the shared text alternative: `role="img"` on the plot, named by the host's `aria-label` or a
+   * generated summary, and a visually hidden table of the series data. A chart that describes itself (its own table,
+   * a keyboard-navigable plot) turns it off.
+   */
+  protected get usesSharedAccessibleView(): boolean {
+    return true
+  }
+
+  /** The message naming this chart type in the generated summary ("Line chart of Revenue, 12 data points"). */
+  protected get chartKind(): ChartKindMessage {
+    return 'chart'
+  }
+
   /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
   protected get legendDependsOnData(): boolean {
     return false
@@ -510,6 +531,7 @@ export abstract class ChartBase extends LitElement {
     if (isServer) return
 
     window.addEventListener('resize', this.#handleViewportChange)
+    // modern-web-ignore: scroll-listener-visual keeps the floating tooltip on its hovered point; anchor positioning would be a rewrite
     window.addEventListener('scroll', this.#handleViewportChange, true)
 
     if (typeof ResizeObserver !== 'undefined' && !this.#resizeObserver) {
@@ -539,6 +561,8 @@ export abstract class ChartBase extends LitElement {
    */
   protected override firstUpdated(): void {
     if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
+    // The canvas says nothing: the plot is one image, named in `#renderAccessibleView`. Set on the shadow node, never the host.
+    if (this.usesSharedAccessibleView) this.plotElement?.setAttribute('role', 'img')
   }
 
   override disconnectedCallback(): void {
@@ -546,6 +570,8 @@ export abstract class ChartBase extends LitElement {
     this.removeEventListener(SERIES_CHANGE_EVENT, this.#handleSeriesChange)
     this.#resizeObserver?.disconnect()
     this.#intersectionObserver?.disconnect()
+    clearTimeout(this.#accessibleViewTimer)
+    this.#accessibleViewTimer = undefined
     if (!isServer) {
       window.removeEventListener('resize', this.#handleViewportChange)
       window.removeEventListener('scroll', this.#handleViewportChange, true)
@@ -614,6 +640,7 @@ export abstract class ChartBase extends LitElement {
     // A hover-only render moves nothing; any other one may have new boxes or a new language for their names.
     if (!(changed.size === 1 && changed.has('hoverContext'))) this.#placeAnnotations()
     if ([...changed.keys()].some((key) => key !== 'hoverContext' && key !== 'annotations')) this.notifyLegendChange()
+    if (!(changed.size === 1 && changed.has('hoverContext'))) this.#renderAccessibleView()
   }
 
   // ----------------------------------------------------------- public API ---
@@ -861,6 +888,8 @@ export abstract class ChartBase extends LitElement {
     if (this.#appended > 0 && this.adapter.appendData) this.adapter.appendData(projected, this.#appended)
     else this.adapter.setData(projected)
     this.#appended = 0
+    // The data path skips Lit's update; the hidden table follows at most once a frame, so a live feed does not rebuild it per tick.
+    this.#scheduleAccessibleView()
     if (this.legendDependsOnData) {
       // The data path skips Lit's update, so a legend drawn from the data (pie slices) is refreshed here.
       this.#renderLegendEntries()
@@ -1162,6 +1191,7 @@ export abstract class ChartBase extends LitElement {
         </div>
         ${legendAfter ? this.renderLegend() : nothing}
       </div>
+      ${this.usesSharedAccessibleView ? html`<div class="a11y-root"></div>` : nothing}
       <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}<span class="axis-font-probe"></span></div>
       <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
       <slot class="definitions" @slotchange=${this.#handleSlotChange}></slot>
@@ -1174,7 +1204,7 @@ export abstract class ChartBase extends LitElement {
     this.#renderedAnnotations = annotations
     if (annotations.length === 0) return nothing
     return html`
-      <div class="annotations" part="annotations" role="group" aria-label=${this.chartMsg?.t('annotations') ?? ''}>
+      <div class="annotations" part="annotations" role="group" aria-label=${this.chartMsg.t('annotations')}>
         ${annotations.map(
           (annotation, index) => html`
             <div class="annotation annotation--${annotation.tone ?? 'neutral'}" part="annotation" hidden>
@@ -1202,9 +1232,9 @@ export abstract class ChartBase extends LitElement {
     const labels = this.#labelsByX()
     const at = (value: number) => labels?.get(value) ?? this.formatX(value)
     const end = annotationEnd(annotation)
-    if (end === undefined) return this.chartMsg?.t('annotationAt', annotation.label, at(annotation.x)) ?? annotation.label
+    if (end === undefined) return this.chartMsg.t('annotationAt', annotation.label, at(annotation.x))
     const [from, to] = end < annotation.x ? [end, annotation.x] : [annotation.x, end]
-    return this.chartMsg?.t('annotationRange', annotation.label, at(from), at(to)) ?? annotation.label
+    return this.chartMsg.t('annotationRange', annotation.label, at(from), at(to))
   }
 
   #labelsByX(): Map<number, string> | undefined {
@@ -1354,6 +1384,103 @@ export abstract class ChartBase extends LitElement {
   /** Content drawn after the series entries in the built-in legend, such as the bubble chart's size key. */
   protected renderLegendExtras(): unknown {
     return nothing
+  }
+
+  #accessibleViewTimer?: ReturnType<typeof setTimeout>
+
+  /** The data-only path (live feeds): refresh the table at most once per {@link ACCESSIBLE_REFRESH_MS}, trailing. */
+  #scheduleAccessibleView(): void {
+    if (!this.usesSharedAccessibleView || this.#accessibleViewTimer !== undefined || isServer) return
+    this.#accessibleViewTimer = setTimeout(() => {
+      this.#accessibleViewTimer = undefined
+      this.#renderAccessibleView()
+    }, ACCESSIBLE_REFRESH_MS)
+  }
+
+  // `aria-label` names the plot (see `accessibleSummary`), so a change to it must re-render the accessible view.
+  static override get observedAttributes(): string[] {
+    return [...super.observedAttributes, 'aria-label']
+  }
+
+  override attributeChangedCallback(name: string, old: string | null, value: string | null): void {
+    super.attributeChangedCallback(name, old, value)
+    if (name === 'aria-label' && old !== value) this.requestUpdate()
+  }
+
+  /** The plot's accessible name: the author's `aria-label` on the host, else a summary of the chart type, series and size. */
+  protected accessibleSummary(resolved: ChartSeriesConfig[] = this.resolvedSeries): string {
+    const authored = this.getAttribute('aria-label')?.trim()
+    if (authored) return authored
+    const kind = this.chartMsg.t(this.chartKind)
+    const series = resolved.map((item) => item.label || item.field).join(', ')
+    const points = this.chartMsg.t('points', this.frame?.length ?? 0)
+    return series ? this.chartMsg.t('summary', kind, series, points) : this.chartMsg.t('summaryNoSeries', kind, points)
+  }
+
+  /**
+   * Names the plot and renders the series data as a visually hidden table: rows are the x values (capped at
+   * {@link ACCESSIBLE_ROW_LIMIT}, the caption saying so, so the DOM never grows with the data), columns the series.
+   * Rendered into a static container after each update rather than in the template, as the legend is: a server cannot
+   * see the `c2-chart-series` children.
+   */
+  #renderAccessibleView(): void {
+    if (!this.usesSharedAccessibleView) return
+    // A full render supersedes a pending live-feed refresh.
+    clearTimeout(this.#accessibleViewTimer)
+    this.#accessibleViewTimer = undefined
+    const plot = this.plotElement
+    const series = this.resolvedSeries
+    const label = this.accessibleSummary(series)
+    if (plot && plot.getAttribute('aria-label') !== label) plot.setAttribute('aria-label', label)
+    const root = this.renderRoot?.querySelector<HTMLElement>('.a11y-root')
+    if (!root) return
+    const frame = this.frame
+    const length = frame?.length ?? 0
+    if (!frame || length === 0 || series.length === 0) {
+      render(nothing, root, { host: this })
+      return
+    }
+    const shown = Math.min(length, ACCESSIBLE_ROW_LIMIT)
+    const rows = Array.from({ length: shown }, (_item, index) => index)
+    const cell = (column: number, index: number) => {
+      const values = frame.columns[column]
+      const value = values ? columnValue(values, index) : null
+      if (value === null || !Number.isFinite(value)) return '—'
+      return series[column]?.format?.(value) ?? this.formatValue(value)
+    }
+    const rowLabel = (index: number) => {
+      const label = frame.labels?.[index]
+      if (label !== undefined && label !== '') return label
+      const x = columnValue(frame.x, index)
+      return x === null ? String(index + 1) : this.formatX(x)
+    }
+    render(
+      html`
+        <table class="a11y-table">
+          <caption>
+            ${length > shown ? this.chartMsg.t('truncated', label, shown, length) : label}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">${this.labelField || this.xField || this.chartMsg.t('item')}</th>
+              ${series.map((item) => html`<th scope="col">${item.label || item.field}</th>`)}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(
+              (index) => html`
+                <tr>
+                  <th scope="row">${rowLabel(index)}</th>
+                  ${series.map((_item, column) => html`<td>${cell(column, index)}</td>`)}
+                </tr>
+              `,
+            )}
+          </tbody>
+        </table>
+      `,
+      root,
+      { host: this },
+    )
   }
 
   #renderLegendEntries(): void {

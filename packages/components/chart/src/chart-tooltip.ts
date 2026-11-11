@@ -52,6 +52,7 @@ export class ChartTooltip extends ChartLinkedElement {
     super.connectedCallback()
     if (isServer) return
     window.addEventListener('resize', this.#handleViewportChange)
+    // modern-web-ignore: scroll-listener-visual keeps the floating tooltip on its hovered point; anchor positioning would be a rewrite
     window.addEventListener('scroll', this.#handleViewportChange, true)
   }
 
@@ -123,9 +124,10 @@ export class ChartTooltip extends ChartLinkedElement {
   }
 
   #position(): void {
+    // The host is pinned to the viewport's corner by its stylesheet and the bubble is moved inside it: nothing is
+    // written on the host, which a hydrating framework would report as a mismatch.
     if (this.position === 'inline') {
-      this.style.removeProperty('left')
-      this.style.removeProperty('top')
+      this.bubble?.style.removeProperty('translate')
       return
     }
     const context = this.#context
@@ -153,8 +155,7 @@ export class ChartTooltip extends ChartLinkedElement {
     }
     left = Math.max(edge, Math.min(left, window.innerWidth - bounds.width - edge))
     top = Math.max(edge, Math.min(top, window.innerHeight - bounds.height - edge))
-    this.style.left = `${left}px`
-    this.style.top = `${top}px`
+    bubble.style.translate = `${left}px ${top}px`
   }
 }
 
