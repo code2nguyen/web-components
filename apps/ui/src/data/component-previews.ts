@@ -420,6 +420,7 @@ price: .price
 </c2-radio-group>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
   'reaction-bar': `<c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'></c2-reaction-bar>`,
+  'recurrence-editor': `<c2-recurrence-editor style="width:320px" start="2026-11-16" value="FREQ=WEEKLY;BYDAY=MO,WE,FR" preview-count="0"></c2-recurrence-editor>`,
   'relative-time': `<div class="preview-row"><span>Edited <c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time></span><span>Renews <c2-relative-time format="short" date="2027-03-01T00:00:00Z"></c2-relative-time></span></div>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>

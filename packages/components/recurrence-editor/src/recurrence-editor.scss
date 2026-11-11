@@ -1,0 +1,211 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-recurrence-editor,
+  $theme: (
+    color: #18181b,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    gap: 16px,
+    rows--row-gap: 12px,
+    rows--column-gap: 16px,
+    label--color: #71717a,
+    label--font-weight: 500,
+    label--min-width: 56px,
+    controls--gap: 8px,
+    select--min-width: 160px,
+    number--width: 96px,
+    weekdays--gap: 6px,
+    weekday--size: 32px,
+    weekday--border: 1px solid #bcbcc6,
+    weekday--border-radius: 999px,
+    weekday--color: #18181b,
+    weekday--background: #ffffff,
+    weekday--font-size: 12px,
+    weekday--font-weight: 500,
+    weekday__hover--border: 1px solid #a1a1aa,
+    weekday__selected--color: #ffffff,
+    weekday__selected--background: #0265dc,
+    weekday__selected--border: 1px solid #0265dc,
+    weekday__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    summary--color: #18181b,
+    summary--font-weight: 500,
+    summary--padding: 10px 12px,
+    summary--background: #f4f4f5,
+    summary--border-radius: 6px,
+    occurrences--gap: 4px,
+    occurrences--color: #71717a,
+    occurrences--font-size: 12px,
+    occurrence--padding: 2px 8px,
+    occurrence--border: 1px solid #e4e4e7,
+    occurrence--border-radius: 999px,
+    occurrence--background: #ffffff,
+    occurrence--color: #18181b,
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  container-type: inline-size;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+.editor.disabled {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+.rows {
+  display: grid;
+  grid-template-columns: minmax(css.cssVar(label--min-width), max-content) minmax(0, 1fr);
+  align-items: center;
+  gap: css.cssVar(rows--row-gap) css.cssVar(rows--column-gap);
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(controls--gap);
+  min-width: 0;
+}
+
+.controls c2-select {
+  min-width: css.cssVar(select--min-width);
+}
+
+.controls c2-number-input {
+  width: css.cssVar(number--width);
+}
+
+.unit {
+  color: css.cssVar(label--color);
+}
+
+.weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(weekdays--gap);
+}
+
+.weekday {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(weekday--size);
+  height: css.cssVar(weekday--size);
+  margin: 0;
+  padding: 0;
+  border: css.cssVar(weekday--border);
+  border-radius: css.cssVar(weekday--border-radius);
+  color: css.cssVar(weekday--color);
+  background: css.cssVar(weekday--background);
+  font: inherit;
+  font-size: css.cssVar(weekday--font-size);
+  font-weight: css.cssVar(weekday--font-weight);
+  cursor: pointer;
+}
+
+.weekday:hover:not(:disabled) {
+  border: css.cssVar(weekday__hover--border);
+}
+
+.weekday[aria-pressed='true'] {
+  border: css.cssVar(weekday__selected--border);
+  color: css.cssVar(weekday__selected--color);
+  background: css.cssVar(weekday__selected--background);
+}
+
+.weekday:focus-visible {
+  outline: css.cssVar(weekday__focus--outline);
+  outline-offset: 1px;
+}
+
+.weekday:disabled {
+  cursor: default;
+}
+
+.summary {
+  margin: 0;
+  padding: css.cssVar(summary--padding);
+  border-radius: css.cssVar(summary--border-radius);
+  color: css.cssVar(summary--color);
+  background: css.cssVar(summary--background);
+  font-weight: css.cssVar(summary--font-weight);
+}
+
+.occurrences {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(occurrences--gap);
+  color: css.cssVar(occurrences--color);
+  font-size: css.cssVar(occurrences--font-size);
+}
+
+.occurrences ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(occurrences--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.occurrence {
+  padding: css.cssVar(occurrence--padding);
+  border: css.cssVar(occurrence--border);
+  border-radius: css.cssVar(occurrence--border-radius);
+  color: css.cssVar(occurrence--color);
+  background: css.cssVar(occurrence--background);
+  white-space: nowrap;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: css.cssVar(controls--gap);
+}
+
+.footer[hidden] {
+  display: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@container (max-width: 420px) {
+  .rows {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .label:not(:first-child) {
+    margin-top: 8px;
+  }
+}
