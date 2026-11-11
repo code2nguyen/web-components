@@ -132,13 +132,21 @@
 /* The picture */
 .stage {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   box-sizing: border-box;
-  aspect-ratio: css.cssVar(stage--aspect-ratio);
   overflow: hidden;
   border-radius: css.cssVar(stage--border-radius);
   background: css.cssVar(stage--background);
   color: css.cssVar(stage--color);
   isolation: isolate;
+}
+
+/* The stage's shape is a minimum: a screen with more text than a short stage holds makes it taller, not cut off. */
+.stage::before {
+  content: '';
+  grid-area: 1 / 1;
+  aspect-ratio: css.cssVar(stage--aspect-ratio);
 }
 
 .video,
@@ -242,9 +250,10 @@
 
 /* Idle, starting and error screens */
 .screen {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  grid-area: 1 / 1;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: center;

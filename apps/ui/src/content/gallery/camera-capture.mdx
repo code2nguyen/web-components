@@ -4,6 +4,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import CameraCaptureExamplesRuntime from '../../components/CameraCaptureExamplesRuntime.astro'
 
 import { CameraCapture } from '@c2n/components/camera-capture'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -171,7 +172,13 @@ Looks and jobs for `c2-camera-capture`. The guide's shape and colours, the stage
 ```
 
 ```html tag=MdxCodeBlock,label=Français
-<div lang="fr">
+<style>
+  .camera-french {
+    width: 100%;
+    max-width: 480px;
+  }
+</style>
+<div lang="fr" class="camera-french">
   <c2-camera-capture guide="card" data-camera-capture-example="card"></c2-camera-capture>
 </div>
 ```
