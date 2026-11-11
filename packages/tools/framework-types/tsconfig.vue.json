@@ -43,6 +43,7 @@
         "c2-quick-time-menu": true,
         "c2-radio-group": true,
         "c2-rate": true,
+        "c2-recurrence-editor": true,
         "c2-rich-text-editor": true,
         "c2-search-field": true,
         "c2-select": true,

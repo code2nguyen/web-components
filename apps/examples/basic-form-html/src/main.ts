@@ -9,17 +9,25 @@ import '@c2n/components/form-field'
 import '@c2n/components/list-item'
 import '@c2n/components/text-field'
 import '@c2n/components/checkbox'
-import '@c2n/components/switch'
 import '@c2n/components/button'
 import { type Form } from '@c2n/components/form'
 import { type Select } from '@c2n/components/select'
 import { type MaskInput } from '@c2n/components/mask-input'
+import { type RecurrenceEditor } from '@c2n/components/recurrence-editor'
+import { type Switch } from '@c2n/components/switch'
 import { toast } from '@c2n/components/toast'
 
 const account = document.querySelector<Form>('#account')!
 const country = document.querySelector<Select>('#country')!
 const postcode = document.querySelector<MaskInput>('#postcode')!
 const unsaved = document.querySelector<HTMLElement>('#unsaved')!
+const digest = document.querySelector<Switch>('#digest')!
+const digestSchedule = document.querySelector<RecurrenceEditor>('#digest-schedule')!
+
+// The schedule only matters while the digest is on; a disabled editor is left out of the submitted values.
+const syncDigest = () => (digestSchedule.disabled = !digest.checked)
+syncDigest()
+digest.addEventListener('change', syncDigest)
 
 // Each country's postcode shape. The UK's varies in length in the middle (SW1A 1AA, M1 1AE): its optional groups
 // are filled or skipped by what is typed.
@@ -41,7 +49,12 @@ country.addEventListener('change', () => {
   postcode.value = ''
   syncPostcode()
 })
-account.form?.addEventListener('reset', () => setTimeout(syncPostcode))
+account.form?.addEventListener('reset', () =>
+  setTimeout(() => {
+    syncPostcode()
+    syncDigest()
+  }),
+)
 
 // The form validates every field on submit and only fires `valid-submit` once they all pass. Validation messages,
 // the error summary and focus are its job; the app only saves. A rejected promise with `{ name: message }` shows
@@ -60,7 +73,7 @@ account.addEventListener('valid-submit', (event) => {
       toast.show({
         variant: 'success',
         heading: 'Saved',
-        message: `${values.fullName} · ${values.country || 'no country'} · weekly digest ${values.digest ? 'on' : 'off'}`,
+        message: `${values.fullName} · ${values.country || 'no country'} · digest: ${values.digest ? digestSchedule.summary : 'off'}`,
       }),
     () => {},
   )

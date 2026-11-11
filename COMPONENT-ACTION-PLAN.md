@@ -87,7 +87,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### New packages
 
-- **recurrence-editor-1** · new package · recurrence editor #262 · absorbs roadmap #22 `c2-cron-input`: one editor, RRULE and cron outputs
 - **camera-capture-2** · new package · barcode scanner #281
 
 ## Wave 2: the P2 rows

@@ -55,8 +55,19 @@
               <c2-mask-input id="postcode" name="postcode" autocomplete="postal-code"></c2-mask-input>
             </c2-form-field>
 
-            <c2-form-field hint="A summary of your team's activity every Monday.">
-              <c2-switch id="digest" name="digest" value="on" checked>Weekly digest</c2-switch>
+            <c2-form-field hint="A summary of your team's activity, on the schedule below.">
+              <c2-switch id="digest" name="digest" value="on" checked>Activity digest</c2-switch>
+            </c2-form-field>
+
+            <c2-form-field label="Digest schedule" necessity="none">
+              <c2-recurrence-editor
+                id="digest-schedule"
+                name="digestSchedule"
+                frequencies="daily weekly monthly"
+                with-time
+                preview-count="3"
+                value="FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;BYMINUTE=0"
+              ></c2-recurrence-editor>
             </c2-form-field>
 
             <c2-form-field class="consent">

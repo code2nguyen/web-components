@@ -754,6 +754,41 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-recurrence-editor': {
+    html: `<c2-recurrence-editor style="width:min(100%, 480px)" start="2026-11-16" value="FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE;COUNT=10" preview-count="3"></c2-recurrence-editor>`,
+    presets: [
+      {
+        name: 'Square teal days',
+        description: 'Rounded-square weekday toggles in teal, for a scheduling sidebar.',
+        css: {
+          '--c2-recurrence-editor__weekday--border-radius': '6px',
+          '--c2-recurrence-editor__weekday--size': '36px',
+          '--c2-recurrence-editor__weekday__selected--background': '#0f766e',
+          '--c2-recurrence-editor__weekday__selected--border': '1px solid #0f766e',
+        },
+      },
+      {
+        name: 'Plain sentence',
+        description: 'The summary as bold text with no box, as in an invoice form.',
+        css: {
+          '--c2-recurrence-editor__summary--background': 'transparent',
+          '--c2-recurrence-editor__summary--padding': '0',
+          '--c2-recurrence-editor__summary--font-weight': '600',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Tighter rows and smaller toggles for a popover.',
+        css: {
+          '--c2-recurrence-editor__rows--row-gap': '8px',
+          '--c2-recurrence-editor--gap': '10px',
+          '--c2-recurrence-editor__weekday--size': '28px',
+          '--c2-recurrence-editor__label--min-width': '44px',
+        },
+        attributes: { 'preview-count': '0' },
+      },
+    ],
+  },
   'c2-relative-time': {
     html: `<c2-relative-time date="2026-09-30T14:20:00Z"></c2-relative-time>`,
     presets: [

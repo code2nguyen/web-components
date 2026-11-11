@@ -326,6 +326,8 @@ export const overrides: Record<string, Override> = {
   '--c2-time-range-picker__popup--box-shadow': { token: 'shadow-md' },
   '--c2-time-range-picker__refresh__active--border': { token: 'color-primary', value: '1px solid var(--c2-theme--color-primary, #0265dc)' },
   '--c2-time-range-picker__live--color': { exclude: 'semantic success colour' },
+  // A pressed weekday of the recurrence editor is filled with the accent; its border is the same accent.
+  '--c2-recurrence-editor__weekday__selected--border': { token: 'color-primary', value: '1px solid var(--c2-theme--color-primary, #0265dc)' },
   // The From and To fields hold expressions such as now-1d/d, which read best in a monospace face whatever the app font.
   '--c2-time-range-picker__input--font-family': { exclude: 'monospace for typed expressions' },
   // The zone chip sits on a muted fill, where the muted text role drops below 4.5:1; a deeper mix of the ink keeps it.

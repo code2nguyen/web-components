@@ -881,6 +881,10 @@
       "types": "./dist/reaction-bar.d.ts",
       "default": "./dist/reaction-bar.js"
     },
+    "./recurrence-editor": {
+      "types": "./dist/recurrence-editor.d.ts",
+      "default": "./dist/recurrence-editor.js"
+    },
     "./relative-time": {
       "types": "./dist/relative-time.d.ts",
       "default": "./dist/relative-time.js"
@@ -1440,6 +1444,7 @@
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/reaction-bar": "*",
+    "@c2n/recurrence-editor": "*",
     "@c2n/relative-time": "*",
     "@c2n/reorder-list": "*",
     "@c2n/rich-text-editor": "*",
