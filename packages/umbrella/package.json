@@ -557,6 +557,10 @@
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
     },
+    "./highlight/find-bar": {
+      "types": "./dist/highlight/find-bar.d.ts",
+      "default": "./dist/highlight/find-bar.js"
+    },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
       "default": "./dist/hover-card.js"

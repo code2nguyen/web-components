@@ -69,7 +69,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
-- **Highlight** — `c2-highlight` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
+- **Highlight** — `c2-highlight, c2-find-bar` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Image Compare** — `c2-image-compare` · `@c2n/components/image-compare` — A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.

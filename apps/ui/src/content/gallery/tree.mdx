@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explorer, a permissions checklist and a docs sidebar. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explorer, a permissions checklist, a docs sidebar, a sortable menu editor and a sortable outline built from data. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -106,6 +106,60 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
     <c2-tree-item value="tree" label="Tree"></c2-tree-item>
   </c2-tree-item>
 </c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Sortable navigation
+<style>
+  .menu-editor {
+    width: 100%;
+    --c2-tree--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--padding-left: 4px;
+    --c2-tree--padding-right: 4px;
+    --c2-tree-item__row--min-height: 34px;
+    --c2-tree-item__row--indent: 20px;
+    --c2-tree-item__row--border-radius: 6px;
+    --c2-tree-item__dragging--opacity: 0.3;
+    --c2-tree__drop-indicator--height: 3px;
+  }
+</style>
+<c2-tree client:only="lit" class="menu-editor" reorderable max-depth="1" selection="none" children-outline aria-label="Main menu" expanded-items="shop;help">
+  <c2-tree-item value="home" label="Home"></c2-tree-item>
+  <c2-tree-item value="shop" label="Shop">
+    <c2-tree-item value="new" label="New arrivals"></c2-tree-item>
+    <c2-tree-item value="women" label="Women"></c2-tree-item>
+    <c2-tree-item value="men" label="Men"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="sale" label="Sale"></c2-tree-item>
+  <c2-tree-item value="help" label="Help">
+    <c2-tree-item value="shipping" label="Shipping"></c2-tree-item>
+    <c2-tree-item value="returns" label="Returns"></c2-tree-item>
+  </c2-tree-item>
+</c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Sortable outline
+<style>
+  .outline-editor {
+    width: 100%;
+    --c2-tree--background: transparent;
+    --c2-tree-item__row--min-height: 30px;
+    --c2-tree-item__row--indent: 18px;
+    --c2-tree-item__drop-target--background: light-dark(#fef3c7, #3b2a0c);
+    --c2-tree__drop-indicator--color: light-dark(#d97706, #e8bc89);
+  }
+</style>
+<c2-tree
+  client:only="lit"
+  class="outline-editor"
+  reorderable
+  max-depth="2"
+  aria-label="Chapter outline"
+  expanded-items="intro;setup"
+  items='[{"value":"intro","label":"Introduction","children":[{"value":"why","label":"Why it matters"},{"value":"who","label":"Who it is for"}]},{"value":"setup","label":"Setting up","children":[{"value":"install","label":"Install"},{"value":"config","label":"Configure"}]},{"value":"next","label":"Next steps"}]'
+></c2-tree>
 ```
 
 </GalleryGrid>

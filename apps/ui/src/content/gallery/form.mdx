@@ -14,18 +14,18 @@ import { Button } from '@c2n/components/button'
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-form-list client:only="lit" name="skills" add-label="Add a skill">
-  <template>
-    <div>
-      <c2-text-field name="skill" aria-label="Skill"></c2-text-field>
-      <c2-icon-button data-action="remove" aria-label="Remove skill"><c2-feather-x></c2-feather-x></c2-icon-button>
-    </div>
-  </template>
-  <div>
-    <c2-text-field name="skill" aria-label="Skill" value="Accessibility"></c2-text-field>
-    <c2-icon-button data-action="remove" aria-label="Remove skill"><c2-feather-x></c2-feather-x></c2-icon-button>
-  </div>
-</c2-form-list>
+<c2-form>
+  <form>
+    <c2-form-list client:only="lit" name="emails" min="1">
+      <template>
+        <div>
+          <c2-form-field label="Email"><c2-text-field name="email" type="email"></c2-text-field></c2-form-field>
+          <c2-button data-action="remove">Remove</c2-button>
+        </div>
+      </template>
+    </c2-form-list>
+  </form>
+</c2-form>
 ```
 
 ```html tag=MdxCodeBlock,label=Repeating contacts

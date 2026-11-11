@@ -28,6 +28,7 @@ export interface RowsChangeEventDetail {
 /** Events fired by {@link FormList}, keyed for `addEventListener`. */
 export interface FormListEventMap {
   'rows-change': CustomEvent<RowsChangeEventDetail>
+  change: Event
 }
 
 export interface FormList {
@@ -70,7 +71,7 @@ const keys = new WeakMap<Element, string>()
  * @slot empty - Shown while the list has no rows.
  *
  * @event {CustomEvent<RowsChangeEventDetail>} rows-change - A row was added, removed, duplicated or moved, or the rows were replaced by `value` or a form reset. Detail: `{ action, index, from, value }`. It does not bubble; a bubbling `change` also fires so a surrounding `c2-form` sees the edit.
- * @event {Event} change - Fires with every `rows-change` and bubbles, so a surrounding `c2-form` (or any form listener) sees a row added, removed, duplicated or moved.
+ * @event {Event} change - Fired with `rows-change`, and bubbles, so a surrounding `c2-form` or a generic two-way binding sees the rows change.
  *
  * @cssproperty {grid-column} [--c2-form-list--grid-column=1 / -1] - Columns the list spans in a `c2-form` grid.
  * @cssproperty {pixel} [--c2-form-list--gap=12px] - Space between the rows, and before the footer.

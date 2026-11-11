@@ -203,7 +203,9 @@ test('a nested list renames its controls under its row', async ({ page, renderSc
     </template>
   </c2-form-list>`)
   await page.getByRole('button', { name: 'Add phone' }).click()
-  await page.getByRole('button', { name: 'Add another' }).click()
+  // The inner list's footer slot replaces its default "Add another" button with "Add phone". WebKit still exposes that
+  // unrendered fallback button by role, so only the visible one, the outer list's, is the one a user can press.
+  await page.getByRole('button', { name: 'Add another' }).filter({ visible: true }).click()
   await expect(page.locator('c2-text-field')).toHaveCount(5)
   expect(await page.locator('c2-text-field').evaluateAll((fields) => fields.map((field) => field.getAttribute('name')))).toEqual([
     'people.0.name',
