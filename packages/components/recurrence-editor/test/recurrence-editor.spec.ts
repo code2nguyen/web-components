@@ -36,6 +36,10 @@ test('parseRRule, formatRRule, parseCron, formatCron and occurrences agree on th
       'FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=-1',
       'FREQ=DAILY;BYYEARDAY=4',
       'DTSTART:20261111T090000\nRRULE:FREQ=HOURLY;INTERVAL=6;BYMINUTE=15',
+      'FREQ=YEARLY;BYMONTHDAY=15',
+      'FREQ=MONTHLY;BYDAY=1FR;BYMONTHDAY=13',
+      'FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;UNTIL=20270831',
+      'FREQ=HOURLY;BYHOUR=9;BYMINUTE=0',
     ]
     return {
       rrules: rrules.map((text) => {
@@ -67,6 +71,13 @@ test('parseRRule, formatRRule, parseCron, formatCron and occurrences agree on th
     // A part the editor does not edit is kept as written.
     ['FREQ=DAILY;BYYEARDAY=4', null, ['2026-11-11', '2026-11-12', '2026-11-13']],
     ['FREQ=HOURLY;INTERVAL=6;BYMINUTE=15', '15 */6 * * *', ['2026-11-11', '2026-11-11', '2026-11-11']],
+    // Without BYMONTH a yearly BYMONTHDAY means every month: kept as written rather than read as one month.
+    ['FREQ=YEARLY;BYMONTHDAY=15', null, ['2026-11-11', '2027-11-11', '2028-11-11']],
+    ['FREQ=MONTHLY;BYDAY=1FR;BYMONTHDAY=13', null, ['2026-12-4', '2027-1-1', '2027-2-5']],
+    // A rule with a time writes UNTIL as a date-time.
+    ['FREQ=WEEKLY;BYDAY=MO;BYHOUR=9;UNTIL=20270831T235959', null, ['2026-11-16', '2026-11-23', '2026-11-30']],
+    // Cron cannot narrow an hourly step to one hour.
+    ['FREQ=HOURLY;BYHOUR=9;BYMINUTE=0', null, ['2026-11-11', '2026-11-12', '2026-11-13']],
   ])
   expect(results.crons).toEqual([
     ['FREQ=MINUTELY;INTERVAL=15', '*/15 * * * *'],
@@ -188,6 +199,11 @@ test('typing the interval and the count edits the value as it is typed', async (
   await numberInput(editor(page), 'interval').fill('3')
   expect(await value(editor(page))).toBe('FREQ=DAILY;INTERVAL=3;COUNT=10')
   expect((await events(editor(page))).length).toBeGreaterThan(0)
+  await watch(editor(page), 'change')
+  await numberInput(editor(page), 'interval').fill('4')
+  await numberInput(editor(page), 'interval').press('Tab')
+  expect(await events(editor(page))).toHaveLength(1)
+  await numberInput(editor(page), 'interval').fill('3')
   await numberInput(editor(page), 'count').fill('2')
   await expect(summary(editor(page))).toHaveText('Every 3 days, 2 times')
   await expect(editor(page).locator('.occurrence')).toHaveText(['Wed, Nov 11, 2026', 'Sat, Nov 14, 2026'])
@@ -213,6 +229,9 @@ test('cron format: reads and writes cron, offers only what cron can say, and sho
   await choose(editor(page), 'interval', '15')
   expect(await value(editor(page))).toBe('*/15 * * * *')
   await expect(editor(page).locator('c2-time-input')).toHaveCount(0)
+
+  // A cron step counts from minute 0, not from the start's minute.
+  await expect(editor(page).locator('.occurrence').first()).toHaveText('Wed, Nov 11, 2026, 12:00 AM')
 
   await choose(editor(page), 'frequency', 'hourly')
   await expect(numberInput(editor(page), 'minute')).toHaveValue('0')

@@ -15,6 +15,7 @@ import {
   CRON_INTERVALS,
   FREQUENCIES,
   WEEKDAYS,
+  daysInMonth,
   defaultRule,
   formatCron,
   formatRRule,
@@ -208,7 +209,10 @@ export class RecurrenceEditor extends LitElement {
    * `monthly`, `yearly`. Defaults to `daily weekly monthly yearly`, and to every frequency but `none` in cron format.
    */
   @property({ type: String }) frequencies = ''
-  /** The first day of the week in the weekday row and for "every 2 weeks": `MO` (the default) to `SU`. */
+  /**
+   * The first day of the week in the weekday row, `MO` (the default) to `SU`, and the `WKST` a new weekly rule takes
+   * ("every 2 weeks" counts weeks from that day). A rule read from `value` keeps its own `WKST`.
+   */
   @property({ attribute: 'week-start' }) weekStart: Weekday = 'MO'
   /** Shows a time-of-day row, written as `BYHOUR`/`BYMINUTE`. Always shown in cron format. */
   @property({ type: Boolean, attribute: 'with-time' }) withTime = false
@@ -252,6 +256,10 @@ export class RecurrenceEditor extends LitElement {
     return this.model ? structuredClone(this.model) : null
   }
   set rule(rule: RecurrenceRule | null) {
+    if (rule && this.cronFormat && formatCron(rule) === null) {
+      console.warn('c2-recurrence-editor: cron cannot say this rule (an end, an nth weekday, an uneven step); it was not applied.')
+      return
+    }
     this.model = rule ? structuredClone(rule) : null
     this.value = this.write(this.model)
     this.readValue = this.value
@@ -280,9 +288,18 @@ export class RecurrenceEditor extends LitElement {
   nextOccurrences(limit = this.previewCount): Date[] {
     this.syncModel()
     if (!this.model) return []
-    return occurrences(this.model, { start: this.startClock(), limit }).map(
-      (clock) => new Date(clock.year, clock.month - 1, clock.day, clock.hour, clock.minute),
-    )
+    return this.upcoming(this.model, limit).map((clock) => new Date(clock.year, clock.month - 1, clock.day, clock.hour, clock.minute))
+  }
+
+  /**
+   * The occurrences from `start`. A cron step counts from the top of its range (minute 0, midnight, January), not from
+   * the start, so in cron format the steps are laid out from there and the ones before `start` skipped.
+   */
+  private upcoming(rule: RecurrenceRule, limit: number): WallClock[] {
+    const start = this.startClock()
+    if (!this.cronFormat || rule.interval === 1) return occurrences(rule, { start, limit })
+    const anchor: WallClock = rule.freq === 'monthly' ? { ...start, year: start.year, month: 1, day: 1, hour: 0, minute: 0 } : { ...start, hour: 0, minute: 0 }
+    return occurrences(rule, { start: { ...anchor, hour: rule.hour ?? anchor.hour, minute: rule.minute ?? anchor.minute }, after: start, limit })
   }
 
   checkValidity() {
@@ -338,12 +355,12 @@ export class RecurrenceEditor extends LitElement {
   /** The time of day `start` names, when it has one. */
   private timeFromStart(): { hour: number; minute: number } | undefined {
     const start = parseWallClock(this.start)
-    return start && /T\d/.test(this.start) ? { hour: start.hour, minute: start.minute } : undefined
+    return start && /[T ]\d/.test(this.start) ? { hour: start.hour, minute: start.minute } : undefined
   }
 
   private write(rule: RecurrenceRule | null): string {
     if (!rule) return ''
-    return this.cronFormat ? (formatCron(rule) ?? '') : formatRRule(rule)
+    return this.cronFormat ? (formatCron(rule) ?? '') : formatRRule(rule, { untilDateTime: rule.hour !== undefined || !!this.timeFromStart() })
   }
 
   private read(value: string): RecurrenceRule | null {
@@ -365,6 +382,7 @@ export class RecurrenceEditor extends LitElement {
     }
     // No rule and no "Does not repeat": the editor shows, and takes, the default rule.
     this.model = defaultRule(this.startClock(), listed.includes('weekly') ? 'weekly' : (listed[0] as RecurrenceRule['freq']))
+    if (this.model.freq === 'weekly' && this.weekStart !== 'MO' && WEEKDAYS.includes(this.weekStart)) this.model.weekStart = this.weekStart
     if (this.cronFormat) {
       this.model.hour ??= this.startClock().hour
       this.model.minute ??= this.startClock().minute
@@ -436,7 +454,7 @@ export class RecurrenceEditor extends LitElement {
       if (freq !== 'minutely') rule.minute ??= start.minute
       if (rule.byMonthDay === -1) rule.byMonthDay = Math.min(start.day, 28)
     }
-    if (freq === 'weekly' && this.weekStart !== 'MO') rule.weekStart = this.weekStart
+    if (freq === 'weekly' && this.weekStart !== 'MO' && WEEKDAYS.includes(this.weekStart)) rule.weekStart = this.weekStart
     this.commit(rule)
   }
 
@@ -557,7 +575,11 @@ export class RecurrenceEditor extends LitElement {
         @change=${(event: Event) => {
           event.stopPropagation()
           const next = wholeNumber((event.currentTarget as HTMLInputElement).value, min, max)
-          if (next !== null) set(next, 'both')
+          if (next === null) return
+          // Typing already applied the number on `input`: the commit still owes the app its `change`.
+          const before = this.value
+          set(next, 'both')
+          if (this.value === before) this.dispatchEvent(new Event('change', { bubbles: true }))
         }}
       ></c2-number-input
       >${unit ? html`<span class="unit">${unit}</span>` : nothing}`
@@ -643,7 +665,7 @@ export class RecurrenceEditor extends LitElement {
           this.msg.t('dayName'),
           rule.byMonthDay ?? this.startClock().day,
           1,
-          this.cronFormat ? 28 : 31,
+          rule.freq === 'yearly' ? daysInMonth(2024, rule.byMonth ?? this.startClock().month) : this.cronFormat ? 28 : 31,
           (next, events) => this.edit((draft) => (draft.byMonthDay = next), events),
           '',
           'day',
@@ -681,7 +703,12 @@ export class RecurrenceEditor extends LitElement {
         this.msg.t('monthName'),
         String(rule.byMonth ?? this.startClock().month),
         Array.from({ length: 12 }, (_, index) => [String(index + 1), monthName(index + 1, locale)] as [string, string]),
-        (next) => this.edit((draft) => (draft.byMonth = Number(next))),
+        (next) =>
+          this.edit((draft) => {
+            draft.byMonth = Number(next)
+            // February 30 never comes: the day is kept within the month picked.
+            if (draft.byMonthDay !== undefined && draft.byMonthDay > 0) draft.byMonthDay = Math.min(draft.byMonthDay, daysInMonth(2024, draft.byMonth))
+          }),
       ),
     )
   }
@@ -767,8 +794,7 @@ export class RecurrenceEditor extends LitElement {
 
   private renderOccurrences(rule: RecurrenceRule | null) {
     if (!rule || this.previewCount <= 0 || rule.extra?.length) return nothing
-    const start = this.startClock()
-    const list = occurrences(rule, { start, limit: Math.min(50, this.previewCount) })
+    const list = this.upcoming(rule, Math.min(50, this.previewCount))
     const withTime = rule.freq === 'minutely' || rule.freq === 'hourly' || rule.hour !== undefined || !!this.timeFromStart()
     const locale = this.msg.locale
     return html`<div class="occurrences" part="occurrences">

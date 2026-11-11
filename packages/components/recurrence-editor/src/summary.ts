@@ -1,6 +1,6 @@
 import { formatMessage, type MessageArgs } from '@c2n/core/localize.js'
 import { recurrenceEditorMessages as catalog } from './messages.js'
-import { WEEKDAYS, type RecurrenceRule, type WallClock, type Weekday } from './recurrence.js'
+import { WEEKDAYS, daysInMonth, type RecurrenceRule, type WallClock, type Weekday } from './recurrence.js'
 
 const WORKWEEK: readonly Weekday[] = ['MO', 'TU', 'WE', 'TH', 'FR']
 
@@ -109,6 +109,7 @@ export function describeRecurrence(rule: RecurrenceRule | null, options: Describ
     const month = monthName(rule.byMonth, locale)
     if (rule.byWeekday) parts.push(t('summaryOnNthOf', t('ordinal', rule.byWeekday.ordinal), weekdayName(rule.byWeekday.day, locale), month))
     else if (rule.byMonthDay === -1) parts.push(t('summaryOnLastDayOf', month))
+    else if (rule.byMonthDay !== undefined && rule.byMonthDay > daysInMonth(2024, rule.byMonth)) parts.push(t('summaryOnDay', rule.byMonthDay))
     else if (rule.byMonthDay !== undefined)
       parts.push(t('summaryOnDate', dateFormat(locale, { day: 'numeric', month: 'long' }).format(utc(2024, rule.byMonth, rule.byMonthDay))))
   }

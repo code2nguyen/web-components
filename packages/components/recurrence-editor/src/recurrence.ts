@@ -109,8 +109,12 @@ export function parseRRule(text: string | null | undefined): RecurrenceRule | nu
         break
       }
       case 'UNTIL': {
-        const match = /^(\d{4})(\d{2})(\d{2})(T\d{6}Z?)?$/.exec(value) ?? /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
-        if (match) rule.until = `${match[1]}-${match[2]}-${match[3]}`
+        const match = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z?))?$/.exec(value) ?? /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
+        if (match && match[7] === 'Z') {
+          // A UTC end time is read as the local date it falls on.
+          const [year, month, day, hour, minute] = match.slice(1, 6).map(Number)
+          rule.until = formatWallDate(wallClockOf(new Date(Date.UTC(year, month - 1, day, hour, minute))))
+        } else if (match) rule.until = `${match[1]}-${match[2]}-${match[3]}`
         else keep(key)
         break
       }
@@ -183,12 +187,33 @@ export function parseRRule(text: string | null | undefined): RecurrenceRule | nu
   }
   // RFC 5545 forbids COUNT with UNTIL; COUNT wins.
   if (rule.count !== undefined) delete rule.until
+  // "The first Friday that is the 13th" combines both: the editor shows the weekday and keeps the day as written.
+  if (rule.byWeekday && rule.byMonthDay !== undefined) {
+    extra.push(`BYMONTHDAY=${rule.byMonthDay}`)
+    delete rule.byMonthDay
+  }
+  // Without BYMONTH, a yearly BYMONTHDAY means every month and a yearly 1MO the first Monday of the year: kept as written.
+  if (rule.freq === 'yearly' && rule.byMonth === undefined) {
+    if (rule.byMonthDay !== undefined) extra.push(`BYMONTHDAY=${rule.byMonthDay}`)
+    if (rule.byWeekday) extra.push(`BYDAY=${rule.byWeekday.ordinal}${rule.byWeekday.day}`)
+    delete rule.byMonthDay
+    delete rule.byWeekday
+  }
   if (extra.length) rule.extra = extra
   return rule
 }
 
+export interface FormatRRuleOptions {
+  /**
+   * Writes `UNTIL` as a local date-time (`UNTIL=20270831T235959`), which RFC 5545 requires when DTSTART has a time.
+   * By default it is a date when the rule names no hour, and a date-time when it does.
+   */
+  untilDateTime?: boolean
+}
+
 /** Writes a rule as an RRULE value, without the `RRULE:` prefix: `FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE`. */
-export function formatRRule(rule: RecurrenceRule): string {
+export function formatRRule(rule: RecurrenceRule, options: FormatRRuleOptions = {}): string {
+  const untilDateTime = options.untilDateTime ?? rule.hour !== undefined
   const parts = [`FREQ=${rule.freq.toUpperCase()}`]
   if (rule.interval > 1) parts.push(`INTERVAL=${rule.interval}`)
   if (rule.byMonth !== undefined) parts.push(`BYMONTH=${rule.byMonth}`)
@@ -199,7 +224,7 @@ export function formatRRule(rule: RecurrenceRule): string {
   if (rule.minute !== undefined) parts.push(`BYMINUTE=${rule.minute}`)
   if (rule.weekStart && rule.weekStart !== 'MO') parts.push(`WKST=${rule.weekStart}`)
   if (rule.count !== undefined) parts.push(`COUNT=${rule.count}`)
-  else if (rule.until) parts.push(`UNTIL=${rule.until.replace(/-/g, '')}`)
+  else if (rule.until) parts.push(`UNTIL=${rule.until.replace(/-/g, '')}${untilDateTime ? 'T235959' : ''}`)
   if (rule.extra) parts.push(...rule.extra)
   return parts.join(';')
 }
@@ -238,6 +263,9 @@ function cronList(values: number[]): string {
 export function formatCron(rule: RecurrenceRule): string | null {
   if (rule.extra?.length || rule.count !== undefined || rule.until || rule.byWeekday) return null
   if (!(CRON_INTERVALS[rule.freq] ?? []).includes(rule.interval)) return null
+  // An hour on an hourly or minutely rule narrows it to that hour, which a step in the hour field cannot say.
+  if ((rule.freq === 'minutely' || rule.freq === 'hourly') && rule.hour !== undefined) return null
+  if (rule.freq === 'minutely' && rule.minute !== undefined) return null
   const minute = rule.minute ?? 0
   const hour = rule.hour ?? 0
   const step = (n: number) => (n === 1 ? '*' : `*/${n}`)
@@ -302,7 +330,8 @@ function cronDays(field: string): Weekday[] | null {
  */
 export function parseCron(text: string | null | undefined): RecurrenceRule | null {
   if (!text) return null
-  const source = CRON_MACROS[text.trim().toLowerCase()] ?? text.trim()
+  const macro = text.trim().toLowerCase()
+  const source = (Object.prototype.hasOwnProperty.call(CRON_MACROS, macro) ? CRON_MACROS[macro] : undefined) ?? text.trim()
   const fields = source.split(/\s+/)
   if (fields.length !== 5) return null
   const [minuteField, hourField, dayField, monthField, weekdayField] = fields
