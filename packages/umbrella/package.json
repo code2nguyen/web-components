@@ -505,6 +505,10 @@
       "types": "./dist/form.d.ts",
       "default": "./dist/form.js"
     },
+    "./form/form-list": {
+      "types": "./dist/form/form-list.d.ts",
+      "default": "./dist/form/form-list.js"
+    },
     "./form-field": {
       "types": "./dist/form-field.d.ts",
       "default": "./dist/form-field.js"
