@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { FindBar } from '@c2n/highlight/find-bar.js'
 import type { Highlight } from '@c2n/highlight'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,16 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-find-bar': DefineComponent<
+      C2Props<FindBar> & {
+        'match-case'?: unknown
+        'whole-word'?: unknown
+        onMatchChange?: (event: EventOf<FindBar, 'match-change'>) => void
+        onClose?: (event: EventOf<FindBar, 'close'>) => void
+        onReplace?: (event: EventOf<FindBar, 'replace'>) => void
+        onInput?: (event: EventOf<FindBar, 'input'>) => void
+      }
+    >
     'c2-highlight': DefineComponent<
       C2Props<Highlight> & {
         'match-case'?: unknown

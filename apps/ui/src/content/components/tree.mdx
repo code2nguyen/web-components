@@ -68,6 +68,16 @@ import '@c2n/components/tree'
     </c2-tree-item>
   </c2-tree>
 </div>
+<div data-label="Reorderable">
+  <c2-tree client:only="lit" class="files" reorderable aria-label="Menu" expanded-items="shop">
+    <c2-tree-item value="home" label="Home"></c2-tree-item>
+    <c2-tree-item value="shop" label="Shop">
+      <c2-tree-item value="new" label="New arrivals"></c2-tree-item>
+      <c2-tree-item value="sale" label="Sale"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="about" label="About"></c2-tree-item>
+  </c2-tree>
+</div>
 <div data-label="Data-driven">
   <c2-tree
     client:only="lit"
@@ -117,3 +127,15 @@ tree.loadChildren = async ({ node }) => {
 ```
 
 When the rows are authored in markup instead, listen for `item-expand` and append the children yourself — the tree notices them and resyncs.
+
+`reorderable` lets the user rearrange the rows: drag one up or down, and right past the row above to nest it there or left to move it out of its parent. A line shows where the row will land, a collapsed branch opens when a dragged row rests on it, and Escape cancels. From the keyboard, Alt with Arrow Up or Down moves the focused row among its siblings, Alt with Arrow Right nests it under the row above and Alt with Arrow Left moves it out; each move is announced. `max-depth` caps how deep a row and its subtree may go (`0` keeps every row at the root), and a disabled row neither moves nor takes children. Before each move the tree fires a cancelable `item-move`; it then moves the element itself in markup, or rebuilds `items` in the data-driven mode, so saving the new order is one listener:
+
+```ts tag=CodeBlock
+tree.addEventListener('item-move', (event) => {
+  const { node, parent, index } = event.detail
+  if (parent?.data?.locked) event.preventDefault() // keep the row where it is
+  else save(node.value, parent?.value ?? null, index)
+})
+```
+
+The code for reordering loads the first time `reorderable` is set, so a tree that only displays a hierarchy does not carry it. `--c2-tree__drop-indicator--color` and `--height` style the line, `--c2-tree-item__dragging--opacity` dims the dragged row and `--c2-tree-item__drop-target--background` tints the row it would land under.
