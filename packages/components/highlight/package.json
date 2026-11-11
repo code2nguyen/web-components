@@ -9,6 +9,10 @@
       "types": "./types/src/highlight.d.ts",
       "default": "./dist/highlight.js"
     },
+    "./find-bar.js": {
+      "types": "./types/src/find-bar.d.ts",
+      "default": "./dist/find-bar.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -30,6 +34,7 @@
   ],
   "keywords": [
     "highlight",
+    "find bar",
     "web component",
     "lit"
   ],

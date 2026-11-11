@@ -1,11 +1,14 @@
 ---
-description: 'Ready-made looks for c2-highlight: search suggestions, highlighter strokes, tinted chips and a find bar. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-highlight and c2-find-bar: search suggestions, highlighter strokes, tinted chips, and a find bar with replace. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Highlight } from '@c2n/components/highlight'
+import { Highlight, FindBar } from '@c2n/components/highlight'
+import { Button } from '@c2n/components/button'
+import FindBarExamplesRuntime from '../../components/FindBarExamplesRuntime.astro'
 
 ## Presets
 
@@ -95,3 +98,173 @@ return formatUser(user)</c2-highlight>
 ```
 
 </GalleryGrid>
+
+## Find bar
+
+`c2-find-bar` drives the highlights inside the element its `for` names. Type in a card's field: Enter and Shift+Enter step through the matches, Alt+C and Alt+W toggle match case and whole word, Escape clears.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Find in a list
+<style>
+  .find-list {
+    display: grid;
+    gap: 10px;
+    max-width: 420px;
+  }
+  .find-list ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+  }
+</style>
+<div class="find-list">
+  <c2-find-bar for="find-list-items" value="invoice"></c2-find-bar>
+  <ul id="find-list-items">
+    <li><c2-highlight>Invoice #1042 sent to Northwind</c2-highlight></li>
+    <li><c2-highlight>Payment received for invoice #1039</c2-highlight></li>
+    <li><c2-highlight>Credit note issued against an invoice</c2-highlight></li>
+    <li><c2-highlight>Quarterly report shared</c2-highlight></li>
+  </ul>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Find and replace
+<style>
+  .find-replace {
+    display: grid;
+    gap: 10px;
+    max-width: 460px;
+  }
+  .find-replace c2-highlight {
+    display: block;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+</style>
+<div class="find-replace">
+  <c2-find-bar for="find-replace-code" value="user" replace replacement="account" data-find-bar-example="replace"></c2-find-bar>
+  <c2-highlight id="find-replace-code">const user = await getUser(id)
+if (!user.active) return null
+return formatUser(user)</c2-highlight>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Editor find widget
+<style>
+  .find-editor {
+    display: grid;
+    gap: 10px;
+    max-width: 460px;
+  }
+  .find-editor c2-find-bar {
+    --c2-find-bar--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-find-bar--border: 0;
+    --c2-find-bar--border-radius: 4px;
+    --c2-find-bar--box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    --c2-find-bar--padding: 4px;
+    --c2-find-bar--font-size: 13px;
+    --c2-find-bar__field--width: 200px;
+    --c2-find-bar__field--height: 26px;
+    --c2-find-bar__field--border-radius: 2px;
+    --c2-find-bar__button--size: 24px;
+    --c2-find-bar__button--border-radius: 4px;
+    --c2-find-bar__toggle--size: 20px;
+  }
+  .find-editor c2-highlight {
+    display: block;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre;
+    --c2-highlight__mark--background-color: rgba(2, 101, 220, 0.18);
+    --c2-highlight__mark__active--background-color: rgba(2, 101, 220, 0.45);
+    --c2-highlight__mark__active--box-shadow: 0 0 0 1px rgb(2, 101, 220);
+  }
+</style>
+<div class="find-editor">
+  <c2-find-bar for="find-editor-code" value="item" match-case></c2-find-bar>
+  <c2-highlight id="find-editor-code">const items = await loadCart(id)
+const total = items.reduce((sum, item) => sum + item.price, 0)
+return total / items.length</c2-highlight>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Extra actions
+<style>
+  .find-actions {
+    display: grid;
+    gap: 10px;
+    max-width: 480px;
+    font-size: 14px;
+  }
+  .find-actions-log {
+    display: grid;
+    gap: 4px;
+  }
+  .find-actions c2-find-bar {
+    --c2-find-bar__field--width: 200px;
+  }
+  .find-actions c2-button {
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--font-size: 13px;
+  }
+</style>
+<div class="find-actions">
+  <c2-find-bar for="find-actions-log" value="error">
+    <c2-button slot="actions" toggle>Errors</c2-button>
+  </c2-find-bar>
+  <div id="find-actions-log" class="find-actions-log">
+    <c2-highlight>12:01 request served in 84 ms</c2-highlight>
+    <c2-highlight>12:02 error: payment provider timed out</c2-highlight>
+    <c2-highlight>12:02 retrying after error</c2-highlight>
+  </div>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Translated (French)
+<style>
+  .find-french {
+    display: grid;
+    gap: 10px;
+    max-width: 420px;
+    font-size: 14px;
+  }
+</style>
+<div class="find-french" lang="fr">
+  <c2-find-bar for="find-french-text" value="pain" replace></c2-find-bar>
+  <c2-highlight id="find-french-text">Pain au levain, pain de mie et pain d’épices.</c2-highlight>
+</div>
+```
+
+</GalleryGrid>
+
+The application performs the replace on the `replace` event, then the highlights re-read their text and the bar recounts:
+
+```ts tag=CodeBlock
+import { findMatches } from '@c2n/components/highlight'
+
+findBar.addEventListener('replace', ({ detail }) => {
+  const { query, replacement, matchCase, wholeWord, all, highlights, highlight, index } = detail
+  for (const item of all ? highlights : [highlight]) {
+    let text = item.textContent
+    const matches = findMatches(text, query, { matchCase, wholeWord })
+    for (const { start, end } of (all ? matches : [matches[index]]).reverse()) text = text.slice(0, start) + replacement + text.slice(end)
+    item.textContent = text
+  }
+})
+```
+
+<FindBarExamplesRuntime />

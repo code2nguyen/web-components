@@ -1,0 +1,56 @@
+---
+/**
+ * Plays the application's part in the find bar examples. `c2-find-bar` never edits text: it fires `replace` with what
+ * to replace, and this rewrites the text of the highlights it names, which they then re-read. It also registers the
+ * French text the translated card shows, as an application adds its languages.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import { findMatches, type FindBar, type Highlight } from '@c2n/components/highlight'
+
+  addTranslations({
+    fr: {
+      highlight: {
+        find: 'Rechercher',
+        replaceWith: 'Remplacer par',
+        previous: 'Résultat précédent',
+        next: 'Résultat suivant',
+        matchCase: 'Respecter la casse',
+        wholeWord: 'Mot entier',
+        close: 'Fermer',
+        replace: 'Remplacer',
+        replaceAll: 'Tout remplacer',
+        count: '{0} sur {1}',
+        noResults: 'Aucun résultat',
+      },
+    },
+  })
+
+  const replaceIn = (
+    highlight: Highlight,
+    starts: (matches: ReturnType<typeof findMatches>) => ReturnType<typeof findMatches>,
+    query: string,
+    replacement: string,
+    options: { matchCase: boolean; wholeWord: boolean },
+  ) => {
+    let text = highlight.textContent ?? ''
+    for (const { start, end } of starts(findMatches(text, query, options)).reverse()) text = text.slice(0, start) + replacement + text.slice(end)
+    highlight.textContent = text
+  }
+
+  document.addEventListener(
+    'replace',
+    (event) => {
+      const bar = event.target as FindBar
+      if (!(bar instanceof HTMLElement) || bar.localName !== 'c2-find-bar' || !bar.matches('[data-find-bar-example="replace"]')) return
+      const { query, replacement, matchCase, wholeWord, all, highlights, highlight, index } = (event as CustomEvent).detail
+      const options = { matchCase, wholeWord }
+      if (all) for (const item of highlights as Highlight[]) replaceIn(item, (matches) => [...matches], query, replacement, options)
+      else if (highlight) replaceIn(highlight, (matches) => matches.slice(index, index + 1), query, replacement, options)
+    },
+    // `replace` does not bubble: a capturing listener on the document still hears it.
+    true,
+  )
+</script>
