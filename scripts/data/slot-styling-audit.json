@@ -2282,6 +2282,41 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-list-group",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["items"],
+      "reason": "The items region holds the rows: its indent, guide line and spacing are variables, and the part covers the rest."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The label region sets the heading's layout; the heading type comes from the header variables."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "prefix-icon",
+      "decision": "part",
+      "parts": ["prefix-icon"],
+      "reason": "The prefix-icon wrapper sizes the slotted icon through the icon variables and is hidden when empty."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "suffix",
+      "decision": "part",
+      "parts": ["suffix"],
+      "reason": "The suffix wrapper holds a count or an action outside the disclosure button and is hidden when empty."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "toggle-icon",
+      "decision": "part",
+      "parts": ["toggle-icon"],
+      "reason": "The toggle-icon wrapper turns the chevron by the rotate variables and mirrors it right to left."
+    },
+    {
       "tag": "c2-list-item",
       "slot": "default",
       "decision": "assigned-content",
