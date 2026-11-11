@@ -263,6 +263,10 @@ export class CameraCapture extends LitElement {
   )
   private readonly urls = new Map<Blob, string>()
   private sampleTimer: ReturnType<typeof setTimeout> | undefined
+  /** Frames the video has presented, counted through `requestVideoFrameCallback` where the engine has it. */
+  private frames = 0
+  private sampledFrame = -1
+  private frameHandle: { video: HTMLVideoElement; id: number } | undefined
   private sampleCanvas: HTMLCanvasElement | undefined
   private previousSample: Uint8Array | undefined
   private candidateHint: CameraQualityHint | undefined
@@ -551,12 +555,29 @@ export class CameraCapture extends LitElement {
     this.previousSample = undefined
     this.candidateHint = undefined
     this.candidateCount = 0
+    this.watchFrames()
     this.sampleTimer = setTimeout(() => this.sample(), SAMPLE_INTERVAL)
+  }
+
+  /**
+   * Counts the frames the video presents. A sample is only compared with the previous one when a new frame came
+   * in between: an engine that repeats a frame (a slow or stalled stream) would otherwise read as perfectly still.
+   */
+  private watchFrames() {
+    const video = this.video
+    if (!video || typeof video.requestVideoFrameCallback !== 'function') return
+    const tick = () => {
+      this.frames++
+      if (this.frameHandle?.video === video) this.frameHandle.id = video.requestVideoFrameCallback(tick)
+    }
+    this.frameHandle = { video, id: video.requestVideoFrameCallback(tick) }
   }
 
   private stopSampling() {
     if (this.sampleTimer !== undefined) clearTimeout(this.sampleTimer)
     this.sampleTimer = undefined
+    if (this.frameHandle) this.frameHandle.video.cancelVideoFrameCallback(this.frameHandle.id)
+    this.frameHandle = undefined
     this.steadySince = undefined
     this.steadyProgress = 0
     this.hint = undefined
@@ -577,6 +598,11 @@ export class CameraCapture extends LitElement {
   }
 
   private assess(video: HTMLVideoElement) {
+    if (this.frameHandle) {
+      // No new frame since the last sample: nothing to compare, and nothing new to say.
+      if (this.frames === this.sampledFrame) return
+      this.sampledFrame = this.frames
+    }
     const shot = this.shot()
     const region = shot.guide !== 'none' ? this.guideRegion(video) : undefined
     const sx = region?.x ?? 0
@@ -733,10 +759,14 @@ export class CameraCapture extends LitElement {
       ${
         status === 'idle'
           ? html`<div class="screen" part="idle">
-              <slot name="idle">
-                <span class="screen__icon">${cameraIcon}</span>
-                <p class="screen__text">${this.msg.t('idle')}</p>
-                <button class="button button--accept" part="button accept" type="button" @click=${() => this.start()}>${this.msg.t('start')}</button>
+              <slot name="idle" @slotchange=${this.handleSlotChange}>
+                ${
+                  this.slotted('idle')
+                    ? nothing
+                    : html`<span class="screen__icon">${cameraIcon}</span>
+                        <p class="screen__text">${this.msg.t('idle')}</p>
+                        <button class="button button--accept" part="button accept" type="button" @click=${() => this.start()}>${this.msg.t('start')}</button>`
+                }
               </slot>
             </div>`
           : nothing
@@ -745,10 +775,14 @@ export class CameraCapture extends LitElement {
       ${
         status === 'error'
           ? html`<div class="screen" part="error">
-              <slot name="error">
-                <span class="screen__icon">${alertIcon}</span>
-                <p class="screen__text">${this.errorText()}</p>
-                <button class="button" part="button" type="button" @click=${() => this.start()}>${this.msg.t('retry')}</button>
+              <slot name="error" @slotchange=${this.handleSlotChange}>
+                ${
+                  this.slotted('error')
+                    ? nothing
+                    : html`<span class="screen__icon">${alertIcon}</span>
+                        <p class="screen__text">${this.errorText()}</p>
+                        <button class="button" part="button" type="button" @click=${() => this.start()}>${this.msg.t('retry')}</button>`
+                }
               </slot>
             </div>`
           : nothing
@@ -756,32 +790,38 @@ export class CameraCapture extends LitElement {
       ${
         status === 'done'
           ? html`<div class="done" part="done">
-              <slot name="done">
-                <ul class="thumbnails">
-                  ${shots.map((s, i) => {
-                    const photo = this.taken[i]
-                    return photo
-                      ? html`<li class="thumbnail">
-                          <img part="thumbnail" src=${this.url(photo.blob)} alt=${s.label} />
-                          <button
-                            class="button button--small"
-                            part="button"
-                            type="button"
-                            aria-label=${this.msg.t('retakeShot', s.label)}
-                            @click=${() => this.retake(i)}
-                          >
-                            ${this.msg.t('retake')}
-                          </button>
-                        </li>`
-                      : nothing
-                  })}
-                </ul>
-              </slot>
+              <slot name="done" @slotchange=${this.handleSlotChange}> ${this.slotted('done') ? nothing : this.renderSummary(shots)} </slot>
             </div>`
           : nothing
       }
     </div>`
   }
+
+  private renderSummary(shots: ResolvedShot[]) {
+    return html`<ul class="thumbnails">
+      ${shots.map((s, i) => {
+        const photo = this.taken[i]
+        return photo
+          ? html`<li class="thumbnail">
+              <img part="thumbnail" src=${this.url(photo.blob)} alt=${s.label} />
+              <button class="button button--small" part="button" type="button" aria-label=${this.msg.t('retakeShot', s.label)} @click=${() => this.retake(i)}>
+                ${this.msg.t('retake')}
+              </button>
+            </li>`
+          : nothing
+      })}
+    </ul>`
+  }
+
+  /** True when the app put content in the named slot: the built-in default is then not drawn at all. */
+  private slotted(name: string): boolean {
+    // On a server there is no light DOM to read; the default is drawn and replaced on the client.
+    if (typeof this.querySelector !== 'function') return false
+    return [...this.children].some((child) => child.getAttribute('slot') === name)
+  }
+
+  /** Redraws when content enters or leaves a slot, so the default shows exactly while the slot is empty. */
+  private readonly handleSlotChange = () => this.requestUpdate()
 
   private renderControls() {
     const status = this._status
