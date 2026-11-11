@@ -1,0 +1,164 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-list-group,
+  $theme: (
+    header--min-height: 36px,
+    header--gap: 8px,
+    header--padding-top: 6px,
+    header--padding-right: 10px,
+    header--padding-bottom: 6px,
+    header--padding-left: 10px,
+    header--border-radius: 6px,
+    header--font-size: 14px,
+    header--font-weight: 500,
+    header--font-family: null,
+    header--line-height: 20px,
+    header--color: #18181b,
+    header--background: transparent,
+    header__hover--color: null,
+    header__hover--background: #f4f4f5,
+    header__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    header__focus--outline-offset: -2px,
+
+    icon--size: 16px,
+    icon--color: null,
+
+    toggle-icon--size: 16px,
+    toggle-icon--color: #71717a,
+    toggle-icon--rotate: 0deg,
+    toggle-icon__open--rotate: 90deg,
+    toggle-icon--transition-duration: 150ms,
+
+    items--padding-left: 24px,
+    items--margin-left: 0px,
+    items--border-left: null,
+    items--gap: 0px,
+    items--padding-top: 0px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  min-height: css.cssVar(header--min-height);
+  gap: css.cssVar(header--gap);
+  padding: css.cssVar(header--padding-top) css.cssVar(header--padding-right) css.cssVar(header--padding-bottom) css.cssVar(header--padding-left);
+  border-radius: css.cssVar(header--border-radius);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  font-family: css.cssVar(header--font-family);
+  line-height: css.cssVar(header--line-height);
+  color: css.cssVar(header--color);
+  background: css.cssVar(header--background);
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(header__hover--color, header--color);
+    background: css.cssVar(header__hover--background, header--background);
+  }
+
+  // The focus lands on the button, but the ring goes round the whole row it opens and closes.
+  &:has(.button:focus-visible) {
+    outline: css.cssVar(header__focus--outline);
+    outline-offset: css.cssVar(header__focus--outline-offset);
+  }
+}
+
+.button {
+  all: unset;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  gap: css.cssVar(header--gap);
+  cursor: inherit;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  text-align: start;
+}
+
+.prefix-icon,
+.suffix {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+::slotted([slot='prefix-icon']) {
+  flex: none;
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+::slotted(svg[slot='prefix-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.toggle-icon {
+  display: inline-flex;
+  flex: none;
+  color: css.cssVar(toggle-icon--color);
+  rotate: css.cssVar(toggle-icon--rotate);
+  transition: rotate css.cssVar(toggle-icon--transition-duration) animation.$standard-easing;
+  --c2-feather-icon--size: #{css.cssVar(toggle-icon--size)};
+
+  svg {
+    width: css.cssVar(toggle-icon--size);
+    height: css.cssVar(toggle-icon--size);
+  }
+}
+
+:host([open]) .toggle-icon {
+  rotate: css.cssVar(toggle-icon__open--rotate);
+}
+
+// Right to left, the closed chevron points to the start of the line (left) and turns the other way to open.
+:host(:dir(rtl)) .toggle-icon {
+  scale: -1 1;
+  rotate: calc(-1 * #{css.cssVar(toggle-icon--rotate)});
+}
+
+:host([open]:dir(rtl)) .toggle-icon {
+  rotate: calc(-1 * #{css.cssVar(toggle-icon__open--rotate)});
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(items--gap);
+  padding-top: css.cssVar(items--padding-top);
+  padding-left: css.cssVar(items--padding-left);
+  margin-left: css.cssVar(items--margin-left);
+  border-left: css.cssVar(items--border-left);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-icon {
+    transition: none;
+  }
+}

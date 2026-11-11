@@ -75,7 +75,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
 - **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
-- **List Item** — `c2-list-item` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
+- **List Item** — `c2-list-item, c2-list-group` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own, as the option of list and select, or as a navigation link with collapsible groups.
 - **Marker** — `c2-marker` · `@c2n/components/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
 - **Math** — `c2-math` · `@c2n/components/math` — TeX formulas rendered as native MathML: no font CSS, readable by screen readers, safe for untrusted input.
 - **Mermaid** — `c2-mermaid` · `@c2n/components/mermaid` — Mermaid text diagrams drawn in your theme colours, loaded on demand and safe for untrusted sources.
