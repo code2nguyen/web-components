@@ -25,6 +25,12 @@ const en = {
   event: (title: string, resource: string, time: string) => `${title}, ${resource}, ${time}`,
   /** Added to a bar's name when it cannot be moved. */
   readonly: 'read-only',
+  /** Added to a bar's name when it is `pending` (a request still to approve). */
+  pending: 'pending',
+  /** The slot under the keyboard cursor over `bands`: `{0}` is the slot, `{1}` their labels. */
+  slotBands: (slot: string, labels: string) => `${slot}, ${labels}`,
+  /** The header of the summary row when `summary-heading` is not set. */
+  summary: 'Summary',
   /** The slot under the keyboard cursor: `{0}` is the resource, `{1}` the time range. */
   slot: (resource: string, time: string) => `${resource}, ${time}`,
   /** A slot under the keyboard cursor that holds bookings (Enter focuses the first): `{0}` is the slot, `{1}` their titles. */
