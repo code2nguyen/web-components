@@ -114,9 +114,10 @@ test('--c2-banner--offset moves a pinned banner off its edge', async ({ page, sc
 
 test('a callout is a note, not a live region', async ({ page, scenario }) => {
   await scenario('callout')
-  await expect(page.getByRole('alert')).toHaveCount(0)
   await expect(page.getByRole('status')).toHaveCount(0)
   await expect(page.getByRole('note')).toHaveCount(2)
+  // callout="false" is read as false by the Boolean converter: a banner, announced and laid out as one.
+  await expect(page.getByRole('alert')).toHaveCount(1)
   await expect(page.getByRole('note').first()).toContainText('Warning')
 })
 
@@ -134,9 +135,14 @@ test('a callout stacks the heading over the body and the actions under it, with 
   expect(Math.round(actions.x)).toBe(Math.round(message.x))
   expect(icon.y).toBeLessThan(message.y)
   expect(close.y).toBeLessThan(message.y)
-  // Paragraph margins do not add space at the top and bottom of the body.
+  // Block margins do not add space at the top and bottom of the body, but stay between blocks.
   await expect(callout.locator('p').first()).toHaveCSS('margin-top', '0px')
+  await expect(callout.locator('p').first()).not.toHaveCSS('margin-bottom', '0px')
+  await expect(callout.locator('ul')).not.toHaveCSS('margin-top', '0px')
+  await expect(callout.locator('ul')).not.toHaveCSS('margin-bottom', '0px')
+  await expect(callout.locator('p').last()).not.toHaveCSS('margin-top', '0px')
   await expect(callout.locator('p').last()).toHaveCSS('margin-bottom', '0px')
+  await expect(page.locator('#off [part="container"]')).toHaveCSS('display', 'flex')
 })
 
 test('a callout keeps its actions under the text when the icon padding is a unit-less 0', async ({ page, scenario }) => {
@@ -146,6 +152,14 @@ test('a callout keeps its actions under the text when the icon padding is a unit
   const message = (await callout.locator('[part="message"]').boundingBox())!
   const action = (await callout.locator('[slot="actions"]').boundingBox())!
   expect(Math.round(action.x)).toBe(Math.round(message.x))
+})
+
+test('a banner with actions renders once, without an update scheduled after the first', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => message.type() === 'warning' && warnings.push(message.text()))
+  await scenario('actions')
+  await expect(page.locator('c2-banner [part="actions"]')).toBeVisible()
+  expect(warnings.filter((text) => text.includes('change-in-update'))).toEqual([])
 })
 
 test('a callout without an icon starts its actions and text at the padding edge', async ({ page, scenario }) => {

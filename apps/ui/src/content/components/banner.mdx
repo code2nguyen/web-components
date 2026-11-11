@@ -83,7 +83,8 @@ import '@c2n/components/banner'
 Inside prose, docs and forms, `callout` turns the banner into an admonition: the heading on its own line above the
 body, the icon at the top, and the actions under the body. A callout is part of the content, not a notice about the
 page, so it is exposed as a `note` and never announced as a status or an alert. The tones are the banner's variants:
-`info` for a note, `success` for a tip, `warning`, and `error` for danger. The default slot takes paragraphs and lists;
+`info` for a note, `success` for a tip, `warning`, and `error` for danger. Name the tone in `heading`, since the
+colour and the icon do not reach a screen reader. The default slot takes paragraphs and lists;
 their outer margins are trimmed so the body sits flush with the padding.
 
 ```html tag=MdxCodeBlock,label=Callouts

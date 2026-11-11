@@ -164,13 +164,12 @@
   }
 }
 // Callout: a block of content. Heading over the body, icon at the top, actions under the body, close on the first row.
-// The grid lines the actions up with the text whatever the icon's size.
-:host([callout]) {
-  .banner {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-  }
+// The grid lines the actions up with the text whatever the icon's size. Keyed on a class, not on the attribute, so
+// callout="false" stays a banner.
+.callout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   .content,
   .actions {
     grid-column: 2;
@@ -183,7 +182,11 @@
   .close {
     grid-area: 1 / 3;
   }
-  // Centre the first line of text on the icon disc (a unit-less padding of 0 leaves it top-aligned).
+  // Centre the icon disc and the first line of text on each other, whichever is taller (a unit-less padding of 0
+  // invalidates the calc and leaves them top-aligned).
+  .icon {
+    margin-block-start: max(0px, calc((1lh - #{css.cssVar(icon--size)} - 2 * #{css.cssVar(icon--padding)}) / 2));
+  }
   .icon ~ .content {
     padding-block-start: max(0px, calc((#{css.cssVar(icon--size)} + 2 * #{css.cssVar(icon--padding)} - 1lh) / 2));
   }
@@ -194,11 +197,11 @@
   .message {
     display: block;
   }
-  // Paragraphs, lists and the like keep their spacing between each other but not at the top and bottom of the body.
-  ::slotted(:not([slot]):first-of-type) {
+  // The body's first and last blocks lose their outer margin; the spacing between blocks stays.
+  ::slotted(:not([slot]):nth-child(1 of :not([slot]))) {
     margin-block-start: 0;
   }
-  ::slotted(:not([slot]):last-of-type) {
+  ::slotted(:not([slot]):nth-last-child(1 of :not([slot]))) {
     margin-block-end: 0;
   }
 }

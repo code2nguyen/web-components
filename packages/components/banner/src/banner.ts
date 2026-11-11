@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -57,7 +57,7 @@ export interface Banner {
  * @cssproperty {pixel} [--c2-banner__heading__callout--margin-block-end=2px] - Space between a callout's heading and its body.
  * @cssproperty {pixel} [--c2-banner__icon--size=20px]
  * @cssproperty {color} [--c2-banner__icon--color=#71717a]
- * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0` removes the disc's padding.
+ * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0px` removes the disc's padding (a unit-less `0` also leaves a callout's first line top-aligned).
  * @cssproperty {border-radius} [--c2-banner__icon--border-radius=999px]
  * @cssproperty {percentage} [--c2-banner__icon--background-mix=14%] - Share of the icon colour in the disc behind it; `0%` removes the disc.
  * @cssproperty {color} [--c2-banner__icon__info--color=#2563eb]
@@ -85,9 +85,10 @@ export class Banner extends LitElement {
    * Presents the banner as a callout: an admonition that is part of the content (a note, a tip, a warning in a doc or a
    * form) rather than a notice about the page. It is laid out as a block, with the heading above the body and the
    * actions under it, and exposed as a `note` instead of a status or alert live region, so it is read in place and
-   * never announced. Use `variant` for the tone: `info` for a note, `success` for a tip, `warning`, `error` for danger.
+   * never announced. Use `variant` for the tone (`info` for a note, `success` for a tip, `warning`, `error` for danger) and
+   * name it in `heading`: the colour and the icon do not reach a screen reader.
    */
-  @property({ type: Boolean, reflect: true }) callout = false
+  @property({ type: Boolean }) callout = false
   /** Hides the leading icon and removes its space from the layout. */
   @property({ type: Boolean, attribute: 'no-icon' }) noIcon = false
   /** Shows a keyboard-accessible dismiss button. */
@@ -97,9 +98,17 @@ export class Banner extends LitElement {
 
   @state() private hasActions = false
 
-  // A server-rendered banner hydrates after its slot was filled, so no slotchange reaches the listener: read it once.
+  // A declarative shadow root exists before the first update.
+  private readonly serverRendered = this.shadowRoot !== null
+
+  // slotchange keeps hasActions current, but the first render must already know it. A server-rendered banner hydrates
+  // with the server's DOM, which a value changed before hydration would not update, so it reads the slot once after.
+  protected override willUpdate() {
+    if (!isServer && !this.hasUpdated && !this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
+  }
+
   protected override firstUpdated() {
-    this.hasActions = (this.renderRoot.querySelector('slot[name="actions"]') as HTMLSlotElement).assignedNodes().length > 0
+    if (this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
   }
 
   /** Requests dismissal. Fires `banner-close`; unless it is prevented the banner is hidden. Returns whether it was hidden. */
@@ -132,7 +141,7 @@ export class Banner extends LitElement {
 
   override render() {
     const role = this.callout ? 'note' : this.variant === 'warning' || this.variant === 'error' ? 'alert' : 'status'
-    return html`<div class="banner" part="container">
+    return html`<div class="banner ${this.callout ? 'callout' : ''}" part="container">
       ${this.noIcon ? nothing : html`<span class="icon" part="icon" aria-hidden="true"><slot name="icon">${this.renderIcon()}</slot></span>`}
       <div class="content" part="content" role=${role}>
         ${this.heading ? html`<span class="heading" part="heading">${this.heading}</span>` : nothing}
