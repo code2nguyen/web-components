@@ -22,6 +22,8 @@
     chip--background-color: #ffffff,
     chip--border: 1px solid #e4e4e7,
     zone__over--background-color: rgba(2, 101, 220, 0.06),
+    computed__negative--color: inherit,
+    computed__positive--color: inherit,
   )
 );
 
@@ -155,6 +157,14 @@ td {
 
 td.empty {
   color: css.cssVar(muted--color);
+}
+
+td.negative {
+  color: css.cssVar(computed__negative--color);
+}
+
+td.positive {
+  color: css.cssVar(computed__positive--color);
 }
 
 .subtotal > *,

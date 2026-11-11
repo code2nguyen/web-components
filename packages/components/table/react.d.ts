@@ -24,7 +24,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups'> & {
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups' | 'expandedRows'> & {
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -47,6 +47,9 @@ declare module 'react' {
         'expanded-groups'?: Attribute
         'groups-collapsed'?: Attribute
         'empty-group-label'?: Attribute
+        'children-field'?: Attribute
+        'expanded-rows'?: Attribute
+        'tree-expanded'?: Attribute
         rows?: Table['rows'] | string
         columns?: Table['columns'] | string
         value?: Table['value'] | string
@@ -54,6 +57,7 @@ declare module 'react' {
         summaryValues?: Table['summaryValues'] | string
         groupBy?: Table['groupBy'] | string
         expandedGroups?: Table['expandedGroups'] | string
+        expandedRows?: Table['expandedRows'] | string
       }
       'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
         'column-id'?: Attribute

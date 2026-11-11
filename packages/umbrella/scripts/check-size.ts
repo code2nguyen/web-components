@@ -53,7 +53,8 @@ const sizeOf = (file: string) => {
 /** The relative modules `file` imports statically, as paths inside `dist/`. */
 function staticImports(file: string): string[] {
   const source = readFileSync(join(distDir, file), 'utf8')
-  const statements = /^\s*(?:import|export)\b[^;'"]*?(?:from\s*)?['"](\.{1,2}\/[^'"]+)['"]/gm
+  // `(?!\s*\()` leaves out a dynamic `import("./chunk.js")` that the bundler printed at the start of a line.
+  const statements = /^\s*(?:import|export)\b(?!\s*\()[^;'"]*?(?:from\s*)?['"](\.{1,2}\/[^'"]+)['"]/gm
   return [...source.matchAll(statements)].map(([, specifier]) =>
     relative(distDir, resolve(dirname(join(distDir, file)), specifier))
       .split(sep)

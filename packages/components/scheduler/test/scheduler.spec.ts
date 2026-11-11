@@ -240,3 +240,80 @@ test('a read-only booking steps aside instead of moving', async ({ page, renderS
   expect(await activeName(page)).toBe('Borealis, Monday 9 November, 15:00 to 16:00')
   expect(await events(scheduler(page))).toEqual([])
 })
+
+const ABSENCE_RESOURCES = [
+  { id: 'ana', label: 'Ana Ruiz' },
+  { id: 'ben', label: 'Ben Carter' },
+  { id: 'lea', label: 'Léa Moreau' },
+]
+const ABSENCES = [
+  { id: 'vacation', resource: 'ana', start: '2026-11-10', end: '2026-11-13', title: 'Vacation' },
+  { id: 'request', resource: 'ben', start: '2026-11-11', end: '2026-11-12', title: 'Vacation', pending: true },
+]
+const BANDS = [
+  { start: '2026-11-11', end: '2026-11-12', label: 'Armistice Day' },
+  { start: '2026-11-13', end: '2026-11-14', label: 'Non-working day', resource: 'lea' },
+]
+
+function absenceMarkup(attributes = '') {
+  return `<c2-scheduler view="week" date="2026-11-09" locale="en-GB" ${attributes}
+    resources='${JSON.stringify(ABSENCE_RESOURCES)}' events='${JSON.stringify(ABSENCES)}'></c2-scheduler>`
+}
+
+test('the absence options are off by default: no band, no hatching and no summary row', async ({ page, renderScenario }) => {
+  await renderScenario(markup(''))
+  await expect(bar(page, 'Kick-off')).toBeVisible()
+  await expect(scheduler(page).locator('.band, .event.pending, .summary')).toHaveCount(0)
+  await expect(scheduler(page).getByRole('row')).toHaveCount(7)
+})
+
+test('a pending event is hatched and named pending', async ({ page, renderScenario }) => {
+  await renderScenario(absenceMarkup())
+  const request = scheduler(page).locator('.event[data-id="request"]')
+  await expect(request).toHaveClass(/\bpending\b/)
+  await expect(request).toHaveAccessibleName('Vacation, Ben Carter, Wednesday 11 November, 00:00 to 00:00, pending')
+  await expect(scheduler(page).locator('.event[data-id="vacation"]')).not.toHaveClass(/\bpending\b/)
+  expect(await request.evaluate((element) => getComputedStyle(element).backgroundImage)).toContain('repeating-linear-gradient')
+  await accessible(page)
+})
+
+test('bands shade every row or one resource, label the header and are read with the slot', async ({ page, renderScenario }) => {
+  await renderScenario(absenceMarkup(`bands='${JSON.stringify(BANDS)}'`))
+  // The holiday is on every row and in the header; the non-working day only on its resource's row.
+  await expect(lane(page, 'ana').locator('.band')).toHaveCount(1)
+  await expect(lane(page, 'lea').locator('.band')).toHaveCount(2)
+  await expect(scheduler(page).locator('.scale .band')).toHaveCount(1)
+  await expect(scheduler(page).locator('.scale .band')).toHaveAttribute('title', 'Armistice Day')
+  // The band sits over its day: the third of seven columns.
+  const lanebox = (await lane(page, 'ana').boundingBox())!
+  const band = (await lane(page, 'ana').locator('.band').boundingBox())!
+  expect(Math.abs(band.x - (lanebox.x + (2 / 7) * lanebox.width))).toBeLessThan(2)
+  expect(Math.abs(band.width - lanebox.width / 7)).toBeLessThan(2)
+
+  await lane(page, 'lea').focus()
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  expect(await activeName(page)).toBe('Léa Moreau, Wednesday 11 November, 00:00 to 00:00, Armistice Day')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  expect(await activeName(page)).toBe('Léa Moreau, Friday 13 November, 00:00 to 00:00, Non-working day')
+  await accessible(page)
+})
+
+test('renderSummary draws a summary row with one cell per column from the events over it', async ({ page, renderScenario }) => {
+  await renderScenario(absenceMarkup('summary-heading="Out"'))
+  await scheduler(page).evaluate((element) => {
+    const host = element as HTMLElement & { renderSummary: (context: { start: string; events: { resource: string }[]; resources: unknown[] }) => string }
+    host.renderSummary = ({ start, events, resources }) => (events.length ? `${start.slice(8, 10)}: ${events.length}/${resources.length}` : '')
+  })
+  const summary = scheduler(page).locator('.summary')
+  await expect(summary.getByRole('rowheader')).toHaveText('Out')
+  const cells = summary.locator('.summary-cell')
+  await expect(cells).toHaveCount(7)
+  await expect(cells).toHaveText(['', '10: 1/3', '11: 2/3', '12: 1/3', '', '', ''])
+  // Without a heading the row is named by its message.
+  await scheduler(page).evaluate((element) => element.removeAttribute('summary-heading'))
+  await expect(summary.getByRole('rowheader')).toHaveText('Summary')
+  await accessible(page)
+})

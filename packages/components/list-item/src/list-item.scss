@@ -51,6 +51,15 @@
     selected__hover--background: #e2e9fd,
     selected__description--color: null,
 
+    current--border-top: null,
+    current--border-bottom: null,
+    current--border-right: null,
+    current--border-left: null,
+    current--color: null,
+    current--background: null,
+    current__hover--background: null,
+    current--font-weight: null,
+
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     focus--outline-offset: -2px,
 
@@ -179,6 +188,21 @@
 
   .c2-list-item__description {
     color: css.cssVar(selected__description--color, description--color);
+  }
+}
+
+// The current page of a navigation list. Each value falls back to the selected one, then to the plain row's.
+:host([current]) .c2-list-item {
+  border-top: css.cssVar(current--border-top, selected--border-top, border-top);
+  border-bottom: css.cssVar(current--border-bottom, selected--border-bottom, border-bottom);
+  border-right: css.cssVar(current--border-right, selected--border-right, border-right);
+  border-left: css.cssVar(current--border-left, selected--border-left, border-left);
+  background: css.cssVar(current--background, selected--background, background);
+  color: css.cssVar(current--color, selected--color, color);
+  font-weight: css.cssVar(current--font-weight, font-weight);
+
+  &:hover {
+    background: css.cssVar(current__hover--background, current--background, selected__hover--background, selected--background);
   }
 }
 

@@ -1,0 +1,227 @@
+---
+title: 'Form gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import FormListExamplesRuntime from '../../components/FormListExamplesRuntime.astro'
+import { Form, FormList } from '@c2n/components/form'
+import { FormField } from '@c2n/components/form-field'
+import { TextField } from '@c2n/components/text-field'
+import { Button } from '@c2n/components/button'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-form>
+  <form>
+    <c2-form-list client:only="lit" name="emails" min="1">
+      <template>
+        <div>
+          <c2-form-field label="Email"><c2-text-field name="email" type="email"></c2-text-field></c2-form-field>
+          <c2-button data-action="remove">Remove</c2-button>
+        </div>
+      </template>
+    </c2-form-list>
+  </form>
+</c2-form>
+```
+
+```html tag=MdxCodeBlock,label=Repeating contacts
+<style>
+  .contacts { width: 100%; }
+  .contacts .contact {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 12px 14px 14px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+  }
+  .contacts legend {
+    padding: 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .contacts .row-actions { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .contacts .row-actions c2-button {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-form class="contacts">
+  <form>
+    <c2-form-list client:only="lit" name="contacts" min="1" max="3">
+      <template>
+        <fieldset class="contact">
+          <legend>Contact <span data-row-number></span></legend>
+          <c2-form-field label="Name"><c2-text-field name="name" required></c2-text-field></c2-form-field>
+          <c2-form-field label="Phone" necessity="optional"><c2-text-field name="phone" type="tel"></c2-text-field></c2-form-field>
+          <div class="row-actions">
+            <c2-button data-action="move-up">Up</c2-button>
+            <c2-button data-action="move-down">Down</c2-button>
+            <c2-button data-action="duplicate">Copy</c2-button>
+            <c2-button data-action="remove">Remove</c2-button>
+          </div>
+        </fieldset>
+      </template>
+    </c2-form-list>
+  </form>
+</c2-form>
+```
+
+```html tag=MdxCodeBlock,label=Compact rows
+<style>
+  .skills c2-form-field,
+  .skills c2-text-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .skills { width: 100%; --c2-form-list--gap: 6px; }
+  .skills .skill { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+  .skills .number {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    text-align: end;
+  }
+</style>
+<c2-form-list client:only="lit" class="skills" name="skills" max="5" add-label="Add a skill">
+  <template>
+    <div class="skill">
+      <span class="number" data-row-number></span>
+      <c2-text-field name="skill" aria-label="Skill" placeholder="e.g. TypeScript"></c2-text-field>
+      <c2-icon-button data-action="remove" aria-label="Remove skill"><c2-feather-x></c2-feather-x></c2-icon-button>
+    </div>
+  </template>
+  <div class="skill">
+    <span class="number" data-row-number></span>
+    <c2-text-field name="skill" aria-label="Skill" value="Accessibility"></c2-text-field>
+    <c2-icon-button data-action="remove" aria-label="Remove skill"><c2-feather-x></c2-feather-x></c2-icon-button>
+  </div>
+  <div class="skill">
+    <span class="number" data-row-number></span>
+    <c2-text-field name="skill" aria-label="Skill" value="Design systems"></c2-text-field>
+    <c2-icon-button data-action="remove" aria-label="Remove skill"><c2-feather-x></c2-feather-x></c2-icon-button>
+  </div>
+</c2-form-list>
+```
+
+```html tag=MdxCodeBlock,label=Empty state and own footer
+<style>
+  .guests c2-form-field,
+  .guests c2-text-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .guests { width: 100%; }
+  .guests .guest { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
+  .guests .empty-note {
+    margin: 0;
+    padding: 14px;
+    border: 1px dashed var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .guests .footer { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 13px; }
+</style>
+<c2-form-list client:only="lit" class="guests" name="guests" max="4">
+  <template>
+    <div class="guest">
+      <c2-form-field label="Guest name"><c2-text-field name="name"></c2-text-field></c2-form-field>
+      <c2-icon-button data-action="remove" aria-label="Remove"><c2-feather-x></c2-feather-x></c2-icon-button>
+    </div>
+  </template>
+  <p slot="empty" class="empty-note">No guests yet. You can bring up to four.</p>
+  <div slot="footer" class="footer">
+    <c2-button data-action="add">Add a guest</c2-button>
+    <span>Up to four guests</span>
+  </div>
+</c2-form-list>
+```
+
+```html tag=MdxCodeBlock,label=Rows from data
+<style>
+  .lines c2-form-field,
+  .lines c2-text-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .lines { width: 100%; }
+  .lines .line { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
+  .lines .item { --c2-form-field--grid-column: 1 / -1; }
+  .lines output {
+    display: block;
+    font: 12px/1.5 ui-monospace, monospace;
+    overflow-wrap: anywhere;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="lines">
+  <c2-form-list client:only="lit" name="lines" min="1" data-form-list-example="value" add-label="Add a line">
+    <template>
+      <div class="line">
+        <c2-form-field class="item" label="Item"><c2-text-field name="item"></c2-text-field></c2-form-field>
+        <c2-form-field label="Hours"><c2-text-field name="hours" inputmode="decimal"></c2-text-field></c2-form-field>
+        <c2-icon-button data-action="remove" aria-label="Remove"><c2-feather-x></c2-feather-x></c2-icon-button>
+      </div>
+    </template>
+  </c2-form-list>
+  <output data-form-list-output></output>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=French
+<style>
+  .fr-list c2-form-field,
+  .fr-list c2-text-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .fr-list { width: 100%; }
+  .fr-list .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
+</style>
+<div lang="fr" class="fr-list">
+  <c2-form-list client:only="lit" name="enfants" min="1">
+    <template>
+      <div class="row">
+        <c2-form-field label="Prénom"><c2-text-field name="prenom"></c2-text-field></c2-form-field>
+        <c2-icon-button data-action="remove" aria-label="Supprimer"><c2-feather-x></c2-feather-x></c2-icon-button>
+      </div>
+    </template>
+  </c2-form-list>
+</div>
+```
+
+</GalleryGrid>
+
+<FormListExamplesRuntime />
+
+The rows of the "Rows from data" card are set from script; `rows-change` reports each add, remove and move:
+
+```ts tag=CodeBlock
+const lines = document.querySelector('c2-form-list')!
+lines.value = [
+  { item: 'Design review', hours: '6' },
+  { item: 'Component build', hours: '18' },
+]
+lines.addEventListener('rows-change', (event) => save(event.detail.value))
+```
+
+The French card's "Ajouter" and its screen-reader announcements come from the app's translations:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'form-list': { add: 'Ajouter', added: 'Ligne {0} ajoutée', removed: 'Ligne {0} supprimée', moved: 'Ligne déplacée en position {0} sur {1}' },
+  },
+})
+```

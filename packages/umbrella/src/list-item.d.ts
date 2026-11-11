@@ -2,4 +2,5 @@
 // Every module of @c2n/list-item. Importing this registers each of its elements.
 
 export * from '@c2n/list-item'
+export * from '@c2n/list-item/list-group.js'
 export * from '@c2n/list-item/list-item-context.js'

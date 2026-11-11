@@ -30,6 +30,7 @@ declare module 'react' {
         'selection-propagation'?: Attribute
         'children-outline'?: Attribute
         'expand-on-click'?: Attribute
+        'max-depth'?: Attribute
         items?: Tree['items'] | string
         value?: Tree['value'] | string
         expandedItems?: Tree['expandedItems'] | string

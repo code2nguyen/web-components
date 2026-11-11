@@ -49,6 +49,9 @@
     actions__hover--opacity: 1,
 
     checkbox--margin-inline-end: 2px,
+
+    dragging--opacity: 0.4,
+    drop-target--background: #edf1fe,
   )
 );
 
@@ -237,4 +240,16 @@ slot[name='icon']::slotted(*) {
   .actions {
     transition: none;
   }
+}
+
+// Set by a `reorderable` tree while a row is dragged: the row and its subtree dim, and the row it would land under is
+// tinted. The `:hover` twin outranks the selected-and-hovered background.
+.row.is-dragging,
+.row.is-dragging + .group {
+  opacity: css.cssVar(dragging--opacity);
+}
+
+:host(:not([disabled])) .row.is-drop-target,
+:host(:not([disabled])) .row.is-drop-target:hover {
+  background: css.cssVar(drop-target--background);
 }

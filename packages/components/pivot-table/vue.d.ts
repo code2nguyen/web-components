@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-pivot-table': DefineComponent<
       C2Props<PivotTable> & {
+        'invert-signs'?: unknown
         'field-labels'?: unknown
         'expand-depth'?: unknown
         onCellClick?: (event: EventOf<PivotTable, 'cell-click'>) => void

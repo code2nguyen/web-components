@@ -1,0 +1,54 @@
+---
+/**
+ * Registers the French translations and the controls inside `c2-form-list` examples, whose rows are raw HTML (a `<template>` cannot hold Astro
+ * islands), and fills the examples that show the property-only `value`.
+ */
+---
+
+<script>
+  import type { FormList } from '@c2n/components/form'
+  import { addTranslations } from '@c2n/core/localize.js'
+  import '@c2n/components/form'
+  import '@c2n/components/form-field'
+  import '@c2n/components/text-field'
+  import '@c2n/components/button'
+  import '@c2n/components/icon-button'
+  import '@c2n/feather-icons/icons/x.js'
+  import '@c2n/components/select'
+  import '@c2n/components/list-item'
+
+  // What an app adds for its languages: the French card reads these.
+  addTranslations({
+    fr: {
+      'form-list': { add: 'Ajouter', added: 'Ligne {0} ajoutée', removed: 'Ligne {0} supprimée', moved: 'Ligne déplacée en position {0} sur {1}' },
+    },
+  })
+
+  const initialized = new WeakSet<FormList>()
+
+  function setupValue(list: FormList) {
+    list.value = [
+      { item: 'Design review', hours: '6' },
+      { item: 'Component build', hours: '18' },
+    ]
+    const output = list.parentElement?.querySelector<HTMLElement>('[data-form-list-output]')
+    const show = () => {
+      if (output) output.textContent = JSON.stringify(list.value)
+    }
+    list.addEventListener('rows-change', show)
+    list.addEventListener('input', show)
+    show()
+  }
+
+  async function setup() {
+    await customElements.whenDefined('c2-form-list')
+    for (const list of document.querySelectorAll<FormList>('c2-form-list[data-form-list-example]')) {
+      if (initialized.has(list)) continue
+      initialized.add(list)
+      if (list.dataset.formListExample === 'value') setupValue(list)
+    }
+  }
+
+  void setup()
+  document.addEventListener('astro:page-load', () => void setup())
+</script>

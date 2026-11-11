@@ -23,6 +23,8 @@ import {
   type SortDirection,
   type SortModel,
   type TableCellEventDetail,
+  type TableChildrenErrorEventDetail,
+  type TableChildrenLoader,
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
   type TableDataSource,
@@ -37,6 +39,7 @@ import {
   type TableRowEventDetail,
   type TableRowPartResolver,
   type TableRowStyler,
+  type TableRowToggleEventDetail,
   type TableSelectionChangeEventDetail,
   type TableSortChangeEventDetail,
   type TableSummaryAggregate,
@@ -111,6 +114,30 @@ interface Grouping {
   items: DisplayItem[]
 }
 
+/** One row of a tree (`children-field`). */
+interface TreeNode {
+  row: TableRow
+  /** Position in the flattened rows (`#sortedRows`): every row of the tree, depth first, sorted among its siblings. */
+  index: number
+  key: string
+  level: number
+  parent?: TreeNode
+  /** The child rows, sorted; undefined for a leaf and for a parent `loadChildren` has not answered yet. */
+  children?: TreeNode[]
+  /** The children field holds `true`: the children come from `loadChildren`. */
+  lazy: boolean
+  /** The leaf rows under the row, the inputs of its `rollup` columns. */
+  leaves: TableRow[]
+  rollup?: Map<string, unknown>
+}
+
+interface TreeRows {
+  roots: TreeNode[]
+  /** Indexed like the flattened rows. */
+  nodes: TreeNode[]
+  byKey: Map<string, TreeNode>
+}
+
 /** Group keys are `field=value` pairs joined by `/`, so those characters (and `;`, the list separator) are escaped. */
 function encodeGroupPart(value: string): string {
   return value.replace(/[%/=;]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
@@ -159,6 +186,9 @@ const rowKeysConverter = {
     return Array.isArray(parsed) ? parsed.filter((key) => key !== null && key !== undefined).map(String) : parsed
   },
 }
+
+/** Keys of the open tree rows: unset until written, like `expanded-groups`, and stored as strings, like `value`. */
+const rowKeysOrUnsetConverter = { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }
 
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value
@@ -277,6 +307,8 @@ export interface TableEventMap {
   'page-change': CustomEvent<TablePageChangeEventDetail>
   'group-toggle': CustomEvent<TableGroupToggleEventDetail>
   'range-change': CustomEvent<TableRangeChangeEventDetail>
+  'row-toggle': CustomEvent<TableRowToggleEventDetail>
+  'children-error': CustomEvent<TableChildrenErrorEventDetail>
 }
 
 export interface Table {
@@ -377,6 +409,24 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Tree.** `children-field="children"` reads each row's child rows from that field, nested to any depth, and the grid
+ * becomes a `treegrid`: every row is a row of the grid, and the first column (or the one marked `group-column`) gets
+ * a chevron and an indentation per level. Rows open with a click on the chevron, ←/→ on that column, `expandRow()` or
+ * `expanded-rows` (the keys of the open rows; all closed until then, or open with `tree-expanded`), and `row-toggle`
+ * reports a click. Sorting orders each level among its siblings. A column with `rollup="sum"` (or `avg`, `min`, `max`,
+ * `count`, or a function) shows in a parent row the aggregate of the leaf rows under it, and the summary row counts
+ * leaves only. With `selection="multiple"` a row is selected with the rows under it, and a parent is selected when
+ * all its children are; its checkbox shows the mixed state in between. A row whose field holds `true` loads its
+ * children from `loadChildren` when it first opens. Give the rows a `row-key`. The tree is built on the client and
+ * does not apply to a `dataSource`.
+ *
+ * ```html
+ * <c2-table row-key="id" children-field="children" tree-expanded>
+ *   <c2-table-column field="name" header="Account"></c2-table-column>
+ *   <c2-table-column field="amount" format="currency" align="end" rollup="sum"></c2-table-column>
+ * </c2-table>
+ * ```
+ *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
  * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
@@ -406,6 +456,8 @@ export interface Table {
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
+ * @event {CustomEvent<TableRowToggleEventDetail>} row-toggle - Fired after the user opens or closes a row of a tree, with its `key`, the `row` and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
+ * @event {CustomEvent<TableChildrenErrorEventDetail>} children-error - Fired when `loadChildren` rejects, with the row's `key`, the `row` and the `error`. The row has closed again. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -430,6 +482,7 @@ export interface Table {
  * @csspart group-row - Every group row. Also `group-row-level-<n>` (0 for the outermost level), `group-band` with `group-display="band"`, and `group-row-echo` on a copy kept under the header.
  * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
  * @csspart group-toggle - The chevron of a group row.
+ * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
  *
@@ -711,6 +764,28 @@ export class Table extends LitElement {
   /** Label of the group of rows whose value is empty. */
   @property({ type: String, attribute: 'empty-group-label' }) emptyGroupLabel = 'No value'
 
+  /**
+   * Turns the rows into a tree: the field (a dotted path is fine) holding each row's child rows, nested to any depth.
+   * A row whose field holds `true` has children `loadChildren` delivers when it is first opened. Wins over `group-by`;
+   * not applied to a `dataSource`.
+   */
+  @property({ type: String, attribute: 'children-field' }) childrenField = ''
+
+  /**
+   * Keys of the open rows of a tree. While unset, every row follows `tree-expanded`; the first toggle writes the full
+   * list here. `;`-separated in the attribute.
+   */
+  @property({ converter: rowKeysOrUnsetConverter, attribute: 'expanded-rows' }) expandedRows?: string[]
+
+  /** Starts every parent row of a tree open while `expandedRows` is unset. */
+  @property({ type: Boolean, attribute: 'tree-expanded' }) treeExpanded = false
+
+  /**
+   * Loads the children of a tree row whose `children-field` holds `true`, the first time it opens. A rejection closes
+   * the row again and fires `children-error`; the next open asks again. Needs `row-key`. Property only.
+   */
+  @property({ attribute: false }) loadChildren?: TableChildrenLoader
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -738,6 +813,13 @@ export class Table extends LitElement {
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
   #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
   #warnedGroupedSource = false
+  #warnedTreeSource = false
+  #tree?: TreeRows
+  #treeCache?: { inputs: unknown[]; lines: TreeNode[]; wanted: TreeNode[] }
+  #partialCache?: { inputs: unknown[]; keys: Set<string> }
+  #openRows?: { source: string[]; keys: Set<string> }
+  #loadedChildren = new Map<string, TableRow[]>()
+  #pendingChildren = new Set<string>()
   #headerHeightPx = 0
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
@@ -772,8 +854,8 @@ export class Table extends LitElement {
    * million-row total.
    */
   get rowCount(): number {
-    const grouping = this.#grouping()
-    if (grouping) return this.paginated ? Math.max(0, Math.min(this.pageSize, grouping.items.length - this.#pageStart)) : grouping.items.length
+    const lines = this.#grouping()?.items.length ?? this.#treeLines()?.length
+    if (lines !== undefined) return this.paginated ? Math.max(0, Math.min(this.pageSize, lines - this.#pageStart)) : lines
     if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
     const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
     if (!this.dataSource) return onPage
@@ -802,7 +884,7 @@ export class Table extends LitElement {
    * and `aria-rowcount` count these, so a collapsed group takes one line.
    */
   get #lineCount(): number {
-    return this.#grouping()?.items.length ?? this.totalRows
+    return this.#grouping()?.items.length ?? this.#treeLines()?.length ?? this.totalRows
   }
 
   /** Index of the first row of the current page within the whole dataset. */
@@ -909,11 +991,11 @@ export class Table extends LitElement {
   }
 
   /**
-   * Upper bound of the row indices `getSelectedRows` and `selectAll` visit: the rows on show, or while grouped every
-   * row, including those in closed groups — they are selected by their group's checkbox too.
+   * Upper bound of the row indices `getSelectedRows` and `selectAll` visit: the rows on show, or while grouped or in a
+   * tree every row, including those in closed groups and under closed rows — a parent's checkbox selects them too.
    */
   get #rowTotal(): number {
-    return this.#grouping()?.source.length ?? this.rowCount
+    return this.#grouping()?.source.length ?? (this.#tree ? this.#sortedRows.length : this.rowCount)
   }
 
   /** Clears the selection. */
@@ -921,14 +1003,18 @@ export class Table extends LitElement {
     this.#commitSelection([])
   }
 
-  /** Scrolls the row at `index` into view; while grouped, only a row whose groups are open has a place to scroll to. */
+  /**
+   * Scrolls the row at `index` into view; while grouped or in a tree, only a row whose groups or parents are open has
+   * a place to scroll to.
+   */
   scrollToIndex(index: number) {
     const grouping = this.#grouping()
-    if (!grouping) {
-      this.#scrollToLine(index)
-      return
-    }
-    const line = grouping.items.findIndex((item) => item.kind === 'row' && item.rowIndex === index)
+    const tree = this.#treeLines()
+    const line = grouping
+      ? grouping.items.findIndex((item) => item.kind === 'row' && item.rowIndex === index)
+      : tree
+        ? tree.findIndex((node) => node.index === index)
+        : index
     if (line >= 0) this.#scrollToLine(line)
   }
 
@@ -960,15 +1046,27 @@ export class Table extends LitElement {
     this.#setGroupExpanded(key, false)
   }
 
-  /** Opens every group. */
+  /** Opens every group, or in a tree every row whose children are loaded. */
   expandAll() {
     const grouping = this.#grouping()
     if (grouping) this.expandedGroups = [...grouping.nodes.keys()]
+    else if (this.#tree) this.expandedRows = this.#tree.nodes.filter((node) => node.children?.length).map((node) => node.key)
   }
 
-  /** Closes every group. */
+  /** Closes every group, or every row of a tree. */
   collapseAll() {
-    this.expandedGroups = []
+    if (this.#tree) this.expandedRows = []
+    else this.expandedGroups = []
+  }
+
+  /** Opens the tree row with `key`, loading its children if needed. Does not fire `row-toggle`. */
+  expandRow(key: string) {
+    this.#setRowExpanded(key, true)
+  }
+
+  /** Closes the tree row with `key`. */
+  collapseRow(key: string) {
+    this.#setRowExpanded(key, false)
   }
 
   /** Drops the `dataSource` cache and reloads the visible rows. */
@@ -982,8 +1080,17 @@ export class Table extends LitElement {
     if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
     if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
     const regroup = changed.has('groupBy') || changed.has('dataSource')
-    if (!this.hasUpdated || regroup || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
+    // A tree's keys, rollups and loaded children depend on these too; a flat table does not look at them.
+    const retree = changed.has('childrenField') || (this.childrenField && (changed.has('rowKey') || changed.has('getRowKey')))
+    // Replaced rather than cleared, so a load still in flight for the old tree knows to drop its answer. A new
+    // `loadChildren` keeps what is loaded: a framework may pass a fresh closure on every render.
+    if (changed.has('childrenField')) this.#loadedChildren = new Map()
+    if (!this.hasUpdated || regroup || retree || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
       this.#applySort()
+    if (this.dataSource && this.childrenField && !this.#warnedTreeSource) {
+      this.#warnedTreeSource = true
+      console.warn('[c2-table] children-field is ignored with a dataSource. Pass the rows in rows, and load children with loadChildren.')
+    }
     if (this.dataSource && this.#groupLevels().length && !this.#warnedGroupedSource) {
       this.#warnedGroupedSource = true
       console.warn(
@@ -1086,6 +1193,8 @@ export class Table extends LitElement {
       this.#pendingFocusOptions = undefined
     }
     if (this.dataSource) this.#ensureBlocks()
+    // Open rows whose children `loadChildren` still owes: opened by a click, `expandRow` or `expanded-rows` alike.
+    if (this.#tree) for (const node of this.#treeCache?.wanted ?? []) void this.#fetchChildren(node)
     this.#reportRenderedRange()
   }
 
@@ -1111,7 +1220,7 @@ export class Table extends LitElement {
       const range = this.#virtualizer.range
       const grouping = this.#grouping()
       start = offset + range.start
-      end = grouping ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
+      end = grouping || this.#tree ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
       for (let line = start; line < end; line++) {
         const item = grouping?.items[line]
         if (item?.kind === 'group') continue
@@ -1155,7 +1264,7 @@ export class Table extends LitElement {
       <div class="viewport" part="viewport" @scroll=${this.#handleViewportScroll}>
         <div
           class=${classMap({ grid: true, 'grid--wrap': this.wrap })}
-          role=${grouping ? 'treegrid' : 'grid'}
+          role=${grouping || this.#tree ? 'treegrid' : 'grid'}
           part="grid"
           aria-rowcount=${this.#lineCount + (summary ? 2 : 1)}
           aria-colcount=${columns.length}
@@ -1204,7 +1313,7 @@ export class Table extends LitElement {
     const lines: number[] = []
     const grouping = this.#grouping()
     // The window is the virtualizer's from the last layout; closing a group shortens the list before it catches up.
-    const last = grouping ? Math.min(end, this.#pageStart + this.rowCount) : end
+    const last = grouping || this.#tree ? Math.min(end, this.#pageStart + this.rowCount) : end
     for (let line = start; line < last; line++) lines.push(line)
     if (grouping) {
       return repeat(
@@ -1222,11 +1331,12 @@ export class Table extends LitElement {
     }
     return repeat(
       lines,
-      (index) => {
+      (line) => {
+        const index = this.#rowIndexAt(line)
         const row = this.#rowAt(index)
         return row ? this.#keyAt(index, row) : `skeleton:${index}`
       },
-      (index) => this.#renderRow(index, columns, pins),
+      (line) => this.#renderRow(line, columns, pins),
     )
   }
 
@@ -1475,8 +1585,10 @@ export class Table extends LitElement {
     const key = row ? this.#keyAt(index, row) : ''
     const grouping = this.#grouping()
     const item = grouping?.items[line]
+    const node = this.#treeLines()?.[line]
     const depth = item?.kind === 'row' ? item.parent.level + 1 : 0
-    const treeColumn = grouping && this.groupDisplay !== 'band' ? this.#groupTreeColumn(columns) : undefined
+    const treeColumn = (grouping && this.groupDisplay !== 'band') || node ? this.#groupTreeColumn(columns) : undefined
+    const open = node && this.#isParent(node) ? this.#isRowExpanded(node.key) : undefined
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
     const updateState = key ? this.#rowUpdateStates.get(key) : undefined
@@ -1492,6 +1604,7 @@ export class Table extends LitElement {
           'row--selected': selected,
           'row--clickable': selectable,
           'row--highlighted': Boolean(updateState && this.highlightUpdates),
+          'row--tree-collapsed': open === false,
           [`row--${updateState}`]: Boolean(updateState),
         })}
         role="row"
@@ -1506,18 +1619,25 @@ export class Table extends LitElement {
         data-row-key=${key}
         data-update-state=${ifDefined(updateState)}
         aria-rowindex=${line + 2}
-        aria-level=${ifDefined(grouping ? depth + 1 : undefined)}
+        aria-level=${ifDefined(grouping ? depth + 1 : node ? node.level + 1 : undefined)}
+        aria-expanded=${ifDefined(open === undefined ? undefined : String(open))}
+        aria-busy=${ifDefined(node && this.#pendingChildren.has(node.key) ? 'true' : undefined)}
         aria-selected=${ifDefined(selectable ? String(selected) : undefined)}
         aria-hidden=${ifDefined(updateState === 'removed' ? 'true' : undefined)}
         style=${styleMap({ ...rowStyle, '--_update-duration': `${Math.max(0, this.updateDuration)}ms` })}
         @click=${(event: MouseEvent) => this.#handleRowClick(event, line)}
       >
-        ${columns.map((column, columnIndex) => this.#renderCell(row, line, index, column, columnIndex, pins, column === treeColumn ? depth : 0))}
+        ${columns.map((column, columnIndex) =>
+          this.#renderCell(row, line, index, column, columnIndex, pins, column === treeColumn ? depth : 0, node, column === treeColumn),
+        )}
       </div>
     `
   }
 
-  /** `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys); `indent` is its group depth. */
+  /**
+   * `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys); `indent` is its group
+   * depth. In a tree, `node` is the row's place in it and `tree` marks the column holding the chevron.
+   */
   #renderCell(
     row: TableRow | undefined,
     line: number,
@@ -1526,6 +1646,8 @@ export class Table extends LitElement {
     columnIndex: number,
     pins: Map<string, PinPlacement>,
     indent = 0,
+    node?: TreeNode,
+    tree = false,
   ) {
     const classes = {
       cell: true,
@@ -1556,6 +1678,7 @@ export class Table extends LitElement {
               ? html`<c2-checkbox
                   aria-label="Select row"
                   ?checked=${this.value.includes(key)}
+                  ?indeterminate=${Boolean(node && this.#partialKeys().has(key))}
                   @click=${(event: Event) => event.stopPropagation()}
                   @change=${() => this.#handleCheckboxToggle(line)}
                 ></c2-checkbox>`
@@ -1565,7 +1688,8 @@ export class Table extends LitElement {
       `
     }
 
-    const value = getFieldValue(row, column.field)
+    const id = columnKey(column)
+    const value = node?.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(row, column.field)
     const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
     // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
     // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
@@ -1590,6 +1714,7 @@ export class Table extends LitElement {
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
         @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
+        ${node && tree ? this.#renderRowToggle(node) : nothing}
         <span
           class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
           part="cell-content cell-content-${fieldPart}"
@@ -1598,6 +1723,22 @@ export class Table extends LitElement {
         >
       </div>
     `
+  }
+
+  /** The chevron of a tree row, indented by its depth; a leaf keeps the room empty so labels line up across levels. */
+  #renderRowToggle(node: TreeNode) {
+    const parent = this.#isParent(node)
+    return html`<span
+      class=${classMap({ 'group-toggle': true, 'row-toggle': true, 'row-toggle--leaf': !parent })}
+      part="row-toggle"
+      style=${styleMap({ '--_group-level': String(node.level) })}
+      @click=${(event: Event) => {
+        if (!parent) return
+        event.stopPropagation()
+        this.#toggleRow(node)
+      }}
+      >${this.#pendingChildren.has(node.key) ? html`<c2-spinner></c2-spinner>` : CHEVRON}</span
+    >`
   }
 
   #hasSummary(columns: TableColumnConfig[]): boolean {
@@ -1640,6 +1781,7 @@ export class Table extends LitElement {
       this.#animationProgress,
       this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
       pageScope ? this.#grouping()?.items : undefined,
+      pageScope ? this.#treeLines() : undefined,
       start,
       count,
     ]
@@ -1651,8 +1793,9 @@ export class Table extends LitElement {
       // The page is made of display lines, so while grouped its rows are those on the page's data lines.
       const index = pageScope ? this.#rowIndexAt(cursor) : cursor
       const row = this.#rowAt(index)
-      // A row collapsing out during an animated update is already gone from the data, so it no longer counts.
-      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed') rows.push(row)
+      // A row collapsing out during an animated update is already gone from the data, so it no longer counts. In a
+      // tree only the leaves count: a parent's figures are its children's, and would be counted twice.
+      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
     }
     const values = new Map<string, unknown>()
     for (const column of columns) {
@@ -1739,7 +1882,11 @@ export class Table extends LitElement {
   #autoColumns(): TableColumnConfig[] {
     const first = Array.isArray(this.rows) ? this.rows[0] : undefined
     if (!first) return []
-    return Object.keys(first).map((field) => ({ field, header: humanize(field) }))
+    // A tree's children field holds rows, not a value to show.
+    const children = this.childrenField.split('.')[0]
+    return Object.keys(first)
+      .filter((field) => field !== children)
+      .map((field) => ({ field, header: humanize(field) }))
   }
 
   #gridTemplate(columns: TableColumnConfig[]): string {
@@ -1873,7 +2020,180 @@ export class Table extends LitElement {
 
   #applySort() {
     const rows = Array.isArray(this.rows) ? this.rows : []
-    this.#sortedRows = this.#sortRows(rows)
+    this.#tree = this.childrenField && !this.dataSource ? this.#buildTree(rows) : undefined
+    this.#sortedRows = this.#tree ? this.#tree.nodes.map((node) => node.row) : this.#sortRows(rows)
+  }
+
+  /**
+   * Builds the tree of `children-field`: nodes and their rollups first, from the leaves up, then every level sorted
+   * (by the rolled-up values where a column has them) and numbered depth first — the order of the flattened rows.
+   */
+  #buildTree(rows: TableRow[]): TreeRows {
+    const columns = this.resolvedColumns.filter((column) => column.rollup)
+    const build = (list: TableRow[], level: number, parent?: TreeNode): TreeNode[] =>
+      list
+        .filter((row) => row && typeof row === 'object')
+        .map((row) => {
+          const node: TreeNode = { row, index: -1, key: '', level, parent, lazy: false, leaves: [row] }
+          const value = getFieldValue(row, this.childrenField)
+          const identity = this.#identityOf(row)
+          const children = Array.isArray(value) ? value : identity === undefined ? undefined : this.#loadedChildren.get(identity)
+          if (children) {
+            node.children = build(children, level + 1, node)
+            if (node.children.length) {
+              node.leaves = node.children.flatMap((child) => child.leaves)
+              node.rollup = new Map()
+              for (const column of columns) {
+                const rollup = column.rollup!
+                node.rollup.set(
+                  columnKey(column),
+                  typeof rollup === 'function'
+                    ? rollup({ column, rows: node.leaves })
+                    : aggregate(
+                        rollup,
+                        node.leaves.map((leaf) => getFieldValue(leaf, column.field)),
+                      ),
+                )
+              }
+            }
+          } else node.lazy = value === true && identity !== undefined
+          return node
+        })
+    const nodes: TreeNode[] = []
+    const byKey = new Map<string, TreeNode>()
+    const number = (list: TreeNode[]): TreeNode[] =>
+      this.#sortBySortModel(list, (node, field, column) => {
+        const id = column && columnKey(column)
+        // The value the cell shows, so a parent sorts by its rollup even when that is empty.
+        return id && node.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(node.row, field)
+      }).map((node) => {
+        node.index = nodes.push(node) - 1
+        node.key = this.#keyAt(node.index, node.row)
+        byKey.set(node.key, node)
+        if (node.children) node.children = number(node.children)
+        return node
+      })
+    return { roots: number(build(rows, 0)), nodes, byKey }
+  }
+
+  /** The tree rows on display, depth first, skipping the children of closed rows; undefined unless the rows are a tree. */
+  #treeLines(): TreeNode[] | undefined {
+    const tree = this.#tree
+    if (!tree) return undefined
+    const inputs = [tree, this.expandedRows, this.treeExpanded]
+    const cached = this.#treeCache
+    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.lines
+    const lines: TreeNode[] = []
+    const wanted: TreeNode[] = []
+    const visit = (list: TreeNode[]) => {
+      for (const node of list) {
+        lines.push(node)
+        if (!this.#isParent(node) || !this.#isRowExpanded(node.key)) continue
+        if (node.children) visit(node.children)
+        else wanted.push(node)
+      }
+    }
+    visit(tree.roots)
+    this.#treeCache = { inputs, lines, wanted }
+    return lines
+  }
+
+  #isParent(node: TreeNode): boolean {
+    return node.lazy || Boolean(node.children?.length)
+  }
+
+  #isRowExpanded(key: string): boolean {
+    const open = this.expandedRows
+    if (!open) return this.treeExpanded
+    if (this.#openRows?.source !== open) this.#openRows = { source: open, keys: new Set(open) }
+    return this.#openRows.keys.has(key)
+  }
+
+  #setRowExpanded(key: string, expanded: boolean): boolean {
+    const tree = this.#tree
+    const node = tree?.byKey.get(key)
+    if (!node || !this.#isParent(node) || this.#isRowExpanded(key) === expanded) return false
+    // Until a row is toggled the list is implicit; write it out whole so it reads back as the state on screen.
+    const current = this.expandedRows ?? (this.treeExpanded ? tree!.nodes.filter((entry) => this.#isParent(entry)).map((entry) => entry.key) : [])
+    this.expandedRows = expanded ? [...current, key] : current.filter((entry) => entry !== key)
+    return true
+  }
+
+  #toggleRow(node: TreeNode) {
+    const expanded = !this.#isRowExpanded(node.key)
+    if (!this.#setRowExpanded(node.key, expanded)) return
+    this.dispatchEvent(
+      new CustomEvent<TableRowToggleEventDetail>('row-toggle', { detail: { key: node.key, row: node.row, expanded }, bubbles: false, composed: true }),
+    )
+  }
+
+  /** Asks `loadChildren` for the children of an open row, once at a time; a selected parent passes its selection on. */
+  async #fetchChildren({ key, row, level }: TreeNode) {
+    const loaded = this.#loadedChildren
+    if (!this.loadChildren || this.#pendingChildren.has(key)) return
+    this.#pendingChildren.add(key)
+    this.requestUpdate()
+    try {
+      const children = await this.loadChildren({ row, key, level })
+      if (loaded !== this.#loadedChildren) return
+      loaded.set(key, Array.isArray(children) ? children : [])
+      this.#applySort()
+      if (this.selection === 'multiple' && this.value.includes(key)) {
+        const keys = new Set(this.value)
+        this.#cascade(keys, key, true)
+        this.#commitSelection([...keys])
+      }
+    } catch (error) {
+      if (loaded !== this.#loadedChildren) return
+      this.#setRowExpanded(key, false)
+      this.dispatchEvent(new CustomEvent<TableChildrenErrorEventDetail>('children-error', { detail: { key, row, error }, bubbles: false, composed: true }))
+    } finally {
+      this.#pendingChildren.delete(key)
+      this.requestUpdate()
+    }
+  }
+
+  /**
+   * Turns row `key` on or off in `selected`. In a tree the rows under it go with it, and unless `settle` is false its
+   * ancestors are settled: a parent is selected exactly when all its children are.
+   */
+  #cascade(selected: Set<string>, key: string, on: boolean, settle = true) {
+    const node = this.#tree?.byKey.get(key)
+    if (on) selected.add(key)
+    else selected.delete(key)
+    if (!node) return
+    const visit = (entry: TreeNode) => {
+      if (on) selected.add(entry.key)
+      else selected.delete(entry.key)
+      entry.children?.forEach(visit)
+    }
+    node.children?.forEach(visit)
+    if (settle) this.#settle(selected, node.parent, on)
+  }
+
+  /** Selects `parent` and the ancestors above it whose children are now all selected, or clears them when `on` is false. */
+  #settle(selected: Set<string>, parent: TreeNode | undefined, on: boolean) {
+    for (; parent; parent = parent.parent) {
+      if (!on) selected.delete(parent.key)
+      else if (parent.children!.every((child) => selected.has(child.key))) selected.add(parent.key)
+      else break
+    }
+  }
+
+  /** Keys of the unselected tree rows with a selected row under them: their checkbox shows the mixed state. */
+  #partialKeys(): Set<string> {
+    const inputs = [this.#tree, this.value]
+    const cached = this.#partialCache
+    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.keys
+    const selected = new Set(this.value)
+    const keys = new Set<string>()
+    for (const key of this.value) {
+      for (let parent = this.#tree?.byKey.get(key)?.parent; parent && !selected.has(parent.key) && !keys.has(parent.key); parent = parent.parent) {
+        keys.add(parent.key)
+      }
+    }
+    this.#partialCache = { inputs, keys }
+    return keys
   }
 
   /** Sorts by `sortModel`, then, while grouped, gathers the rows of each group together in the order of the groups. */
@@ -1903,8 +2223,8 @@ export class Table extends LitElement {
    * inputs: the tree only depends on the rows and the levels, and opening a group should not re-bucket 10k rows.
    */
   #grouping(): Grouping | undefined {
-    // Read per rendered row, so an ungrouped table leaves before allocating anything.
-    if (!this.groupBy?.length) return undefined
+    // Read per rendered row, so an ungrouped table leaves before allocating anything. A tree wins over grouping.
+    if (!this.groupBy?.length || this.#tree) return undefined
     const levels = this.#groupLevels()
     if (this.dataSource || !levels.length) return undefined
     const source = this.#transitionRows ?? this.#sortedRows
@@ -2118,6 +2438,8 @@ export class Table extends LitElement {
 
   /** The data row index on display line `line`, or -1 for a group row. Lines and rows are the same thing ungrouped. */
   #rowIndexAt(line: number): number {
+    const tree = this.#treeLines()
+    if (tree) return tree[line]?.index ?? -1
     const grouping = this.#grouping()
     if (!grouping) return line
     const item = grouping.items[line]
@@ -2156,14 +2478,16 @@ export class Table extends LitElement {
     else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
   }
 
-  #sortBySortModel(rows: TableRow[]): TableRow[] {
-    if (this.dataSource || this.sortModel.length === 0) return rows
+  /** Sorts rows, or tree nodes, by `sortModel`; `read` reads an item's value in a column (a tree node's rollup). */
+  #sortBySortModel<T extends TableRow | TreeNode>(items: T[], read?: (item: T, field: string, column?: TableColumnConfig) => unknown): T[] {
+    if (this.dataSource || this.sortModel.length === 0) return items
     const columns = this.resolvedColumns
-    return [...rows].sort((left, right) => {
+    const value = (item: T, field: string, column?: TableColumnConfig) => (read ? read(item, field, column) : getFieldValue(item as TableRow, field))
+    return [...items].sort((left, right) => {
       for (const entry of this.sortModel) {
         const column = columns.find((candidate) => candidate.field === entry.field)
         const comparator = column?.comparator ?? defaultCompare
-        const result = comparator(getFieldValue(left, entry.field), getFieldValue(right, entry.field))
+        const result = comparator(value(left, entry.field, column), value(right, entry.field, column))
         if (result !== 0) return entry.direction === 'desc' ? -result : result
       }
       return 0
@@ -2182,6 +2506,8 @@ export class Table extends LitElement {
     if (
       !this.hasUpdated ||
       !this.animateUpdates ||
+      // A tree is not animated: its rows are matched by their place in the flattened tree, which `rows` does not hold.
+      this.childrenField ||
       this.updateDuration <= 0 ||
       !Array.isArray(displayedPrevious) ||
       !Array.isArray(this.rows) ||
@@ -2220,7 +2546,7 @@ export class Table extends LitElement {
 
     // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
     // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.#hasRowIdentity && !this.paginated) {
+    if (this.#hasRowIdentity && !this.paginated && !this.childrenField) {
       const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
       const transitionRows = [...this.#sortRows(this.rows)]
       previousRows.forEach((row, index) => {
@@ -2478,26 +2804,40 @@ export class Table extends LitElement {
       return
     }
 
+    // In a tree a row is selected with the rows under it, and a parent follows its children (see `#cascade`).
     if (modifiers.range && this.#selectionAnchor >= 0) {
       const from = Math.min(this.#selectionAnchor, line)
       const to = Math.max(this.#selectionAnchor, line)
       const keys = new Set(modifiers.toggle ? this.value : [])
+      // In a tree the parents are settled once at the end, deepest first, rather than after every row of the range.
+      const parents = new Set<TreeNode>()
       for (let cursor = from; cursor <= to; cursor++) {
         const cursorIndex = this.#rowIndexAt(cursor)
         const rangeRow = this.#rowAt(cursorIndex)
-        if (rangeRow) keys.add(this.#keyAt(cursorIndex, rangeRow))
+        if (!rangeRow) continue
+        const rangeKey = this.#keyAt(cursorIndex, rangeRow)
+        this.#cascade(keys, rangeKey, true, false)
+        const parent = this.#tree?.byKey.get(rangeKey)?.parent
+        if (parent) parents.add(parent)
       }
+      for (const parent of [...parents].sort((a, b) => b.level - a.level)) this.#settle(keys, parent, true)
       this.#commitSelection([...keys])
       return
     }
 
     this.#selectionAnchor = line
+    const on = !this.value.includes(key)
     if (modifiers.toggle) {
-      this.#commitSelection(this.value.includes(key) ? this.value.filter((entry) => entry !== key) : [...this.value, key])
+      const keys = new Set(this.value)
+      this.#cascade(keys, key, on)
+      this.#commitSelection([...keys])
       return
     }
-    // A plain click narrows the selection to one row; on the row that already is the whole selection, it clears it.
-    this.#commitSelection(this.value.length === 1 && this.value[0] === key ? [] : [key])
+    // A plain click narrows the selection to one row (in a tree, with the rows under it); on the row that already is
+    // the whole selection, it clears it.
+    const next = new Set<string>()
+    this.#cascade(next, key, true)
+    this.#commitSelection(next.size === this.value.length && this.value.every((entry) => next.has(entry)) ? [] : [...next])
   }
 
   #commitSelection(keys: string[]) {
@@ -2576,6 +2916,22 @@ export class Table extends LitElement {
       else if (event.key === 'ArrowLeft' && expanded) this.#toggleGroup(groupNode)
       else if (event.key === 'ArrowLeft' && groupNode.parent && groupNode.parent.position >= first) row = groupNode.parent.position
       else if (event.key === 'ArrowRight' && this.groupDisplay !== 'band') column = Math.min(columns.length - 1, column + 1)
+      this.focusedCell = { row, column }
+      this.#pendingFocus = true
+      this.#scrollToLine(row)
+      return
+    }
+    // The same keys in a tree: ← closes an open row, then climbs to its parent; → opens a closed one.
+    const lines = this.#treeLines()
+    const node = lines && row >= 0 ? lines[row] : undefined
+    if (node && columns[column] === this.#groupTreeColumn(columns) && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+      event.preventDefault()
+      const open = this.#isParent(node) && this.#isRowExpanded(node.key)
+      const parentLine = node.parent ? lines!.indexOf(node.parent) : -1
+      if (event.key === 'ArrowRight' && this.#isParent(node) && !open) this.#toggleRow(node)
+      else if (event.key === 'ArrowLeft' && open) this.#toggleRow(node)
+      else if (event.key === 'ArrowLeft' && parentLine >= first) row = parentLine
+      else column = Math.min(columns.length - 1, Math.max(0, column + (event.key === 'ArrowRight' ? 1 : -1)))
       this.focusedCell = { row, column }
       this.#pendingFocus = true
       this.#scrollToLine(row)

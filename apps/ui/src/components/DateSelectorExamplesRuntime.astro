@@ -2,6 +2,7 @@
 /**
  * Resolves relative date bounds for date-selector documentation examples. `data-min-days` / `data-max-days` are day
  * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates.
+ * `data-render-day-example="fares"` gets a `renderDay` that draws a made-up fare under each day.
  */
 ---
 
@@ -22,13 +23,17 @@
   function setup(selector: DateSelector) {
     if (initialized.has(selector)) return
     initialized.add(selector)
-    const { minDays, maxDays } = selector.dataset
+    const { minDays, maxDays, renderDayExample } = selector.dataset
     if (minDays !== undefined) selector.min = isoDaysFromToday(Number(minDays))
     if (maxDays !== undefined) selector.max = isoDaysFromToday(Number(maxDays))
+    // A made-up but deterministic fare per day of the month, so the card reads like a fare calendar.
+    if (renderDayExample === 'fares') selector.renderDay = ({ day, disabled }) => (disabled ? undefined : `$${80 + ((day * 37) % 90)}`)
   }
 
   function setupAll() {
-    document.querySelectorAll<DateSelector>('c2-date-selector[data-min-days], c2-date-selector[data-max-days]').forEach(setup)
+    document
+      .querySelectorAll<DateSelector>('c2-date-selector[data-min-days], c2-date-selector[data-max-days], c2-date-selector[data-render-day-example]')
+      .forEach(setup)
   }
 
   setupAll()
