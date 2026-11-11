@@ -70,8 +70,8 @@ the days that carry something, and `renderDay` draws content of your own under t
 ```html tag=MdxCodeBlock,label=Multiple dates
 <style>
   .shift-days {
-    --c2-date-selector__day--border-radius: 10px;
     --c2-date-selector__day__selected--background: #0f766e;
+    --c2-date-selector__day__selected--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-date-selector__day__today--color: #0f766e;
   }
 </style>
@@ -109,7 +109,7 @@ the days that carry something, and `renderDay` draws content of your own under t
     --c2-date-selector__day--size: 48px;
     --c2-date-selector__day--border-radius: 12px;
     --c2-date-selector__day-content--font-size: 10px;
-    --c2-date-selector__day-content--color: #15803d;
+    --c2-date-selector__day-content--color: light-dark(#15803d, #4ade80);
     --c2-date-selector--min-width: 368px;
   }
 </style>
