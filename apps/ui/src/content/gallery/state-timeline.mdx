@@ -93,6 +93,8 @@ sets the density.
     --c2-state-timeline__track--border-radius: 6px;
     --c2-state-timeline__track--background: transparent;
     --c2-state-timeline__swatch--border-radius: 2px;
+    /* The default orange is too light for white labels; one step deeper keeps 4.5:1. */
+    --c2-state-timeline__series-2--color: light-dark(#c2410c, #fb923c);
   }
 </style>
 <c2-state-timeline class="state-timeline-palette" aria-label="Host power" series='[{"label":"web-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T02:30:00Z","state":"sleep"},{"start":"2026-10-08T06:00:00Z","state":"on"}]},{"label":"web-02","segments":[{"start":"2026-10-08T00:00:00Z","state":"on"},{"start":"2026-10-08T04:00:00Z","state":"off"},{"start":"2026-10-08T04:20:00Z","state":"on"}]},{"label":"batch-01","segments":[{"start":"2026-10-08T00:00:00Z","state":"sleep"},{"start":"2026-10-08T01:00:00Z","state":"on"},{"start":"2026-10-08T05:00:00Z","state":"sleep"}]}]'></c2-state-timeline>

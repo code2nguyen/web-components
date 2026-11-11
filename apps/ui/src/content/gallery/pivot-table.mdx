@@ -26,7 +26,7 @@ A sales summary, a compact cross-tab, a retention cohort, a branded report and a
 ```html tag=MdxCodeBlock,label=Retention cohort
 <style>
   .pivot-cohort {
-    --c2-pivot-table__heat--color: #0f766e;
+    --c2-pivot-table__heat--color: #134e4a;
   }
 </style>
 <c2-pivot-table class="pivot-cohort" rows="cohort" columns="month" heatmap totals="none" values='[{"field":"retained","aggregate":"avg","label":"Retained","format":{"style":"unit","unit":"percent"}}]' data='[{"cohort":"2026-01","month":"M0","retained":100},{"cohort":"2026-01","month":"M1","retained":62},{"cohort":"2026-01","month":"M2","retained":48},{"cohort":"2026-01","month":"M3","retained":41},{"cohort":"2026-01","month":"M4","retained":37},{"cohort":"2026-01","month":"M5","retained":35},{"cohort":"2026-02","month":"M0","retained":100},{"cohort":"2026-02","month":"M1","retained":58},{"cohort":"2026-02","month":"M2","retained":44},{"cohort":"2026-02","month":"M3","retained":39},{"cohort":"2026-02","month":"M4","retained":36},{"cohort":"2026-03","month":"M0","retained":100},{"cohort":"2026-03","month":"M1","retained":65},{"cohort":"2026-03","month":"M2","retained":51},{"cohort":"2026-03","month":"M3","retained":45},{"cohort":"2026-04","month":"M0","retained":100},{"cohort":"2026-04","month":"M1","retained":61},{"cohort":"2026-04","month":"M2","retained":47},{"cohort":"2026-05","month":"M0","retained":100},{"cohort":"2026-05","month":"M1","retained":67},{"cohort":"2026-06","month":"M0","retained":100}]'></c2-pivot-table>

@@ -117,8 +117,8 @@ Curated looks for `c2-org-chart`. Open any card in the studio to start from it. 
     --c2-org-chart__card__selected--border-color: var(--c2-theme--color-primary, rgb(2, 101, 220));
   }
   .selected-chart::part(card-selected) {
-    --c2-org-chart__label--color: #ffffff;
-    --c2-org-chart__description--color: #ffffff;
+    --c2-org-chart__label--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-org-chart__description--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-org-chart client:only="lit" class="selected-chart" selectable value="li" aria-label="Leadership team" items='[{"id":"ana","label":"Ana Ruiz","description":"CEO","children":[{"id":"li","label":"Li Wei","description":"CTO"},{"id":"maya","label":"Maya Cohen","description":"CFO"}]}]'></c2-org-chart>
