@@ -39,10 +39,11 @@ findBar.addEventListener('close', () => record('close'))
 // The application replaces in its own text: here, the text of each highlight.
 findBar.addEventListener('replace', ({ detail }) => {
   record(`replace:${detail.all ? 'all' : detail.index}`)
-  const options = { matchCase: detail.matchCase, wholeWord: detail.wholeWord }
   for (const highlight of detail.all ? detail.highlights : [detail.highlight!]) {
     const text = highlight.textContent ?? ''
-    const matches = findMatches(text, detail.query, options)
+    // Each highlight's own options, which the bar counted with.
+    const { matchCase, wholeWord, ignoreAccents, words } = highlight
+    const matches = findMatches(text, detail.query, { matchCase, wholeWord, ignoreAccents, words })
     const chosen = detail.all ? matches : [matches[detail.index]]
     let next = text
     for (const { start, end } of [...chosen].reverse()) next = next.slice(0, start) + detail.replacement + next.slice(end)

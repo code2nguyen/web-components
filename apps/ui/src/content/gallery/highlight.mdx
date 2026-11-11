@@ -257,10 +257,12 @@ The application performs the replace on the `replace` event, then the highlights
 import { findMatches } from '@c2n/components/highlight'
 
 findBar.addEventListener('replace', ({ detail }) => {
-  const { query, replacement, matchCase, wholeWord, all, highlights, highlight, index } = detail
+  const { query, replacement, all, highlights, highlight, index } = detail
   for (const item of all ? highlights : [highlight]) {
+    // Match with the highlight's own options, which the bar counted with.
+    const { matchCase, wholeWord, ignoreAccents, words } = item
     let text = item.textContent
-    const matches = findMatches(text, query, { matchCase, wholeWord })
+    const matches = findMatches(text, query, { matchCase, wholeWord, ignoreAccents, words })
     for (const { start, end } of (all ? matches : [matches[index]]).reverse()) text = text.slice(0, start) + replacement + text.slice(end)
     item.textContent = text
   }

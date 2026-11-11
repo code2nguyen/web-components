@@ -115,6 +115,30 @@ test('replace and replace all fire replace; the bar recounts the text the app ch
   await expect(events(page)).toHaveText('match:0/3 match:1/3 replace:0 match:1/2 replace:all match:-1/0')
 })
 
+test('Enter right after typing steps through the new matches', async ({ page, scenario }) => {
+  await scenario()
+  const find = page.getByRole('textbox', { name: 'Find' })
+  await find.fill('apple')
+  await find.press('Enter')
+  await expect(page.locator('c2-find-bar').getByRole('status')).toHaveText('2 of 3')
+})
+
+test('keys pressed in the actions slot belong to the action', async ({ page, scenario }) => {
+  await scenario('actions')
+  await page.getByRole('button', { name: 'Filter' }).press('Escape')
+  await expect(events(page)).toHaveText('match:0/3')
+  expect(await marks(page)).toEqual(['*Apple', 'apple', 'apple'])
+})
+
+test('removing the bar clears its marks, and putting it back re-applies them', async ({ page, scenario }) => {
+  await scenario('value')
+  const bar = await page.locator('c2-find-bar').evaluateHandle((element) => element)
+  await bar.evaluate((element) => element.remove())
+  await expect.poll(() => marks(page)).toEqual([])
+  await bar.evaluate((element) => document.querySelector('main')!.prepend(element))
+  await expect.poll(() => marks(page)).toEqual(['*Apple', 'apple', 'apple'])
+})
+
 test('drives a single c2-highlight given as the target', async ({ page, scenario }) => {
   await scenario('single')
   await expect(page.locator('c2-find-bar').getByRole('status')).toHaveText('1 of 3')

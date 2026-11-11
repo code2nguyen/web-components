@@ -6,7 +6,11 @@ const en = {
   previous: 'Previous match',
   next: 'Next match',
   matchCase: 'Match case',
+  /** The match case toggle's glyph. */
+  matchCaseGlyph: 'Aa',
   wholeWord: 'Match whole word',
+  /** The whole word toggle's glyph. */
+  wholeWordGlyph: 'ab',
   close: 'Close',
   replace: 'Replace',
   replaceAll: 'Replace all',

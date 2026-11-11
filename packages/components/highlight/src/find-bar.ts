@@ -17,12 +17,14 @@ export interface FindBarMatchDetail {
   index: number
 }
 
-/** `detail` of the `replace` event of {@link FindBar}: what to replace, which the application does in its own text. */
+/**
+ * `detail` of the `replace` event of {@link FindBar}: what to replace, which the application does in its own text. Find
+ * the matches of each highlight with its own options (`matchCase`, `wholeWord`, `ignoreAccents`, `words`), which the bar
+ * counts with, so `index` points at the same match.
+ */
 export interface FindBarReplaceDetail {
   query: string
   replacement: string
-  matchCase: boolean
-  wholeWord: boolean
   /** True for "Replace all": every match of every highlight in `highlights`. */
   all: boolean
   /** The `c2-highlight` elements of the target that hold at least one match. */
@@ -49,15 +51,11 @@ const NEXT = svg`<path d="m6 9 6 6 6-6" />`
 const CLOSE = svg`<path d="M18 6 6 18M6 6l12 12" />`
 
 /**
- * A find bar for a region of the page: a query field, the "3 of 12" count, previous and next, match case and whole
- * word toggles, an optional replace row and Escape to close. It drives the `c2-highlight` elements of its target (the
- * element named by `for`, or the `target` property): it sets their `query`, `match-case` and `whole-word`, counts
- * their matches in document order and moves `active-index` through them, so the current match scrolls into view.
- *
- * The target is one `c2-highlight` or any element holding several, such as a list of search results or a log; a
- * highlight added later is picked up on the next keystroke. The bar never edits text: "Replace" and "Replace all"
- * fire `replace` with what to replace, and the application changes its own text, which the highlights then re-read.
- * Escape and the close button fire `close` and clear the highlights; the application hides the bar.
+ * A find bar for a region: a query field, a "3 of 12" count, previous and next, match case and whole word toggles,
+ * an optional replace row and Escape to close. It drives the `c2-highlight` elements of its target (`for` or
+ * `target`: one highlight or an element holding several), setting their `query`, `match-case` and `whole-word` and
+ * stepping `active-index` through their matches in document order. It never edits text: "Replace" fires `replace`
+ * and the application changes its own text. Escape and the close button fire `close` and clear the highlights.
  *
  * Keyboard: Enter and Shift+Enter step to the next and previous match, Alt+C and Alt+W toggle match case and whole
  * word, Escape closes. In the replace field, Enter replaces the current match and Ctrl+Enter (⌘+Enter) every match.
@@ -94,12 +92,11 @@ const CLOSE = svg`<path d="M18 6 6 18M6 6l12 12" />`
  * @cssproperty {pixel} [--c2-find-bar__field--width=240px]
  * @cssproperty {pixel} [--c2-find-bar__field--height=32px]
  * @cssproperty {color} [--c2-find-bar__field--background-color=#ffffff]
- * @cssproperty {border} [--c2-find-bar__field--border=1px solid #d4d4d8]
+ * @cssproperty {border} [--c2-find-bar__field--border=1px solid #d4d4d8] - Also the border of the replace buttons.
  * @cssproperty {border-radius} [--c2-find-bar__field--border-radius=6px]
  * @cssproperty {outline} [--c2-find-bar__field__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {color} [--c2-find-bar__count--color=#71717a]
  * @cssproperty {font-size} [--c2-find-bar__count--font-size=12px]
- * @cssproperty {color} [--c2-find-bar__count__empty--color=#d31510]
  * @cssproperty {pixel} [--c2-find-bar__button--size=28px]
  * @cssproperty {border-radius} [--c2-find-bar__button--border-radius=6px]
  * @cssproperty {color} [--c2-find-bar__button--color=#18181b]
@@ -109,7 +106,6 @@ const CLOSE = svg`<path d="M18 6 6 18M6 6l12 12" />`
  * @cssproperty {pixel} [--c2-find-bar__toggle--size=24px]
  * @cssproperty {color} [--c2-find-bar__toggle__pressed--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-find-bar__toggle__pressed--background-color=#edf1fe]
- * @cssproperty {border} [--c2-find-bar__replace-button--border=1px solid #d4d4d8]
  * @cssproperty {padding} [--c2-find-bar__replace-button--padding=0 10px]
  */
 @customElement('c2-find-bar')
@@ -153,6 +149,7 @@ export class FindBar extends LitElement {
   private syncing = false
   private synced = false
   private pending = false
+  private running?: Promise<void>
   private reported = '0:-1'
 
   /** Number of matches across the target. */
@@ -167,12 +164,13 @@ export class FindBar extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    // Moved in the page: hook the target again.
     if (this.synced) void this.sync()
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    // Leaves no marks behind; reconnecting re-applies the query.
+    if (this.counted) this.clear()
     this.listen(undefined)
   }
 
@@ -181,7 +179,7 @@ export class FindBar extends LitElement {
     const input = this.renderRoot.querySelector<HTMLInputElement>('.c2-find-bar__input')
     input?.focus(options)
     input?.select()
-    this.sync()
+    void this.sync()
   }
 
   /** Moves to the next match, wrapping after the last. */
@@ -196,7 +194,8 @@ export class FindBar extends LitElement {
 
   /** Clears the highlights of the target, keeping the query in the field. The next keystroke or `focus()` re-applies it. */
   clear(): void {
-    for (const highlight of this.collect()) {
+    // Disconnected, `for` cannot be looked up: clear the last highlights.
+    for (const highlight of this.isConnected ? this.collect() : this.highlights) {
       highlight.query = ''
       highlight.activeIndex = -1
     }
@@ -209,7 +208,6 @@ export class FindBar extends LitElement {
   protected override updated(changed: PropertyValues<this>): void {
     super.updated(changed)
     const query = changed.has('value') || changed.has('matchCase') || changed.has('wholeWord')
-    // The first update syncs too, so the highlights of a bar written with a `value` are marked on load.
     if (!this.synced || query || changed.has('for') || changed.has('target')) {
       this.synced = true
       void this.sync(query)
@@ -224,16 +222,13 @@ export class FindBar extends LitElement {
 
   private collect(): Highlight[] {
     const target = this.resolveTarget()
-    this.listen(target)
+    this.listen(this.isConnected ? target : undefined)
     if (!target) return []
     if (target.localName === 'c2-highlight') return [target as Highlight]
     return Array.from(target.querySelectorAll('c2-highlight'))
   }
 
-  /**
-   * `match-change` does not bubble, but a capturing listener on the target hears every highlight inside it (an edit,
-   * a replace). A mutation observer catches a highlight added to or removed from the target, such as a filtered list.
-   */
+  /** `match-change` does not bubble: capture it on the target. The observer sees highlights added or removed. */
   private listen(target: Element | undefined): void {
     if (target === this.listened) return
     this.listened?.removeEventListener('match-change', this.onMatchChange, true)
@@ -245,14 +240,13 @@ export class FindBar extends LitElement {
     this.observer.observe(target, { childList: true, subtree: true })
   }
 
-  /** Only a highlight's count: the bar's own `match-change` reaches this listener too when the bar sits inside its target. */
+  /** Ignores the bar's own `match-change` when it sits inside its target. */
   private readonly onMatchChange = (event: Event): void => {
     if ((event.target as Element).localName === 'c2-highlight') this.onChange()
   }
 
   private readonly onChange = (): void => {
     if (this.syncing || this.pending || !this.counted) return
-    // Settle the burst of updates first, then push the query to any new highlight and recount.
     this.pending = true
     queueMicrotask(() => {
       this.pending = false
@@ -260,8 +254,14 @@ export class FindBar extends LitElement {
     })
   }
 
-  /** Pushes the query and options to every highlight of the target, then counts. `restart` moves to the first match. */
-  private async sync(restart = false): Promise<void> {
+  private sync(restart = false): Promise<void> {
+    const run = this.run(restart).finally(() => {
+      if (this.running === run) this.running = undefined
+    })
+    return (this.running = run)
+  }
+
+  private async run(restart: boolean): Promise<void> {
     const list = this.collect()
     this.syncing = true
     for (const highlight of list) {
@@ -271,7 +271,7 @@ export class FindBar extends LitElement {
     }
     await Promise.all(list.map((highlight) => highlight.updateComplete))
     this.syncing = false
-    this.recount(restart)
+    if (this.isConnected) this.recount(restart)
   }
 
   private recount(restart: boolean): void {
@@ -286,12 +286,16 @@ export class FindBar extends LitElement {
   }
 
   private step(delta: number): void {
+    // Step through the new query's matches, not the old ones.
+    if (this.running) {
+      void this.running.then(() => this.step(delta))
+      return
+    }
     if (this.count === 0) return
     this.current = (this.current + delta + this.count) % this.count
     this.place()
   }
 
-  /** The highlight holding the global match `index`, and the match's index inside it. */
   private locate(index: number): [Highlight | undefined, number] {
     let offset = 0
     for (const highlight of this.highlights) {
@@ -325,8 +329,6 @@ export class FindBar extends LitElement {
     const detail: FindBarReplaceDetail = {
       query: this.value,
       replacement: this.replacement,
-      matchCase: this.matchCase,
-      wholeWord: this.wholeWord,
       all,
       highlights: this.highlights.filter((item) => (item.matchCount ?? 0) > 0),
       highlight,
@@ -345,6 +347,8 @@ export class FindBar extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent): void {
+    // Keys pressed in slotted actions belong to them.
+    if (event.defaultPrevented || (event.target as Node).getRootNode() !== this.renderRoot) return
     if (event.key === 'Escape') {
       event.preventDefault()
       this.close()
@@ -368,7 +372,7 @@ export class FindBar extends LitElement {
   }
 
   private iconButton(part: string, label: string, icon: unknown, onClick: () => void, disabled = false) {
-    return html`<button type="button" class="c2-find-bar__button" part=${part} aria-label=${label} title=${label} ?disabled=${disabled} @click=${onClick}>
+    return html`<button type="button" class="c2-find-bar__button" part=${part} aria-label=${label} ?disabled=${disabled} @click=${onClick}>
       <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         ${icon}
       </svg>
@@ -381,7 +385,6 @@ export class FindBar extends LitElement {
       class="c2-find-bar__toggle"
       part="toggle"
       aria-label=${label}
-      title=${label}
       aria-pressed=${pressed ? 'true' : 'false'}
       @click=${onClick}
     >
@@ -411,11 +414,9 @@ export class FindBar extends LitElement {
             @input=${this.handleInput}
             @keydown=${this.handleQueryKeydown}
           />
-          <span class="c2-find-bar__count ${this.counted && this.value && none ? 'c2-find-bar__count--empty' : ''}" part="count" role="status"
-            >${this.renderCount()}</span
-          >
-          ${this.toggle(this.msg.t('matchCase'), this.matchCase, 'Aa', () => (this.matchCase = !this.matchCase))}
-          ${this.toggle(this.msg.t('wholeWord'), this.wholeWord, 'ab', () => (this.wholeWord = !this.wholeWord))}
+          <span class="c2-find-bar__count" part="count" role="status">${this.renderCount()}</span>
+          ${this.toggle(this.msg.t('matchCase'), this.matchCase, this.msg.t('matchCaseGlyph'), () => (this.matchCase = !this.matchCase))}
+          ${this.toggle(this.msg.t('wholeWord'), this.wholeWord, this.msg.t('wholeWordGlyph'), () => (this.wholeWord = !this.wholeWord))}
         </div>
         ${this.iconButton('button', this.msg.t('previous'), PREVIOUS, () => this.previous(), none)}
         ${this.iconButton('button', this.msg.t('next'), NEXT, () => this.next(), none)}

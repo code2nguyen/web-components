@@ -18,7 +18,6 @@
     field__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     count--color: #71717a,
     count--font-size: 12px,
-    count__empty--color: #d31510,
 
     button--size: 28px,
     button--border-radius: 6px,
@@ -31,7 +30,6 @@
     toggle__pressed--color: rgb(2, 101, 220),
     toggle__pressed--background-color: #edf1fe,
 
-    replace-button--border: 1px solid #d4d4d8,
     replace-button--padding: 0 10px,
   )
 );
@@ -120,10 +118,6 @@
   }
 }
 
-.c2-find-bar__count--empty {
-  color: css.cssVar(count__empty--color);
-}
-
 .c2-find-bar__button,
 .c2-find-bar__toggle,
 .c2-find-bar__replace {
@@ -181,7 +175,7 @@
   height: css.cssVar(button--size);
   padding: css.cssVar(replace-button--padding);
   white-space: nowrap;
-  border: css.cssVar(replace-button--border);
+  border: css.cssVar(field--border);
 }
 
 .c2-find-bar__actions {
