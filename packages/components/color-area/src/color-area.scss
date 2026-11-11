@@ -1,11 +1,13 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-color-area,
   $theme: (
     width: 240px,
     height: 240px,
     color-handle--size: 12px,
+    color-handle__focus--outline: 2px solid #476ef9,
 
     border-top-left-radius: null,
     border-top-right-radius: null,
@@ -16,18 +18,30 @@
 
 :host {
   display: block;
+  // In a flex or grid parent the area shrinks to the room it has instead of growing to its 240px width.
+  min-inline-size: 0;
 }
 
 .c2-color-area {
   display: block;
   position: relative;
+  box-sizing: border-box;
+  // Room for the half of the thumb that hangs over an edge.
   padding: calc(css.cssVar(color-handle--size) - 6px);
   width: fit-content;
+  max-width: 100%;
   height: fit-content;
   .gradient {
+    // The thumb is placed in percent of this box.
+    position: relative;
+    box-sizing: border-box;
+    // The drag is captured on this element: no page scroll or zoom gesture may take the pointer over.
+    touch-action: none;
     width: 100%;
     height: 100%;
     width: css.cssVar(width);
+    // Narrower than its width in a small container rather than overflowing it; the thumb follows in percent.
+    max-width: 100%;
     height: css.cssVar(height);
     border-top-left-radius: css.cssVar(border-top-left-radius);
     border-top-right-radius: css.cssVar(border-top-right-radius);
@@ -41,11 +55,18 @@
     width: css.cssVar(color-handle--size);
     height: css.cssVar(color-handle--size);
     border-radius: 50%;
-    top: 0;
-    left: 0;
+    // `left`/`top` are the colour's position; the thumb is centred on it.
+    translate: -50% -50%;
     border: 2px solid white;
     background: transparent;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 0px 0.6px;
     cursor: inherit;
+    outline: none;
+
+    &:focus-visible {
+      outline: css.cssVar(color-handle__focus--outline);
+      outline-offset: 2px;
+      @include focus.forced-colors-ring;
+    }
   }
 }
