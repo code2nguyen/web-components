@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Form } from '@c2n/form'
+import type { FormList } from '@c2n/form/form-list.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -26,6 +27,13 @@ declare module 'vue' {
         onValidSubmit?: (event: EventOf<Form, 'valid-submit'>) => void
         onInvalidSubmit?: (event: EventOf<Form, 'invalid-submit'>) => void
         onDirtyChange?: (event: EventOf<Form, 'dirty-change'>) => void
+      }
+    >
+    'c2-form-list': DefineComponent<
+      C2Props<FormList> & {
+        'add-label'?: unknown
+        onRowsChange?: (event: EventOf<FormList, 'rows-change'>) => void
+        onChange?: (event: EventOf<FormList, 'change'>) => void
       }
     >
   }

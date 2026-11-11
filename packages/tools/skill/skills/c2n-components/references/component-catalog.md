@@ -174,7 +174,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
 - **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
-- **Form** — `c2-form` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
+- **Form** — `c2-form, c2-form-list` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
 - **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.

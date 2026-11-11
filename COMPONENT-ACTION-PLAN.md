@@ -85,7 +85,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
 - **highlight-1** · `c2-highlight` · find bar #258 (companion) · 2.5 kB new entry · risk low
 - **date-input-1** · `c2-date-input` · date picker #290 (lazy) · +0.5 kB on 3.1 kB, 17 kB lazy · risk low · after `date-selector-1`
-- **form-1** · `c2-form` · field array #442 (companion) · 3 kB new entry · risk low
 - **tree-1** · `c2-tree` · sortable tree #465 (lazy) · +0.4 kB on 15.3 kB, 6 kB lazy · risk medium
 
 ### New packages
