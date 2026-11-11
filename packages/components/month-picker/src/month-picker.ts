@@ -35,11 +35,11 @@ const YEAR_PAGE = 12
 interface Period {
   year: number
   unit: MonthPickerGranularity
-  /** Zero-based: the month, quarter or half of the year. */
+  /** Zero-based. */
   index: number
 }
 
-/** A value's year, granularity and place in the year, or `null` when it is none of the formats. */
+/** A value's parts, or `null`. */
 function parse(key: string): Period | null {
   const match = keyPattern.exec(key)
   if (!match) return null
@@ -59,7 +59,7 @@ function keyOf(year: number, unit: MonthPickerGranularity, index: number): strin
   return `${year}-${unit === 'month' ? pad(index + 1) : `${unit === 'quarter' ? 'Q' : 'H'}${index + 1}`}`
 }
 
-/** Months are counted from year 0 (`year * 12 + month`), so a range is two numbers. */
+/** Months count from year 0: `year * 12 + month`. */
 const dateOf = (month: number, day = 1) => new Date(Math.floor(month / 12), month % 12, day, 12)
 const thisMonth = () => {
   const now = new Date()
@@ -318,7 +318,7 @@ export class MonthPicker extends LitElement {
     return this.unit === 'year'
   }
 
-  /** The months from January to the fiscal year's first month: 0 for calendar years, and always for months. */
+  /** Months from January to the fiscal year's start; 0 in month mode. */
   private get offset(): number {
     const start = Math.round(this.fiscalStart)
     return this.unit !== 'month' && start > 1 && start <= 12 ? start - 1 : 0
@@ -332,7 +332,7 @@ export class MonthPicker extends LitElement {
     return parse(value)?.unit === this.unit
   }
 
-  /** The first and last month of a period in any format, or `null` when it is none. */
+  /** A period's first and last month, or `null`. */
   private range(key: string): [number, number] | null {
     const period = parse(key)
     if (!period) return null
@@ -348,7 +348,7 @@ export class MonthPicker extends LitElement {
     return keyOf(Math.floor(fromStart / 12) + (this.offset ? 1 : 0), unit, Math.floor((((fromStart % 12) + 12) % 12) / SIZE[unit]))
   }
 
-  /** The period `count` periods after the value (before it when negative), counted from the current period without one. */
+  /** `count` periods after the value, or after the current period. */
   private stepped(count: number): string {
     const value = parse(this.value)
     const period = value?.unit === this.unit ? value : parse(this.periodAt(thisMonth(), this.unit))!
@@ -511,13 +511,15 @@ export class MonthPicker extends LitElement {
     void this.focusCell()
   }
 
-  /** A year's name: `2026`, or `FY2026` with `fiscal-start`. */
-  private yearName(year: number): string {
-    const text = formatter(this.msg.locale, { year: 'numeric' }).format(new Date(year, 0, 1, 12))
-    return this.offset ? this.msg.t('fiscalYear', text) : text
+  /** `2026`, `FY2026`, or with `last` `FY2016 – 2027`. */
+  private yearName(year: number, last?: number): string {
+    const format = formatter(this.msg.locale, { year: 'numeric' })
+    const text = (at: number) => format.format(new Date(at, 0, 1, 12))
+    const name = last === undefined ? text(year) : `${text(year)} – ${text(last)}`
+    return this.offset ? this.msg.t('fiscalYear', name) : name
   }
 
-  /** A period's name: `July 2026`, `Q3 2026`, `H1 FY2027`, `2026`. */
+  /** `July 2026`, `Q3 2026`, `H1 FY2027`. */
   private periodName(key: string): string {
     const { year, unit, index } = parse(key)!
     if (unit === 'month') return formatter(this.msg.locale, { month: 'long', year: 'numeric' }).format(dateOf(year * 12 + index))
@@ -525,7 +527,7 @@ export class MonthPicker extends LitElement {
     return this.msg.t('period', this.msg.t(unit === 'quarter' ? 'quarter' : 'halfYear', String(index + 1)), this.yearName(year))
   }
 
-  /** The months a period covers, as `Jul – Sep` (with the year, `Jul – Sep 2026`). */
+  /** `Jul – Sep`, or `Jul – Sep 2026`. */
   private months(key: string, month: 'short' | 'long', withYear = false): string {
     const [first, last] = this.range(key)!
     const format = formatter(this.msg.locale, withYear ? { month, year: 'numeric' } : { month }) as Intl.DateTimeFormat & {
@@ -570,7 +572,7 @@ export class MonthPicker extends LitElement {
     const stop = this.tabStop(keys, current)
     const shortMonth = formatter(this.msg.locale, { month: 'short' })
     const first = pageStart(this.viewYear)
-    const title = yearsView ? `${this.yearName(first)} – ${this.yearName(first + YEAR_PAGE - 1)}` : this.yearName(this.viewYear)
+    const title = yearsView ? this.yearName(first, first + YEAR_PAGE - 1) : this.yearName(this.viewYear)
     const invalid = this.field.invalid && !this.effectiveDisabled
     const columns = this.columns
     const rows = Array.from({ length: Math.ceil(keys.length / columns) }, (_, row) => keys.slice(row * columns, row * columns + columns))
@@ -653,7 +655,7 @@ export class MonthPicker extends LitElement {
                           ? html`${this.msg.t(period.unit === 'quarter' ? 'quarter' : 'halfYear', String(period.index + 1))}<span class="range" part="range"
                                 >${this.months(key, 'short')}</span
                               >`
-                          : this.yearName(period.year)
+                          : formatter(this.msg.locale, { year: 'numeric' }).format(new Date(period.year, 0, 1, 12))
                     }
                   </button>`
                 })}

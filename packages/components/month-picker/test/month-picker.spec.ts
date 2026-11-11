@@ -151,6 +151,9 @@ test('fiscal-start shifts quarters, half-years and years; from and to resolve th
   await picker(page).evaluate((element: MonthPicker) => (element.granularity = 'year'))
   expect(await value(page)).toBe('2027')
   await expect(page.getByRole('gridcell', { name: 'FY2027' })).toHaveAttribute('aria-selected', 'true')
+  // The page of years names the fiscal years once, in its title; each cell shows the bare year.
+  await expect(page.getByRole('grid', { name: 'FY2016 – 2027' })).toBeVisible()
+  await expect(page.getByRole('gridcell', { name: 'FY2027' })).toHaveText('2027')
   expect(await picker(page).evaluate((element: MonthPicker) => [element.from, element.to])).toEqual(['2026-07-01', '2027-06-30'])
 })
 
