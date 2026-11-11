@@ -426,6 +426,11 @@
 .a11y-root,
 [class$='-a11y-root'] {
   position: absolute;
+  // Pinned to the start corner of its containing block: left at its static place, a chart scrolled out of a table
+  // would carry the box past the scroller's edge (an absolute box escapes a scroller that is not its containing
+  // block) and widen the page.
+  inset-block-start: 0;
+  inset-inline-start: 0;
   width: 1px;
   height: 1px;
   overflow: hidden;

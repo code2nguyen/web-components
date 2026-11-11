@@ -279,6 +279,8 @@ export interface ChartBase {
  *
  * @cssproperty {color} [--c2-chart__state--color=#71717a] - Colour of the empty, loading and error text.
  * @cssproperty {font-size} [--c2-chart__state--font-size=14px] - Font size of the empty, loading and error text.
+ *
+ * @attr aria-label - The chart's accessible name, read by a screen reader on the plot before its data table. Without it the chart describes itself from its type, series and size.
  */
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
