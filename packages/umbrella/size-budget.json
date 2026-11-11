@@ -1,5 +1,5 @@
 {
-  "lazy": 374640,
+  "lazy": 379589,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -104,7 +104,7 @@
     "facet-list": 4626,
     "fieldset": 3166,
     "file-browser": 97292,
-    "filter-builder": 68415,
+    "filter-builder": 69643,
     "float-button": 5910,
     "float-button/float-button-action": 1684,
     "floating-panel": 10950,

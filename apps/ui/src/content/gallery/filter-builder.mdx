@@ -1,10 +1,12 @@
 ---
-description: 'Looks for c2-filter-builder: the default pill bar, square chips, soft filled chips and a dense bar. Open any card in the studio to start from it.'
+description: 'Looks for c2-filter-builder: the default pill bar, square chips, soft filled chips, a dense bar, and the rule builder of nested AND/OR groups with an automation rule. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 
+import { Button } from '@c2n/components/button'
 import { FilterBuilder } from '@c2n/components/filter-builder'
 
 ## Presets
@@ -58,3 +60,58 @@ Most of the look comes from the chip variables (`--c2-filter-builder__chip--*`),
 ```
 
 </GalleryGrid>
+
+## Rule builder
+
+With `groups`, the same fields and editors are laid out as a tree of AND/OR groups, loaded the first time a builder sets it. A group can be negated, nested and removed; drag a row by its handle, or press the arrow keys on the handle, to move it into, within and out of a group. The tree reads as a sentence below it, and the `then` slot holds the actions of an automation rule. Restyle the groups with `--c2-filter-builder__group--*`, the connector column with `__joiner--*` and the sentence with `__sentence--*`.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Nested groups
+<c2-filter-builder groups fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa"},{"value":"doing","label":"In progress","color":"#0265dc"},{"value":"review","label":"In review","color":"#d97706"},{"value":"done","label":"Done","color":"#16a34a"}]},{"id":"assignee","label":"Assignee","type":"person","options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"op":"or","rules":[{"field":"labels","operator":"has_any","value":["bug","regression"]},{"field":"estimate","operator":"gt","value":5}]},{"op":"and","not":true,"rules":[{"field":"assignee","operator":"eq","value":"ana"},{"field":"blocked","operator":"is_true"}]}]}'></c2-filter-builder>
+```
+
+```html tag=MdxCodeBlock,label=Automation rule
+<style>
+  .automation-rule {
+    width: 100%;
+  }
+  .automation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+</style>
+<c2-filter-builder class="automation-rule" groups fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa"},{"value":"doing","label":"In progress","color":"#0265dc"},{"value":"review","label":"In review","color":"#d97706"},{"value":"done","label":"Done","color":"#16a34a"}]},{"id":"assignee","label":"Assignee","type":"person","options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"labels","operator":"has_any","value":["bug"]},{"op":"or","rules":[{"field":"status","operator":"eq","value":"todo"},{"field":"estimate","operator":"gte","value":8}]}]}'>
+  <div slot="then" class="automation-actions">
+    <c2-button>Assign to Triage</c2-button>
+    <c2-button>Post in #bugs</c2-button>
+  </div>
+</c2-filter-builder>
+```
+
+```html tag=MdxCodeBlock,label=Outlined groups
+<style>
+  .outlined-groups {
+    --c2-filter-builder__group--background-color: transparent;
+    --c2-filter-builder__group--border: 1px dashed var(--c2-theme--color-outline, #d4d4d8);
+    --c2-filter-builder__group--border-radius: 4px;
+    --c2-filter-builder__group--padding: 8px 8px 8px 0;
+    --c2-filter-builder__joiner--width: 56px;
+    --c2-filter-builder__joiner--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-filter-builder__sentence--font-size: 12px;
+  }
+</style>
+<c2-filter-builder class="outlined-groups" groups fields='[{"id":"status","label":"Status","type":"enum","options":[{"value":"todo","label":"To do","color":"#a1a1aa"},{"value":"doing","label":"In progress","color":"#0265dc"},{"value":"review","label":"In review","color":"#d97706"},{"value":"done","label":"Done","color":"#16a34a"}]},{"id":"assignee","label":"Assignee","type":"person","options":[{"value":"ana","label":"Ana Ng"},{"value":"ben","label":"Ben Kowalski"},{"value":"carla","label":"Carla Ruiz"}]},{"id":"labels","label":"Labels","type":"multi","options":[{"value":"bug","label":"Bug","color":"#dc2626"},{"value":"feature","label":"Feature","color":"#7c3aed"},{"value":"regression","label":"Regression","color":"#ea580c"}]},{"id":"title","label":"Title","type":"text"},{"id":"estimate","label":"Estimate","type":"number","unit":"pts"},{"id":"blocked","label":"Blocked","type":"boolean"}]' value='{"op":"and","rules":[{"field":"status","operator":"in","value":["doing","review"]},{"op":"or","rules":[{"field":"labels","operator":"has_any","value":["bug","regression"]},{"field":"estimate","operator":"gt","value":5}]},{"op":"and","not":true,"rules":[{"field":"assignee","operator":"eq","value":"ana"},{"field":"blocked","operator":"is_true"}]}]}'></c2-filter-builder>
+```
+
+</GalleryGrid>
+
+`describe()` returns the sentence for any tree, and `filter-change` reports the tree with its groups, a negated group carrying `not: true`:
+
+```ts tag=CodeBlock
+const rule = document.querySelector('c2-filter-builder')!
+rule.addEventListener('filter-change', async (event) => {
+  await save({ when: event.detail.value, summary: await rule.describe() })
+})
+```

@@ -117,9 +117,23 @@ export function normalizeTree(value: unknown): FilterGroup {
   if (Array.isArray(value)) return { op: 'and', rules: value.filter(isNode) }
   if (value && typeof value === 'object' && Array.isArray((value as FilterGroup).rules)) {
     const group = value as FilterGroup
-    return { op: group.op === 'or' ? 'or' : 'and', rules: group.rules.filter(isNode) }
+    const tree: FilterGroup = { op: group.op === 'or' ? 'or' : 'and', rules: group.rules.filter(isNode) }
+    if (group.not === true) tree.not = true
+    return tree
   }
   return { op: 'and', rules: [] }
+}
+
+/** A copy of `list` with the node at `path` replaced, or removed when `node` is not given. */
+export function replaceAt(list: FilterNode[], path: number[], node?: FilterNode): FilterNode[] {
+  const [index, ...rest] = path
+  const next = [...list]
+  const current = next[index]
+  if (rest.length) {
+    if (current && isGroup(current)) next[index] = { ...current, rules: replaceAt(current.rules, rest, node) }
+  } else if (node) next[index] = node
+  else next.splice(index, 1)
+  return next
 }
 
 function isNode(node: unknown): node is FilterNode {
