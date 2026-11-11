@@ -151,3 +151,15 @@ test('has no detectable accessibility violations', async ({ page, scenario }) =>
   const results = await new AxeBuilder({ page }).include('c2-state-timeline').analyze()
   baseExpect(results.violations).toEqual([])
 })
+
+test('each tone writes its label in its own colour, so a dark theme can flip some and keep the others', async ({ page, scenario }) => {
+  await scenario()
+  const subject = page.locator('c2-state-timeline')
+  // A dark theme sets a dark segment colour for the fills that lighten; the warning fill stays deep, its label white.
+  await subject.evaluate((el) => el.style.setProperty('--c2-state-timeline__segment--color', 'rgb(11, 26, 58)'))
+  const degraded = segment(subject, /^API: Degraded/)
+  await expect(degraded).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(segment(subject, /^Database: Outage/)).toHaveCSS('color', 'rgb(11, 26, 58)')
+  await subject.evaluate((el) => el.style.setProperty('--c2-state-timeline__tone-warning__label--color', 'rgb(1, 2, 3)'))
+  await expect(degraded).toHaveCSS('color', 'rgb(1, 2, 3)')
+})
