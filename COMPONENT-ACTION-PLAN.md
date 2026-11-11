@@ -86,7 +86,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **description-list-1** · `c2-description-list` · comparison matrix #249, example: record diff #250 · +1.2 kB on 5.6 kB · risk low
 - **pivot-table-1** · `c2-pivot-table` · financial statement #332 · +2 kB on 32.3 kB · risk medium
 - **highlight-1** · `c2-highlight` · find bar #258 (companion) · 2.5 kB new entry · risk low
-- **filter-builder-1** · `c2-filter-builder` · rule builder #260 (lazy) · +0.6 kB on 66.8 kB, 7 kB lazy · risk medium
 - **date-input-1** · `c2-date-input` · date picker #290 (lazy) · +0.5 kB on 3.1 kB, 17 kB lazy · risk low · after `date-selector-1`
 - **month-picker-1** · `c2-month-picker` · period picker #294 · +1 kB on 5.4 kB · risk low
 - **form-1** · `c2-form` · field array #442 (companion) · 3 kB new entry · risk low

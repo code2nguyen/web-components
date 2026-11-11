@@ -44,6 +44,7 @@ import {
   matches,
   normalizeTree,
   operatorLabel,
+  replaceAt,
   operatorsOf,
   ruleValues,
   toggleOption,
@@ -67,10 +68,16 @@ export interface FilterBuilder {
 type EditorMode = 'fields' | 'operator' | 'value'
 
 interface Editing {
-  /** Index in the working list, or -1 while picking a field for a new condition. */
-  index: number
+  /** Path of the condition, or of the group a new condition goes into while picking a field (`[]` is the root). */
+  path: number[]
   mode: EditorMode
 }
+
+type TreeModule = typeof import('./filter-tree.js')
+let treeModule: TreeModule | undefined
+let treeLoading: Promise<TreeModule> | undefined
+const loadTree = () =>
+  (treeLoading ??= import('./filter-tree.js').then((module) => (treeModule = module)).finally(() => treeModule || (treeLoading = undefined)))
 
 const ICON_TAG = /^[a-z][a-z0-9]*(-[a-z0-9]+)+$/
 const VALUE_SEPARATOR = '\u0000'
@@ -133,6 +140,12 @@ const backIcon = html`<svg
  * dashed chip but kept out of the tree, and dropped when its editor closes empty. A nested group in a tree it is given
  * shows as one removable chip.
  *
+ * `groups` lays the conditions out as a tree instead, loaded on first use: each group reads "all / any of the
+ * following" and can be negated (`not: true` in the tree), nested, removed and reordered by dragging a row or with the
+ * arrow keys on its handle, which also move it into and out of groups. The tree reads as a sentence below it
+ * (`describe()` returns that sentence), and the `then` slot adds an action zone after it, for an automation rule's
+ * actions. Groups left empty are kept on screen but not in `value`.
+ *
  * Picking a field opens its value editor straight away. Typing in the field picker also matches the options of
  * every choice field, so "Ana" offers "Assignee is Ana Ng" in one step. On `enum` and `person` fields the operator
  * follows the number of values: one value is `is` (`eq`), several are `is any of` (`in`). Below `compact-below`
@@ -142,6 +155,7 @@ const backIcon = html`<svg
  * @tag c2-filter-builder
  *
  * @slot end - Content at the end of the bar, such as a `c2-search-field`.
+ * @slot then - With `groups`: what happens when the tree matches, such as the action editor of an automation rule. Shown under a "Then" heading; hidden when empty.
  *
  * @event {CustomEvent<FilterChangeEventDetail>} filter-change - The tree changed: a condition was added, edited or removed. `detail.value` is the new tree (also in `value`). Does not bubble.
  *
@@ -152,6 +166,12 @@ const backIcon = html`<svg
  * @csspart clear-button - The "Clear" button shown while there are conditions.
  * @csspart popover - The surface of the field, operator and value editors.
  * @csspart sheet - The `c2-sheet` of the compact layout.
+ * @csspart tree - With `groups`: the whole tree layout.
+ * @csspart group - With `groups`: each group, the root included.
+ * @csspart rules - With `groups`: the rows of a group.
+ * @csspart row - With `groups`: one row, a condition or a nested group, with its connector and drag handle.
+ * @csspart sentence - With `groups`: the tree read as a sentence.
+ * @csspart then - With `groups`: the wrapper of the `then` slot.
  *
  * @cssproperty {pixel} [--c2-filter-builder--gap=6px] - Space between chips and buttons.
  * @cssproperty {pixel} [--c2-filter-builder__chip--height=28px]
@@ -179,6 +199,17 @@ const backIcon = html`<svg
  * @cssproperty {pixel} [--c2-filter-builder__popover--max-height=360px] - Height cap of a list of options; the list scrolls past it.
  * @cssproperty {color} [--c2-filter-builder__muted--color=#71717a] - Headings, counts and hints in the editors.
  * @cssproperty {color} [--c2-filter-builder__check--color=#0265dc] - Check mark of a selected option.
+ * @cssproperty {pixel} [--c2-filter-builder__group--gap=8px] - With `groups`: space between the rows of a group.
+ * @cssproperty {pixel} [--c2-filter-builder__group--padding=10px] - With `groups`: padding of a nested group.
+ * @cssproperty {border} [--c2-filter-builder__group--border=1px solid #e4e4e7] - With `groups`: border of a nested group.
+ * @cssproperty {border-radius} [--c2-filter-builder__group--border-radius=8px]
+ * @cssproperty {color} [--c2-filter-builder__group--background-color=#fafafa] - With `groups`: background of a nested group.
+ * @cssproperty {color} [--c2-filter-builder__group__negated--border-color=#dc2626] - With `groups`: border colour of a negated group.
+ * @cssproperty {pixel} [--c2-filter-builder__joiner--width=44px] - With `groups`: width of the "and" / "or" column.
+ * @cssproperty {color} [--c2-filter-builder__joiner--color=#71717a]
+ * @cssproperty {color} [--c2-filter-builder__drop--color=#0265dc] - With `groups`: the line showing where a dragged row lands.
+ * @cssproperty {color} [--c2-filter-builder__sentence--color=#52525b] - With `groups`: text colour of the sentence.
+ * @cssproperty {pixel} [--c2-filter-builder__sentence--font-size=14px]
  *
  * @internalcomponent c2-chip
  * @internalcomponent c2-chip-part
@@ -209,6 +240,12 @@ export class FilterBuilder extends LitElement {
 
   /** Locale of dates and numbers in the chips. Defaults to the browser's. */
   @property() locale: string | undefined = undefined
+
+  /**
+   * Lays the conditions out as a tree of nested AND/OR groups that can be negated and reordered, with the tree read
+   * as a sentence and a `then` slot. Loaded on first use. Without it, nested groups show as one chip each.
+   */
+  @property({ type: Boolean, reflect: true }) groups = false
 
   /** The conditions on screen, including one still being written. `value` holds the complete ones. */
   @state() private nodes: FilterNode[] = []
@@ -250,7 +287,7 @@ export class FilterBuilder extends LitElement {
     if (typeof ResizeObserver === 'undefined') return
     this.resizeObserver ??= new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? 0
-      this.compact = this.compactBelow > 0 && width > 0 && width < this.compactBelow
+      this.compact = !this.groups && this.compactBelow > 0 && width > 0 && width < this.compactBelow
     })
     this.resizeObserver.observe(this)
   }
@@ -263,6 +300,7 @@ export class FilterBuilder extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>) {
+    if (changed.has('groups') && this.groups) this.compact = false
     if (changed.has('value')) {
       const tree = normalizeTree(this.value)
       if (JSON.stringify(tree) !== this.lastEmitted) {
@@ -280,12 +318,50 @@ export class FilterBuilder extends LitElement {
 
   override updated() {
     this.resolveUnknown()
+    if (this.groups && !treeModule) loadTree().then(() => this.requestUpdate(), console.error)
+  }
+
+  /** `value` (or `tree`) as a sentence: `Status is Done and (Estimate > 5 pts or Blocked is true)`. */
+  async describe(tree: FilterGroup = this.value): Promise<string> {
+    const module = await loadTree()
+    return module.describeFilter(normalizeTree(tree), this.describeOptions())
+  }
+
+  private describeOptions() {
+    return { fields: this.fields ?? [], labels: this.text, locale: this.locale, options: (field: FilterField, rule: FilterRule) => this.optionsOf(field, rule) }
   }
 
   // ---- model ----------------------------------------------------------------------------------------------------
 
   private fieldOf(id: string): FilterField | undefined {
     return (this.fields ?? []).find((field) => field.id === id)
+  }
+
+  private nodeAt(path: number[]): FilterNode | undefined {
+    let node: FilterNode | undefined
+    let list = this.nodes
+    for (const index of path) {
+      node = list[index]
+      list = node && isGroup(node) ? node.rules : []
+    }
+    return node
+  }
+
+  private rulesAt(path: number[]): FilterNode[] {
+    const node = this.nodeAt(path)
+    return node && isGroup(node) ? node.rules : path.length ? [] : this.nodes
+  }
+
+  private withRules(path: number[], rules: FilterNode[]): FilterNode[] {
+    const node = this.nodeAt(path)
+    if (!path.length) return rules
+    return node && isGroup(node) ? replaceAt(this.nodes, path, { ...node, rules }) : this.nodes
+  }
+
+  private prune(nodes: FilterNode[], dropEmpty: boolean): FilterNode[] {
+    const labels = this.text
+    const complete = (rule: FilterRule) => isComplete(this.fieldOf(rule.field), rule, labels)
+    return this.groups && treeModule ? treeModule.prune(nodes, complete, dropEmpty) : nodes.filter((node) => isGroup(node) || complete(node))
   }
 
   private remember(fieldId: string, option: FilterOption) {
@@ -301,8 +377,8 @@ export class FilterBuilder extends LitElement {
 
   /** Asks `resolveOptions` for the labels of stored values no option list has described yet. */
   private resolveUnknown() {
-    for (const node of this.nodes) {
-      if (isGroup(node)) continue
+    const rules = (nodes: FilterNode[]): FilterRule[] => nodes.flatMap((node) => (isGroup(node) ? (this.groups ? rules(node.rules) : []) : [node]))
+    for (const node of rules(this.nodes)) {
       const field = this.fieldOf(node.field)
       if (!field?.resolveOptions) continue
       const known = this.known.get(field.id)
@@ -320,11 +396,10 @@ export class FilterBuilder extends LitElement {
   }
 
   /** The tree of complete conditions; fires `filter-change` when it differs from the last one. */
-  private commit(nodes: FilterNode[]) {
+  private commit(nodes: FilterNode[], head: Pick<FilterGroup, 'op' | 'not'> = normalizeTree(this.value)) {
     this.nodes = nodes
-    const labels = this.text
-    const rules = nodes.filter((node) => isGroup(node) || isComplete(this.fieldOf(node.field), node, labels))
-    const tree: FilterGroup = { op: normalizeTree(this.value).op, rules }
+    const tree: FilterGroup = { op: head.op, rules: this.prune(nodes, true) }
+    if (head.not) tree.not = true
     const json = JSON.stringify(tree)
     if (json === this.lastEmitted) return
     this.lastEmitted = json
@@ -332,21 +407,18 @@ export class FilterBuilder extends LitElement {
     this.dispatchEvent(new CustomEvent<FilterChangeEventDetail>('filter-change', { detail: { value: tree } }))
   }
 
-  private updateRule(index: number, rule: FilterRule) {
-    const nodes = [...this.nodes]
-    nodes[index] = rule
-    this.commit(nodes)
-  }
-
-  private removeRule(index: number) {
-    this.commit(this.nodes.filter((_, i) => i !== index))
+  private updateRule(path: number[], rule: FilterRule) {
+    this.commit(replaceAt(this.nodes, path, rule))
   }
 
   /** Drops conditions left without a value when their editor closes. */
   private dropIncomplete() {
-    const labels = this.text
-    const nodes = this.nodes.filter((node) => isGroup(node) || isComplete(this.fieldOf(node.field), node, labels))
-    if (nodes.length !== this.nodes.length) this.commit(nodes)
+    const nodes = this.prune(this.nodes, false)
+    if (JSON.stringify(nodes) !== JSON.stringify(this.nodes)) this.commit(nodes)
+  }
+
+  private focusLater(selector: string) {
+    void this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>(selector)?.focus())
   }
 
   // ---- editor state ---------------------------------------------------------------------------------------------
@@ -404,14 +476,15 @@ export class FilterBuilder extends LitElement {
     const anchor = this.anchor
     this.anchor = null
     if (!editing || this.compact || !focusInside) return
+    const group = editing.mode === 'fields' ? editing.path : editing.path.slice(0, -1)
     void this.updateComplete.then(() => {
       if (anchor?.isConnected) anchor.focus()
-      else this.renderRoot.querySelector<HTMLElement>('.add')?.focus()
+      else this.renderRoot.querySelector<HTMLElement>(this.groups ? `.add-rule[data-path="${group.join('.')}"]` : '.add')?.focus()
     })
   }
 
-  private chipPart(index: number, name: string): HTMLElement | null {
-    return this.renderRoot.querySelector<HTMLElement>(`c2-chip[data-index="${index}"] c2-chip-part[name="${name}"]`)
+  private chipPart(path: number[], name: string): HTMLElement | null {
+    return this.renderRoot.querySelector<HTMLElement>(`c2-chip[data-path="${path.join('.')}"] c2-chip-part[name="${name}"]`)
   }
 
   // ---- async options --------------------------------------------------------------------------------------------
@@ -446,8 +519,8 @@ export class FilterBuilder extends LitElement {
   }
 
   private get editingRule(): FilterRule | undefined {
-    const index = this.editing?.index ?? -1
-    const node = index >= 0 ? this.nodes[index] : undefined
+    const editing = this.editing
+    const node = editing && editing.mode !== 'fields' ? this.nodeAt(editing.path) : undefined
     return node && !isGroup(node) ? node : undefined
   }
 
@@ -459,7 +532,7 @@ export class FilterBuilder extends LitElement {
   // ---- event handlers -------------------------------------------------------------------------------------------
 
   private handleAdd = (event: Event) => {
-    this.open({ index: -1, mode: 'fields' }, event.currentTarget as HTMLElement)
+    this.open({ path: [], mode: 'fields' }, event.currentTarget as HTMLElement)
   }
 
   private handleClear = () => {
@@ -467,19 +540,25 @@ export class FilterBuilder extends LitElement {
     this.renderRoot.querySelector<HTMLElement>('.add')?.focus()
   }
 
-  private handlePartClick(index: number, event: CustomEvent<{ name: string }>) {
+  private handlePartClick(path: number[], event: CustomEvent<{ name: string }>) {
     const mode = event.detail.name === 'operator' ? 'operator' : 'value'
-    this.open({ index, mode }, event.target as HTMLElement)
+    this.open({ path, mode }, event.target as HTMLElement)
   }
 
-  private handleRemove(index: number) {
-    this.removeRule(index)
+  private handleRemove(path: number[]) {
+    this.commit(replaceAt(this.nodes, path))
     // Focus the chip that took its place, the one before it, or the add button.
     void this.updateComplete.then(() => {
-      const count = this.nodes.length
-      const chip = count ? this.renderRoot.querySelector<HTMLElement>(`c2-chip[data-index="${Math.min(index, count - 1)}"]`) : null
+      const parent = path.slice(0, -1)
+      const count = this.rulesAt(parent).length
+      const next = [...parent, Math.min(path[path.length - 1], count - 1)].join('.')
+      const chip = count ? this.renderRoot.querySelector<HTMLElement>(`c2-chip[data-path="${next}"]`) : null
       const target =
-        chip?.querySelector<HTMLElement>('c2-chip-part[interactive]') ?? chip ?? this.renderRoot.querySelector<HTMLElement>('.add, .filters-button')
+        chip?.querySelector<HTMLElement>('c2-chip-part[interactive]') ??
+        chip ??
+        this.renderRoot.querySelector<HTMLElement>(
+          this.groups ? `.row[data-path="${next}"] > .handle, .add-rule[data-path="${parent.join('.')}"]` : '.add, .filters-button',
+        )
       target?.focus()
     })
   }
@@ -494,44 +573,46 @@ export class FilterBuilder extends LitElement {
     const field = this.fieldOf(fieldId)
     if (!field) return
     const labels = this.text
+    const group = this.editing?.path ?? []
+    const list = this.rulesAt(group)
     if (optionValue !== undefined) {
       // A value picked straight from the field search: add it to an `is`/`is any of` condition on that field, or start one.
-      const index = this.nodes.findIndex((node) => !isGroup(node) && node.field === field.id && ['eq', 'in', 'has_any'].includes(node.operator))
+      const index = list.findIndex((node) => !isGroup(node) && node.field === field.id && ['eq', 'in', 'has_any'].includes(node.operator))
       if (index >= 0) {
-        const rule = this.nodes[index] as FilterRule
-        if (!ruleValues(rule).includes(optionValue)) this.updateRule(index, toggleOption(field, rule, optionValue))
+        const rule = list[index] as FilterRule
+        if (!ruleValues(rule).includes(optionValue)) this.updateRule([...group, index], toggleOption(field, rule, optionValue))
       } else {
         const operator = field.type === 'multi' ? 'has_any' : defaultOperator(field, labels)
-        this.commit([...this.nodes, toggleOption(field, { field: field.id, operator }, optionValue)])
+        this.commit(this.withRules(group, [...list, toggleOption(field, { field: field.id, operator }, optionValue)]))
       }
       this.close()
       return
     }
     const operator = defaultOperator(field, labels)
     const rule: FilterRule = { field: field.id, operator }
-    const index = this.nodes.length
-    this.commit([...this.nodes, rule])
+    const path = [...group, list.length]
+    this.commit(this.withRules(group, [...list, rule]))
     if (isValueless(field, operator, labels)) {
       this.close()
       return
     }
     if (this.compact && this.sheetOpen) {
-      this.sheetRule = index
-      this.open({ index, mode: 'value' }, null)
+      this.sheetRule = path[0]
+      this.open({ path, mode: 'value' }, null)
       return
     }
-    await this.moveEditor({ index, mode: 'value' })
+    await this.moveEditor({ path, mode: 'value' })
   }
 
   private handleOperatorPick = async (event: CustomEvent<SelectionChangeEventDetail>) => {
-    const index = this.editing?.index ?? -1
+    const path = this.editing?.path ?? []
     const rule = this.editingRule
     const field = this.editingField
     const operator = event.detail.value[0]
     if (!rule || !field || !operator) return
     const labels = this.text
     const next = withOperator(field, rule, operator, labels)
-    this.updateRule(index, next)
+    this.updateRule(path, next)
     // A relative date gets a default amount, which the user still wants to see and change.
     const needsEditor = operator === 'last' && !isRelative(rule.value)
     if (isValueless(field, operator, labels) || (isComplete(field, next, labels) && !needsEditor)) {
@@ -541,10 +622,10 @@ export class FilterBuilder extends LitElement {
     }
     // The new operator needs a value: move on to the value editor.
     if (this.compact && this.sheetOpen) {
-      this.editing = { index, mode: 'value' }
+      this.editing = { path, mode: 'value' }
       return
     }
-    await this.moveEditor({ index, mode: 'value' })
+    await this.moveEditor({ path, mode: 'value' })
   }
 
   /** Switches the open popover to another editor, anchored on that condition's value part. */
@@ -555,7 +636,7 @@ export class FilterBuilder extends LitElement {
     this.loaded = null
     this.startLoad('')
     await this.updateComplete
-    const anchor = this.chipPart(editing.index, 'value')
+    const anchor = this.chipPart(editing.path, 'value')
     const overlay = this.overlay
     if (overlay && anchor) {
       this.anchor = anchor
@@ -571,20 +652,18 @@ export class FilterBuilder extends LitElement {
   }
 
   private handleOptionPick = (event: CustomEvent<CommandSelectEventDetail>) => {
-    const index = this.editing?.index ?? -1
     const rule = this.editingRule
     const field = this.editingField
-    if (!rule || !field) return
-    this.updateRule(index, toggleOption(field, rule, event.detail.value))
+    if (!rule || !field || !this.editing) return
+    this.updateRule(this.editing.path, toggleOption(field, rule, event.detail.value))
   }
 
   private setValue(value: FilterValue | undefined) {
-    const index = this.editing?.index ?? -1
     const rule = this.editingRule
-    if (!rule) return
+    if (!rule || !this.editing) return
     const next: FilterRule = { field: rule.field, operator: rule.operator }
     if (value !== undefined) next.value = value
-    this.updateRule(index, next)
+    this.updateRule(this.editing.path, next)
   }
 
   private handleEditorKeyDown = (event: KeyboardEvent) => {
@@ -618,13 +697,13 @@ export class FilterBuilder extends LitElement {
 
   private sheetEdit(index: number) {
     this.sheetRule = index
-    this.open({ index, mode: 'value' }, null)
+    this.open({ path: [index], mode: 'value' }, null)
     void this.updateComplete.then(() => this.focusEditor())
   }
 
   private sheetAdd = () => {
     this.sheetRule = -1
-    this.open({ index: -1, mode: 'fields' }, null)
+    this.open({ path: [], mode: 'fields' }, null)
     void this.updateComplete.then(() => this.focusEditor())
   }
 
@@ -668,34 +747,35 @@ export class FilterBuilder extends LitElement {
     return html`<span class="visuals" slot="prefix">${visuals}</span>${text}`
   }
 
-  private renderChip(node: FilterNode, index: number) {
+  private renderChip(node: FilterNode, path: number[]) {
     const labels = this.text
+    const id = path.join('.')
     if (isGroup(node)) {
       const count = node.rules.length
       return html`<c2-chip
         class="chip"
         part="chip"
-        data-index=${index}
+        data-path=${id}
         removable
         ?disabled=${this.disabled}
         remove-label=${labels.remove}
-        @remove=${() => this.handleRemove(index)}
+        @remove=${() => this.handleRemove(path)}
       >
         <c2-chip-part name="field" class="field">${labels.conditions.replace('{count}', String(count))}</c2-chip-part>
         <c2-chip-part name="operator" class="operator">${node.op === 'or' ? labels.any : labels.all}</c2-chip-part>
       </c2-chip>`
     }
     const field = this.fieldOf(node.field)
-    const editing = this.editing?.index === index ? this.editing.mode : null
+    const editing = this.editing && this.editing.mode !== 'fields' && this.editing.path.join('.') === id ? this.editing.mode : null
     if (!field) {
       return html`<c2-chip
         class="chip"
         part="chip"
-        data-index=${index}
+        data-path=${id}
         removable
         ?disabled=${this.disabled}
         remove-label=${labels.remove}
-        @remove=${() => this.handleRemove(index)}
+        @remove=${() => this.handleRemove(path)}
       >
         <c2-chip-part name="field" class="field">${node.field}</c2-chip-part>
         <c2-chip-part name="operator" class="operator">${labels.operators[node.operator] ?? node.operator}</c2-chip-part>
@@ -710,12 +790,12 @@ export class FilterBuilder extends LitElement {
     return html`<c2-chip
       class=${complete ? 'chip' : 'chip draft'}
       part="chip"
-      data-index=${index}
+      data-path=${id}
       removable
       ?disabled=${this.disabled}
       remove-label=${labels.remove}
-      @remove=${() => this.handleRemove(index)}
-      @part-click=${(event: CustomEvent<{ name: string }>) => this.handlePartClick(index, event)}
+      @remove=${() => this.handleRemove(path)}
+      @part-click=${(event: CustomEvent<{ name: string }>) => this.handlePartClick(path, event)}
     >
       <c2-chip-part name="field" class="field">${this.renderIcon(field.icon, 'prefix')}${field.label}</c2-chip-part>
       <c2-chip-part
@@ -981,7 +1061,7 @@ export class FilterBuilder extends LitElement {
     const editing = this.editing
     let body: unknown
     if (rule !== null && editing) {
-      const node = editing.index >= 0 ? this.nodes[editing.index] : undefined
+      const node = editing.mode === 'fields' ? undefined : this.nodeAt(editing.path)
       const field = node && !isGroup(node) ? this.fieldOf(node.field) : undefined
       body = html`<div class="sheet-editor">
         <c2-button class="back" @click=${this.sheetBack}>${backIcon}${field?.label ?? labels.addFilter}</c2-button>
@@ -1009,7 +1089,7 @@ export class FilterBuilder extends LitElement {
                 @click=${(event: Event) => {
                   // The row opens the editor on click; the remove button is its own control.
                   event.stopPropagation()
-                  this.removeRule(index)
+                  this.commit(replaceAt(this.nodes, [index]))
                 }}
                 >×</c2-button
               >
@@ -1030,7 +1110,31 @@ export class FilterBuilder extends LitElement {
     </c2-sheet>`
   }
 
+  private renderOverlay() {
+    return html`<c2-overlay id="editor" placement="bottom-start" free-width @beforetoggle=${this.handleOverlayBeforeToggle}>
+      <div class="popover" part="popover">${this.compact && this.sheetOpen ? nothing : this.renderEditor()}</div>
+    </c2-overlay>`
+  }
+
+  private renderTree() {
+    if (!treeModule) return html`<div class="tree" part="tree"></div>`
+    return treeModule.renderTree({
+      value: normalizeTree(this.value),
+      nodes: this.nodes,
+      ...this.describeOptions(),
+      disabled: this.disabled,
+      renderRule: (rule, path) => this.renderChip(rule, path),
+      commit: (root, focus) => {
+        this.commit(root.rules, root)
+        if (focus) this.focusLater(focus)
+      },
+      addRule: (path, anchor) => this.open({ path, mode: 'fields' }, anchor),
+      shadowRoot: this.renderRoot as ShadowRoot,
+    })
+  }
+
   override render() {
+    if (this.groups) return html`${this.renderTree()}${this.renderOverlay()}`
     const labels = this.text
     const count = this.nodes.length
     return html`<div class=${this.compact ? 'bar is-compact' : 'bar'} part="bar">
@@ -1045,7 +1149,7 @@ export class FilterBuilder extends LitElement {
           ${repeat(
             this.nodes,
             (_, index) => index,
-            (node, index) => this.renderChip(node, index),
+            (node, index) => this.renderChip(node, [index]),
           )}
           ${
             this.compact
@@ -1057,10 +1161,7 @@ export class FilterBuilder extends LitElement {
         </div>
         <slot name="end"></slot>
       </div>
-      <c2-overlay id="editor" placement="bottom-start" free-width @beforetoggle=${this.handleOverlayBeforeToggle}>
-        <div class="popover" part="popover">${this.compact && this.sheetOpen ? nothing : this.renderEditor()}</div>
-      </c2-overlay>
-      ${this.compact ? this.renderSheet() : nothing}`
+      ${this.renderOverlay()} ${this.compact ? this.renderSheet() : nothing}`
   }
 }
 
