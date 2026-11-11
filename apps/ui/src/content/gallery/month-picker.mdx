@@ -47,4 +47,32 @@ Looks for `c2-month-picker`. The cell shape and the selected colour do most of t
 <c2-month-picker class="months-soft" granularity="year" value="2025"></c2-month-picker>
 ```
 
+```html tag=MdxCodeBlock,label=Quarters
+<c2-month-picker granularity="quarter" value="2026-Q3"></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Fiscal quarter stepper
+<c2-month-picker granularity="quarter" fiscal-start="7" value="2027-Q2" stepper></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Half-years
+<c2-month-picker granularity="half-year" fiscal-start="4" value="2027-H1" stepper></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Fiscal years
+<c2-month-picker granularity="year" fiscal-start="10" value="2027" min="2020" max="2030"></c2-month-picker>
+```
+
+```html tag=MdxCodeBlock,label=Report period bar
+<style>
+  .months-period-bar {
+    --c2-month-picker--width: 300px;
+    --c2-month-picker__stepper--border-bottom: 0;
+    --c2-month-picker__cell--border-radius: 8px;
+    --c2-month-picker__range--font-size: 11px;
+  }
+</style>
+<c2-month-picker class="months-period-bar" granularity="quarter" stepper value="2026-Q4"></c2-month-picker>
+```
+
 </GalleryGrid>

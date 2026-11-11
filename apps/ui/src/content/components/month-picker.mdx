@@ -1,6 +1,6 @@
 ---
 title: 'Month Picker'
-description: 'Pick a month, or a year: billing periods, reports and card expiry.'
+description: 'Pick a month, a quarter, a half-year or a year: billing periods, fiscal reports and card expiry.'
 category: 'Inputs'
 ---
 
@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { MonthPicker } from '@c2n/components/month-picker'
 
-`c2-month-picker` picks a month the way a billing page or a report filter does: a year with its twelve months, paging buttons to move through the years, and a title that opens a grid of years to jump further. Its value is `YYYY-MM`, as a native month input gives, or `YYYY` with `granularity="year"`.
+`c2-month-picker` picks a month the way a billing page or a report filter does: a year with its twelve months, paging buttons to move through the years, and a title that opens a grid of years to jump further. Its value is `YYYY-MM`, as a native month input gives, `YYYY-Qn` with `granularity="quarter"`, `YYYY-Hn` with `granularity="half-year"`, or `YYYY` with `granularity="year"`. With `fiscal-start` and `stepper` it is the period selector of an accounting report: fiscal quarters, and arrows that step through them.
 
 ## Import
 
@@ -23,6 +23,9 @@ import '@c2n/components/month-picker'
 <div data-label="Billing period">
   <c2-month-picker name="period" value="2026-09" max="2026-10"></c2-month-picker>
 </div>
+<div data-label="Fiscal quarter">
+  <c2-month-picker granularity="quarter" fiscal-start="7" value="2027-Q2" stepper></c2-month-picker>
+</div>
 <div data-label="Year only">
   <c2-month-picker granularity="year" value="2024" min="2018" max="2026"></c2-month-picker>
 </div>
@@ -30,11 +33,21 @@ import '@c2n/components/month-picker'
 
 ### Value
 
-`value` is the month picked as `YYYY-MM`, or the year as `YYYY` with `granularity="year"`; anything else is ignored. A click, or Enter or Space on the focused month, picks it and fires `input` then `change` (with `detail.value`). Month names follow the page's language.
+`value` is the period picked: the month as `YYYY-MM`, the quarter as `YYYY-Q1` to `YYYY-Q4` with `granularity="quarter"`, the half-year as `YYYY-H1` or `YYYY-H2` with `granularity="half-year"`, the year as `YYYY` with `granularity="year"`; anything else is ignored. A click, or Enter or Space on the focused cell, picks it and fires `input` then `change` (with `detail.value`). Month names follow the page's language. When the granularity changes, a value becomes the wider period that holds it (May becomes Q2, Q2 becomes H1 and then the year), and one that no longer fits a single cell is cleared.
+
+`from` and `to` resolve the value to its first and last day as `YYYY-MM-DD` (`2026-07-01` and `2026-09-30` for `2026-Q3`), which is what a report query wants.
+
+### Fiscal years
+
+`fiscal-start` is the month (1 to 12) the fiscal year starts in. It moves the quarters, half-years and years: with `fiscal-start="7"` the year `2027` (shown as FY2027) runs from July 2026 to June 2027, and `2027-Q1` is July to September 2026. A fiscal year is named after the calendar year it ends in. Months are always calendar months. Each quarter and half-year cell shows the months it covers.
+
+### Stepper
+
+`stepper` adds a bar above the grid with the period picked between two arrows, which step it to the previous or next whole period and fire `input` and `change` like a click. With no value they pick the current period. `stepUp(count)` and `stepDown(count)` do the same from code, without events, as on a native input.
 
 ### Limits
 
-`min` and `max`, in the same format as the value (a bare year also works in month mode), disable the months outside them and stop the paging buttons at the first and last year that has one, as a card-expiry field would with this year and ten years ahead.
+`min` and `max`, in any of the value's formats (a bare year also works in month mode, a month in quarter mode), disable the periods outside them, stop the stepper's arrows and stop the paging buttons at the first and last year that has one, as a card-expiry field would with this year and ten years ahead.
 
 ### Years
 
@@ -46,4 +59,4 @@ Under a `name`, the form receives the value. `required` asks for one. Inside a `
 
 ### Keyboard
 
-The months are a grid with one tab stop. The arrow keys move by month and by row, running on into the previous or next year at the ends; Home and End go to the start and end of a row; Page Up and Page Down change the year (or the page of years); Enter or Space picks. The current month is marked, and a screen reader hears each month with its year.
+The months (quarters, half-years) are a grid with one tab stop. The arrow keys move by cell and by row, running on into the previous or next year at the ends; Home and End go to the start and end of a row; Page Up and Page Down change the year (or the page of years); Enter or Space picks. The current month is marked, and a screen reader hears each month with its year.
