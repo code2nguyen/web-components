@@ -9,6 +9,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
 import GroupByTableToolbar from '../../components/GroupByTableToolbar.astro'
+import TableExamplesRuntime from '../../components/TableExamplesRuntime.astro'
 
 import { Table } from '@c2n/components/table'
 import { TableColumn } from '@c2n/components/table/table-column'
@@ -20,6 +21,7 @@ import { Button } from '@c2n/components/button'
 <ExampleModules />
 <SparklineMarketTable />
 <GroupByTableToolbar />
+<TableExamplesRuntime />
 
 ## Columns and data
 
@@ -706,6 +708,83 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 ```
 
 </GalleryGrid>
+
+## Tree rows
+
+`children-field` reads each row's child rows from a field of its own, nested to any depth, and turns the grid into a `treegrid`: a parent is an ordinary row with a chevron, indented by level in the first column (or the one marked `group-column`). A column with `rollup` shows in a parent the aggregate of the leaves under it, so the totals of a chart of accounts or a bill of materials need no precomputing, and a sort orders each level by those figures. With `selection="multiple"` a parent selects the rows under it and follows its children.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Chart of accounts
+<style>
+  .tree-accounts {
+    height: 400px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="tree-accounts" row-key="id" children-field="children" tree-expanded sortable rows='[{"id":"1000","name":"Assets","children":[{"id":"1100","name":"Current assets","children":[{"id":"1110","name":"Cash and equivalents","balance":184200},{"id":"1120","name":"Accounts receivable","balance":96450},{"id":"1130","name":"Inventory","balance":61300}]},{"id":"1200","name":"Fixed assets","children":[{"id":"1210","name":"Equipment","balance":142000},{"id":"1220","name":"Accumulated depreciation","balance":-38600}]}]},{"id":"2000","name":"Liabilities","children":[{"id":"2100","name":"Accounts payable","balance":72900},{"id":"2200","name":"Accrued expenses","balance":18450},{"id":"2300","name":"Long-term debt","balance":120000}]},{"id":"3000","name":"Equity","children":[{"id":"3100","name":"Share capital","balance":200000},{"id":"3200","name":"Retained earnings","balance":34000}]}]'>
+  <c2-table-column field="id" header="No." width="80px"></c2-table-column>
+  <c2-table-column field="name" header="Account" width="minmax(200px, 2fr)" group-column></c2-table-column>
+  <c2-table-column field="balance" header="Balance" width="140px" align="end" format="currency" rollup="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Cascading selection
+<style>
+  .tree-tasks {
+    height: 400px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="tree-tasks" row-key="id" children-field="children" expanded-rows="p1;p1-2" selection="multiple" checkbox-selection value="p1-2;p1-2-1;p1-2-2" rows='[{"id":"p1","task":"Website relaunch","children":[{"id":"p1-1","task":"Content audit","owner":"Mia","hours":12},{"id":"p1-2","task":"Design system","children":[{"id":"p1-2-1","task":"Tokens","owner":"Leo","hours":8},{"id":"p1-2-2","task":"Components","owner":"Ana","hours":26}]},{"id":"p1-3","task":"Launch checklist","owner":"Mia","hours":5}]},{"id":"p2","task":"Billing migration","children":[{"id":"p2-1","task":"Data mapping","owner":"Sam","hours":16},{"id":"p2-2","task":"Dry run","owner":"Sam","hours":6}]},{"id":"p3","task":"Quarterly report","owner":"Ana","hours":4}]'>
+  <c2-table-column field="task" header="Task" width="minmax(200px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="owner" header="Owner" width="90px"></c2-table-column>
+  <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Children loaded on open
+<style>
+  .tree-lazy {
+    height: 400px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="tree-lazy" data-table-example="lazy-children" row-key="id" children-field="children" rows='[{"id":"emea","region":"EMEA","children":true,"stores":42,"revenue":4820000},{"id":"americas","region":"Americas","children":true,"stores":57,"revenue":6310000},{"id":"apac","region":"APAC","children":true,"stores":23,"revenue":2140000}]'>
+  <c2-table-column field="region" header="Region" width="minmax(200px, 2fr)"></c2-table-column>
+  <c2-table-column field="stores" header="Stores" width="90px" align="end" format="number" rollup="sum"></c2-table-column>
+  <c2-table-column field="revenue" header="Revenue" width="140px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' rollup="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=File tree
+<style>
+  .tree-files {
+    height: 400px;
+    width: 100%;
+    --c2-table__group--indent: 18px;
+    --c2-table__group-toggle--size: 14px;
+    --c2-table__group-toggle--color: rgb(2, 101, 220);
+    --c2-table__row--height: 30px;
+    --c2-table__cell--font-size: 13px;
+  }
+</style>
+<c2-table client:only="lit" class="tree-files" row-key="id" children-field="children" tree-expanded sortable sort="name:asc" rows='[{"id":"src","name":"src","children":[{"id":"src/components","name":"components","children":[{"id":"src/components/table.ts","name":"table.ts","size":112080},{"id":"src/components/tree.ts","name":"tree.ts","size":41210}]},{"id":"src/index.ts","name":"index.ts","size":820}]},{"id":"docs","name":"docs","children":[{"id":"docs/guide.md","name":"guide.md","size":18400}]},{"id":"package.json","name":"package.json","size":2310}]'>
+  <c2-table-column field="name" header="Name" width="minmax(200px, 2fr)"></c2-table-column>
+  <c2-table-column field="size" header="Size" width="110px" align="end" format="number" format-options='{"style":"unit","unit":"byte","notation":"compact","unitDisplay":"narrow"}' rollup="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+The regions in "Children loaded on open" get their countries from `loadChildren` the first time they open, after a short delay that stands in for the network; their field holds `true` until then, and the chevron turns into a spinner while they load.
+
+```ts tag=CodeBlock
+table.loadChildren = async ({ key }) => {
+  const response = await fetch(`/api/regions/${key}/countries`)
+  return response.json() // [{ id: 'de', region: 'Germany', stores: 12, revenue: 1480000 }, …]
+}
+```
 
 ## States
 

@@ -27,7 +27,7 @@ title ends with [<step-id>], and delete the step's line from COMPONENT-ACTION-PL
 
 ### Where to start
 
-These wave-1 steps depend on nothing and sit on different tracks, so they can all start today: `table-1`, `description-list-1`, `pivot-table-1`, `highlight-1`, `filter-builder-1`, `recurrence-editor-1`, `import-mapper-1`, `camera-capture-1`, `date-selector-1`, `month-picker-1`, `scheduler-1`, `form-1`, `list-item-1`, `tree-1`, `banner-1`. Their lines are under wave 1 below.
+These wave-1 steps depend on nothing and sit on different tracks, so they can all start today: `table-2`, `description-list-1`, `pivot-table-1`, `highlight-1`, `filter-builder-1`, `recurrence-editor-1`, `import-mapper-1`, `camera-capture-1`, `date-selector-1`, `month-picker-1`, `scheduler-1`, `form-1`, `list-item-1`, `tree-1`, `banner-1`. Their lines are under wave 1 below.
 
 `table` is the longest track (10 steps) and the one most other rows lean on, so keep a session on it continuously.
 
@@ -79,7 +79,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-1** · `c2-table` · tree grid #239 · +2.5 kB on 31.4 kB · risk medium
 - **table-2** · `c2-table` · row detail #240 · +1.5 kB on 31.4 kB · risk medium
 - **table-3** · `c2-table` · data editor #241 (lazy), example: timesheet grid #307, example: journal entry grid #328 · +0.6 kB on 31.4 kB, 9 kB lazy · risk medium
 - **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low

@@ -43,8 +43,13 @@ declare module 'vue' {
         'expanded-groups'?: unknown
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
+        'children-field'?: unknown
+        'expanded-rows'?: unknown
+        'tree-expanded'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
+        onRowToggle?: (event: EventOf<Table, 'row-toggle'>) => void
+        onChildrenError?: (event: EventOf<Table, 'children-error'>) => void
         onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
