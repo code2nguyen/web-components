@@ -861,6 +861,10 @@
       "types": "./dist/reaction-bar.d.ts",
       "default": "./dist/reaction-bar.js"
     },
+    "./recurrence-editor": {
+      "types": "./dist/recurrence-editor.d.ts",
+      "default": "./dist/recurrence-editor.js"
+    },
     "./relative-time": {
       "types": "./dist/relative-time.d.ts",
       "default": "./dist/relative-time.js"
