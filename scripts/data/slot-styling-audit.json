@@ -3130,6 +3130,13 @@
       "reason": "The end slot projects consumer-owned light DOM, such as a search field, at the end of the bar; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-filter-builder",
+      "slot": "then",
+      "decision": "part",
+      "parts": ["then"],
+      "reason": "With groups, the then wrapper owns the action zone's layout under its heading; the slotted actions keep their own contract."
+    },
+    {
       "tag": "c2-qr-code",
       "slot": "center",
       "decision": "assigned-content",

@@ -144,11 +144,18 @@ export interface TableColumnConfig {
   summarySpan?: number
   /** Renders the summary cell body instead of the formatted value. */
   renderSummary?: TableSummaryRenderer
+  /**
+   * In a tree (`children-field`), the value a parent row shows in this column: a built-in aggregate, or a function, of
+   * the leaf rows under it (the rows with no children of their own). The parent's own value is not used, and sorting
+   * reads the rolled-up value.
+   */
+  rollup?: TableSummaryAggregate | TableSummaryFunction
   /** Client-side sort comparator for the column's values. */
   comparator?: (a: unknown, b: unknown) => number
   /**
    * Puts the group tree in this column while the table is grouped: the chevron, the group's label and its row count
-   * on each group row, and the indentation of the rows under it. Defaults to the first column.
+   * on each group row, and the indentation of the rows under it. In a tree (`children-field`) it holds each row's
+   * chevron and indentation. Defaults to the first column.
    */
   groupColumn?: boolean
 }
@@ -195,6 +202,31 @@ export interface TableGroupToggleEventDetail {
   key: string
   expanded: boolean
   group: TableGroupContext
+}
+
+/** What `loadChildren` is asked for: the children of one parent row of a tree. */
+export interface TableChildrenRequest {
+  row: TableRow
+  key: string
+  /** Depth of the parent, 0 for a top-level row. */
+  level: number
+}
+
+/** Resolves the children of a tree row whose `children-field` holds `true`. */
+export type TableChildrenLoader = (request: TableChildrenRequest) => Promise<TableRow[]>
+
+export interface TableRowToggleEventDetail {
+  key: string
+  row: TableRow
+  /** Whether the row is now open. */
+  expanded: boolean
+}
+
+export interface TableChildrenErrorEventDetail {
+  key: string
+  row: TableRow
+  /** Whatever `loadChildren` rejected with. */
+  error: unknown
 }
 
 export interface TableRowsRequest {
