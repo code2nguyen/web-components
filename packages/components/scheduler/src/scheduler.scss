@@ -23,6 +23,9 @@
     off--color: color-mix(in srgb, currentColor 7%, transparent),
     today--color: rgb(2, 101, 220),
     now--color: #dc2626,
+    band--color: color-mix(in srgb, currentColor 8%, transparent),
+    event__pending--stripe-color: color-mix(in srgb, currentColor 16%, transparent),
+    summary--background-color: #fafafa,
     event--color: rgb(2, 101, 220),
     event--text-color: #18181b,
     event--border-radius: 6px,
@@ -331,6 +334,7 @@
 }
 
 .off,
+.band,
 .now,
 .cursor,
 .event,
@@ -347,6 +351,19 @@
   pointer-events: none;
 }
 
+.band {
+  top: 0;
+  bottom: 0;
+  background: var(--band-color, #{css.cssVar(band--color)});
+  pointer-events: none;
+}
+// In the header a band is a strip along the bottom edge, which leaves the day's label readable.
+.scale .band {
+  top: auto;
+  height: 3px;
+  background: var(--band-color, #{css.cssVar(muted--color)});
+  pointer-events: auto;
+}
 // Drawn under the bars: it never crosses their text.
 .now {
   top: 0;
@@ -418,6 +435,10 @@
     opacity: 0.45;
   }
 
+  &.pending {
+    border-inline-start-style: dashed;
+    background-image: repeating-linear-gradient(135deg, #{css.cssVar(event__pending--stripe-color)} 0 4px, transparent 4px 8px);
+  }
   &.clipped-start {
     border-start-start-radius: 0;
     border-end-start-radius: 0;
@@ -509,4 +530,34 @@
   .group-toggle svg {
     transition: none;
   }
+}
+
+// ------------------------------------------------------------------------------------------------------- summary
+.summary {
+  position: sticky;
+  z-index: 3;
+  bottom: 0;
+  background: css.cssVar(summary--background-color);
+  .corner {
+    border-top: 1px solid css.cssVar(line--color);
+    background: css.cssVar(summary--background-color);
+  }
+}
+.summary-cells {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  border-top: 1px solid css.cssVar(line--color);
+  border-bottom: 1px solid css.cssVar(line--color);
+}
+.summary-cell {
+  display: flex;
+  min-width: 0;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 4px 2px;
+  border-inline-start: 1px solid css.cssVar(line--color);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
