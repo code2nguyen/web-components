@@ -68,6 +68,7 @@
           "value": { "type": "string", "minLength": 1 },
           "controlValue": { "type": "string", "minLength": 1 },
           "target": { "type": "string", "minLength": 1 },
+          "activate": { "type": "string", "minLength": 1, "description": "The element to hover or focus for the state when it is not the observed target." },
           "assertion": { "enum": ["computed-style", "geometry", "pseudo-style", "slotted-style", "delegated-style", "programmatic-output"] },
           "declaration": { "type": "string", "minLength": 1 },
           "pseudo": { "enum": ["::before", "::after", "::placeholder"] },

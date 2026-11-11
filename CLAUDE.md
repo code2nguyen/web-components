@@ -234,6 +234,40 @@ Follow the shape in `packages/checkbox/src/checkbox.ts`:
 - In `exports`, `"types"` comes **first** in every condition object; `"default"` first makes esbuild warn that the types condition is unreachable.
 - **Built-in text is in English, and translatable.** A component never hard-codes interface text (visible labels, `aria-label`s, live-region announcements, validation messages, default slot content): it lists it in `src/messages.ts` as `const en = {…}` (a function for text with values; called with `{0}`, `{1}`… it must read as the template a translation writes), registered with `defineMessages('<package>', en)` from `@c2n/core/localize.js`, and renders it through `private readonly msg = new LocalizeController(this, …)` and `this.msg.t(key, …args)`. Components ship English only: apps add their languages with `addTranslations({ fr: { '<package>': {…} } })` (JSON: `{0}` placeholders, plural and keyed choice objects) or `addMessages`, and the docs list every message on the component's API tab. Language tests register their translations from `test/translations.ts`. The language is the nearest `lang` attribute (through shadow roots), else the browser's; the host redraws when any `lang` changes. A public property whose default is text keeps an empty default and falls back to the message at render time. Text drawn outside Lit (ProseMirror views, CodeMirror, imperative DOM) must follow a language switch too; `Intl`-only components use `LocaleController`.
 
+## Modern web platform
+
+Components use the current platform, not the patterns it replaced. The `modern-web-review` skill
+(`.claude/skills/modern-web-review/`) holds the guide map, the old → new pattern table and the scanner; read it when
+designing, implementing or reviewing a component.
+
+**Browser support policy.** A feature Baseline _Widely available_ is used freely. _Newly available_ is used with the
+fallback its modern-web-guidance guide prescribes, feature-detected. _Limited availability_ is only a progressive
+enhancement over a path that already works everywhere, and never through a polyfill. Say which applies whenever a
+change adopts a platform feature.
+
+**Before choosing an approach**, look the behaviour up: `npx -y modern-web-guidance@latest search "<what it must do>"`,
+then `retrieve` the guide and follow its rules and fallbacks.
+
+**Rules that hold everywhere** (each was a bug the 2026-11 platform audit found in shipped components):
+
+- An Enter handler on a text field returns early on `isComposingKey(event)` (`@c2n/core/dom-helper.js`).
+- Focus drawn without an outline also has `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`), so it
+  survives Windows High Contrast; a visible focus style keys on `:focus-visible`, not `:focus`.
+- Collapsed or inactive content stays findable by find-in-page: `<details>`/`::details-content` or
+  `hidden="until-found"`, never `display: none` or an unrendered slot.
+- No HTML string sinks (`innerHTML`, `insertAdjacentHTML`), constants included: render with Lit or clone a
+  `<template>`, so pages enforcing Trusted Types work.
+- Semantics that cross a shadow boundary use element references (`ariaDescribedByElements`, `ariaLabelledByElements`),
+  not ids; nothing is written on author light-DOM children (the host rule above, extended to children).
+- A layer that must show above an open modal lives in the top layer (`popover`), not `position: fixed` + `z-index`.
+- A canvas has a name and a text alternative; a long list is virtualized or `content-visibility: auto`; a live feed
+  pauses off-screen.
+- `formDisabledCallback` keeps a disabled ancestor fieldset in effect even when the control carries its own
+  `disabled` attribute; a form control implements `formStateRestoreCallback` and anchors `setValidity`.
+
+`node .claude/skills/modern-web-review/scripts/scan.mjs` checks the lines a branch changed for these patterns (exit 1
+on an error); a deliberate exception carries a `// modern-web-ignore: <rule> <reason>` comment.
+
 ## Using c2n components in the UI app
 
 **In `apps/ui` (and any app under `apps/`), reach for a `c2-*` component before writing markup of your own.** The
@@ -284,10 +318,11 @@ Pull requests target `develop`. Before opening one, review the branch's changes 
 
 1. Run `/code-review` on the branch. Fix the confirmed bugs. For a finding left unfixed, say why (not a real bug, out of scope, or left for a follow-up).
 2. Run `/security-review` on the branch and handle its findings the same way.
-3. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `npm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 8 of the `new-component` skill describes. Fix what it shows.
-4. Re-run the checks the fixes touched, then open the pull request. Its description lists what each review found, what the screenshot review caught, and what was done about it.
+3. When the branch changes a component, run the `modern-web-review` skill: `node .claude/skills/modern-web-review/scripts/scan.mjs` must pass (fix each error or justify it with a `modern-web-ignore` comment), then review the diff against its old → new pattern table and the guides for what the component does. Handle its findings the same way.
+4. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `npm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 8 of the `new-component` skill describes. Fix what it shows.
+5. Re-run the checks the fixes touched, then open the pull request. Its description lists what each review found (code, security, modern web), what the screenshot review caught, and what was done about it.
 
-Do not open a pull request while either review still has an unanswered finding.
+Do not open a pull request while any review still has an unanswered finding.
 
 ## Browser usage
 

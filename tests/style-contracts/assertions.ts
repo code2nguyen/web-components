@@ -6,6 +6,8 @@ export type ObservableCase = {
   value: string
   controlValue?: string
   target: string
+  /** The element to hover or focus for the state, when it is not the observed target (a card's ring drawn around its focused link). */
+  activate?: string
   assertion: 'computed-style' | 'geometry' | 'pseudo-style' | 'slotted-style' | 'delegated-style' | 'programmatic-output'
   declaration?: string
   valueSyntax?: string
@@ -222,8 +224,9 @@ const PUBLISHED_TYPE_SYNTAX: Record<string, string> = {
 }
 
 async function activateState(page: Page, options: ObservableCase) {
-  if (options.state === 'hover') await page.locator(options.target).first().hover()
-  else if (options.state === 'focus') await page.locator(options.target).first().focus()
+  const activate = options.activate ?? options.target
+  if (options.state === 'hover') await page.locator(activate).first().hover()
+  else if (options.state === 'focus') await page.locator(activate).first().focus()
   else if (options.state && options.state !== 'base')
     await page.locator(options.host).evaluate((element, state) => element.setAttribute(state, ''), options.state)
 }
