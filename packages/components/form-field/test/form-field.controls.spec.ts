@@ -50,6 +50,8 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   // Both are groups named by the field; the field label names the group and each inner control keeps its own name.
   { tag: 'c2-card-input', markup: '<c2-card-input></c2-card-input>', selfLabelled: true },
   { tag: 'c2-address-field', markup: '<c2-address-field></c2-address-field>', selfLabelled: true },
+  // A group named by the field; each inner control keeps its own name.
+  { tag: 'c2-recurrence-editor', markup: '<c2-recurrence-editor></c2-recurrence-editor>' },
   {
     tag: 'c2-time-slot-picker',
     markup: `<c2-time-slot-picker time-zone="UTC" slots='[{"start":"2030-01-07T09:00:00Z"}]'></c2-time-slot-picker>`,

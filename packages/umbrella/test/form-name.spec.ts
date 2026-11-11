@@ -49,6 +49,7 @@ const submitted: Record<string, string[]> = {
   'c2-radio': ['a'],
   'c2-radio-group': ['a'],
   'c2-rate': ['3'],
+  'c2-recurrence-editor': ['FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE'],
   'c2-rich-text-editor': ['Hello **world**'],
   'c2-search-field': ['query'],
   'c2-select': ['eu'],
@@ -132,6 +133,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-angle-slider': (e) => (e.value = 90),
         'c2-keypad': (e) => (e.value = '42.5'),
         'c2-rate': (e) => (e.value = 3),
+        'c2-recurrence-editor': (e) => (e.value = 'FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE'),
         'c2-signature-pad': (e) =>
           (e.strokes = [
             [

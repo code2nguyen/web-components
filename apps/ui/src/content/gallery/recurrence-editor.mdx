@@ -1,0 +1,125 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import RecurrenceEditorExamplesRuntime from '../../components/RecurrenceEditorExamplesRuntime.astro'
+
+import { Button } from '@c2n/components/button'
+import { RecurrenceEditor } from '@c2n/components/recurrence-editor'
+
+## Presets
+
+Looks and jobs for `c2-recurrence-editor`. The weekday toggles are drawn by `--c2-recurrence-editor__weekday--*` (and `__weekday__selected--*` once pressed), the sentence by `__summary--*`, the next dates by `__occurrence--*`; the selects and number fields inside keep their own variables, which inherit.
+
+<RecurrenceEditorExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-recurrence-editor start="2026-11-16"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Team sync every two weeks
+<style>
+  .recurrence-squares {
+    --c2-recurrence-editor__weekday--border-radius: 6px;
+    --c2-recurrence-editor__weekday--size: 36px;
+    --c2-recurrence-editor__weekday__selected--background: #0f766e;
+    --c2-recurrence-editor__weekday__selected--border: 1px solid #0f766e;
+    --c2-recurrence-editor__summary--background: light-dark(#ccfbf1, #0b3b36);
+    --c2-recurrence-editor__summary--color: light-dark(#115e59, #5eead4);
+  }
+</style>
+<c2-recurrence-editor class="recurrence-squares" start="2026-11-16" value="FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TH;COUNT=12" preview-count="3"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Repeating invoice
+<style>
+  .recurrence-invoice {
+    --c2-recurrence-editor__label--min-width: 72px;
+    --c2-recurrence-editor__summary--background: transparent;
+    --c2-recurrence-editor__summary--padding: 0;
+    --c2-recurrence-editor__summary--font-weight: 600;
+    --c2-recurrence-editor__occurrence--border-radius: 4px;
+  }
+</style>
+<c2-recurrence-editor class="recurrence-invoice" frequencies="weekly monthly yearly" start="2026-11-30" value="FREQ=MONTHLY;BYMONTHDAY=-1;UNTIL=20271231" preview-count="4"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Job schedule (cron)
+<style>
+  .recurrence-cron {
+    --c2-recurrence-editor__summary--border-radius: 8px;
+    --c2-recurrence-editor__occurrence--border: 1px solid transparent;
+    --c2-recurrence-editor__occurrence--background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-recurrence-editor class="recurrence-cron" format="cron" start="2026-11-16T02:00" value="0 2 * * *" preview-count="3"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Calendar event
+<c2-recurrence-editor frequencies="none daily weekly monthly yearly" with-time start="2026-11-16T10:00" preview-count="0"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Footer actions
+<style>
+  .recurrence-dialog {
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .recurrence-dialog c2-button.quiet {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-recurrence-editor class="recurrence-dialog" start="2026-11-16" value="FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR" preview-count="2">
+  <c2-button class="quiet" slot="footer">Cancel</c2-button>
+  <c2-button slot="footer">Done</c2-button>
+</c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=Occurrence renderer
+<c2-recurrence-editor data-recurrence-example="countdown" start="2026-11-16" value="FREQ=WEEKLY;BYDAY=TU,FR" preview-count="4"></c2-recurrence-editor>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<c2-recurrence-editor lang="fr" start="2026-11-16" value="FREQ=MONTHLY;BYDAY=1MO;COUNT=6" preview-count="3"></c2-recurrence-editor>
+```
+
+</GalleryGrid>
+
+The occurrence renderer card draws each date through `renderOccurrence`, which a fence cannot set:
+
+```ts tag=CodeBlock
+import type { RecurrenceEditor } from '@c2n/components/recurrence-editor'
+import { html } from 'lit'
+
+const editor = document.querySelector<RecurrenceEditor>('c2-recurrence-editor')!
+editor.renderOccurrence = ({ date, label }) => {
+  const days = Math.round((date.getTime() - Date.parse('2026-11-16T00:00')) / 86_400_000)
+  return html`${label} <strong>${days === 0 ? 'start' : `+${days}d`}</strong>`
+}
+```
+
+The French card is the editor under `lang="fr"`, with the French an app adds (weekday and month names come from `Intl`):
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'recurrence-editor': {
+      repeatLabel: 'Répéter',
+      everyLabel: 'Tous les',
+      summaryMonthly: { one: 'Tous les mois', other: 'Tous les {0} mois' },
+      summaryOnNth: 'le {0} {1}',
+      ordinal: { '1': 'premier', '2': 'deuxième', '3': 'troisième', '4': 'quatrième', '-1': 'dernier' },
+      summaryCount: { one: 'une fois', other: '{0} fois' },
+      // …every other message of the API tab
+    },
+  },
+})
+```
