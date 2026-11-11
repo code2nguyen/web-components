@@ -55,6 +55,8 @@ export interface TableBenchMountOptions {
   rowPart?: boolean
   /** Sets `wrap`, which turns windowing off — every row renders. */
   wrap?: boolean
+  /** Sets `children-field` to this value: `''` is the default, a field no row has makes a tree of leaves. */
+  childrenField?: string
 }
 
 export interface TableBenchApi {

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -23,6 +23,8 @@ export interface Banner {
  * `position` pins it to an edge of the viewport: `top` sticks to the top of its scroll container while keeping its
  * place in the flow, `bottom` floats fixed over the content (give the page bottom padding so nothing is covered).
  * A pinned banner spans the full width with square corners and a border on its inner edge only.
+ * `callout` turns it into an in-content admonition for prose, docs and forms: the heading on its own line above the
+ * body, the icon at the top, the actions under the body, and a `note` role instead of a live region.
  * @tag c2-banner
  * @slot default - Message content, replacing message.
  * @slot icon - Leading icon, with a variant-specific SVG default.
@@ -52,9 +54,10 @@ export interface Banner {
  * @cssproperty {percentage} [--c2-banner__container__variant--background-mix=8%] - Share of the variant colour mixed into the background.
  * @cssproperty {percentage} [--c2-banner__container__variant--border-mix=32%] - Share of the variant colour in the border colour.
  * @cssproperty {font-weight} [--c2-banner__heading--font-weight=600]
+ * @cssproperty {pixel} [--c2-banner__heading__callout--margin-block-end=2px] - Space between a callout's heading and its body.
  * @cssproperty {pixel} [--c2-banner__icon--size=20px]
  * @cssproperty {color} [--c2-banner__icon--color=#71717a]
- * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0` removes the disc's padding.
+ * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0px` removes the disc's padding (a unit-less `0` also leaves a callout's first line top-aligned).
  * @cssproperty {border-radius} [--c2-banner__icon--border-radius=999px]
  * @cssproperty {percentage} [--c2-banner__icon--background-mix=14%] - Share of the icon colour in the disc behind it; `0%` removes the disc.
  * @cssproperty {color} [--c2-banner__icon__info--color=#2563eb]
@@ -74,10 +77,18 @@ export class Banner extends LitElement {
   @property() message = ''
   /** Optional title before the message. */
   @property() heading = ''
-  /** Semantic variant: tints the banner with the matching icon colour. `warning` and `error` are announced as alerts, the others as status messages. */
+  /** Semantic variant: tints the banner with the matching icon colour. `warning` and `error` are announced as alerts, the others as status messages (a callout is never announced). */
   @property({ reflect: true }) variant: BannerVariant = 'neutral'
   /** `inline` stays in the page flow; `top` sticks to the top edge while scrolling; `bottom` is fixed to the bottom of the viewport. */
   @property({ reflect: true }) position: BannerPosition = 'inline'
+  /**
+   * Presents the banner as a callout: an admonition that is part of the content (a note, a tip, a warning in a doc or a
+   * form) rather than a notice about the page. It is laid out as a block, with the heading above the body and the
+   * actions under it, and exposed as a `note` instead of a status or alert live region, so it is read in place and
+   * never announced. Use `variant` for the tone (`info` for a note, `success` for a tip, `warning`, `error` for danger) and
+   * name it in `heading`: the colour and the icon do not reach a screen reader.
+   */
+  @property({ type: Boolean }) callout = false
   /** Hides the leading icon and removes its space from the layout. */
   @property({ type: Boolean, attribute: 'no-icon' }) noIcon = false
   /** Shows a keyboard-accessible dismiss button. */
@@ -86,6 +97,19 @@ export class Banner extends LitElement {
   @property({ attribute: 'close-label' }) closeLabel = 'Dismiss'
 
   @state() private hasActions = false
+
+  // A declarative shadow root exists before the first update.
+  private readonly serverRendered = this.shadowRoot !== null
+
+  // slotchange keeps hasActions current, but the first render must already know it. A server-rendered banner hydrates
+  // with the server's DOM, which a value changed before hydration would not update, so it reads the slot once after.
+  protected override willUpdate() {
+    if (!isServer && !this.hasUpdated && !this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
+  }
+
+  protected override firstUpdated() {
+    if (this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
+  }
 
   /** Requests dismissal. Fires `banner-close`; unless it is prevented the banner is hidden. Returns whether it was hidden. */
   dismiss(): boolean {
@@ -116,8 +140,8 @@ export class Banner extends LitElement {
   }
 
   override render() {
-    const role = this.variant === 'warning' || this.variant === 'error' ? 'alert' : 'status'
-    return html`<div class="banner" part="container">
+    const role = this.callout ? 'note' : this.variant === 'warning' || this.variant === 'error' ? 'alert' : 'status'
+    return html`<div class="banner ${this.callout ? 'callout' : ''}" part="container">
       ${this.noIcon ? nothing : html`<span class="icon" part="icon" aria-hidden="true"><slot name="icon">${this.renderIcon()}</slot></span>`}
       <div class="content" part="content" role=${role}>
         ${this.heading ? html`<span class="heading" part="heading">${this.heading}</span>` : nothing}

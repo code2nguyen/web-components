@@ -2,6 +2,8 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Scheduler } from '@c2n/components/scheduler'
+import CodeBlock from '../../components/CodeBlock.astro'
+import SchedulerExamplesRuntime from '../../components/SchedulerExamplesRuntime.astro'
 
 ## Presets
 
@@ -70,3 +72,87 @@ carry the accent.
 ```
 
 </GalleryGrid>
+
+## Absence calendar
+
+People down the side and a month across: each absence is a bar coloured by its type, `pending` requests are hatched,
+`bands` shade the public holidays, and `renderSummary` draws a "who is out" row under the grid that flags the days
+below cover.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Team absences
+<style>
+  .absence-calendar {
+    --c2-scheduler__month-day--width: 36px;
+    --c2-scheduler__row--height: 40px;
+    --c2-scheduler__band--color: color-mix(in srgb, #f59e0b 22%, transparent);
+  }
+  .absence-calendar::part(out) {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    place-items: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .absence-calendar::part(short) {
+    background: #dc2626;
+    color: #ffffff;
+  }
+</style>
+<c2-scheduler
+  class="absence-calendar"
+  data-scheduler-example="absence"
+  data-min-staff="4"
+  view="month"
+  date="2026-05-01"
+  locale="en-GB"
+  resource-heading="People"
+  summary-heading="Out"
+  resources='[{"id":"ana","label":"Ana Ruiz","group":"Support"},{"id":"ben","label":"Ben Carter","group":"Support"},{"id":"chloe","label":"Chloé Martin","group":"Support"},{"id":"dev","label":"Dev Patel","group":"Support"},{"id":"eva","label":"Eva Novak","group":"Engineering"},{"id":"femi","label":"Femi Adeyemi","group":"Engineering"}]'
+  events='[{"id":"1","resource":"ana","start":"2026-05-05","end":"2026-05-09","title":"Vacation","color":"#0891b2"},{"id":"2","resource":"ben","start":"2026-05-05","end":"2026-05-08","title":"Vacation","color":"#0891b2","pending":true},{"id":"3","resource":"chloe","start":"2026-05-06","end":"2026-05-08","title":"Sick leave","color":"#dc2626"},{"id":"4","resource":"dev","start":"2026-05-11","end":"2026-05-13","title":"Training","color":"#7c3aed"},{"id":"5","resource":"eva","start":"2026-05-11","end":"2026-05-14","title":"Conference","color":"#7c3aed"},{"id":"6","resource":"femi","start":"2026-05-18","end":"2026-05-23","title":"Vacation","color":"#0891b2","pending":true},{"id":"7","resource":"chloe","start":"2026-05-26","end":"2026-05-30","title":"Vacation","color":"#0891b2","pending":true}]'
+  bands='[{"start":"2026-05-04","end":"2026-05-05","label":"Early May bank holiday"},{"start":"2026-05-25","end":"2026-05-26","label":"Spring bank holiday"}]'
+></c2-scheduler>
+```
+
+```html tag=MdxCodeBlock,label=Requests to approve
+<style>
+  .time-off-requests {
+    --c2-scheduler__day--width: 96px;
+    --c2-scheduler__event__pending--stripe-color: light-dark(rgba(180, 83, 9, 0.22), rgba(245, 158, 11, 0.3));
+    --c2-scheduler__band--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+  }
+</style>
+<c2-scheduler
+  class="time-off-requests"
+  view="week"
+  date="2026-11-16"
+  locale="en-GB"
+  hide-header
+  resource-heading="Team"
+  resources='[{"id":"lea","label":"Léa Moreau","description":"Part time, off Fridays","color":"#0d9488"},{"id":"omar","label":"Omar Haddad","description":"Full time","color":"#2563eb"},{"id":"sofia","label":"Sofia Rossi","description":"Full time","color":"#db2777"}]'
+  events='[{"id":"1","resource":"lea","start":"2026-11-16","end":"2026-11-18","title":"Vacation"},{"id":"2","resource":"omar","start":"2026-11-18","end":"2026-11-21","title":"Vacation","pending":true},{"id":"3","resource":"sofia","start":"2026-11-17T09:00","end":"2026-11-17T13:00","title":"Dentist","pending":true}]'
+  bands='[{"start":"2026-11-20","end":"2026-11-21","label":"Non-working day","resource":"lea"}]'
+></c2-scheduler>
+```
+
+</GalleryGrid>
+
+<SchedulerExamplesRuntime />
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { Scheduler } from '@c2n/components/scheduler'
+
+const scheduler = document.querySelector<Scheduler>('c2-scheduler')!
+// Called once per column (a day here) with the absences over it and every resource.
+scheduler.renderSummary = ({ events, resources }) => {
+  const out = new Set(events.map((event) => event.resource)).size
+  if (!out) return ''
+  const short = resources.length - out < 4
+  return html`<span part=${short ? 'out short' : 'out'}>${out}</span>`
+}
+```

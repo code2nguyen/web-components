@@ -1,0 +1,35 @@
+---
+/** Enhances scheduler examples whose property-only API (`renderSummary`) cannot be expressed as an HTML attribute. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Scheduler } from '@c2n/components/scheduler'
+  import '@c2n/components/scheduler'
+
+  const initialized = new WeakSet<Scheduler>()
+
+  /** "Who is out" per day, flagged when fewer than `data-min-staff` people are left. */
+  function setupAbsence(scheduler: Scheduler) {
+    const minStaff = Number(scheduler.dataset.minStaff ?? 3)
+    scheduler.renderSummary = ({ events, resources }) => {
+      const out = new Set(events.map((event) => event.resource)).size
+      if (!out) return ''
+      const short = resources.length - out < minStaff
+      return html`<span part=${short ? 'out short' : 'out'} title=${`${out} out${short ? ', below cover' : ''}`}>${out}</span>`
+    }
+  }
+
+  function setup() {
+    document.querySelectorAll<Scheduler>('c2-scheduler[data-scheduler-example]').forEach((scheduler) => {
+      if (initialized.has(scheduler)) return
+      initialized.add(scheduler)
+      if (scheduler.dataset.schedulerExample === 'absence') setupAbsence(scheduler)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

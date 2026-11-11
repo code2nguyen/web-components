@@ -2,3 +2,4 @@
 // Every module of @c2n/form. Importing this registers each of its elements.
 
 export * from '@c2n/form'
+export * from '@c2n/form/form-list.js'

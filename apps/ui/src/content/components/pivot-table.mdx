@@ -40,11 +40,26 @@ import '@c2n/components/pivot-table'
 <div data-label="Heatmap">
   <c2-pivot-table rows="cohort" columns="month" heatmap totals="none" values='[{"field":"retained","aggregate":"avg","label":"Retained","format":{"style":"unit","unit":"percent"}}]' data='[{"cohort":"2026-01","month":"M0","retained":100},{"cohort":"2026-01","month":"M1","retained":62},{"cohort":"2026-01","month":"M2","retained":48},{"cohort":"2026-01","month":"M3","retained":41},{"cohort":"2026-01","month":"M4","retained":37},{"cohort":"2026-01","month":"M5","retained":35},{"cohort":"2026-02","month":"M0","retained":100},{"cohort":"2026-02","month":"M1","retained":58},{"cohort":"2026-02","month":"M2","retained":44},{"cohort":"2026-02","month":"M3","retained":39},{"cohort":"2026-02","month":"M4","retained":36},{"cohort":"2026-03","month":"M0","retained":100},{"cohort":"2026-03","month":"M1","retained":65},{"cohort":"2026-03","month":"M2","retained":51},{"cohort":"2026-03","month":"M3","retained":45},{"cohort":"2026-04","month":"M0","retained":100},{"cohort":"2026-04","month":"M1","retained":61},{"cohort":"2026-04","month":"M2","retained":47},{"cohort":"2026-05","month":"M0","retained":100},{"cohort":"2026-05","month":"M1","retained":67},{"cohort":"2026-06","month":"M0","retained":100}]'></c2-pivot-table>
 </div>
+<div data-label="Financial statement">
+  <c2-pivot-table
+    rows="section;account"
+    totals="rows"
+    invert-signs='{"section":["5000 Cost of sales","6000 Operating expenses"]}'
+    values='[{"field":"actual","label":"Actual","format":{"style":"currency","currency":"EUR","currencySign":"accounting","notation":"compact","maximumFractionDigits":1}},{"field":"budget","label":"Budget","format":{"style":"currency","currency":"EUR","currencySign":"accounting","notation":"compact","maximumFractionDigits":1}},{"field":"variance","label":"Variance","compute":"difference","of":["actual","budget"],"format":{"style":"currency","currency":"EUR","currencySign":"accounting","notation":"compact","maximumFractionDigits":1}},{"field":"variance_pct","label":"Var. %","compute":"percent-difference","of":["actual","budget"]}]'
+    data='[{"section":"4000 Revenue","account":"Product sales","actual":1240000,"budget":1180000},{"section":"4000 Revenue","account":"Subscriptions","actual":860000,"budget":900000},{"section":"4000 Revenue","account":"Services","actual":215000,"budget":190000},{"section":"5000 Cost of sales","account":"Hosting","actual":182000,"budget":170000},{"section":"5000 Cost of sales","account":"Support staff","actual":240000,"budget":250000},{"section":"6000 Operating expenses","account":"Salaries","actual":910000,"budget":880000},{"section":"6000 Operating expenses","account":"Marketing","actual":305000,"budget":260000},{"section":"6000 Operating expenses","account":"Rent","actual":96000,"budget":96000},{"section":"6000 Operating expenses","account":"Software","actual":64000,"budget":70000}]'
+  ></c2-pivot-table>
+</div>
 ```
 
 ### Data and values
 
 `data` is an array of plain rows (a dotted field such as `customer.country` reads a nested value). `rows` and `columns` list the grouping fields, outermost first; a missing value groups under "(blank)". Each `values` entry is `{ field, aggregate, label, format }`: the aggregate is `sum` (the default), `count`, `avg`, `min`, `max` or `distinct`, and `format` takes `Intl.NumberFormat` options. Two or more values split each column. `field-labels` names the fields in headers and in the field list.
+
+### Financial statements
+
+A `values` entry with `compute` is worked out from two other values of the same cell instead of the records: `{ "field": "variance", "compute": "difference", "of": ["actual", "budget"] }` is actual minus budget, `percent-difference` is that difference over the budget (shown as a percentage unless `format` says otherwise) and `ratio` divides them. Subtotals and totals compute from their own sums, so a section's variance % is not an average of its accounts'. `of` names the first aggregated value of each field, so the data holds the compared figures side by side (`actual` and `budget`, or this year and last year) in each record.
+
+`invert-signs` lists row groups whose numbers count with the opposite sign, by field: `{ "section": ["Cost of sales"] }`. The sign flips before aggregation, so costs show negative, subtract in the grand total and an overspend reads as a negative variance. A computed cell carries the class `negative` or `positive`; colour them with `--c2-pivot-table__computed__negative--color` and `--c2-pivot-table__computed__positive--color`, and use `"currencySign": "accounting"` in `format` for parentheses.
 
 `pivot(data, config)` is the same computation as a plain function, for a server, a test or an export.
 

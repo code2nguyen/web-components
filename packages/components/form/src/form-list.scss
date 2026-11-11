@@ -1,0 +1,103 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-form-list,
+  $theme: (
+    // Quoted, or Sass reads it as a division.
+    grid-column: string.unquote('1 / -1'),
+    gap: 12px,
+
+    add--padding: 6px 12px,
+    add--border: 1px dashed #d4d4d8,
+    add--border-radius: 6px,
+    add--background: #ffffff,
+    add--color: #18181b,
+    add--font-size: 14px,
+    add--font-weight: 500,
+    add__hover--background: #f4f4f5,
+    add__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    add__disabled--opacity: 0.38,
+
+    empty--color: #71717a,
+    empty--font-size: 14px,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  grid-column: css.cssVar(grid-column);
+  min-width: 0;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+::slotted(template) {
+  display: none;
+}
+
+.empty {
+  color: css.cssVar(empty--color);
+  font-size: css.cssVar(empty--font-size);
+  line-height: 20px;
+}
+
+.footer {
+  display: flex;
+  gap: 8px;
+}
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: css.cssVar(add--padding);
+  border: css.cssVar(add--border);
+  border-radius: css.cssVar(add--border-radius);
+  background: css.cssVar(add--background);
+  color: css.cssVar(add--color);
+  font: inherit;
+  font-size: css.cssVar(add--font-size);
+  font-weight: css.cssVar(add--font-weight);
+  line-height: 20px;
+  cursor: pointer;
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(add__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(add__focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(add__disabled--opacity);
+  }
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
