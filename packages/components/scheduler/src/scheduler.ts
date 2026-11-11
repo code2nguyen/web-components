@@ -66,7 +66,40 @@ export interface SchedulerEvent {
   color?: string
   /** Keeps the bar in place when the scheduler is `editable`. */
   readonly?: boolean
+  /** Draws the bar hatched, for a request still to approve, and adds "pending" to its name. */
+  pending?: boolean
 }
+
+/** A stretch of time shaded under the bars: a public holiday, a shutdown, one resource's non-working days. */
+export interface SchedulerBand {
+  /** Wall-clock start, `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm`. */
+  start: string
+  /** Wall-clock end, same shape, after `start`. */
+  end: string
+  /** Read with the slots it covers; a band across every row also shows it as the header's tooltip. */
+  label?: string
+  /** Shade, any CSS colour. Defaults to `--c2-scheduler__band--color`. */
+  color?: string
+  /** The `id` of the one resource the band shades; every row when absent. */
+  resource?: string
+}
+
+/** What {@link Scheduler.renderSummary} is called with, once per column. */
+export interface SchedulerSummaryContext {
+  /** Start of the column, `YYYY-MM-DDTHH:mm`. */
+  start: string
+  /** End of the column, `YYYY-MM-DDTHH:mm`. */
+  end: string
+  /** The column's position, from 0. */
+  index: number
+  /** The events over the column, on any resource. */
+  events: SchedulerEvent[]
+  /** Every resource. */
+  resources: SchedulerResource[]
+}
+
+/** Draws one cell of the summary row: anything Lit renders. */
+export type SchedulerSummaryRenderer = (context: SchedulerSummaryContext) => unknown
 
 export interface SchedulerRangeSelectDetail {
   /** The `id` of the resource. */
@@ -198,6 +231,10 @@ function safeColor(value: string | undefined): string | null {
  *   with `{ event, start, end, resource }`. A preview follows the pointer, and Escape cancels.
  * - `readonly` bookings stay in place. `event-click` fires on any bar.
  *
+ * For an absence calendar, a `pending` event is drawn hatched, `bands` shade holidays or one resource's days off
+ * under the bars, and `renderSummary` draws a row under the grid with one cell per column ("2 out", a coverage
+ * warning), headed by `summary-heading`.
+ *
  * The grid is one Tab stop holding a slot cursor. The arrow keys move it over every slot of a row, booked or free,
  * Up/Down to the same slot of the next row, Home/End to the first and last slot; a booked slot is read with its
  * bookings. Enter (or Space) on a booked slot focuses its first bar; on a free slot, with `editable`, it fires
@@ -217,6 +254,8 @@ function safeColor(value: string | undefined): string | null {
  * @csspart header - The header with the range, navigation and view switch.
  * @csspart grid - The scrolling grid of resources and time.
  * @csspart event - Each booking bar.
+ * @csspart summary - The summary row drawn by `renderSummary`.
+ * @csspart summary-cell - Each cell of the summary row.
  *
  * @cssproperty {color} [--c2-scheduler--background-color=#ffffff] - Background of the scheduler and its sticky column.
  * @cssproperty {color} [--c2-scheduler--color=#18181b] - Text colour.
@@ -239,6 +278,9 @@ function safeColor(value: string | undefined): string | null {
  * @cssproperty {color} [--c2-scheduler__off--color=color-mix(in srgb, currentColor 7%, transparent)] - Stripes over non-working hours and the weekend.
  * @cssproperty {color} [--c2-scheduler__today--color=rgb(2, 101, 220)] - Today's header label.
  * @cssproperty {color} [--c2-scheduler__now--color=#dc2626] - The current-time line.
+ * @cssproperty {color} [--c2-scheduler__band--color=color-mix(in srgb, currentColor 8%, transparent)] - Shade of `bands` without a colour of their own.
+ * @cssproperty {color} [--c2-scheduler__event__pending--stripe-color=color-mix(in srgb, currentColor 16%, transparent)] - Hatching over `pending` bars.
+ * @cssproperty {color} [--c2-scheduler__summary--background-color=#fafafa] - Background of the summary row.
  * @cssproperty {color} [--c2-scheduler__event--color=rgb(2, 101, 220)] - Bar colour when neither the booking nor its resource has one.
  * @cssproperty {color} [--c2-scheduler__event--text-color=#18181b] - Text on bars.
  * @cssproperty {pixel} [--c2-scheduler__event--border-radius=6px] - Corner radius of bars.
@@ -274,6 +316,12 @@ export class Scheduler extends LitElement {
   @property({ attribute: 'time-zone' }) timeZone = ''
   /** Lets the user create, move and resize bookings; see `range-select` and `event-change`. */
   @property({ type: Boolean }) editable = false
+  /** Shaded stretches under the bars: `{ start, end, label?, color?, resource? }`. Accepts a JSON string as an attribute. */
+  @property({ converter: jsonPropertyConverter }) bands: SchedulerBand[] = []
+  /** Draws a summary row under the grid, called once per column with `{ start, end, index, events, resources }`. */
+  @property({ attribute: false }) renderSummary?: SchedulerSummaryRenderer
+  /** Header of the summary row. Defaults to "Summary" in the scheduler's language. */
+  @property({ attribute: 'summary-heading' }) summaryHeading = ''
   /** Hides the header for an app that drives `date` and `view` from its own controls. */
   @property({ type: Boolean, attribute: 'hide-header' }) hideHeader = false
   /** Header of the resource column. Defaults to "Resources" in the scheduler's language. */
@@ -304,6 +352,8 @@ export class Scheduler extends LitElement {
   /** The range and columns of the last render, which the pointer and keyboard handlers work in. */
   private layout: { range: SchedulerRange; columns: SchedulerColumn[]; rows: Row[] } | null = null
   private scrolledFor = ''
+  /** `bands` parsed once per array assigned. */
+  private parsedBands?: { source: unknown; list: { start: number; end: number; label?: string; color: string | null; resource?: string }[] }
 
   override connectedCallback() {
     super.connectedCallback()
@@ -858,7 +908,27 @@ export class Scheduler extends LitElement {
     const name = this.msg.t('slot', resource.label, this.spoken(slot.start, slot.end))
     const row = this.layout?.rows.find((item): item is Extract<Row, { kind: 'resource' }> => item.kind === 'resource' && item.resource.id === resource.id)
     const titles = row ? this.barsIn(row, column).map((placed) => placed.event.title) : []
-    return titles.length ? this.msg.t('slotBookings', name, titles.join(', ')) : name
+    const booked = titles.length ? this.msg.t('slotBookings', name, titles.join(', ')) : name
+    const labels = this.bandsOf(resource.id)
+      .filter((band) => band.label && band.start < slot.end && band.end > slot.start)
+      .map((band) => band.label)
+    return labels.length ? this.msg.t('slotBands', booked, labels.join(', ')) : booked
+  }
+
+  /** The valid `bands` over `resource` (only those across every row when it is absent), as minutes. */
+  private bandsOf(resource?: string): { start: number; end: number; label?: string; color: string | null }[] {
+    if (this.parsedBands?.source !== this.bands) {
+      const list = []
+      for (const band of Array.isArray(this.bands) ? this.bands : []) {
+        const start = toMinutes(band?.start)
+        const end = toMinutes(band?.end)
+        if (start === null || end === null || end <= start) continue
+        const label = typeof band.label === 'string' ? band.label : undefined
+        list.push({ start, end, label, color: safeColor(band.color), resource: typeof band.resource === 'string' ? band.resource : undefined })
+      }
+      this.parsedBands = { source: this.bands, list }
+    }
+    return this.parsedBands.list.filter((band) => !band.resource || band.resource === resource)
   }
 
   private toggleGroup(group: string) {
@@ -915,7 +985,7 @@ export class Scheduler extends LitElement {
               : html`<span class="weekday">${this.format({ weekday: 'narrow' }, column.start)}</span>${this.format({ day: 'numeric' }, column.start)}`
         return html`<span class="tick ${view !== 'day' && isToday ? 'today' : ''}" aria-hidden="true">${label}</span>`
       })}
-      ${this.renderNowMarker(range, 'now-head')}
+      ${this.renderBands(range)} ${this.renderNowMarker(range, 'now-head')}
     </div>`
   }
 
@@ -954,15 +1024,60 @@ export class Scheduler extends LitElement {
       )
   }
 
+  /** `bands` under one row (`resource`), or those across every row in the header, where their label is the tooltip. */
+  private renderBands(range: SchedulerRange, resource?: string) {
+    return this.bandsOf(resource)
+      .filter((band) => fractionOf(range, band.start) < fractionOf(range, band.end))
+      .map(
+        (band) =>
+          html`<div
+            class="band"
+            aria-hidden="true"
+            title=${resource === undefined && band.label ? band.label : nothing}
+            style=${styleMap({ '--from': String(fractionOf(range, band.start)), '--to': String(fractionOf(range, band.end)), '--band-color': band.color })}
+          ></div>`,
+      )
+  }
+
+  private renderSummaryRow(columns: SchedulerColumn[]) {
+    const render = this.renderSummary
+    if (typeof render !== 'function') return nothing
+    const resources = (Array.isArray(this.resources) ? this.resources : []).filter((resource) => resource && typeof resource.id === 'string')
+    const ids = new Set(resources.map((resource) => resource.id))
+    const events = (Array.isArray(this.events) ? this.events : [])
+      .filter((event) => event && ids.has(event.resource))
+      .map((event) => ({ event, start: toMinutes(event?.start), end: toMinutes(event?.end) }))
+      .filter((item): item is { event: SchedulerEvent; start: number; end: number } => item.start !== null && item.end !== null && item.end > item.start)
+    return html`<div class="row summary" role="row" part="summary">
+      <div class="corner" role="rowheader">${this.summaryHeading || this.msg.t('summary')}</div>
+      <div class="summary-cells" role="none">
+        ${columns.map(
+          (column, index) =>
+            html`<div class="summary-cell" role="gridcell" part="summary-cell">
+              ${render({
+                start: fromMinutes(column.start),
+                end: fromMinutes(column.end),
+                index,
+                events: events.filter((item) => item.start < column.end && item.end > column.start).map((item) => item.event),
+                resources,
+              })}
+            </div>`,
+        )}
+      </div>
+    </div>`
+  }
+
   private renderBar(placed: Placed, row: Extract<Row, { kind: 'resource' }>, range: SchedulerRange, lanes: number, tabbable: boolean) {
     const { event, start, end } = placed
     const movable = this.editable && !event.readonly
     const dragging = this.preview?.event === event
     const time = this.shown(start, end)
     const name =
-      this.msg.t('event', event.title, row.resource.label, this.spoken(start, end)) + (this.editable && event.readonly ? `, ${this.msg.t('readonly')}` : '')
+      this.msg.t('event', event.title, row.resource.label, this.spoken(start, end)) +
+      (this.editable && event.readonly ? `, ${this.msg.t('readonly')}` : '') +
+      (event.pending ? `, ${this.msg.t('pending')}` : '')
     return html`<button
-      class="event ${lanes > 1 ? 'stacked' : ''} ${movable ? 'movable' : ''} ${dragging ? 'dragging' : ''} ${start < range.start ? 'clipped-start' : ''} ${end > range.end ? 'clipped-end' : ''}"
+      class="event ${lanes > 1 ? 'stacked' : ''} ${movable ? 'movable' : ''} ${dragging ? 'dragging' : ''} ${start < range.start ? 'clipped-start' : ''} ${end > range.end ? 'clipped-end' : ''} ${event.pending ? 'pending' : ''}"
       type="button"
       part="event"
       data-id=${event.id}
@@ -1077,7 +1192,7 @@ export class Scheduler extends LitElement {
                 @pointerup=${(event: PointerEvent) => this.endPointer(event, true)}
                 @pointercancel=${(event: PointerEvent) => this.endPointer(event, false)}
               >
-                ${off} ${this.renderNowMarker(range, 'now')}
+                ${this.renderBands(range, id)} ${off} ${this.renderNowMarker(range, 'now')}
                 ${
                   slot && this.cursorVisible
                     ? html`<div
@@ -1092,6 +1207,7 @@ export class Scheduler extends LitElement {
               </div>
             </div>`
           })}
+          ${this.renderSummaryRow(columns)}
         </div>
       </div>
       <div class="announcement" role="status">${this.announcement}</div>

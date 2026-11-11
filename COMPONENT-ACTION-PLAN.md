@@ -91,7 +91,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **date-selector-1** · `c2-date-selector` · calendar #289 · +1.5 kB on 4.7 kB · risk low
 - **date-input-1** · `c2-date-input` · date picker #290 (lazy) · +0.5 kB on 3.1 kB, 17 kB lazy · risk low · after `date-selector-1`
 - **month-picker-1** · `c2-month-picker` · period picker #294 · +1 kB on 5.4 kB · risk low
-- **scheduler-1** · `c2-scheduler` · absence calendar #349 · +1.2 kB on 38.1 kB · risk low
 - **form-1** · `c2-form` · field array #442 (companion) · 3 kB new entry · risk low
 - **list-item-1** · `c2-list-item` · nav list #464 · +0.3 kB on 3.3 kB, 1.5 kB new entry · risk low
 - **tree-1** · `c2-tree` · sortable tree #465 (lazy) · +0.4 kB on 15.3 kB, 6 kB lazy · risk medium

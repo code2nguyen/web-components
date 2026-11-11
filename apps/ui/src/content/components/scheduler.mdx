@@ -30,6 +30,9 @@ import '@c2n/components/scheduler'
     flex: 1 1 0;
     min-width: 0;
   }
+  .scheduler-absence {
+    --c2-scheduler__month-day--width: 36px;
+  }
   .scheduler-result {
     display: block;
     min-height: 20px;
@@ -58,6 +61,18 @@ import '@c2n/components/scheduler'
     events='[{"id":"1","resource":"p1","start":"2026-11-09T08:00","end":"2026-11-10T14:00","title":"Order 1182"},{"id":"2","resource":"p1","start":"2026-11-10T16:00","end":"2026-11-13T10:00","title":"Order 1190"},{"id":"3","resource":"p2","start":"2026-11-10T07:00","end":"2026-11-10T17:00","title":"Maintenance","readonly":true},{"id":"4","resource":"p2","start":"2026-11-11T07:00","end":"2026-11-13T18:00","title":"Order 1185"},{"id":"5","resource":"l1","start":"2026-11-09T06:00","end":"2026-11-12T22:00","title":"Panels batch 7"}]'
   ></c2-scheduler>
 </div>
+<div data-label="Absence calendar">
+  <c2-scheduler
+    view="month"
+    date="2026-05-01"
+    locale="en-GB"
+    resource-heading="People"
+    class="scheduler-absence"
+    resources='[{"id":"ana","label":"Ana Ruiz"},{"id":"ben","label":"Ben Carter"},{"id":"chloe","label":"Chloé Martin"}]'
+    events='[{"id":"1","resource":"ana","start":"2026-05-05","end":"2026-05-09","title":"Vacation","color":"#0891b2"},{"id":"2","resource":"ben","start":"2026-05-05","end":"2026-05-08","title":"Vacation","color":"#0891b2","pending":true},{"id":"3","resource":"chloe","start":"2026-05-06","end":"2026-05-08","title":"Sick leave","color":"#dc2626"}]'
+    bands='[{"start":"2026-05-04","end":"2026-05-05","label":"Early May bank holiday"},{"start":"2026-05-25","end":"2026-05-26","label":"Spring bank holiday"}]'
+  ></c2-scheduler>
+</div>
 <div data-label="Editable">
   <div class="scheduler-demo">
     <c2-scheduler
@@ -81,10 +96,23 @@ import '@c2n/components/scheduler'
 under the label, `avatar` an image (the label's initials otherwise), and `color` tints the avatar and the resource's
 bars. Ungrouped resources come first, then each group in the order it first appears.
 
-`events` is an array of `{ id, resource, start, end, title, description?, color?, readonly? }`. `start` and `end` are
+`events` is an array of `{ id, resource, start, end, title, description?, color?, readonly?, pending? }`. `start` and `end` are
 wall-clock `YYYY-MM-DDTHH:mm` strings, the shape `c2-date-time-picker` uses, and every time the scheduler reports
 comes back in that shape. A bar takes its `color`, else its resource's, else `--c2-scheduler__event--color`. Both
 properties accept JSON as an attribute.
+
+## Absences, holidays and a summary row
+
+Three drawing options turn the scheduler into a team absence calendar:
+
+- **Pending.** An event with `pending: true` is drawn hatched with a dashed edge (a request still to approve), and its
+  name ends with "pending". `--c2-scheduler__event__pending--stripe-color` sets the hatching.
+- **Bands.** `bands` is an array of `{ start, end, label?, color?, resource? }` shaded under the bars: public holidays,
+  a shutdown week, or with `resource` one person's non-working days. A band across every row also shades the header,
+  where its `label` is the tooltip, and the slot cursor reads it. The weekend stays shaded as before.
+- **Summary row.** `renderSummary` draws a row under the grid with one cell per column. It is called with
+  `{ start, end, index, events, resources }`: the column's range and position, the events over it and every resource, and returns what to
+  draw ("2 out", a coverage warning). `summary-heading` names the row. Give the content a `part` to style it.
 
 ## Views and range
 
