@@ -188,6 +188,15 @@ test('a field is picked from the keyboard, moves from the column that had it, an
   await expect(mapper(page).locator('[role="status"]')).toHaveText('Column “Full name” will not be imported.')
 })
 
+test('matches a file written in markup, as a server render or an MDX example writes it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-import-mapper fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"}]' csv="Full name,E-mail
+Ada,ada@example.com"></c2-import-mapper>`,
+  )
+  expect(await mapping(page)).toEqual(['name', 'email'])
+  await expect(mapper(page).locator('[part="column"]').first()).toContainText('Auto-matched')
+})
+
 test('a mapping set with the file wins over matching, and manual leaves columns unmapped', async ({ page, renderScenario }) => {
   await renderScenario('<c2-import-mapper mapping=\'[null, "email"]\'></c2-import-mapper><c2-import-mapper manual></c2-import-mapper>')
   const mappings = await page.locator('c2-import-mapper').evaluateAll(async (elements) => {

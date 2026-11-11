@@ -180,6 +180,7 @@ const alert = svg`<path d="M12 7.5v5.5M12 16.5v.5" />`
  * @csspart pager - The preview's page range and buttons.
  * @csspart state - Container for the `empty`, `loading` or `error` slot, which replaces its built-in message.
  *
+ * @cssproperty {width} [--c2-import-mapper--width=100%] - The mapper lays its columns out from its own width, so it has no width from its content: it fills its container unless given one.
  * @cssproperty {background-color} [--c2-import-mapper--background-color=#ffffff]
  * @cssproperty {color} [--c2-import-mapper--color=#18181b]
  * @cssproperty {border} [--c2-import-mapper--border=1px solid #e4e4e7]
@@ -394,15 +395,17 @@ export class ImportMapper extends LitElement {
       this.status = 'idle'
       this.request++
     }
+    // The first update lists `mapping` as changed for its default alone; only a mapping with entries was set.
+    const mappingSet = changed.has('mapping') && (changed.get('mapping') !== undefined || this.mapping.some((key) => key != null))
     // A mapping set before the file arrives is kept for it, like one set together with it.
-    const pending = sourceChanged && !changed.has('mapping') && !this.mapped && this.mapping.some((key) => key != null)
-    if ((sourceChanged || changed.has('fields') || changed.has('matcher')) && !changed.has('mapping') && !pending) {
+    const pending = sourceChanged && !mappingSet && !this.mapped && this.mapping.some((key) => key != null)
+    if ((sourceChanged || changed.has('fields') || changed.has('matcher')) && !mappingSet && !pending) {
       const known = new Set(this.fields.map((field) => field.key))
       const kept = sourceChanged ? [] : this.mapping.map((key) => (key !== null && known.has(key) ? key : null))
       const next = this.manual ? this.sourceColumns.map((_, i) => kept[i] ?? null) : autoMatch(this.sourceColumns, this.fields, kept, this.matcher)
       this.autoColumns = new Set(next.flatMap((key, i) => (key !== null && kept[i] == null ? [i] : [])))
       this.mapping = next
-    } else if (changed.has('mapping') || pending) {
+    } else if (mappingSet || pending) {
       // A mapping the app sets replaces the matched one, so no column reads as matched any more.
       if (this.mapping !== this.committed) this.autoColumns.clear()
       // Until a file arrives there is nothing to fit the mapping to, so it is kept as given.
@@ -632,10 +635,9 @@ export class ImportMapper extends LitElement {
                 ${required.map((field) => {
                   const ok = mapped.has(field.key)
                   return html`<li class="field ${ok ? 'field--mapped' : 'field--missing'}">
-                    <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true">${ok ? check : alert}</svg>${field.label || field.key}<span
-                      class="visually-hidden"
-                      >, ${this.msg.t(ok ? 'mapped' : 'notMapped')}</span
-                    >
+                    <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true">${ok ? check : alert}</svg
+                    ><span aria-hidden="true">${field.label || field.key}</span
+                    ><span class="visually-hidden">${field.label || field.key}, ${this.msg.t(ok ? 'mapped' : 'notMapped')}</span>
                   </li>`
                 })}
               </ul>

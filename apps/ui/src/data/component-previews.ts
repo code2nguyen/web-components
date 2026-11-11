@@ -255,8 +255,9 @@ price: .price
   'image-annotator': `<c2-image-annotator readonly style="width:280px" src="/web-components/images/image-invoice-screen.svg" shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":5},{"id":"b","type":"arrow","x":520,"y":200,"w":-140,"h":-20,"color":"#e11d48","stroke":6},{"id":"c","type":"redact","x":436,"y":96,"w":70,"h":18,"color":"#000000","stroke":4},{"id":"d","type":"number","x":276,"y":246,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":5}]'></c2-image-annotator>`,
   'image-compare': `<c2-image-compare style="width:240px" position="45"><img slot="before" src="/web-components/images/compare-before.svg" alt="Room before" width="800" height="500" /><img slot="after" src="/web-components/images/compare-after.svg" alt="Room after" width="800" height="500" /></c2-image-compare>`,
   'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
-  'import-mapper': `<c2-import-mapper style="width:320px;--c2-import-mapper--padding:10px;--c2-import-mapper--font-size:12px;--c2-import-mapper__picker--width:120px;--c2-import-mapper__column--min-height:40px;--c2-import-mapper__column--padding:4px 0" sample-count="1" fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email"}]' csv="Full name,E-mail
-Ada Lovelace,ada@analytical.io"></c2-import-mapper>`,
+  'import-mapper': `<c2-import-mapper style="width:300px;--c2-import-mapper--padding:10px;--c2-import-mapper--font-size:12px;--c2-import-mapper__cell--padding:4px 8px" view="preview" fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email","type":"email"}]' csv="Full name,E-mail
+Ada Lovelace,ada@analytical.io
+Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'in-view': `<c2-in-view style="--c2-in-view__hidden--opacity: 0; --c2-in-view__hidden--transform: translateY(12px)"><div style="padding: 16px 24px; border-radius: 8px; background: var(--c2-theme--color-surface-container, #f4f4f5)">Revealed on scroll</div></c2-in-view>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
