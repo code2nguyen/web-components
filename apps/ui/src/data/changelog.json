@@ -2,6 +2,205 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.24",
+      "date": "2026-11-11",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["form"],
+              "text": "Add c2-form-list, a repeatable group of fields",
+              "hash": "89c6b01"
+            },
+            {
+              "scopes": ["filter-builder"],
+              "text": "Add a rule builder of nested AND/OR groups behind `groups`",
+              "hash": "58e8430"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Add c2-find-bar, a find bar that drives c2-highlight",
+              "hash": "2963681"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Add a callout presentation for in-content admonitions",
+              "hash": "35e9759"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Add reorderable rows with drag, keyboard moves and max-depth",
+              "hash": "28650f5"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Pending events, background bands and a summary row for absence calendars",
+              "hash": "3a7d741"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Compare values with highlight, differences-only and a selectable column",
+              "hash": "c256638"
+            },
+            {
+              "scopes": ["import-mapper"],
+              "text": "Add c2-import-mapper",
+              "hash": "24e4688"
+            },
+            {
+              "scopes": ["camera-capture"],
+              "text": "Add c2-camera-capture, a camera viewfinder for documents, cards and faces",
+              "hash": "c092bce"
+            },
+            {
+              "scopes": ["pivot-table"],
+              "text": "Add computed value columns and per-group sign inversion for financial statements",
+              "hash": "5754a27"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Add current rows and the c2-list-group companion for navigation lists",
+              "hash": "7d263c1"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Add single and multiple modes, marked dates and renderDay",
+              "hash": "f03b301"
+            },
+            {
+              "scopes": ["recurrence-editor"],
+              "text": "Add c2-recurrence-editor with RRULE and cron output",
+              "hash": "ff6c5e1"
+            },
+            {
+              "scopes": ["month-picker"],
+              "text": "Add quarters, half-years, a fiscal start and a period stepper",
+              "hash": "0cb1cce"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Add tree rows through children-field [table-1]",
+              "hash": "a5a05c9"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["camera-capture"],
+              "text": "Judge movement only between new frames, and draw no default under a filled slot",
+              "hash": "4dfc7d7"
+            },
+            {
+              "scopes": ["form"],
+              "text": "Document c2-form-list's change event, audit its slots, add a Default gallery card",
+              "hash": "f1cbc4e"
+            },
+            {
+              "scopes": ["form"],
+              "text": "Document c2-form-list change event, Default gallery card and slot audit",
+              "hash": "f459e89"
+            },
+            {
+              "scopes": ["camera-capture"],
+              "text": "Notice a camera that ends in Firefox, and keep slotted screens out of WebKit's fallback",
+              "hash": "cfe1263"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Record the c2-find-bar actions slot in the slot styling audit",
+              "hash": "698e6e3"
+            },
+            {
+              "scopes": ["form"],
+              "text": "Narrow c2-form-list to form controls and match FormData",
+              "hash": "d5d3a95"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Address review findings on c2-find-bar",
+              "hash": "35478fc"
+            },
+            {
+              "scopes": ["filter-builder"],
+              "text": "Record the then slot in the slot styling audit",
+              "hash": "e8c7b0c"
+            },
+            {
+              "scopes": ["import-mapper"],
+              "text": "Match a file written in markup and fill the container",
+              "hash": "5eadab8"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Record c2-list-group slots in the slot styling audit",
+              "hash": "1c819b6"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Serialize keyboard moves and harden reordering edge cases",
+              "hash": "2a258fc"
+            },
+            {
+              "scopes": ["month-picker"],
+              "text": "Name a page of fiscal years once, in its title",
+              "hash": "bf7f5a1"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Key the callout on a class and render actions once",
+              "hash": "214249e"
+            },
+            {
+              "scopes": ["recurrence-editor"],
+              "text": "Address review findings",
+              "hash": "640d7d2"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Keep single-value items under differences-only, read the first number",
+              "hash": "08439c6"
+            },
+            {
+              "scopes": ["recurrence-editor"],
+              "text": "Wrap rows on narrow widths, dim only own parts when disabled",
+              "hash": "129f72e"
+            },
+            {
+              "scopes": ["pivot-table"],
+              "text": "Flip a record once across inverted groups, allow chained computed values",
+              "hash": "0d19eac"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Keep suffix controls out of the group's button, and review fixes",
+              "hash": "0392530"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Name the expanded-rows converter and refresh generated types [table-1]",
+              "hash": "e03f414"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Add AI-era article series",
+              "hash": "f9477ae"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.23",
       "date": "2026-11-07",
       "sections": [
