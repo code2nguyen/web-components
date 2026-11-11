@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { FindBar } from '@c2n/highlight/find-bar.js'
 import type { Highlight } from '@c2n/highlight'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,10 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-find-bar': C2Props<FindBar> & {
+        'match-case'?: Attribute
+        'whole-word'?: Attribute
+      }
       'c2-highlight': Omit<C2Props<Highlight>, 'query'> & {
         'match-case'?: Attribute
         'ignore-accents'?: Attribute

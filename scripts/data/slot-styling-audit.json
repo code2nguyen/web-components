@@ -1314,6 +1314,13 @@
       "reason": "The error slot projects consumer-owned light DOM inside the error part; it inherits the --c2-fieldset__error--* colour and size."
     },
     {
+      "tag": "c2-find-bar",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
       "tag": "c2-float-button",
       "slot": "",
       "decision": "assigned-content",
