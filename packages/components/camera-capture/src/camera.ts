@@ -130,6 +130,11 @@ export class CameraController implements ReactiveController {
     if (this.stream) this.onEnded?.()
   }
 
+  /** True when a track of the open stream has ended without `stop()`: the camera went away. */
+  get ended(): boolean {
+    return !!this.stream?.getVideoTracks().some((track) => track.readyState === 'ended')
+  }
+
   private close() {
     if (this.stream) {
       for (const track of this.stream.getVideoTracks()) track.removeEventListener('ended', this.handleEnded)

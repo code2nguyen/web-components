@@ -39,10 +39,9 @@ export function fakeCamera(): FakeCamera {
       canvas.width = 640
       canvas.height = 480
       const context = canvas.getContext('2d')!
-      let frame = 0
       const draw = () => {
-        frame++
-        const shake = camera.scene === 'moving' ? (frame % 2 ? 40 : -40) : 0
+        // Random, not alternating: an alternating shake can line up with the sampling and read as still.
+        const shake = camera.scene === 'moving' ? Math.round((Math.random() - 0.5) * 120) : 0
         context.fillStyle = camera.scene === 'dark' ? '#0a0a0a' : camera.scene === 'glare' ? '#ffffff' : '#6b7280'
         context.fillRect(0, 0, 640, 480)
         if (camera.scene === 'dark' || camera.scene === 'glare') return

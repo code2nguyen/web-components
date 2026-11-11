@@ -566,6 +566,11 @@ export class CameraCapture extends LitElement {
   private sample() {
     this.sampleTimer = undefined
     if (this._status !== 'live' || !this.isConnected) return
+    // Not every engine fires `ended` on a track that stops by itself, so the sampler also reads its state.
+    if (this.camera.ended) {
+      this.lost()
+      return
+    }
     const video = this.video
     if (video && video.videoWidth && !document.hidden) this.assess(video)
     if (this._status === 'live') this.sampleTimer = setTimeout(() => this.sample(), SAMPLE_INTERVAL)

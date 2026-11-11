@@ -288,8 +288,8 @@ test('a camera that goes away while open shows the error screen', async ({ page,
   await render(page, renderScenario, '<c2-camera-capture></c2-camera-capture>')
   await watch(camera(page), 'camera-error')
   await startCamera(page)
-  // What the browser does when the camera is unplugged: the track ends by itself.
-  await camera(page).evaluate((element: CameraCapture) => element.stream!.getVideoTracks()[0].dispatchEvent(new Event('ended')))
+  // What the browser does when the camera is unplugged: the track ends without the component stopping it.
+  await camera(page).evaluate((element: CameraCapture) => element.stream!.getVideoTracks()[0].stop())
   await expect(camera(page)).toHaveState('error')
   await expect(camera(page).locator('[part="error"]')).toContainText('The camera stopped. Check that it is connected, then try again.')
   expect((await events(page)).map((detail) => detail.kind)).toEqual(['ended'])

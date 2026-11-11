@@ -265,8 +265,13 @@
     max-width: 100%;
   }
 
+  /* The slot lays out its own fallback: `display: contents` on a slot keeps the fallback in WebKit's accessibility tree. */
   slot {
-    display: contents;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
   }
 }
 
