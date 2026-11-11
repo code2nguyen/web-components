@@ -43,11 +43,11 @@ import '@c2n/components/month-picker'
 
 ### Stepper
 
-`stepper` adds a bar above the grid with the period picked between two arrows, which step it to the previous or next whole period and fire `input` and `change` like a click. With no value they pick the current period. `stepUp(count)` and `stepDown(count)` do the same from code, without events, as on a native input.
+`stepper` adds a bar above the grid with the period picked between two arrows, which step it to the previous or next whole period and fire `input` and `change` like a click. With no value they count from the current period. `stepUp(count)` and `stepDown(count)` do the same from code, without events, as on a native input.
 
 ### Limits
 
-`min` and `max`, in any of the value's formats (a bare year also works in month mode, a month in quarter mode), disable the periods outside them, stop the stepper's arrows and stop the paging buttons at the first and last year that has one, as a card-expiry field would with this year and ten years ahead.
+`min` and `max`, in any of the value's formats (a bare year also works in month mode, a month in quarter mode; outside month mode a year, quarter or half-year here follows `fiscal-start`), disable the periods outside them, stop the stepper's arrows and stop the paging buttons at the first and last year that has one, as a card-expiry field would with this year and ten years ahead.
 
 ### Years
 
