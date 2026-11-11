@@ -15,6 +15,7 @@ import type {
   TreeItemClickEventDetail,
   TreeItemExpandEventDetail,
   TreeItemLoadErrorEventDetail,
+  TreeItemMoveEventDetail,
   TreeItemRenderer,
   TreeNode,
   TreeSelectionChangeEventDetail,
@@ -33,6 +34,7 @@ export interface TreeEventMap {
   'item-click': CustomEvent<TreeItemClickEventDetail>
   'item-expand': CustomEvent<TreeItemExpandEventDetail>
   'item-load-error': CustomEvent<TreeItemLoadErrorEventDetail>
+  'item-move': CustomEvent<TreeItemMoveEventDetail>
 }
 
 export interface Tree {
@@ -71,6 +73,12 @@ export interface Tree {
  * row belongs to. It is off by default; `--c2-tree-item__guide--color` and `--c2-tree-item__guide--width` style
  * the rules once it is on.
  *
+ * `reorderable` lets the user drag rows to reorder them and to re-parent them: drag right past the row above to nest
+ * under it, left to move out. A line marks where the row will land, a collapsed branch opens when a row rests on it,
+ * and `max-depth` caps how deep a row and its subtree may go. The tree fires a cancelable `item-move`, then moves the
+ * row itself — it rebuilds `items` in the data-driven mode and moves the element in markup. The code for it loads
+ * the first time the attribute is set, so a read-only tree does not carry it.
+ *
  * Only expanded rows render their children slot, which keeps a collapsed subtree out of both layout and the
  * accessibility tree — though the child elements are still created. Reach for virtualization rather than this
  * component once a tree runs to many thousands of rows.
@@ -80,7 +88,10 @@ export interface Tree {
  * Arrow Up and Down walk the visible rows. Arrow Right expands a collapsed branch, then moves to its first
  * child; Arrow Left collapses an expanded one, then moves to its parent. Home and End jump to the ends, Enter
  * and Space select, `*` expands every sibling of the focused row, and typing a few letters jumps to the
- * matching row. With `selection="multiple"`, Shift extends a range and Ctrl or Cmd toggles a single row.
+ * matching row. With `selection="multiple"`, Shift extends a range and Ctrl or Cmd toggles a single row. In a
+ * `reorderable` tree, Alt with Arrow Up or Down moves the focused row among its siblings, Alt with Arrow Right nests
+ * it under the row above and Alt with Arrow Left moves it out of its parent; each move is announced. Escape
+ * cancels a drag.
  *
  * @tag c2-tree
  *
@@ -90,12 +101,14 @@ export interface Tree {
  * @slotcomponent c2-tree-item
  *
  * @csspart tree - The scrolling container holding the rows.
+ * @csspart drop-indicator - The line marking where a dragged row will land, in a `reorderable` tree.
  *
  * @event {CustomEvent<TreeSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself.
  * @event {CustomEvent<TreeExpansionChangeEventDetail>} expansion-change - Fired after a row is expanded or collapsed. Does not bubble.
  * @event {CustomEvent<TreeItemClickEventDetail>} item-click - Fired when a row is clicked, selected or not.
  * @event {CustomEvent<TreeItemExpandEventDetail>} item-expand - Fired when a row expands. Call `preventDefault()` to keep it closed. This is where a consumer authoring in markup appends children for a lazily loaded branch.
  * @event {CustomEvent<TreeItemLoadErrorEventDetail>} item-load-error - Fired when `loadChildren` rejects.
+ * @event {CustomEvent<TreeItemMoveEventDetail>} item-move - Fired before a `reorderable` tree moves a row, by drag or keyboard. Call `preventDefault()` to keep the row where it is.
  *
  * @cssproperty {color} [--c2-tree--background=#ffffff] - Background of the tree.
  * @cssproperty {padding} [--c2-tree--padding-top=4px] - Space above the first row.
@@ -116,6 +129,9 @@ export interface Tree {
  * @cssproperty {opacity} [--c2-tree__disabled--opacity=0.38] - Opacity of a disabled tree.
  * @cssproperty {color} [--c2-tree__empty--color=#71717a] - Colour of the empty message.
  * @cssproperty {padding} [--c2-tree__empty--padding=18px] - Space around the empty message.
+ * @cssproperty {color} [--c2-tree__drop-indicator--color=rgb(2, 101, 220)] - Colour of the line marking where a dragged row will land.
+ * @cssproperty {pixel} [--c2-tree__drop-indicator--height=2px] - Thickness of that line.
+ * @cssproperty {border-radius} [--c2-tree__drop-indicator--border-radius=999px] - Corner radius of that line.
  */
 @customElement('c2-tree')
 export class Tree extends LitElement {
@@ -152,6 +168,15 @@ export class Tree extends LitElement {
   /** Expands a branch when its row is clicked — or activated with Enter or Space — not only when its toggle is. */
   @property({ type: Boolean, attribute: 'expand-on-click' }) expandOnClick = false
 
+  /**
+   * Lets the user drag rows, or move them with Alt and the arrow keys, to reorder and re-parent them. The code for
+   * it loads the first time this is set.
+   */
+  @property({ type: Boolean, reflect: true }) reorderable = false
+
+  /** Deepest level, `0` at the root, a moved row and its subtree may reach in a `reorderable` tree. Unset: no limit. */
+  @property({ type: Number, attribute: 'max-depth' }) maxDepth?: number
+
   /** Resolves the children of a branch the first time it is expanded. */
   @property({ attribute: false }) loadChildren?: TreeChildrenLoader
 
@@ -185,6 +210,7 @@ export class Tree extends LitElement {
   #typeaheadAt = 0
   #syncing = false
   #syncQueued = false
+  #reorderLoaded = false
 
   /** Every row in the tree, in document order, expanded or not. */
   get allItems(): TreeItem[] {
@@ -327,6 +353,12 @@ export class Tree extends LitElement {
     this.internals.ariaDisabled = this.disabled ? 'true' : null
     if (changed.has('items')) this.#loaded.clear()
     this.#syncItems()
+    // Reordering lives in its own chunk, fetched the first time a tree turns it on.
+    if (this.reorderable && !this.#reorderLoaded) {
+      this.#reorderLoaded = true
+      const reorder = import('./tree-reorder')
+      void reorder.then((module) => module.attachReorder(this))
+    }
   }
 
   /**

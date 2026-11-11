@@ -90,6 +90,20 @@ export interface TreeItemLoadErrorEventDetail {
   error: unknown
 }
 
+/** Detail of `c2-tree`'s `item-move` event, fired before a `reorderable` tree moves a row. */
+export interface TreeItemMoveEventDetail {
+  /** The node being moved. */
+  node: TreeNode
+  /** Its new parent, or `null` for the root. */
+  parent: TreeNode | null
+  /** Its index among the new parent's children, counted without the moved node. */
+  index: number
+  /** Its parent before the move, or `null` for the root. */
+  previousParent: TreeNode | null
+  /** Its index among its previous siblings. */
+  previousIndex: number
+}
+
 /** How a checkbox tick travels between a node and its relatives. */
 export type TreeSelectionPropagation = 'none' | 'descendants' | 'parents' | 'both'
 
