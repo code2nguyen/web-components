@@ -34,7 +34,7 @@ async function render(page: Page, renderScenario: (html: string) => Promise<void
   await mapper(page).evaluate(async (element) => {
     Object.assign(element, window.contacts)
     await (element as Mapper).updateComplete
-    for (const select of element.shadowRoot!.querySelectorAll('c2-select')) await (select as Mapper).updateComplete
+    for (const select of element.shadowRoot!.querySelectorAll('c2-select')) await select.updateComplete
   })
 }
 
