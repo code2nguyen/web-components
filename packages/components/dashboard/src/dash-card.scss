@@ -53,8 +53,8 @@
   )
 );
 
-// `--_grid-column` / `--_grid-row` are written by the element from the placement the grid resolved; `auto` keeps a
-// card outside a `c2-dashboard` in the normal flow.
+// `--_grid-column` / `--_grid-row` are set by the element (a `:host` rule in a sheet of its own) from the placement
+// the grid resolved; `auto` keeps a card outside a `c2-dashboard` in the normal flow.
 :host {
   position: relative;
   display: block;
@@ -95,7 +95,6 @@
   :host([expanded='full']) {
     animation: none;
   }
-
 }
 
 // The enter and leave animations are played by the element with the Web Animations API; the timing lives here so
