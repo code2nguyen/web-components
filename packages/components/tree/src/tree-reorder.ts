@@ -70,6 +70,8 @@ export function attachReorder(tree: Tree): void {
 
   let press: Press | undefined
   let drag: Drag | undefined
+  /** True while a move waits for the tree to render it; a key repeat meanwhile would read the old rows. */
+  let moving = false
   let dropTarget: TreeItem | null = null
 
   const announce = (text: string) => {
@@ -106,11 +108,11 @@ export function attachReorder(tree: Tree): void {
   const rowBox = (item: TreeItem) => (item.renderRoot.querySelector('.row') ?? item).getBoundingClientRect()
 
   /** Whether `item` may sit under `parent`: never inside itself, never in a different authoring mode, within `max-depth`. */
-  const allowed = (item: TreeItem, parent: TreeItem | null, before: TreeItem | null) => {
+  const allowed = (item: TreeItem, parent: TreeItem | null, before: TreeItem | null, height = heightOf(item)) => {
     if (parent && (parent === item || contains(item, parent) || !canNest(parent) || inData(parent) !== inData(item))) return false
     if (before && inData(before) !== inData(item)) return false
     const level = parent ? parent.level + 1 : 0
-    return tree.maxDepth == null || level + heightOf(item) <= tree.maxDepth
+    return tree.maxDepth == null || level + height <= tree.maxDepth
   }
 
   const move = async (item: TreeItem, parent: TreeItem | null, before: TreeItem | null) => {
@@ -129,6 +131,7 @@ export function attachReorder(tree: Tree): void {
     }
     const event = new CustomEvent<TreeItemMoveEventDetail>('item-move', { detail, bubbles: true, composed: true, cancelable: true })
     if (!tree.dispatchEvent(event)) return
+    moving = true
 
     const label = item.resolvedLabel
     const parentLabel = parent?.resolvedLabel
@@ -137,7 +140,11 @@ export function attachReorder(tree: Tree): void {
     else (parent ?? tree).insertBefore(outer(item), before ? outer(before) : null)
 
     // `focusItem` opens the new parent, so the row the user just moved stays in view and keeps the focus.
-    await tree.updateComplete
+    try {
+      await tree.updateComplete
+    } finally {
+      moving = false
+    }
     tree.focusItem(value)
     const total = siblings.length + 1
     announce(
@@ -156,11 +163,12 @@ export function attachReorder(tree: Tree): void {
     (event: KeyboardEvent) => {
       if (!tree.reorderable || tree.disabled || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
       if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return
+      // A control in the row's actions keeps its own Alt+Arrow (a select opening, a menu button).
       const item = itemOf(event)
       if (!item || item.disabled) return
       event.preventDefault()
       event.stopPropagation()
-      if (drag) return
+      if (drag || moving) return
 
       const parent = parentOf(item)
       const siblings = siblingsOf(parent, item)
@@ -184,8 +192,8 @@ export function attachReorder(tree: Tree): void {
   // Pointer --------------------------------------------------------------------------------------------------------
 
   tree.addEventListener('pointerdown', (event: PointerEvent) => {
-    if (!tree.reorderable || tree.disabled || press || drag || event.button !== 0 || !event.isPrimary) return
-    const item = itemOf(event, true)
+    if (!tree.reorderable || tree.disabled || press || drag || moving || event.button !== 0 || !event.isPrimary) return
+    const item = itemOf(event)
     if (!item || item.disabled) return
     press = { item, pointerId: event.pointerId, x: event.clientX, y: event.clientY, touch: event.pointerType === 'touch' }
     if (press.touch) press.timer = setTimeout(() => press && begin(press.x), TOUCH_DELAY)
@@ -197,9 +205,13 @@ export function attachReorder(tree: Tree): void {
     document.addEventListener('touchmove', onTouchMove, { passive: false })
   })
 
-  // A row that is a link, or holds an image, would otherwise start the browser's own drag and cancel ours.
+  // A row that is a link, or holds an image, would otherwise start the browser's own drag and cancel ours. A touch
+  // hold would open the long-press menu partway into the drag.
   tree.addEventListener('dragstart', (event) => {
     if (tree.reorderable) event.preventDefault()
+  })
+  tree.addEventListener('contextmenu', (event) => {
+    if ((press?.touch || drag) && tree.reorderable) event.preventDefault()
   })
 
   const begin = (x: number) => {
@@ -207,17 +219,18 @@ export function attachReorder(tree: Tree): void {
     const { item, pointerId } = press
     clearTimeout(press.timer)
     press = undefined
-    const style = getComputedStyle(item)
     drag = {
       item,
       pointerId,
       x,
       level: item.level,
       height: heightOf(item),
-      indent: parseFloat(style.getPropertyValue('--c2-tree-item__row--indent')) || 16,
-      rtl: style.direction === 'rtl',
+      indent: indentOf(item),
+      rtl: getComputedStyle(item).direction === 'rtl',
     }
     item.dragging = true
+    // A press that moved before the drag began may have started selecting text.
+    getSelection()?.removeAllRanges()
   }
 
   const onMove = (event: PointerEvent) => {
@@ -324,7 +337,7 @@ export function attachReorder(tree: Tree): void {
     }
 
     const drop = locate(above, below, drag.level + Math.round(((x - drag.x) * (drag.rtl ? -1 : 1)) / drag.indent))
-    drag.drop = drop && allowed(item, drop.parent, drop.before) ? drop : undefined
+    drag.drop = drop && allowed(item, drop.parent, drop.before, drag.height) ? drop : undefined
     setDropTarget(drag.drop?.parent ?? null)
     draw(drag.drop, above ? rowBox(above) : below ? rowBox(below) : undefined, above ?? below, !!above)
   }
@@ -349,6 +362,8 @@ export function attachReorder(tree: Tree): void {
     // Beside the row above, or beside the ancestor of it that sits at `level`.
     let sibling = above
     while (sibling.level > level) sibling = parentOf(sibling) ?? sibling
+    // Roots authored the other way (data next to markup) are not a place this row can land beside.
+    if (inData(sibling) !== inData(drag.item)) return undefined
     const parent = parentOf(sibling)
     const siblings = siblingsOf(parent, drag.item).filter((row) => row !== drag?.item)
     return { parent, before: siblings[siblings.indexOf(sibling) + 1] ?? null, level }
@@ -370,17 +385,30 @@ export function attachReorder(tree: Tree): void {
     indicator.style.width = `${Math.max(0, box.width - inset)}px`
   }
 
-  /** The row an event happened on. A press on the toggle, the checkbox or the actions is not a drag. */
-  function itemOf(event: Event, pointer = false): TreeItem | undefined {
+  /** The row an event happened on. A press or key on the toggle, the checkbox or the actions belongs to that control. */
+  function itemOf(event: Event): TreeItem | undefined {
     for (const target of event.composedPath()) {
       if (target instanceof TreeItem) return target
       if (target === tree) return undefined
-      if (pointer && target instanceof Element && (target.part.contains('toggle') || target.part.contains('checkbox') || target.part.contains('actions'))) {
+      if (target instanceof Element && (target.part.contains('toggle') || target.part.contains('checkbox') || target.part.contains('actions'))) {
         return undefined
       }
     }
     return undefined
   }
+}
+
+/**
+ * The row indent in pixels. Measured, not parsed, so `1.25rem` or a `calc()` works: a probe in the row's own shadow root
+ * resolves the variable exactly as the row does.
+ */
+function indentOf(item: TreeItem): number {
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:absolute;visibility:hidden;inline-size:var(--c2-tree-item__row--indent,16px)'
+  item.renderRoot.append(probe)
+  const indent = probe.getBoundingClientRect().width
+  probe.remove()
+  return indent || 16
 }
 
 /** `items` with the node `value` moved under `parent` (`null` for the root) at `index`; untouched branches are kept. */
@@ -415,7 +443,8 @@ function mapChildren(nodes: TreeNode[], change: (children: TreeNode[]) => TreeNo
     const children = change(node.children)
     if (children === node.children) return node
     changed = true
-    return { ...node, children }
+    // A lazily loaded branch whose last child moved out is a leaf now: left `hasChildren`, it would load again.
+    return children.length === 0 && node.hasChildren ? { ...node, children, hasChildren: false } : { ...node, children }
   })
   return changed ? next : nodes
 }

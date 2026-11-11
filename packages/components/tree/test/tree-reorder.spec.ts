@@ -275,3 +275,80 @@ test('a drag is clamped to max-depth', async ({ page, renderScenario }) => {
   await page.mouse.up()
   await expect.poll(() => shape(page)).toBe('/src src/app src/main /readme /docs')
 })
+
+test('quick repeated moves in a data-driven tree each take one step', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Steps" reorderable></c2-tree>')
+  const host = page.locator('c2-tree')
+  await props(host, { items: ['a', 'b', 'c', 'd'].map((value) => ({ value, label: value })) })
+  await ready(page)
+  const events: unknown[] = []
+  await page.exposeFunction('recordMove', (detail: unknown) => events.push(detail))
+  await host.evaluate((element) =>
+    element.addEventListener('item-move', (event) =>
+      (window as unknown as { recordMove: (d: unknown) => void }).recordMove((event as CustomEvent).detail.previousIndex),
+    ),
+  )
+
+  await itemOf(page, 'a').focus()
+  // Two presses inside one task: the second must not read the rows the first has not re-rendered yet.
+  await host.evaluate((element) => {
+    const row = element.shadowRoot!.querySelector('c2-tree-item[value="a"]')!
+    for (let i = 0; i < 2; i += 1) row.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true, composed: true }))
+  })
+  await page.keyboard.press('Alt+ArrowDown')
+  await expect.poll(() => host.evaluate((element: Tree) => element.items.map((node: TreeNode) => node.value).join(''))).toBe('bcad')
+  expect(events).toEqual([0, 1])
+})
+
+test('a lazily loaded branch whose last child moves out becomes a leaf, and a rem indent still drags by level', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Files" reorderable style="--c2-tree-item__row--indent: 2rem"></c2-tree>')
+  const host = page.locator('c2-tree')
+  await props(host, {
+    items: [
+      { value: 'remote', label: 'Remote', hasChildren: true, children: [{ value: 'only', label: 'Only' }] },
+      { value: 'local', label: 'Local' },
+    ],
+    expandedItems: ['remote'],
+  })
+  await ready(page)
+  await itemOf(page, 'only').focus()
+  await page.keyboard.press('Alt+ArrowLeft')
+  await expect
+    .poll(() => host.evaluate((element: Tree) => JSON.stringify(element.items.map((node: TreeNode) => [node.value, node.hasChildren ?? false]))))
+    .toBe(
+      JSON.stringify([
+        ['remote', false],
+        ['only', false],
+        ['local', false],
+      ]),
+    )
+
+  // 2rem is 32px: 40px to the right of the press is one level, under `only`.
+  const local = (await rowOf(page, 'local').boundingBox())!
+  await page.mouse.move(local.x + 30, local.y + local.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(local.x + 34, local.y + local.height / 2, { steps: 2 })
+  await page.mouse.move(local.x + 70, local.y + local.height / 2 - 2, { steps: 4 })
+  await page.mouse.up()
+  await expect
+    .poll(() =>
+      host.evaluate((element: Tree) => JSON.stringify(element.items.map((node: TreeNode) => [node.value, node.children?.map((child) => child.value)]))),
+    )
+    .toBe(
+      JSON.stringify([
+        ['remote', []],
+        ['only', ['local']],
+      ]),
+    )
+})
+
+test('Alt with an arrow inside a row action stays with that control', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable>
+    <c2-tree-item value="one" label="One"></c2-tree-item>
+    <c2-tree-item value="two" label="Two"><button slot="actions">More</button></c2-tree-item>
+  </c2-tree>`)
+  await ready(page)
+  await page.getByRole('button', { name: 'More' }).focus()
+  await page.keyboard.press('Alt+ArrowUp')
+  expect(await shape(page)).toBe('/one /two')
+})

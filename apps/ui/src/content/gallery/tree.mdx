@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explorer, a permissions checklist, a docs sidebar and a sortable menu editor. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explorer, a permissions checklist, a docs sidebar, a sortable menu editor and a sortable outline built from data. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -138,6 +138,28 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
     <c2-tree-item value="returns" label="Returns"></c2-tree-item>
   </c2-tree-item>
 </c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Sortable outline
+<style>
+  .outline-editor {
+    width: 100%;
+    --c2-tree--background: transparent;
+    --c2-tree-item__row--min-height: 30px;
+    --c2-tree-item__row--indent: 18px;
+    --c2-tree-item__drop-target--background: light-dark(#fef3c7, #3b2a0c);
+    --c2-tree__drop-indicator--color: light-dark(#d97706, #e8bc89);
+  }
+</style>
+<c2-tree
+  client:only="lit"
+  class="outline-editor"
+  reorderable
+  max-depth="2"
+  aria-label="Chapter outline"
+  expanded-items="intro;setup"
+  items='[{"value":"intro","label":"Introduction","children":[{"value":"why","label":"Why it matters"},{"value":"who","label":"Who it is for"}]},{"value":"setup","label":"Setting up","children":[{"value":"install","label":"Install"},{"value":"config","label":"Configure"}]},{"value":"next","label":"Next steps"}]'
+></c2-tree>
 ```
 
 </GalleryGrid>

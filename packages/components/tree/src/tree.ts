@@ -357,7 +357,11 @@ export class Tree extends LitElement {
     if (this.reorderable && !this.#reorderLoaded) {
       this.#reorderLoaded = true
       const reorder = import('./tree-reorder')
-      void reorder.then((module) => module.attachReorder(this))
+      reorder.then(
+        (module) => module.attachReorder(this),
+        // A chunk that failed to load (a dropped connection, a stale deploy) is tried again on the next update.
+        () => (this.#reorderLoaded = false),
+      )
     }
   }
 

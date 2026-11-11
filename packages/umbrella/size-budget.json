@@ -1,5 +1,5 @@
 {
-  "lazy": 380049,
+  "lazy": 380376,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -260,7 +260,7 @@
     "tour/tour-step": 939,
     "trace-waterfall": 6653,
     "transcript": 13449,
-    "tree": 16034,
+    "tree": 16041,
     "tree-select": 39702,
     "tree/tree-item": 9331,
     "truncate": 2160,
