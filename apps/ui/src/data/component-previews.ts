@@ -74,6 +74,7 @@ export const componentPreviews: Record<string, string> = {
   </c2-button-group>
   <c2-button-group><c2-button>Save</c2-button><c2-button>Publish</c2-button></c2-button-group>
 </div>`,
+  'camera-capture': `<c2-camera-capture guide="card" style="--c2-camera-capture--width:220px;--c2-camera-capture__screen--font-size:12px"></c2-camera-capture>`,
   'candlestick-chart': `<c2-candlestick-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="date" legend="none" data='[{"date":"M","open":248.3,"close":256.1,"low":248.1,"high":256.6},{"date":"T","open":255.9,"close":254.4,"low":253.6,"high":257.3},{"date":"W","open":255.2,"close":252.3,"low":251,"high":255.7},{"date":"T","open":253.2,"close":256.9,"low":252.4,"high":257.2},{"date":"F","open":254.1,"close":255.5,"low":253.1,"high":257.6}]'></c2-candlestick-chart>`,
   card: `<c2-card style="width:220px">
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>

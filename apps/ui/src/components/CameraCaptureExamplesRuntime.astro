@@ -1,0 +1,280 @@
+---
+/**
+ * Gives the camera capture examples a pretend camera: a canvas that films a card, a document, a receipt or a face on a
+ * desk, so the gallery shows the live viewfinder without asking the reader for their camera. Each element marked
+ * `data-camera-capture-example="<case>"` gets the source when it scrolls into view, and stops when it leaves.
+ */
+---
+
+<script>
+  import type { CameraCapture, CameraFrameAssessor, CameraStreamSource } from '@c2n/components/camera-capture'
+  import { assessFrame } from '@c2n/components/camera-capture'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the language card: the library ships English only, an app adds its languages.
+  addTranslations({
+    fr: {
+      'camera-capture': {
+        label: 'Caméra',
+        idle: 'Prenez une photo avec votre caméra.',
+        start: 'Activer la caméra',
+        starting: 'Ouverture de la caméra…',
+        capture: 'Prendre la photo',
+        switchCamera: 'Changer de caméra',
+        retake: 'Reprendre',
+        accept: 'Utiliser la photo',
+        retakeShot: 'Reprendre {0}',
+        preview: 'Photo à vérifier',
+        shot: 'Photo {0}',
+        shots: 'Photos à prendre',
+        progress: 'Photo {0} sur {1} : {2}',
+        shotDone: 'prise',
+        done: 'Toutes les photos sont prises.',
+        guideDocument: 'Placez le document dans le cadre.',
+        guideCard: 'Placez la carte dans le cadre.',
+        guideFace: 'Centrez votre visage dans l’ovale.',
+        dark: 'Il faut plus de lumière.',
+        glare: 'Évitez les reflets : inclinez la carte.',
+        moving: 'Tenez l’appareil immobile.',
+        blurry: 'La photo est floue : approchez-vous.',
+        holdStill: 'Ne bougez plus…',
+        captured: 'Photo prise.',
+        errorDenied: 'L’accès à la caméra a été refusé. Autorisez-le dans les réglages du navigateur, puis réessayez.',
+        errorNotFound: 'Aucune caméra sur cet appareil.',
+        errorBusy: 'La caméra est utilisée par une autre application.',
+        errorUnsupported: 'Ce navigateur ne peut pas utiliser de caméra sur cette page.',
+        errorEnded: 'La caméra s’est arrêtée. Vérifiez qu’elle est branchée, puis réessayez.',
+        errorUnknown: 'La caméra n’a pas pu démarrer.',
+        retry: 'Réessayer',
+      },
+    },
+  })
+
+  type Scene = 'card' | 'card-back' | 'document' | 'receipt' | 'face' | 'desk'
+
+  const FPS = 15
+
+  /** Draws one frame of a scene. `sway` is the hand's offset in pixels: it shakes for a moment, then holds still. */
+  function draw(context: CanvasRenderingContext2D, scene: Scene, time: number) {
+    const width = 640
+    const height = 480
+    const cycle = (time / 1000) % 7
+    const amplitude = cycle < 1.6 ? 14 * (1 - cycle / 1.6) : 0
+    const sway = Math.sin(time / 70) * amplitude
+    const tilt = Math.cos(time / 90) * amplitude * 0.4
+
+    // A wooden desk, or a soft wall behind a face.
+    const desk = context.createLinearGradient(0, 0, width, height)
+    if (scene === 'face') {
+      desk.addColorStop(0, '#cbd5e1')
+      desk.addColorStop(1, '#94a3b8')
+    } else {
+      desk.addColorStop(0, '#9a7452')
+      desk.addColorStop(1, '#6b4f36')
+    }
+    context.fillStyle = desk
+    context.fillRect(0, 0, width, height)
+    if (scene !== 'face') {
+      context.strokeStyle = 'rgba(60, 40, 20, 0.18)'
+      context.lineWidth = 2
+      for (let y = 18; y < height; y += 26) {
+        context.beginPath()
+        context.moveTo(0, y + Math.sin(y) * 4)
+        context.bezierCurveTo(width / 3, y + 8, (2 * width) / 3, y - 8, width, y + Math.cos(y) * 4)
+        context.stroke()
+      }
+    }
+
+    context.save()
+    context.translate(width / 2 + sway, height / 2 + tilt)
+    context.rotate((sway / 900) * Math.PI)
+    context.shadowColor = 'rgba(0, 0, 0, 0.35)'
+    context.shadowBlur = 18
+    context.shadowOffsetY = 8
+
+    if (scene === 'card' || scene === 'card-back') {
+      const w = 470
+      const h = w / 1.586
+      const card = context.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2)
+      card.addColorStop(0, '#1e3a8a')
+      card.addColorStop(1, '#3b82f6')
+      context.fillStyle = card
+      context.beginPath()
+      context.roundRect(-w / 2, -h / 2, w, h, 18)
+      context.fill()
+      context.shadowColor = 'transparent'
+      if (scene === 'card') {
+        context.fillStyle = '#facc15'
+        context.beginPath()
+        context.roundRect(-w / 2 + 34, -36, 56, 42, 6)
+        context.fill()
+        context.fillStyle = '#ffffff'
+        context.font = '600 28px ui-monospace, monospace'
+        context.fillText('4242  4242  4242  4242', -w / 2 + 34, 50)
+        context.font = '500 16px system-ui, sans-serif'
+        context.fillText('ALEX MORGAN', -w / 2 + 34, 100)
+        context.fillText('09 / 29', w / 2 - 100, 100)
+        context.font = '700 22px system-ui, sans-serif'
+        context.fillText('NORTHBANK', -w / 2 + 34, -h / 2 + 44)
+      } else {
+        context.fillStyle = '#0f172a'
+        context.fillRect(-w / 2, -h / 2 + 30, w, 46)
+        context.fillStyle = '#f8fafc'
+        context.fillRect(-w / 2 + 34, -h / 2 + 100, 260, 34)
+        context.fillStyle = '#0f172a'
+        context.font = 'italic 500 18px system-ui, sans-serif'
+        context.fillText('Alex Morgan', -w / 2 + 44, -h / 2 + 124)
+        context.fillStyle = 'rgba(255, 255, 255, 0.8)'
+        context.font = '500 12px system-ui, sans-serif'
+        for (let line = 0; line < 3; line++) context.fillText('Customer service: call the number on the back.', -w / 2 + 34, h / 2 - 70 + line * 18)
+      }
+    } else if (scene === 'document' || scene === 'receipt') {
+      const receipt = scene === 'receipt'
+      const h = 410
+      const w = receipt ? h / 2.4 : h / 1.414
+      context.fillStyle = '#fafaf9'
+      context.fillRect(-w / 2, -h / 2, w, h)
+      context.shadowColor = 'transparent'
+      context.fillStyle = '#1c1917'
+      context.font = `700 ${receipt ? 14 : 18}px system-ui, sans-serif`
+      context.fillText(receipt ? 'CORNER CAFÉ' : 'Invoice 2026-114', -w / 2 + 18, -h / 2 + 34)
+      context.fillStyle = '#57534e'
+      const lines = receipt ? 14 : 12
+      for (let line = 0; line < lines; line++) {
+        const y = -h / 2 + 64 + line * (receipt ? 22 : 24)
+        context.fillRect(-w / 2 + 18, y, (w - 36) * (receipt ? 0.55 : 0.4 + ((line * 37) % 50) / 100), 6)
+        if (receipt || line % 3 === 0) context.fillRect(w / 2 - 18 - 34, y, 34, 6)
+      }
+      context.fillStyle = '#1c1917'
+      context.fillRect(-w / 2 + 18, h / 2 - 40, w - 36, 2)
+      context.font = `700 ${receipt ? 13 : 15}px system-ui, sans-serif`
+      context.fillText('TOTAL', -w / 2 + 18, h / 2 - 16)
+      context.fillText(receipt ? '18.40' : '1,280.00', w / 2 - (receipt ? 58 : 90), h / 2 - 16)
+    } else if (scene === 'face') {
+      context.shadowColor = 'transparent'
+      context.fillStyle = '#334155'
+      context.beginPath()
+      context.ellipse(0, 230, 190, 150, 0, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#e0ac84'
+      context.fillRect(-34, 70, 68, 70)
+      context.beginPath()
+      context.ellipse(0, -10, 96, 122, 0, 0, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#3f2a1d'
+      context.beginPath()
+      context.ellipse(0, -84, 104, 62, 0, Math.PI, Math.PI * 2)
+      context.fill()
+      context.fillStyle = '#1f2937'
+      for (const x of [-36, 36]) {
+        context.beginPath()
+        context.ellipse(x, -10, 9, 7, 0, 0, Math.PI * 2)
+        context.fill()
+      }
+      context.strokeStyle = '#9a5b3c'
+      context.lineWidth = 4
+      context.lineCap = 'round'
+      context.beginPath()
+      context.arc(0, 36, 30, 0.2 * Math.PI, 0.8 * Math.PI)
+      context.stroke()
+    }
+    context.restore()
+  }
+
+  /** A pretend camera filming `scene()`: read on every frame, so a list of shots moves from the front to the back. */
+  function demoSource(scene: () => Scene): CameraStreamSource {
+    return async () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 640
+      canvas.height = 480
+      const context = canvas.getContext('2d')
+      if (!context) throw new DOMException('No canvas', 'NotSupportedError')
+      const start = performance.now()
+      const paint = () => draw(context, scene(), performance.now() - start)
+      paint()
+      const timer = window.setInterval(paint, 1000 / FPS)
+      const stream = canvas.captureStream(FPS)
+      for (const track of stream.getTracks()) {
+        const stop = track.stop.bind(track)
+        track.stop = () => {
+          window.clearInterval(timer)
+          stop()
+        }
+      }
+      return stream
+    }
+  }
+
+  const deniedSource: CameraStreamSource = () => Promise.reject(new DOMException('The reader said no', 'NotAllowedError'))
+
+  /** An app's own rule for the "Own quality rules" card: a receipt needs a bright desk, brighter than the built-in rule asks. */
+  const brightDesk: CameraFrameAssessor = (metrics, context) => (metrics.brightness < 150 ? 'dark' : assessFrame(metrics, context))
+
+  const initialized = new WeakSet<CameraCapture>()
+  const later = (delay: number, run: () => void) => window.setTimeout(run, delay)
+
+  /** Keeps the camera of an example open while it is on screen. */
+  const visibility = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      const camera = entry.target as CameraCapture
+      if (entry.isIntersecting) void camera.start()
+      else if (camera.status === 'live' || camera.status === 'starting') camera.stop()
+    }
+  })
+
+  function setup(camera: CameraCapture) {
+    if (initialized.has(camera)) return
+    initialized.add(camera)
+    const example = camera.dataset.cameraCaptureExample ?? 'card'
+    if (example === 'denied') {
+      camera.streamSource = deniedSource
+      void camera.start()
+      return
+    }
+    const manual = example === 'manual'
+    const finish = example === 'finish'
+    const scenes = (camera.dataset.cameraCaptureScenes ?? (manual ? 'card' : finish ? 'receipt' : example === 'strict' ? 'document' : example)).split(
+      ',',
+    ) as Scene[]
+    // A list of shots films the scene of the shot being taken: the front, then the back, then a face.
+    let shot = 0
+    camera.streamSource = demoSource(() => scenes[Math.min(shot, scenes.length - 1)] ?? 'card')
+    if (example === 'strict') camera.assessFrame = brightDesk
+    camera.addEventListener('accept', (event) => (shot = event.detail.index + 1))
+    camera.addEventListener('retake', (event) => (shot = event.detail.index))
+    camera.addEventListener('complete', () => {
+      // The demo starts over after a moment, so the card keeps showing the walk through the shots.
+      later(4000, () => {
+        shot = 0
+        camera.reset()
+        if (camera.getBoundingClientRect().width) void camera.start()
+      })
+    })
+    if (camera.hasAttribute('shots') || finish) {
+      // The reader sees each photo for a moment, then the demo keeps it and moves on, as a user pressing Use photo.
+      camera.addEventListener('capture', () => later(1500, () => camera.status === 'review' && camera.accept()))
+    } else if (camera.hasAttribute('auto-capture')) {
+      // A single auto-capture keeps going: the photo is shown for a moment, then the camera comes back.
+      camera.addEventListener('capture', () => later(2500, () => camera.status === 'review' && camera.retake()))
+    }
+    // A manual example waits for its own button (`data-camera-capture-start`), as an app's idle screen does.
+    if (manual)
+      camera.addEventListener(
+        'click',
+        (event) => event.composedPath().some((node) => node instanceof HTMLElement && node.hasAttribute('data-camera-capture-start')) && camera.start(),
+      )
+    else visibility.observe(camera)
+  }
+
+  function setupAll() {
+    // An island upgrades after this script runs: the methods exist once the element is defined.
+    void customElements.whenDefined('c2-camera-capture').then(() => {
+      document.querySelectorAll<CameraCapture>('c2-camera-capture[data-camera-capture-example]').forEach(setup)
+    })
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

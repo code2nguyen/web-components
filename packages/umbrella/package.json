@@ -165,6 +165,10 @@
       "types": "./dist/button-group.d.ts",
       "default": "./dist/button-group.js"
     },
+    "./camera-capture": {
+      "types": "./dist/camera-capture.d.ts",
+      "default": "./dist/camera-capture.js"
+    },
     "./card": {
       "types": "./dist/card.d.ts",
       "default": "./dist/card.js"
@@ -1311,6 +1315,7 @@
     "@c2n/breadcrumb": "*",
     "@c2n/button": "*",
     "@c2n/button-group": "*",
+    "@c2n/camera-capture": "*",
     "@c2n/card": "*",
     "@c2n/card-input": "*",
     "@c2n/carousel": "*",

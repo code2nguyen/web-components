@@ -156,6 +156,12 @@ export const overrides: Record<string, Override> = {
   '--c2-beam__beam--duration': { exclude: 'decorative animation timing' },
   '--c2-beam__beam--delay': { exclude: 'decorative animation timing' },
   '--c2-beam--z-index': { exclude: 'consumer stacking context' },
+  // Camera Capture: the stage is a viewfinder, dark in both themes like a camera's screen; its text follows the
+  // dark-surface roles. The guide's ring stays white on the picture, whatever the page's theme.
+  '--c2-camera-capture__stage--background': { token: 'color-dark-surface' },
+  '--c2-camera-capture__stage--color': { token: 'color-on-dark-surface' },
+  '--c2-camera-capture__stage__muted--color': { token: 'color-on-dark-surface-variant' },
+  '--c2-camera-capture__guide--border-radius': { exclude: 'guide shape follows the document or card it frames' },
   // Device Frame: a phone, tablet or laptop body is dark in both themes, like the hardware; its shape is the
   // device's, not the theme's. The browser window, its bar and the deck follow the surface roles.
   '--c2-device-frame__bezel--color': { token: 'color-dark-surface' },

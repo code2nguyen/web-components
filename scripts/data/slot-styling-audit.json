@@ -505,6 +505,41 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-camera-capture",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region beside the shutter owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-camera-capture",
+      "slot": "done",
+      "decision": "part",
+      "parts": ["done"],
+      "reason": "The done region covers the stage and owns the summary's padding and scrolling."
+    },
+    {
+      "tag": "c2-camera-capture",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["error"],
+      "reason": "The error screen covers the stage and centres the error slot's content."
+    },
+    {
+      "tag": "c2-camera-capture",
+      "slot": "guide",
+      "decision": "part",
+      "parts": ["guide"],
+      "reason": "The guide box owns the position, width and aspect ratio of the guide slot's drawing; crop keeps its area."
+    },
+    {
+      "tag": "c2-camera-capture",
+      "slot": "idle",
+      "decision": "part",
+      "parts": ["idle"],
+      "reason": "The idle screen covers the stage and centres the idle slot's content."
+    },
+    {
       "tag": "c2-candlestick-chart",
       "slot": "actions",
       "decision": "part",

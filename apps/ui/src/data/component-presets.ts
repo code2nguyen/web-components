@@ -4116,4 +4116,39 @@ selectors:
       },
     ],
   },
+  'c2-camera-capture': {
+    html: `<c2-camera-capture guide="card"></c2-camera-capture>`,
+    presets: [
+      {
+        name: 'Receipt',
+        description: 'An upright stage and a long, narrow guide for a till receipt.',
+        css: {
+          '--c2-camera-capture__stage--aspect-ratio': '3 / 4',
+          '--c2-camera-capture__guide__document--aspect-ratio': '0.42',
+          '--c2-camera-capture__guide--border-radius': '4px',
+        },
+        attributes: { guide: 'document' },
+      },
+      {
+        name: 'Wide',
+        description: 'A 16:9 stage with a narrower guide and rounded corners.',
+        css: {
+          '--c2-camera-capture__stage--aspect-ratio': '16 / 9',
+          '--c2-camera-capture__stage--border-radius': '24px',
+          '--c2-camera-capture__guide--width': '60%',
+        },
+      },
+      {
+        name: 'Teal',
+        description: 'A teal shutter and Use photo button, and a deeper scrim around the guide.',
+        css: {
+          '--c2-camera-capture__shutter--background': '#0f766e',
+          '--c2-camera-capture__shutter__hover--background': '#115e59',
+          '--c2-camera-capture__accept--background': '#0f766e',
+          '--c2-camera-capture__accept__hover--background': '#115e59',
+          '--c2-camera-capture__guide__scrim--color': 'rgba(15, 23, 42, 0.6)',
+        },
+      },
+    ],
+  },
 }
