@@ -102,3 +102,25 @@ test.describe('realtime updates reuse the rendered rows', () => {
     expect(result.after.scrollHeight).toBeGreaterThan(result.before.scrollHeight * 10)
   })
 })
+
+test.describe('a tree costs nothing while it is off', () => {
+  test('50,000 rows render the same window with children-field at its default, and as a tree of leaves', async ({ page, bench }) => {
+    await bench()
+    const stats = await page.evaluate(async (count) => {
+      const mount = async (options?: { childrenField?: string }) => {
+        await window.tableBench.mount(count, options)
+        return window.tableBench.stats()
+      }
+      return { plain: await mount(), unset: await mount({ childrenField: '' }), leaves: await mount({ childrenField: 'children' }) }
+    }, 50_000)
+
+    expect(stats.plain.rowElements).toBeLessThanOrEqual(MAX_WINDOW_ROWS)
+    expect(stats.unset.rowElements).toBe(stats.plain.rowElements)
+    expect(stats.unset.shadowElements).toBe(stats.plain.shadowElements)
+    expect(stats.unset.scrollHeight).toBe(stats.plain.scrollHeight)
+    // A tree with nothing nested is the same rows on the same lines, plus a chevron's room per row.
+    expect(stats.leaves.rowElements).toBe(stats.plain.rowElements)
+    expect(stats.leaves.scrollHeight).toBe(stats.plain.scrollHeight)
+    expect(stats.leaves.firstCellText).toBe(stats.plain.firstCellText)
+  })
+})

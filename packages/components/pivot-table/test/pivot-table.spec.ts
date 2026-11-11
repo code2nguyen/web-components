@@ -231,3 +231,135 @@ test('regressions: Enter sorts from a header button, a value chip reorders, two 
   const csv = await table(page).evaluate((element) => (element as HTMLElement & { toCSV(): string }).toCSV())
   expect(csv.split('\n')[0]).toBe(',Sum of orders,Sum of revenue,Max of revenue')
 })
+
+const LEDGER = [
+  { section: 'Revenue', account: 'Product', actual: 900, budget: 800 },
+  { section: 'Revenue', account: 'Services', actual: 300, budget: 400 },
+  { section: 'Expenses', account: 'Payroll', actual: 500, budget: 450 },
+  { section: 'Expenses', account: 'Rent', actual: 100, budget: 100 },
+]
+const STATEMENT_VALUES = [
+  { field: 'actual', label: 'Actual' },
+  { field: 'budget', label: 'Budget' },
+  { field: 'variance', compute: 'difference', of: ['actual', 'budget'] },
+  { field: 'change', compute: 'percent-difference', of: ['actual', 'budget'] },
+]
+
+test('pivot(): computed values read two values of the same cell, subtotals included; invertSigns subtracts a group in the totals', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-pivot-table></c2-pivot-table>`)
+  const out = await page.evaluate((data) => {
+    type Result = { cell(r: string[], c: string[], v: number): number | null }
+    const { pivot } = (window as unknown as { pivotApi: { pivot: (data: unknown[], config: object) => Result } }).pivotApi
+    const result = pivot([...data, { section: 'Other', account: 'Zero', actual: 5, budget: 0 }], {
+      rows: ['section', 'account'],
+      columns: [],
+      invertSigns: { section: ['Expenses'] },
+      values: [
+        { field: 'actual' },
+        { field: 'budget' },
+        { field: 'variance', compute: 'difference', of: ['actual', 'budget'] },
+        { field: 'change', compute: 'percent-difference', of: ['actual', 'budget'] },
+        { field: 'ratio', compute: 'ratio', of: ['actual', 'budget'] },
+        { field: 'broken', compute: 'difference', of: ['actual', 'missing'] },
+        { field: 'actual', aggregate: 'count' },
+      ],
+    })
+    const row = (path: string[]) => [0, 1, 2, 3, 4, 5, 6].map((index) => result.cell(path, [], index))
+    return { payroll: row(['Expenses', 'Payroll']), revenue: row(['Revenue']), expenses: row(['Expenses']), zero: row(['Other', 'Zero']), total: row([]) }
+  }, LEDGER)
+  // Expenses count negative: an overspend is a negative variance, and the totals subtract them.
+  expect(out.payroll).toEqual([-500, -450, -50, -50 / 450, 500 / 450, null, 1])
+  expect(out.revenue).toEqual([1200, 1200, 0, 0, 1, null, 2])
+  expect(out.expenses).toEqual([-600, -550, -50, -50 / 550, 600 / 550, null, 2])
+  expect(out.zero).toEqual([5, 0, 5, null, null, null, 1])
+  expect(out.total).toEqual([605, 650, -45, -45 / 650, 605 / 650, null, 5])
+})
+
+test('a financial statement: computed variance columns with labels, percent format and sign classes; the keyboard reaches them', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(
+    `<c2-pivot-table rows="section;account" invert-signs='{"section":["Expenses"]}' values='${json(STATEMENT_VALUES)}' data='${json(LEDGER)}'></c2-pivot-table>`,
+  )
+  await expect(table(page).locator('thead th')).toHaveText([
+    'section / account',
+    'Actual',
+    'Budget',
+    'Difference: actual vs budget',
+    '% difference: actual vs budget',
+  ])
+  expect(await grid(table(page))).toEqual([
+    ['Expenses', '', '', '', ''],
+    ['Payroll', '-500', '-450', '-50', '-11.1%'],
+    ['Rent', '-100', '-100', '0', '0%'],
+    ['Expenses total', '-600', '-550', '-50', '-9.1%'],
+    ['Revenue', '', '', '', ''],
+    ['Product', '900', '800', '100', '12.5%'],
+    ['Services', '300', '400', '-100', '-25%'],
+    ['Revenue total', '1,200', '1,200', '0', '0%'],
+    ['Grand total', '600', '650', '-50', '-7.7%'],
+  ])
+  await expect(table(page).locator('[data-cell="1:3"]')).toHaveClass(/negative/)
+  await expect(table(page).locator('[data-cell="5:3"]')).toHaveClass(/positive/)
+  await expect(table(page).locator('[data-cell="2:3"]')).not.toHaveClass(/negative|positive/)
+  // Aggregated cells never get a sign class, even when negative.
+  await expect(table(page).locator('[data-cell="1:1"]')).not.toHaveClass(/negative|positive/)
+  // The colours are variables, inherited by default.
+  await table(page).evaluate((element) => (element as HTMLElement).style.setProperty('--c2-pivot-table__computed__negative--color', 'rgb(185, 28, 28)'))
+  await expect(table(page).locator('[data-cell="1:3"]')).toHaveCSS('color', 'rgb(185, 28, 28)')
+
+  await watch(table(page), 'cell-click')
+  await table(page).locator('[data-cell="1:0"]').click()
+  await page.keyboard.press('End')
+  await page.keyboard.press('ArrowLeft')
+  await expect(table(page).locator('[data-cell="1:3"]')).toBeFocused()
+  await page.keyboard.press('Enter')
+  const [detail] = await events(table(page))
+  expect(detail).toMatchObject({ rowPath: ['Expenses', 'Payroll'], field: 'variance', value: -50 })
+  expect(detail.records).toEqual([LEDGER[2]])
+  expect((await table(page).evaluate((element) => (element as HTMLElement & { config: object }).config)) as object).toMatchObject({
+    invertSigns: { section: ['Expenses'] },
+  })
+
+  // Clearing invert-signs counts every row as stored.
+  await props(table(page), { invertSigns: {} })
+  expect((await grid(table(page))).at(-1)).toEqual(['Grand total', '1,800', '1,750', '50', '2.9%'])
+  await accessible(page)
+})
+
+test('configurable: a computed value chip shows its computation and offers only Remove', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-pivot-table configurable rows="section" values='${json(STATEMENT_VALUES)}' data='${json(LEDGER)}'></c2-pivot-table>`)
+  const zone = table(page).locator('.zone').nth(3)
+  await expect(zone.locator('.chip-aggregate')).toHaveText(['Sum', 'Sum', 'Difference', '% difference'])
+  await zone.locator('[data-field="variance"] .chip-menu').click()
+  await expect(zone.locator('[data-field="variance"] c2-menu-item')).toHaveCount(1)
+  await zone.locator('[data-field="variance"] c2-menu-item', { hasText: 'Remove' }).click()
+  await expect(zone.locator('.chip-label')).toHaveText(['actual', 'budget', 'change'])
+  // It is not a field of the data, so it does not come back to the unused fields.
+  await expect(table(page).locator('.zone').first().locator('.chip-label')).toHaveText(['account'])
+})
+
+test('regressions: a record in two inverted groups flips once, a group may be named as a string, a computed value may read an earlier one', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-pivot-table></c2-pivot-table>`)
+  const out = await page.evaluate((data) => {
+    type Result = { cell(r: string[], c: string[], v: number): number | null }
+    const { pivot } = (window as unknown as { pivotApi: { pivot: (data: unknown[], config: object) => Result } }).pivotApi
+    const values = [
+      { field: 'actual' },
+      { field: 'budget' },
+      { field: 'variance', compute: 'difference', of: ['actual', 'budget'] },
+      { field: 'share', compute: 'ratio', of: ['variance', 'budget'] },
+    ]
+    const twice = pivot(data, { rows: ['section'], columns: [], values, invertSigns: { section: ['Expenses'], account: ['Payroll'] } })
+    const shorthand = pivot(data, { rows: ['section'], columns: [], values, invertSigns: { section: 'Expenses' } })
+    return { twice: twice.cell(['Expenses'], [], 0), shorthand: shorthand.cell([], [], 0), share: twice.cell([], [], 3) }
+  }, LEDGER)
+  expect(out).toEqual({ twice: -600, shorthand: 600, share: -50 / 650 })
+})

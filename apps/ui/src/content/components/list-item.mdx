@@ -1,20 +1,22 @@
 ---
 title: 'List Item'
-description: 'Selectable row with icon slots, used on its own or as the option of list and select.'
+description: 'Selectable row with icon slots, used on its own, as the option of list and select, or as a navigation link with collapsible groups.'
 category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { ListItem } from '@c2n/components/list-item'
+import { ListItem, ListGroup } from '@c2n/components/list-item'
 import { List } from '@c2n/components/list'
 import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
 import { FeatherSendIcon as FeatherSend } from '@c2n/feather-icons/icons/send.js'
 import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
 import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
+import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
+import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
 
-`c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
+`c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. `current` marks the link of the page the reader is on, and `c2-list-group`, from the same package, folds navigation rows under a collapsible heading. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
 
 ## Import
 
@@ -83,6 +85,17 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
     <c2-list-item href="https://www.npmjs.com/org/c2n" target="_blank">npm packages<span slot="suffix-icon" class="hint">↗</span></c2-list-item>
   </div>
 </div>
+<div data-label="Navigation">
+  <nav class="col" aria-label="Example">
+    <c2-list-item href="#overview" current><c2-feather-home slot="prefix-icon"></c2-feather-home>Overview</c2-list-item>
+    <c2-list-group label="Projects" open>
+      <c2-feather-folder slot="prefix-icon"></c2-feather-folder>
+      <span slot="suffix" class="hint">2</span>
+      <c2-list-item href="#website">Website</c2-list-item>
+      <c2-list-item href="#mobile-app">Mobile app</c2-list-item>
+    </c2-list-group>
+  </nav>
+</div>
 <div data-label="Inside a list">
   <c2-list client:only="lit" value="sent" class="menu">
     <c2-list-item value="inbox">Inbox</c2-list-item>
@@ -101,6 +114,8 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
 - **Keyboard**: a standalone row is a tab stop; Enter and Space toggle it. In a list the list moves focus with the arrow keys and selects with Enter or Space.
 - **`description`**: a second line under the content, muted and smaller; `label` keeps the select trigger to the first line.
 - **`href`**: the row renders as a link (`role="link"`); inside a list it still takes part in the selection.
+- **`current`**: marks a link row as the current page (`aria-current="page"`). It looks selected by default; the `--c2-list-item__current--*` variables give it its own look, such as an accent bar. It does not change `selected`.
+- **`c2-list-group`**: a collapsible heading over navigation rows, imported with the row (`@c2n/components/list-item`). The header is a disclosure button (`aria-expanded`) taking a `label`, a `prefix-icon` and a `suffix` such as a count; `open` shows the rows, `toggle()` flips it and a `toggle` event (`ToggleEvent`, not bubbling) reports each change. Groups nest. Keep the rows in a `<nav>` rather than a `c2-list`, which is a listbox of options.
 - **`label`**: what a `c2-select` shows for the row. Without it the trigger shows the row's text content, which for a two-line row would be both lines.
 - **`data`**: any object you attach to the row; a list or select returns it in `selection-change` next to the value.
 
