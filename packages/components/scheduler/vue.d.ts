@@ -27,6 +27,7 @@ declare module 'vue' {
         'snap-minutes'?: unknown
         'working-hours'?: unknown
         'time-zone'?: unknown
+        'summary-heading'?: unknown
         'hide-header'?: unknown
         'resource-heading'?: unknown
         onRangeSelect?: (event: EventOf<Scheduler, 'range-select'>) => void

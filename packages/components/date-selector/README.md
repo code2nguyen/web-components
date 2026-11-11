@@ -18,3 +18,7 @@ npm install @c2n/components
 Dates use local-calendar ISO strings (`YYYY-MM-DD`). The first selection starts a range, the second completes it, and
 the next starts over. The component supports arrow-key navigation, month paging, locale and week-start options,
 min/max constraints, disabled and required states, and form submission.
+
+`mode="single"` picks one date into `value` and `mode="multiple"` toggles any number of dates (comma-separated in
+`value`). `marked` draws a dot under listed dates, and the `renderDay` property draws content of your own (a price, a
+count) under each day's number.

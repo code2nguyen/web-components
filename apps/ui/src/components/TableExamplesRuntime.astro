@@ -1,0 +1,46 @@
+---
+/** Enhances table gallery examples whose property-only API (`loadChildren`) cannot be expressed as an HTML attribute. */
+---
+
+<script>
+  import type { Table, TableRow } from '@c2n/components/table'
+  import '@c2n/components/table'
+
+  // Each region's countries add up to the figures the region shows before it is opened, so the rollup agrees.
+  const countries: Record<string, TableRow[]> = {
+    emea: [
+      { id: 'de', region: 'Germany', stores: 14, revenue: 1720000 },
+      { id: 'fr', region: 'France', stores: 11, revenue: 1260000 },
+      { id: 'uk', region: 'United Kingdom', stores: 10, revenue: 1190000 },
+      { id: 'se', region: 'Sweden', stores: 7, revenue: 650000 },
+    ],
+    americas: [
+      { id: 'us', region: 'United States', stores: 38, revenue: 4480000 },
+      { id: 'ca', region: 'Canada', stores: 11, revenue: 1100000 },
+      { id: 'br', region: 'Brazil', stores: 8, revenue: 730000 },
+    ],
+    apac: [
+      { id: 'jp', region: 'Japan', stores: 12, revenue: 1210000 },
+      { id: 'au', region: 'Australia', stores: 7, revenue: 640000 },
+      { id: 'sg', region: 'Singapore', stores: 4, revenue: 290000 },
+    ],
+  }
+
+  const initialized = new WeakSet<Table>()
+
+  function setup() {
+    document.querySelectorAll<Table>('c2-table[data-table-example]').forEach((table) => {
+      if (initialized.has(table)) return
+      initialized.add(table)
+      if (table.dataset.tableExample === 'lazy-children') {
+        // A short delay stands in for the network, so the spinner on the chevron shows.
+        table.loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
+      }
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>
