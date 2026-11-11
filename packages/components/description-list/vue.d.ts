@@ -8,12 +8,15 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { DescriptionItem } from '@c2n/description-list/description-item.js'
 import type { DescriptionList } from '@c2n/description-list'
 import type { DescriptionValue } from '@c2n/description-list/description-value.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -26,6 +29,10 @@ declare module 'vue' {
       C2Props<DescriptionList> & {
         'value-labels'?: unknown
         'label-heading'?: unknown
+        'differences-only'?: unknown
+        'selected-column'?: unknown
+        'column-selectable'?: unknown
+        onSelectionChange?: (event: EventOf<DescriptionList, 'selection-change'>) => void
       }
     >
     'c2-description-value': DefineComponent<C2Props<DescriptionValue>>

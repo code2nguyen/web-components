@@ -38,7 +38,8 @@
   grid-column: css.cssVar(grid-column);
 }
 
-:host([hidden]) {
+:host([hidden]),
+:host(:state(filtered)) {
   display: none;
 }
 

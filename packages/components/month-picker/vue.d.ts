@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-month-picker': DefineComponent<
       C2Props<MonthPicker> & {
+        'fiscal-start'?: unknown
         onInput?: (event: EventOf<MonthPicker, 'input'>) => void
         onChange?: (event: EventOf<MonthPicker, 'change'>) => void
       }

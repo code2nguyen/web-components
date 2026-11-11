@@ -1,6 +1,6 @@
 ---
 title: 'Date Selector'
-description: 'Accessible one- or two-month calendar for choosing a date range.'
+description: 'Accessible one- or two-month calendar for choosing a date range, one date or several dates.'
 category: 'Inputs'
 ---
 
@@ -43,11 +43,32 @@ import '@c2n/components/date-selector'
 <div data-label="Disabled">
   <c2-date-selector months="1" from="2026-11-08" disabled locale="en-US"></c2-date-selector>
 </div>
+<div data-label="Single date">
+  <c2-date-selector mode="single" months="1" value="2026-09-17" marked="2026-09-04;2026-09-22;2026-09-29" locale="en-US"></c2-date-selector>
+</div>
 ```
 
 Listen for `change` to receive `{ from, to }` in `event.detail`; both are `YYYY-MM-DD` strings. `input` fires at the
 same time for generic form bindings. With `name="trip"`, a complete range submits `trip` and `trip-end`; override the
 second key with `end-name`. `required` treats an unfinished range as missing.
+
+## One date or several
+
+`mode="single"` turns the calendar into an inline date picker: each activation replaces `value`, a single `YYYY-MM-DD`
+date. `mode="multiple"` toggles dates in and out of `value`, kept in ascending order and separated by commas, and marks
+the grid `aria-multiselectable`. Both leave `from` and `to` alone, add `value` to the `change` detail, submit `value`
+under `name` (one entry per date in `multiple` mode), and treat an empty `value` as missing when `required`.
+
+`marked` lists dates that carry a dot (events, availability): an array in script, or `;`-separated in markup. For more
+than a dot, such as a price or an event count, set `renderDay`: it receives `{ date, day, selected, disabled, marked,
+today }` for each day and returns what to draw under the number. The day button, its accessible name and the selection
+stay the component's. The [gallery](/web-components/components/date-selector/gallery) shows both.
+
+```html tag=UsageBlock,package=@c2n/date-selector
+<div data-label="Multiple dates">
+  <c2-date-selector mode="multiple" months="1" value="2026-09-08,2026-09-10,2026-09-15" locale="en-US" aria-label="Choose shift days"></c2-date-selector>
+</div>
+```
 
 ## Limiting the date range
 

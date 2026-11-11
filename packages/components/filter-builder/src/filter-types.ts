@@ -47,6 +47,8 @@ export interface FilterRule {
 export interface FilterGroup {
   op: 'and' | 'or'
   rules: FilterNode[]
+  /** Negates the group: `not (… and …)`. Set from the tree layout (`groups`). */
+  not?: boolean
 }
 
 export type FilterNode = FilterRule | FilterGroup
@@ -151,6 +153,23 @@ export interface FilterBuilderLabels {
   selected: string
   units: Record<FilterRelativeDate['unit'], { one: string; other: string }>
   operators: Record<string, string>
+  /** The text below is drawn by the tree layout (`groups`) only. */
+  or?: string
+  /** Negates a group, and starts a negated group in the sentence: "not (…)". */
+  not?: string
+  /** After the connector of a group: "all" / "any" + "of the following". */
+  ofTheFollowing?: string
+  /** Button adding a condition to a group. */
+  addCondition?: string
+  /** Button adding a nested group. */
+  addGroup?: string
+  removeGroup?: string
+  /** Accessible name of the drag handle of a row, before the row's text. */
+  move?: string
+  /** Before the first condition of a group. */
+  where?: string
+  /** Heading of the `then` zone. */
+  then?: string
 }
 
 export interface FilterChangeEventDetail {

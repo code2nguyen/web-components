@@ -78,13 +78,17 @@ const values: Record<string, FilterGroup> = {
 }
 
 const width = scenario === 'compact' ? 'width: 360px' : 'width: 760px'
-main.innerHTML = `<c2-filter-builder id="subject" style="${width}"></c2-filter-builder><output aria-label="Tree"></output>`
+const tree = scenario.startsWith('tree')
+// The `then` scenario fills the action zone the way an automation rule would.
+const then = scenario === 'tree-then' ? '<c2-button slot="then">Notify the team</c2-button>' : ''
+main.innerHTML = `<c2-filter-builder id="subject" style="${width}" ${tree ? 'groups' : ''}>${then}</c2-filter-builder><output aria-label="Tree"></output>`
 
 const subject = document.querySelector('c2-filter-builder')!
 const output = document.querySelector('output')!
 subject.fields = fields
 if (scenario === 'disabled') subject.toggleAttribute('disabled', true)
-const initial = values[scenario] ?? (scenario === 'disabled' || scenario === 'compact' ? values.applied : undefined)
+const initial =
+  values[scenario] ?? (scenario === 'disabled' || scenario === 'compact' ? values.applied : scenario.startsWith('tree-') ? values.group : undefined)
 if (initial) subject.value = initial
 if (scenario === 'labels') subject.labels = { addFilter: 'Filtrer', clear: 'Effacer', operators: { eq: 'est' } }
 if (scenario === 'render-value') {
@@ -102,5 +106,7 @@ subject.addEventListener('filter-change', (event) => {
 })
 
 await subject.updateComplete
+// The tree layout is a lazy module: wait until it has drawn the root group.
+if (tree) while (!subject.shadowRoot!.querySelector('.group')) await new Promise(requestAnimationFrame)
 await new Promise(requestAnimationFrame)
 main.dataset.ready = 'true'

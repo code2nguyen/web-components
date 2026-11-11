@@ -23,13 +23,15 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-pivot-table': Omit<C2Props<PivotTable>, 'data' | 'rows' | 'columns' | 'values' | 'fieldLabels'> & {
+      'c2-pivot-table': Omit<C2Props<PivotTable>, 'data' | 'rows' | 'columns' | 'values' | 'invertSigns' | 'fieldLabels'> & {
+        'invert-signs'?: Attribute
         'field-labels'?: Attribute
         'expand-depth'?: Attribute
         data?: PivotTable['data'] | string
         rows?: PivotTable['rows'] | string
         columns?: PivotTable['columns'] | string
         values?: PivotTable['values'] | string
+        invertSigns?: PivotTable['invertSigns'] | string
         fieldLabels?: PivotTable['fieldLabels'] | string
       }
     }

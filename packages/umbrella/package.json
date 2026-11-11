@@ -645,6 +645,10 @@
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
     },
+    "./list-item/list-group": {
+      "types": "./dist/list-item/list-group.d.ts",
+      "default": "./dist/list-item/list-group.js"
+    },
     "./loading-overlay": {
       "types": "./dist/loading-overlay.d.ts",
       "default": "./dist/loading-overlay.js"
