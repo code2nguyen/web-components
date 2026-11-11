@@ -172,4 +172,54 @@ import { LinkButton } from '@c2n/components/link-button'
 </c2-banner>
 ```
 
+```html tag=MdxCodeBlock,label=Docs admonitions
+<style>
+  .admonition-stack {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 640px;
+  }
+  .admonition {
+    --c2-banner__container--border: none;
+    --c2-banner__container--border-radius: 4px 8px 8px 4px;
+    --c2-banner__container--box-shadow: none;
+    --c2-banner__container__variant--background-mix: 10%;
+    --c2-banner__icon--padding: 0px;
+    --c2-banner__icon--background-mix: 0%;
+    --c2-banner__icon--size: 18px;
+    --c2-banner__heading__callout--margin-block-end: 4px;
+  }
+  .admonition--note {
+    --c2-banner__container--box-shadow: inset 4px 0 0 #2563eb;
+  }
+  .admonition--tip {
+    --c2-banner__container--box-shadow: inset 4px 0 0 #15803d;
+  }
+  .admonition--warning {
+    --c2-banner__container--box-shadow: inset 4px 0 0 #a16207;
+  }
+  .admonition--danger {
+    --c2-banner__container--box-shadow: inset 4px 0 0 #dc2626;
+  }
+  .admonition ul {
+    padding-inline-start: 20px;
+  }
+</style>
+<div class="admonition-stack">
+  <c2-banner class="admonition admonition--note" callout variant="info" heading="Note" message="Environment variables are read once, when the build starts."></c2-banner>
+  <c2-banner class="admonition admonition--tip" callout variant="success" heading="Tip" message="Cache the dependency folder between builds to save a minute per run."></c2-banner>
+  <c2-banner class="admonition admonition--warning" callout variant="warning" heading="Warning">
+    <p>These settings apply to every branch:</p>
+    <ul>
+      <li>the build command,</li>
+      <li>the output directory.</li>
+    </ul>
+  </c2-banner>
+  <c2-banner class="admonition admonition--danger" callout variant="error" heading="Danger" message="Deleting the project removes its deployments and domains." dismissible>
+    <c2-link-button slot="actions" href="#">Export first</c2-link-button>
+  </c2-banner>
+</div>
+```
+
 </GalleryGrid>

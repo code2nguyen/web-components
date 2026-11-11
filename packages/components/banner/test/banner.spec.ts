@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from './fixture'
 
-for (const state of ['default', 'variants', 'dismissible', 'actions', 'no-icon']) {
+for (const state of ['default', 'variants', 'dismissible', 'actions', 'no-icon', 'callout']) {
   test(`${state} has no axe violations`, async ({ page, scenario }) => {
     await scenario(state)
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
@@ -110,4 +110,58 @@ test('--c2-banner--offset moves a pinned banner off its edge', async ({ page, sc
   await bottom.evaluate((el) => (el as HTMLElement).style.setProperty('--c2-banner--offset', '16px'))
   const box = await bottom.boundingBox()
   expect(Math.round(box!.y + box!.height)).toBe(page.viewportSize()!.height - 16)
+})
+
+test('a callout is a note, not a live region', async ({ page, scenario }) => {
+  await scenario('callout')
+  await expect(page.getByRole('alert')).toHaveCount(0)
+  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(page.getByRole('note')).toHaveCount(2)
+  await expect(page.getByRole('note').first()).toContainText('Warning')
+})
+
+test('a callout stacks the heading over the body and the actions under it, with the close button on the first row', async ({ page, scenario }) => {
+  await scenario('callout')
+  const callout = page.locator('c2-banner').first()
+  const box = async (part: string) => (await callout.locator(part).boundingBox())!
+  const [icon, heading, message, actions, close] = await Promise.all(
+    ['[part="icon"]', '[part="heading"]', '[part="message"]', '[slot="actions"]', '[part="close"]'].map(box),
+  )
+  expect(heading.y + heading.height).toBeLessThanOrEqual(message.y + 1)
+  expect(Math.round(heading.x)).toBe(Math.round(message.x))
+  expect(actions.y).toBeGreaterThanOrEqual(message.y + message.height - 1)
+  // The actions line up with the text, not with the icon.
+  expect(Math.round(actions.x)).toBe(Math.round(message.x))
+  expect(icon.y).toBeLessThan(message.y)
+  expect(close.y).toBeLessThan(message.y)
+  // Paragraph margins do not add space at the top and bottom of the body.
+  await expect(callout.locator('p').first()).toHaveCSS('margin-top', '0px')
+  await expect(callout.locator('p').last()).toHaveCSS('margin-bottom', '0px')
+})
+
+test('a callout keeps its actions under the text when the icon padding is a unit-less 0', async ({ page, scenario }) => {
+  await scenario('callout')
+  const callout = page.locator('c2-banner').first()
+  await callout.evaluate((el) => (el as HTMLElement).style.setProperty('--c2-banner__icon--padding', '0'))
+  const message = (await callout.locator('[part="message"]').boundingBox())!
+  const action = (await callout.locator('[slot="actions"]').boundingBox())!
+  expect(Math.round(action.x)).toBe(Math.round(message.x))
+})
+
+test('a callout without an icon starts its actions and text at the padding edge', async ({ page, scenario }) => {
+  await scenario('callout')
+  const note = page.locator('#note')
+  const container = (await note.locator('[part="container"]').boundingBox())!
+  const content = (await note.locator('[part="content"]').boundingBox())!
+  expect(Math.round(content.x - container.x)).toBe(17)
+})
+
+test('the callout dismiss button is reachable by keyboard', async ({ page, scenario, tab }) => {
+  await scenario('callout')
+  await page.getByRole('button', { name: 'Export' }).focus()
+  await tab()
+  const close = page.getByRole('button', { name: 'Dismiss notice' })
+  await expect(close).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('c2-banner').first()).toBeHidden()
 })

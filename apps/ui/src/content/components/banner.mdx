@@ -39,7 +39,7 @@ import '@c2n/components/banner'
   }
   .banner-action--quiet {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: inherit;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-button__container--border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
     --c2-button__container__hover--background-color: color-mix(in srgb, currentColor 8%, transparent);
     --c2-button__container__active--background-color: color-mix(in srgb, currentColor 14%, transparent);
@@ -70,6 +70,41 @@ import '@c2n/components/banner'
 </div>
 <div data-label="Neutral">
   <c2-banner class="banner-row" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC."></c2-banner>
+</div>
+<div data-label="Callout">
+  <c2-banner class="banner-row" callout variant="warning" heading="Before you delete">
+    Deleting a project removes its builds and preview links. Export what you need first.
+  </c2-banner>
+</div>
+```
+
+## Callout
+
+Inside prose, docs and forms, `callout` turns the banner into an admonition: the heading on its own line above the
+body, the icon at the top, and the actions under the body. A callout is part of the content, not a notice about the
+page, so it is exposed as a `note` and never announced as a status or an alert. The tones are the banner's variants:
+`info` for a note, `success` for a tip, `warning`, and `error` for danger. The default slot takes paragraphs and lists;
+their outer margins are trimmed so the body sits flush with the padding.
+
+```html tag=MdxCodeBlock,label=Callouts
+<style>
+  .callout-stack {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 640px;
+  }
+</style>
+<div class="callout-stack">
+  <c2-banner callout variant="info" heading="Note" message="Preview links expire after 30 days."></c2-banner>
+  <c2-banner callout variant="success" heading="Tip">
+    <p>Press <kbd>⌘K</kbd> anywhere to jump to a project.</p>
+  </c2-banner>
+  <c2-banner callout variant="error" heading="Danger" dismissible>
+    <p>Rotating the signing key logs every user out.</p>
+    <p>Schedule it outside working hours.</p>
+    <c2-link-button slot="actions" href="#">Read the runbook</c2-link-button>
+  </c2-banner>
 </div>
 ```
 
