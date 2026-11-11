@@ -3,6 +3,52 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.24](https://github.com/code2nguyen/web-components/releases/tag/v1.0.24) — 2026-11-11
+
+### Features
+
+- **form:** Add c2-form-list, a repeatable group of fields ([89c6b01](https://github.com/code2nguyen/web-components/commit/89c6b01))
+- **filter-builder:** Add a rule builder of nested AND/OR groups behind `groups` ([58e8430](https://github.com/code2nguyen/web-components/commit/58e8430))
+- **highlight:** Add c2-find-bar, a find bar that drives c2-highlight ([2963681](https://github.com/code2nguyen/web-components/commit/2963681))
+- **banner:** Add a callout presentation for in-content admonitions ([35e9759](https://github.com/code2nguyen/web-components/commit/35e9759))
+- **tree:** Add reorderable rows with drag, keyboard moves and max-depth ([28650f5](https://github.com/code2nguyen/web-components/commit/28650f5))
+- **scheduler:** Pending events, background bands and a summary row for absence calendars ([3a7d741](https://github.com/code2nguyen/web-components/commit/3a7d741))
+- **description-list:** Compare values with highlight, differences-only and a selectable column ([c256638](https://github.com/code2nguyen/web-components/commit/c256638))
+- **import-mapper:** Add c2-import-mapper ([24e4688](https://github.com/code2nguyen/web-components/commit/24e4688))
+- **camera-capture:** Add c2-camera-capture, a camera viewfinder for documents, cards and faces ([c092bce](https://github.com/code2nguyen/web-components/commit/c092bce))
+- **pivot-table:** Add computed value columns and per-group sign inversion for financial statements ([5754a27](https://github.com/code2nguyen/web-components/commit/5754a27))
+- **list-item:** Add current rows and the c2-list-group companion for navigation lists ([7d263c1](https://github.com/code2nguyen/web-components/commit/7d263c1))
+- **date-selector:** Add single and multiple modes, marked dates and renderDay ([f03b301](https://github.com/code2nguyen/web-components/commit/f03b301))
+- **recurrence-editor:** Add c2-recurrence-editor with RRULE and cron output ([ff6c5e1](https://github.com/code2nguyen/web-components/commit/ff6c5e1))
+- **month-picker:** Add quarters, half-years, a fiscal start and a period stepper ([0cb1cce](https://github.com/code2nguyen/web-components/commit/0cb1cce))
+- **table:** Add tree rows through children-field [table-1] ([a5a05c9](https://github.com/code2nguyen/web-components/commit/a5a05c9))
+
+### Fixes
+
+- **camera-capture:** Judge movement only between new frames, and draw no default under a filled slot ([4dfc7d7](https://github.com/code2nguyen/web-components/commit/4dfc7d7))
+- **form:** Document c2-form-list's change event, audit its slots, add a Default gallery card ([f1cbc4e](https://github.com/code2nguyen/web-components/commit/f1cbc4e))
+- **form:** Document c2-form-list change event, Default gallery card and slot audit ([f459e89](https://github.com/code2nguyen/web-components/commit/f459e89))
+- **camera-capture:** Notice a camera that ends in Firefox, and keep slotted screens out of WebKit's fallback ([cfe1263](https://github.com/code2nguyen/web-components/commit/cfe1263))
+- **highlight:** Record the c2-find-bar actions slot in the slot styling audit ([698e6e3](https://github.com/code2nguyen/web-components/commit/698e6e3))
+- **form:** Narrow c2-form-list to form controls and match FormData ([d5d3a95](https://github.com/code2nguyen/web-components/commit/d5d3a95))
+- **highlight:** Address review findings on c2-find-bar ([35478fc](https://github.com/code2nguyen/web-components/commit/35478fc))
+- **filter-builder:** Record the then slot in the slot styling audit ([e8c7b0c](https://github.com/code2nguyen/web-components/commit/e8c7b0c))
+- **import-mapper:** Match a file written in markup and fill the container ([5eadab8](https://github.com/code2nguyen/web-components/commit/5eadab8))
+- **list-item:** Record c2-list-group slots in the slot styling audit ([1c819b6](https://github.com/code2nguyen/web-components/commit/1c819b6))
+- **tree:** Serialize keyboard moves and harden reordering edge cases ([2a258fc](https://github.com/code2nguyen/web-components/commit/2a258fc))
+- **month-picker:** Name a page of fiscal years once, in its title ([bf7f5a1](https://github.com/code2nguyen/web-components/commit/bf7f5a1))
+- **banner:** Key the callout on a class and render actions once ([214249e](https://github.com/code2nguyen/web-components/commit/214249e))
+- **recurrence-editor:** Address review findings ([640d7d2](https://github.com/code2nguyen/web-components/commit/640d7d2))
+- **description-list:** Keep single-value items under differences-only, read the first number ([08439c6](https://github.com/code2nguyen/web-components/commit/08439c6))
+- **recurrence-editor:** Wrap rows on narrow widths, dim only own parts when disabled ([129f72e](https://github.com/code2nguyen/web-components/commit/129f72e))
+- **pivot-table:** Flip a record once across inverted groups, allow chained computed values ([0d19eac](https://github.com/code2nguyen/web-components/commit/0d19eac))
+- **list-item:** Keep suffix controls out of the group's button, and review fixes ([0392530](https://github.com/code2nguyen/web-components/commit/0392530))
+- **table:** Name the expanded-rows converter and refresh generated types [table-1] ([e03f414](https://github.com/code2nguyen/web-components/commit/e03f414))
+
+### Docs site & examples
+
+- **ui:** Add AI-era article series ([f9477ae](https://github.com/code2nguyen/web-components/commit/f9477ae))
+
 ## [1.0.23](https://github.com/code2nguyen/web-components/releases/tag/v1.0.23) — 2026-11-07
 
 ### Features
