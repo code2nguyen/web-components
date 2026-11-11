@@ -1126,4 +1126,34 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, #16a34a 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-choice-matrix__row-header--font-weight': { exclude: 'regular body weight' },
+  // Import mapper: mapped and invalid states are washes of the positive and error colours, so they tint the surface in
+  // either theme; their text is mixed toward the ink for contrast on the wash.
+  '--c2-import-mapper__field__mapped--background-color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 12%, transparent)',
+  },
+  '--c2-import-mapper__field__mapped--color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 60%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-import-mapper__valid--color': {
+    token: 'chart-positive',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-positive, #16a34a) 70%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-import-mapper__field__missing--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 10%, transparent)',
+  },
+  '--c2-import-mapper__cell__invalid--background-color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 8%, transparent)',
+  },
+  '--c2-import-mapper__field__missing--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-import-mapper__error--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
 }

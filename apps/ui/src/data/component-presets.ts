@@ -1115,6 +1115,44 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-import-mapper': {
+    html: `<c2-import-mapper style="width: 560px" label="Import contacts" fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email"},{"key":"phone","label":"Phone"}]' csv="Full name,E-mail,Phone #,Notes
+Ada Lovelace,ada@analytical.io,+44 20 7946 0000,VIP
+Alan Turing,alan@bletchley.org,,Call back"></c2-import-mapper>`,
+    presets: [
+      {
+        name: 'Borderless',
+        description: 'No frame or summary panel, for a mapper inside a dialog or a wizard step.',
+        css: {
+          '--c2-import-mapper--border': 'none',
+          '--c2-import-mapper--padding': '0',
+          '--c2-import-mapper__summary--background-color': 'transparent',
+          '--c2-import-mapper__summary--padding': '0',
+        },
+      },
+      {
+        name: 'Dense',
+        description: 'Shorter rows, two samples per column and a narrower picker for long files.',
+        attributes: { 'sample-count': '2' },
+        css: {
+          '--c2-import-mapper--font-size': '13px',
+          '--c2-import-mapper__column--min-height': '40px',
+          '--c2-import-mapper__column--padding': '4px 0',
+          '--c2-import-mapper__picker--width': '180px',
+        },
+      },
+      {
+        name: 'Square chips',
+        description: 'Square required-field chips and plain samples.',
+        css: {
+          '--c2-import-mapper__field--border-radius': '4px',
+          '--c2-import-mapper__sample--background-color': 'transparent',
+          '--c2-import-mapper__sample--border-radius': '0',
+          '--c2-import-mapper__badge--background-color': 'transparent',
+        },
+      },
+    ],
+  },
   'c2-sheet': {
     html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
     presets: [

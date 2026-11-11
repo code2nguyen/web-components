@@ -83,6 +83,7 @@ import imageAnnotator from '@c2n/image-annotator/custom-elements.json'
 import imageCompare from '@c2n/image-compare/custom-elements.json'
 import imageCropper from '@c2n/image-cropper/custom-elements.json'
 import image from '@c2n/image/custom-elements.json'
+import importMapper from '@c2n/import-mapper/custom-elements.json'
 import inView from '@c2n/in-view/custom-elements.json'
 import indicator from '@c2n/indicator/custom-elements.json'
 import inlineEdit from '@c2n/inline-edit/custom-elements.json'
@@ -302,6 +303,7 @@ export const componentManifests = (function () {
     imageAnnotator,
     imageCompare,
     imageCropper,
+    importMapper,
     inView,
     indicator,
     inlineEdit,

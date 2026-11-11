@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-import-mapper</title>
+    <script type="module" src="/src/import-mapper.ts"></script>
+    <style>
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      section {
+        margin-bottom: 32px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Map the columns</h2>
+      <c2-import-mapper
+        label="Import contacts"
+        fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"phone","label":"Phone"},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+        csv="Full name,E-mail address,Phone #,Signed up,Notes
+Ada Lovelace,ada@analytical.io,+44 20 7946 0000,2024-03-01,VIP
+Grace Hopper,grace(at)navy.mil,,2024-13-01,
+Alan Turing,alan@bletchley.org,+44 161 496 0000,2024-05-17,Call back"
+      ></c2-import-mapper>
+    </section>
+
+    <section>
+      <h2>Preview</h2>
+      <c2-import-mapper
+        view="preview"
+        fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+        csv="Full name,E-mail address,Signed up
+Ada Lovelace,ada@analytical.io,2024-03-01
+Grace Hopper,grace(at)navy.mil,2024-13-01"
+      ></c2-import-mapper>
+    </section>
+
+    <section>
+      <h2>Missing a required field, with a toolbar</h2>
+      <c2-import-mapper
+        fields='[{"key":"sku","label":"SKU","required":true},{"key":"title","label":"Title","required":true}]'
+        csv="Product,Cost
+Desk lamp,49.90"
+      >
+        <button slot="toolbar">Preview</button>
+      </c2-import-mapper>
+    </section>
+  </body>
+</html>
