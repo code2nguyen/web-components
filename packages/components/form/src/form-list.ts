@@ -1,7 +1,8 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { formListMessages } from './messages'
@@ -58,7 +59,7 @@ const keys = new WeakMap<Element, string>()
  *
  * After adding or duplicating, focus moves to the new row's first control; after removing, to the next row, the
  * previous one, or the add button. Changes are announced to screen readers. Resetting the form restores the rows the
- * list started with.
+ * list started with (unless a `reset` listener that ran before the list's cancelled it).
  *
  * The host exposes custom states: `:state(empty)`, `:state(at-min)` and `:state(at-max)`.
  *
@@ -116,6 +117,7 @@ export class FormList extends LitElement {
 
   private initialRows: Element[] | null = null
   private edited = false
+  private waitingForParse = false
   private formElement: HTMLFormElement | null = null
   private ownDisabled = new WeakSet<Element>()
 
@@ -198,7 +200,7 @@ export class FormList extends LitElement {
     this.insertBefore(row, reference)
     this.sync()
     if (active instanceof HTMLElement && row.contains(active)) {
-      // Moving a node drops its focus: give it back, or, when that button is now disabled at the edge, to its counterpart.
+      // Moving drops focus: restore it, or move it to the counterpart of a button now disabled at the edge.
       const counterpart = active.dataset.action === 'move-up' ? 'move-down' : active.dataset.action === 'move-down' ? 'move-up' : ''
       const other = counterpart ? row.querySelector<Actionable>(`[data-action="${counterpart}"]`) : null
       const target = !(active as Actionable).disabled ? active : other && !other.disabled ? other : null
@@ -224,6 +226,8 @@ export class FormList extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     super.willUpdate(changed)
+    if (isServer) return
+    if (!this.hasUpdated) this.hasEmpty = hasSlottedContent(this, 'empty')
     if (changed.has('name') || changed.has('min') || changed.has('max')) this.sync()
   }
 
@@ -236,7 +240,9 @@ export class FormList extends LitElement {
   }
 
   private createRow(): HTMLElement | null {
-    const fragment = this.template?.content.cloneNode(true) as DocumentFragment | undefined
+    const fragment = this.template ? document.importNode(this.template.content, true) : undefined
+    // So a c2-form-field connects with its control already upgraded.
+    if (fragment) customElements.upgrade(fragment)
     const row = fragment ? [...fragment.children].find((child): child is HTMLElement => child instanceof HTMLElement) : undefined
     return row ?? null
   }
@@ -247,7 +253,7 @@ export class FormList extends LitElement {
     const reference = rows[index] ?? rows[rows.length - 1]?.nextSibling ?? null
     this.insertBefore(row, reference && reference.parentNode === this ? reference : null)
     for (const element of [row, ...row.querySelectorAll('[name]')]) {
-      if (element.hasAttribute('name') && !keys.has(element)) keys.set(element, element.getAttribute('name') ?? '')
+      if (element.hasAttribute('name') && !keys.has(element)) keys.set(element, this.parseKey(element.getAttribute('name') ?? ''))
     }
   }
 
@@ -255,7 +261,6 @@ export class FormList extends LitElement {
     const index = this.rows.indexOf(row)
     this.notify(action, index)
     this.announce(this.msg.t('added', index + 1))
-    // A custom element in the new row renders in its first update: focus it after that.
     const pending = [...row.querySelectorAll('*')].map((element) => (element as Element & { updateComplete?: Promise<unknown> }).updateComplete)
     void Promise.all(pending).then(() => this.focusFirst(row))
   }
@@ -263,22 +268,26 @@ export class FormList extends LitElement {
   /** Brings the rows to `min`, writes indexes into names and row numbers, and enables the actions that apply. */
   private sync() {
     let rows = this.rows
-    while (rows.length < (this.min || 0) && rows.length < this.limit) {
+    // Filling to `min` while the parser appends authored rows would put a blank row first.
+    const parsing = document.readyState === 'loading'
+    if (parsing && !this.waitingForParse) {
+      this.waitingForParse = true
+      document.addEventListener('DOMContentLoaded', () => this.sync(), { once: true })
+    }
+    while (!parsing && rows.length < (this.min || 0) && rows.length < this.limit) {
       const row = this.createRow()
       if (!row) break
       this.insertRow(row, rows.length)
       rows = this.rows
     }
-    // Until the first edit, rows the parser is still appending belong to the initial set a form reset restores.
+    // Until the first edit, the rows are the initial set a reset restores.
     if (!this.edited) this.initialRows = rows
     this.hasTemplate = !!this.template
     rows.forEach((row, index) => {
       for (const control of this.controls(row)) {
         const key = this.keyOf(control)
-        if (this.name) {
-          const indexed = `${this.name}.${index}.${key}`
-          if (control.getAttribute('name') !== indexed) control.setAttribute('name', indexed)
-        }
+        const name = this.name ? `${this.name}.${index}.${key}` : key
+        if (control.getAttribute('name') !== name) control.setAttribute('name', name)
       }
       for (const number of this.owned(row.querySelectorAll<HTMLElement>('[data-row-number]'))) {
         const text = String(index + 1)
@@ -287,9 +296,10 @@ export class FormList extends LitElement {
     })
     const count = rows.length
     this.count = count
+    const indexes = new Map<Element, number>(rows.map((row, index) => [row, index]))
     for (const element of this.owned(this.querySelectorAll<HTMLElement>('[data-action]'))) {
       const row = this.rowOf(element)
-      const index = row ? rows.indexOf(row) : -1
+      const index = row ? (indexes.get(row) ?? -1) : -1
       const action = element.dataset.action as FormListAction
       const possible =
         action === 'add' || action === 'duplicate'
@@ -329,35 +339,38 @@ export class FormList extends LitElement {
   }
 
   private controls(row: HTMLElement): Control[] {
-    const named = [row, ...row.querySelectorAll('[name]')].filter((element) => element.hasAttribute('name') && element.localName !== 'template')
+    const named = [row, ...row.querySelectorAll('[name]')].filter((element) => element.hasAttribute('name') && isControl(element))
     return [...this.owned(named)] as Control[]
   }
 
-  /** The row a light-DOM descendant belongs to. */
   private rowOf(element: Element): HTMLElement | null {
     let node: Element | null = element
     while (node && node.parentElement !== this) node = node.parentElement
-    return node instanceof HTMLElement && this.rows.includes(node) ? node : null
+    return node instanceof HTMLElement && !node.slot && node.localName !== 'template' ? node : null
   }
 
   private keyOf(control: Element): string {
     const known = keys.get(control)
     if (known !== undefined) return known
-    const name = control.getAttribute('name') ?? ''
-    const prefix = `${this.name}.`
-    // A row authored with indexed names (a server render) keeps the part after the index.
-    const match = this.name && name.startsWith(prefix) ? /^\d+\.(.+)$/.exec(name.slice(prefix.length)) : null
-    const key = match ? match[1] : name
+    const key = this.parseKey(control.getAttribute('name') ?? '')
     keys.set(control, key)
     return key
+  }
+
+  /** A name the list indexed (`contacts.0.email`, from a server render or a cloned row) without its prefix and index. */
+  private parseKey(name: string): string {
+    const prefix = `${this.name}.`
+    const match = this.name && name.startsWith(prefix) ? /^\d+\.(.+)$/.exec(name.slice(prefix.length)) : null
+    return match ? match[1] : name
   }
 
   private readRow(row: HTMLElement): FormListRowValue {
     const values: FormListRowValue = {}
     for (const control of this.controls(row)) {
-      if (control.disabled) continue
+      // As FormData, a control disabled itself or by its fieldset is left out.
+      if (control.matches(':disabled')) continue
       let value: unknown
-      if (typeof control.checked === 'boolean') {
+      if (isCheckable(control)) {
         if (!control.checked) continue
         value = control.value === undefined || control.value === '' ? 'on' : control.value
       } else if ('value' in control) {
@@ -378,7 +391,7 @@ export class FormList extends LitElement {
       const key = this.keyOf(control)
       if (!(key in values) && !clear) continue
       const value = key in values ? values[key] : control.localName === 'c2-form-list' ? [] : undefined
-      if (typeof control.checked === 'boolean') {
+      if (isCheckable(control)) {
         const own = control.value === undefined || control.value === '' ? 'on' : control.value
         control.checked = value === true || value === own || (Array.isArray(value) && value.includes(own))
       } else if ('value' in control) {
@@ -410,8 +423,9 @@ export class FormList extends LitElement {
   }
 
   /** The form resets its controls after this event: put the initial rows back first, so they reset with it. */
-  private handleReset = () => {
+  private handleReset = (event: Event) => {
     const initial = this.initialRows
+    if (event.defaultPrevented) return
     if (!initial) return
     const current = this.rows
     if (current.length === initial.length && current.every((row, index) => row === initial[index])) return
@@ -422,14 +436,21 @@ export class FormList extends LitElement {
   }
 
   private notify(action: RowsChangeEventDetail['action'], index: number, from?: number) {
-    const detail: RowsChangeEventDetail = { action, index, value: this.value }
+    const read = () => this.value
+    const detail: RowsChangeEventDetail = {
+      action,
+      index,
+      get value() {
+        return read()
+      },
+    }
     if (from !== undefined) detail.from = from
     this.dispatchEvent(new CustomEvent<RowsChangeEventDetail>('rows-change', { detail }))
     this.dispatchEvent(new Event('change', { bubbles: true }))
   }
 
   private announce(message: string) {
-    // Re-set the text even when it repeats, so the live region speaks again.
+    // Cleared first, so a repeated message is spoken again.
     this.announcement = ''
     void this.updateComplete.then(() => (this.announcement = message))
   }
@@ -443,7 +464,6 @@ export class FormList extends LitElement {
     if (button && !button.disabled) button.focus()
   }
 
-  /** The focused element of the tree the rows are in. */
   private activeElement(): Element | null {
     return (this.getRootNode() as Document | ShadowRoot).activeElement ?? null
   }
@@ -481,7 +501,21 @@ export class FormList extends LitElement {
   }
 }
 
-const FOCUSABLE = 'input, select, textarea, button, [tabindex]:not([tabindex="-1"]), [contenteditable]'
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable]'
+
+/** A form control (native or form-associated) or a nested list: what carries a row's values. Not `c2-avatar name`. */
+function isControl(element: Element): boolean {
+  if (element.localName === 'c2-form-list') return true
+  if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) return true
+  return (element.constructor as { formAssociated?: boolean }).formAssociated === true
+}
+
+/** A checkbox or radio: its value counts only while checked. A text `<input>` has a `checked` property too. */
+function isCheckable(control: Control): boolean {
+  if (control instanceof HTMLInputElement) return control.type === 'checkbox' || control.type === 'radio'
+  return typeof control.checked === 'boolean'
+}
 
 declare global {
   interface HTMLElementTagNameMap {

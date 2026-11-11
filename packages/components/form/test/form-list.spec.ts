@@ -239,6 +239,29 @@ test('translates its text with the nearest lang', async ({ page, renderScenario 
   await expect(list(page).getByRole('status')).toHaveText('Ligne 1 ajoutée')
 })
 
+test('native inputs read and write by type, and only form controls are renamed', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-form-list name="items">
+    <template><div class="item"><a name="anchor">Item</a><input name="title" aria-label="Title"><input type="checkbox" name="done" aria-label="Done"><fieldset disabled><input name="locked" value="x"></fieldset></div></template>
+  </c2-form-list></form>`)
+  await list(page).evaluate((element) => ((element as FormList).value = [{ title: 'Write docs', done: true }, { title: 'Ship' }]))
+  await expect(page.getByRole('textbox', { name: 'Title' }).first()).toHaveValue('Write docs')
+  await expect(page.getByRole('checkbox', { name: 'Done' }).first()).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Done' }).nth(1)).not.toBeChecked()
+  expect(await value(page)).toEqual([{ title: 'Write docs', done: 'on' }, { title: 'Ship' }])
+  expect(await page.locator('a').evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('name')))).toEqual(['anchor', 'anchor'])
+  expect(await page.locator('input:not([type])').evaluateAll((inputs) => inputs.map((input) => input.getAttribute('name')))).toEqual([
+    'items.0.title',
+    'items.0.locked',
+    'items.1.title',
+    'items.1.locked',
+  ])
+  await list(page).evaluate(async (element) => {
+    ;(element as FormList).name = ''
+    await (element as FormList).updateComplete
+  })
+  expect(await page.locator('input[aria-label="Title"]').evaluateAll((inputs) => inputs.map((input) => input.getAttribute('name')))).toEqual(['title', 'title'])
+})
+
 test('spans every column of a c2-form grid', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-form style="--c2-form--columns: 1fr 1fr"><form><c2-form-list>${row}</c2-form-list></form></c2-form>`)
   await expect(list(page)).toHaveCSS('grid-column-start', '1')
