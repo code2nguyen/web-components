@@ -23,10 +23,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-date-selector': C2Props<DateSelector> & {
+      'c2-date-selector': Omit<C2Props<DateSelector>, 'marked'> & {
         'week-start'?: Attribute
         'end-name'?: Attribute
         'aria-label'?: Attribute
+        marked?: DateSelector['marked'] | string
       }
     }
   }
