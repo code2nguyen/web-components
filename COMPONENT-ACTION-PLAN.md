@@ -85,7 +85,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low
 - **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
 - **description-list-1** · `c2-description-list` · comparison matrix #249, example: record diff #250 · +1.2 kB on 5.6 kB · risk low
-- **pivot-table-1** · `c2-pivot-table` · financial statement #332 · +2 kB on 32.3 kB · risk medium
 - **highlight-1** · `c2-highlight` · find bar #258 (companion) · 2.5 kB new entry · risk low
 - **filter-builder-1** · `c2-filter-builder` · rule builder #260 (lazy) · +0.6 kB on 66.8 kB, 7 kB lazy · risk medium
 - **date-selector-1** · `c2-date-selector` · calendar #289 · +1.5 kB on 4.7 kB · risk low

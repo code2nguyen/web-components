@@ -1,13 +1,27 @@
 /** How the values of a field are combined in a cell. */
 export type PivotAggregate = 'sum' | 'count' | 'avg' | 'min' | 'max' | 'distinct'
 
+/**
+ * How a computed value combines two other values `a` and `b` of the same cell: `difference` is `a - b`,
+ * `percent-difference` is `(a - b) / |b|` (a fraction, shown as a percentage), `ratio` is `a / b`.
+ */
+export type PivotCompute = 'difference' | 'percent-difference' | 'ratio'
+
 /** One measure: a field and how it is combined, with its header label and number format. */
 export interface PivotValue {
+  /** The field aggregated; for a computed value, the name it goes by (no record needs to have it). */
   field: string
   aggregate?: PivotAggregate
   label?: string
   /** `Intl.NumberFormat` options for the cells, such as `{ "style": "currency", "currency": "EUR" }`. */
   format?: Intl.NumberFormatOptions
+  /**
+   * Makes this a computed value: the cell is worked out from two other values of the same cell (subtotals and totals
+   * included), named by their `field` in `of`, rather than aggregated from the records.
+   */
+  compute?: PivotCompute
+  /** The fields of the two values a computed value reads, `[a, b]`. */
+  of?: [string, string]
 }
 
 /** What the table groups by and what it shows. */
@@ -15,6 +29,11 @@ export interface PivotConfig {
   rows: string[]
   columns: string[]
   values: PivotValue[]
+  /**
+   * Row groups whose numbers count with the opposite sign, by field: `{ "section": ["Expenses"] }`. The sign flips
+   * before aggregation, so the group shows negative and subtracts in every subtotal and total above it.
+   */
+  invertSigns?: Record<string, string[]>
 }
 
 /** A group of the row or column header tree. The root has an empty path. */
@@ -63,7 +82,7 @@ class Accumulator {
   max = -Infinity
   distinct: Set<string> | null = null
 
-  add(value: unknown, aggregate: PivotAggregate): void {
+  add(value: unknown, aggregate: PivotAggregate, sign: number): void {
     if (aggregate === 'count') {
       if (value !== undefined && value !== null && value !== '') this.count += 1
       return
@@ -73,8 +92,9 @@ class Accumulator {
       ;(this.distinct ??= new Set()).add(String(value))
       return
     }
-    const number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : Number.NaN
+    let number = typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : Number.NaN
     if (!Number.isFinite(number)) return
+    number *= sign
     this.numbers += 1
     this.sum += number
     if (number < this.min) this.min = number
@@ -149,8 +169,15 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
   const columnPaths: string[][] = []
   const seenRows = new Set<string>()
   const seenColumns = new Set<string>()
+  // A computed value reads the first aggregated value of each field it names.
+  const operands = values.map((value) =>
+    value.compute ? (value.of ?? []).slice(0, 2).map((field) => values.findIndex((other) => !other.compute && other.field === field)) : null,
+  )
+  const inverted = Object.entries(config.invertSigns ?? {}).filter(([, groups]) => Array.isArray(groups) && groups.length)
 
   ;(Array.isArray(data) ? data : []).forEach((record, recordIndex) => {
+    let sign = 1
+    for (const [field, groups] of inverted) if (groups.includes(groupLabel(fieldValue(record, field)))) sign = -sign
     const rowPath = rows.map((field) => groupLabel(fieldValue(record, field)))
     const columnPath = columns.map((field) => groupLabel(fieldValue(record, field)))
     const rowKey = rowPath.join(SEP)
@@ -174,7 +201,9 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
           cells.set(key, accumulators)
           members.set(key, [])
         }
-        values.forEach((value, index) => accumulators![index].add(fieldValue(record, value.field), value.aggregate))
+        values.forEach((value, index) => {
+          if (!value.compute) accumulators![index].add(fieldValue(record, value.field), value.aggregate, sign)
+        })
         members.get(key)!.push(recordIndex)
       }
     }
@@ -182,15 +211,24 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
 
   const keyOf = (rowPath: readonly string[], columnPath: readonly string[]) =>
     `${rowPath.length}:${rowPath.join(SEP)}\u001e${columnPath.length}:${columnPath.join(SEP)}`
+  const cell = (rowPath: readonly string[], columnPath: readonly string[], valueIndex: number): number | null => {
+    const accumulators = cells.get(keyOf(rowPath, columnPath))
+    const value = values[valueIndex]
+    if (!accumulators || !value) return null
+    const pair = operands[valueIndex]
+    if (!pair) return accumulators[valueIndex].result(value.aggregate)
+    const [a, b] = pair.map((index) => (index >= 0 ? accumulators[index].result(values[index].aggregate) : null))
+    if (a === null || b === null || b === undefined) return null
+    if (value.compute === 'difference') return a - b
+    if (!b) return null
+    if (value.compute === 'ratio') return a / b
+    return value.compute === 'percent-difference' ? (a - b) / Math.abs(b) : null
+  }
   return {
     rows: buildTree(rowPaths),
     columns: buildTree(columnPaths),
     values,
-    cell(rowPath, columnPath, valueIndex) {
-      const accumulators = cells.get(keyOf(rowPath, columnPath))
-      const value = values[valueIndex]
-      return accumulators && value ? accumulators[valueIndex].result(value.aggregate) : null
-    },
+    cell,
     records(rowPath, columnPath) {
       return [...(members.get(keyOf(rowPath, columnPath)) ?? [])]
     },
