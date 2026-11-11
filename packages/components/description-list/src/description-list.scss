@@ -27,6 +27,12 @@
     value-header--padding-bottom: 8px,
     value-header--border-bottom: 1px solid #e4e4e7,
     value-header--margin-bottom: 0px,
+    value-header__cell--border-radius: 4px,
+    value-header__cell--outset: 4px,
+    value-header__cell__hover--background-color: #f4f4f5,
+    value-header__cell__selected--background-color: #f4f4f5,
+    value-header__cell__selected--color: #0265dc,
+    value-header__cell__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
 
@@ -141,6 +147,39 @@
     flex: 1 1 calc((var(--_threshold) - 100%) * 999);
     min-width: 0;
     max-width: 100%;
+    border-radius: css.cssVar(value-header__cell--border-radius);
+  }
+
+  // The background reaches past the name through a spread shadow, so a selected or hovered name does not move.
+  .value-header__cell.is-selected {
+    color: css.cssVar(value-header__cell__selected--color);
+    background-color: css.cssVar(value-header__cell__selected--background-color);
+    box-shadow: 0 0 0 css.cssVar(value-header__cell--outset) css.cssVar(value-header__cell__selected--background-color);
+  }
+
+  .value-header__button {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: inherit;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: css.cssVar(value-header__cell__focus--outline);
+      outline-offset: css.cssVar(value-header__cell--outset);
+    }
+  }
+
+  .value-header__cell:not(.is-selected):has(.value-header__button:hover) {
+    background-color: css.cssVar(value-header__cell__hover--background-color);
+    box-shadow: 0 0 0 css.cssVar(value-header__cell--outset) css.cssVar(value-header__cell__hover--background-color);
   }
 }
 

@@ -1,0 +1,191 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-find-bar,
+  $theme: (
+    background-color: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+    padding: 6px,
+    gap: 4px,
+    color: #18181b,
+    font-size: 14px,
+
+    field--width: 240px,
+    field--height: 32px,
+    field--background-color: #ffffff,
+    field--border: 1px solid #d4d4d8,
+    field--border-radius: 6px,
+    field__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    count--color: #71717a,
+    count--font-size: 12px,
+
+    button--size: 28px,
+    button--border-radius: 6px,
+    button--color: #18181b,
+    button__hover--background-color: rgba(24, 24, 27, 0.08),
+    button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    button__disabled--opacity: 0.38,
+
+    toggle--size: 24px,
+    toggle__pressed--color: rgb(2, 101, 220),
+    toggle__pressed--background-color: #edf1fe,
+
+    replace-button--padding: 0 10px,
+  )
+);
+
+:host {
+  display: inline-block;
+  max-width: 100%;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.c2-find-bar {
+  display: grid;
+  gap: css.cssVar(gap);
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  background-color: css.cssVar(background-color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+}
+
+.c2-find-bar__row {
+  display: flex;
+  // In a container narrower than the bar, the buttons move to a second line instead of overlapping the field.
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+.c2-find-bar__field {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 1 css.cssVar(field--width);
+  box-sizing: border-box;
+  max-width: 100%;
+  height: css.cssVar(field--height);
+  padding: 0 4px 0 8px;
+  background-color: css.cssVar(field--background-color);
+  border: css.cssVar(field--border);
+  border-radius: css.cssVar(field--border-radius);
+
+  &:focus-within {
+    outline: css.cssVar(field__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.c2-find-bar__input {
+  // A zero basis lets the field shrink in a narrow container instead of keeping the input's intrinsic width.
+  flex: 1 1 0;
+  width: 0;
+  min-width: 3em;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: none;
+  border: 0;
+  outline: none;
+
+  &::placeholder {
+    color: css.cssVar(count--color);
+  }
+}
+
+.c2-find-bar__count {
+  flex: none;
+  padding: 0 4px;
+  color: css.cssVar(count--color);
+  font-size: css.cssVar(count--font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  // Kept in the tree while empty, so the live region exists before its first announcement.
+  &:empty {
+    padding: 0;
+  }
+}
+
+.c2-find-bar__button,
+.c2-find-bar__toggle,
+.c2-find-bar__replace {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: css.cssVar(button--color);
+  font: inherit;
+  background: none;
+  border: 0;
+  border-radius: css.cssVar(button--border-radius);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: css.cssVar(button__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(button__disabled--opacity);
+  }
+}
+
+.c2-find-bar__button {
+  width: css.cssVar(button--size);
+  height: css.cssVar(button--size);
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.c2-find-bar__toggle {
+  width: css.cssVar(toggle--size);
+  height: css.cssVar(toggle--size);
+  font-size: 12px;
+  font-weight: 600;
+
+  &[aria-pressed='true'] {
+    color: css.cssVar(toggle__pressed--color);
+    background-color: css.cssVar(toggle__pressed--background-color);
+  }
+}
+
+.c2-find-bar__replace {
+  height: css.cssVar(button--size);
+  padding: css.cssVar(replace-button--padding);
+  white-space: nowrap;
+  border: css.cssVar(field--border);
+}
+
+.c2-find-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+@media (forced-colors: active) {
+  .c2-find-bar__toggle[aria-pressed='true'] {
+    outline: 1px solid Highlight;
+  }
+}

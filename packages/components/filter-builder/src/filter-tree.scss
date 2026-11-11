@@ -1,0 +1,182 @@
+// Styles of the tree layout (`groups`), adopted by the lazy `filter-tree.ts` module the first time it renders. The
+// shared entries repeat the defaults of `filter-builder.scss`.
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-filter-builder,
+  $theme: (
+    chip--height: 28px,
+    chip--font-size: 14px,
+    chip--border: 1px solid #d4d4d8,
+    chip--border-radius: 999px,
+    value--color: #18181b,
+    icon--size: 16px,
+    add-button--border: 1px dashed #a1a1aa,
+    add-button--color: #71717a,
+    add-button--border-radius: 999px,
+    muted--color: #71717a,
+    group--gap: 8px,
+    group--padding: 10px,
+    group--border: 1px solid #e4e4e7,
+    group--border-radius: 8px,
+    group--background-color: #fafafa,
+    group__negated--border-color: #dc2626,
+    joiner--width: 44px,
+    joiner--color: #71717a,
+    drop--color: #0265dc,
+    sentence--color: #52525b,
+    sentence--font-size: 14px,
+  )
+);
+
+.tree,
+.group,
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(group--gap);
+  min-width: 0;
+}
+
+.group:not(.is-root) {
+  padding: css.cssVar(group--padding);
+  border: css.cssVar(group--border);
+  border-radius: css.cssVar(group--border-radius);
+  background-color: css.cssVar(group--background-color);
+}
+
+.group.is-negated:not(.is-root) {
+  border-color: css.cssVar(group__negated--border-color);
+}
+
+.group-head,
+.group-actions,
+.then {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.rules:empty,
+.sentence[hidden],
+.then[hidden] {
+  display: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: #{css.cssVar(joiner--width)} auto minmax(0, 1fr);
+  align-items: start;
+  gap: 6px;
+}
+
+.row > .chip {
+  justify-self: start;
+}
+
+.joiner {
+  flex: none;
+  width: css.cssVar(joiner--width);
+  color: css.cssVar(joiner--color);
+  font-size: 12px;
+  line-height: css.cssVar(chip--height);
+  text-align: end;
+}
+
+.row[data-drop]::before {
+  position: absolute;
+  inset-inline: 0;
+  height: 2px;
+  border-radius: 1px;
+  background-color: css.cssVar(drop--color);
+  content: '';
+}
+
+.row[data-drop='before']::before {
+  top: calc(#{css.cssVar(group--gap)} / -2 - 1px);
+}
+
+.row[data-drop='after']::before {
+  bottom: calc(#{css.cssVar(group--gap)} / -2 - 1px);
+}
+
+.group-actions {
+  margin-inline-start: calc(#{css.cssVar(joiner--width)} + 6px);
+  border-radius: 6px;
+}
+
+.group-actions[data-drop] {
+  outline: 2px dashed css.cssVar(drop--color);
+  outline-offset: 2px;
+}
+
+.handle,
+.connector,
+.remove-group,
+.add-rule,
+.add-group {
+  flex: none;
+  --c2-button__container--height: #{css.cssVar(chip--height)};
+  --c2-button__container--font-size: #{css.cssVar(chip--font-size)};
+  --c2-button__container--padding-left: 8px;
+  --c2-button__container--padding-right: 8px;
+  --c2-button__container--gap: 4px;
+  --c2-button__container--background-color: transparent;
+  // A light wash of the text colour on hover, in either theme, and the text keeps its colour.
+  --c2-button__container__hover--background-color: color-mix(in srgb, currentColor 8%, transparent);
+  --c2-button__icon--size: #{css.cssVar(icon--size)};
+}
+
+.connector {
+  --c2-button__container--border: #{css.cssVar(chip--border)};
+  --c2-button__container--border-radius: #{css.cssVar(chip--border-radius)};
+  --c2-button__container--color: #{css.cssVar(value--color)};
+  --c2-button__container__hover--color: #{css.cssVar(value--color)};
+}
+
+.handle,
+.remove-group {
+  --c2-button__container--padding-left: 4px;
+  --c2-button__container--padding-right: 4px;
+  --c2-button__container--border: 1px solid transparent;
+  --c2-button__container--color: #{css.cssVar(muted--color)};
+  --c2-button__container__hover--color: #{css.cssVar(muted--color)};
+}
+
+.handle {
+  cursor: grab;
+}
+
+.handle svg,
+.remove-group svg {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+.remove-group {
+  margin-inline-start: auto;
+}
+
+.add-rule,
+.add-group {
+  --c2-button__container--border: #{css.cssVar(add-button--border)};
+  --c2-button__container--border-radius: #{css.cssVar(add-button--border-radius)};
+  --c2-button__container--color: #{css.cssVar(add-button--color)};
+  --c2-button__container__hover--color: #{css.cssVar(add-button--color)};
+}
+
+.not {
+  --c2-chip__container--height: #{css.cssVar(chip--height)};
+  --c2-chip__container--font-size: #{css.cssVar(chip--font-size)};
+}
+
+.sentence {
+  margin: 0;
+  color: css.cssVar(sentence--color);
+  font-size: css.cssVar(sentence--font-size);
+}
+
+.then > .joiner {
+  width: auto;
+  font-weight: 600;
+}

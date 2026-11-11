@@ -72,6 +72,12 @@ const KEY = '\u001f'
  * `cell-click` gives the records behind a cell, for drill-down, and `toCSV()` exports what is shown. `pivot()` is the
  * same computation as a plain function.
  *
+ * For a financial statement, a `values` entry with `compute` and `of` is worked out from two other values of the same
+ * cell (`{ "field": "variance", "compute": "difference", "of": ["actual", "budget"] }`; `percent-difference` and
+ * `ratio` too), so subtotals and totals get the variance of their own sums. `invert-signs` flips the sign of the rows
+ * in the named groups before aggregation (`{ "section": ["Expenses"] }`), so they subtract in the totals above them.
+ * A computed cell carries the `negative` or `positive` class, coloured by the `__computed` variables.
+ *
  * The grid is a `treegrid`: the arrow keys move between cells, Left and Right close and open a group, and Enter on a
  * value cell fires `cell-click`.
  *
@@ -109,6 +115,8 @@ const KEY = '\u001f'
  * @cssproperty {color} [--c2-pivot-table__chip--background-color=#ffffff]
  * @cssproperty {border} [--c2-pivot-table__chip--border=1px solid #e4e4e7]
  * @cssproperty {color} [--c2-pivot-table__zone__over--background-color=rgba(2, 101, 220, 0.06)]
+ * @cssproperty {color} [--c2-pivot-table__computed__negative--color=inherit] - A computed value below zero, such as an unfavourable variance.
+ * @cssproperty {color} [--c2-pivot-table__computed__positive--color=inherit] - A computed value above zero.
  */
 @customElement('c2-pivot-table')
 export class PivotTable extends LitElement {
@@ -125,6 +133,12 @@ export class PivotTable extends LitElement {
 
   /** The measures: `{ field, aggregate, label, format }`. */
   @property({ converter: jsonPropertyConverter }) values: PivotValue[] = []
+
+  /**
+   * Row groups whose numbers count with the opposite sign, by field: `{ "section": ["Expenses", "Taxes"] }`. They show
+   * negative and subtract in every subtotal and total above them, as costs do under revenue in an income statement.
+   */
+  @property({ converter: jsonPropertyConverter, attribute: 'invert-signs' }) invertSigns: Record<string, string[]> = {}
 
   /** Labels for fields, by field name, used in headers and the field list. */
   @property({ converter: jsonPropertyConverter, attribute: 'field-labels' }) fieldLabels: Record<string, string> = {}
@@ -168,7 +182,9 @@ export class PivotTable extends LitElement {
 
   /** The layout as configured now. */
   get config(): PivotConfig {
-    return { rows: [...this.rows], columns: [...this.columns], values: this.values.map((value) => ({ ...value })) }
+    const config: PivotConfig = { rows: [...this.rows], columns: [...this.columns], values: this.values.map((value) => ({ ...value })) }
+    if (this.invertSigns && Object.keys(this.invertSigns).length) config.invertSigns = JSON.parse(JSON.stringify(this.invertSigns))
+    return config
   }
 
   /** Opens every row group. */
@@ -208,12 +224,12 @@ export class PivotTable extends LitElement {
     this.internals.ariaLabel = this.label || this.msg.t('table')
     if (!Array.isArray(this.data)) this.data = []
     if (!Array.isArray(this.values)) this.values = []
-    if (changed.has('data') || changed.has('rows') || changed.has('columns') || changed.has('values')) {
-      this.result = pivot(this.data, { rows: this.rows, columns: this.columns, values: this.values })
+    if (['data', 'rows', 'columns', 'values', 'invertSigns'].some((key) => changed.has(key as keyof PivotTable))) {
+      this.result = pivot(this.data, { rows: this.rows, columns: this.columns, values: this.values, invertSigns: this.invertSigns ?? {} })
     }
     if (changed.has('rows') || changed.has('columns')) this.sort = null
     // The cursor, a drag, an announcement or the language alone leave the rows and columns as they are.
-    const layoutKeys = ['data', 'rows', 'columns', 'values', 'toggled', 'sort', 'subtotals', 'totals', 'expandDepth', 'heatmap']
+    const layoutKeys = ['data', 'invertSigns', 'rows', 'columns', 'values', 'toggled', 'sort', 'subtotals', 'totals', 'expandDepth', 'heatmap']
     if (!this.hasUpdated || layoutKeys.some((key) => changed.has(key as keyof PivotTable))) this.layout()
     this.formatters.clear()
   }
@@ -226,7 +242,12 @@ export class PivotTable extends LitElement {
 
   private valueLabel(value: PivotValue | undefined): string {
     if (!value) return ''
-    return value.label ?? this.msg.t('valueOf', this.msg.t(value.aggregate ?? 'sum'), this.fieldLabel(value.field))
+    if (value.label != null) return value.label
+    if (value.compute) {
+      const [a = '', b = ''] = value.of ?? []
+      return this.msg.t('computedOf', this.msg.t(value.compute), this.fieldLabel(a), this.fieldLabel(b))
+    }
+    return this.msg.t('valueOf', this.msg.t(value.aggregate ?? 'sum'), this.fieldLabel(value.field))
   }
 
   private keyOf(path: readonly string[]): string {
@@ -253,7 +274,11 @@ export class PivotTable extends LitElement {
     let format = this.formatters.get(column.value)
     if (format === undefined) {
       try {
-        format = new Intl.NumberFormat(this.msg.locale, this.values[column.value]?.format ?? { maximumFractionDigits: 2 })
+        const value = this.values[column.value]
+        format = new Intl.NumberFormat(
+          this.msg.locale,
+          value?.format ?? (value?.compute === 'percent-difference' ? { style: 'percent', maximumFractionDigits: 1 } : { maximumFractionDigits: 2 }),
+        )
       } catch {
         format = null
       }
@@ -437,6 +462,8 @@ export class PivotTable extends LitElement {
 
   /** Moves a field to a zone, as a drop or a menu command does, and says so. */
   move(field: string, to: Zone, index?: number): void {
+    // A computed value has no field in the records to group by.
+    if ((to === 'rows' || to === 'columns') && this.values.some((value) => value.compute && value.field === field)) return
     const rows = this.rows.filter((name) => name !== field)
     const columns = this.columns.filter((name) => name !== field)
     let values = this.values
@@ -501,11 +528,13 @@ export class PivotTable extends LitElement {
 
   private renderChip(field: string, zone: Zone, index: number) {
     const value = zone === 'values' ? this.values[index] : undefined
-    const commands: [string, string][] = [
-      ['rows', this.msg.t('moveToRows')],
-      ['columns', this.msg.t('moveToColumns')],
-      ['values', this.msg.t('moveToValues')],
-    ]
+    const commands: [string, string][] = value?.compute
+      ? []
+      : [
+          ['rows', this.msg.t('moveToRows')],
+          ['columns', this.msg.t('moveToColumns')],
+          ['values', this.msg.t('moveToValues')],
+        ]
     return html`<span
       class="chip"
       part="chip"
@@ -522,7 +551,7 @@ export class PivotTable extends LitElement {
       }}
     >
       <span class="chip-label">${this.fieldLabel(field)}</span>
-      ${value ? html`<span class="chip-aggregate">${this.msg.t(value.aggregate ?? 'sum')}</span>` : nothing}
+      ${value ? html`<span class="chip-aggregate">${this.msg.t(value.compute ?? value.aggregate ?? 'sum')}</span>` : nothing}
       <c2-menu
         @menu-select=${(event: CustomEvent<{ value: string }>) => {
           const choice = event.detail.value
@@ -536,17 +565,12 @@ export class PivotTable extends LitElement {
         </button>
         ${commands.filter(([target]) => target !== zone).map(([target, text]) => html`<c2-menu-item value=${target}>${text}</c2-menu-item>`)}
         ${
-          value
+          value && !value.compute
             ? html`<hr />
                 ${AGGREGATES.map((aggregate) => html`<c2-menu-item value=${aggregate} type="radio" ?checked=${(value.aggregate ?? 'sum') === aggregate}>${this.msg.t(aggregate)}</c2-menu-item>`)}`
             : nothing
         }
-        ${
-          zone !== 'fields'
-            ? html`<hr />
-                <c2-menu-item value="remove">${this.msg.t('remove')}</c2-menu-item>`
-            : nothing
-        }
+        ${zone !== 'fields' ? html`${commands.length ? html`<hr />` : nothing} <c2-menu-item value="remove">${this.msg.t('remove')}</c2-menu-item>` : nothing}
       </c2-menu>
     </span>`
   }
@@ -669,10 +693,12 @@ export class PivotTable extends LitElement {
       heat = `--_heat: ${(share * 100).toFixed(1)}%`
       hot = share > 0.55
     }
+    // Coloured by what is shown: a variance that rounds to zero is neither.
+    const computed = value !== null && this.values[column.value]?.compute && /[1-9]/.test(text) ? (value < 0 ? 'negative' : 'positive') : ''
     return html`<td
       part="cell"
       role="gridcell"
-      class="${column.total ? 'total' : ''} ${heat ? 'heat' : ''} ${hot ? 'hot' : ''} ${row.values && value === null ? 'empty' : ''}"
+      class="${column.total ? 'total' : ''} ${heat ? 'heat' : ''} ${hot ? 'hot' : ''} ${row.values && value === null ? 'empty' : ''} ${computed}"
       style=${heat}
       data-cell="${rowIndex}:${columnIndex + 1}"
       tabindex=${this.cursor.row === rowIndex && this.cursor.column === columnIndex + 1 ? 0 : -1}

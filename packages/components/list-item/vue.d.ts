@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ListGroup } from '@c2n/list-item/list-group.js'
 import type { ListItem } from '@c2n/list-item'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,11 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-list-group': DefineComponent<
+      C2Props<ListGroup> & {
+        onToggle?: (event: EventOf<ListGroup, 'toggle'>) => void
+      }
+    >
     'c2-list-item': DefineComponent<
       C2Props<ListItem> & {
         'joined-before'?: unknown

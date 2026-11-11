@@ -22,6 +22,7 @@
         "c2-choice-matrix": true,
         "c2-code-editor": true,
         "c2-date-input": true,
+        "c2-date-selector": true,
         "c2-date-strip": true,
         "c2-date-time-picker": true,
         "c2-duration-input": true,

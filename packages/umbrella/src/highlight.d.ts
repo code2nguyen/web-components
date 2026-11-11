@@ -2,3 +2,4 @@
 // Every module of @c2n/highlight. Importing this registers each of its elements.
 
 export * from '@c2n/highlight'
+export * from '@c2n/highlight/find-bar.js'

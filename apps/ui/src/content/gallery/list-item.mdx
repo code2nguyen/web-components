@@ -5,7 +5,7 @@ description: 'Ready-made looks for c2-list-item: row shapes, densities, selected
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { ListItem } from '@c2n/components/list-item'
+import { ListItem, ListGroup } from '@c2n/components/list-item'
 import { List } from '@c2n/components/list'
 import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
 import { FeatherSendIcon as FeatherSend } from '@c2n/feather-icons/icons/send.js'
@@ -14,6 +14,9 @@ import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check
 import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
 import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 import { FeatherUsersIcon as FeatherUsers } from '@c2n/feather-icons/icons/users.js'
+import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
+import { FeatherBarChartIcon as FeatherBarChart } from '@c2n/feather-icons/icons/bar-chart.js'
+import { FeatherBriefcaseIcon as FeatherBriefcase } from '@c2n/feather-icons/icons/briefcase.js'
 
 ## Rows
 
@@ -390,6 +393,110 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
   <c2-list-item value="2">Second row</c2-list-item>
   <c2-list-item value="3">Third row</c2-list-item>
 </c2-list>
+```
+
+</GalleryGrid>
+
+## Navigation
+
+`current` marks the row of the page the reader is on (`aria-current="page"`); it takes the selected look unless the `--c2-list-item__current--*` variables say otherwise. `c2-list-group` folds rows under a heading with an icon and a count, and groups nest. Put the rows in a `<nav>`, not in a `c2-list`: they are links, not options.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Nav list
+<style>
+  .nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 220px;
+    --c2-list-item--font-weight: 500;
+    --c2-list-group__items--gap: 2px;
+    --c2-list-group__items--padding-top: 2px;
+  }
+  .nav-list .count {
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<nav class="nav-list" aria-label="Workspace">
+  <c2-list-item href="#overview"><c2-feather-home slot="prefix-icon"></c2-feather-home>Overview</c2-list-item>
+  <c2-list-group label="Projects" open>
+    <c2-feather-folder slot="prefix-icon"></c2-feather-folder>
+    <span slot="suffix" class="count">3</span>
+    <c2-list-item href="#website">Website</c2-list-item>
+    <c2-list-item href="#mobile-app" current>Mobile app</c2-list-item>
+    <c2-list-item href="#design-system">Design system</c2-list-item>
+  </c2-list-group>
+  <c2-list-group label="Reports">
+    <c2-feather-bar-chart slot="prefix-icon"></c2-feather-bar-chart>
+    <c2-list-item href="#revenue">Revenue</c2-list-item>
+    <c2-list-item href="#usage">Usage</c2-list-item>
+  </c2-list-group>
+  <c2-list-item href="#settings"><c2-feather-settings slot="prefix-icon"></c2-feather-settings>Settings</c2-list-item>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Guide line
+<style>
+  .guide-line {
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    --c2-list-group__items--padding-left: 8px;
+    --c2-list-group__items--margin-left: 18px;
+    --c2-list-group__items--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item--min-height: 32px;
+    --c2-list-item--padding-top: 4px;
+    --c2-list-item--padding-bottom: 4px;
+    --c2-list-item__current--background: transparent;
+    --c2-list-item__current--font-weight: 600;
+  }
+</style>
+<nav class="guide-line" aria-label="Documentation">
+  <c2-list-group label="Getting started" open>
+    <c2-list-item href="#install">Installation</c2-list-item>
+    <c2-list-item href="#theming" current>Theming</c2-list-item>
+    <c2-list-group label="Frameworks" open>
+      <c2-list-item href="#react">React</c2-list-item>
+      <c2-list-item href="#vue">Vue</c2-list-item>
+    </c2-list-group>
+  </c2-list-group>
+  <c2-list-group label="Components">
+    <c2-list-item href="#button">Button</c2-list-item>
+    <c2-list-item href="#table">Table</c2-list-item>
+  </c2-list-group>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Accent bar current
+<style>
+  .accent-current {
+    display: flex;
+    flex-direction: column;
+    width: 220px;
+    --c2-list-item--border-top-left-radius: 0px;
+    --c2-list-item--border-top-right-radius: 0px;
+    --c2-list-item--border-bottom-left-radius: 0px;
+    --c2-list-item--border-bottom-right-radius: 0px;
+    --c2-list-item--border-left: 3px solid transparent;
+    --c2-list-item__current--border-left: 3px solid var(--c2-theme--color-primary, #2563eb);
+    --c2-list-item__current--background: transparent;
+    --c2-list-item__current--color: var(--c2-theme--color-primary, #2563eb);
+    --c2-list-group__header--border-radius: 0px;
+    --c2-list-group__header--padding-left: 13px;
+    --c2-list-group__items--padding-left: 16px;
+  }
+</style>
+<nav class="accent-current" aria-label="Account">
+  <c2-list-item href="#profile"><c2-feather-users slot="prefix-icon"></c2-feather-users>Profile</c2-list-item>
+  <c2-list-group label="Billing" open>
+    <c2-feather-briefcase slot="prefix-icon"></c2-feather-briefcase>
+    <c2-list-item href="#plan" current>Plan</c2-list-item>
+    <c2-list-item href="#invoices">Invoices</c2-list-item>
+  </c2-list-group>
+  <c2-list-item href="#security"><c2-feather-settings slot="prefix-icon"></c2-feather-settings>Security</c2-list-item>
+</nav>
 ```
 
 </GalleryGrid>

@@ -1349,6 +1349,13 @@
       "reason": "The error slot projects consumer-owned light DOM inside the error part; it inherits the --c2-fieldset__error--* colour and size."
     },
     {
+      "tag": "c2-find-bar",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
       "tag": "c2-float-button",
       "slot": "",
       "decision": "assigned-content",
@@ -1414,6 +1421,27 @@
       "slot": "error-summary-heading",
       "decision": "assigned-content",
       "reason": "The error-summary-heading slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["rows"],
+      "reason": "The rows part wraps the default slot and owns the layout of the rows (gap through --c2-form-list--gap)."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer part wraps the footer slot and owns its placement."
+    },
+    {
+      "tag": "c2-form-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty part wraps the empty slot and owns its presentation."
     },
     {
       "tag": "c2-form-field",
@@ -2317,6 +2345,41 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-list-group",
+      "slot": "default",
+      "decision": "part",
+      "parts": ["items"],
+      "reason": "The items region holds the rows: its indent, guide line and spacing are variables, and the part covers the rest."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The label region sets the heading's layout; the heading type comes from the header variables."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "prefix-icon",
+      "decision": "part",
+      "parts": ["prefix-icon"],
+      "reason": "The prefix-icon wrapper sizes the slotted icon through the icon variables and is hidden when empty."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "suffix",
+      "decision": "part",
+      "parts": ["suffix"],
+      "reason": "The suffix wrapper holds a count or an action outside the disclosure button and is hidden when empty."
+    },
+    {
+      "tag": "c2-list-group",
+      "slot": "toggle-icon",
+      "decision": "part",
+      "parts": ["toggle-icon"],
+      "reason": "The toggle-icon wrapper turns the chevron by the rotate variables and mirrors it right to left."
+    },
+    {
       "tag": "c2-list-item",
       "slot": "default",
       "decision": "assigned-content",
@@ -3163,6 +3226,13 @@
       "slot": "end",
       "decision": "assigned-content",
       "reason": "The end slot projects consumer-owned light DOM, such as a search field, at the end of the bar; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-filter-builder",
+      "slot": "then",
+      "decision": "part",
+      "parts": ["then"],
+      "reason": "With groups, the then wrapper owns the action zone's layout under its heading; the slotted actions keep their own contract."
     },
     {
       "tag": "c2-qr-code",

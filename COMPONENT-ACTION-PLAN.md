@@ -27,7 +27,7 @@ title ends with [<step-id>], and delete the step's line from COMPONENT-ACTION-PL
 
 ### Where to start
 
-These wave-1 steps depend on nothing and sit on different tracks, so they can all start today: `table-1`, `description-list-1`, `pivot-table-1`, `highlight-1`, `filter-builder-1`, `recurrence-editor-1`, `import-mapper-1`, `camera-capture-1`, `date-selector-1`, `month-picker-1`, `scheduler-1`, `form-1`, `list-item-1`, `tree-1`, `banner-1`. Their lines are under wave 1 below.
+These wave-1 steps depend on nothing and sit on different tracks, so they can all start today: `table-2`, `description-list-1`, `pivot-table-1`, `highlight-1`, `filter-builder-1`, `recurrence-editor-1`, `import-mapper-1`, `camera-capture-1`, `date-selector-1`, `month-picker-1`, `scheduler-1`, `form-1`, `list-item-1`, `tree-1`, `banner-1`. Their lines are under wave 1 below.
 
 `table` is the longest track (10 steps) and the one most other rows lean on, so keep a session on it continuously.
 
@@ -79,23 +79,11 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-1** · `c2-table` · tree grid #239 · +2.5 kB on 31.4 kB · risk medium
 - **table-2** · `c2-table` · row detail #240 · +1.5 kB on 31.4 kB · risk medium
 - **table-3** · `c2-table` · data editor #241 (lazy), example: timesheet grid #307, example: journal entry grid #328 · +0.6 kB on 31.4 kB, 9 kB lazy · risk medium
 - **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low
 - **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
-- **description-list-1** · `c2-description-list` · comparison matrix #249, example: record diff #250 · +1.2 kB on 5.6 kB · risk low
-- **pivot-table-1** · `c2-pivot-table` · financial statement #332 · +2 kB on 32.3 kB · risk medium
-- **highlight-1** · `c2-highlight` · find bar #258 (companion) · 2.5 kB new entry · risk low
-- **filter-builder-1** · `c2-filter-builder` · rule builder #260 (lazy) · +0.6 kB on 66.8 kB, 7 kB lazy · risk medium
-- **date-selector-1** · `c2-date-selector` · calendar #289 · +1.5 kB on 4.7 kB · risk low
 - **date-input-1** · `c2-date-input` · date picker #290 (lazy) · +0.5 kB on 3.1 kB, 17 kB lazy · risk low · after `date-selector-1`
-- **month-picker-1** · `c2-month-picker` · period picker #294 · +1 kB on 5.4 kB · risk low
-- **scheduler-1** · `c2-scheduler` · absence calendar #349 · +1.2 kB on 38.1 kB · risk low
-- **form-1** · `c2-form` · field array #442 (companion) · 3 kB new entry · risk low
-- **list-item-1** · `c2-list-item` · nav list #464 · +0.3 kB on 3.3 kB, 1.5 kB new entry · risk low
-- **tree-1** · `c2-tree` · sortable tree #465 (lazy) · +0.4 kB on 15.3 kB, 6 kB lazy · risk medium
-- **banner-1** · `c2-banner` · callout #494 · +0.2 kB on 2.6 kB · risk low
 
 ### New packages
 

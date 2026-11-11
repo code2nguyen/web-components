@@ -509,6 +509,10 @@
       "types": "./dist/form.d.ts",
       "default": "./dist/form.js"
     },
+    "./form/form-list": {
+      "types": "./dist/form/form-list.d.ts",
+      "default": "./dist/form/form-list.js"
+    },
     "./form-field": {
       "types": "./dist/form-field.d.ts",
       "default": "./dist/form-field.js"
@@ -556,6 +560,10 @@
     "./highlight": {
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
+    },
+    "./highlight/find-bar": {
+      "types": "./dist/highlight/find-bar.d.ts",
+      "default": "./dist/highlight/find-bar.js"
     },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
@@ -644,6 +652,10 @@
     "./list-item": {
       "types": "./dist/list-item.d.ts",
       "default": "./dist/list-item.js"
+    },
+    "./list-item/list-group": {
+      "types": "./dist/list-item/list-group.d.ts",
+      "default": "./dist/list-item/list-group.js"
     },
     "./loading-overlay": {
       "types": "./dist/loading-overlay.d.ts",
