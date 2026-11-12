@@ -3,6 +3,26 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.25](https://github.com/code2nguyen/web-components/releases/tag/v1.0.25) — 2026-11-12
+
+### Breaking changes
+
+- **state-timeline:** Give each tone and series slot its own segment label colour ([5aa2cbd](https://github.com/code2nguyen/web-components/commit/5aa2cbd))
+
+### Fixes
+
+- **log-viewer:** Keep the copy button a scroll hid hidden until the pointer really moves ([5c339b7](https://github.com/code2nguyen/web-components/commit/5c339b7))
+- **terminal:** Keep the screen at its end when WebKit measures our own scroll after the output grew ([4a3f1cc](https://github.com/code2nguyen/web-components/commit/4a3f1cc))
+- **chart:** Keep the hidden data table from widening a scroller, and document aria-label ([e1ccbaa](https://github.com/code2nguyen/web-components/commit/e1ccbaa))
+- **theme:** Map label colours that sit on fills which lighten in a dark theme ([0f3f596](https://github.com/code2nguyen/web-components/commit/0f3f596))
+- **components:** Adopt modern platform patterns from the platform audit ([e63fa0a](https://github.com/code2nguyen/web-components/commit/e63fa0a))
+- **dashboard:** Keep grid placement off the host's inline style ([33a7016](https://github.com/code2nguyen/web-components/commit/33a7016))
+- **color-area:** Place the thumb in percent and shrink to its container ([a28986a](https://github.com/code2nguyen/web-components/commit/a28986a))
+
+### Docs site & examples
+
+- **gallery:** Fix contrast, overflow and registration found by the gallery audit ([0619a85](https://github.com/code2nguyen/web-components/commit/0619a85))
+
 ## [1.0.24](https://github.com/code2nguyen/web-components/releases/tag/v1.0.24) — 2026-11-11
 
 ### Features
