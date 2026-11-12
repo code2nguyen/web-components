@@ -3,6 +3,24 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.26](https://github.com/code2nguyen/web-components/releases/tag/v1.0.26) — 2026-11-12
+
+### Features
+
+- **barcode-scanner:** Add c2-barcode-scanner ([272c3cd](https://github.com/code2nguyen/web-components/commit/272c3cd))
+- **date-input:** Open a themed calendar popover with picker="calendar" ([3338cb3](https://github.com/code2nguyen/web-components/commit/3338cb3))
+- **table:** Open a detail panel under a row with detail-height ([a71ebcd](https://github.com/code2nguyen/web-components/commit/a71ebcd))
+- **todo-list:** Remember the selected filter tab with storage-key ([862198e](https://github.com/code2nguyen/web-components/commit/862198e))
+- **notepad:** Open web addresses written on the page as links ([dfe1fde](https://github.com/code2nguyen/web-components/commit/dfe1fde))
+
+### Fixes
+
+- **barcode-scanner:** Keep focus, read several codes in one picture and retry a failed decoder load ([fe8e400](https://github.com/code2nguyen/web-components/commit/fe8e400))
+- **date-input:** Keep the calendar's state, focus and events right when it closes ([b6a5ceb](https://github.com/code2nguyen/web-components/commit/b6a5ceb))
+- **table:** Keep panel keys with their content, find closed panels in page search, name the chevron by a message ([1b075f3](https://github.com/code2nguyen/web-components/commit/1b075f3))
+- **mcp:** List, search and describe the components only the installed @c2n/components knows ([44f8430](https://github.com/code2nguyen/web-components/commit/44f8430))
+- **mcp:** Serve a component the installed @c2n/components added after this server was built ([410a15a](https://github.com/code2nguyen/web-components/commit/410a15a))
+
 ## [1.0.25](https://github.com/code2nguyen/web-components/releases/tag/v1.0.25) — 2026-11-12
 
 ### Breaking changes
