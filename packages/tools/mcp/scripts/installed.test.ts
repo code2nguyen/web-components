@@ -3,7 +3,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { withInstalledApi } from '../src/installed.ts'
+import { withInstalledApi, withInstalledComponents } from '../src/installed.ts'
+import { resolveElement } from '../src/registry.ts'
 import type { ComponentEntry, Registry } from '../src/registry-types.ts'
 
 function component(id: string, tags: string[], pkg = `@c2n/${id}`): ComponentEntry {
@@ -155,7 +156,7 @@ test('a component the installed umbrella added, unknown to this server, is serve
       },
     },
   )
-  const result = withProject(root, () => withInstalledApi(registry))
+  const [result, live] = withProject(root, () => [withInstalledApi(registry), withInstalledComponents(registry)])
   assert.equal(result.tagIndex['c2-meter'], 'meter')
   assert.equal(result.tagIndex['c2-meter-mark'], 'meter')
   assert.equal(result.packageIndex['@c2n/meter'], 'meter')
@@ -167,7 +168,11 @@ test('a component the installed umbrella added, unknown to this server, is serve
   )
   assert.equal(meter.install.import, "import '@c2n/components/meter'")
   assert.equal(meter.status, 'undocumented')
-  assert.match(meter.description, /9\.9\.9.*newer than this server \(0\.0\.0\)/)
+  assert.match(meter.description, /9\.9\.9 and unknown to this server \(0\.0\.0\)/)
+  // The server's tools find it the same way, by tag, id or package, next to the components the registry knows.
+  for (const name of ['c2-meter', 'c2-meter-mark', 'meter', '@c2n/meter']) assert.equal(resolveElement(live, name)?.component.id, 'meter')
+  assert.equal(live.components['button'], registry.components['button'])
+  assert.equal(live.tagIndex['c2-thing'], undefined)
   // The registry handed in is left as it was.
   assert.equal(registry.components['meter'], undefined)
   assert.equal(registry.packageIndex['@c2n/meter'], undefined)

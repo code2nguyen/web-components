@@ -197,6 +197,25 @@ export function withInstalledApi(registry: Registry): Registry {
 }
 
 /**
+ * The registry plus the components only the project's installed `@c2n/components` knows (see `newComponents`), which
+ * is what the server's tools list, search and describe. The API of the components the registry does know is left
+ * alone: each tool reads the installed one where it needs it.
+ */
+export function withInstalledComponents(registry: Registry): Registry {
+  const added = newComponents(registry, registry.tagIndex)
+  if (added.length === 0) return registry
+  const components = { ...registry.components }
+  const tagIndex = { ...registry.tagIndex }
+  const packageIndex = { ...registry.packageIndex }
+  for (const component of added) {
+    components[component.id] = component
+    packageIndex[component.package] = component.id
+    for (const element of component.elements) tagIndex[element.tag] = component.id
+  }
+  return { ...registry, components, tagIndex, packageIndex }
+}
+
+/**
  * The components the project's `@c2n/components` bundles and this server's registry has never heard of: a server
  * older than the installed version (pinned in an MCP config, or cached by `npx`) would otherwise answer "Unknown
  * component" for an element the project can use, and the check would flag it. Each is a directory of the umbrella's
@@ -224,7 +243,7 @@ function newComponents(registry: Registry, tagIndex: Record<string, string>): Co
       modulePath: entry,
       description: umbrella.declared?.get(tag)?.description ?? '',
     }))
-    const note = `Added in the installed ${UMBRELLA} ${umbrella.version}, which is newer than this server (${registry.c2nVersion}): the API below is read from the installed package, and there are no examples or presets for it. Update @c2n/mcp to the installed version to get them.`
+    const note = `Bundled by the installed ${UMBRELLA} ${umbrella.version} and unknown to this server (${registry.c2nVersion}): the API below is read from the installed package, and there are no examples or presets for it. A @c2n/mcp of the installed version has them.`
     return {
       id: directory,
       package: `@c2n/${directory}`,
