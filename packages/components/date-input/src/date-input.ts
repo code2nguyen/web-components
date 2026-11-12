@@ -47,7 +47,7 @@ export interface DateInput {
  * @event {Event} change - Re-dispatched from the inner date input when the value is committed.
  *
  * @csspart calendar - The calendar popover's surface (`picker="calendar"`).
- * @csspart calendar-actions - The row at the bottom of the calendar popover holding the `calendar-actions` slot, Today and Clear.
+ * @csspart calendar-actions - The row at the bottom of the calendar popover. It wraps the `calendar-actions` slot: the built-in Today and Clear buttons show as the slot's fallback, and assigned content replaces them in the same row.
  *
  * @cssproperty {pixel} [--c2-date-input--min-height=36px]
  * @cssproperty {pixel} [--c2-date-input--gap=8px]
