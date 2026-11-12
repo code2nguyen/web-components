@@ -205,7 +205,8 @@ export class SplitPanel extends LitElement {
     event.preventDefault()
     this.divider.setPointerCapture(event.pointerId)
     this.dragging = true
-    this.toggleAttribute('dragging', true)
+    // A class on the shadow container, not an attribute on the host (which the author owns, and SSR would not match).
+    this.container.classList.add('dragging')
   }
 
   private handlePointerMove(event: PointerEvent) {
@@ -216,7 +217,7 @@ export class SplitPanel extends LitElement {
   private handlePointerUp(event: PointerEvent) {
     if (!this.dragging) return
     this.dragging = false
-    this.toggleAttribute('dragging', false)
+    this.container.classList.remove('dragging')
     if (this.divider.hasPointerCapture(event.pointerId)) this.divider.releasePointerCapture(event.pointerId)
   }
 

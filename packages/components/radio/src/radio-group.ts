@@ -3,7 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { provide } from '@lit/context'
@@ -130,7 +130,7 @@ export class RadioGroup extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
     this.context = this.createContext()
     this.syncRadios()
   }
@@ -226,7 +226,9 @@ export class RadioGroup extends LitElement {
     const missing = this.required && !this.value
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
     const message = this.customValidityMessage || (missing ? 'Please select an option.' : '')
-    this.internals.setValidity(flags, message)
+    // Anchor the validation bubble on the first enabled option's own input, when it has rendered one.
+    const anchor = this.radios.find((radio) => !radio.disabled)?.shadowRoot?.querySelector('input') ?? undefined
+    this.internals.setValidity(flags, message, anchor)
   }
 
   private get effectiveDisabled() {

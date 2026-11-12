@@ -9,6 +9,7 @@ import { formatDate, parseDate } from '@c2n/core/zoned-time.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { dateStripMessages } from './messages'
 import styles from './date-strip.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { dateStripMessages } from './messages'
 
@@ -212,7 +213,7 @@ export class DateStrip extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

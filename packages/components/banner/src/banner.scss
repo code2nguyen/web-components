@@ -47,6 +47,7 @@
   z-index: css.cssVar(z-index);
 }
 :host([position='bottom']) {
+  // modern-web-ignore: fixed-overlay-z-index a bottom banner is page-level chrome (an announcement next to the content); an open modal is meant to cover it and make it inert, unlike a toast
   position: fixed;
   inset-inline: 0;
   bottom: css.cssVar(offset);

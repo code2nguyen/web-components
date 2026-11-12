@@ -3,6 +3,8 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { truncateMessages } from './messages'
 import styles from './truncate.scss?inline'
 
 /** Events fired by {@link Truncate}, keyed for `addEventListener`. */
@@ -65,11 +67,13 @@ export class Truncate extends LitElement {
   /** Shows the whole text. The button sets it; set it yourself to open or close the text programmatically. */
   @property({ type: Boolean, reflect: true }) expanded = false
 
-  /** Label of the button while collapsed. */
-  @property({ attribute: 'more-label' }) moreLabel = 'Show more'
+  /** Label of the button while collapsed. Empty uses the translated "Show more" message. */
+  @property({ attribute: 'more-label' }) moreLabel = ''
 
-  /** Label of the button while expanded. */
-  @property({ attribute: 'less-label' }) lessLabel = 'Show less'
+  /** Label of the button while expanded. Empty uses the translated "Show less" message. */
+  @property({ attribute: 'less-label' }) lessLabel = ''
+
+  private readonly msg = new LocalizeController(this, truncateMessages)
 
   @state() private overflowing = false
 
@@ -160,7 +164,7 @@ export class Truncate extends LitElement {
               aria-controls="content"
               @click=${this.handleToggle}
             >
-              ${this.expanded ? this.lessLabel : this.moreLabel}
+              ${this.expanded ? this.lessLabel || this.msg.t('less') : this.moreLabel || this.msg.t('more')}
             </button>`
           : nothing
       }`

@@ -7,6 +7,7 @@ import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { ChartSeriesConfig } from './chart-types.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface LineChart {
   addEventListener: TypedAddEventListener<LineChart, ChartEventMap>
@@ -37,6 +38,10 @@ export interface LineChart {
  */
 @customElement('c2-line-chart')
 export class LineChart extends UplotChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'lineChart'
+  }
+
   /** Interpolation between points. */
   @property({ type: String }) curve: 'linear' | 'smooth' | 'step' = 'linear'
 

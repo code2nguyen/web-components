@@ -128,6 +128,11 @@ const LABEL_DISTANCE = 6
  */
 @customElement('c2-chord-chart')
 export class ChordChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(chordStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['chord']

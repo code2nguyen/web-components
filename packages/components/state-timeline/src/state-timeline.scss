@@ -48,6 +48,11 @@
     tone-warning--color: #a16207,
     tone-danger--color: #dc2626,
     tone-neutral--color: #71717a,
+    tone-primary__label--color: #ffffff,
+    tone-success__label--color: #ffffff,
+    tone-warning__label--color: #ffffff,
+    tone-danger__label--color: #ffffff,
+    tone-neutral__label--color: #ffffff,
     series-1--color: #0265dc,
     series-2--color: #ea580c,
     series-3--color: #0f766e,
@@ -56,6 +61,14 @@
     series-6--color: #7c3aed,
     series-7--color: #0891b2,
     series-8--color: #52525b,
+    series-1__label--color: #ffffff,
+    series-2__label--color: #ffffff,
+    series-3__label--color: #ffffff,
+    series-4__label--color: #ffffff,
+    series-5__label--color: #ffffff,
+    series-6__label--color: #ffffff,
+    series-7__label--color: #ffffff,
+    series-8__label--color: #ffffff,
     empty--color: #71717a,
     empty--padding: 32px 16px,
   )
@@ -199,7 +212,7 @@
   background-clip: padding-box;
   background-color: color-mix(in srgb, var(--_tone) #{css.cssVar(segment--background-mix)}, var(--_surface));
   border-radius: css.cssVar(segment--border-radius);
-  color: css.cssVar(segment--color);
+  color: var(--_on, #{css.cssVar(segment--color)});
   font-weight: css.cssVar(segment--font-weight);
   outline: none;
   cursor: default;
@@ -255,14 +268,25 @@
 }
 
 /* ---- tones ---- */
-@each $tone in primary, success, warning, danger, neutral {
+// Each fill has its own label colour, since one text colour cannot suit every fill: in a dark theme the fills that
+// follow it lighten (their labels fall back to `segment--color`, which a theme flips), while the success and warning
+// fills stay deep, so their labels stay white.
+@each $tone in primary, danger, neutral {
   .tone-#{$tone} {
     --_tone: #{css.cssVar(tone-#{$tone}--color)};
+    --_on: #{css.cssVar(tone-#{$tone}__label--color, segment--color)};
+  }
+}
+@each $tone in success, warning {
+  .tone-#{$tone} {
+    --_tone: #{css.cssVar(tone-#{$tone}--color)};
+    --_on: #{css.cssVar(tone-#{$tone}__label--color)};
   }
 }
 @for $slot from 1 through 8 {
   .tone-#{$slot} {
     --_tone: #{css.cssVar(series-#{$slot}--color)};
+    --_on: #{css.cssVar(series-#{$slot}__label--color, segment--color)};
   }
 }
 

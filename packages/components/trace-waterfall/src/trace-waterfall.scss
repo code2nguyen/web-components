@@ -130,6 +130,10 @@
 .row {
   height: css.cssVar(row--height);
   box-sizing: border-box;
+  // Every span is a row in the DOM: those scrolled out of the waterfall skip layout and paint. The height is fixed,
+  // so a skipped row keeps its place and nothing measured changes.
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto css.cssVar(row--height);
   border-bottom: css.cssVar(row--border-bottom);
   cursor: pointer;
   outline: none;

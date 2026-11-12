@@ -259,6 +259,7 @@ export class ListItem extends LitElement {
   private handleKeydown = (event: KeyboardEvent) => {
     // Inside a list the list owns the keyboard.
     if (this.applyContext || this.disabled || isFromInteractiveContent(event, this)) return
+    // modern-web-ignore: ime-enter the row renders no text field (the match is a selector string); keys from slotted interactive content return early above
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       if (this.href) this.renderRoot.querySelector('a')?.click()

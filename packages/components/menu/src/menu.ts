@@ -299,7 +299,9 @@ export class Menu extends LitElement {
     if (element.updateComplete) await element.updateComplete
     const inner = trigger.localName.includes('-') ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]') : null
     const target = inner ?? trigger
+    // modern-web-ignore: aria-attribute-on-other-element the trigger is a separate element the author points at (anchor/for), not a child; its own button role carries the popup state, and aria-haspopup/aria-expanded have no element-reference or internals form for another element (a c2-* trigger gets them inside its shadow root)
     target.setAttribute('aria-haspopup', 'menu')
+    // modern-web-ignore: aria-attribute-on-other-element the popup state of the same trigger, as above
     target.setAttribute('aria-expanded', String(this.open))
   }
 
@@ -325,6 +327,7 @@ export class Menu extends LitElement {
 
     // Separators and headings are decoration: a `role="menu"` may only contain menu rows.
     for (const element of this.itemSlot?.assignedElements({ flatten: true }) ?? []) {
+      // modern-web-ignore: aria-attribute-on-other-element a role has no element-reference form; a slotted heading must be presentational inside role=menu, and this runs after upgrade on author markup that cannot carry its own role in every framework
       if (/^h[1-6]$/.test(element.localName)) element.setAttribute('role', 'presentation')
     }
   }

@@ -271,9 +271,11 @@ export class ContextMenu extends LitElement {
       if (this.openAt({ x, y, target, trigger: 'touch', originalEvent: event })) this.suppressClick = true
     }, this.longPressDuration)
     this.longPress = { timer, pointerId, x, y }
+    // modern-web-ignore: document-pointer-drag not a drag: these only watch a pending long press for the finger slipping past the slop; capturing the pointer would retarget the author's content's own events
     window.addEventListener('pointermove', this.handleLongPressMove, true)
     window.addEventListener('pointerup', this.handleLongPressEnd, true)
     window.addEventListener('pointercancel', this.handleLongPressEnd, true)
+    // modern-web-ignore: scroll-listener-visual drives no visual: a scroll anywhere cancels the pending long press
     window.addEventListener('scroll', this.handleLongPressEnd, true)
   }
 

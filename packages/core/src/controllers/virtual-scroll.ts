@@ -117,6 +117,7 @@ export class VirtualScrollController implements ReactiveController {
     this.#detach()
     if (!element) return
     this.#scrollElement = element
+    // modern-web-ignore: scroll-listener-visual computes which rows are rendered (virtualization), not a visual effect
     element.addEventListener('scroll', this.#handleScroll, { passive: true })
     this.#resizeObserver?.observe(element)
     this.#measure()

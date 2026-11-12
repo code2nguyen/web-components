@@ -18,7 +18,6 @@
     confirm-button--color: #ffffff,
     confirm-button__hover--background-color: rgb(1, 84, 184),
     confirm-button__active--background-color: rgb(1, 70, 154),
-
     confirm-button__destructive--background-color: #dc2626,
     confirm-button__destructive--color: #ffffff,
     confirm-button__destructive__hover--background-color: #b91c1c,
@@ -71,7 +70,7 @@
     margin: 0;
   }
 
-  ::slotted(p + p) {
+  ::slotted(p:not(:first-child)) {
     margin-top: 8px;
   }
 }

@@ -9,6 +9,7 @@ import type { Overlay } from '@c2n/overlay'
 import styles from './cascader.scss?inline'
 
 import '@c2n/overlay'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 /** One node in a cascader hierarchy. */
 export interface CascaderOption {
@@ -210,7 +211,7 @@ export class Cascader extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean): void {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null): void {

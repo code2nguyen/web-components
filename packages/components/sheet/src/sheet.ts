@@ -326,6 +326,9 @@ export class Sheet extends LitElement {
   override updated(changed: PropertyValues<this>) {
     if (changed.has('open') && !isServer && this.dialog) {
       if (this.open && !this.dialog.open) {
+        // A dismissal (Escape, backdrop, ×) leaves `returnValue` untouched: clear the last answer so it reports ''.
+        this.returnValue = ''
+        this.dialog.returnValue = ''
         this.dialog.showModal()
         this.lockScroll()
         this.dispatchEvent(new Event('open', { bubbles: true, composed: true }))
@@ -352,6 +355,7 @@ export class Sheet extends LitElement {
         aria-labelledby=${hasTitle ? 'title' : nothing}
         aria-label=${!hasTitle && this.label ? this.label : nothing}
         @close=${this.handleDialogClose}
+        closedby=${this.noEscape ? 'none' : nothing}
         @cancel=${this.handleDialogCancel}
         @click=${this.handleDialogClick}
       >

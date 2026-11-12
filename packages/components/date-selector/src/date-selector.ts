@@ -5,6 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './date-selector.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export type DateSelectorWeekStart = 'monday' | 'sunday'
 
@@ -214,7 +215,7 @@ export class DateSelector extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

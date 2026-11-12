@@ -3,6 +3,7 @@ import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/checkbox'
@@ -222,8 +223,7 @@ export class TreeItem extends LitElement {
     if (changed.has('value') || changed.has('disabled') || changed.has('hasChildren')) this.#notify()
   }
 
-  override updated(changed: PropertyValues<this>) {
-    if (changed.has('level')) this.style.setProperty('--level', String(this.level))
+  override updated() {
     this.#syncAria()
   }
 
@@ -318,12 +318,16 @@ export class TreeItem extends LitElement {
     `
 
     const rowClass = classMap({ row: true, 'is-dragging': this.dragging, 'is-drop-target': this.dropTarget })
+    // The depth is set on the row inside the shadow root, never on the host: a host style the server did not render
+    // is a hydration mismatch, and it would override an author's own inline style.
+    const rowStyle = styleMap({ '--level': String(this.level) })
     // The link wraps the whole row so the click target matches the highlight, which is what a navigation tree
     // wants. `tabindex="-1"` keeps the tree's roving tabindex on the host, exactly as `c2-list-item` does.
     const row =
       this.href && !this.disabled
         ? html`<a
             class=${rowClass}
+            style=${rowStyle}
             part="row"
             href=${this.href}
             target=${ifDefined(this.target || undefined)}
@@ -331,7 +335,7 @@ export class TreeItem extends LitElement {
             tabindex="-1"
             >${content}</a
           >`
-        : html`<div class=${rowClass} part="row">${content}</div>`
+        : html`<div class=${rowClass} style=${rowStyle} part="row">${content}</div>`
 
     return html`
       ${row} ${this.expanded ? html`<div class="group" part="group" role="group"><slot @slotchange=${this.#handleChildSlotChange}></slot></div>` : nothing}

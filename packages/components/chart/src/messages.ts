@@ -51,7 +51,48 @@ const chartEn = {
   annotations: 'Annotations',
   annotationAt: (label: string, at: string) => `${label}, ${at}`,
   annotationRange: (label: string, from: string, to: string) => `${label}, ${from} to ${to}`,
+  chart: 'Chart',
+  lineChart: 'Line chart',
+  areaChart: 'Area chart',
+  barChart: 'Bar chart',
+  sparkline: 'Sparkline',
+  pieChart: 'Pie chart',
+  scatterChart: 'Scatter chart',
+  bubbleChart: 'Bubble chart',
+  radarChart: 'Radar chart',
+  gaugeChart: 'Gauge',
+  candlestickChart: 'Candlestick chart',
+  butterflyChart: 'Butterfly chart',
+  pyramidChart: 'Pyramid chart',
+  radialBarChart: 'Radial bar chart',
+  points: (count: number) => (count === 1 ? '1 data point' : `${count} data points`),
+  summary: (kind: string, series: string, points: string) => `${kind} of ${series}, ${points}`,
+  summaryNoSeries: (kind: string, points: string) => `${kind}, ${points}`,
+  item: 'Item',
+  truncated: (caption: string, shown: number, total: number) => `${caption}. The table lists the first ${shown} of ${total} rows.`,
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  resetView: 'Reset view',
+  vennDiagram: 'Venn diagram',
+  vennSummary: (sets: string) => `Venn diagram of ${sets}`,
 }
+
+/** A key of the shared chart messages that names a chart type, read into the generated summary. */
+export type ChartKindMessage =
+  | 'chart'
+  | 'lineChart'
+  | 'areaChart'
+  | 'barChart'
+  | 'sparkline'
+  | 'pieChart'
+  | 'scatterChart'
+  | 'bubbleChart'
+  | 'radarChart'
+  | 'gaugeChart'
+  | 'candlestickChart'
+  | 'butterflyChart'
+  | 'pyramidChart'
+  | 'radialBarChart'
 
 /** The interface text every chart shares, in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const chartMessages = defineMessages('chart', chartEn)

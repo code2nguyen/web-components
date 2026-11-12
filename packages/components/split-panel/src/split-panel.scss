@@ -1,5 +1,6 @@
 @use '@c2n/sass/variables';
 @use '@c2n/sass/scrollbar';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-split-panel,
   $theme: (
@@ -120,7 +121,7 @@
 
 // The line and the grip stay hidden until the pointer finds the divider, and while it is dragged or keyboard-focused.
 :host(:not([disabled])) [part~='divider']:hover,
-:host([dragging]) [part~='divider'],
+.container.dragging > [part~='divider'],
 [part~='divider']:focus-visible {
   opacity: css.cssVar(divider__hover--opacity);
 }
@@ -132,13 +133,15 @@
   }
 }
 
-:host([dragging]) [part~='divider'] {
+.container.dragging > [part~='divider'] {
   background: css.cssVar(divider__active--background);
 }
 
-// Keyboard focus recolours the line instead of drawing a ring around it.
+// Keyboard focus recolours the line instead of drawing a ring around it; forced colors drops that background, so a
+// system-coloured ring stands in there.
 [part~='divider']:focus-visible {
   background: css.cssVar(divider__focus--background);
+  @include focus.forced-colors-ring;
 }
 
 :host([disabled]) [part~='divider'] {
@@ -177,6 +180,6 @@
   transform: rotate(90deg);
 }
 
-:host([dragging]) {
+.container.dragging {
   user-select: none;
 }

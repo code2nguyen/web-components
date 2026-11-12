@@ -289,3 +289,28 @@ test('lowering max-lines trims the screen at once', async ({ page, renderScenari
   await terminal(page).evaluate((element) => (element as HTMLElement & { print(text: string): void }).print('line 9\nline 10'))
   await expect(terminal(page).locator('.output .line')).toHaveText(['line 8', 'line 9', 'line 10'])
 })
+
+test('prints keep a screen at its end there, even a tall block drawn late, and leave a screen scrolled back alone', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-terminal style="--c2-terminal--height: 200px"></c2-terminal>`)
+  const host = terminal(page)
+  const screen = host.locator('.screen')
+  const gap = () => screen.evaluate((element) => element.scrollHeight - element.scrollTop - element.clientHeight)
+  await host.evaluate((element) => {
+    const print = (element as HTMLElement & { print(value: string): void }).print.bind(element)
+    for (let index = 0; index < 40; index += 1) print(`line ${index}`)
+    // One block of 30 lines: far taller than the one-line estimate a block skipped by content-visibility starts from.
+    print(Array.from({ length: 30 }, (_item, index) => `tall ${index}`).join('\n'))
+  })
+  expect(await screen.evaluate((element) => element.scrollHeight > element.clientHeight + 400)).toBe(true)
+  await expect.poll(gap).toBeLessThan(2)
+  await expect(blocks(host).last().locator('.line').last()).toBeInViewport()
+
+  // Scrolled back to read: a print leaves the position where the reader put it.
+  await screen.evaluate((element) => {
+    element.scrollTop = 0
+  })
+  await expect.poll(() => screen.evaluate((element) => element.scrollTop)).toBe(0)
+  await host.evaluate((element) => (element as HTMLElement & { print(value: string): void }).print('more'))
+  await expect(blocks(host).last()).toHaveText('more')
+  expect(await screen.evaluate((element) => element.scrollTop)).toBe(0)
+})

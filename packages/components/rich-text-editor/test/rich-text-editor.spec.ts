@@ -474,3 +474,16 @@ test('a link that browsers would read as javascript: is never kept', async ({ pa
   await expect(text$(page)).toContainText('@Mai')
   await expect(links).toHaveCount(0)
 })
+
+test('in forced colors, focus draws a system-colour outline round the field, since its border colour and shadow are repainted away', async ({
+  page,
+  renderScenario,
+}) => {
+  await page.emulateMedia({ forcedColors: 'active' })
+  await renderScenario(`<c2-rich-text-editor label="Comment"></c2-rich-text-editor>`)
+  const container = host(page).locator('.container')
+  await expect(container).toHaveCSS('outline-style', 'none')
+  await text$(page).click()
+  await expect(container).toHaveCSS('outline-style', 'solid')
+  await expect(container).toHaveCSS('outline-width', '2px')
+})

@@ -1,5 +1,6 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-money-input,
   $theme: (
@@ -84,6 +85,7 @@
     border: css.cssVar(focus--border);
     outline: css.cssVar(focus--outline);
     outline-offset: css.cssVar(focus--outline-offset);
+    @include focus.forced-colors-ring;
   }
 
   &.error {
@@ -91,6 +93,7 @@
 
     &.focused {
       outline: css.cssVar(error__focus--outline);
+      @include focus.forced-colors-ring;
     }
   }
 

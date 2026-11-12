@@ -6,6 +6,7 @@ import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface ScatterChart {
   addEventListener: TypedAddEventListener<ScatterChart, ChartEventMap>
@@ -31,6 +32,10 @@ export interface ScatterChart {
  */
 @customElement('c2-scatter-chart')
 export class ScatterChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'scatterChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['scatter', 'grid']
 
   /** Diameter of each point in CSS pixels. */

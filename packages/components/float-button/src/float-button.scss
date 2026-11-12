@@ -2,6 +2,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-float-button,
   $theme: (
+    // modern-web-ignore: fixed-overlay-z-index a floating action button acts on the page beneath it, so an open modal must cover it and make it inert
     position: fixed,
     inset: auto 24px 24px auto,
     z-index: 100,
@@ -15,14 +16,8 @@
     button__hover--background-color: #0154b8,
     button__open--background-color: #0154b8,
     button--color: #ffffff,
-    button--box-shadow: (
-      0 6px 16px rgba(24, 24, 27, 0.2),
-      0 2px 4px rgba(24, 24, 27, 0.12),
-    ),
-    button__hover--box-shadow: (
-      0 10px 24px rgba(24, 24, 27, 0.24),
-      0 3px 6px rgba(24, 24, 27, 0.14),
-    ),
+    button--box-shadow: (0 6px 16px rgba(24, 24, 27, 0.2), 0 2px 4px rgba(24, 24, 27, 0.12)),
+    button__hover--box-shadow: (0 10px 24px rgba(24, 24, 27, 0.24), 0 3px 6px rgba(24, 24, 27, 0.14)),
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     focus--outline-offset: 3px,
     disabled--opacity: 0.38,

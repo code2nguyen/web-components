@@ -4,7 +4,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './password-field.scss?inline'
@@ -366,7 +366,7 @@ export class PasswordField extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(restored: string | File | FormData | null) {

@@ -1,4 +1,5 @@
 import '../src/truncate'
+import './translations.js'
 
 const LONG =
   'Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell for the third ' +

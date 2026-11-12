@@ -16,6 +16,8 @@ export type AudioPlayerVariant = 'default' | 'bubble'
 const SPEEDS = [1, 1.5, 2]
 /** How far an arrow key seeks, in seconds. */
 const STEP = 5
+/** How far outside the viewport a player starts fetching the file its waveform is drawn from. */
+const VIEWPORT_MARGIN = '200px'
 /** The players with `exclusive` that are on the page: starting one pauses the others. */
 const exclusivePlayers = new Set<AudioPlayer>()
 
@@ -236,6 +238,8 @@ export class AudioPlayer extends LitElement {
     this.unbindMedia()
     this.resizeObserver?.disconnect()
     this.resizeObserver = undefined
+    this.viewportObserver?.disconnect()
+    this.viewportObserver = undefined
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -492,6 +496,31 @@ export class AudioPlayer extends LitElement {
     return this.src ? new URL(this.src, document.baseURI).href : ''
   }
 
+  /** Whether the player has come within {@link VIEWPORT_MARGIN} of the viewport, which the waveform decode waits for. */
+  private nearViewport = false
+  private viewportObserver?: IntersectionObserver
+
+  /** Decodes once the player nears the viewport. Without IntersectionObserver it decodes at once, as before. */
+  private watchViewport(): void {
+    if (this.viewportObserver) return
+    if (typeof IntersectionObserver === 'undefined') {
+      this.nearViewport = true
+      this.maybeDecode()
+      return
+    }
+    this.viewportObserver = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        this.viewportObserver?.disconnect()
+        this.viewportObserver = undefined
+        this.nearViewport = true
+        this.maybeDecode()
+      },
+      { rootMargin: VIEWPORT_MARGIN },
+    )
+    this.viewportObserver.observe(this)
+  }
+
   /** Fetches and decodes the audio once to draw its waveform, when no `peaks` are given. */
   private maybeDecode(): void {
     if (this.peaks?.length) return
@@ -500,6 +529,11 @@ export class AudioPlayer extends LitElement {
     // `preload="none"` (on the player, or on a slotted `<audio>`) means nothing is fetched before the first play.
     const preload = this.slotted ? this.slotted.getAttribute('preload') : this.preload
     if (preload === 'none' && !this.playing) return
+    // A page of players fetches only the files someone can see: the whole file is downloaded to draw the bars.
+    if (!this.nearViewport && !this.playing) {
+      this.watchViewport()
+      return
+    }
     this.decodedFor = url
     this.decodeAbort?.abort()
     const abort = new AbortController()

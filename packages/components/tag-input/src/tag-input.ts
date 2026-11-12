@@ -6,8 +6,11 @@ import { repeat } from 'lit/directives/repeat.js'
 import { live } from 'lit/directives/live.js'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { tagInputMessages } from './messages.js'
 import styles from './tag-input.scss?inline'
 
 /** Detail of the `tag-add` event. */
@@ -195,6 +198,7 @@ export class TagInput extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, tagInputMessages)
 
   // Splitting
 
@@ -288,7 +292,7 @@ export class TagInput extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -476,7 +480,7 @@ export class TagInput extends LitElement {
   }
 
   private handleInputKeydown(event: KeyboardEvent) {
-    if (event.isComposing) return
+    if (isComposingKey(event)) return
     const input = event.target as HTMLInputElement
     if (event.key === 'Enter') {
       if (!this.text.trim()) return
@@ -598,7 +602,7 @@ export class TagInput extends LitElement {
     const invalid = this.value.map((tag) => this.validate(tag)).find((result) => result !== true)
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, this.input ?? undefined)
     else if (invalid) this.internals.setValidity({ typeMismatch: true }, invalid, this.input ?? undefined)
-    else if (this.required && this.value.length === 0) this.internals.setValidity({ valueMissing: true }, 'Add at least one entry.', this.input ?? undefined)
+    else if (this.required && this.value.length === 0) this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), this.input ?? undefined)
     else this.internals.setValidity({})
   }
 
@@ -622,7 +626,7 @@ export class TagInput extends LitElement {
               part="remove-button"
               type="button"
               tabindex="-1"
-              aria-label="Remove ${tag}"
+              aria-label=${this.msg.t('remove', tag)}
               @click=${(event: Event) => this.handleRemoveClick(event, index)}
             >
               <slot name="remove-icon">

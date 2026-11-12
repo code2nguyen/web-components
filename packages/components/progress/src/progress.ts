@@ -3,8 +3,9 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { progressMessages } from './messages.js'
 import styles from './progress.scss?inline'
 
 export type ProgressVariant = 'linear' | 'circular'
@@ -62,8 +63,10 @@ export class Progress extends LitElement {
   /** Value that fills the whole track. */
   @property({ type: Number }) max = 100
 
-  /** Accessible name when nothing is slotted. Defaults to "Loading". */
+  /** Accessible name when nothing is slotted. Defaults to "Loading" in the nearest `lang` (English, or a language the app adds). */
   @property() label = ''
+
+  private readonly msg = new LocalizeController(this, progressMessages)
 
   /** Show the completed percentage beside the label. Always on when the `value` slot has content. */
   @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = false
@@ -109,7 +112,7 @@ export class Progress extends LitElement {
           class="c2-progress-track"
           part="track"
           role="progressbar"
-          aria-label=${hasLabel ? nothing : ifDefined(this.label || 'Loading')}
+          aria-label=${hasLabel ? nothing : this.label || this.msg.t('loading')}
           aria-labelledby=${hasLabel ? 'label' : nothing}
           aria-valuemin=${determinate ? '0' : nothing}
           aria-valuemax=${determinate ? String(this.effectiveMax) : nothing}
@@ -129,7 +132,7 @@ export class Progress extends LitElement {
           class="c2-progress-track"
           part="track"
           role="progressbar"
-          aria-label=${hasLabel ? nothing : ifDefined(this.label || 'Loading')}
+          aria-label=${hasLabel ? nothing : this.label || this.msg.t('loading')}
           aria-labelledby=${hasLabel ? 'label' : nothing}
           aria-valuemin=${determinate ? '0' : nothing}
           aria-valuemax=${determinate ? String(this.effectiveMax) : nothing}

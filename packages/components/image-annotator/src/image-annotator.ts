@@ -3,6 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/icon-button'
 import { imageAnnotatorMessages } from './messages.js'
@@ -717,7 +718,8 @@ export class ImageAnnotator extends LitElement {
       .value=${shape.text ?? ''}
       @keydown=${(event: KeyboardEvent) => {
         event.stopPropagation()
-        if (event.key === 'Enter') this.finishText((event.target as HTMLInputElement).value)
+        // Enter that confirms an IME candidate (CJK) belongs to the composition, not to the edit.
+        if (event.key === 'Enter' && !isComposingKey(event)) this.finishText((event.target as HTMLInputElement).value)
         if (event.key === 'Escape') this.finishText(shape.text ? shape.text : '')
       }}
       @blur=${(event: FocusEvent) => this.finishText((event.target as HTMLInputElement).value)}

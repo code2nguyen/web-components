@@ -81,6 +81,7 @@ const ownCase: Record<string, string> = {
   'c2-address-field': 'submits name[line1], name[city]… and name[country], one entry per part of the country format',
   'c2-card-input': 'submits name[number], name[expiry] and name[cvc], typed in by the user only',
   'c2-choice-matrix': 'submits one name[row] entry per choice',
+  'c2-quantity-picker': "submits one entry per counter, under each c2-quantity's own name (covered in quantity-picker.spec.ts)",
 }
 
 test('every form-associated element has a FormData case', async ({ page, renderScenario }) => {

@@ -217,7 +217,7 @@ kbd {
   font: inherit;
   font-size: 14px;
 
-  &:focus {
+  &:focus-visible {
     outline: css.cssVar(option__focus--outline);
     outline-offset: 1px;
   }

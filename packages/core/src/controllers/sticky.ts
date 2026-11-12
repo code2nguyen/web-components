@@ -162,6 +162,7 @@ export class StickyController implements ReactiveController {
     if (scroller === this.scroller) return
     this.unbind()
     this.scroller = scroller
+    // modern-web-ignore: scroll-listener-visual drives the public stuck-change/retract-change events and the scroll-direction headroom, which scroll-state queries (Limited availability) cannot express
     this.scrollTarget(scroller).addEventListener('scroll', this.schedule, { passive: true })
     window.addEventListener('resize', this.relayout, { passive: true })
     // Content that loads or collapses changes what is scrollable without a scroll or a window resize; the scroll box

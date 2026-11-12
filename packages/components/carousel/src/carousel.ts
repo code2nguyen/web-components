@@ -317,8 +317,13 @@ export class Carousel extends LitElement {
     const count = this.slides.length
     this.labelledLocale = this.msg.locale
     this.slides.forEach((slide, index) => {
-      slide.setAttribute('role', slide.getAttribute('role') ?? 'group')
+      // The slides are the author's light-DOM children and also the scroll-snap items, so the slide semantics land on
+      // them: moving them onto per-slide shadow wrappers (manual slot assignment) is a rewrite of the track. Author
+      // values are kept; only a missing role is added.
+      // modern-web-ignore: aria-attribute-on-other-element slides are the snap items; per-slide shadow wrappers need a track rewrite (tracked as a follow-up)
+      if (!slide.hasAttribute('role')) slide.setAttribute('role', 'group')
       if (!slide.hasAttribute('aria-roledescription') || this.describedSlides.has(slide)) {
+        // modern-web-ignore: aria-attribute-on-other-element same as the role above; only rewritten when this component wrote it
         slide.setAttribute('aria-roledescription', this.msg.t('slide'))
         this.describedSlides.add(slide)
       }

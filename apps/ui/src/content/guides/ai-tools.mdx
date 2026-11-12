@@ -13,6 +13,41 @@ c2n provides two complementary tools for coding agents:
 
 When MCP is unavailable, the skill uses a compact bundled catalog for component discovery and reads installed packages' `custom-elements.json` manifests for exact, version-correct APIs. MCP can also run by itself, but installing both gives an agent the component facts and the conventions for applying them well.
 
+## Add the c2n MCP server
+
+The quickest start is one command in your agent's own CLI. It registers `@c2n/mcp`, which `npx` downloads and runs on demand, so nothing is added to the project's dependencies.
+
+Claude Code:
+
+```bash tag=CodeBlock
+claude mcp add --transport stdio c2n -- npx -y @c2n/mcp
+```
+
+Add `--scope project` to write it to the project's `.mcp.json` and share it with the team; without it the server is registered for you only.
+
+Claude Code can also install c2n as a plugin, which bundles the skill and the MCP server together. Run these two commands inside Claude Code:
+
+```text tag=CodeBlock
+/plugin marketplace add code2nguyen/web-components
+/plugin install c2n@c2n
+```
+
+Codex:
+
+```bash tag=CodeBlock
+codex mcp add c2n -- npx -y @c2n/mcp
+```
+
+GitHub Copilot in VS Code:
+
+```bash tag=CodeBlock
+code --add-mcp '{"name":"c2n","command":"npx","args":["-y","@c2n/mcp"]}'
+```
+
+Any other MCP client launches the same stdio command, `npx -y @c2n/mcp`; [Manual MCP-only configuration](#manual-mcp-only-configuration) has the configuration files. The server is also listed in the official MCP Registry as `io.github.code2nguyen/c2n` and on [MCP Rush](https://mcprush.com/to/c2n-web-components-mcp), so clients that browse a registry can add it from there.
+
+These commands add the MCP server only. To also give the agent the c2n skill, the rules block in its instructions file and the markup check after each edit, use the installer below. Restart the agent after adding the server, then [verify the setup](#verify-the-setup).
+
 ## Install in an application
 
 From the root of the application that will use c2n:

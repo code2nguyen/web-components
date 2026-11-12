@@ -3,7 +3,7 @@ import { query } from 'lit/decorators.js'
 import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { isComposingKey, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './command.scss?inline'
 import { CommandItem } from './command-item'
@@ -271,7 +271,7 @@ export class Command extends LitElement {
   }
 
   private handleKeyDown = (event: KeyboardEvent) => {
-    if (event.isComposing) return
+    if (isComposingKey(event)) return
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault()

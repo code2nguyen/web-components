@@ -408,6 +408,29 @@ export const overrides: Record<string, Override> = {
   '--c2-state-timeline__series-7--color': { token: 'chart-series-7' },
   '--c2-state-timeline__series-8--color': { token: 'chart-series-8' },
   '--c2-state-timeline__tooltip--box-shadow': { token: 'shadow-md' },
+  // Segment labels sit on the tone and series fills, which lighten in a dark theme: white text there falls to 2.5:1,
+  // so the label flips with them the way on-primary does (white in light, a dark ink in dark).
+  '--c2-state-timeline__segment--color': onPrimary,
+  '--c2-state-timeline__tone-primary__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__tone-danger__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__tone-neutral__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__tone-success__label--color': { exclude: 'white on a fill that stays deep in both themes' },
+  '--c2-state-timeline__tone-warning__label--color': { exclude: 'white on a fill that stays deep in both themes' },
+  '--c2-state-timeline__series-1__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-2__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-3__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-4__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-5__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-6__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-7__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  '--c2-state-timeline__series-8__label--color': { exclude: 'falls back to segment--color, which the theme maps' },
+  // Initials on the default event colour, the primary, which lightens in a dark theme.
+  '--c2-scheduler__avatar--color': onPrimary,
+  // The diff's added green is the semantic success colour, mixed with the ink so it stays readable on a dark page.
+  '--c2-change-review__stats__added--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
@@ -457,6 +480,11 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__cell-label__inverse--color': { exclude: 'chosen per cell by the fill lightness, not the theme' },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
   // The success green has no token, but a fixed green fails on a dark surface; pulled towards the ink it reads on both.
+  // A resolved thread's mark is the same semantic green, mixed with the ink so it stays readable on a dark page.
+  '--c2-comment-thread__resolved--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-attachment__status__complete--color': {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, rgb(0, 122, 77) 75%, var(--c2-theme--color-on-surface, #18181b))',

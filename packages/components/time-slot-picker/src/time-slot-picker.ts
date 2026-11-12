@@ -9,6 +9,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import '@c2n/date-strip'
 import { timeSlotPickerMessages } from './messages'
 import styles from './time-slot-picker.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { timeSlotPickerMessages } from './messages'
 
@@ -249,7 +250,7 @@ export class TimeSlotPicker extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

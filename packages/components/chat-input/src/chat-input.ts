@@ -1,13 +1,16 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import styles from './chat-input.scss?inline'
+
+/** Browsers without `field-sizing` get the textarea's height from script; the others grow it in CSS. */
+const supportsFieldSizing = !isServer && typeof CSS !== 'undefined' && CSS.supports('field-sizing', 'content')
 
 /** Events fired by {@link ChatInput}, keyed for `addEventListener`. */
 export interface ChatInputEventMap {
@@ -107,6 +110,7 @@ export class ChatInput extends LitElement {
   @state() private disabledByForm = false
   @query('textarea') private input?: HTMLTextAreaElement
   private resizeFrame = 0
+  private appliedMinRows = 0
 
   /** The containing form, when this control is associated with one. */
   get form() {
@@ -159,7 +163,7 @@ export class ChatInput extends LitElement {
     this.reset()
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = state
@@ -185,7 +189,8 @@ export class ChatInput extends LitElement {
     if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
     else this.internals.states.delete('error')
     this.syncFormState()
-    if (changed.has('value') || changed.has('minRows')) this.scheduleInputHeightUpdate()
+    if (supportsFieldSizing) this.applyMinRows()
+    else if (changed.has('value') || changed.has('minRows')) this.scheduleInputHeightUpdate()
   }
 
   override disconnectedCallback() {
@@ -228,7 +233,7 @@ export class ChatInput extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent) {
-    if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229) return
+    if (event.key !== 'Enter' || isComposingKey(event)) return
     if (event.altKey) {
       event.preventDefault()
       const input = this.input
@@ -261,8 +266,23 @@ export class ChatInput extends LitElement {
     this.focus()
   }
 
+  /**
+   * `field-sizing: content` grows the field in CSS but ignores `rows`, so `min-rows` becomes a minimum height of that
+   * many lines plus the field's own padding and border. Measured when `min-rows` changes, never per keystroke.
+   */
+  private applyMinRows() {
+    const rows = Math.max(1, this.minRows)
+    if (!this.input || this.appliedMinRows === rows) return
+    this.appliedMinRows = rows
+    const style = getComputedStyle(this.input)
+    const edges = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'] as const
+    const extra = edges.reduce((sum, edge) => sum + (parseFloat(style[edge]) || 0), 0)
+    this.input.style.minBlockSize = `calc(${rows} * 1lh + ${extra}px)`
+  }
+
+  /** Without `field-sizing`: the height the text needs, set from script. */
   private updateInputHeight() {
-    if (!this.input) return
+    if (!this.input || supportsFieldSizing) return
     this.input.style.height = 'auto'
     const height = this.input.scrollHeight
     if (height > 0) this.input.style.height = `${height}px`

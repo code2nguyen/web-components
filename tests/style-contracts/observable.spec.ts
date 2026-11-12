@@ -14,6 +14,7 @@ type ReviewedCase = {
   value: string
   controlValue?: string
   target: string
+  activate?: string
   assertion: 'computed-style' | 'geometry' | 'pseudo-style' | 'slotted-style' | 'delegated-style' | 'programmatic-output'
   declaration?: string
   pseudo?: '::before' | '::after' | '::placeholder'
@@ -74,6 +75,7 @@ for (const verificationCase of registry.cases) {
       value: verificationCase.value,
       controlValue: verificationCase.controlValue,
       target: verificationCase.target,
+      activate: verificationCase.activate,
       declaration: verificationCase.declaration,
       pseudo: verificationCase.pseudo,
       valueSyntax: verificationCase.valueSyntax,

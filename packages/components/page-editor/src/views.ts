@@ -1,7 +1,8 @@
-import { html, nothing, svg, type TemplateResult } from 'lit'
+import { html, nothing, render, svg, type TemplateResult } from 'lit'
 import type { Node as ProseNode } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import type { Decoration, EditorView, NodeView } from 'prosemirror-view'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import type {
   Spreadsheet,
@@ -40,10 +41,27 @@ const TABLE_ICONS = {
   delete: menuIcon(line('M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10')),
 }
 
-const CHECK = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-const CARET = `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-const COPY = `<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 10.5h-.5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`
-const WRAP = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h10a2 2 0 0 1 0 4H9.5M2 12h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 10.5L9.5 12l1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const CHECK = html`<svg viewBox="0 0 16 16" aria-hidden="true">
+  <path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
+const CARET = html`<svg viewBox="0 0 12 12" aria-hidden="true">
+  <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
+const COPY = html`<svg viewBox="0 0 16 16" aria-hidden="true">
+  <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+  <path d="M3.5 10.5h-.5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+</svg>`
+const WRAP = html`<svg viewBox="0 0 16 16" aria-hidden="true">
+  <path d="M2 4h12M2 8h10a2 2 0 0 1 0 4H9.5M2 12h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M11 10.5L9.5 12l1.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
+
+/** A static icon template as DOM nodes, built by Lit rather than an HTML string sink (Trusted Types). */
+const icon = (template: TemplateResult): DocumentFragment => {
+  const fragment = document.createDocumentFragment()
+  render(template, fragment)
+  return fragment
+}
 
 let uid = 0
 
@@ -54,7 +72,9 @@ const element = <K extends keyof HTMLElementTagNameMap>(tag: K, className: strin
   return node
 }
 
-const PLUS = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`
+const PLUS = html`<svg viewBox="0 0 16 16" aria-hidden="true">
+  <path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+</svg>`
 
 /** A node view with interface text of its own, which it rewrites when the page's language changes. */
 export interface Localizable {
@@ -92,8 +112,8 @@ export class ItemView implements NodeView, Localizable {
       this.marker.setAttribute('role', 'checkbox')
       this.localize()
       i18n.live.add(this)
-      // A static SVG string, rendered once.
-      this.marker.innerHTML = CHECK
+      // A static SVG template, rendered once.
+      this.marker.replaceChildren(icon(CHECK))
       this.marker.addEventListener('mousedown', (event) => event.preventDefault())
       this.marker.addEventListener('click', (event) => {
         event.preventDefault()
@@ -190,7 +210,7 @@ export class CodeBlockView implements NodeView, Localizable {
     this.hint = element('div', 'code-hint', { contenteditable: 'false', 'aria-hidden': 'true' })
     const tools = element('div', 'code-tools')
     this.wrapButton = element('button', 'code-tool', { type: 'button', 'aria-pressed': 'false' })
-    this.wrapButton.innerHTML = WRAP
+    this.wrapButton.replaceChildren(icon(WRAP))
     this.wrapButton.addEventListener('click', () => {
       const wrap = !this.dom.classList.contains('wrap')
       this.dom.classList.toggle('wrap', wrap)
@@ -276,10 +296,8 @@ export class CodeBlockView implements NodeView, Localizable {
   private sync() {
     const language = normalizeLanguage(this.node.attrs.language)
     this.dom.dataset.language = language
-    this.languageButton.innerHTML = ''
     const label = languageLabel(language, this.settings.text.t('plainText'))
-    this.languageButton.append(label)
-    this.languageButton.insertAdjacentHTML('beforeend', CARET)
+    this.languageButton.replaceChildren(label, icon(CARET))
     this.languageButton.setAttribute('aria-label', this.settings.text.t('languageIs', label))
     this.languageButton.disabled = !this.view.editable
     const lines = this.node.textContent.split('\n').length
@@ -292,8 +310,7 @@ export class CodeBlockView implements NodeView, Localizable {
   private renderCopy(copied: boolean) {
     const t = this.settings.text.t.bind(this.settings.text)
     this.copied = copied
-    this.copyButton.innerHTML = COPY
-    this.copyButton.append(copied ? t('copied') : t('copy'))
+    this.copyButton.replaceChildren(icon(COPY), copied ? t('copied') : t('copy'))
     this.copyButton.setAttribute('aria-label', copied ? t('copied') : t('copyCode'))
   }
 
@@ -336,7 +353,7 @@ export class CodeBlockView implements NodeView, Localizable {
         })
         if (index === this.active) option.classList.add('active')
         option.append(this.labelOf(each))
-        if (each.id === current) option.insertAdjacentHTML('beforeend', CHECK)
+        if (each.id === current) option.append(icon(CHECK))
         return option
       }),
     )
@@ -367,6 +384,8 @@ export class CodeBlockView implements NodeView, Localizable {
   }
 
   private handleMenuKey(event: KeyboardEvent) {
+    // The search field may be composing: Enter then confirms the IME candidate, not a language.
+    if (isComposingKey(event)) return
     const list = this.filtered()
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
@@ -516,10 +535,8 @@ export class TableView implements NodeView, Localizable {
     const t = this.settings.text.t.bind(this.settings.text)
     this.sheet.label = t('table')
     this.menu.menuLabel = t('tableActions')
-    this.addRow.innerHTML = PLUS
-    this.addRow.append(t('newRow'))
-    this.addColumn.innerHTML = PLUS
-    this.addColumn.append(t('newColumn'))
+    this.addRow.replaceChildren(icon(PLUS), t('newRow'))
+    this.addColumn.replaceChildren(icon(PLUS), t('newColumn'))
   }
 
   refresh() {

@@ -8,6 +8,22 @@ test('tooltip supplies a name and keyboard activation reaches the consumer', asy
   await expect(host).toHaveAttribute('data-events', '[null]')
   await accessible(page)
 })
+// The guide's rule for a hint that repeats the trigger's name: add nothing, or the name is read twice.
+test('a tooltip that only repeats the name is not added as a description', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-icon-button tooltip="Settings"><span aria-hidden="true">⚙</span></c2-icon-button>')
+  const button = page.getByRole('button', { name: 'Settings', exact: true })
+  await button.focus()
+  await expect(page.locator('c2-icon-button').locator('c2-tooltip')).toBeVisible()
+  expect(await button.evaluate((element) => element.ariaDescribedByElements?.length ?? 0)).toBe(0)
+  await expect(button).not.toHaveAttribute('aria-describedby')
+})
+test('a tooltip that differs from the name describes the button', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-icon-button aria-label="Bookmark" tooltip="Save for later">★</c2-icon-button>')
+  const button = page.getByRole('button', { name: 'Bookmark' })
+  await expect
+    .poll(() => button.evaluate((element) => (element.ariaDescribedByElements ?? []).map((other) => other.textContent?.trim())))
+    .toEqual(['Save for later'])
+})
 test('explicit name wins and selected state is announced', async ({ page, renderScenario }) => {
   await renderScenario('<c2-icon-button aria-label="Bookmark" tooltip="Save" toggle>★</c2-icon-button>')
   const button = page.getByRole('button', { name: 'Bookmark' })

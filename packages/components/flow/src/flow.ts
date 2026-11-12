@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, isComposingKey } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { ariaKeyShortcuts, isApplePlatform, matchesStroke, parseShortcut } from '@c2n/core/shortcut-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -1618,6 +1618,9 @@ export class Flow extends LitElement {
     if (!this.editable || (event.pointerType === 'mouse' && event.button !== 0)) return
     this.endNewNodeDrag()
     this.newNodeDrag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false }
+    // The press starts on the application's own button in the actions slot and ends over the canvas, so it is followed on
+    // the window: capturing it on that button would retarget every move and the release away from the canvas.
+    // modern-web-ignore: document-pointer-drag the drag starts on an app-owned button and drops on the canvas
     window.addEventListener('pointermove', this.handleNewNodeMove)
     window.addEventListener('pointerup', this.handleNewNodeUp)
     window.addEventListener('pointercancel', this.endNewNodeDrag)
@@ -1831,7 +1834,7 @@ export class Flow extends LitElement {
   }
 
   private handleEditorKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.isComposing) {
+    if (event.key === 'Enter' && !isComposingKey(event)) {
       event.preventDefault()
       event.stopPropagation()
       this.commitEdit(true)

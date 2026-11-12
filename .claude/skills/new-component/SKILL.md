@@ -32,6 +32,8 @@ Then settle the six foundation decisions (CLAUDE.md, "Component foundation") bef
 | **Text**         | Every string the component draws or announces, as a key in `src/messages.ts`.                                                                                                              |
 | **Gallery**      | The list of cards: one per feature above, and which of them need an `<Name>ExamplesRuntime.astro` because the feature is property-only.                                                    |
 
+Then settle the **platform decisions** the same way (CLAUDE.md, "Modern web platform"; step 1 of the `modern-web-review` skill): for each behaviour the component needs (a popup, a dialog, a collapsible region, a growing field, Enter to submit, a long list, drag, a canvas, motion), search the modern-web-guidance guides, read the matching one, and write down the feature you will use, its Baseline status and its fallback. Prefer the platform feature over hand-written JavaScript, and an existing `@c2n/core` helper (`isComposingKey`, `lockPageScroll`, the overlay) over a new copy.
+
 ## 2. Design mock screen (complex components)
 
 For a complex component, draw it before building it. A mock is the cheapest place to get the look and the layout
@@ -105,6 +107,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - **Data** (foundation rule 3, collection components): the declarative form (child elements read on `slotchange`, and/or a `jsonPropertyConverter` attribute) and the in-memory property feed one internal model; `@property({ attribute: false }) dataSource?: <Class>DataSource` (one async `get<Things>(request)` returning the items and `total`) replaces it for remote or paged data, with `loading`/`empty`/`error` slots and superseded responses dropped. Say in the JSDoc which form wins. See `TableDataSource` in `packages/components/table/src/table-types.ts`.
 - Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
+- **Modern platform** (CLAUDE.md, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
 - Replace the scaffold's `<c2-<name>>` in `index.html` with a few hand-written usage examples (states, slots, themed variant).
 
 ## 5. Write the test suite
@@ -143,6 +146,7 @@ npm run build:tools                           # regenerate the MCP registry (ign
 npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
+node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/<name>   # legacy-pattern scan: fix each error or justify it with a modern-web-ignore comment
 npm run lint && npm run format:check          # or: npm run fix
 npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
 npm test                                      # the new package's Playwright suite
@@ -199,6 +203,7 @@ that the review was done and what it caught.
 - `apps/ui/src/data/component-modules.ts`, `component-previews.ts` (+ `component-presets.ts` if presets)
 - `apps/ui/src/content/components/<name>.mdx` and `gallery/<name>.mdx` filled in (or the gallery deliberately deleted)
 - `<package>/test/` suite written and passing
+- platform decisions recorded (feature, Baseline status, fallback) and `modern-web-review` passed: scanner clean, diff reviewed against its old → new pattern table
 - lint + format clean, `npm run ui:build` green
 - complex components: design mock drawn and reviewed in both themes, and shared with the design doc before building (step 2)
 - docs app reviewed by screenshot (step 8) in both themes, problems fixed, screenshots shared

@@ -19,6 +19,12 @@ export function getFieldValue(item: unknown, field: string): unknown {
 }
 
 /**
+ * The collator behind {@link defaultCompare}: the same options `localeCompare` was called with, built once, since
+ * `localeCompare` with options builds a collator per call and a sort calls it n·log n times.
+ */
+let collator: Intl.Collator | undefined
+
+/**
  * Orders two cell values the way a person expects a column to sort: empties last, numbers and dates by magnitude,
  * everything else by a numeric-aware, case-insensitive locale compare so `item 2` comes before `item 10`.
  */
@@ -29,7 +35,8 @@ export function defaultCompare(a: unknown, b: unknown): number {
   if (typeof a === 'number' && typeof b === 'number') return a - b
   if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b)
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime()
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+  collator ??= new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+  return collator.compare(String(a), String(b))
 }
 
 /** `name:asc` ⇄ `SortEntry`, so a single-key sort can be set from markup. */

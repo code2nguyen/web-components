@@ -329,6 +329,11 @@ function luminance(color: string): number | undefined {
  */
 @customElement('c2-heatmap-chart')
 export class HeatmapChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(heatmapStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['custom']

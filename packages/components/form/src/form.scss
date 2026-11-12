@@ -48,10 +48,6 @@
   background: css.cssVar(summary--background);
   color: css.cssVar(summary--color);
 
-  &:focus {
-    outline: none;
-  }
-
   &:focus-visible {
     outline: css.cssVar(summary__focus--outline);
     outline-offset: 2px;

@@ -15,6 +15,7 @@ import styles from './tree-select.scss?inline'
 
 import '@c2n/overlay'
 import '@c2n/tree'
+import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 
 /** Which of the ticked rows `value` holds when checkboxes propagate through the tree. */
 export type TreeSelectValueDisplay = 'parent' | 'leaves' | 'all'
@@ -338,7 +339,7 @@ export class TreeSelect extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -678,6 +679,8 @@ export class TreeSelect extends LitElement {
   }
 
   private handleSearchKeydown(event: KeyboardEvent) {
+    // Enter that confirms an IME candidate must not pick the first match.
+    if (isComposingKey(event)) return
     if (event.key === 'ArrowDown') {
       event.preventDefault()
       const first = this.tree?.visibleItems.find((row) => !row.disabled)

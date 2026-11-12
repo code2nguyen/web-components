@@ -210,6 +210,11 @@ const SET_SERIES = 2
  */
 @customElement('c2-overlap-chart')
 export class OverlapChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(overlapStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['custom']
@@ -552,7 +557,6 @@ export class OverlapChart extends EchartsChartBase {
     // The plot is the chart's one tab stop. It is inside the shadow root, so nothing is written on the host.
     plot.tabIndex = 0
     plot.setAttribute('role', 'group')
-    plot.setAttribute('aria-roledescription', 'Venn diagram')
     plot.addEventListener('keydown', this.#handleKeydown)
     plot.addEventListener('blur', this.#handleBlur)
     plot.addEventListener('click', this.#handlePlotClick)
@@ -562,8 +566,11 @@ export class OverlapChart extends EchartsChartBase {
     super.updated(changed)
     this.#renderAccessibleSummary()
     const model = this.#computeModel()
-    const label = model ? `Venn diagram of ${model.sets.map((set) => set.label).join(', ')}` : 'Venn diagram'
+    const label = model ? this.chartMsg.t('vennSummary', model.sets.map((set) => set.label).join(', ')) : this.chartMsg.t('vennDiagram')
     if (this.plotElement?.getAttribute('aria-label') !== label) this.plotElement?.setAttribute('aria-label', label)
+    const roleDescription = this.chartMsg.t('vennDiagram')
+    if (this.plotElement && this.plotElement.getAttribute('aria-roledescription') !== roleDescription)
+      this.plotElement.setAttribute('aria-roledescription', roleDescription)
   }
 
   /**

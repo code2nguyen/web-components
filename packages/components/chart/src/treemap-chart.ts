@@ -85,6 +85,11 @@ const HEADER_PADDING = 8
  */
 @customElement('c2-treemap-chart')
 export class TreemapChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(treemapStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['treemap']

@@ -29,6 +29,7 @@
 
 /* The drawing surface: the whole viewport, in the top layer, under nothing and above everything, never in the way. */
 .stage {
+  // modern-web-ignore: fixed-overlay-z-index the canvas is already popover="manual" (shown with showPopover); fixed positioning is the no-popover fallback and the UA's own popover inset
   position: fixed;
   inset: 0;
   width: 100vw;

@@ -367,7 +367,8 @@ interface Collected extends HeatmapCategory {
   seen: number
 }
 
-const compareText = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+// One collator for every comparison: `localeCompare` with options builds a new one per call.
+const compareText = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' }).compare
 
 /** Orders the categories of one axis. `totals` holds each key's aggregate, for the value orders. */
 export function orderCategories<T extends HeatmapCategory & { sort?: number; seen?: number }>(

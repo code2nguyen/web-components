@@ -68,6 +68,7 @@
 .panel {
   --_handle: #{css.cssVar(handle--size)};
 
+  // modern-web-ignore: fixed-overlay-z-index non-modal panels raise each other through z-index + --_stack (bring to front); a modal should cover them, and the top layer would fix their order to the order shown
   position: fixed;
   inset: css.cssVar(inset);
   z-index: calc(#{css.cssVar(z-index)} + var(--_stack, 0));

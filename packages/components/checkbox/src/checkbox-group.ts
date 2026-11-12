@@ -3,7 +3,7 @@ import { state } from 'lit/decorators.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 // Registers `c2-checkbox` so consumers of the group alone get the option element too (same pattern as radio-group).
@@ -138,7 +138,7 @@ export class CheckboxGroup extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -219,7 +219,9 @@ export class CheckboxGroup extends LitElement {
     const missing = this.required && this.value.length === 0
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
     const message = this.customValidityMessage || (missing ? this.msg.t('groupValueMissing') : '')
-    this.internals.setValidity(flags, message)
+    // Anchor the validation bubble on the first enabled option's own input, when it has rendered one.
+    const anchor = this.checkboxes.find((checkbox) => !checkbox.disabled)?.shadowRoot?.querySelector('input') ?? undefined
+    this.internals.setValidity(flags, message, anchor)
   }
 
   private get effectiveDisabled() {

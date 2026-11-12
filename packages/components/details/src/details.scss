@@ -180,9 +180,18 @@ summary {
   transition-timing-function: animation.$standard-easing;
 }
 
-// WebKit does not consistently apply the native closed-details rendering rule to slotted shadow content.
-.c2-details:not([open]) > .c2-details-content {
-  display: none;
+// Closed content is skipped with `content-visibility: hidden`, never `display: none`: it is hidden from sight and from
+// the accessibility tree, yet find-in-page can still match it and open the panel (which fires `toggle`). Browsers with
+// `::details-content` do this in their UA stylesheet; it is restated here because WebKit did not consistently apply
+// the closed-details rule to slotted shadow content. Older engines get the same property on the content wrapper.
+.c2-details:not([open])::details-content {
+  content-visibility: hidden;
+}
+
+@supports not selector(::details-content) {
+  .c2-details:not([open]) > .c2-details-content {
+    content-visibility: hidden;
+  }
 }
 
 .c2-details-body {

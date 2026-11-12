@@ -174,6 +174,11 @@ function arcPath(cx: number, cy: number, arc: SunburstArc): string {
  */
 @customElement('c2-sunburst-chart')
 export class SunburstChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(sunburstStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['sunburst']

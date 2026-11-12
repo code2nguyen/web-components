@@ -41,3 +41,19 @@ test('responsive mode collapses on phone and restores desktop preference', async
   await page.setViewportSize({ width: 1400, height: 900 })
   await expect(page.locator('c2-side-nav')).toHaveJSProperty('opened', true)
 })
+
+// Inside a dialog the drawer is the innermost layer: Escape closes it, and only it. The enclosing dialog is a layer
+// outside the drawer host, so it does not count as a nested layer that owns the key.
+test('Escape in a drawer inside an open modal closes the drawer and leaves the modal open', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-modal label="Settings" open>${markup}</c2-modal>`)
+  const host = page.locator('c2-side-nav')
+  const modal = page.locator('c2-modal')
+  await page.getByRole('button', { name: 'Open navigation' }).click()
+  await expect(host).toHaveJSProperty('opened', true)
+  await page.getByRole('button', { name: 'Drawer action' }).focus()
+
+  await page.keyboard.press('Escape')
+  await expect(host).toHaveJSProperty('opened', false)
+  await expect(modal).toHaveJSProperty('open', true)
+  expect(await modal.evaluate((el) => el.shadowRoot!.querySelector('dialog')!.matches(':modal'))).toBe(true)
+})

@@ -1,1 +1,4 @@
-{}
+{
+  "image/*/light/console": "The Fallback card loads a missing image on purpose to show the fallback; the 404 is the point of the card.",
+  "image/*/dark/console": "The Fallback card loads a missing image on purpose to show the fallback; the 404 is the point of the card."
+}

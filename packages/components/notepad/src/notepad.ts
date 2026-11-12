@@ -1,10 +1,10 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, render, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { Fragment, Slice, type Mark, type MarkType, type Node as ProseNode } from 'prosemirror-model'
@@ -166,7 +166,16 @@ const STICKY_TILT_MAX = 4
 const HOVER_OPEN_DELAY = 150
 const HOVER_CLOSE_DELAY = 250
 
-const BOX = `<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 4.2c4.6-.6 10-.5 15 .2.6 4.5.5 9.6-.2 14.2-4.8.5-9.9.6-14.6.1-.6-4.7-.6-9.7-.2-14.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="tick" d="M5.5 11.5l4 4.2L19 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const BOX = html`<svg viewBox="0 0 22 22" aria-hidden="true">
+  <path
+    d="M3.5 4.2c4.6-.6 10-.5 15 .2.6 4.5.5 9.6-.2 14.2-4.8.5-9.9.6-14.6.1-.6-4.7-.6-9.7-.2-14.5z"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+  />
+  <path class="tick" d="M5.5 11.5l4 4.2L19 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
 
 const textLength = (doc: ProseNode) => doc.textContent.length
 
@@ -211,8 +220,8 @@ class TaskView implements NodeView {
     this.box.contentEditable = 'false'
     this.box.setAttribute('role', 'checkbox')
     this.box.setAttribute('aria-label', label)
-    // The SVG is a static Lit template; render its markup once.
-    this.box.innerHTML = BOX
+    // The SVG is a static Lit template, rendered by Lit rather than an HTML string sink (Trusted Types).
+    render(BOX, this.box)
     this.box.addEventListener('mousedown', (event) => event.preventDefault())
     this.box.addEventListener('click', (event) => {
       event.preventDefault()
@@ -582,7 +591,7 @@ export class Notepad extends LitElement {
     this.reset()
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(restored: string | File | FormData | null) {
     if (typeof restored === 'string') this.value = restored
@@ -1164,6 +1173,7 @@ export class Notepad extends LitElement {
       return
     }
     const trigger = active?.classList.contains('trigger') ? (active.closest<HTMLElement>('.group')?.dataset.group as 'ink' | 'highlight') : null
+    // modern-web-ignore: ime-enter the toolbar handler only sees keys on its buttons (a colour trigger here), never the text surface
     if (trigger && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
       stop()
       this.openFlyout(trigger)

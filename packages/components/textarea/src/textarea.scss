@@ -1,3 +1,4 @@
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-textarea,
   $theme: (
@@ -58,9 +59,11 @@ textarea {
   &:hover:not(:disabled) {
     border: css.cssVar(container__hover--border);
   }
-  &:focus {
+  // A textarea matches :focus-visible on every focus, pointer included.
+  &:focus-visible {
     border: css.cssVar(container__focus--border);
     outline: css.cssVar(container__focus--outline);
+    @include focus.forced-colors-ring;
   }
   &:read-only {
     background: css.cssVar(container__read-only--background);
@@ -84,8 +87,9 @@ textarea {
   textarea {
     border: css.cssVar(container__error--border);
   }
-  textarea:focus {
+  textarea:focus-visible {
     outline: css.cssVar(container__error__focus--outline);
+    @include focus.forced-colors-ring;
   }
   .supporting-text {
     color: css.cssVar(supporting-text__error--color);

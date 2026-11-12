@@ -304,8 +304,10 @@ export class FormField extends LitElement {
       control.addEventListener('focusin', this.handleFocusIn)
       control.addEventListener('focusout', this.handleFocusOut)
       control.addEventListener('invalid', this.handleInvalid)
-      // A custom element that has not upgraded yet announces itself when it does: only warn about a settled one.
-      const pending = control.localName.includes('-') && !customElements.get(control.localName)
+      // A custom element that has not upgraded yet announces itself when it does: only warn about a settled one. Ask the
+      // instance (`:defined`), not the registry: markup inserted in one go connects this field before its child is
+      // upgraded, while the definition already exists.
+      const pending = control.localName.includes('-') && !control.matches(':defined')
       if (!this.consumer && !pending && !warnedNative && (this.label || this.hint)) {
         warnedNative = true
         console.warn(

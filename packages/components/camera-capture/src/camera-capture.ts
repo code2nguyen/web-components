@@ -3,6 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { CameraController, cameraErrorKind, browserCameraSource, type CameraErrorKind, type CameraFacing, type CameraStreamSource } from './camera'
 import { analyzeFrame, assessFrame as builtInAssessor, luma, type CameraFrameAssessor, type CameraQualityHint } from './frame-analysis'
@@ -312,6 +313,9 @@ export class CameraCapture extends LitElement {
 
   /** Opens the camera. Does nothing while it is open or opening, under review or finished. */
   async start(): Promise<void> {
+    // Called as soon as the element is defined, a server-rendered element has not hydrated yet: a state change before
+    // that first update would render something other than the server's markup (a Lit hydration mismatch).
+    if (!this.hasUpdated) await this.updateComplete
     if (this._status !== 'idle' && this._status !== 'error') return
     await this.open(this.shot().facing)
   }
@@ -814,14 +818,19 @@ export class CameraCapture extends LitElement {
   }
 
   /** True when the app put content in the named slot: the built-in default is then not drawn at all. */
+  /**
+   * Which screens the author replaced. A server cannot read the light DOM and draws every default, so a server-rendered
+   * element keeps the defaults through hydration (a different first render is a Lit hydration mismatch) and drops them
+   * right after; a client-created one reads its children before the first render.
+   */
+  private readonly screens = new SlotPresenceController(this, ['idle', 'error', 'done'])
+
   private slotted(name: string): boolean {
-    // On a server there is no light DOM to read; the default is drawn and replaced on the client.
-    if (typeof this.querySelector !== 'function') return false
-    return [...this.children].some((child) => child.getAttribute('slot') === name)
+    return this.screens.state(name) === 'present'
   }
 
   /** Redraws when content enters or leaves a slot, so the default shows exactly while the slot is empty. */
-  private readonly handleSlotChange = () => this.requestUpdate()
+  private readonly handleSlotChange = (event: Event) => this.screens.handleSlotChange(event)
 
   private renderControls() {
     const status = this._status

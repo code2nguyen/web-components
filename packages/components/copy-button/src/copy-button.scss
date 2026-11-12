@@ -46,13 +46,15 @@
   display: none;
 }
 
-// Pinned: an absolutely positioned corner button. `--_scroll-*` is written by the element on every scroll of the
+// Pinned: an absolutely positioned corner button. `--_scroll-*` is written on the inner button on every scroll of the
 // container, cancelling out the offset so the button stays against the visible box instead of scrolling away with
 // the content (the whole point: long or wide text is exactly when you need the button).
 :host([pin]) {
   position: absolute;
   top: css.cssVar(pin--offset-y);
   right: css.cssVar(pin--offset-x);
+}
+:host([pin]) .c2-copy-button {
   transform: translate(var(--_c2-copy-button-scroll-x, 0px), var(--_c2-copy-button-scroll-y, 0px));
 }
 :host([pin='top-left']) {

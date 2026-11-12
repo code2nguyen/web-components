@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-spreadsheet,
@@ -191,8 +192,11 @@ button.fx {
   font-family: css.cssVar(formula-bar--font-family);
   font-size: 13px;
 
-  &:focus {
+  // A text field matches :focus-visible on a click too, so the underline still shows whenever it is being typed in.
+  &:focus-visible {
     box-shadow: inset 0 -2px 0 css.cssVar(header__selected--color);
+    // The underline is a shadow, which forced colors drop: draw a real ring there.
+    @include focus.forced-colors-ring(2px, -2px);
   }
 
   &[readonly] {

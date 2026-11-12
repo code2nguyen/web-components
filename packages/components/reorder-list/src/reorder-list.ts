@@ -7,6 +7,8 @@ import { classMap } from 'lit/directives/class-map.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { animate, type Options as MotionOptions } from '@lit-labs/motion'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { reorderListMessages } from './messages'
 import styles from './reorder-list.scss?inline'
 
 export type ReorderInputMethod = 'mouse' | 'touch' | 'pen' | 'keyboard'
@@ -236,6 +238,7 @@ export class ReorderList extends LitElement {
 
   private readonly assignmentIds = new WeakMap<HTMLElement, string>()
   private assignmentCounter = 0
+  private readonly msg = new LocalizeController(this, reorderListMessages)
   private readonly instructionsId = `c2-reorder-list-instructions-${++componentId}`
   private readonly swipeInstructionsId = `c2-reorder-list-swipe-instructions-${componentId}`
   private childListObserver?: MutationObserver
@@ -273,7 +276,7 @@ export class ReorderList extends LitElement {
   }
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
-    if (changedProperties.has('editable') && !this.editable && this.session) this.cancelSession('Reordering canceled because editing is no longer available.')
+    if (changedProperties.has('editable') && !this.editable && this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
   }
 
   protected override updated(changedProperties: PropertyValues<this>): void {
@@ -291,9 +294,7 @@ export class ReorderList extends LitElement {
     const activeLabel = this.session ? this.getItemLabel(this.session.item) : ''
 
     return html`
-      <p id=${this.instructionsId} class="visually-hidden">
-        Press Space to pick up an item. Use Arrow keys, Home, or End to move it; Space drops and Escape cancels.
-      </p>
+      <p id=${this.instructionsId} class="visually-hidden">${this.msg.t('instructions')}</p>
       ${this.swipeable && this.swipeShortcutText ? html`<p id=${this.swipeInstructionsId} class="visually-hidden">${this.swipeShortcutText}</p>` : nothing}
       <div
         part="container"
@@ -435,7 +436,7 @@ export class ReorderList extends LitElement {
       this.requestUpdate()
       const activeItem = this.session?.item ?? null
       const previousIndex = activeItem ? (this.session?.candidateIndex ?? 0) : 0
-      if (this.session) this.cancelSession('Items changed. Reordering canceled.')
+      if (this.session) this.cancelSession(this.msg.t('canceledItemsChanged'))
       // The item whose wrapper has focus: its wrapper is still rendered here, even when the item itself was removed
       // or moved into a special slot, so the next render would drop focus to the document without this.
       const previousOrder = this.visualOrder
@@ -526,7 +527,7 @@ export class ReorderList extends LitElement {
   private readonly handleDocumentKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== 'Escape' || (this.session?.phase !== 'armed-pointer' && this.session?.phase !== 'dragging-pointer')) return
     event.preventDefault()
-    this.cancelSession('Reordering canceled. The item returned to its original position.')
+    this.cancelSession(this.msg.t('canceled'))
   }
 
   private handlePointerMove(event: PointerEvent): void {
@@ -560,7 +561,7 @@ export class ReorderList extends LitElement {
       }
       const itemRect = this.getWrapperForItem(session.item)?.getBoundingClientRect()
       if (!itemRect || itemRect.width <= 0 || itemRect.height <= 0) {
-        this.cancelSession('Reordering canceled because the item is not visible.')
+        this.cancelSession(this.msg.t('canceledItemHidden'))
         return
       }
       session.phase = 'dragging-pointer'
@@ -598,7 +599,7 @@ export class ReorderList extends LitElement {
       const rect = this.containerElement?.getBoundingClientRect()
       const inside = !!rect && event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom
       if (inside) this.commitSession()
-      else this.cancelSession('Reordering canceled. The item returned to its original position.')
+      else this.cancelSession(this.msg.t('canceled'))
       return
     }
     this.finishSession()
@@ -612,7 +613,7 @@ export class ReorderList extends LitElement {
       if (this.swipeState?.item === item) this.closeSwipe()
       return
     }
-    this.cancelSession('Reordering canceled. The item returned to its original position.')
+    this.cancelSession(this.msg.t('canceled'))
   }
 
   private handleLostPointerCapture(event: PointerEvent): void {
@@ -623,7 +624,7 @@ export class ReorderList extends LitElement {
       return
     }
     if (!this.releasingCapture && this.session?.phase === 'dragging-pointer' && this.session.pointerId === event.pointerId) {
-      this.cancelSession('Reordering canceled because pointer control was lost.')
+      this.cancelSession(this.msg.t('canceledPointerLost'))
     }
   }
 
@@ -685,7 +686,7 @@ export class ReorderList extends LitElement {
         candidateIndex: index,
       }
       this.observeSessionVisibility()
-      this.announcement = `${this.getItemLabel(item)} picked up, position ${index + 1} of ${this.visualOrder.length}. Use Arrow keys, Home, or End to move; Space drops and Escape cancels.`
+      this.announcement = this.msg.t('pickedUp', this.getItemLabel(item), index + 1, this.visualOrder.length)
       return
     }
     if (session.phase !== 'reordering-keyboard' || session.item !== item) return
@@ -697,7 +698,7 @@ export class ReorderList extends LitElement {
     }
     if (event.key === 'Escape') {
       event.preventDefault()
-      this.cancelSession(`${this.getItemLabel(item)} returned to position ${session.fromIndex + 1}.`)
+      this.cancelSession(this.msg.t('returned', this.getItemLabel(item), session.fromIndex + 1))
       this.pendingFocus = item
       return
     }
@@ -714,13 +715,13 @@ export class ReorderList extends LitElement {
 
     const boundedOrdinal = Math.max(0, Math.min(movable.length - 1, targetOrdinal))
     if (boundedOrdinal === currentOrdinal) {
-      this.announcement = `${this.getItemLabel(item)} is already at the ${currentOrdinal === 0 ? 'first' : 'last'} permitted position.`
+      this.announcement = this.msg.t(currentOrdinal === 0 ? 'atFirst' : 'atLast', this.getItemLabel(item))
       return
     }
     const nextOrder = this.orderAtMovableOrdinal(session.originalOrder, item, boundedOrdinal)
     session.candidateOrder = nextOrder
     session.candidateIndex = nextOrder.indexOf(item)
-    this.announcement = `${this.getItemLabel(item)} moved to position ${session.candidateIndex + 1} of ${nextOrder.length}.`
+    this.announcement = this.msg.t('moved', this.getItemLabel(item), session.candidateIndex + 1, nextOrder.length)
     this.pendingFocus = item
     this.requestUpdate()
   }
@@ -746,7 +747,7 @@ export class ReorderList extends LitElement {
 
   private get swipeShortcutText(): string {
     const keyed = this.swipeActionList.filter((action) => action.key)
-    return keyed.map((action) => `Press ${action.key} to ${action.label.toLowerCase()}.`).join(' ')
+    return keyed.map((action) => this.msg.t('swipeShortcut', action.key!, action.label)).join(' ')
   }
 
   private get isRtl(): boolean {
@@ -820,7 +821,7 @@ export class ReorderList extends LitElement {
       document.addEventListener('keydown', this.handleSwipeEscape)
     }
     const labels = this.actionsFor(this.sideOfOffset(offset)).map((action) => action.label)
-    this.announcement = `${this.getItemLabel(item)}: ${labels.join(', ')} available. Press Escape to close.`
+    this.announcement = this.msg.t('swipeOpen', this.getItemLabel(item), labels.join(', '))
   }
 
   private closeSwipe(): void {
@@ -884,10 +885,10 @@ export class ReorderList extends LitElement {
       const remaining = this.visualOrder.filter((candidate) => candidate !== item && this.isKeyboardItem(candidate))
       if (trigger === 'key') this.pendingFocus = remaining[Math.min(index, remaining.length - 1)] ?? 'host'
       item.remove()
-      this.announcement = `${label} deleted.`
+      this.announcement = this.msg.t('deleted', label)
       return
     }
-    this.announcement = `${action.label}: ${label}.`
+    this.announcement = this.msg.t('actionDone', action.label, label)
   }
 
   private orderAtMovableOrdinal(baseOrder: readonly HTMLElement[], item: HTMLElement, targetOrdinal: number): readonly HTMLElement[] {
@@ -918,7 +919,7 @@ export class ReorderList extends LitElement {
     const legacyOrder = this.getAuthoredItems().map((item) => session.candidateOrder.indexOf(item))
     const label = this.getItemLabel(session.item)
     this.finishSession()
-    this.announcement = `${label} moved from position ${detail.fromIndex + 1} to ${detail.toIndex + 1}.`
+    this.announcement = this.msg.t('dropped', label, detail.fromIndex + 1, detail.toIndex + 1)
     this.pendingFocus = detail.inputMethod === 'keyboard' ? detail.item.element : null
     this.dispatchEvent(new CustomEvent<ReorderEventDetail>('reorder', { bubbles: true, composed: true, detail }))
     this.dispatchEvent(new CustomEvent<number[]>('change', { bubbles: true, cancelable: true, detail: legacyOrder }))
@@ -964,7 +965,7 @@ export class ReorderList extends LitElement {
     if (!duplicate) return true
     const [key, elements] = duplicate
     const detail: ReorderErrorEventDetail = Object.freeze({ reason: 'duplicate-key', key, elements: Object.freeze([...elements]) })
-    this.announcement = `Reordering is unavailable because the item key ${key} is used more than once.`
+    this.announcement = this.msg.t('duplicateKey', key)
     this.dispatchEvent(new CustomEvent<ReorderErrorEventDetail>('reorder-error', { bubbles: true, composed: true, detail }))
     return false
   }
@@ -975,7 +976,7 @@ export class ReorderList extends LitElement {
   }
 
   private getItemLabel(item: HTMLElement): string {
-    return item.dataset.reorderLabel?.trim() || item.getAttribute('aria-label')?.trim() || item.textContent?.replace(/\s+/g, ' ').trim() || 'Item'
+    return item.dataset.reorderLabel?.trim() || item.getAttribute('aria-label')?.trim() || item.textContent?.replace(/\s+/g, ' ').trim() || this.msg.t('item')
   }
 
   private getAccessibleName(): string {
@@ -1046,6 +1047,7 @@ export class ReorderList extends LitElement {
     preview.style.left = `${x}px`
     preview.style.top = `${y}px`
     preview.style.width = this.placeholderSize.width
+    // modern-web-ignore: js-autosize the drag preview copies the dragged item's measured box, not a field fitting its text
     preview.style.height = this.placeholderSize.height
     // `position: fixed` is only viewport-relative while no ancestor contains it: a `transform`, `filter` or `contain`
     // ancestor (and, in Safari, a size container) moves the preview by its own offset. Measure and shift it back.
@@ -1158,6 +1160,7 @@ export class ReorderList extends LitElement {
         style.visibility !== 'collapse'
       )
     })
+    // modern-web-ignore: js-autosize reads whether the dragged item was collapsed to 0×0, no field is sized here
     const pointerItemExplicitlyZeroSized = session.phase === 'dragging-pointer' && session.item.style.width === '0px' && session.item.style.height === '0px'
     const sized = requiredSizedElements.every((element) => {
       if (!element?.isConnected) return false
@@ -1165,7 +1168,7 @@ export class ReorderList extends LitElement {
       return rect.width > 0 && rect.height > 0
     })
     if (visiblyStyled && sized && !pointerItemExplicitlyZeroSized) return true
-    this.cancelSession('Reordering canceled because the item or list is not visible.')
+    this.cancelSession(this.msg.t('canceledListHidden'))
     return false
   }
 

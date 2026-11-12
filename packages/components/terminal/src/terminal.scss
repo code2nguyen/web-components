@@ -127,6 +127,10 @@
 .block {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  // A long session keeps up to `max-lines` lines: blocks scrolled out of view skip layout and paint. `auto` remembers
+  // each block's height once drawn; one line is the estimate for a block never drawn.
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto css.cssVar(line-height);
 }
 
 .block.command {

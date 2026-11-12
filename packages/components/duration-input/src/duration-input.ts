@@ -6,7 +6,7 @@ import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { DURATION_UNITS, formatDurationText, parseDurationText, unitSeconds, type DurationFormat, type DurationUnit } from './duration.js'
@@ -252,7 +252,7 @@ export class DurationInput extends LitElement {
     this.error = false
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = secondsConverter.fromAttribute(state)

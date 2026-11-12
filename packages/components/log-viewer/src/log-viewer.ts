@@ -203,6 +203,8 @@ export class LogViewer extends LitElement {
   private copiedSource: number | null = null
   private hoveredSource: number | null = null
   private press?: { x: number; y: number }
+  /** Where the last pointer move was, to tell a real move from one a browser fires after a scroll. */
+  private pointer?: { x: number; y: number }
   private copyStatus = ''
   private copyVersion = 0
   private copyTimer?: ReturnType<typeof setTimeout>
@@ -1071,7 +1073,13 @@ export class LogViewer extends LitElement {
   }
 
   private onPointerMove(event: PointerEvent): void {
-    if (event.pointerType !== 'touch') this.revealCopy(event)
+    if (event.pointerType === 'touch') return
+    // WebKit fires a move at the same point when content scrolls under a still pointer: that is not the pointer moving,
+    // so the copy button a scroll hid stays hidden until it really does.
+    const last = this.pointer
+    this.pointer = { x: event.clientX, y: event.clientY }
+    if (last && last.x === event.clientX && last.y === event.clientY) return
+    this.revealCopy(event)
   }
 
   // Touch has no hover: a tap reveals that entry's copy button only, instead of showing one on every row.
@@ -1083,6 +1091,7 @@ export class LogViewer extends LitElement {
   private onPointerLeave(event: PointerEvent): void {
     // Touch fires pointerleave right after every tap; keep the tapped entry revealed until another tap or a scroll.
     if (event.pointerType === 'touch') return
+    this.pointer = undefined
     this.hoveredSource = null
     this.requestUpdate()
   }

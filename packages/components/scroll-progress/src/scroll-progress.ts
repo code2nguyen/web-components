@@ -135,11 +135,13 @@ export class ScrollProgress extends LitElement {
         return
       }
       this.scroller = scroller
+      // modern-web-ignore: scroll-listener-visual the progress is also the progressbar's ariaValueNow, which a scroll-driven animation cannot update
       scroller.addEventListener('scroll', this.schedule, { passive: true })
       this.resizeObserver?.observe(scroller)
       const content = scroller.firstElementChild
       if (content) this.resizeObserver?.observe(content)
     } else {
+      // modern-web-ignore: scroll-listener-visual same as above: the value feeds ariaValueNow
       window.addEventListener('scroll', this.schedule, { passive: true })
       window.addEventListener('resize', this.schedule, { passive: true })
       this.resizeObserver?.observe(document.documentElement)
