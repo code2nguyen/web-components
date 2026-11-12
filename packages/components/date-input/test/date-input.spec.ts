@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test'
 import { accessible, expect, props, slotPresenceMatrix, test, watch } from '../../../../tests/component-fixture'
 
 test('supporting-text presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
@@ -102,6 +103,9 @@ test('clicking the calendar icon survives showPicker() throwing', async ({ page,
   expect(errors).toEqual([])
 })
 
+/** The popover is open and has moved focus to a day, which it does a moment after it opens. */
+const focusInCalendar = (host: Locator) => expect.poll(() => host.evaluate((element) => element.shadowRoot!.activeElement?.localName)).toBe('c2-date-selector')
+
 const calendarField = (attributes = '', children = '') =>
   `<form><c2-date-input picker="calendar" name="due" aria-label="Due date" ${attributes}>${children}</c2-date-input></form><button id="after">After</button>`
 
@@ -184,17 +188,27 @@ test('Today and Clear set the value, Today respects the bounds, and slotted acti
 
   // A preset sets the value and closes the popover itself.
   await host.getByRole('button', { name: 'Open calendar' }).click()
+  await focusInCalendar(host)
   await expect(host.getByRole('button', { name: 'Clear' })).toBeDisabled()
   await page.locator('#preset').evaluate((button) => {
-    const field = button.closest('c2-date-input') as HTMLElement & { value: string; hideCalendar(): void }
-    button.addEventListener('click', () => {
-      field.value = '2031-01-08'
-      field.hideCalendar()
-    })
+    const field = button.closest('c2-date-input') as HTMLElement & { pick(value: string): void }
+    button.addEventListener('click', () => field.pick('2031-01-08'))
   })
-  await page.getByRole('button', { name: 'In a week' }).click()
+  await page.getByRole('button', { name: 'In a week' }).focus()
+  await page.keyboard.press('Enter')
   await expect(host.getByRole('dialog')).toBeHidden()
   await expect(host).toHaveJSProperty('value', '2031-01-08')
+  // A preset reports the change like a day does, and focus goes back to the field.
+  await expect(host).toHaveAttribute('data-events', '[null,null,null]')
+  await expect(host.locator('input')).toBeFocused()
+
+  // Escape with a slotted action focused returns to the field too.
+  await host.getByRole('button', { name: 'Open calendar' }).click()
+  await focusInCalendar(host)
+  await page.getByRole('button', { name: 'In a week' }).focus()
+  await page.keyboard.press('Escape')
+  await expect(host.getByRole('dialog')).toBeHidden()
+  await expect(host.locator('input')).toBeFocused()
 
   await props(host, { max: '2000-01-01' })
   await host.getByRole('button', { name: 'Open calendar' }).click()
@@ -222,4 +236,26 @@ test('the calendar speaks the field language', async ({ page, renderScenario }) 
   await expect(host.getByRole('button', { name: "Aujourd'hui" })).toBeVisible()
   await expect(host.getByRole('button', { name: 'Effacer' })).toBeVisible()
   await expect(host.getByRole('dialog').getByRole('gridcell', { name: /12 octobre 2026/ })).toBeFocused()
+})
+
+test('the popover is named by its form field, and a field taken out while open reopens on the first press', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-form-field label="Ship by"><c2-date-input picker="calendar" value="2026-10-12"></c2-date-input></c2-form-field>')
+  const host = page.locator('c2-date-input')
+  const opener = host.getByRole('button', { name: 'Open calendar' })
+  await opener.click()
+  await expect(host.getByRole('dialog', { name: 'Ship by' })).toBeVisible()
+
+  // Removing the field hides the popover without telling it.
+  await host.evaluate((element) => {
+    const parent = element.parentElement!
+    element.remove()
+    parent.append(element)
+  })
+  await expect(opener).toHaveAttribute('aria-expanded', 'false')
+  await opener.click()
+  await expect(host.getByRole('dialog', { name: 'Ship by' })).toBeVisible()
+
+  await host.evaluate((element: HTMLElement & { readOnly: boolean }) => (element.readOnly = true))
+  await expect(host.getByRole('dialog')).toBeHidden()
+  await expect(opener).toHaveAttribute('aria-expanded', 'false')
 })

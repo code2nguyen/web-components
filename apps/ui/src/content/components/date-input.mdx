@@ -72,8 +72,9 @@ as small as with the native picker. The popover is the `calendar` part and follo
 `--c2-date-input__calendar--*` variables; Today and Clear follow `--c2-date-input__calendar-action--*`, and their
 text is the `today` and `clear` messages.
 
-Presets are buttons of your own in the `calendar-actions` slot, beside Today and Clear. Set `value` from them and
-call `hideCalendar()`; `showCalendar()` opens the popover from script.
+Presets are buttons of your own in the `calendar-actions` slot, beside Today and Clear. Call `pick(date)` from them:
+it stores the date, fires `input` and `change` and closes the popover, as a day of the calendar does. `showCalendar()`
+and `hideCalendar()` open and close the popover from script.
 
 ```html tag=CodeBlock
 <c2-date-input id="due" picker="calendar" aria-label="Due date">
@@ -84,13 +85,14 @@ call `hideCalendar()`; `showCalendar()` opens the popover from script.
 ```ts tag=CodeBlock
 const due = document.querySelector<DateInput>('#due')!
 due.querySelector('[data-days]')!.addEventListener('click', (event) => {
-  due.value = isoDaysFromToday(Number((event.currentTarget as HTMLElement).dataset.days))
-  due.hideCalendar()
+  due.pick(isoDaysFromToday(Number((event.currentTarget as HTMLElement).dataset.days)))
 })
 ```
 
-On a phone a tap in the field still opens the browser's own picker, which suits a small screen; the calendar button
-opens the themed one.
+The field is still the browser's date input, so what the browser itself opens from it stays: on a phone a tap in the
+field opens the browser's picker, and so does a click in the field in Firefox. The calendar button and Alt+ArrowDown
+open the themed one. `step` is not drawn in the calendar: a day off the step can be picked and makes the field
+invalid, as a typed one does. If the calendar cannot be loaded, the button falls back to the browser's picker.
 
 ## Limiting the date range
 

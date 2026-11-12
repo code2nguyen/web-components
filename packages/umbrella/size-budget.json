@@ -1,5 +1,5 @@
 {
-  "lazy": 387590,
+  "lazy": 388024,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -89,7 +89,7 @@
     "countdown": 4389,
     "dashboard": 12021,
     "dashboard/dash-card": 6809,
-    "date-input": 3960,
+    "date-input": 4057,
     "date-selector": 5871,
     "date-strip": 5261,
     "date-time-picker": 29876,

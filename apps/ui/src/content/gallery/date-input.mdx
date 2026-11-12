@@ -96,15 +96,31 @@ Each treatment keeps the native date picker and changes only the public CSS vari
 <c2-date-input class="calendar-brand" picker="calendar" aria-label="Launch date" value="2026-09-15"></c2-date-input>
 ```
 
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .calendar-french {
+    width: 220px;
+  }
+</style>
+<div lang="fr">
+  <c2-date-input class="calendar-french" picker="calendar" aria-label="Date de livraison" value="2026-09-15"></c2-date-input>
+</div>
+```
+
 </GalleryGrid>
 
-The preset buttons set the value and close the popover:
+The preset buttons pick a date, which closes the popover and fires `input` and `change`:
 
 ```ts tag=CodeBlock
 field.querySelectorAll('[slot="calendar-actions"]').forEach((button) =>
-  button.addEventListener('click', () => {
-    field.value = isoDaysFromToday(Number(button.dataset.days))
-    field.hideCalendar()
-  }),
+  button.addEventListener('click', () => field.pick(isoDaysFromToday(Number(button.dataset.days)))),
 )
+```
+
+"In French" sits under `lang="fr"`: the month and the days follow the language by themselves, and Today and Clear show the translation the page registered.
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'date-input': { calendar: 'Calendrier', today: "Aujourd'hui", clear: 'Effacer' } } })
 ```

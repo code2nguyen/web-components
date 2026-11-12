@@ -34,7 +34,8 @@ export interface DateInput {
  * Picking a day stores it, fires `input` and `change` and closes the popover; Escape or a press outside closes it.
  * The date can still be typed in the field. The calendar and its popover are loaded the first time one opens, so a
  * field that never opens it stays as small as the native one. Buttons slotted into `calendar-actions` (presets
- * such as "In a week") sit beside Today and Clear; set `value` from them and call `hideCalendar()`.
+ * such as "In a week") sit beside Today and Clear; call `pick(date)` from them. `step` is not drawn in the calendar:
+ * a day off the step can be picked and makes the field invalid, as a typed one does.
  *
  * @tag c2-date-input
  *
@@ -171,6 +172,16 @@ export class DateInput extends LitElement {
     }
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    // Removing the field hides its popover without a `toggle`.
+    this.calendarOpen = false
+  }
+
+  protected override willUpdate() {
+    if (this.calendarOpen && (this.picker !== 'calendar' || this.effectiveDisabled || this.readOnly)) this.calendarOpen = false
+  }
+
   override focus(options?: FocusOptions) {
     this.input?.focus(options)
   }
@@ -183,37 +194,38 @@ export class DateInput extends LitElement {
   /** Opens the calendar popover of `picker="calendar"`, loading it first if this is the first time. */
   async showCalendar() {
     if (this.picker !== 'calendar' || this.effectiveDisabled || this.readOnly) return
-    if (!this.calendar) {
-      const { createCalendar } = await import('./calendar.js')
-      this.calendar ??= createCalendar(this, {
-        commit: (value) => void this.commitFromCalendar(value),
-        toggled: (open) => {
-          const wasOpen = this.calendarOpen
-          this.calendarOpen = open
-          if (open) void this.updateComplete.then(() => this.calendar?.focus())
-          // Back to the field, unless the popover closed because focus went elsewhere.
-          else if (wasOpen && (this.renderRoot as ShadowRoot).activeElement?.closest('.calendar')) this.input?.focus()
-        },
-      })
+    try {
+      this.calendar ??= (await import('./calendar.js')).createCalendar(this, (open) => (this.calendarOpen = open))
+    } catch {
+      // The calendar could not be loaded (offline, a deploy that replaced its file): the browser's picker is what is
+      // left, where it still opens without a fresh user gesture.
+      this.showNative()
+      return
     }
     this.calendarOpen = true
   }
 
-  /** Closes the calendar popover. */
+  /** Closes the calendar popover, and returns focus to the field when it was inside the popover. */
   hideCalendar() {
+    if (!this.calendarOpen) return
+    this.calendar?.returnFocus()
     this.calendarOpen = false
   }
 
-  private async commitFromCalendar(value: string) {
+  /**
+   * Chooses `value` (`YYYY-MM-DD`, or an empty string to clear) the way a day of the calendar does: stores it, fires
+   * `input` and `change` when it changed, and closes the popover. For a preset button in the `calendar-actions` slot.
+   */
+  pick(value: string) {
     const changed = value !== this.value
     this.value = value
-    this.input?.focus()
-    this.calendarOpen = false
+    this.hideCalendar()
     if (!changed) return
     // After the update, so the events report the value the field holds and its validity.
-    await this.updateComplete
-    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-    this.dispatchEvent(new Event('change', { bubbles: true }))
+    void this.updateComplete.then(() => {
+      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+      this.dispatchEvent(new Event('change', { bubbles: true }))
+    })
   }
 
   checkValidity() {
@@ -273,8 +285,11 @@ export class DateInput extends LitElement {
       return
     }
     input.focus()
+    this.showNative()
+  }
+  private showNative() {
     try {
-      input.showPicker()
+      this.input?.showPicker()
     } catch {
       // showPicker() throws in a cross-origin iframe and where the engine has no date picker for it; the focused
       // input still takes keyboard editing, and the browser's own affordances still open its picker.
@@ -367,7 +382,8 @@ export class DateInput extends LitElement {
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }
-      ${this.field.renderDescription()} ${this.picker === 'calendar' ? this.calendar?.render(this.calendarOpen, this.fieldElement) : nothing}
+      ${this.field.renderDescription()}
+      ${this.picker === 'calendar' ? this.calendar?.render(this.calendarOpen, this.fieldElement, this.ariaLabel || this.field.label || '') : nothing}
     `
   }
 }
