@@ -672,6 +672,34 @@ test('remembers the look and the tasks in localStorage', async ({ page, scenario
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('c2-todo-list:spec') ?? 'null').look)).toEqual({})
 })
 
+test('remembers the selected filter tab in localStorage', async ({ page, scenario }) => {
+  await scenario('persist')
+  const list = page.locator('c2-todo-list')
+  const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('c2-todo-list:spec') ?? 'null'))
+  expect(await stored()).toBeNull()
+
+  await list.locator('c2-tab', { hasText: 'Done' }).click()
+  await expect.poll(async () => (await stored()).filter).toBe('done')
+
+  await scenario('persist')
+  await expect(list.locator('c2-tabs')).toHaveAttribute('selected-tab', 'filter-done')
+  await expect(list.locator('#filter-done')).toHaveAttribute('slot', 'tab-content')
+  await expect(list.getByRole('checkbox', { name: 'Renew passport' })).toHaveCount(0)
+
+  // The default tab is not written, and a filter the component does not know is ignored.
+  await list.locator('c2-tab', { hasText: 'All' }).click()
+  await expect.poll(async () => 'filter' in (await stored())).toBe(false)
+  await page.evaluate(() => localStorage.setItem('c2-todo-list:spec', JSON.stringify({ look: {}, filter: 'nope' })))
+  await scenario('persist')
+  await expect(list.locator('c2-tabs')).toHaveAttribute('selected-tab', 'filter-all')
+
+  // Another key is another list: its own tab, not the one the previous key left selected.
+  await list.locator('c2-tab', { hasText: 'Done' }).click()
+  await page.evaluate(() => localStorage.setItem('c2-todo-list:other', JSON.stringify({ look: { progress: 'bar' } })))
+  await list.evaluate((element: HTMLElement & { storageKey: string }) => (element.storageKey = 'other'))
+  await expect(list.locator('c2-tabs')).toHaveAttribute('selected-tab', 'filter-all')
+})
+
 test('changes the list icon from the customize panel, and remembers it', async ({ page, scenario }) => {
   await scenario('persist')
   const list = page.locator('c2-todo-list')

@@ -36,7 +36,7 @@ Add `customizable` for a palette button. It opens a panel over the tasks, kept i
 from it), a colour **palette** (a dropdown of Classic, Soft, Earth and Ocean, each with six
 highlighters and five pens in a light and a dark variant), the done mark, the density
 and the progress style. Changes apply at once; the × button, Escape or a press elsewhere closes the panel. With a `storage-key` those choices are
-remembered in `localStorage`; `persist-tasks` remembers the tasks too.
+remembered in `localStorage`, along with the selected filter tab; `persist-tasks` remembers the tasks too.
 
 ## Import
 
@@ -301,4 +301,5 @@ text colour, and each palette's accent, pens and highlighters were checked
 against every background, plain and under every highlighter, in a light and a dark variant (a palette on the default
 background follows a dark theme too), so any combination stays legible at 4.5:1 or better. The look is applied inside the component, so it wins over the CSS variables the page sets, and
 **Reset** (or `resetLook()`) hands it back to the page and the theme. With `storage-key="this-week"` the look is
-stored under `c2-todo-list:this-week`; give every list its own key.
+stored under `c2-todo-list:this-week`, together with the filter tab the viewer left selected (All, To do or Done), so
+the list reopens on it; give every list its own key.

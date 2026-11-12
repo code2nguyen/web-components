@@ -11,7 +11,7 @@ Tasks can carry an optional icon from `@c2n/task-icons`, a highlighter backgroun
 With `customizable`, a palette button opens a panel over the tasks, kept in the window, that styles the whole list: the background (whose
 text colour follows from it), a colour palette (Classic, Soft, Earth or Ocean: its accent, highlighters and pens),
 the list's icon, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
-`localStorage`.
+`localStorage`, along with the selected filter tab.
 
 ```bash
 npm install @c2n/components
