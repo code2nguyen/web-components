@@ -198,6 +198,8 @@ export class Terminal extends LitElement {
    * write per frame, after layout, however many prints the frame had.
    */
   private atEnd = true
+  /** The screen's scroll position at the last scroll event, to tell a scroll up from the output growing below it. */
+  private lastScrollTop = 0
   private outputObserver?: ResizeObserver
 
   constructor() {
@@ -274,7 +276,12 @@ export class Terminal extends LitElement {
 
   private handleScroll = (): void => {
     const screen = this.screen
-    this.atEnd = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 24
+    const top = screen.scrollTop
+    // Only a scroll up lets go of the end. The scroll event for our own write can be measured after the output grew
+    // (WebKit lays out a block `content-visibility` skipped in the same frame), which reads as a gap but is not a move.
+    if (screen.scrollHeight - top - screen.clientHeight < 24) this.atEnd = true
+    else if (top < this.lastScrollTop) this.atEnd = false
+    this.lastScrollTop = top
   }
 
   protected override firstUpdated(): void {
