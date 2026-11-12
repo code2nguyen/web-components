@@ -1,7 +1,7 @@
 /** The c2n MCP server: tools and resources over the bundled registry. */
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { importPath, installedPackage, umbrellaInstalled, withInstalledApi } from './installed.ts'
+import { importPath, installedPackage, umbrellaInstalled, withInstalledApi, withInstalledComponents } from './installed.ts'
 import { generateCode, type CodeFormat } from './lib/generate-code.ts'
 import { formatFindings, validateMarkup } from './lib/validate.ts'
 import { loadRegistry, resolveElement, suggest } from './registry.ts'
@@ -111,6 +111,9 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     },
   )
 
+  // With the components only the project's installed `@c2n/components` knows: read on each call, as installs change.
+  const live = () => withInstalledComponents(registry)
+
   const formatSchema = z.enum(['markdown', 'json']).default('markdown').describe('Output format')
   const tagSchema = z
     .string()
@@ -135,7 +138,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     },
     ({ category, keyword, installedOnly, format }) => {
       const needle = keyword?.toLowerCase()
-      const components = Object.values(registry.components).filter(
+      const components = Object.values(live().components).filter(
         (c) =>
           (!category || c.category === category) &&
           (!needle || `${c.id} ${c.title} ${c.description} ${c.elements.map((e) => e.tag).join(' ')}`.toLowerCase().includes(needle)) &&
@@ -174,8 +177,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ tag, include, format }) => {
-      const resolved = resolveElement(registry, tag)
-      if (!resolved) return notFound(registry, tag)
+      const resolved = resolveElement(live(), tag)
+      if (!resolved) return notFound(live(), tag)
       const installed = installedPackage(resolved.component.package)
       if (format === 'json')
         return json({
@@ -205,7 +208,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ query, limit }) => {
-      const hits = searchComponents(registry, query, limit)
+      const hits = searchComponents(live(), query, limit)
       if (hits.length === 0) return text(`No component matches "${query}". Try \`list_components\`.`)
       return text(
         `${hits.length} result(s) for "${query}"\n\n` +
@@ -242,8 +245,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ tag, view, kind, label, section, query, limit, offset, format }) => {
-      const resolved = resolveElement(registry, tag)
-      if (!resolved) return notFound(registry, tag)
+      const resolved = resolveElement(live(), tag)
+      if (!resolved) return notFound(live(), tag)
       const needle = query?.toLowerCase()
       const all = resolved.component.examples.filter((e) => {
         const searchable =
@@ -285,8 +288,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ query, tag, limit }) => {
-      const resolved = tag ? resolveElement(registry, tag) : undefined
-      if (tag && !resolved) return notFound(registry, tag)
+      const resolved = tag ? resolveElement(live(), tag) : undefined
+      if (tag && !resolved) return notFound(live(), tag)
       const hits = searchExamples(registry, query, limit, resolved?.component)
       if (hits.length === 0) return text(`No gallery card matches "${query}". Try \`get_examples\` with \`view: "index"\` for one component.`)
       return text(
@@ -310,8 +313,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ tag, name, format }) => {
-      const resolved = resolveElement(registry, tag)
-      if (!resolved) return notFound(registry, tag)
+      const resolved = resolveElement(live(), tag)
+      if (!resolved) return notFound(live(), tag)
       if (format === 'json') return json(resolved.component.presets ?? null)
       return text(renderPresets(resolved.component, name))
     },
@@ -327,8 +330,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ tag, format }) => {
-      const resolved = tag ? resolveElement(registry, tag) : undefined
-      if (tag && !resolved) return notFound(registry, tag)
+      const resolved = tag ? resolveElement(live(), tag) : undefined
+      if (tag && !resolved) return notFound(live(), tag)
       if (format === 'json')
         return json(
           resolved
@@ -370,8 +373,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ tag, name, css, attributes, preset, example, html, format }) => {
-      const resolved = resolveElement(registry, tag)
-      if (!resolved) return notFound(registry, tag)
+      const resolved = resolveElement(live(), tag)
+      if (!resolved) return notFound(live(), tag)
       if (name.startsWith('c2-')) return { ...text('Variant names must not start with `c2-`; use your own prefix (app-, site-, my-).'), isError: true }
       const presetItem = preset ? resolved.component.presets?.items.find((p) => p.name.toLowerCase() === preset.toLowerCase()) : undefined
       if (preset && !presetItem)
@@ -496,7 +499,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           uri: uri.href,
           mimeType: 'application/json',
           text: JSON.stringify(
-            Object.values(registry.components).map((c) => ({
+            Object.values(live().components).map((c) => ({
               id: c.id,
               tags: c.elements.map((e) => e.tag),
               tagPattern: c.tagPattern,
@@ -515,11 +518,11 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
   server.registerResource(
     'component',
     new ResourceTemplate('c2n://components/{tag}', {
-      list: () => ({ resources: Object.keys(registry.tagIndex).map((tag) => ({ uri: `c2n://components/${tag}`, name: tag, mimeType: 'application/json' })) }),
+      list: () => ({ resources: Object.keys(live().tagIndex).map((tag) => ({ uri: `c2n://components/${tag}`, name: tag, mimeType: 'application/json' })) }),
     }),
     { title: 'c2n component', description: 'Full registry entry of one component (API, composition, presets, examples)', mimeType: 'application/json' },
     (uri, { tag }) => {
-      const resolved = resolveElement(registry, String(tag))
+      const resolved = resolveElement(live(), String(tag))
       if (!resolved) throw new Error(`Unknown component ${String(tag)}`)
       return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(resolved.component, null, 2) }] }
     },

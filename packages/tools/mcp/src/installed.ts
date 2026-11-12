@@ -5,7 +5,7 @@
  */
 import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { ElementEntry, Registry } from './registry-types.ts'
+import type { ComponentEntry, ElementEntry, Registry } from './registry-types.ts'
 
 /** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
@@ -23,6 +23,10 @@ export interface InstalledInfo {
    * one only those whose module path starts with the package's directory (`table/…`).
    */
   owned?: Set<string>
+  /** Per tag of `elements`, the manifest module declaring it (`meter/src/meter.js` in the umbrella's merged manifest) and its description. */
+  declared?: Map<string, { path: string; description: string }>
+  /** The package's export entries (`./meter`), as its `package.json` lists them. */
+  entries?: Set<string>
 }
 
 const TTL = 10_000
@@ -45,8 +49,8 @@ export function installedPackage(name: string): InstalledInfo | null {
     // The umbrella bundles the package, so its own package.json and merged manifest stand in for the package's.
     const pkgJsonPath = umbrella ? umbrella.path : findPackageJson(root, name)
     if (!pkgJsonPath) throw new Error(`${name} is not installed`)
-    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string }
-    info = { version: pkg.version }
+    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string; exports?: Record<string, unknown> }
+    info = { version: pkg.version, entries: new Set(Object.keys(pkg.exports ?? {})) }
     if (umbrella) info.via = { package: UMBRELLA, version: umbrella.version }
     if (pkg.customElements) {
       try {
@@ -56,6 +60,7 @@ export function installedPackage(name: string): InstalledInfo | null {
             declarations?: {
               tagName?: string
               name?: string
+              description?: string
               members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
               attributes?: unknown[]
               slots?: unknown[]
@@ -67,11 +72,13 @@ export function installedPackage(name: string): InstalledInfo | null {
         }
         const elements = new Map<string, InstalledElement>()
         const owned = new Set<string>()
+        const declared = new Map<string, { path: string; description: string }>()
         const directory = umbrella ? `${name.slice('@c2n/'.length)}/` : ''
         for (const mod of manifest.modules ?? []) {
           for (const decl of mod.declarations ?? []) {
             if (!decl.tagName) continue
             if ((mod.path ?? '').startsWith(directory)) owned.add(decl.tagName)
+            declared.set(decl.tagName, { path: mod.path ?? '', description: decl.description ?? '' })
             elements.set(decl.tagName, {
               className: decl.name ?? '',
               properties: publicProperties(decl.members),
@@ -85,6 +92,7 @@ export function installedPackage(name: string): InstalledInfo | null {
         }
         info.elements = elements
         info.owned = owned
+        info.declared = declared
       } catch {
         /* manifest unreadable: keep the bundled API */
       }
@@ -179,7 +187,83 @@ export function withInstalledApi(registry: Registry): Registry {
       return [id, { ...component, elements: elements.length ? elements : component.elements }]
     }),
   )
-  return { ...registry, components, tagIndex }
+  const packageIndex = { ...registry.packageIndex }
+  for (const component of newComponents(registry, tagIndex)) {
+    components[component.id] = component
+    packageIndex[component.package] = component.id
+    for (const element of component.elements) tagIndex[element.tag] = component.id
+  }
+  return { ...registry, components, tagIndex, packageIndex }
+}
+
+/**
+ * The registry plus the components only the project's installed `@c2n/components` knows (see `newComponents`), which
+ * is what the server's tools list, search and describe. The API of the components the registry does know is left
+ * alone: each tool reads the installed one where it needs it.
+ */
+export function withInstalledComponents(registry: Registry): Registry {
+  const added = newComponents(registry, registry.tagIndex)
+  if (added.length === 0) return registry
+  const components = { ...registry.components }
+  const tagIndex = { ...registry.tagIndex }
+  const packageIndex = { ...registry.packageIndex }
+  for (const component of added) {
+    components[component.id] = component
+    packageIndex[component.package] = component.id
+    for (const element of component.elements) tagIndex[element.tag] = component.id
+  }
+  return { ...registry, components, tagIndex, packageIndex }
+}
+
+/**
+ * The components the project's `@c2n/components` bundles and this server's registry has never heard of: a server
+ * older than the installed version (pinned in an MCP config, or cached by `npx`) would otherwise answer "Unknown
+ * component" for an element the project can use, and the check would flag it. Each is a directory of the umbrella's
+ * merged manifest with its own export entry (`meter/…` and `./meter`); it is served from the manifest alone, so with
+ * its whole API and without examples, presets or a docs page.
+ */
+function newComponents(registry: Registry, tagIndex: Record<string, string>): ComponentEntry[] {
+  const umbrella = umbrellaInstalled()
+  if (!umbrella?.elements || !umbrella.declared) return []
+  const byDirectory = new Map<string, string[]>()
+  for (const [tag, { path }] of umbrella.declared) {
+    const directory = path.split('/')[0]
+    if (!directory || !path.includes('/') || tagIndex[tag] || !umbrella.entries?.has(`./${directory}`)) continue
+    // A package the registry knows had its new tags placed above; an id already taken is some other page.
+    if (registry.packageIndex[`@c2n/${directory}`] || registry.components[directory]) continue
+    byDirectory.set(directory, [...(byDirectory.get(directory) ?? []), tag])
+  }
+  return [...byDirectory].map(([directory, tags]) => {
+    const entry = `${UMBRELLA}/${directory}`
+    // The element named after the package leads: it is the one the page would be about.
+    tags.sort((a, b) => Number(b === `c2-${directory}`) - Number(a === `c2-${directory}`))
+    const elements = tags.map((tag) => ({
+      ...(umbrella.elements?.get(tag) as InstalledElement),
+      tag,
+      modulePath: entry,
+      description: umbrella.declared?.get(tag)?.description ?? '',
+    }))
+    const note = `Bundled by the installed ${UMBRELLA} ${umbrella.version} and unknown to this server (${registry.c2nVersion}): the API below is read from the installed package, and there are no examples or presets for it. A @c2n/mcp of the installed version has them.`
+    return {
+      id: directory,
+      package: `@c2n/${directory}`,
+      title: directory.replace(/(^|-)([a-z])/g, (_, dash: string, letter: string) => `${dash ? ' ' : ''}${letter.toUpperCase()}`),
+      description: [note, elements[0].description].filter(Boolean).join('\n\n'),
+      category: 'Other',
+      status: 'undocumented' as const,
+      docsUrl: '',
+      elements,
+      composition: { internal: [], slotted: [], usedBy: [] },
+      install: {
+        npm: `npm install ${UMBRELLA}`,
+        import: `import '${entry}'`,
+        importClass: `import { ${elements[0].className} } from '${entry}'`,
+        umbrella: entry,
+      },
+      examples: [],
+      hasGallery: false,
+    }
+  })
 }
 
 /**
