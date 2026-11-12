@@ -990,13 +990,13 @@ test('cancels on active-item removal, emptying, and disconnect with surviving co
 test('tracks destinations through page and ancestor scroll, transforms, RTL, and live height changes', async ({ page, renderScenario }) => {
   await renderScenario(`
     <div style="height:320px"></div>
-    <div id="scroller" dir="rtl" style="height:210px;overflow-y:auto;transform:translateX(18px);margin:24px">
+    <div id="scroller" dir="rtl" style="height:360px;overflow-y:auto;transform:translateX(18px);margin:24px">
       <c2-reorder-list editable aria-label="Tasks">
         <div id="geo-0" style="height:52px">Zero</div>
         <div id="geo-1" style="height:74px">One</div>
         <div id="geo-2" style="height:46px">Two</div>
         <div id="geo-3" style="height:82px">Three</div>
-        <div id="geo-4" style="height:58px">Four</div>
+        <div id="geo-4" style="height:120px">Four</div>
       </c2-reorder-list>
     </div>
     <div style="height:400px"></div>
@@ -1006,6 +1006,11 @@ test('tracks destinations through page and ancestor scroll, transforms, RTL, and
     document.querySelector<HTMLElement>('#scroller')!.scrollTop = 24
   })
   await startPointerDrag(page, '#geo-0')
+  // The grab point sits in the scroller's top edge zone, so it auto-scrolls to the start: measure once that settled.
+  // The drop point below stays inside the scroller and out of its bottom edge zone, so nothing scrolls under the
+  // pointer between the move and the release, however slow the runner.
+  const scroller = page.locator('#scroller')
+  await expect.poll(() => scroller.evaluate((element) => element.scrollTop)).toBe(0)
   await page.locator('#geo-2').evaluate((element) => (element.style.height = '96px'))
   const destination = await page.locator('#geo-3').boundingBox()
   if (!destination) throw new Error('Missing transformed destination geometry')
