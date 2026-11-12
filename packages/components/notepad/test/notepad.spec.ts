@@ -38,6 +38,77 @@ test('typing writes Markdown into value and fires input, then change on blur', a
   await expect(host).toHaveAttribute('data-events', '[null]')
 })
 
+test('a web address written on the page is a link that opens in a new tab', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  // Records what would open, and keeps the test from opening tabs.
+  await page.evaluate(() => {
+    const opened: string[] = []
+    Object.assign(window, { opened, open: (url: string, target: string, features: string) => void opened.push(`${url} ${target} ${features}`) })
+  })
+  const opened = () => page.evaluate(() => (window as unknown as { opened: string[] }).opened)
+
+  await surface(page).click()
+  await page.keyboard.type('Read https://example.com/guide?page=2 (or www.example.org), then **http://localhost:5173/a**. Not awww.nope.com')
+  const links = surface(page).locator('a.link')
+  await expect(links).toHaveText(['https://example.com/guide?page=2', 'www.example.org', 'http://localhost:5173/a'])
+  await expect(links.nth(1)).toHaveAttribute('href', 'https://www.example.org/')
+  await expect(links.nth(0)).toHaveAttribute('rel', 'noopener noreferrer')
+  // The address stays plain text in the value.
+  await expect(host).toHaveJSProperty(
+    'value',
+    'Read https://example.com/guide?page=2 (or www.example.org), then **http://localhost:5173/a**. Not awww.nope.com',
+  )
+
+  await watch(host, 'link-open')
+  await links.nth(0).click()
+  await expect(host).toHaveAttribute('data-events', '[{"href":"https://example.com/guide?page=2"}]')
+  expect(await opened()).toEqual(['https://example.com/guide?page=2 _blank noopener,noreferrer'])
+
+  // Alt+Enter opens the link the caret is in.
+  await page.keyboard.press('Alt+Enter')
+  expect(await opened()).toHaveLength(2)
+
+  // A read-only page still opens its links, once.
+  await host.evaluate((element: HTMLElement & { readOnly: boolean }) => (element.readOnly = true))
+  await links.nth(2).click()
+  expect(await opened()).toEqual([
+    'https://example.com/guide?page=2 _blank noopener,noreferrer',
+    'https://example.com/guide?page=2 _blank noopener,noreferrer',
+    'http://localhost:5173/a _blank noopener,noreferrer',
+  ])
+
+  // A click that selects text (the second of a double click) and a click with Shift are not left to the browser,
+  // which would open a tab of its own past `link-open`.
+  await links.nth(2).dblclick()
+  await links.nth(2).click({ modifiers: ['Shift'] })
+  expect(page.context().pages()).toHaveLength(1)
+  const before = (await opened()).length
+
+  // A cancelled `link-open` opens nothing.
+  await host.evaluate((element) => element.addEventListener('link-open', (event) => event.preventDefault()))
+  await links.nth(1).click()
+  await links.nth(1).click({ button: 'middle' })
+  expect(await opened()).toHaveLength(before)
+  expect(page.context().pages()).toHaveLength(1)
+})
+
+test('an address ends where the writing goes on, and a disabled page has nothing to open', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-notepad label="Notes" value="https://example.com/reset?token=YWJjZA== and (https://example.com/a_(b)).\n见https://example.com/页。然后继续写"></c2-notepad>',
+  )
+  const host = page.locator('c2-notepad')
+  const links = page.locator('c2-notepad a.link')
+  await expect(links).toHaveText(['https://example.com/reset?token=YWJjZA==', 'https://example.com/a_(b)', 'https://example.com/页'])
+  await expect(links.nth(0)).toHaveAttribute('draggable', 'false')
+
+  await host.evaluate((element: HTMLElement & { disabled: boolean }) => (element.disabled = true))
+  await expect(links).toHaveCount(3)
+  await expect(page.locator('c2-notepad a.link[href]')).toHaveCount(0)
+  await host.evaluate((element: HTMLElement & { disabled: boolean }) => (element.disabled = false))
+  await expect(page.locator('c2-notepad a.link[href]')).toHaveCount(3)
+})
+
 test('selecting text opens the tape toolbar, which formats the selection', async ({ page, renderScenario }) => {
   await renderScenario('<c2-notepad label="Notes"></c2-notepad>')
   const host = page.locator('c2-notepad')

@@ -19,6 +19,7 @@ import { HIGHLIGHTS, INKS, MARK_NAMES, colorIndex, emptyFormat, formatOf, schema
 import { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
 import { imageFiles, readPastedHtml, type ImageResolver, type ImageUploader } from '@c2n/core/image-helper.js'
 import { adoptPastedImages, copySelectedImage, ImageView, insertImages, resizeSelectedImage, savedImages, type ImageHost } from './images'
+import { linkAtCaret, links } from './links'
 import { notepadMessages } from './messages'
 import styles from './notepad.scss?inline'
 
@@ -63,6 +64,11 @@ export interface NotepadPaperChangeEventDetail {
   paperColor: NotepadPaperColor
 }
 
+export interface NotepadLinkOpenEventDetail {
+  /** The address about to open, as the browser reads it (`www.example.com` is `https://www.example.com/`). */
+  href: string
+}
+
 /** Events fired by {@link Notepad}, keyed for `addEventListener`. */
 export interface NotepadEventMap {
   input: Event
@@ -72,6 +78,7 @@ export interface NotepadEventMap {
   'page-tear': CustomEvent<NotepadPageTearEventDetail>
   'paper-change': CustomEvent<NotepadPaperChangeEventDetail>
   'image-error': CustomEvent<{ error: unknown }>
+  'link-open': CustomEvent<NotepadLinkOpenEventDetail>
 }
 
 export interface Notepad {
@@ -276,6 +283,10 @@ class TaskView implements NodeView {
  * its edge: drag it to resize the image (double-click it for the natural size), or use Alt+ArrowLeft and
  * Alt+ArrowRight. Copying a selected image puts the image itself on the clipboard.
  *
+ * A web address written on the page (`https://…`, `http://…` or `www.…`) is drawn as a link: a click, or Alt+Enter
+ * with the caret in it, opens it in a new tab, on a read-only page too. It stays plain text in the value. `link-open`
+ * fires first; cancel it to open the address your own way.
+ *
  * The handwriting face is Patrick Hand (SIL Open Font License 1.1), bundled and registered with `document.fonts`
  * only when the writing surface uses it.
  *
@@ -291,6 +302,7 @@ class TaskView implements NodeView {
  * @event {CustomEvent<NotepadPageTearEventDetail>} page-tear - Fired before a page is torn off; cancel it to keep the page. Does not bubble.
  * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another pad, ruling or paper colour in the paper picker. Does not bubble.
  * @event {CustomEvent<{ error: unknown }>} image-error - A pasted or dropped image could not be saved: `imageUpload` rejected. Its image is removed, but a pasted web image keeps its address. Does not bubble.
+ * @event {CustomEvent<NotepadLinkOpenEventDetail>} link-open - Fired before a web address written on the page opens in a new tab; cancel it to keep the tab closed and open `detail.href` yourself. Does not bubble.
  * @csspart sheet - The paper sheet.
  * @csspart writing - The editable writing surface.
  * @csspart toolbar - The selection formatting toolbar.
@@ -331,6 +343,8 @@ class TaskView implements NodeView {
  * @cssproperty {pixel} [--c2-notepad__pad--padding-bottom=0px] - Space under the sheet. A `tearable` pad sets it to 8px, where the sheets underneath show; set it to 0 with `--c2-notepad__stack--display: none`.
  * @cssproperty {display} [--c2-notepad__stack--display=block] - Sheets drawn under the page of a `tearable` pad; none to show the page alone.
  * @cssproperty {opacity} [--c2-notepad__controls--opacity=1] - Opacity of the "Paper" button, the "Tear off" button and the `actions` slot while the notepad is neither hovered nor focused. Set it to 0 to show them only on the note being pointed at or written in (on a touch screen, once the writer taps into it), and while the paper picker is open.
+ * @cssproperty {color} [--c2-notepad__link--color=inherit] - Colour of a web address written on the page. Unset, the ink it is written in.
+ * @cssproperty {text-decoration} [--c2-notepad__link--text-decoration=underline dotted] - Line that marks a web address as a link.
  * @cssproperty {color} [--c2-notepad__ink-blue--color=#2848b8]
  * @cssproperty {color} [--c2-notepad__ink-black--color=#18181b]
  * @cssproperty {color} [--c2-notepad__ink-red--color=#b8232b]
@@ -522,6 +536,32 @@ export class Notepad extends LitElement {
     return new Set(listed.length ? listed : MARK_NAMES)
   }
 
+  /**
+   * A click on a web address opens it: the main button, or the middle one. A click that ends a text selection (a
+   * drag, a double click) opens nothing, and no click is left to the browser.
+   */
+  private handleLinkClick(view: EditorView, event: MouseEvent): boolean {
+    const link = (event.target as Element | null)?.closest?.('a.link[href]')
+    if (!link || event.button > 1) return false
+    event.preventDefault()
+    if (view.state.selection.empty && !this.selectsText()) this.openLink(link.getAttribute('href') ?? '')
+    return true
+  }
+
+  /** Whether text is selected in the page, which on a read-only page the editor's own selection does not follow. */
+  private selectsText(): boolean {
+    const selection = this.domSelection()
+    return !!selection && (selection.anchorNode !== selection.focusNode || selection.anchorOffset !== selection.focusOffset)
+  }
+
+  /** Opens a web address of the page in a new tab, unless the notepad is disabled or `link-open` is cancelled. */
+  private openLink(href: string): boolean {
+    if (!href || this.disabled || this.disabledByForm) return false
+    const event = new CustomEvent<NotepadLinkOpenEventDetail>('link-open', { detail: { href }, cancelable: true })
+    if (this.dispatchEvent(event)) window.open(href, '_blank', 'noopener,noreferrer')
+    return true
+  }
+
   private get editable() {
     return !this.disabled && !this.disabledByForm && !this.readOnly
   }
@@ -704,6 +744,9 @@ export class Notepad extends LitElement {
             this.updateToolbar()
             return false
           },
+          // Every click on a link is ours: left to the browser, a read-only page would open it past `link-open`.
+          click: (view, event) => this.handleLinkClick(view, event),
+          auxclick: (view, event) => this.handleLinkClick(view, event),
           copy: (view, event) => copySelectedImage(view, schema.nodes.image, event, false),
           cut: (view, event) => copySelectedImage(view, schema.nodes.image, event, true),
         },
@@ -884,6 +927,10 @@ export class Notepad extends LitElement {
         'Shift-Mod-h': () => this.formatSelection('highlight'),
         'Mod-\\': () => this.clearFormatting(),
         'Mod-Enter': toggleChecked,
+        'Alt-Enter': (state) => {
+          const href = linkAtCaret(state)
+          return href ? this.openLink(href) : false
+        },
         'Shift-Mod-l': toggleTaskLine,
         Enter: enterTask,
         Backspace: chainCommands(undoInputRule, backspaceTask),
@@ -894,6 +941,7 @@ export class Notepad extends LitElement {
       }),
       keymap(baseKeymap),
       placeholder,
+      links(() => !this.disabled && !this.disabledByForm),
       limit,
       lineAfterImage,
       savedImages(schema.nodes.image),
