@@ -556,7 +556,7 @@ interface Toast {
  * With `customizable`, a palette button opens a panel over the tasks, kept in the window, that styles the whole list: the list's icon, the
  * background (whose text colour and pens follow from it), the palette (its accent, pens and highlighters), the done
  * mark, the density and the progress style. `look.pen` still sets the accent from script. With
- * `storage-key` those choices are remembered in `localStorage`.
+ * `storage-key` those choices are remembered in `localStorage`, and so is the selected filter tab.
  *
  * With `heading-editable`, the heading is a `c2-inline-edit`: click it (or call `editHeading()`) to rename the list,
  * Enter or leaving the field saves, Escape cancels, and `heading-change` reports the new heading. The icon suggested
@@ -698,8 +698,8 @@ export class TodoList extends LitElement {
   @property({ type: Boolean }) customizable = false
 
   /**
-   * Remembers the viewer's customization in `localStorage` under `c2-todo-list:<storage-key>`. Give every list on a
-   * site its own key.
+   * Remembers the viewer's customization and the selected filter tab (All, To do, Done) in `localStorage` under
+   * `c2-todo-list:<storage-key>`. Give every list on a site its own key.
    */
   @property({ attribute: 'storage-key' }) storageKey = ''
 
@@ -839,6 +839,8 @@ export class TodoList extends LitElement {
     }
     if (!isRecord(stored)) return
     this.look = sanitizeLook(stored.look)
+    // The first filter is not stored, so a list stored without one opens on it, whatever the previous key showed.
+    this.filter = FILTERS.some(([filter]) => filter === stored.filter) ? (stored.filter as TodoFilter) : 'all'
     const tasks = this.persistTasks ? sanitizeTasks(stored.tasks) : undefined
     if (tasks) this.tasks = tasks
   }
@@ -849,9 +851,11 @@ export class TodoList extends LitElement {
     this.loadedKey = key
     try {
       const look = sanitizeLook(this.look)
-      const empty = Object.keys(look).length === 0 && !this.persistTasks
+      // The first filter is the default, so it is not written: a list nobody touched leaves nothing behind.
+      const filter = this.filter === 'all' ? {} : { filter: this.filter }
+      const empty = Object.keys(look).length === 0 && this.filter === 'all' && !this.persistTasks
       if (empty) window.localStorage.removeItem(key)
-      else window.localStorage.setItem(key, JSON.stringify(this.persistTasks ? { look, tasks: this.tasks } : { look }))
+      else window.localStorage.setItem(key, JSON.stringify(this.persistTasks ? { look, ...filter, tasks: this.tasks } : { look, ...filter }))
     } catch {
       // Storage can be full or blocked (private mode, a sandboxed frame); the list keeps working without it.
     }
@@ -1501,6 +1505,7 @@ export class TodoList extends LitElement {
         @selection-change=${(event: CustomEvent<{ value: string }>) => {
           event.stopPropagation()
           this.filter = event.detail.value.replace('filter-', '') as TodoFilter
+          this.persist()
         }}
       >
         ${FILTERS.map(([filter, label]) => html`<c2-tab slot="tab" for=${`filter-${filter}`}>${this.msg.t(label)}<span class="count">${counts[filter]}</span></c2-tab>`)}
