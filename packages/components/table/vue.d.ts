@@ -61,6 +61,8 @@ declare module 'vue' {
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
         onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
         onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<Table, 'cell-change'>) => void
+        onRowsChange?: (event: EventOf<Table, 'rows-change'>) => void
       }
     >
     'c2-table-column': DefineComponent<

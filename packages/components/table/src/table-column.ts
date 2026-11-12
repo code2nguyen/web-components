@@ -6,7 +6,12 @@ import type {
   ColumnAlign,
   ColumnFormat,
   ColumnPin,
+  TableCellEditor,
+  TableCellEditorRenderer,
+  TableCellOption,
+  TableCellParser,
   TableCellRenderer,
+  TableCellValidator,
   TableColumnConfig,
   TableHeaderRenderer,
   TableSummaryAggregate,
@@ -128,6 +133,27 @@ export class TableColumn extends LitElement implements TableColumnConfig {
    * each row's chevron and indentation in a tree (`children-field`). Defaults to the first column.
    */
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
+
+  /**
+   * Makes the cells editable while the table is `editable`: `text`, `number`, `date`, `url` and `select` open one input
+   * over the cell being edited, `checkbox` shows a checkbox in every cell and toggles it.
+   */
+  @property({ type: String }) editor?: TableCellEditor
+
+  /** The choices of the `select` editor, as JSON in the attribute: values, or `{ "value", "label" }` objects. The cell shows the label. */
+  @property({ converter: jsonPropertyConverter }) options?: TableCellOption[]
+
+  /** An empty value marks the cell invalid while the table is `editable`. */
+  @property({ type: Boolean }) required = false
+
+  /** Checks a cell's value after an edit, a paste or the table's `validate()`: returns the message, or nothing. Property only. */
+  @property({ attribute: false }) validate?: TableCellValidator
+
+  /** Draws the cell's editor in place of the built-in `editor`, and makes the column editable. Property only. */
+  @property({ attribute: false }) renderEditor?: TableCellEditorRenderer
+
+  /** Turns text pasted from a spreadsheet into the column's value; the default follows `editor`. Property only. */
+  @property({ attribute: false }) parseValue?: TableCellParser
 
   override connectedCallback() {
     super.connectedCallback()

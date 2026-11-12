@@ -1,3 +1,4 @@
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-table,
   $theme: (
@@ -84,7 +85,15 @@
     cell--border-right: none,
     cell__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     cell__focus--outline-offset: -2px,
-
+    cell__dirty--color: rgb(2, 101, 220),
+    cell__dirty--size: 6px,
+    cell__invalid--background: rgba(220, 38, 38, 0.06),
+    cell__invalid--box-shadow: inset 0 0 0 1px rgb(211, 21, 16),
+    editor--background: #ffffff,
+    editor--color: #18181b,
+    editor--font-size: 14px,
+    editor--padding: 0 11px,
+    editor--box-shadow: inset 0 0 0 2px rgb(2, 101, 220),
     pinned-start--box-shadow: 1px 0 0 0 #e4e4e7,
     pinned-end--box-shadow: -1px 0 0 0 #e4e4e7,
 
@@ -353,6 +362,66 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+// Editing (`editable`). A changed cell carries a corner mark, an invalid one a red ring and its message for screen
+// readers; the one editor sits over the cell being edited, so the row keeps its height.
+.cell--dirty,
+.cell--invalid,
+.cell--editing {
+  position: relative;
+}
+
+.cell--dirty::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  border-block-start: css.cssVar(cell__dirty--size) solid css.cssVar(cell__dirty--color);
+  border-inline-start: css.cssVar(cell__dirty--size) solid transparent;
+  pointer-events: none;
+}
+
+.cell--invalid {
+  background: css.cssVar(cell__invalid--background);
+  box-shadow: css.cssVar(cell__invalid--box-shadow);
+}
+
+.cell-error {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.editor-host {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 1;
+}
+
+.editor {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: css.cssVar(editor--padding);
+  font: inherit;
+  font-size: css.cssVar(editor--font-size);
+  color: css.cssVar(editor--color);
+  background: css.cssVar(editor--background);
+  box-shadow: css.cssVar(editor--box-shadow);
+  text-align: inherit;
+  outline: none;
+  @include focus.forced-colors-ring;
+}
+
+.cell--align-end .editor {
+  text-align: end;
 }
 
 // `wrap`: body rows grow to their content, so cells top-align, stop clipping and let their text break. The table turns

@@ -5,6 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { guard } from 'lit/directives/guard.js'
+import { live } from 'lit/directives/live.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
@@ -25,7 +26,11 @@ import {
   type ColumnPin,
   type SortDirection,
   type SortModel,
+  type TableCellChangeEventDetail,
+  type TableCellContext,
+  type TableCellError,
   type TableCellEventDetail,
+  type TableChanges,
   type TableChildrenErrorEventDetail,
   type TableChildrenLoader,
   type TableColumnConfig,
@@ -43,6 +48,8 @@ import {
   type TableRow,
   type TableRowEventDetail,
   type TableRowPartResolver,
+  type TableRowRule,
+  type TableRowsChangeEventDetail,
   type TableRowStyler,
   type TableRowToggleEventDetail,
   type TableSelectionChangeEventDetail,
@@ -53,6 +60,7 @@ import {
 import '@c2n/checkbox'
 import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
+import type { EditTrigger, TableEditing } from './table-editing.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -319,6 +327,8 @@ export interface TableEventMap {
   'row-toggle': CustomEvent<TableRowToggleEventDetail>
   'children-error': CustomEvent<TableChildrenErrorEventDetail>
   'detail-toggle': CustomEvent<TableDetailToggleEventDetail>
+  'cell-change': CustomEvent<TableCellChangeEventDetail>
+  'rows-change': CustomEvent<TableRowsChangeEventDetail>
 }
 
 export interface Table {
@@ -445,6 +455,25 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Editing.** `editable` lets the user change the cells of every column with an `editor` (`text`, `number`, `date`,
+ * `url`, `select` with its `options`, or `checkbox`), or a `renderEditor` of its own. Enter, F2, a double click or
+ * typing opens one editor over the cell (never one input per cell, so a long table scrolls as fast as before); Enter
+ * commits and moves down, Tab across, Escape cancels, Delete clears. A block copied from a spreadsheet pastes from the
+ * focused cell, adding rows past the last. Each change fires the cancelable `cell-change`, goes through `rowRule`, and
+ * replaces the row with a copy and `rows` with a new array (`rows-change`): the application's objects are never
+ * mutated. Changed cells are marked (`cell-dirty`), invalid ones too (`required`, the editor's type, the column's
+ * `validate`; `cell-invalid`), and `getChanges()`, `acceptChanges()`, `revertChanges()`, `validate()`, `addRow()`,
+ * `duplicateRow()` and `deleteRows()` are what a toolbar's buttons call. `isCellEditable` locks cells by row. The
+ * editing code loads on the first edit. Not applied to a `dataSource`.
+ *
+ * ```html
+ * <c2-table row-key="id" editable>
+ *   <c2-table-column field="item" editor="text" required></c2-table-column>
+ *   <c2-table-column field="qty" editor="number" align="end" summary="sum"></c2-table-column>
+ *   <c2-table-column field="status" editor="select" options='["Open","Done"]'></c2-table-column>
+ * </c2-table>
+ * ```
+ *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
  * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
@@ -478,6 +507,8 @@ export interface Table {
  * @event {CustomEvent<TableRowToggleEventDetail>} row-toggle - Fired after the user opens or closes a row of a tree, with its `key`, the `row` and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableDetailToggleEventDetail>} detail-toggle - Fired after the user opens or closes a row's detail panel (`detail-height`), with its `key`, the `row` and whether it is now open. Does not bubble.
  * @event {CustomEvent<TableChildrenErrorEventDetail>} children-error - Fired when `loadChildren` rejects, with the row's `key`, the `row` and the `error`. The row has closed again. Does not bubble.
+ * @event {CustomEvent<TableCellChangeEventDetail>} cell-change - Fired when the user commits a new value to a cell of an `editable` table (typed, toggled, cleared or pasted), before the table stores it: `detail.row` is the row as it was, with `key`, `column`, `field`, `value` and `previousValue`. Cancelable: `preventDefault()` keeps the old value. Does not bubble.
+ * @event {CustomEvent<TableRowsChangeEventDetail>} rows-change - Fired after the table replaced `rows` itself: a cell edited or pasted, a row added, duplicated or deleted, changes reverted. `detail.rows` is the new array and `detail.reason` says why. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -505,6 +536,10 @@ export interface Table {
  * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
+ * @csspart cell-dirty - A body cell whose value was edited since the rows were given or `acceptChanges()` ran; exposed in addition to `cell`.
+ * @csspart cell-invalid - A body cell whose value failed its check (`required`, the editor's type, `validate`); exposed in addition to `cell`.
+ * @csspart row-new - A body row added by `addRow`, `duplicateRow` or a paste, until `acceptChanges()`; exposed in addition to `row`.
+ * @csspart editor - The box holding the editor of the cell being edited.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
  *
@@ -572,6 +607,16 @@ export interface Table {
  * @cssproperty {padding} [--c2-table__cell__wrap--padding=8px 12px] - Body cell padding with `wrap`, where content is top-aligned.
  * @cssproperty {outline} [--c2-table__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-table__cell__focus--outline-offset=-2px]
+ *
+ * @cssproperty {color} [--c2-table__cell__dirty--color=rgb(2, 101, 220)] - The corner mark of an edited cell.
+ * @cssproperty {pixel} [--c2-table__cell__dirty--size=6px]
+ * @cssproperty {color} [--c2-table__cell__invalid--background=rgba(220, 38, 38, 0.06)]
+ * @cssproperty {box-shadow} [--c2-table__cell__invalid--box-shadow=inset 0 0 0 1px rgb(211, 21, 16)]
+ * @cssproperty {color} [--c2-table__editor--background=#ffffff]
+ * @cssproperty {color} [--c2-table__editor--color=#18181b]
+ * @cssproperty {font-size} [--c2-table__editor--font-size=14px]
+ * @cssproperty {padding} [--c2-table__editor--padding=0 11px]
+ * @cssproperty {box-shadow} [--c2-table__editor--box-shadow=inset 0 0 0 2px rgb(2, 101, 220)] - The ring of the cell being edited.
  *
  * @cssproperty {box-shadow} [--c2-table__pinned-start--box-shadow=1px 0 0 0 #e4e4e7] - Separator on the last column pinned to the start.
  * @cssproperty {box-shadow} [--c2-table__pinned-end--box-shadow=-1px 0 0 0 #e4e4e7] - Separator on the first column pinned to the end.
@@ -826,6 +871,23 @@ export class Table extends LitElement {
   /** Accessible name of the chevron that opens a row's detail panel. Unset, `Details` in the table's language. */
   @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
 
+  /**
+   * Lets the user edit the cells of the columns that have an `editor` (or a `renderEditor`): Enter, F2, a double click
+   * or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears the
+   * cell, and a block copied from a spreadsheet pastes from the focused cell. Each change fires `cell-change` and
+   * replaces `rows`. The editing code loads on the first edit. Not applied to a `dataSource`.
+   */
+  @property({ type: Boolean }) editable = false
+
+  /** Decides per cell whether an `editable` table lets it be edited, such as `({ row }) => row.status !== 'approved'`. Property only. */
+  @property({ attribute: false }) isCellEditable?: (context: TableCellContext) => boolean
+
+  /**
+   * Adjusts a row after one of its cells is edited or pasted, before the table stores it: return the row to keep, such
+   * as the debit cleared when a credit is typed, or a total recomputed from a quantity. Property only.
+   */
+  @property({ attribute: false }) rowRule?: TableRowRule
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -870,6 +932,9 @@ export class Table extends LitElement {
   #warnedDetail = false
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
+  /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
+  #editing?: TableEditing
+  #editingLoad?: Promise<TableEditing>
   /** The window `range-change` last reported, to fire only when it moves. */
   #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [], rows: [] }
   /** Whether `range-change` has fired yet: the first update reports even an empty window. */
@@ -1126,6 +1191,130 @@ export class Table extends LitElement {
     this.#setDetailExpanded(key, false)
   }
 
+  /**
+   * Adds `row` at `index` (the end by default) of `rows`, as a new row of `getChanges()`, and fires `rows-change`.
+   * Resolves to the row once it is drawn, so `scrollToIndex` can reach it.
+   */
+  async addRow(row: TableRow = {}, index?: number): Promise<TableRow> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.addRow(row, index))
+  }
+
+  /**
+   * Adds a copy of `row` under it, without its `row-key` field, with `overrides` written over it: pass the copy's new
+   * key there when `getRowKey` builds keys. Resolves to the copy once it is drawn, or `undefined` when `row` is not a
+   * top-level row.
+   */
+  async duplicateRow(row: TableRow, overrides?: TableRow): Promise<TableRow | undefined> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.duplicateRow(row, overrides))
+  }
+
+  /** Removes `rows` from `rows` (and from the children of a tree), and from the selection; fires `rows-change`. */
+  async deleteRows(rows: TableRow[]): Promise<void> {
+    const editing = await this.#loadEditing()
+    const drop = new Set(rows)
+    await this.#keepSelection(() => editing.deleteRows(rows), drop)
+  }
+
+  /**
+   * Runs a change of the rows and keeps the selection on the same rows (less the `dropped` ones): without a `row-key`
+   * a key is a position, which now points at another row. Fires `selection-change` only if the keys moved.
+   */
+  async #keepSelection<T>(change: () => T, dropped?: Set<TableRow>): Promise<T> {
+    // Every selected row of the dataset, not only the page on show that `getSelectedRows` covers.
+    const keys = new Set(this.value)
+    const selected =
+      keys.size && !this.dataSource ? this.#sortedRows.filter((row, index) => keys.has(this.#keyAt(index, row)) && !dropped?.has(row)) : undefined
+    const result = change()
+    await this.updateComplete
+    if (selected) {
+      const next = selected.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
+      if (next.length !== this.value.length || next.some((key, index) => key !== this.value[index])) this.#commitSelection(next)
+    }
+    return result
+  }
+
+  /** The rows added, edited and deleted since the rows were given or `acceptChanges()` ran. */
+  getChanges(): TableChanges {
+    return this.#editing?.changes() ?? { added: [], updated: [], removed: [] }
+  }
+
+  /** Takes the rows as they are as the new baseline, after a save: no cell is marked as changed any more. */
+  acceptChanges() {
+    this.#editing?.accept()
+  }
+
+  /** Undoes every change since the baseline: edits, added and deleted rows. Fires `rows-change`. */
+  revertChanges() {
+    this.#editing?.revert()
+  }
+
+  /** Checks every cell of the editable columns (`required`, the editor's type, `validate`), marks the invalid ones and resolves to them. */
+  async validate(): Promise<TableCellError[]> {
+    return (await this.#loadEditing()).validate()
+  }
+
+  #loadEditing(): Promise<TableEditing> {
+    this.#editingLoad ??= import('./table-editing.js').then(({ TableEditing }) => {
+      this.#editing = new TableEditing({
+        table: this,
+        columns: () => this.#renderColumns(),
+        rowAt: (line) => {
+          const index = this.#rowIndexAt(line)
+          const row = this.#sourceRowAt(index)
+          return row && { row, index, key: this.#keyAt(index, row) }
+        },
+        canEdit: (line, column) => this.#canEdit(line, column),
+        focus: (line, column) => {
+          this.focusedCell = { row: line, column }
+          this.#pendingFocus = true
+          this.#scrollToLine(line)
+        },
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: string[]) => string).call(this.msg, key, ...args),
+      })
+      this.requestUpdate()
+      return this.#editing
+    })
+    return this.#editingLoad
+  }
+
+  /** Whether the cell on display line `line` can be edited: an editable column, a data row, and `isCellEditable` agrees. */
+  #canEdit(line: number, columnIndex: number): boolean {
+    const column = this.#renderColumns()[columnIndex]
+    if (!this.editable || this.dataSource || !column || !(column.editor || column.renderEditor) || !column.field) return false
+    const index = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(index)
+    // A parent row of a tree shows the rollup of its leaves in such a column, not a value of its own.
+    if (!row || (column.rollup && this.#treeLines()?.[line]?.children?.length)) return false
+    return this.isCellEditable?.({ value: getFieldValue(row, column.field), row, rowIndex: index, column }) ?? true
+  }
+
+  /** Starts an edit of a cell once the editing module is in. */
+  #beginEdit(line: number, columnIndex: number, trigger: EditTrigger) {
+    void this.#loadEditing().then((editing) => editing.begin(line, columnIndex, trigger))
+  }
+
+  /**
+   * A double click on a cell, or a block pasted from a spreadsheet, in an editable table: handed to the editing module.
+   * One listener each on the grid, so the cells carry none. The pasted text is read now: it is gone once the event ends.
+   */
+  #handleEditGesture = (event: MouseEvent | ClipboardEvent) => {
+    const paste = event instanceof ClipboardEvent
+    if (
+      !this.editable ||
+      this.dataSource ||
+      event.composedPath().some((node) => node instanceof Element && node.matches('input, select, textarea, .editor-host'))
+    )
+      return
+    const text = paste ? event.clipboardData?.getData('text/plain') : ''
+    if (paste && (!text || this.focusedCell.row < 0)) return
+    if (paste) event.preventDefault()
+    // The path is empty once the event has been dispatched, and the module may still be on its way.
+    const path = event.composedPath()
+    void this.#loadEditing().then((editing) => editing.gesture(path, text, this.focusedCell))
+  }
+
   /** Drops the `dataSource` cache and reloads the visible rows. */
   refresh() {
     this.error = ''
@@ -1333,6 +1522,8 @@ export class Table extends LitElement {
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
+          @dblclick=${this.#handleEditGesture}
+          @paste=${this.#handleEditGesture}
         >
           ${this.#renderHeaderRow(columns, pins)}
           ${
@@ -1675,6 +1866,7 @@ export class Table extends LitElement {
           'row',
           selected ? 'row-selected' : '',
           updateState ? `row-${updateState}` : '',
+          row && this.#editing?.isNew(this.#sourceRowAt(index) ?? row) ? 'row-new' : '',
           ...(typeof extraParts === 'string' ? extraParts.split(/\s+/) : (extraParts ?? [])),
         ]
           .filter(Boolean)
@@ -1765,25 +1957,41 @@ export class Table extends LitElement {
 
     const id = columnKey(column)
     const value = node?.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(row, column.field)
-    const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
+    const rendered = row
+      ? column.renderCell
+        ? column.renderCell({ value, row, rowIndex, column })
+        : column.editor === 'checkbox'
+          ? this.#renderCheckCell(line, columnIndex, column, value)
+          : this.#formatValue(column, value)
+      : undefined
+    // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
+    // module knows rows as the application gave them, not the interpolated copy an animated update draws.
+    const editing = row ? this.#editing : undefined
+    const source = editing && this.#sourceRowAt(rowIndex)
+    const editor = source ? editing!.editor(source, column, rowIndex) : undefined
+    const state = source ? editing!.cellState(source, column) : undefined
     // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
     // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
     // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
-    const content = row
-      ? column.cellSlot
-        ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-        : rendered
-      : html`<span class="skeleton" part="skeleton"></span>`
+    const content = editor
+      ? editor
+      : row
+        ? column.cellSlot
+          ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
+          : rendered
+        : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
     // the cell for its box, the content for the text itself, which is what a pill or a chip needs.
     const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
     return html`
       <div
-        class=${shared.class}
+        class=${state || editor ? classMap({ ...classes, 'cell--editing': Boolean(editor), 'cell--dirty': Boolean(state?.dirty), 'cell--invalid': Boolean(state?.error) }) : shared.class}
         role="gridcell"
-        part="cell cell-${fieldPart}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}"
         aria-colindex=${columnIndex + 1}
+        aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
+        title=${ifDefined(state?.error)}
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
@@ -1795,9 +2003,20 @@ export class Table extends LitElement {
           part="cell-content cell-content-${fieldPart}"
           style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
           >${content}</span
-        >
+        >${state?.error ? html`<span class="cell-error">${state.error}</span>` : nothing}
       </div>
     `
+  }
+
+  /** The checkbox of a `checkbox` column: toggled in place while the cell can be edited, a read-only mark otherwise. */
+  #renderCheckCell(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    return html`<c2-checkbox
+      aria-label=${column.header ?? column.field}
+      .checked=${live(Boolean(value))}
+      ?disabled=${!this.#canEdit(line, columnIndex)}
+      @click=${(event: Event) => event.stopPropagation()}
+      @change=${() => this.#beginEdit(line, columnIndex, 'edit')}
+    ></c2-checkbox>`
   }
 
   /** The chevron of a tree row, indented by its depth; a leaf keeps the room empty so labels line up across levels. */
@@ -2189,6 +2408,9 @@ export class Table extends LitElement {
 
   #formatValue(column: TableColumnConfig, value: unknown): string {
     if (value === null || value === undefined || value === '') return ''
+    // A `select` column shows the label of its option.
+    const option = column.options?.find((entry) => (typeof entry === 'object' ? entry.value : entry) === value)
+    if (option !== undefined) return typeof option === 'object' ? (option.label ?? String(option.value)) : String(option)
     const locale = column.locale
     const extra = column.formatOptions
     try {
@@ -2705,7 +2927,7 @@ export class Table extends LitElement {
       const top = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top
       const bottom = top + element.getBoundingClientRect().height
       if (top < header) viewport.scrollTop += top - header
-      else if (bottom > viewport.clientHeight) viewport.scrollTop += bottom - viewport.clientHeight
+      else if (bottom > viewport.clientHeight - this.#footerHeight()) viewport.scrollTop += bottom - viewport.clientHeight + this.#footerHeight()
       return
     }
     const viewport = this.viewport
@@ -2716,13 +2938,14 @@ export class Table extends LitElement {
       // Past the browser's height limit the virtualizer scales the scroll: its own arithmetic is the closer one there.
       const scaled = range.paddingTop + (range.end - range.start) * height + range.paddingBottom < this.rowCount * height - 1
       if (open.length === 0 || !viewport || scaled) {
-        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
+        // The summary row is sticky at the bottom as the header is at the top: a row under either is out of sight.
+        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight() + this.#footerHeight())
         return
       }
       // The panels open above the row push it down by their height.
       const index = line - this.#pageStart
       const rowTop = index * height + open.filter((entry) => entry < index).length * this.detailHeight
-      const room = viewport.clientHeight - this.#headerHeight()
+      const room = viewport.clientHeight - this.#headerHeight() - this.#footerHeight()
       if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop
       else if (rowTop + height > viewport.scrollTop + room) viewport.scrollTop = rowTop + height - room
       return
@@ -2730,7 +2953,7 @@ export class Table extends LitElement {
     if (!viewport) return
     const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
     const covered = this.#depthOf(grouping.items[line]) * height
-    const visible = viewport.clientHeight - this.#headerHeight()
+    const visible = viewport.clientHeight - this.#headerHeight() - this.#footerHeight()
     if (top - covered < viewport.scrollTop) viewport.scrollTop = Math.max(0, top - covered)
     else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
   }
@@ -3217,6 +3440,25 @@ export class Table extends LitElement {
       return
     }
 
+    // An editable cell opens its editor on Enter or F2, takes a typed character as its new value, and Delete clears it.
+    if (this.editable && row >= 0 && !event.ctrlKey && !event.metaKey && !event.altKey && this.#canEdit(row, column)) {
+      const checkbox = columns[column].editor === 'checkbox' && !columns[column].renderEditor
+      const trigger: EditTrigger | undefined =
+        // modern-web-ignore: ime-enter the grid cell is not a text field; a composing key comes from an input and is dropped by #isFromCellControl above
+        event.key === 'Enter' || event.key === 'F2' || (checkbox && event.key === ' ')
+          ? 'edit'
+          : event.key === 'Delete' || event.key === 'Backspace'
+            ? 'clear'
+            : event.key.length === 1 && event.key !== ' ' && !checkbox
+              ? { text: event.key }
+              : undefined
+      if (trigger) {
+        event.preventDefault()
+        this.#beginEdit(row, column, trigger)
+        return
+      }
+    }
+
     switch (event.key) {
       case 'ArrowDown':
         if (row === SUMMARY_ROW) break
@@ -3307,6 +3549,11 @@ export class Table extends LitElement {
 
   #headerHeight(): number {
     return this.renderRoot.querySelector('.row--header')?.getBoundingClientRect().height ?? 0
+  }
+
+  /** Height of the summary row, which stays at the bottom of the viewport and covers the rows under it. */
+  #footerHeight(): number {
+    return this.renderRoot.querySelector('.row--summary')?.getBoundingClientRect().height ?? 0
   }
 
   #measureRowHeight() {

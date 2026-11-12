@@ -1,10 +1,16 @@
 ---
-/** Enhances table gallery examples whose property-only API (`loadChildren`, `renderDetail`) cannot be expressed as an HTML attribute. */
+/**
+ * Enhances table gallery examples whose property-only API (`loadChildren`, `renderDetail`, `renderEditor`, `rowRule`,
+ * `isCellEditable`) cannot be expressed as an HTML attribute, and wires the buttons of the editing cards' toolbars.
+ */
 ---
 
 <script>
   import type { Table, TableRow } from '@c2n/components/table'
+  import type { TableColumn } from '@c2n/components/table/table-column'
+  import type { DurationInput } from '@c2n/components/duration-input'
   import '@c2n/components/table'
+  import '@c2n/components/duration-input'
 
   // Each region's countries add up to the figures the region shows before it is opened, so the rollup agrees.
   const countries: Record<string, TableRow[]> = {
@@ -28,6 +34,113 @@
 
   const initialized = new WeakSet<Table>()
 
+  const action = (table: Table, name: string) => table.querySelector<HTMLElement & { disabled: boolean }>(`[data-action="${name}"]`)
+  const amount = (value: unknown) => (typeof value === 'number' ? value : 0)
+
+  /** The editable grid: the toolbar counts the changes and adds or reverts rows. */
+  function editableGrid(table: Table) {
+    const changes = table.querySelector('.changes')!
+    let next = 5
+    table.addEventListener('rows-change', () => {
+      const { added, updated, removed } = table.getChanges()
+      const count = added.length + updated.length + removed.length
+      changes.textContent = count ? `${count} unsaved ${count === 1 ? 'change' : 'changes'}` : 'No changes'
+    })
+    action(table, 'add')?.addEventListener('click', async () => {
+      const row = await table.addRow({ id: `T-${next++}`, task: '', estimate: null, status: 'todo', billable: false })
+      table.scrollToIndex(table.rows.indexOf(row))
+    })
+    action(table, 'revert')?.addEventListener('click', () => table.revertChanges())
+  }
+
+  const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
+
+  /** The timesheet: durations typed in a c2-duration-input, row totals, missing days, locked rows, overtime. */
+  function timesheet(table: Table) {
+    const withTotal = (row: TableRow): TableRow => ({ ...row, total: DAYS.reduce((sum, day) => sum + amount(row[day]), 0) })
+    table.rows = table.rows.map(withTotal)
+    table.rowRule = ({ row }) => withTotal(row)
+    table.isCellEditable = ({ row }) => row.status === 'draft'
+    table.rowPart = ({ row }) => (row.status === 'draft' ? undefined : 'row-locked')
+    // One editor element per edit, kept while the table re-renders so the text typed so far stays. An edit that ended
+    // took its element out of the page, so a disconnected one belongs to an earlier edit.
+    let editor: { row: TableRow; column: string; input: DurationInput } | undefined
+    for (const day of DAYS) {
+      const column = table.querySelector<TableColumn>(`c2-table-column[field="${day}"]`)!
+      column.renderEditor = ({ row, draft, setDraft, column }) => {
+        if (!editor?.input.isConnected || editor.row !== row || editor.column !== column.field) {
+          const input = document.createElement('c2-duration-input')
+          input.setAttribute('largest-unit', 'h')
+          input.setAttribute('aria-label', `${column.header} hours`)
+          // Fills the cell: no radius, a 2px ring for the border, and neither the icon nor the `= 1 hour` preview, which
+          // a day column has no room for (the row total shows the result).
+          input.style.cssText =
+            'flex: 1; min-width: 0; --c2-duration-input--min-height: 100%; --c2-duration-input--border-radius: 0; --c2-duration-input__value--padding: 0 8px; --c2-duration-input__icon--size: 0px; --c2-duration-input__preview--font-size: 0px; --c2-duration-input__value--gap: 0px; --c2-duration-input__focus--border: 2px solid var(--c2-theme--color-primary, #0265dc)'
+          input.value = typeof draft === 'number' ? Math.round(draft * 3600) : null
+          const read = () => setDraft(input.value === null ? null : input.value / 3600)
+          input.addEventListener('input', read)
+          input.addEventListener('change', read)
+          editor = { row, column: column.field, input }
+        }
+        return editor.input
+      }
+      // Pasted `7:30` or `1h 30m` reads as hours too.
+      column.parseValue = (text) => {
+        const clock = /^(\d+):(\d{2})$/.exec(text)
+        if (clock) return Number(clock[1]) + Number(clock[2]) / 60
+        const units = /^(?:(\d+(?:\.\d+)?)h)?\s*(?:(\d+)m)?$/.exec(text)
+        if (units && (units[1] || units[2])) return Number(units[1] ?? 0) + Number(units[2] ?? 0) / 60
+        return text === '' ? null : Number(text)
+      }
+      // A workday with no hours on a project that has some that week is flagged, not refused.
+      column.validate = ({ value, row }) => (value === null && amount(row.total) > 0 && row.status === 'draft' ? 'No hours on a workday' : undefined)
+    }
+    const total = table.querySelector<TableColumn>('c2-table-column[field="total"]')!
+    total.renderSummary = ({ value }) => {
+      const hours = amount(value)
+      const overtime = Math.max(0, hours - 40)
+      return overtime ? `${hours - overtime} + ${overtime} OT` : `${hours} h`
+    }
+    // The column children register after the first render: check the rows once the table knows them.
+    void customElements.whenDefined('c2-table-column').then(async () => {
+      await new Promise(requestAnimationFrame)
+      await table.updateComplete
+      await table.validate()
+    })
+    action(table, 'submit')?.addEventListener('click', () => {
+      table.rows = table.rows.map((row) => (row.status === 'draft' ? { ...row, status: 'submitted' } : row))
+      table.acceptChanges()
+      void table.validate()
+    })
+  }
+
+  /** The journal entry: a line is a debit or a credit, and Post waits until the entry balances. */
+  function journal(table: Table) {
+    const balance = table.querySelector<HTMLElement>('.balance')!
+    const post = action(table, 'post')!
+    const debit = table.querySelector<TableColumn>('c2-table-column[field="debit"]')!
+    debit.validate = ({ row }) => (row.debit === null && row.credit === null ? 'Enter a debit or a credit' : undefined)
+    table.rowRule = ({ row, field, value }) =>
+      value === null ? row : field === 'debit' ? { ...row, credit: null } : field === 'credit' ? { ...row, debit: null } : row
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+    const update = async () => {
+      const difference = table.rows.reduce((sum, row) => sum + amount(row.debit) - amount(row.credit), 0)
+      const errors = await table.validate()
+      const balanced = Math.abs(difference) < 0.005
+      balance.toggleAttribute('data-balanced', balanced)
+      balance.textContent = balanced ? 'Balanced' : `Out of balance by ${money.format(Math.abs(difference))}`
+      post.disabled = !balanced || errors.length > 0
+    }
+    table.addEventListener('rows-change', update)
+    void update()
+    action(table, 'add')?.addEventListener('click', () => table.addRow({ account: null, memo: '', debit: null, credit: null }))
+    post.addEventListener('click', () => {
+      table.acceptChanges()
+      balance.textContent = 'Posted'
+      post.disabled = true
+    })
+  }
+
   function setup() {
     document.querySelectorAll<Table>('c2-table[data-table-example]').forEach((table) => {
       if (initialized.has(table)) return
@@ -36,6 +149,9 @@
         // A short delay stands in for the network, so the spinner on the chevron shows.
         table.loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
       }
+      if (table.dataset.tableExample === 'editable') editableGrid(table)
+      if (table.dataset.tableExample === 'timesheet') timesheet(table)
+      if (table.dataset.tableExample === 'journal') journal(table)
       if (table.dataset.tableExample === 'row-detail') {
         // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
         table.renderDetail = ({ row }) => {

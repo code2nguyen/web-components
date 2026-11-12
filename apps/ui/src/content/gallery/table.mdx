@@ -846,6 +846,176 @@ table.loadChildren = async ({ key }) => {
 table.renderDetail = ({ row }) => html`<p class="server-note">${row.note}</p>`
 ```
 
+## Editing
+
+`editable` turns the columns that have an `editor` into a grid people type into, as in a spreadsheet: Enter, F2, a double click or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears, and a block copied from Excel or Sheets pastes from the focused cell. Changed cells get a corner mark, invalid ones (`required`, a value that is not a number or a date, a column's `validate`) a red ring. The rows are never mutated: each change fires `cell-change` and `rows-change` with a new `rows` array. The toolbar's buttons call `addRow()`, `revertChanges()` and `validate()`; the editing code loads on the first edit.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Editable grid
+<style>
+  .edit-grid {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .edit-grid .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .edit-grid .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .edit-grid .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .edit-grid .changes {
+    font-size: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-table client:only="lit" class="edit-grid" data-table-example="editable" editable row-key="id" rows='[{"id":"T-1","task":"Kick-off workshop","owner":"Ada","estimate":6,"status":"done","due":"2026-11-03","billable":true},{"id":"T-2","task":"Data model","owner":"Grace","estimate":14,"status":"doing","due":"2026-11-10","billable":true},{"id":"T-3","task":"Import mapping","owner":"Alan","estimate":9,"status":"todo","due":"2026-11-14","billable":false},{"id":"T-4","task":"Review","owner":"Radia","estimate":4,"status":"todo","due":"2026-11-18","billable":true}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Project plan</span>
+    <span class="changes" aria-live="polite">No changes</span>
+    <c2-button data-action="revert" class="ghost">Revert</c2-button>
+    <c2-button data-action="add">Add task</c2-button>
+  </div>
+  <c2-table-column field="task" header="Task" width="minmax(140px, 2fr)" editor="text" required summary-label="Total"></c2-table-column>
+  <c2-table-column field="owner" header="Owner" width="96px" editor="text"></c2-table-column>
+  <c2-table-column field="estimate" header="Hours" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="116px" editor="select" options='[{"value":"todo","label":"To do"},{"value":"doing","label":"In progress"},{"value":"done","label":"Done"}]'></c2-table-column>
+  <c2-table-column field="due" header="Due" width="118px" format="date" editor="date"></c2-table-column>
+  <c2-table-column field="billable" header="Billable" width="76px" align="center" editor="checkbox"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Timesheet grid
+<style>
+  .timesheet {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__cell__invalid--background: light-dark(#fef3c7, #3a2a06);
+    --c2-table__cell__invalid--box-shadow: inset 0 0 0 1px #d97706;
+  }
+  .timesheet .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .timesheet .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .timesheet::part(row-locked) {
+    --c2-table__cell--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .timesheet::part(cell-total) {
+    font-weight: 600;
+  }
+</style>
+<c2-table client:only="lit" class="timesheet" data-table-example="timesheet" editable row-key="id" rows='[{"id":"P-1","project":"Atlas migration","mon":7.5,"tue":8,"wed":6,"thu":8,"fri":4,"status":"draft"},{"id":"P-2","project":"Client support","mon":1,"tue":0.5,"wed":2,"thu":null,"fri":2,"status":"draft"},{"id":"P-3","project":"Hiring panel","mon":null,"tue":null,"wed":1.5,"thu":null,"fri":null,"status":"approved"},{"id":"P-4","project":"Planning","mon":0.5,"tue":0.5,"wed":0.5,"thu":0.5,"fri":3,"status":"draft"}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Week 46 · Ada Lovelace</span>
+    <c2-button data-action="submit">Submit week</c2-button>
+  </div>
+  <c2-table-column field="project" header="Project" width="minmax(130px, 2fr)" pinned="start" summary-label="Day total"></c2-table-column>
+  <c2-table-column field="mon" header="Mon" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="tue" header="Tue" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="wed" header="Wed" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="thu" header="Thu" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="fri" header="Fri" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="104px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="92px" options='[{"value":"draft","label":"Draft"},{"value":"submitted","label":"Submitted"},{"value":"approved","label":"Approved"}]'></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Journal entry
+<style>
+  .journal {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .journal .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .journal .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .journal .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .journal .balance {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: light-dark(#b91c1c, #f87171);
+  }
+  .journal .balance[data-balanced] {
+    color: light-dark(#15803d, #4ade80);
+  }
+  .journal::part(cell-debit),
+  .journal::part(cell-credit) {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+<c2-table client:only="lit" class="journal" data-table-example="journal" editable rows='[{"account":"6100","memo":"November office rent","debit":4200,"credit":null},{"account":"2100","memo":"VAT on rent","debit":840,"credit":null},{"account":"1000","memo":"Paid from operating account","debit":null,"credit":5000}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">JE-2026-0418</span>
+    <span class="balance" aria-live="polite"></span>
+    <c2-button data-action="add" class="ghost">Add line</c2-button>
+    <c2-button data-action="post" disabled>Post</c2-button>
+  </div>
+  <c2-table-column field="account" header="Account" width="minmax(170px, 2fr)" editor="select" required summary-label="Totals" options='[{"value":"1000","label":"1000 · Operating cash"},{"value":"1200","label":"1200 · Receivables"},{"value":"2000","label":"2000 · Payables"},{"value":"2100","label":"2100 · VAT receivable"},{"value":"6100","label":"6100 · Rent"},{"value":"6300","label":"6300 · Utilities"}]'></c2-table-column>
+  <c2-table-column field="memo" header="Memo" width="minmax(160px, 2fr)" editor="text"></c2-table-column>
+  <c2-table-column field="debit" header="Debit" width="110px" align="end" format="currency" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="credit" header="Credit" width="110px" align="end" format="currency" editor="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+"Timesheet grid" edits hours with a `c2-duration-input` (type `1h 30m`, `90m` or `1:30`), recomputes each row's total with `rowRule`, flags a missing day on a workday with `validate`, locks approved and submitted rows with `isCellEditable`, and splits the week total into regular and overtime hours. "Journal entry" keeps a line to a debit or a credit (typing one clears the other) and enables Post only once the entry balances:
+
+```ts tag=CodeBlock
+// A custom editor: any element, mounted over the cell being edited.
+day.renderEditor = ({ draft, setDraft }) => {
+  const input = document.createElement('c2-duration-input')
+  input.value = typeof draft === 'number' ? draft * 3600 : null
+  input.addEventListener('input', () => setDraft(input.value === null ? null : input.value / 3600))
+  return input
+}
+
+// A row rule: runs after each edit, before the row is stored.
+timesheet.rowRule = ({ row }) => ({ ...row, total: days.reduce((sum, day) => sum + (row[day] ?? 0), 0) })
+timesheet.isCellEditable = ({ row }) => row.status === 'draft'
+
+journal.rowRule = ({ row, field, value }) =>
+  value === null ? row : field === 'debit' ? { ...row, credit: null } : field === 'credit' ? { ...row, debit: null } : row
+journal.addEventListener('rows-change', ({ detail }) => {
+  const difference = sum(detail.rows, 'debit') - sum(detail.rows, 'credit')
+  post.disabled = difference !== 0
+})
+```
+
 ## States
 
 `loading` shows a spinner until the data lands — or whatever you slot into `loading` — `error` replaces the body with a message and a way out, and an empty `rows` array shows `empty-message` or the `empty` slot. Give the host a height and the body scrolls inside it; past `virtual-threshold` rows it virtualizes on its own.

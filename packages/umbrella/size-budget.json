@@ -1,5 +1,5 @@
 {
-  "lazy": 389459,
+  "lazy": 396259,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -242,7 +242,7 @@
     "streaming-text": 2776,
     "swipe-action": 4151,
     "switch": 3794,
-    "table": 39669,
+    "table": 41529,
     "table-of-contents": 5207,
     "table/table-column": 1280,
     "tabs": 6452,
