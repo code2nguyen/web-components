@@ -138,3 +138,37 @@ test('a new tag extending one page family goes to that page, not to the package 
     false,
   )
 })
+
+test('a component the installed umbrella added, unknown to this server, is served from its manifest', () => {
+  const root = project(
+    { '@c2n/components': '*' },
+    {
+      '@c2n/components': {
+        exports: { './button': './dist/button.js', './meter': './dist/meter.js' },
+        modules: [
+          { path: 'button/src/button.ts', tags: ['c2-button'] },
+          { path: 'meter/src/meter-mark.ts', tags: ['c2-meter-mark'] },
+          { path: 'meter/src/meter.ts', tags: ['c2-meter'] },
+          // Not an entry of the umbrella: nothing an application can import.
+          { path: 'internal/src/thing.ts', tags: ['c2-thing'] },
+        ],
+      },
+    },
+  )
+  const result = withProject(root, () => withInstalledApi(registry))
+  assert.equal(result.tagIndex['c2-meter'], 'meter')
+  assert.equal(result.tagIndex['c2-meter-mark'], 'meter')
+  assert.equal(result.packageIndex['@c2n/meter'], 'meter')
+  assert.equal(result.tagIndex['c2-thing'], undefined)
+  const meter = result.components['meter']
+  assert.deepEqual(
+    meter.elements.map((e) => e.tag),
+    ['c2-meter', 'c2-meter-mark'],
+  )
+  assert.equal(meter.install.import, "import '@c2n/components/meter'")
+  assert.equal(meter.status, 'undocumented')
+  assert.match(meter.description, /9\.9\.9.*newer than this server \(0\.0\.0\)/)
+  // The registry handed in is left as it was.
+  assert.equal(registry.components['meter'], undefined)
+  assert.equal(registry.packageIndex['@c2n/meter'], undefined)
+})
