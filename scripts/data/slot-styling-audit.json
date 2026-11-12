@@ -416,6 +416,20 @@
     },
     {
       "tag": "c2-barcode-scanner",
+      "slot": "switch-icon",
+      "decision": "part",
+      "parts": ["switch"],
+      "reason": "The Switch camera button owns the size and colour of the icon slotted into it."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "torch-icon",
+      "decision": "part",
+      "parts": ["torch"],
+      "reason": "The light button owns the size and colour of the icon slotted into it, on and off."
+    },
+    {
+      "tag": "c2-barcode-scanner",
       "slot": "window",
       "decision": "part",
       "parts": ["window"],

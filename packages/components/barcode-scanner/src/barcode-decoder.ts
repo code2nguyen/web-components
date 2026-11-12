@@ -16,7 +16,15 @@ export interface BarcodeScanResult {
  * Reads the codes of one picture. `formats` is the list the scanner was asked for (empty: every format the decoder
  * knows). A picture without a code resolves an empty list; a rejection is treated the same.
  */
-export type BarcodeDecoder = (frame: ImageData, context: { formats: readonly string[] }) => Promise<BarcodeScanResult[]> | BarcodeScanResult[]
+export type BarcodeDecoder = (frame: ImageData, context: BarcodeDecoderContext) => Promise<BarcodeScanResult[]> | BarcodeScanResult[]
+
+/** What a {@link BarcodeDecoder} is told about the picture it reads. */
+export interface BarcodeDecoderContext {
+  /** The formats the scanner was asked for; empty for every format the decoder knows. */
+  formats: readonly string[]
+  /** True for a still picture (`scanImage()`), worth a slower and more thorough reading than one frame of a camera. */
+  still: boolean
+}
 
 interface NativeDetector {
   detect(source: ImageData): Promise<{ rawValue: string; format: string; cornerPoints?: { x: number; y: number }[] }[]>
@@ -74,15 +82,22 @@ function fallbackDecoder(): Promise<BarcodeDecoder> {
 export function createBarcodeDecoder(): BarcodeDecoder {
   let key: string | undefined
   let engine: Promise<BarcodeDecoder> | undefined
-  let native = true
+  /** The engine for the current formats is the browser's detector. */
+  let native = false
+  /** The browser's detector failed while reading: it is not asked again. */
+  let broken = false
   return async (frame, context) => {
     const wanted = context.formats.join(' ')
     if (!engine || wanted !== key) {
       key = wanted
-      engine = (native ? nativeDecoder(context.formats) : Promise.resolve(undefined)).then((decoder) => {
+      // A detector that lacks one list of formats is asked again for the next list.
+      const pending = (broken ? Promise.resolve(undefined) : nativeDecoder(context.formats)).then((decoder) => {
         native = !!decoder
         return decoder ?? fallbackDecoder()
       })
+      engine = pending
+      // A fallback that failed to load is loaded again on the next reading, not remembered as a failure.
+      pending.catch(() => engine === pending && (engine = undefined))
     }
     const decode = await engine
     try {
@@ -91,8 +106,9 @@ export function createBarcodeDecoder(): BarcodeDecoder {
       if (!native) throw error
       // The platform's detection service went away: read this frame, and every later one, with the fallback.
       native = false
-      engine = fallbackDecoder()
-      return (await engine)(frame, context)
+      broken = true
+      engine = undefined
+      return (await fallbackDecoder())(frame, context)
     }
   }
 }

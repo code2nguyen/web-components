@@ -13,8 +13,6 @@ const en = {
   hint: 'Point the camera at a code.',
   /** Read when a code is scanned, with its value. */
   scanned: (value: string) => `Scanned: ${value}`,
-  /** Accessible name of the value shown once a code is scanned. */
-  value: 'Scanned code',
   /** The button that starts scanning again after a code was read. */
   scanAgain: 'Scan again',
   /** The button that turns the camera's light on and off. */

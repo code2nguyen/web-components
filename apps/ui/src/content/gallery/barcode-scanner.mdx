@@ -159,6 +159,25 @@ Looks and jobs for `c2-barcode-scanner`. The window's shape and colours, the sca
 <c2-barcode-scanner data-barcode-scanner-example="denied"></c2-barcode-scanner>
 ```
 
+```html tag=MdxCodeBlock,label=Own error screen
+<style>
+  .scanner-own-error {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    max-width: 32ch;
+    font-size: 14px;
+  }
+</style>
+<c2-barcode-scanner data-barcode-scanner-example="denied">
+  <div slot="error" class="scanner-own-error">
+    <strong>No camera? No problem.</strong>
+    <span>Type the number printed under the barcode instead.</span>
+    <c2-button>Type the code</c2-button>
+  </div>
+</c2-barcode-scanner>
+```
+
 ```html tag=MdxCodeBlock,label=In French
 <style>
   .scanner-french {

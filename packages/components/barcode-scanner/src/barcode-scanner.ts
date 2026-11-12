@@ -20,7 +20,7 @@ import styles from './barcode-scanner.scss?inline'
 
 export { barcodeScannerMessages } from './messages'
 export { BarcodeDecoderUnavailableError, createBarcodeDecoder } from './barcode-decoder'
-export type { BarcodeDecoder, BarcodeScanFormat, BarcodeScanResult } from './barcode-decoder'
+export type { BarcodeDecoder, BarcodeDecoderContext, BarcodeScanFormat, BarcodeScanResult } from './barcode-decoder'
 export type { CameraErrorKind, CameraFacing, CameraStreamRequest, CameraStreamSource } from '@c2n/camera-capture/camera.js'
 
 /** Where the scanner is: before the camera, opening it, reading the picture, finished with a code, or failed. */
@@ -98,6 +98,8 @@ const torchIcon = svg`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
  * @slot error - Replaces the screen shown when the camera or the decoder cannot start. Read the reason from the `camera-error` event.
  * @slot window - Replaces the drawing of the scan window; the window's box (`part="window"`) stays, and is the area that is read.
  * @slot done - Replaces the screen shown once a code is read (its value, its format and the Scan again button). Read the code from the `scan` event.
+ * @slot torch-icon - Replaces the icon of the light button.
+ * @slot switch-icon - Replaces the icon of the Switch camera button.
  * @slot actions - Action zone under the picture, for the app's own commands: type the code instead, read a picture of it (`scanImage()`), cancel.
  *
  * The events do not bubble: listen on the element itself.
@@ -115,8 +117,8 @@ const torchIcon = svg`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
  * @csspart result - The last code read, over the picture, in `continuous` mode.
  * @csspart controls - The bar under the picture.
  * @csspart actions - The wrapper of the `actions` slot.
- * @csspart torch - The button that turns the camera's light on and off, shown when the camera has one.
- * @csspart switch - The button that switches camera, shown when the device has more than one.
+ * @csspart torch - The button that turns the camera's light on and off, shown when the camera has one. It wraps the `torch-icon` slot: the built-in icon shows as the slot's fallback, and assigned content replaces it at the same size.
+ * @csspart switch - The button that switches camera, shown when the device has more than one. It wraps the `switch-icon` slot: the built-in icon shows as the slot's fallback, and assigned content replaces it at the same size.
  * @csspart button - The Start camera, Try again and Scan again buttons.
  * @csspart idle - The region of the idle screen, wrapping the `idle` slot and its default content.
  * @csspart error - The region of the error screen, wrapping the `error` slot and its default content.
@@ -237,7 +239,12 @@ export class BarcodeScanner extends LitElement {
   /** Changes whenever scanning starts or stops: a reading that comes back for an older run is dropped. */
   private run = 0
   private canvas: HTMLCanvasElement | undefined
-  private lastSeen = 0
+  /** When each code was last in the picture, by format and value: a code still in view does not fire again. */
+  private readonly seen = new Map<string, number>()
+  private opening = 0
+  private warnedFormats = ''
+  /** Focus was inside the component when its screen changed: it moves to the new screen instead of being lost. */
+  private keepFocus = false
   private onScreen = true
   private visibility: IntersectionObserver | undefined
   private audio: AudioContext | undefined
@@ -268,6 +275,8 @@ export class BarcodeScanner extends LitElement {
       void this.updateComplete.then(() => {
         if (this.isConnected) void this.start()
       })
+    // Started while off the page, the camera is open but nothing reads it yet.
+    else if (this._status === 'scanning' && this.scanTimer === undefined) this.startScanning()
   }
 
   override disconnectedCallback() {
@@ -289,11 +298,15 @@ export class BarcodeScanner extends LitElement {
     if (!this.hasUpdated) await this.updateComplete
     if (this._status === 'starting' || this._status === 'scanning') return
     this.last = undefined
+    this.seen.clear()
+    // Called from a click, this is where a browser lets the page start its sound.
+    if (this.beep) this.wakeSound()
     await this.open(facingOf(this.facing))
   }
 
   /** Closes the camera and goes back to the idle screen. */
   stop(): void {
+    this.opening++
     this.camera.stop()
     this.stopScanning()
     this._status = 'idle'
@@ -316,8 +329,8 @@ export class BarcodeScanner extends LitElement {
       const scale = Math.min(1, (FRAME_SIZE * 2) / Math.max(bitmap.width, bitmap.height))
       const frame = this.draw(bitmap, 0, 0, bitmap.width, bitmap.height, scale)
       if (!frame) return []
-      const codes = (await this.decode(frame)).map((code) => this.inFrame(code, 0, 0, scale))
-      if (codes.length) this.accept(codes[0])
+      const codes = (await this.decode(frame, true)).map((code) => this.inFrame(code, 0, 0, scale))
+      if (codes.length) this.accept(codes.slice(0, 1))
       return codes
     } finally {
       bitmap.close()
@@ -325,6 +338,7 @@ export class BarcodeScanner extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    if ((changed as Map<PropertyKey, unknown>).has('_status') && this.hasUpdated) this.keepFocus = !!this.shadowRoot?.activeElement
     if (changed.has('continuous') && !this.continuous && this._status === 'scanning' && this.last) this.finish()
   }
 
@@ -341,6 +355,12 @@ export class BarcodeScanner extends LitElement {
         }
       }
     if (changed.has('torch')) void this.applyTorch()
+    if (this.keepFocus) {
+      this.keepFocus = false
+      // The button that was pressed is gone with its screen: the new screen's button takes the focus, or the picture.
+      const active = this.shadowRoot?.activeElement
+      if (!active || active === this.stage) (this.renderRoot.querySelector<HTMLElement>('.screen .button') ?? this.stage)?.focus()
+    }
   }
 
   override firstUpdated() {
@@ -352,9 +372,14 @@ export class BarcodeScanner extends LitElement {
     this.openFacing = facing
     this.torchAvailable = false
     this._status = 'starting'
+    const attempt = ++this.opening
     try {
       const opened = await this.camera.start({ facing, width: 1280, height: 720 }, this.streamSource ?? browserCameraSource)
-      if (!opened) return
+      if (!opened) {
+        // Nothing to show the camera in (the element is not on the page yet), and no later start took over.
+        if (attempt === this.opening && this._status === 'starting' && !this.camera.stream) this._status = 'idle'
+        return
+      }
       this._status = 'scanning'
       this.emit('camera-start', { facing })
       this.torchAvailable = !!(this.track()?.getCapabilities?.() as { torch?: boolean } | undefined)?.torch
@@ -425,6 +450,7 @@ export class BarcodeScanner extends LitElement {
       return
     }
     const video = this.video
+    let wait = SCAN_INTERVAL
     if (video && video.videoWidth && this.onScreen && !document.hidden) {
       const region = coverRegion(video, this.stage, this.windowBox, this.openFacing === 'user') ?? {
         x: 0,
@@ -435,10 +461,11 @@ export class BarcodeScanner extends LitElement {
       const scale = Math.min(1, FRAME_SIZE / Math.max(region.width, region.height))
       const frame = this.draw(video, region.x, region.y, region.width, region.height, scale)
       if (frame) {
+        const began = performance.now()
         try {
-          const codes = await this.decode(frame)
+          const codes = await this.decode(frame, false)
           if (run !== this.run) return
-          if (codes.length) this.accept(this.inFrame(codes[0], region.x, region.y, scale))
+          if (codes.length) this.accept(codes.map((code) => this.inFrame(code, region.x, region.y, scale)))
         } catch (error) {
           if (run !== this.run) return
           // By name: an app's decoder may throw the class of another copy of this package.
@@ -449,14 +476,26 @@ export class BarcodeScanner extends LitElement {
           }
           // A decoder that fails on one picture reads the next one.
         }
+        // A slow decoder (the fallback on a modest phone) leaves the page as much time as it took.
+        wait = Math.max(SCAN_INTERVAL, performance.now() - began)
       }
     }
-    if (run === this.run && this._status === 'scanning') this.scanTimer = setTimeout(() => void this.scan(run), SCAN_INTERVAL)
+    if (run === this.run && this._status === 'scanning') this.scanTimer = setTimeout(() => void this.scan(run), wait)
   }
 
-  private async decode(frame: ImageData): Promise<BarcodeScanResult[]> {
+  private async decode(frame: ImageData, still: boolean): Promise<BarcodeScanResult[]> {
     const formats = Array.isArray(this.formats) ? this.formats.map((format) => String(format).trim()).filter(Boolean) : []
-    const codes = await (this.decoder ?? this.builtInDecoder)(frame, { formats })
+    if (!this.decoder) {
+      // The built-in decoder reads nothing for a name it does not know (`ean13` for `ean_13`): say so, once per list.
+      const unknown = formats.filter((format) => !Object.prototype.hasOwnProperty.call(FORMAT_NAMES, format))
+      if (unknown.length && this.warnedFormats !== unknown.join(' ')) {
+        this.warnedFormats = unknown.join(' ')
+        console.warn(
+          `c2-barcode-scanner: unknown format ${unknown.map((format) => `"${format}"`).join(', ')}. Formats are: ${Object.keys(FORMAT_NAMES).join(', ')}.`,
+        )
+      }
+    }
+    const codes = await (this.decoder ?? this.builtInDecoder)(frame, { formats, still })
     return Array.isArray(codes) ? codes.filter((code) => code && typeof code.value === 'string' && code.value !== '') : []
   }
 
@@ -486,22 +525,27 @@ export class BarcodeScanner extends LitElement {
     return { value: code.value, format: String(code.format ?? ''), ...(corners ? { corners } : {}) }
   }
 
-  /** Takes a code that was read: fires `scan`, unless it is the code already in the picture. */
-  private accept(code: BarcodeScanResult) {
+  /** Takes the codes read from one picture: fires `scan` for each, unless it is a code already in the picture. */
+  private accept(codes: BarcodeScanResult[]) {
     const now = performance.now()
     const delay = Number.isFinite(this.repeatDelay) ? Math.max(0, this.repeatDelay) : 1500
-    const repeated =
-      this.continuous && this._status === 'scanning' && this.last?.value === code.value && this.last.format === code.format && now - this.lastSeen < delay
-    this.lastSeen = now
-    if (repeated) return
-    this.last = code
-    if (this.beep) this.sound()
-    if (this.continuous && this._status === 'scanning') {
-      this.found = true
-      if (this.foundTimer !== undefined) clearTimeout(this.foundTimer)
-      this.foundTimer = setTimeout(() => (this.found = false), FOUND_TIME)
-    } else this.finish()
-    this.emit('scan', code)
+    const live = this.continuous && this._status === 'scanning'
+    for (const code of live ? codes : codes.slice(0, 1)) {
+      const key = `${code.format} ${code.value}`
+      const before = this.seen.get(key)
+      this.seen.set(key, now)
+      // Two codes side by side are each remembered, so neither fires again while both stay in view.
+      if (live && before !== undefined && now - before < delay) continue
+      this.last = code
+      if (this.beep) this.sound()
+      if (live) {
+        this.found = true
+        if (this.foundTimer !== undefined) clearTimeout(this.foundTimer)
+        this.foundTimer = setTimeout(() => (this.found = false), FOUND_TIME)
+      } else this.finish()
+      this.emit('scan', code)
+    }
+    for (const [key, at] of this.seen) if (now - at >= delay) this.seen.delete(key)
   }
 
   /** Closes the camera on the code that was read. */
@@ -511,10 +555,21 @@ export class BarcodeScanner extends LitElement {
     this._status = 'done'
   }
 
-  private sound() {
+  /** Creates the sound output, or wakes one the browser suspended: only allowed while handling a user's action. */
+  private wakeSound(): AudioContext | undefined {
     try {
       this.audio ??= new AudioContext()
-      const audio = this.audio
+      if (this.audio.state === 'suspended') void this.audio.resume().catch(() => undefined)
+      return this.audio
+    } catch {
+      return undefined
+    }
+  }
+
+  private sound() {
+    try {
+      const audio = this.wakeSound()
+      if (!audio) return
       const oscillator = audio.createOscillator()
       const gain = audio.createGain()
       oscillator.frequency.value = 1040
@@ -557,7 +612,7 @@ export class BarcodeScanner extends LitElement {
     const status = this._status
     const scanning = status === 'scanning'
     const last = this.last
-    return html`<div class="stage stage--${status}" part="stage">
+    return html`<div class="stage stage--${status}" part="stage" tabindex="-1">
       <video
         class="video ${this.openFacing === 'user' ? 'video--mirrored' : ''}"
         part="video"
@@ -651,14 +706,14 @@ export class BarcodeScanner extends LitElement {
                 aria-pressed=${this.torch ? 'true' : 'false'}
                 @click=${() => (this.torch = !this.torch)}
               >
-                ${torchIcon}
+                <slot name="torch-icon">${torchIcon}</slot>
               </button>`
             : nothing
         }
         ${
           cameras
             ? html`<button class="round" part="switch" type="button" aria-label=${this.msg.t('switchCamera')} @click=${() => this.switchCamera()}>
-                ${switchIcon}
+                <slot name="switch-icon">${switchIcon}</slot>
               </button>`
             : nothing
         }

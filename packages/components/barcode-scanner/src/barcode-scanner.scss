@@ -358,7 +358,8 @@
     background: css.cssVar(button__hover--background);
   }
 
-  svg {
+  svg,
+  ::slotted(*) {
     width: 20px;
     height: 20px;
   }
@@ -370,6 +371,7 @@
   color: css.cssVar(torch__on--color);
 }
 
+.stage:focus-visible,
 .button:focus-visible,
 .round:focus-visible {
   outline: css.cssVar(focus--outline);

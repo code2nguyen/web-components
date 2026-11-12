@@ -67,8 +67,13 @@ test('reads a code, fires scan, closes the camera and shows the code with Scan a
   await expect.poll(async () => (await frames(page)).length).toBeGreaterThan(2)
   expect(await events(page)).toEqual([])
 
+  // The Start camera button went away with its screen: focus stays in the component, on the picture.
+  expect(await scanner(page).evaluate((element) => element.shadowRoot!.activeElement?.getAttribute('part'))).toBe('stage')
+
   await setLabel(page, { value: '4006381333931', format: 'ean_13' })
   await expect(scanner(page)).toHaveState('done')
+  // And moves to Scan again when the code is read, so the next scan is one key press away.
+  await expect(page.getByRole('button', { name: 'Scan again' })).toBeFocused()
   const [scan] = await events(page)
   expect(scan.value).toBe('4006381333931')
   expect(scan.format).toBe('ean_13')
@@ -85,7 +90,7 @@ test('reads a code, fires scan, closes the camera and shows the code with Scan a
   await accessible(page)
 
   await setLabel(page, null)
-  await page.getByRole('button', { name: 'Scan again' }).click()
+  await page.keyboard.press('Enter')
   await expect(scanner(page)).toHaveState('scanning')
   expect(await scanner(page).evaluate((element: BarcodeScanner) => element.result)).toBeUndefined()
 })
@@ -373,4 +378,69 @@ test('draws its text in the language of the page', async ({ page, renderScenario
   await setLabel(page, { value: '96385074', format: 'ean_8' })
   await expect(page.getByRole('status').filter({ hasText: 'Code lu : 96385074' })).toHaveCount(1)
   await expect(page.getByRole('button', { name: 'Scanner à nouveau' })).toBeVisible()
+})
+
+test('two codes in the window each fire once, however the decoder orders them', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, '<c2-barcode-scanner continuous repeat-delay="5000"></c2-barcode-scanner>')
+  await watch(scanner(page), 'scan')
+  await scanner(page).evaluate((element: BarcodeScanner) => {
+    let flip = false
+    const codes = [
+      { value: '4006381333931', format: 'ean_13' },
+      { value: 'https://example.com/p/1', format: 'qr_code' },
+    ]
+    element.decoder = () => {
+      flip = !flip
+      return flip ? codes : [...codes].reverse()
+    }
+    return element.start()
+  })
+  await expect.poll(async () => (await events(page)).length).toBe(2)
+  await page.waitForTimeout(800)
+  expect((await events(page)).map((scan) => scan.value).sort()).toEqual(['4006381333931', 'https://example.com/p/1'])
+})
+
+test('a fallback that failed to load is loaded again on Try again', async ({ page, renderScenario, browserName }) => {
+  // Chromium remembers a module that failed to load for the life of the page, so only a reload helps there; it is
+  // also the engine that has the browser's own detector.
+  test.skip(browserName === 'chromium')
+  await render(page, renderScenario, '<c2-barcode-scanner></c2-barcode-scanner>', 'fallback')
+  // The lazy chunk does not arrive the first time.
+  let blocked = 0
+  await page.route(/zxing-decoder/, (route) => (blocked++ ? route.continue() : route.abort()))
+  await watch(scanner(page), 'scan')
+  await page.getByRole('button', { name: 'Start camera' }).click()
+  await expect(scanner(page).locator('[part="error"]')).toContainText('Barcodes cannot be read in this browser.')
+  await page.getByRole('button', { name: 'Try again' }).click()
+  await expect(scanner(page)).toHaveState('done', { timeout: 15000 })
+  expect((await events(page))[0]).toMatchObject({ value: 'C2N-12345', format: 'code_128' })
+})
+
+test('started before it is on the page, it opens the camera once it is there', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, '<div id="host"></div>')
+  await page.evaluate(() => {
+    const element = document.createElement('c2-barcode-scanner')
+    element.streamSource = window.fakeBarcodeCamera.source
+    element.decoder = () => []
+    void element.start()
+    document.querySelector('#host')!.append(element)
+  })
+  await expect(scanner(page)).toHaveState('scanning')
+})
+
+test('warns about a format name the built-in decoder does not know', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => message.type() === 'warning' && warnings.push(message.text()))
+  await render(page, renderScenario, '<c2-barcode-scanner continuous formats="ean13"></c2-barcode-scanner>', 'fallback')
+  await scanner(page).evaluate((element: BarcodeScanner) => element.start())
+  await expect.poll(() => warnings.filter((text) => text.includes('unknown format "ean13"')).length).toBe(1)
+})
+
+test('the icons of the light button can be replaced', async ({ page, renderScenario }) => {
+  await render(page, renderScenario, '<c2-barcode-scanner continuous><span slot="torch-icon" id="bulb">*</span></c2-barcode-scanner>')
+  await setLabel(page, null)
+  await page.evaluate(() => (window.fakeBarcodeCamera.hasTorch = true))
+  await scanner(page).evaluate((element: BarcodeScanner) => element.start())
+  await expect(page.getByRole('button', { name: 'Light' })).toBeVisible()
+  await expect(page.locator('#bulb')).toBeVisible()
 })

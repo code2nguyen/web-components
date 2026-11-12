@@ -38,17 +38,18 @@ const MATRIX: [string, () => Reader][] = [
 ]
 
 const readers = new Map<string, { reader: Reader; hints: Map<DecodeHintType, unknown> }[]>()
+const known = (format: string) => Object.prototype.hasOwnProperty.call(FORMATS, format)
 
 /** The readers for a list of formats, built once: the 2D ones asked for, then one reader for every 1D format asked for. */
-function readersFor(formats: readonly string[]) {
-  const key = formats.join(' ')
+function readersFor(formats: readonly string[], thorough: boolean) {
+  const key = `${thorough} ${formats.join(' ')}`
   let list = readers.get(key)
   if (!list) {
-    const wanted = formats.length ? formats.filter((format) => format in FORMATS) : Object.keys(FORMATS)
-    const hints = new Map<DecodeHintType, unknown>([
-      [DecodeHintType.POSSIBLE_FORMATS, wanted.map((format) => FORMATS[format])],
-      [DecodeHintType.TRY_HARDER, true],
-    ])
+    const wanted = formats.length ? formats.filter(known) : Object.keys(FORMATS)
+    const hints = new Map<DecodeHintType, unknown>([[DecodeHintType.POSSIBLE_FORMATS, wanted.map((format) => FORMATS[format])]])
+    // The thorough search costs about eight times as much: worth it for one still picture, not for every frame of a
+    // camera, which gets another chance a moment later.
+    if (thorough) hints.set(DecodeHintType.TRY_HARDER, true)
     list = MATRIX.filter(([format]) => wanted.includes(format)).map(([, create]) => ({ reader: create(), hints }))
     if (wanted.some((format) => !MATRIX.some(([matrix]) => matrix === format))) list.push({ reader: new MultiFormatOneDReader(hints), hints })
     readers.set(key, list)
@@ -60,14 +61,14 @@ function readersFor(formats: readonly string[]) {
  * Reads one code from a picture with `@zxing/library`. Each reader is tried in turn rather than through the
  * library's `MultiFormatReader`, which writes a console warning for every frame without a code.
  */
-export const zxingDecoder: BarcodeDecoder = (frame, { formats }) => {
+export const zxingDecoder: BarcodeDecoder = (frame, { formats, still }) => {
   // The luma (Rec. 601) of each pixel: the library binarizes a greyscale picture.
   const { data } = frame
   const gray = new Uint8ClampedArray(data.length / 4)
   for (let i = 0, p = 0; p < gray.length; i += 4, p++) gray[p] = (data[i] * 77 + data[i + 1] * 150 + data[i + 2] * 29) >> 8
   const bitmap = new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(gray, frame.width, frame.height)))
   const found: BarcodeScanResult[] = []
-  for (const { reader, hints } of readersFor(formats)) {
+  for (const { reader, hints } of readersFor(formats, still)) {
     try {
       const result = reader.decode(bitmap, hints)
       const format = NAMES.get(result.getBarcodeFormat()) ?? String(BarcodeFormat[result.getBarcodeFormat()]).toLowerCase()

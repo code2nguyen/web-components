@@ -66,7 +66,7 @@ Codes are read by the browser's `BarcodeDetector` where it knows the formats ask
 npm install @zxing/library
 ```
 
-Without either, the scanner shows "Barcodes cannot be read in this browser." and fires `camera-error` with `kind: 'decoder'`. To read codes another way (a WebAssembly decoder, a server), set `decoder`: a function that receives the `ImageData` of the scan window and returns the codes it found.
+Without either, the scanner shows "Barcodes cannot be read in this browser." and fires `camera-error` with `kind: 'decoder'`. To read codes another way (a WebAssembly decoder, a server), set `decoder`: a function that receives the `ImageData` of the scan window and returns the codes it found. Its second argument carries the `formats` asked for and `still`, true for a picture from `scanImage()` that is worth a slower, more thorough reading.
 
 ```ts tag=CodeBlock
 import type { BarcodeDecoder } from '@c2n/components/barcode-scanner'
@@ -88,7 +88,7 @@ With `continuous`, a code that stays in the window fires `scan` once. It fires a
 
 ## Light and camera
 
-On a device whose camera has a light (most phones, in Chrome), a light button shows under the picture; the `torch` property reads and sets it. A device with several cameras gets a switch button, and `facing` picks the one to open.
+On a device whose camera has a light (most phones, in Chrome), a light button shows under the picture; the `torch` property reads and sets it. A device with several cameras gets a switch button, and `facing` picks the one to open. The `torch-icon` and `switch-icon` slots replace their icons.
 
 ## Still pictures and handheld scanners
 
@@ -109,4 +109,4 @@ The scanner shows the value as text and hands it to the app. It never opens a li
 
 ## Accessibility
 
-The element is a group named by `label` ("Barcode scanner" by default). The instruction, each code read and each error are announced through live regions; the picture and the scan window are hidden from assistive technology. The scan line stands still under reduced motion.
+The element is a group named by `label` ("Barcode scanner" by default). The instruction, each code read and each error are announced through live regions. When a screen's button is pressed and the screen changes, focus moves to the next screen's button (Scan again, Try again), or to the picture while scanning, so it is never lost; the picture and the scan window are hidden from assistive technology. The scan line stands still under reduced motion.
