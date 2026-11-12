@@ -307,6 +307,36 @@ The tree is built on the client and wins over `group-by`; with a `dataSource` it
 The chevron is the `row-toggle` part and takes the `--c2-table__group-toggle--*` and `--c2-table__group--indent`
 variables.
 
+### Row detail
+
+`detail-height` gives every row a chevron in the first column that opens a panel of that height under the row, the
+master/detail of a data grid: the lines of an order, a form, a chart, a child table. Fill it from markup with a child
+in the row's slot, `slot="detail:{key}"`, or from script with `renderDetail`, which gets `{ row, rowIndex, key }`,
+returns anything Lit can render and runs when the row opens (and again only when its row changes).
+
+```html tag=CodeBlock
+<c2-table row-key="id" detail-height="140" expanded-details="ORD-2" rows="...">
+  <c2-table-column field="id" header="Order"></c2-table-column>
+  <c2-table-column field="customer" header="Customer"></c2-table-column>
+  <div slot="detail:ORD-2">Two items, shipped on Monday.</div>
+</c2-table>
+```
+
+```typescript tag=CodeBlock
+table.renderDetail = ({ row }) => html`<order-lines .order=${row}></order-lines>`
+```
+
+A click on the chevron, Alt+↓ and Alt+↑ from any cell of the row, `expandDetail(key)` and `collapseDetail(key)` open
+and close a panel; `expanded-details` lists the open rows by key (`;`-separated in the attribute) and `detail-toggle`
+reports a click or a key. The height is declared, like `row-height`, because that is what keeps a long table
+windowed: an open panel adds a known offset, where a panel of any height would force every row to render. Content
+taller than the panel scrolls inside it, and keys pressed inside a panel belong to its content. A closed panel filled
+from a slot is still found by the browser's find-in-page, which opens it (where the browser supports
+`hidden="until-found"`; a windowed table only holds the rows near the viewport). Give the rows a `row-key`, since the open panels are remembered by key
+through a sort or a new page. The panel is the `detail` part and the chevron the `detail-toggle` part, named
+`Details` in the table's language (the `detailToggle` message) or by `detail-label`; `--c2-table__detail--background` and `--c2-table__detail--padding` style the panel. Row detail is
+ignored, with a console warning, while the rows are grouped or a tree: those rows already open.
+
 ### Rendering a cell
 
 `renderCell` is a property on the column, so it is set from script. It receives the cell's value, the whole row and the row index, and returns anything Lit can render.

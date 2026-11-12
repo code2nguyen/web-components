@@ -1,5 +1,5 @@
 ---
-/** Enhances table gallery examples whose property-only API (`loadChildren`) cannot be expressed as an HTML attribute. */
+/** Enhances table gallery examples whose property-only API (`loadChildren`, `renderDetail`) cannot be expressed as an HTML attribute. */
 ---
 
 <script>
@@ -35,6 +35,15 @@
       if (table.dataset.tableExample === 'lazy-children') {
         // A short delay stands in for the network, so the spinner on the chevron shows.
         table.loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
+      }
+      if (table.dataset.tableExample === 'row-detail') {
+        // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
+        table.renderDetail = ({ row }) => {
+          const note = document.createElement('p')
+          note.textContent = String(row.note)
+          note.style.cssText = 'margin: 0; font-size: 13px; line-height: 1.5; max-width: 60ch'
+          return note
+        }
       }
     })
   }
