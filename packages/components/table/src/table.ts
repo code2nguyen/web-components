@@ -504,7 +504,7 @@ export interface Table {
  * @csspart group-toggle - The chevron of a group row.
  * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
- * @csspart detail - The detail panel under an open row.
+ * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
  *

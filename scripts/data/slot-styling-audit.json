@@ -3898,6 +3898,13 @@
     },
     {
       "tag": "c2-table",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
+    },
+    {
+      "tag": "c2-table",
       "slot": "empty",
       "decision": "part",
       "parts": ["state"],
