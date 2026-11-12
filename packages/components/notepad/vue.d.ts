@@ -35,6 +35,7 @@ declare module 'vue' {
         onFormatChange?: (event: EventOf<Notepad, 'format-change'>) => void
         onPaperChange?: (event: EventOf<Notepad, 'paper-change'>) => void
         onImageError?: (event: EventOf<Notepad, 'image-error'>) => void
+        onLinkOpen?: (event: EventOf<Notepad, 'link-open'>) => void
       }
     >
   }

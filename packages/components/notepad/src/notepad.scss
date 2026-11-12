@@ -42,6 +42,8 @@
     pad--padding-bottom: 0px,
     stack--display: block,
     controls--opacity: 1,
+    link--color: inherit,
+    link--text-decoration: underline dotted,
     ink-blue--color: #2848b8,
     ink-black--color: #18181b,
     ink-red--color: #b8232b,
@@ -544,6 +546,21 @@
   }
   s {
     text-decoration-thickness: 1.5px;
+  }
+  // A web address written on the page. It keeps the ink it is written in, so it reads on every paper.
+  .link {
+    color: css.cssVar(link--color);
+    text-decoration: css.cssVar(link--text-decoration);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+    &[href] {
+      cursor: pointer;
+    }
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 1px;
+      border-radius: 2px;
+    }
   }
   // Each mark names its colour by position (`--_ink-<n>`, set by the component from its list); a position the
   // list does not have falls back to the page's ink.

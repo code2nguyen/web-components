@@ -163,6 +163,18 @@ notepad.value = '- [ ] Call the bank'
 
 `input` fires on every edit, after `value` is updated. `change` fires when the notepad loses focus with a changed value. Writing the emitted value straight back, as `v-model` does, keeps the caret where it is. `c2-notepad` is form-associated: it submits `value` under `name`, supports `required` and `maxlength` (which counts plain-text characters), resets with its form, and follows a disabled fieldset.
 
+## Links
+
+A web address written on the page (`https://…`, `http://…` or `www.…`) is drawn as a link: a click, or Alt+Enter with the caret in it, opens it in a new tab, on a read-only page as well. Nothing is added to the value, where the address stays plain text, and editing it into something else removes the link. A link keeps the ink it is written in under a dotted line; `--c2-notepad__link--color` and `--c2-notepad__link--text-decoration` restyle it. `link-open` fires before the tab opens: cancel it to open `detail.href` your own way, such as inside the application.
+
+```ts tag=CodeBlock
+notepad.addEventListener('link-open', (event) => {
+  if (!event.detail.href.startsWith(location.origin)) return
+  event.preventDefault()
+  router.navigate(new URL(event.detail.href).pathname)
+})
+```
+
 ## Tearing off a page
 
 With `tearable`, the sheet gets a perforated top edge, a "Tear off" button and a stack of sheets underneath. `tearOff()` does the same from script. It fires a cancelable `page-tear` with the page's value and number, plays the tear, clears the page and adds one to `page`. Cancel the event to keep the page. Ctrl/⌘ Z brings a torn page back.
