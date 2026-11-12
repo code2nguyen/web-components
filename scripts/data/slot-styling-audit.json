@@ -1231,6 +1231,13 @@
     },
     {
       "tag": "c2-date-input",
+      "slot": "calendar-actions",
+      "decision": "part",
+      "parts": ["calendar-actions"],
+      "reason": "The row under the calendar owns the layout, spacing and separator of the calendar-actions slot."
+    },
+    {
+      "tag": "c2-date-input",
       "slot": "calendar-icon",
       "decision": "assigned-content",
       "reason": "The calendar-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
@@ -3944,6 +3951,13 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
     },
     {
       "tag": "c2-table",

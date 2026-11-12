@@ -4,12 +4,15 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { guard } from 'lit/directives/guard.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
-import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { VirtualScrollController, type VirtualScrollRange } from '@c2n/core/controllers/virtual-scroll.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { tableMessages } from './messages.js'
 import { defaultCompare } from '@c2n/core/data-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import { provide } from '@lit/context'
@@ -28,6 +31,8 @@ import {
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
   type TableDataSource,
+  type TableDetailRenderer,
+  type TableDetailToggleEventDetail,
   type TableGroupBy,
   type TableGroupContext,
   type TableGroupDisplay,
@@ -74,6 +79,10 @@ type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modifie
 const HEADER_ROW = -1
 /** Row index of the summary row in `focusedCell`; body rows are numbered from 0 and the header is `HEADER_ROW`. */
 const SUMMARY_ROW = -2
+/** No detail panel is open: the one value `#detailLines` returns for it, so the windowing takes its short path. */
+const NO_LINES: number[] = []
+/** Whether the browser can keep a closed panel findable (`hidden="until-found"`), which it tells by firing `beforematch`. */
+const FINDABLE = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype
 
 export type TableSummaryScope = 'all' | 'page'
 
@@ -309,6 +318,7 @@ export interface TableEventMap {
   'range-change': CustomEvent<TableRangeChangeEventDetail>
   'row-toggle': CustomEvent<TableRowToggleEventDetail>
   'children-error': CustomEvent<TableChildrenErrorEventDetail>
+  'detail-toggle': CustomEvent<TableDetailToggleEventDetail>
 }
 
 export interface Table {
@@ -409,6 +419,14 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Row detail.** `detail-height="240"` gives every row a chevron in the first column that opens a panel of that
+ * height under the row (master/detail). The panel is filled by `renderDetail` (`{ row, rowIndex, key }`), which runs
+ * when the row opens, or, without it, from a child in the row's slot (`slot="detail:{key}"`), which find-in-page
+ * reaches while the row is closed and opens. Keys pressed inside a panel belong to its content. Rows open with a click on the chevron,
+ * Alt+↓ and Alt+↑ on the row, `expandDetail()` or `expanded-details` (the keys of the open rows), and `detail-toggle`
+ * reports a click or a key. The height is declared so the table keeps windowing its rows: an open panel adds a known
+ * offset. Give the rows a `row-key`. It is ignored while the rows are grouped or a tree.
+ *
  * **Tree.** `children-field="children"` reads each row's child rows from that field, nested to any depth, and the grid
  * becomes a `treegrid`: every row is a row of the grid, and the first column (or the one marked `group-column`) gets
  * a chevron and an indentation per level. Rows open with a click on the chevron, ←/→ on that column, `expandRow()` or
@@ -443,6 +461,7 @@ export interface Table {
  * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
  * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
  * @slot group:{groupKey} - Label of one group, e.g. `slot="group:region=EMEA"`, in place of its formatted value and row count. The copy of the group kept under the header while its rows scroll shows the built-in label.
+ * @slot detail:{key} - Detail panel of one row (`detail-height`), e.g. `slot="detail:ORD-7"`, shown while that row is open and `renderDetail` is unset.
  * @slot cell:{line}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:0:change"` for the first displayed row. `line` is the cell's display line, counted across the whole dataset after sort, filter and grouping with the page offset included — the numbering of `range-change`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback. Children are needed only for the lines `range-change` reports (map `detail.rows`, or `renderedRange.rows`, each `{ line, key, row }`); a child whose line is outside the rendered window is left unassigned. After a sort, filter or page change the same line holds a different row, so re-render the children from the next `range-change`.
  *
  * @slotcomponent c2-table-column
@@ -457,6 +476,7 @@ export interface Table {
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
  * @event {CustomEvent<TableRowToggleEventDetail>} row-toggle - Fired after the user opens or closes a row of a tree, with its `key`, the `row` and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
+ * @event {CustomEvent<TableDetailToggleEventDetail>} detail-toggle - Fired after the user opens or closes a row's detail panel (`detail-height`), with its `key`, the `row` and whether it is now open. Does not bubble.
  * @event {CustomEvent<TableChildrenErrorEventDetail>} children-error - Fired when `loadChildren` rejects, with the row's `key`, the `row` and the `error`. The row has closed again. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
@@ -483,6 +503,8 @@ export interface Table {
  * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
  * @csspart group-toggle - The chevron of a group row.
  * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
+ * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
+ * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
  *
@@ -583,6 +605,8 @@ export interface Table {
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
  * @cssproperty {border-radius} [--c2-table__skeleton--border-radius=4px]
  *
+ * @cssproperty {color} [--c2-table__detail--background=#fafafa] - Background of a row's detail panel.
+ * @cssproperty {padding} [--c2-table__detail--padding=12px] - Padding of a row's detail panel.
  * @cssproperty {color} [--c2-table__state--color=#71717a] - Colour of the empty and loading messages.
  * @cssproperty {padding} [--c2-table__state--padding=32px 12px]
  * @cssproperty {font-size} [--c2-table__state--font-size=14px]
@@ -786,10 +810,27 @@ export class Table extends LitElement {
    */
   @property({ attribute: false }) loadChildren?: TableChildrenLoader
 
+  /**
+   * Height in pixels of a row's detail panel, and the switch of the feature: above 0, every row gets a chevron that
+   * opens a panel of this height under it. Declared, like `row-height`, so the rows stay windowed. Ignored while the
+   * rows are grouped (`group-by`) or a tree (`children-field`).
+   */
+  @property({ type: Number, attribute: 'detail-height' }) detailHeight = 0
+
+  /** Draws the detail panel of an open row. Unset, the panel shows the child in the row's `detail:{key}` slot. */
+  @property({ attribute: false }) renderDetail?: TableDetailRenderer
+
+  /** Keys of the rows whose detail panel is open, `;`-separated in the attribute. The table writes it as rows are opened and closed. */
+  @property({ converter: rowKeysOrUnsetConverter, attribute: 'expanded-details' }) expandedDetails?: string[]
+
+  /** Accessible name of the chevron that opens a row's detail panel. Unset, `Details` in the table's language. */
+  @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
   private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
+  private readonly msg = new LocalizeController(this, tableMessages)
   @state() private remoteTotal = -1
 
   #sortedRows: TableRow[] = []
@@ -821,6 +862,12 @@ export class Table extends LitElement {
   #loadedChildren = new Map<string, TableRow[]>()
   #pendingChildren = new Set<string>()
   #headerHeightPx = 0
+  #openDetails?: { source: string[]; keys: Set<string> }
+  #detailCache?: { inputs: unknown[]; lines: number[] }
+  #windowCache?: { inputs: unknown[]; range: VirtualScrollRange }
+  /** Counts the blocks a `dataSource` delivered, which is when a row of an open detail may appear. */
+  #blocksVersion = 0
+  #warnedDetail = false
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
   /** The window `range-change` last reported, to fire only when it moves. */
@@ -1069,6 +1116,16 @@ export class Table extends LitElement {
     this.#setRowExpanded(key, false)
   }
 
+  /** Opens the detail panel of the row with `key` (`detail-height`). Does not fire `detail-toggle`. */
+  expandDetail(key: string) {
+    this.#setDetailExpanded(key, true)
+  }
+
+  /** Closes the detail panel of the row with `key`. */
+  collapseDetail(key: string) {
+    this.#setDetailExpanded(key, false)
+  }
+
   /** Drops the `dataSource` cache and reloads the visible rows. */
   refresh() {
     this.error = ''
@@ -1090,6 +1147,10 @@ export class Table extends LitElement {
     if (this.dataSource && this.childrenField && !this.#warnedTreeSource) {
       this.#warnedTreeSource = true
       console.warn('[c2-table] children-field is ignored with a dataSource. Pass the rows in rows, and load children with loadChildren.')
+    }
+    if (this.detailHeight > 0 && !this.#warnedDetail && (this.childrenField || this.#groupLevels().length)) {
+      this.#warnedDetail = true
+      console.warn('[c2-table] detail-height is ignored while the rows are grouped (group-by) or a tree (children-field).')
     }
     if (this.dataSource && this.#groupLevels().length && !this.#warnedGroupedSource) {
       this.#warnedGroupedSource = true
@@ -1217,7 +1278,7 @@ export class Table extends LitElement {
       // The same window `render` drew (`#renderBody` gets `offset + range.start` to `offset + range.end`, clamped the
       // same way while grouped), so each `line` here is the one its cells' `cell:{line}:{field}` slots carry.
       const offset = this.#pageStart
-      const range = this.#virtualizer.range
+      const range = this.#window()
       const grouping = this.#grouping()
       start = offset + range.start
       end = grouping || this.#tree ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
@@ -1248,7 +1309,7 @@ export class Table extends LitElement {
   override render() {
     const columns = this.#renderColumns()
     const pins = this.#pinPlacements(columns)
-    const range = this.#virtualizer.range
+    const range = this.#window()
     // The virtualizer windows the page; the body renders dataset indices, so shift its range by the page offset.
     const offset = this.#pageStart
     const summary = this.#hasSummary(columns)
@@ -1329,6 +1390,7 @@ export class Table extends LitElement {
         },
       )
     }
+    const detail = this.#detail
     return repeat(
       lines,
       (line) => {
@@ -1336,7 +1398,7 @@ export class Table extends LitElement {
         const row = this.#rowAt(index)
         return row ? this.#keyAt(index, row) : `skeleton:${index}`
       },
-      (line) => this.#renderRow(line, columns, pins),
+      (line) => (detail ? html`${this.#renderRow(line, columns, pins)}${this.#renderDetailRow(line, columns)}` : this.#renderRow(line, columns, pins)),
     )
   }
 
@@ -1589,6 +1651,7 @@ export class Table extends LitElement {
     const depth = item?.kind === 'row' ? item.parent.level + 1 : 0
     const treeColumn = (grouping && this.groupDisplay !== 'band') || node ? this.#groupTreeColumn(columns) : undefined
     const open = node && this.#isParent(node) ? this.#isRowExpanded(node.key) : undefined
+    const detailColumn = row && this.#detail ? columns.find((column) => column.field !== SELECTION_FIELD) : undefined
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
     const updateState = key ? this.#rowUpdateStates.get(key) : undefined
@@ -1628,7 +1691,18 @@ export class Table extends LitElement {
         @click=${(event: MouseEvent) => this.#handleRowClick(event, line)}
       >
         ${columns.map((column, columnIndex) =>
-          this.#renderCell(row, line, index, column, columnIndex, pins, column === treeColumn ? depth : 0, node, column === treeColumn),
+          this.#renderCell(
+            row,
+            line,
+            index,
+            column,
+            columnIndex,
+            pins,
+            column === treeColumn ? depth : 0,
+            node,
+            column === treeColumn,
+            column === detailColumn,
+          ),
         )}
       </div>
     `
@@ -1648,6 +1722,7 @@ export class Table extends LitElement {
     indent = 0,
     node?: TreeNode,
     tree = false,
+    detail = false,
   ) {
     const classes = {
       cell: true,
@@ -1714,7 +1789,7 @@ export class Table extends LitElement {
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
         @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
-        ${node && tree ? this.#renderRowToggle(node) : nothing}
+        ${node && tree ? this.#renderRowToggle(node) : nothing} ${detail && row ? this.#renderDetailToggle(row, rowIndex, line, columnIndex) : nothing}
         <span
           class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
           part="cell-content cell-content-${fieldPart}"
@@ -1739,6 +1814,169 @@ export class Table extends LitElement {
       }}
       >${this.#pendingChildren.has(node.key) ? html`<c2-spinner></c2-spinner>` : CHEVRON}</span
     >`
+  }
+
+  /** Whether rows have a detail panel: `detail-height` is set and the rows are neither grouped nor a tree. */
+  get #detail(): boolean {
+    return this.detailHeight > 0 && !this.#tree && !this.#grouping()
+  }
+
+  #isDetailOpen(key: string): boolean {
+    const open = this.expandedDetails
+    if (!open?.length) return false
+    if (this.#openDetails?.source !== open) this.#openDetails = { source: open, keys: new Set(open) }
+    return this.#openDetails.keys.has(key)
+  }
+
+  #setDetailExpanded(key: string, expanded: boolean): boolean {
+    if (this.#isDetailOpen(key) === expanded) return false
+    const current = this.expandedDetails ?? []
+    this.expandedDetails = expanded ? [...current, key] : current.filter((entry) => entry !== key)
+    return true
+  }
+
+  #toggleDetail(key: string, row: TableRow, expanded = !this.#isDetailOpen(key)) {
+    if (!this.#setDetailExpanded(key, expanded)) return
+    this.dispatchEvent(new CustomEvent<TableDetailToggleEventDetail>('detail-toggle', { detail: { key, row, expanded }, bubbles: false, composed: true }))
+    // A panel opened at the bottom edge is brought into view, as far as its row stays under the header.
+    if (expanded)
+      void this.updateComplete.then(() => {
+        const panel = [...this.renderRoot.querySelectorAll<HTMLElement>('.row--detail')].find((entry) => entry.dataset.detailKey === key)
+        const viewport = this.viewport
+        if (!panel || !viewport) return
+        const over = panel.getBoundingClientRect().bottom - viewport.getBoundingClientRect().bottom
+        const room = panel.getBoundingClientRect().top - this.#rowHeightPx - viewport.getBoundingClientRect().top - this.#headerHeight()
+        if (over > 0 && room > 0) viewport.scrollTop += Math.min(over, room)
+      })
+  }
+
+  /**
+   * The lines of the page whose detail panel is open, in order, counted from the page's first line. Found by one walk
+   * over the rows, kept until the rows, the page or the open keys change: scrolling never repeats it.
+   */
+  #detailLines(): number[] {
+    const keys = this.expandedDetails
+    if (!keys?.length || !this.#detail) return NO_LINES
+    const count = this.rowCount
+    const first = this.#pageStart
+    const inputs = [keys, this.#sortedRows, this.#transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
+    const cached = this.#detailCache
+    if (cached && inputs.every((input, index) => input === cached.inputs[index])) return cached.lines
+    const wanted = new Set(keys)
+    const lines: number[] = []
+    if (this.dataSource) {
+      // Only the blocks that arrived can hold an open row: a key that is not loaded costs no walk over the total.
+      const size = this.#effectiveBlockSize
+      for (const [block, rows] of this.#blocks) {
+        rows.forEach((row, position) => {
+          const line = block * size + position - first
+          if (line >= 0 && line < count && wanted.has(this.#keyAt(first + line, row))) lines.push(line)
+        })
+      }
+      lines.sort((a, b) => a - b)
+    } else {
+      for (let line = 0; line < count && lines.length < wanted.size; line++) {
+        const row = this.#sourceRowAt(first + line)
+        if (row && wanted.has(this.#keyAt(first + line, row))) lines.push(line)
+      }
+    }
+    this.#detailCache = { inputs, lines }
+    return lines
+  }
+
+  /**
+   * The window to render: the virtualizer's, which counts uniform rows, moved by the detail panels open above it.
+   * Each adds `detail-height` to the offset of the rows after it, so the first visible row is found by walking the
+   * open panels, and the spacers carry the panels outside the window. With no panel open it is the virtualizer's own.
+   */
+  #window(): VirtualScrollRange {
+    const range = this.#virtualizer.range
+    const open = this.#detailLines()
+    if (open.length === 0 || !this.isVirtualized) return range
+    const height = this.#rowHeightPx
+    const panel = this.detailHeight
+    const count = this.rowCount
+    // An update reads the window several times (render, focus, blocks, range-change): computed once per scroll position.
+    const inputs = [range, open, this.#virtualizer.scrollTop, height, panel, count, this.overscan]
+    const cached = this.#windowCache
+    if (cached && inputs.every((input, index) => input === cached.inputs[index])) return cached.range
+    // Past the browser's height limit the virtualizer scales the scroll offset; `shift` is what it added to it.
+    const shift = Math.max(0, range.start * height - range.paddingTop)
+    const offset = this.#virtualizer.scrollTop + shift
+    let above = 0
+    let first = Math.floor(offset / height)
+    while (above < open.length && open[above] < first) {
+      above++
+      // Inside the panel of that row, the row itself is the first one still on screen.
+      first = Math.max(open[above - 1], Math.floor((offset - above * panel) / height))
+    }
+    // One more row than the overscan: the virtualizer asks for a render when its own first row changes, which with
+    // panels above is up to a row away from when this one does.
+    const overscan = Math.max(0, this.overscan) + 1
+    const start = Math.max(0, Math.min(first, count - 1) - overscan)
+    const end = Math.min(count, start + Math.ceil((this.viewport?.clientHeight || 480) / height) + 1 + overscan * 2)
+    const before = open.filter((line) => line < start).length
+    const inside = open.filter((line) => line >= start && line < end).length
+    const total = range.paddingTop + (range.end - range.start) * height + range.paddingBottom + open.length * panel
+    const paddingTop = Math.max(0, start * height + before * panel - shift)
+    const moved = { start, end, paddingTop, paddingBottom: Math.max(0, total - paddingTop - (end - start) * height - inside * panel) }
+    this.#windowCache = { inputs, range: moved }
+    return moved
+  }
+
+  /** The chevron that opens a row's detail panel: a button, since a plain grid row has no expanded state of its own. */
+  #renderDetailToggle(row: TableRow, rowIndex: number, line: number, columnIndex: number) {
+    const key = this.#keyAt(rowIndex, row)
+    const open = this.#isDetailOpen(key)
+    return html`<button
+      class=${classMap({ 'group-toggle': true, 'detail-toggle': true, 'detail-toggle--closed': !open })}
+      part="detail-toggle"
+      type="button"
+      tabindex="-1"
+      aria-label=${this.detailLabel || this.msg.t('detailToggle')}
+      aria-expanded=${String(open)}
+      aria-controls=${open ? `detail-${line}` : nothing}
+      @click=${(event: Event) => {
+        event.stopPropagation()
+        // The click put focus on the button: the keys that follow act on this row, not on the last cell focused.
+        this.focusedCell = { row: line, column: columnIndex }
+        this.#toggleDetail(key, this.#sourceRowAt(rowIndex) ?? row)
+      }}
+    >
+      ${CHEVRON}
+    </button>`
+  }
+
+  /**
+   * The panel under an open row: a row of the grid with one cell across every column, of the declared height. Its
+   * cell is a tab stop, so a panel taller than its content's room scrolls from the keyboard. A renderer runs again
+   * only when its row changes, so the panel keeps what the user did in it while the table redraws around it.
+   *
+   * A closed panel filled from the row's slot stays in the page as `hidden="until-found"`, with no height, so
+   * find-in-page reaches its text and opens it. Where the browser has no such state it is not drawn, and neither is
+   * a renderer's panel, which is drawn on open.
+   */
+  #renderDetailRow(line: number, columns: TableColumnConfig[]) {
+    const index = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(index)
+    if (!row) return nothing
+    const key = this.#keyAt(index, row)
+    const open = this.#isDetailOpen(key)
+    const renderer = this.renderDetail
+    if (!open && (renderer || !FINDABLE)) return nothing
+    return html`<div
+      class="row row--detail"
+      role="row"
+      data-detail-key=${key}
+      hidden=${open ? nothing : 'until-found'}
+      aria-hidden=${open ? nothing : 'true'}
+      style=${open ? `height:${this.detailHeight}px` : nothing}
+      @beforematch=${() => this.#toggleDetail(key, row, true)}
+    >
+      <div class="detail" id="detail-${line}" role="gridcell" part="detail" tabindex=${open ? '0' : nothing} aria-colspan=${columns.length}>
+        ${renderer ? guard([renderer, row, index, key], () => renderer({ row, rowIndex: index, key })) : html`<slot name=${`detail:${key}`}></slot>`}
+      </div>
+    </div>`
   }
 
   #hasSummary(columns: TableColumnConfig[]): boolean {
@@ -2011,8 +2249,14 @@ export class Table extends LitElement {
 
   /** A selectable table without a key selects positions, which re-point at other rows after a sort. Say so, once. */
   #warnPositionalKeys() {
-    if (this.#warnedPositionalKeys || this.#hasRowIdentity || this.selection === 'none' || this.rowCount === 0) return
+    if (this.#warnedPositionalKeys || this.#hasRowIdentity || (this.selection === 'none' && !this.#detail) || this.rowCount === 0) return
     this.#warnedPositionalKeys = true
+    if (this.selection === 'none') {
+      console.warn(
+        "[c2-table] detail-height without row-key: a row's key is its position, so an open panel moves to another row when the rows are sorted or replaced. Set row-key (or getRowKey) to the field that identifies a row.",
+      )
+      return
+    }
     console.warn(
       `[c2-table] selection="${this.selection}" without row-key: a row's key is its position, so the selection moves to other rows when they are sorted or replaced. Set row-key (or getRowKey) to the field that identifies a row.`,
     )
@@ -2464,13 +2708,26 @@ export class Table extends LitElement {
       else if (bottom > viewport.clientHeight) viewport.scrollTop += bottom - viewport.clientHeight
       return
     }
+    const viewport = this.viewport
+    const height = this.#rowHeightPx
     if (!grouping) {
-      this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
+      const open = this.#detailLines()
+      const range = this.#virtualizer.range
+      // Past the browser's height limit the virtualizer scales the scroll: its own arithmetic is the closer one there.
+      const scaled = range.paddingTop + (range.end - range.start) * height + range.paddingBottom < this.rowCount * height - 1
+      if (open.length === 0 || !viewport || scaled) {
+        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
+        return
+      }
+      // The panels open above the row push it down by their height.
+      const index = line - this.#pageStart
+      const rowTop = index * height + open.filter((entry) => entry < index).length * this.detailHeight
+      const room = viewport.clientHeight - this.#headerHeight()
+      if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop
+      else if (rowTop + height > viewport.scrollTop + room) viewport.scrollTop = rowTop + height - room
       return
     }
-    const viewport = this.viewport
     if (!viewport) return
-    const height = this.#rowHeightPx
     const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
     const covered = this.#depthOf(grouping.items[line]) * height
     const visible = viewport.clientHeight - this.#headerHeight()
@@ -2591,6 +2848,7 @@ export class Table extends LitElement {
   #resetRemote() {
     this.#requestToken++
     this.#blocks.clear()
+    this.#blocksVersion++
     this.#pendingBlocks.clear()
     this.remoteTotal = -1
   }
@@ -2607,7 +2865,7 @@ export class Table extends LitElement {
       void this.#fetchBlock(0)
       return
     }
-    const { start, end } = this.#virtualizer.range
+    const { start, end } = this.#window()
     if (end <= start) return
     const firstBlock = Math.floor(start / this.blockSize)
     const lastBlock = Math.floor((end - 1) / this.blockSize)
@@ -2624,6 +2882,7 @@ export class Table extends LitElement {
       const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel })
       if (token !== this.#requestToken) return
       this.#blocks.set(block, result.rows ?? [])
+      this.#blocksVersion++
       if (typeof result.total === 'number') this.remoteTotal = result.total
       else if (this.remoteTotal < 0) this.remoteTotal = block * size + (result.rows?.length ?? 0)
       this.requestUpdate()
@@ -2894,6 +3153,8 @@ export class Table extends LitElement {
   #handleKeyDown = (event: KeyboardEvent) => {
     const columns = this.#renderColumns()
     if (columns.length === 0) return
+    // Keys pressed in a detail panel belong to its content (a child table, a form), not to this grid.
+    if (event.composedPath().some((node) => node instanceof Element && node.classList.contains('row--detail'))) return
     if (this.#isFromCellControl(event)) return
     let { row, column } = this.focusedCell
     // Keyboard movement stays inside the page: rows are numbered across the whole dataset, so page 2 starts at
@@ -2944,6 +3205,15 @@ export class Table extends LitElement {
     if (groupNode && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault()
       this.#toggleGroup(groupNode)
+      return
+    }
+
+    // Alt+↓ opens the row's detail panel and Alt+↑ closes it, from any of its cells.
+    if (event.altKey && row >= 0 && (event.key === 'ArrowDown' || event.key === 'ArrowUp') && this.#detail) {
+      event.preventDefault()
+      const index = this.#rowIndexAt(row)
+      const data = this.#sourceRowAt(index)
+      if (data) this.#toggleDetail(this.#keyAt(index, data), data, event.key === 'ArrowDown')
       return
     }
 
@@ -3082,8 +3352,9 @@ export class Table extends LitElement {
     const { row, column } = this.focusedCell
     if (row < 0) return
     const offset = this.#pageStart
-    const start = offset + this.#virtualizer.range.start
-    const end = offset + this.#virtualizer.range.end
+    const range = this.#window()
+    const start = offset + range.start
+    const end = offset + range.end
     if (row >= start && row < end) return
     const shadowRoot = this.renderRoot as ShadowRoot
     if (shadowRoot.activeElement) {

@@ -4,8 +4,14 @@ description: 'Ready-made date fields with default, soft and underline treatments
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import DateInputExamplesRuntime from '../../components/DateInputExamplesRuntime.astro'
 
 import { DateInput } from '@c2n/components/date-input'
+import { Button } from '@c2n/components/button'
+
+<DateInputExamplesRuntime />
 
 ## Presets
 
@@ -36,3 +42,85 @@ Each treatment keeps the native date picker and changes only the public CSS vari
 ```
 
 </GalleryGrid>
+
+## Calendar popover
+
+`picker="calendar"` opens a themed calendar in place of the browser's date picker, with Today and Clear. It is loaded the first time it opens. Buttons in the `calendar-actions` slot add presets.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Calendar
+<style>
+  .calendar-field {
+    width: 220px;
+  }
+</style>
+<c2-date-input class="calendar-field" picker="calendar" aria-label="Due date" value="2026-09-15"></c2-date-input>
+```
+
+```html tag=MdxCodeBlock,label=Presets
+<style>
+  .calendar-presets {
+    width: 220px;
+  }
+  .calendar-presets .preset {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-date-input class="calendar-presets" picker="calendar" aria-label="Follow-up date" help="Pick a day or a preset.">
+  <c2-button class="preset" slot="calendar-actions" data-days="1">Tomorrow</c2-button>
+  <c2-button class="preset" slot="calendar-actions" data-days="7">In a week</c2-button>
+</c2-date-input>
+```
+
+```html tag=MdxCodeBlock,label=Brand calendar
+<style>
+  .calendar-brand {
+    width: 220px;
+    --c2-date-input--border-radius: 10px;
+    --c2-date-input__calendar--border-radius: 14px;
+    --c2-date-input__calendar--border: 1px solid light-dark(#ddd6fe, #3b2a6b);
+    --c2-date-input__calendar--background: light-dark(#faf5ff, #1c1433);
+    --c2-date-input__calendar-action--color: light-dark(#7e22ce, #c4a1f5);
+    --c2-date-input__calendar-actions--border-top: 1px solid light-dark(#ddd6fe, #3b2a6b);
+    --c2-date-selector__day__selected--background: #7e22ce;
+    --c2-date-selector__day__today--color: light-dark(#7e22ce, #c4a1f5);
+  }
+</style>
+<c2-date-input class="calendar-brand" picker="calendar" aria-label="Launch date" value="2026-09-15"></c2-date-input>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .calendar-french {
+    width: 220px;
+  }
+</style>
+<div lang="fr">
+  <c2-date-input class="calendar-french" picker="calendar" aria-label="Date de livraison" value="2026-09-15"></c2-date-input>
+</div>
+```
+
+</GalleryGrid>
+
+The preset buttons pick a date, which closes the popover and fires `input` and `change`:
+
+```ts tag=CodeBlock
+field.querySelectorAll('[slot="calendar-actions"]').forEach((button) =>
+  button.addEventListener('click', () => field.pick(isoDaysFromToday(Number(button.dataset.days)))),
+)
+```
+
+"In French" sits under `lang="fr"`: the month and the days follow the language by themselves, and Today and Clear show the translation the page registered.
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'date-input': { calendar: 'Calendrier', today: "Aujourd'hui", clear: 'Effacer' } } })
+```

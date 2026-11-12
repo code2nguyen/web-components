@@ -79,11 +79,9 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-2** · `c2-table` · row detail #240 · +1.5 kB on 31.4 kB · risk medium
 - **table-3** · `c2-table` · data editor #241 (lazy), example: timesheet grid #307, example: journal entry grid #328 · +0.6 kB on 31.4 kB, 9 kB lazy · risk medium
 - **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low
 - **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
-- **date-input-1** · `c2-date-input` · date picker #290 (lazy) · +0.5 kB on 3.1 kB, 17 kB lazy · risk low · after `date-selector-1`
 
 ### New packages
 

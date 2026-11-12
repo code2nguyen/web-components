@@ -15,7 +15,16 @@
         gap: 16px;
       }
     </style>
-    <script type="module" src="./scenarios.ts"></script>
+    <script type="module">
+      // Imported here rather than from a TypeScript file: the calendar module brings in the built declarations of
+      // `@c2n/date-selector`, which would meet that package's own sources in the tests' type-check.
+      // The app's languages: French, added as an app would.
+      import './translations.ts'
+      import '../src/date-input.ts'
+      // The field that names the calendar popover in one scenario.
+      import '../../form-field/src/form-field.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
   </head>
   <body>
     <main aria-label="Date Input scenario"></main>
