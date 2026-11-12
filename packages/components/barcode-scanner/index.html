@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-barcode-scanner</title>
+    <script type="module" src="/src/barcode-scanner.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font: 16px system-ui;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-barcode-scanner></c2-barcode-scanner>
+    <c2-barcode-scanner
+      continuous
+      beep
+      formats="ean_13;upc_a"
+      style="--c2-barcode-scanner__window--aspect-ratio: 2.4; --c2-barcode-scanner__window--width: 80%"
+    ></c2-barcode-scanner>
+  </body>
+</html>

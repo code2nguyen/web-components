@@ -1,5 +1,5 @@
 {
-  "lazy": 385325,
+  "lazy": 387024,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -18,6 +18,7 @@
     "banner": 2981,
     "bar-list": 4003,
     "barcode": 7782,
+    "barcode-scanner": 11503,
     "beam": 2434,
     "border-beam": 1871,
     "bottom-nav": 7874,

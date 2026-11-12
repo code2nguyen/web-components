@@ -387,6 +387,41 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-barcode-scanner",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region under the picture owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "done",
+      "decision": "part",
+      "parts": ["done"],
+      "reason": "The done screen covers the stage and centres the done slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["error"],
+      "reason": "The error screen covers the stage and centres the error slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "idle",
+      "decision": "part",
+      "parts": ["idle"],
+      "reason": "The idle screen covers the stage and centres the idle slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "window",
+      "decision": "part",
+      "parts": ["window"],
+      "reason": "The window box owns the position, width and aspect ratio of the window slot's drawing; only its area is read."
+    },
+    {
       "tag": "c2-bottom-nav",
       "slot": "default",
       "decision": "assigned-content",

@@ -156,6 +156,14 @@ export const overrides: Record<string, Override> = {
   '--c2-beam__beam--duration': { exclude: 'decorative animation timing' },
   '--c2-beam__beam--delay': { exclude: 'decorative animation timing' },
   '--c2-beam--z-index': { exclude: 'consumer stacking context' },
+  // Barcode Scanner: the same viewfinder as Camera Capture, dark in both themes; the window's ring, the scan line and
+  // the light button's "on" colour are drawn on the picture, whatever the page's theme.
+  '--c2-barcode-scanner__stage--background': { token: 'color-dark-surface' },
+  '--c2-barcode-scanner__stage--color': { token: 'color-on-dark-surface' },
+  '--c2-barcode-scanner__stage__muted--color': { token: 'color-on-dark-surface-variant' },
+  '--c2-barcode-scanner__window--border-radius': { exclude: 'window shape follows the code it frames' },
+  '--c2-barcode-scanner__line--color': { exclude: 'a laser line on the camera picture, not a page colour' },
+  '--c2-barcode-scanner__done__icon--color': { exclude: 'a light green on the dark stage in both themes' },
   // Camera Capture: the stage is a viewfinder, dark in both themes like a camera's screen; its text follows the
   // dark-surface roles. The guide's ring stays white on the picture, whatever the page's theme.
   '--c2-camera-capture__stage--background': { token: 'color-dark-surface' },

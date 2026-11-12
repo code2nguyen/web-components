@@ -69,6 +69,7 @@
         "../../components/badge:build",
         "../../components/banner:build",
         "../../components/bar-list:build",
+        "../../components/barcode-scanner:build",
         "../../components/barcode:build",
         "../../components/beam:build",
         "../../components/border-beam:build",

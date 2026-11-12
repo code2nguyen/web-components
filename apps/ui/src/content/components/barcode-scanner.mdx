@@ -1,0 +1,112 @@
+---
+title: 'Barcode Scanner'
+description: 'Reads barcodes and QR codes with the camera: a scan window, single or continuous scanning, a beep, the camera light, and a scan event with the value and the format.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import BarcodeScannerExamplesRuntime from '../../components/BarcodeScannerExamplesRuntime.astro'
+
+import { BarcodeScanner } from '@c2n/components/barcode-scanner'
+
+`c2-barcode-scanner` reads barcodes and QR codes with the device's camera, as a point of sale, a warehouse app or a ticket check-in does. It shows the camera with a scan window, reads the picture inside the window several times a second, and fires `scan` with the code's value and format. By default it stops at the first code and shows it with a **Scan again** button; `continuous` keeps the camera open and fires once for each new code.
+
+The camera only opens when the user presses **Start camera** (or the app calls `start()`), and closes on a scan, on `stop()`, or when the element leaves the page. The examples on this page film a pretend conveyor belt through `streamSource`, so they never ask for your camera; the first row uses the real one.
+
+<BarcodeScannerExamplesRuntime />
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/barcode-scanner'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/barcode-scanner
+<div data-label="Your camera">
+  <c2-barcode-scanner></c2-barcode-scanner>
+</div>
+<div data-label="Product barcode">
+  <style>
+    .scanner-usage-product {
+      --c2-barcode-scanner__window--aspect-ratio: 2.4;
+      --c2-barcode-scanner__window--width: 80%;
+    }
+  </style>
+  <c2-barcode-scanner class="scanner-usage-product" formats="ean_13;upc_a" data-barcode-scanner-example="product"></c2-barcode-scanner>
+</div>
+<div data-label="Continuous">
+  <c2-barcode-scanner
+    continuous
+    data-barcode-scanner-example="continuous"
+    data-barcode-scanner-codes="code128:PALLET-0071,datamatrix:LOT 42,ean13:4006381333931"
+  ></c2-barcode-scanner>
+</div>
+```
+
+Read the code from the `scan` event. It does not bubble: listen on the element.
+
+```ts tag=CodeBlock
+const scanner = document.querySelector('c2-barcode-scanner')!
+scanner.addEventListener('scan', (event) => {
+  const { value, format } = event.detail // '4006381333931', 'ean_13'
+  cart.add(value)
+})
+```
+
+## Formats and decoders
+
+`formats` narrows what is read, with the names the browser's `BarcodeDetector` uses, separated by `;`: `qr_code`, `ean_13`, `ean_8`, `upc_a`, `upc_e`, `code_128`, `code_39`, `code_93`, `codabar`, `itf`, `data_matrix`, `aztec`, `pdf417`. Naming the formats you expect is faster and avoids a wrong reading; empty reads them all.
+
+Codes are read by the browser's `BarcodeDetector` where it knows the formats asked for (Chrome and Edge on Android, macOS and ChromeOS). Everywhere else the scanner imports [`@zxing/library`](https://www.npmjs.com/package/@zxing/library) on the first scan. It is an optional peer dependency: install it so the scanner works in Firefox, Safari and on Windows.
+
+```bash tag=CodeBlock
+npm install @zxing/library
+```
+
+Without either, the scanner shows "Barcodes cannot be read in this browser." and fires `camera-error` with `kind: 'decoder'`. To read codes another way (a WebAssembly decoder, a server), set `decoder`: a function that receives the `ImageData` of the scan window and returns the codes it found.
+
+```ts tag=CodeBlock
+import type { BarcodeDecoder } from '@c2n/components/barcode-scanner'
+
+const decoder: BarcodeDecoder = async (frame, { formats }) => {
+  const codes = await myWasmReader.read(frame, formats)
+  return codes.map((code) => ({ value: code.text, format: code.format }))
+}
+scanner.decoder = decoder
+```
+
+## The scan window
+
+Only the picture inside the window is read, so the window is also how the user aims. Its shape is a CSS variable: `--c2-barcode-scanner__window--aspect-ratio` is `1` for a QR code and about `2.4` for a 1D barcode; `--c2-barcode-scanner__window--width` and `--height` set how much of the picture it may take. The `window` slot replaces its drawing.
+
+## Continuous scanning
+
+With `continuous`, a code that stays in the window fires `scan` once. It fires again when another code is read, or when the same code comes back after being out of the picture for `repeat-delay` milliseconds (1500 by default), so a cashier can scan two identical items. The last code read shows over the picture. `beep` sounds on every scan.
+
+## Light and camera
+
+On a device whose camera has a light (most phones, in Chrome), a light button shows under the picture; the `torch` property reads and sets it. A device with several cameras gets a switch button, and `facing` picks the one to open.
+
+## Still pictures and handheld scanners
+
+`scanImage(blob)` reads a picture the user chose or pasted with the same decoder and formats, and fires `scan` like the camera does. Offer it from the `actions` slot for a device without a camera.
+
+```ts tag=CodeBlock
+fileInput.addEventListener('change', async () => {
+  const codes = await scanner.scanImage(fileInput.files[0])
+  if (!codes.length) toast('No code found in this picture.')
+})
+```
+
+A handheld (keyboard-wedge) scanner needs no element: it types the code into the focused field and presses Enter, so a `c2-text-field` receives it.
+
+## What it does with the value
+
+The scanner shows the value as text and hands it to the app. It never opens a link a QR code carries: what to do with the value, and whether to trust it, is the app's decision.
+
+## Accessibility
+
+The element is a group named by `label` ("Barcode scanner" by default). The instruction, each code read and each error are announced through live regions; the picture and the scan window are hidden from assistive technology. The scan line stands still under reduced motion.

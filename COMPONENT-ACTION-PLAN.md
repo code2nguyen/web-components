@@ -87,8 +87,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### New packages
 
-- **camera-capture-2** · new package · barcode scanner #281
-
 ## Wave 2: the P2 rows
 
 ### Existing packages

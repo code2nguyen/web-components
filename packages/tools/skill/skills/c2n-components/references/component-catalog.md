@@ -156,6 +156,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Address field** — `c2-address-field` · `@c2n/components/address-field` — A postal address input with the parts, order and labels of each country, optional autocomplete from your address provider.
 - **Angle Slider** — `c2-angle-slider` · `@c2n/components/angle-slider` — A round knob to pick a direction on a full circle, or a value along an arc like a thermostat or volume dial, by drag or keys.
 - **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Barcode Scanner** — `c2-barcode-scanner` · `@c2n/components/barcode-scanner` — Reads barcodes and QR codes with the camera: a scan window, single or continuous scanning, a beep, the camera light, and a scan event with the value and the format.
 - **Camera Capture** — `c2-camera-capture` · `@c2n/components/camera-capture` — A camera viewfinder for documents, cards and faces: a framing guide, quality hints, auto-capture when steady, retake or keep, front/back switch and a list of required shots. Each photo is a Blob.
 - **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.

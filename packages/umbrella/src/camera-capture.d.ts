@@ -2,3 +2,4 @@
 // Every module of @c2n/camera-capture. Importing this registers each of its elements.
 
 export * from '@c2n/camera-capture'
+export * from '@c2n/camera-capture/camera.js'

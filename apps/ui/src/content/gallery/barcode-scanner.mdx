@@ -1,0 +1,196 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import BarcodeScannerExamplesRuntime from '../../components/BarcodeScannerExamplesRuntime.astro'
+
+import { BarcodeScanner } from '@c2n/components/barcode-scanner'
+import { Button } from '@c2n/components/button'
+
+## Presets
+
+Looks and jobs for `c2-barcode-scanner`. The window's shape and colours, the scan line and the stage set the style. Every card but the first films a pretend conveyor belt through `streamSource` (the code is under the grid) and reads it with the real decoder, so the gallery never asks for your camera.
+
+<BarcodeScannerExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-barcode-scanner></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Product barcode
+<style>
+  .scanner-product {
+    --c2-barcode-scanner__window--aspect-ratio: 2.4;
+    --c2-barcode-scanner__window--width: 80%;
+  }
+</style>
+<c2-barcode-scanner class="scanner-product" formats="ean_13;upc_a" data-barcode-scanner-example="product"></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Inventory count
+<style>
+  .scanner-count {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+  .scanner-count output {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+<div class="scanner-count">
+  <c2-barcode-scanner
+    continuous
+    repeat-delay="1000"
+    data-barcode-scanner-example="continuous"
+    data-barcode-scanner-codes="code128:PALLET-0071,code128:PALLET-0072,ean13:4006381333931"
+    data-barcode-scanner-log="#scanner-count-log"
+  ></c2-barcode-scanner>
+  <output id="scanner-count-log">Nothing scanned yet</output>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Data Matrix
+<style>
+  .scanner-matrix {
+    --c2-barcode-scanner--width: 320px;
+    --c2-barcode-scanner__stage--aspect-ratio: 1;
+    --c2-barcode-scanner__window--width: 62%;
+    --c2-barcode-scanner__window--border-radius: 4px;
+  }
+</style>
+<c2-barcode-scanner class="scanner-matrix" formats="data_matrix" data-barcode-scanner-example="matrix" data-barcode-scanner-codes="datamatrix:LOT 42 EXP 2027-03"></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Brand window
+<style>
+  .scanner-brand {
+    --c2-barcode-scanner__stage--border-radius: 24px;
+    --c2-barcode-scanner__window--aspect-ratio: 2.4;
+    --c2-barcode-scanner__window--width: 80%;
+    --c2-barcode-scanner__window--border-color: #fde68a;
+    --c2-barcode-scanner__window__found--border-color: #22c55e;
+    --c2-barcode-scanner__window__scrim--color: rgba(15, 23, 42, 0.65);
+    --c2-barcode-scanner__line--color: #fde68a;
+    --c2-barcode-scanner__line--duration: 1.2s;
+    --c2-barcode-scanner__hint--border-radius: 8px;
+    --c2-barcode-scanner__accept--background: #0f766e;
+    --c2-barcode-scanner__accept__hover--background: #115e59;
+    --c2-barcode-scanner__done__icon--color: #5eead4;
+  }
+</style>
+<c2-barcode-scanner class="scanner-brand" data-barcode-scanner-example="product" data-barcode-scanner-codes="code128:INV-2026-114"></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Corner marks
+<style>
+  .scanner-corners {
+    --c2-barcode-scanner__stage--aspect-ratio: 16 / 9;
+    --c2-barcode-scanner__window--aspect-ratio: 2;
+    --c2-barcode-scanner__window--width: 76%;
+    --c2-barcode-scanner__window--height: 80%;
+  }
+  .scanner-corners svg {
+    overflow: visible;
+    color: #ffffff;
+  }
+</style>
+<c2-barcode-scanner class="scanner-corners" continuous data-barcode-scanner-example="continuous" data-barcode-scanner-codes="ean13:4006381333931,ean13:5901234123457">
+  <svg slot="window" viewBox="0 0 100 50" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <path d="M0 12V0h10M90 0h10v12M100 38v12H90M10 50H0V38" vector-effect="non-scaling-stroke" />
+  </svg>
+</c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Ticket check-in
+<style>
+  .scanner-ticket {
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+    font-size: 14px;
+  }
+  .scanner-ticket strong {
+    font-size: 16px;
+  }
+  .scanner-ticket-ok {
+    color: #4ade80;
+    font-size: 20px;
+    font-weight: 600;
+  }
+</style>
+<c2-barcode-scanner formats="data_matrix" data-barcode-scanner-example="manual" data-barcode-scanner-codes="datamatrix:TICKET 81 ROW F SEAT 12">
+  <div slot="idle" class="scanner-ticket">
+    <strong>Check a ticket in</strong>
+    <span>Hold the ticket's code in front of the camera.</span>
+    <c2-button data-barcode-scanner-start>Open scanner</c2-button>
+  </div>
+  <div slot="done" class="scanner-ticket">
+    <span class="scanner-ticket-ok">Welcome</span>
+    <span>Row F, seat 12</span>
+    <c2-button data-barcode-scanner-start>Next ticket</c2-button>
+  </div>
+</c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Actions
+<style>
+  .scanner-action {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+  }
+</style>
+<c2-barcode-scanner continuous data-barcode-scanner-example="continuous" data-barcode-scanner-codes="code128:PALLET-0071,code128:PALLET-0072">
+  <c2-button slot="actions" class="scanner-action">Type the code</c2-button>
+  <c2-button slot="actions" class="scanner-action">Read a picture</c2-button>
+</c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Own decoder
+<c2-barcode-scanner continuous data-barcode-scanner-example="decoder" data-barcode-scanner-codes="code39:BIN 7,code39:BIN 12"></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=Access denied
+<c2-barcode-scanner data-barcode-scanner-example="denied"></c2-barcode-scanner>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .scanner-french {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+</style>
+<div class="scanner-french" lang="fr">
+  <c2-barcode-scanner data-barcode-scanner-example="product" data-barcode-scanner-codes="ean13:3017620422003"></c2-barcode-scanner>
+</div>
+```
+
+</GalleryGrid>
+
+The cards hand the scanner a canvas that films a printed label, in place of the camera, and the "Own decoder" card reads the picture with the app's own function:
+
+```ts tag=CodeBlock
+import type { BarcodeDecoder, BarcodeScanner, CameraStreamSource } from '@c2n/components/barcode-scanner'
+
+const scanner = document.querySelector<BarcodeScanner>('c2-barcode-scanner')!
+
+// Any MediaStream works: a chosen device, a WebRTC stream, or a canvas in a demo or a test.
+const source: CameraStreamSource = async () => labelCanvas.captureStream(15)
+scanner.streamSource = source
+
+// The decoder receives the picture inside the scan window and returns the codes it finds.
+const decoder: BarcodeDecoder = async (frame, { formats }) => {
+  const codes = await myReader.read(frame, formats)
+  return codes.map((code) => ({ value: code.text, format: code.format }))
+}
+scanner.decoder = decoder
+
+scanner.addEventListener('scan', (event) => count(event.detail.value))
+```
