@@ -146,6 +146,42 @@ export class CameraController implements ReactiveController {
   }
 }
 
+/** A rectangle of a video frame, in the video's own pixels. */
+export interface CameraRegion {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * The part of the video frame shown under `box`, in the video's own pixels. The video fills `stage` with
+ * `object-fit: cover`, so the box is mapped through that scale and offset, and mirrored back when the picture is.
+ */
+export function coverRegion(
+  video: HTMLVideoElement,
+  stage: Element | null | undefined,
+  box: Element | null | undefined,
+  mirrored: boolean,
+): CameraRegion | undefined {
+  const vw = video.videoWidth
+  const vh = video.videoHeight
+  if (!stage || !box || !vw || !vh) return undefined
+  const outer = stage.getBoundingClientRect()
+  const inner = box.getBoundingClientRect()
+  if (!outer.width || !outer.height || !inner.width || !inner.height) return undefined
+  const scale = Math.max(outer.width / vw, outer.height / vh)
+  const offsetX = (outer.width - vw * scale) / 2
+  const offsetY = (outer.height - vh * scale) / 2
+  let left = inner.left - outer.left
+  if (mirrored) left = outer.width - left - inner.width
+  const x = Math.max(0, (left - offsetX) / scale)
+  const y = Math.max(0, (inner.top - outer.top - offsetY) / scale)
+  const width = Math.min(vw - x, inner.width / scale)
+  const height = Math.min(vh - y, inner.height / scale)
+  return width > 0 && height > 0 ? { x, y, width, height } : undefined
+}
+
 function stopTracks(stream: MediaStream) {
   for (const track of stream.getTracks()) track.stop()
 }

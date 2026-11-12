@@ -66,6 +66,17 @@ test('moves with the keyboard', async ({ page, scenario, tab }) => {
   await expect(page.getByRole('status')).toHaveText('4:100')
 })
 
+test('in forced colours keyboard focus draws a system-coloured ring on the divider', async ({ page, scenario, tab }) => {
+  await page.emulateMedia({ forcedColors: 'active' })
+  await scenario()
+  await page.getByRole('button', { name: 'Before' }).focus()
+  await tab()
+  await expect(divider(page)).toBeFocused()
+  // Forced colours drops the recoloured background that marks focus everywhere else, so an outline replaces it.
+  await expect(divider(page)).toHaveCSS('outline-style', 'solid')
+  await expect(divider(page)).toHaveCSS('outline-width', '2px')
+})
+
 test('Enter collapses the start panel and restores it', async ({ page, scenario }) => {
   await scenario()
   await divider(page).focus()

@@ -6,9 +6,12 @@ import { live } from 'lit/directives/live.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { formatEnv, parseEnv, type KeyValueEntry } from './dotenv.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { keyValueEditorMessages } from './messages.js'
 import styles from './key-value-editor.scss?inline'
 
 export { formatEnv, parseEnv, type KeyValueEntry } from './dotenv.js'
@@ -132,6 +135,7 @@ export class KeyValueEditor extends LitElement {
   private readonly internals = this.attachInternals()
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the hint line. */
   private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, keyValueEditorMessages)
 
   // Data
 
@@ -252,7 +256,7 @@ export class KeyValueEditor extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -379,7 +383,7 @@ export class KeyValueEditor extends LitElement {
   }
 
   private async handleKeydown(event: KeyboardEvent, index: number, field: Field) {
-    if (event.defaultPrevented || event.isComposing || !this.editable) return
+    if (event.defaultPrevented || isComposingKey(event) || !this.editable) return
     const input = event.target as HTMLInputElement
     if (event.key === 'Enter') {
       event.preventDefault()
@@ -483,7 +487,7 @@ export class KeyValueEditor extends LitElement {
       this.internals.setValidity({ customError: true }, error === 'duplicate' ? this.duplicateMessage : this.patternMessage, anchor)
     } else if (this.required && !keyed) {
       const anchor = this.renderRoot.querySelector<HTMLElement>('input, .add') ?? undefined
-      this.internals.setValidity({ valueMissing: true }, 'Please add at least one variable.', anchor)
+      this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), anchor)
     } else {
       this.internals.setValidity({})
     }
@@ -523,7 +527,7 @@ export class KeyValueEditor extends LitElement {
     return html`<button
       class="button reveal"
       type="button"
-      aria-label="${hidden ? 'Show' : 'Hide'} ${name}"
+      aria-label=${hidden ? this.msg.t('show', name) : this.msg.t('hide', name)}
       aria-pressed=${hidden ? 'false' : 'true'}
       ?disabled=${this.isDisabled}
       @click=${() => this.toggleReveal(id)}
@@ -627,7 +631,7 @@ export class KeyValueEditor extends LitElement {
           : html`<button
               class="button remove"
               type="button"
-              aria-label=${key.trim() ? `Remove ${key.trim()}` : `Remove row ${number}`}
+              aria-label=${key.trim() ? this.msg.t('remove', key.trim()) : this.msg.t('removeRow', number)}
               ?disabled=${this.isDisabled}
               @click=${() => this.handleRemove(index)}
             >

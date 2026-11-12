@@ -233,7 +233,11 @@ export class Popconfirm extends LitElement {
     if (trigger.updateComplete) await trigger.updateComplete
     const inner = trigger.localName.includes('-') ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]') : null
     const target = inner ?? trigger
+    // Written only once the popup has first opened (`ariaSynced`), so a server-rendered trigger hydrates unchanged, and
+    // ARIA has no element-reference form of these two states for a trigger outside this shadow root.
+    // modern-web-ignore: aria-attribute-on-other-element first written on the first open, after hydration; no reference-based alternative exists
     target.setAttribute('aria-haspopup', 'dialog')
+    // modern-web-ignore: aria-attribute-on-other-element first written on the first open, after hydration; no reference-based alternative exists
     target.setAttribute('aria-expanded', String(this.open))
   }
 

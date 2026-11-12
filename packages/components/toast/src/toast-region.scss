@@ -38,6 +38,30 @@
   transform: none;
   max-width: 100%;
 }
+// The stack is a manual popover where the Popover API exists. Closed (no toasts), it stays in the host like the fixed
+// layout without the API; open, it is in the top layer and takes the host's placement through inheritance.
+section[popover] {
+  display: block;
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+section[popover]:popover-open {
+  position: fixed;
+  top: inherit;
+  right: inherit;
+  bottom: inherit;
+  left: inherit;
+  width: inherit;
+  max-width: inherit;
+  transform: inherit;
+}
 section {
   max-height: calc(100dvh - 2 * #{css.cssVar(container--offset)});
   overflow: auto;

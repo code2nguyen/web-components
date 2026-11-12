@@ -9,6 +9,7 @@ import { linePaths, withAlpha } from './engines/uplot-paths.js'
 import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { ChartSeriesConfig } from './chart-types.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface Sparkline {
   addEventListener: TypedAddEventListener<Sparkline, ChartEventMap>
@@ -39,6 +40,10 @@ export interface Sparkline {
  */
 @customElement('c2-sparkline')
 export class Sparkline extends UplotChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'sparkline'
+  }
+
   static override styles = [
     unsafeCSS(styles),
     // A sparkline is chrome-free and inline-sized. These are `:host` rules, so an outer author rule or a

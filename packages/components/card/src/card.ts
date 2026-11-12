@@ -6,11 +6,17 @@ import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './card.scss?inline'
 
+/** What counts as a control of its own inside a link card: a click on one must not also follow the card's link. */
+const INNER_CONTROL =
+  'a[href], button, input, select, textarea, label, summary, [contenteditable=""], [contenteditable="true"], [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="radio"], [role="menuitem"], [role="tab"], [role="option"], [tabindex]:not([tabindex="-1"])'
+
 /**
  * Surface that groups related content and actions. The body goes in the default slot; `media`, `header` and `footer`
  * are optional sections that render only when filled: media bleeds to the edges at the top, header and footer get
  * their own padding and divider tokens. With `href` the whole card is a link; with `interactive` it behaves like a
- * button (focusable, Enter and Space click it). Hover, focus and disabled looks are themeable.
+ * button (focusable, Enter and Space click it). The link or button holds the media, header and body, and stretches
+ * over the whole card, so the footer's own actions stay separate controls above it. Hover, focus and disabled looks
+ * are themeable.
  *
  * @tag c2-card
  *
@@ -117,42 +123,66 @@ export class Card extends LitElement {
 
   private handleKeydown(event: KeyboardEvent) {
     if (event.target !== event.currentTarget) return
+    // modern-web-ignore: ime-enter only the interactive card itself (target === currentTarget) reaches this line, never a text field inside it
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       this.click()
     }
   }
 
-  private renderSections() {
+  private renderPrimary() {
     return html`
       <div part="media" class="c2-card-media" ?hidden=${!this.slotPresence.has('media')}><slot name="media" @slotchange=${this.handleSlotChange}></slot></div>
       <div part="header" class="c2-card-header" ?hidden=${!this.slotPresence.has('header')}>
         <slot name="header" @slotchange=${this.handleSlotChange}></slot>
       </div>
       <div part="body" class="c2-card-content" ?hidden=${!this.slotPresence.has()}><slot @slotchange=${this.handleSlotChange}></slot></div>
-      <div part="footer" class="c2-card-footer" ?hidden=${!this.slotPresence.has('footer')}>
-        <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
-      </div>
     `
+  }
+
+  /**
+   * A click on a control inside the link (a button or checkbox in the body) is that control's: the browser would
+   * otherwise also follow the link. Calling `preventDefault` would cancel the control's own action too (a checkbox
+   * would not toggle), so the link is disarmed instead: an `<a>` without `href` does nothing when the click's
+   * activation runs at the end of the dispatch, and the `href` comes back right after.
+   */
+  private handleLinkClick = (event: MouseEvent) => {
+    const link = event.currentTarget as HTMLAnchorElement
+    const path = event.composedPath()
+    const end = path.indexOf(link)
+    const fromControl = path.slice(0, end).some((node) => node instanceof Element && node.matches(INNER_CONTROL))
+    if (!fromControl || !link.hasAttribute('href')) return
+    const href = link.getAttribute('href')!
+    link.removeAttribute('href')
+    setTimeout(() => {
+      if (!link.hasAttribute('href')) link.setAttribute('href', href)
+    })
   }
 
   override render() {
     const isLink = !!this.href && !this.disabled
     const interactive = this.interactive || !!this.href
-    const classes = classMap({ 'c2-card': true, 'is-interactive': interactive })
-
-    if (isLink) {
-      return html`<a class=${classes} href=${this.href} target=${ifDefined(this.target)} rel=${ifDefined(this.rel)}>${this.renderSections()}</a>`
-    }
+    // The link or button covers media, header and body only, so the footer's actions are not nested in it; its
+    // stretched `::after` makes the rest of the card clickable, with the footer's content stacked above.
+    const primary = isLink
+      ? html`<a class="c2-card-primary" href=${this.href!} target=${ifDefined(this.target)} rel=${ifDefined(this.rel)} @click=${this.handleLinkClick}
+          >${this.renderPrimary()}</a
+        >`
+      : html`<div
+          class="c2-card-primary"
+          role=${interactive ? 'button' : nothing}
+          tabindex=${interactive && !this.disabled ? '0' : nothing}
+          aria-disabled=${interactive && this.disabled ? 'true' : nothing}
+          @keydown=${interactive && !this.disabled ? this.handleKeydown : nothing}
+        >
+          ${this.renderPrimary()}
+        </div>`
     return html`
-      <div
-        class=${classes}
-        role=${interactive ? 'button' : nothing}
-        tabindex=${interactive && !this.disabled ? '0' : nothing}
-        aria-disabled=${interactive && this.disabled ? 'true' : nothing}
-        @keydown=${interactive && !this.disabled ? this.handleKeydown : nothing}
-      >
-        ${this.renderSections()}
+      <div class=${classMap({ 'c2-card': true, 'is-interactive': interactive })}>
+        ${primary}
+        <div part="footer" class="c2-card-footer" ?hidden=${!this.slotPresence.has('footer')}>
+          <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
+        </div>
       </div>
     `
   }

@@ -159,6 +159,7 @@ export class Shortcut extends LitElement {
     }
     for (const [target, list] of values) {
       const value = list.join(' ')
+      // modern-web-ignore: aria-attribute-on-other-element aria-keyshortcuts has no element-reference or internals form for another element; written only when the author set none and removed on teardown
       target.setAttribute('aria-keyshortcuts', value)
       this.labelledTargets.set(target, value)
     }

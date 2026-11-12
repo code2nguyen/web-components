@@ -148,6 +148,11 @@ interface RenderApi {
  */
 @customElement('c2-waterfall-chart')
 export class WaterfallChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(waterfallStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['custom', 'grid']

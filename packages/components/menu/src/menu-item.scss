@@ -1,5 +1,6 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-menu-item,
   $theme: (
@@ -175,6 +176,7 @@
   --c2-kbd--letter-spacing: #{css.cssVar(shortcut--letter-spacing)};
 }
 
+// modern-web-ignore: bare-focus-style removes the UA outline only; the visible ring is the :focus-visible rule below
 :host(:focus) {
   outline: none;
 }
@@ -185,6 +187,8 @@
   color: css.cssVar(hover--color, color);
   outline: css.cssVar(focus--outline);
   outline-offset: css.cssVar(focus--outline-offset);
+  // The highlight alone is repainted away in forced colors: draw a real ring there.
+  @include focus.forced-colors-ring(2px, -2px);
 }
 
 :host([destructive]) {

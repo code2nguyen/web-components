@@ -5,7 +5,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -250,7 +250,7 @@ export class MoneyInput extends LitElement {
     this.error = false
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = state
@@ -339,7 +339,7 @@ export class MoneyInput extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') this.commit()
+    if (event.key === 'Enter' && !isComposingKey(event)) this.commit()
   }
 
   private handleFocusIn(event: FocusEvent) {

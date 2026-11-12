@@ -48,7 +48,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../date-selector:build",
+        "../overlay:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -61,6 +63,8 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/date-selector": "*",
+    "@c2n/overlay": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

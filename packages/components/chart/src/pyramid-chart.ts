@@ -20,6 +20,7 @@ import {
   type PyramidSort,
 } from './pyramid-layout.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface PyramidChart {
   addEventListener: TypedAddEventListener<PyramidChart, ChartEventMap>
@@ -98,6 +99,10 @@ interface RenderApi {
  */
 @customElement('c2-pyramid-chart')
 export class PyramidChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'pyramidChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['custom']
 
   /**

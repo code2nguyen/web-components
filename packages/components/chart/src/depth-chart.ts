@@ -99,6 +99,11 @@ const RANGE_STEPS = [0.001, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.25]
  */
 @customElement('c2-depth-chart')
 export class DepthChart extends UplotChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(depthStyles)]
 
   /** Bid levels, `[price, size]` pairs or `{ price, size }` rows, in any order. A size of 0 is ignored. */

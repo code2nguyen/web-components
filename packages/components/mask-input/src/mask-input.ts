@@ -4,7 +4,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, isComposingKey, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -259,7 +259,7 @@ export class MaskInput extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(restored: string | File | FormData | null) {
@@ -371,7 +371,7 @@ export class MaskInput extends LitElement {
   }
 
   private handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.isComposing) this.commitChange()
+    if (event.key === 'Enter' && !isComposingKey(event)) this.commitChange()
   }
 
   /**

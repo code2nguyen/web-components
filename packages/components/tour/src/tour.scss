@@ -149,6 +149,8 @@
     display css.cssVar(transition-duration) allow-discrete,
     overlay css.cssVar(transition-duration) allow-discrete;
 
+  // The panel is a dialog container, not a control: focus goes to its Next/Back buttons, which keep their own rings.
+  // modern-web-ignore: bare-focus-style draws nothing, it only removes a UA ring from the dialog container
   &:focus {
     outline: none;
   }

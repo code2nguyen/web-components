@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.24",
+  "version": "1.0.26",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -136,6 +136,10 @@
     "./barcode": {
       "types": "./dist/barcode.d.ts",
       "default": "./dist/barcode.js"
+    },
+    "./barcode-scanner": {
+      "types": "./dist/barcode-scanner.d.ts",
+      "default": "./dist/barcode-scanner.js"
     },
     "./beam": {
       "types": "./dist/beam.d.ts",
@@ -1200,10 +1204,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.24",
-    "@c2n/phosphor-icons": "1.0.24",
-    "@c2n/task-icons": "1.0.24",
-    "@c2n/theme": "1.0.24",
+    "@c2n/core": "1.0.26",
+    "@c2n/phosphor-icons": "1.0.26",
+    "@c2n/task-icons": "1.0.26",
+    "@c2n/theme": "1.0.26",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",
@@ -1241,6 +1245,7 @@
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
+    "@zxing/library": "^0.23.0",
     "echarts": "^5.5.0 || ^6.0.0",
     "mermaid": "^12.1.0",
     "react": ">=18.0.0",
@@ -1281,6 +1286,9 @@
     "@lezer/highlight": {
       "optional": true
     },
+    "@zxing/library": {
+      "optional": true
+    },
     "echarts": {
       "optional": true
     },
@@ -1313,6 +1321,7 @@
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
     "@c2n/barcode": "*",
+    "@c2n/barcode-scanner": "*",
     "@c2n/beam": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",

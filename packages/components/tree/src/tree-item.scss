@@ -69,6 +69,7 @@
 }
 
 // The tree owns focus through a roving tabindex and draws the ring on the row, so drop the UA outline.
+// modern-web-ignore: bare-focus-style removes the UA outline only; the visible ring is :host(:focus-visible) .row
 :host(:focus) {
   outline: none;
 }
@@ -90,8 +91,8 @@
   transition: animation.standard(background-color), animation.standard(color);
 
   // The indent is padding on a full-width row rather than margin on a nested group, so the hover and selected
-  // backgrounds bleed the whole width — the Figma/VS Code behaviour. `--level` is internal state written by
-  // the tree during its sync pass; CSS cannot read `aria-level` (typed `attr()` is Chromium-only).
+  // backgrounds bleed the whole width — the Figma/VS Code behaviour. `--level` is internal state the item sets
+  // on this row from the depth the tree assigns; CSS cannot read `aria-level` (typed `attr()` is Chromium-only).
   padding-inline-start: calc(#{css.cssVar(row--indent)} * var(--level, 0) + #{css.cssVar(row--padding-inline-start)});
   padding-inline-end: css.cssVar(row--padding-inline-end);
   // `row--min-height` is a floor, so vertical padding only grows the row once content + padding passes it.

@@ -93,6 +93,8 @@
     skeleton--background: #f4f4f5,
     skeleton--border-radius: 4px,
 
+    detail--background: #fafafa,
+    detail--padding: 12px,
     state--color: #71717a,
     state--padding: 32px 12px,
     state--font-size: 14px,
@@ -336,6 +338,7 @@
   border-right: css.cssVar(cell--border-right);
 }
 
+// modern-web-ignore: bare-focus-style removes the UA outline only; the visible ring is the :focus-visible rule below
 .cell:focus {
   outline: none;
 }
@@ -618,6 +621,50 @@
 
 .row-toggle c2-spinner {
   --c2-spinner--size: 100%;
+}
+
+// Row detail (`detail-height`): the chevron is a button before the content of the first column, and the panel a row
+// of the grid with one cell across every column. Its height is set inline: the windowing counts on it.
+.detail-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.detail-toggle--closed {
+  transform: rotate(-90deg);
+}
+
+.detail-toggle:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: 1px;
+}
+
+.row--detail {
+  box-sizing: border-box;
+}
+
+// A closed panel kept for find-in-page (`hidden="until-found"`) takes no room.
+.row--detail[hidden] {
+  height: 0;
+  border-bottom: 0;
+}
+
+.detail {
+  grid-column: 1 / -1;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: css.cssVar(detail--padding);
+  background: css.cssVar(detail--background);
+  font-size: css.cssVar(cell--font-size);
+  color: css.cssVar(cell--color);
+  overflow: auto;
+}
+
+.detail:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: css.cssVar(cell__focus--outline-offset);
 }
 
 .group-label {

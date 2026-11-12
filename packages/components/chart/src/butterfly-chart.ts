@@ -9,6 +9,7 @@ import type { ChartFrame } from './chart-types.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface ButterflyChart {
   addEventListener: TypedAddEventListener<ButterflyChart, ChartEventMap>
@@ -47,6 +48,10 @@ const INSET = { top: 8, side: 22, bottom: 24 }
  */
 @customElement('c2-butterfly-chart')
 export class ButterflyChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'butterflyChart'
+  }
+
   protected override readonly features: readonly EchartsFeature[] = ['bar', 'grid']
 
   constructor() {

@@ -4,6 +4,9 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { styleMap } from 'lit/directives/style-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { copyButtonMessages } from './messages.js'
 import styles from './copy-button.scss?inline'
 
 /** Elements that carry their text on a property rather than in their child nodes. */
@@ -107,11 +110,11 @@ export class CopyButton extends LitElement {
   /** How long the `copied` state lasts, in ms. */
   @property({ type: Number, attribute: 'copied-duration' }) copiedDuration = 2000
 
-  /** Accessible name of the button while idle. */
-  @property() label = 'Copy'
+  /** Accessible name of the button while idle. Defaults to "Copy" in the nearest `lang` (English, or a language the app adds). */
+  @property() label = ''
 
-  /** Accessible name (and `copied-label` fallback) after a successful copy. */
-  @property({ attribute: 'copied-label' }) copiedLabel = 'Copied'
+  /** Accessible name (and `copied-label` fallback) after a successful copy. Defaults to "Copied" in the nearest `lang`. */
+  @property({ attribute: 'copied-label' }) copiedLabel = ''
 
   /**
    * `hover` (default) keeps the button transparent until the pointer is over its source, or keyboard focus lands
@@ -134,6 +137,17 @@ export class CopyButton extends LitElement {
 
   /** Set when the last copy attempt failed, so the failure is visible rather than silent. */
   @state() private failed = false
+
+  /** Scroll offset of the pinned button's container, cancelled out by translating the inner button. */
+  @state() private scrollOffset: { x: number; y: number } | null = null
+
+  /**
+   * Flipped on every copy attempt, so a repeated announcement differs by a trailing no-break space and screen readers
+   * read it again. Starts set, so the first announcement is the plain text.
+   */
+  @state() private announceAgain = true
+
+  private readonly msg = new LocalizeController(this, copyButtonMessages)
 
   /** Whether the pointer is currently over the source. */
   @state() private hovered = false
@@ -288,6 +302,7 @@ export class CopyButton extends LitElement {
     this.detachScroller()
     if (!this.pin && this.pin !== '') return
     this.scroller = nearestScrollable(this)
+    // modern-web-ignore: scroll-listener-visual pinning cancels the container's scroll offset (in px) for any corner; a scroll() timeline maps progress, not offset, so it cannot hold the button still across content sizes
     this.scroller?.addEventListener('scroll', this.handleScroll, { passive: true })
     this.syncPinOffset()
   }
@@ -295,8 +310,7 @@ export class CopyButton extends LitElement {
   private detachScroller() {
     this.scroller?.removeEventListener('scroll', this.handleScroll)
     this.scroller = null
-    this.style.removeProperty('--_c2-copy-button-scroll-x')
-    this.style.removeProperty('--_c2-copy-button-scroll-y')
+    this.scrollOffset = null
   }
 
   private handleScroll = () => {
@@ -316,8 +330,7 @@ export class CopyButton extends LitElement {
   private syncPinOffset() {
     const scroller = this.scroller
     if (!scroller) return
-    this.style.setProperty('--_c2-copy-button-scroll-x', `${scroller.scrollLeft}px`)
-    this.style.setProperty('--_c2-copy-button-scroll-y', `${scroller.scrollTop}px`)
+    this.scrollOffset = { x: scroller.scrollLeft, y: scroller.scrollTop }
   }
 
   /**
@@ -350,12 +363,14 @@ export class CopyButton extends LitElement {
     } catch (error) {
       this.copied = false
       this.failed = true
+      this.announceAgain = !this.announceAgain
       this.armResolvedTimer()
       this.dispatchEvent(new CustomEvent('copy-error', { detail: { error }, bubbles: true, composed: true }))
       return false
     }
     this.failed = false
     this.copied = true
+    this.announceAgain = !this.announceAgain
     this.armResolvedTimer()
     this.dispatchEvent(new CustomEvent('copied', { detail: { text }, bubbles: true, composed: true }))
     return true
@@ -380,13 +395,17 @@ export class CopyButton extends LitElement {
   }
 
   override render() {
+    const copiedLabel = this.copiedLabel || this.msg.t('copied')
+    const status = this.copied ? copiedLabel : this.failed ? this.msg.t('failed') : ''
+    const offset = this.scrollOffset
     return html`
       <button
         class=${classMap({ 'c2-copy-button': true, 'is-copied': this.copied, 'is-failed': this.failed, 'is-visible': this.isVisible })}
         part="button"
         type="button"
+        style=${styleMap(offset ? { '--_c2-copy-button-scroll-x': `${offset.x}px`, '--_c2-copy-button-scroll-y': `${offset.y}px` } : {})}
         ?disabled=${this.disabled}
-        aria-label=${this.copied ? this.copiedLabel : this.label}
+        aria-label=${this.copied ? copiedLabel : this.label || this.msg.t('copy')}
         @click=${this.handleClick}
       >
         <span class="c2-copy-button-icon" part="icon">${this.renderIcon()}</span>
@@ -394,9 +413,7 @@ export class CopyButton extends LitElement {
       </button>
       ${
         // The state change is announced separately: a label swap on the button itself is not reliably read out.
-        html`<span class="c2-copy-button-status" role="status" aria-live="polite"
-          >${this.copied ? this.copiedLabel : this.failed ? 'Copy failed' : nothing}</span
-        >`
+        html`<span class="c2-copy-button-status" role="status" aria-live="polite">${status ? `${status}${this.announceAgain ? '\u00a0' : ''}` : nothing}</span>`
       }
     `
   }

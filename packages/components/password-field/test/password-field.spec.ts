@@ -138,3 +138,22 @@ test('has no accessibility violations', async ({ page, renderScenario }) => {
   )
   await accessible(page)
 })
+
+// The platform counts a `disabled` attribute as disabled whatever its value, and reports it through
+// `formDisabledCallback`; the property converter reads `disabled="false"` as false, and that is what holds.
+test('disabled="false" outside a disabled fieldset leaves the field enabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-password-field name="secret" aria-label="Secret" disabled="false"></c2-password-field></form>')
+  const input = page.getByRole('textbox', { name: 'Secret' })
+  await expect(input).toBeEnabled()
+  await input.fill('hunter2')
+  await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('secret'))).toBe('hunter2')
+})
+
+test('an own disabled removed inside a disabled fieldset stays disabled until the fieldset is enabled', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-password-field name="secret" aria-label="Secret" disabled></c2-password-field></fieldset></form>')
+  const input = page.getByRole('textbox', { name: 'Secret' })
+  await page.locator('c2-password-field').evaluate((element) => element.removeAttribute('disabled'))
+  await expect(input).toBeDisabled()
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
+  await expect(input).toBeEnabled()
+})

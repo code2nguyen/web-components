@@ -580,6 +580,7 @@ export class VideoPlayer extends LitElement {
     const onVolume = origin instanceof HTMLInputElement
     const onSeek = origin === this.seekBar
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key
+    // modern-web-ignore: ime-enter the only inputs in the player are range sliders (volume, seek); no text field composes here
     if ((key === ' ' || key === 'Enter') && onButton) return
     if (onVolume && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(key)) return
     let handled = true

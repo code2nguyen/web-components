@@ -5,7 +5,7 @@ import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { cardBrands, detectBrand, expiryState, formatExpiry, formatNumber, normalizeExpiry, numberState, unknownBrand, type CardBrandId } from './brands'
 import { cardInputMessages } from './messages'
@@ -241,8 +241,11 @@ export class CardInput extends LitElement {
     this.clear()
   }
 
+  /** Deliberately restores nothing: a card number is never stored as restore state (see `syncFormState`). */
+  formStateRestoreCallback(_state: string | File | FormData | null) {}
+
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   private get effectiveDisabled(): boolean {

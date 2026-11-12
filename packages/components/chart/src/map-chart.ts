@@ -273,6 +273,11 @@ let mapCounter = 0
  */
 @customElement('c2-map-chart')
 export class MapChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(mapStyles)]
 
   static formAssociated = true
@@ -1307,13 +1312,13 @@ export class MapChart extends EchartsChartBase {
     if (this.roam !== 'zoom' && this.roam !== 'both') return nothing
     return html`
       <div class="zoom-controls" part="zoom-controls">
-        <button class="zoom-control" part="zoom-control" type="button" aria-label="Zoom in" @click=${() => this.zoomIn()}>
+        <button class="zoom-control" part="zoom-control" type="button" aria-label=${this.chartMsg.t('zoomIn')} @click=${() => this.zoomIn()}>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9" /></svg>
         </button>
-        <button class="zoom-control" part="zoom-control" type="button" aria-label="Zoom out" @click=${() => this.zoomOut()}>
+        <button class="zoom-control" part="zoom-control" type="button" aria-label=${this.chartMsg.t('zoomOut')} @click=${() => this.zoomOut()}>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8h9" /></svg>
         </button>
-        <button class="zoom-control" part="zoom-control" type="button" aria-label="Reset view" @click=${() => this.resetView()}>
+        <button class="zoom-control" part="zoom-control" type="button" aria-label=${this.chartMsg.t('resetView')} @click=${() => this.resetView()}>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6V3h3M13 6V3h-3M3 10v3h3M13 10v3h-3" /></svg>
         </button>
       </div>

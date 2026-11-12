@@ -8,6 +8,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { pad } from '@c2n/core/zoned-time.js'
 import { monthPickerMessages } from './messages'
 import styles from './month-picker.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { monthPickerMessages } from './messages'
 
@@ -275,7 +276,7 @@ export class MonthPicker extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

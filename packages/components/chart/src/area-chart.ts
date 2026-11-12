@@ -7,6 +7,7 @@ import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import { withAlpha } from './engines/uplot-paths.js'
 import type { ChartSeriesConfig } from './chart-types.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface AreaChart {
   addEventListener: TypedAddEventListener<AreaChart, ChartEventMap>
@@ -32,6 +33,10 @@ export interface AreaChart {
  */
 @customElement('c2-area-chart')
 export class AreaChart extends LineChart {
+  protected override get chartKind(): ChartKindMessage {
+    return 'areaChart'
+  }
+
   // A click inside a fill picks that area, not whichever line happens to be nearest.
   protected override readonly hitMode = 'band' as const
 

@@ -1,5 +1,6 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-chat-input,
   $theme: (
@@ -68,6 +69,7 @@
 .container:focus-within {
   border: css.cssVar(container__focus--border);
   box-shadow: css.cssVar(container__focus--box-shadow);
+  @include focus.forced-colors-ring;
 }
 
 .container:has(.textarea:invalid),
@@ -86,6 +88,8 @@
   width: 100%;
   min-width: 0;
   max-height: css.cssVar(textarea--max-height);
+  // Grows with its text up to the max height: `field-sizing` where supported, a height set from script elsewhere.
+  field-sizing: content;
   margin: 0;
   padding: css.cssVar(textarea--padding);
   resize: none;

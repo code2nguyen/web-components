@@ -9,7 +9,7 @@ import { textFieldMessages } from './messages'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
@@ -241,7 +241,7 @@ export class TextField extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

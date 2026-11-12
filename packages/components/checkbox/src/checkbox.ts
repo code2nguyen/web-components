@@ -8,7 +8,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { checkboxMessages } from './messages'
 import styles from './checkbox.scss?inline'
-import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 /** Events fired by {@link Checkbox}, keyed for `addEventListener`. */
@@ -175,7 +175,7 @@ export class Checkbox extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

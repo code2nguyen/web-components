@@ -387,6 +387,55 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-barcode-scanner",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region under the picture owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "done",
+      "decision": "part",
+      "parts": ["done"],
+      "reason": "The done screen covers the stage and centres the done slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["error"],
+      "reason": "The error screen covers the stage and centres the error slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "idle",
+      "decision": "part",
+      "parts": ["idle"],
+      "reason": "The idle screen covers the stage and centres the idle slot's content."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "switch-icon",
+      "decision": "part",
+      "parts": ["switch"],
+      "reason": "The Switch camera button owns the size and colour of the icon slotted into it."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "torch-icon",
+      "decision": "part",
+      "parts": ["torch"],
+      "reason": "The light button owns the size and colour of the icon slotted into it, on and off."
+    },
+    {
+      "tag": "c2-barcode-scanner",
+      "slot": "window",
+      "decision": "part",
+      "parts": ["window"],
+      "reason": "The window box owns the position, width and aspect ratio of the window slot's drawing; only its area is read."
+    },
+    {
       "tag": "c2-bottom-nav",
       "slot": "default",
       "decision": "assigned-content",
@@ -1179,6 +1228,13 @@
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-date-input",
+      "slot": "calendar-actions",
+      "decision": "part",
+      "parts": ["calendar-actions"],
+      "reason": "The row under the calendar owns the layout, spacing and separator of the calendar-actions slot."
     },
     {
       "tag": "c2-date-input",
@@ -3895,6 +3951,13 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
     },
     {
       "tag": "c2-table",

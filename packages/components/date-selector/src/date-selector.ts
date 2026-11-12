@@ -5,6 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import styles from './date-selector.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export type DateSelectorWeekStart = 'monday' | 'sunday'
 
@@ -214,7 +215,7 @@ export class DateSelector extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {
@@ -369,6 +370,16 @@ export class DateSelector extends LitElement {
     Array.from(this.dayButtons)
       .find((button) => button.dataset.date === value)
       ?.focus()
+  }
+
+  /** Moves focus into the calendar: to a selected day, else today, else the first available day shown. */
+  override focus(options?: FocusOptions) {
+    const days = '.day:not(:disabled)'
+    const day =
+      this.renderRoot.querySelector<HTMLElement>(`${days}[aria-selected="true"]`) ??
+      this.renderRoot.querySelector<HTMLElement>(`${days}[aria-current="date"]`) ??
+      this.renderRoot.querySelector<HTMLElement>(`${days}[tabindex="0"]`)
+    day?.focus(options)
   }
 
   private handleDayKeydown(event: KeyboardEvent, value: string, column: number) {

@@ -286,6 +286,7 @@ function safeColor(value: string | undefined): string | null {
  * @cssproperty {pixel} [--c2-scheduler__event--border-radius=6px] - Corner radius of bars.
  * @cssproperty {length} [--c2-scheduler__event--font-size=12px] - Font size of bars.
  * @cssproperty {length} [--c2-scheduler__avatar--size=28px] - Size of resource avatars.
+ * @cssproperty {color} [--c2-scheduler__avatar--color=#ffffff] - Initials on an avatar drawn in the default event colour (a resource with its own `color` keeps white).
  * @cssproperty {outline} [--c2-scheduler__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of bars, the slot cursor and buttons.
  */
 @customElement('c2-scheduler')
@@ -1125,7 +1126,7 @@ export class Scheduler extends LitElement {
 
   private renderResource(resource: SchedulerResource) {
     const color = safeColor(resource.color)
-    return html`<span class="avatar" aria-hidden="true" style=${styleMap({ '--avatar-color': color })}
+    return html`<span class="avatar ${color ? 'avatar--own' : ''}" aria-hidden="true" style=${styleMap({ '--avatar-color': color })}
         >${resource.avatar ? html`<img src=${resource.avatar} alt="" />` : initials(resource.label)}</span
       ><span class="resource-text" title=${resource.label}
         ><span class="resource-label">${resource.label}</span

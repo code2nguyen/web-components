@@ -47,6 +47,9 @@
 :host {
   display: block;
   box-sizing: border-box;
+  // Rows never wrap, so the min-content width is the longest line: in a flex or grid parent the viewer would grow to it
+  // instead of scrolling inside its own scroller.
+  min-inline-size: 0;
   background-color: css.cssVar(background-color);
   color: css.cssVar(color);
   font-family: css.cssVar(font-family);

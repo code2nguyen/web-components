@@ -1,4 +1,5 @@
 @use 'sass:string';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-rich-text-editor,
   $theme: (
@@ -88,6 +89,8 @@
   &:focus-within {
     border: css.cssVar(container__focus--border);
     box-shadow: css.cssVar(container__focus--box-shadow);
+    // Border colour and shadow are repainted away in forced colors; the ring keeps focus visible there.
+    @include focus.forced-colors-ring;
   }
 }
 :host(:state(error)) .container {
@@ -410,7 +413,7 @@ pre {
   background: transparent;
   color: inherit;
   font: inherit;
-  &:focus {
+  &:focus-visible {
     outline: css.cssVar(tool__focus--outline);
     outline-offset: 0;
   }

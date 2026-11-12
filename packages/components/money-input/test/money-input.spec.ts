@@ -181,3 +181,26 @@ test('formats a value set from script', async ({ page, renderScenario }) => {
   await props(host, { value: 'not a number' })
   await expect(page.getByRole('textbox')).toHaveValue('')
 })
+
+/** An Enter that ends an IME composition: flagged `isComposing`, or the legacy `keyCode` 229 some engines send instead. */
+async function imeEnter(target: import('@playwright/test').Locator, legacy: boolean) {
+  await target.evaluate((element, legacy) => {
+    const event = new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', isComposing: !legacy, bubbles: true, composed: true, cancelable: true })
+    if (legacy) Object.defineProperty(event, 'keyCode', { get: () => 229 })
+    element.dispatchEvent(event)
+  }, legacy)
+}
+
+test('an IME Enter (isComposing or keyCode 229) does not commit; a plain Enter does', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-money-input aria-label="Amount" locale="en-US"></c2-money-input>')
+  const host = page.locator('c2-money-input')
+  await watch(host, 'change')
+  const input = page.getByRole('textbox', { name: 'Amount' })
+  await input.pressSequentially('12.5')
+  for (const legacy of [false, true]) await imeEnter(input, legacy)
+  await expect(input).toHaveValue('12.5')
+  await expect(host).toHaveAttribute('data-events', '[]')
+  await input.press('Enter')
+  await expect(input).toHaveValue('12.50')
+  await expect(host).toHaveAttribute('data-events', '[null]')
+})

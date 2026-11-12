@@ -3,11 +3,13 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { disabledByAncestor, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { otpInputMessages } from './messages.js'
 import styles from './otp-input.scss?inline'
 
 /** Characters an {@link OtpInput} accepts. */
@@ -94,6 +96,7 @@ export class OtpInput extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, otpInputMessages)
   @query('input') private readonly input?: HTMLInputElement
 
   /** Current code. Characters outside `mode` are dropped and the value is cut to `length`. */
@@ -179,7 +182,7 @@ export class OtpInput extends LitElement {
     this.error = false
   }
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = state
@@ -262,8 +265,8 @@ export class OtpInput extends LitElement {
     this.internals.setFormValue(this.value, this.value)
     const anchor = this.input
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, anchor)
-    else if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, 'Enter the code.', anchor)
-    else if (this.value && !this.complete) this.internals.setValidity({ tooShort: true }, `Enter all ${this.cellCount} characters.`, anchor)
+    else if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), anchor)
+    else if (this.value && !this.complete) this.internals.setValidity({ tooShort: true }, this.msg.t('tooShort', this.cellCount), anchor)
     else this.internals.setValidity({})
   }
 
@@ -299,7 +302,7 @@ export class OtpInput extends LitElement {
           pattern=${this.mode === 'numeric' ? '[0-9]*' : nothing}
           spellcheck="false"
           autocapitalize="off"
-          aria-label=${this.ariaLabel || this.field.label || 'Verification code'}
+          aria-label=${this.ariaLabel || this.field.label || this.msg.t('label')}
           aria-invalid=${invalid ? 'true' : nothing}
           aria-describedby=${this.field.describedBy(showSupporting && 'supporting-text')}
           name=${ifDefined(this.name || undefined)}

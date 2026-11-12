@@ -143,6 +143,11 @@ function humanize(field: string): string {
  */
 @customElement('c2-boxplot-chart')
 export class BoxplotChart extends EchartsChartBase {
+  /** Describes itself: its own summary, table and keyboard model. */
+  protected override get usesSharedAccessibleView(): boolean {
+    return false
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(boxplotStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['custom', 'grid', 'markLine']

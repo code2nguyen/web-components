@@ -134,7 +134,7 @@ interface Moment {
  * @cssproperty {pixel} [--c2-state-timeline__segment--gap=1px] - Space between two segments; `0px` joins them.
  * @cssproperty {border-radius} [--c2-state-timeline__segment--border-radius=0px] - Rounding of each segment's inner ends.
  * @cssproperty {percentage} [--c2-state-timeline__segment--background-mix=100%] - Share of the state colour in a segment that is not the baseline.
- * @cssproperty {color} [--c2-state-timeline__segment--color=#ffffff] - Colour of the state written inside a segment.
+ * @cssproperty {color} [--c2-state-timeline__segment--color=#ffffff] - Colour of the state written inside a segment whose fill follows the theme (primary, danger, neutral and the series slots); each tone and slot can override it with its own `__label--color`.
  * @cssproperty {font-weight} [--c2-state-timeline__segment--font-weight=500] - Weight of the state written inside a segment.
  * @cssproperty {outline} [--c2-state-timeline__segment__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the active segment.
  * @cssproperty {border} [--c2-state-timeline__segment__empty--border=1px dashed #bcbcc6] - Outline of a stretch with no data.
@@ -161,6 +161,11 @@ interface Moment {
  * @cssproperty {color} [--c2-state-timeline__tone-warning--color=#a16207] - `tone: 'warning'`.
  * @cssproperty {color} [--c2-state-timeline__tone-danger--color=#dc2626] - `tone: 'danger'`.
  * @cssproperty {color} [--c2-state-timeline__tone-neutral--color=#71717a] - `tone: 'neutral'`.
+ * @cssproperty {color} [--c2-state-timeline__tone-primary__label--color=#ffffff] - Label written on a `tone: 'primary'` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__tone-success__label--color=#ffffff] - Label written on a `tone: 'success'` segment (its fill stays deep in a dark theme, so it does not follow `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__tone-warning__label--color=#ffffff] - Label written on a `tone: 'warning'` segment (its fill stays deep in a dark theme, so it does not follow `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__tone-danger__label--color=#ffffff] - Label written on a `tone: 'danger'` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__tone-neutral__label--color=#ffffff] - Label written on a `tone: 'neutral'` segment (falls back to `segment--color`).
  * @cssproperty {color} [--c2-state-timeline__series-1--color=#0265dc] - `tone: 1`, the first automatic colour; the eight slots match the chart palette.
  * @cssproperty {color} [--c2-state-timeline__series-2--color=#ea580c] - `tone: 2`.
  * @cssproperty {color} [--c2-state-timeline__series-3--color=#0f766e] - `tone: 3`.
@@ -169,6 +174,14 @@ interface Moment {
  * @cssproperty {color} [--c2-state-timeline__series-6--color=#7c3aed] - `tone: 6`.
  * @cssproperty {color} [--c2-state-timeline__series-7--color=#0891b2] - `tone: 7`.
  * @cssproperty {color} [--c2-state-timeline__series-8--color=#52525b] - `tone: 8`.
+ * @cssproperty {color} [--c2-state-timeline__series-1__label--color=#ffffff] - Label written on a `tone: 1` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-2__label--color=#ffffff] - Label written on a `tone: 2` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-3__label--color=#ffffff] - Label written on a `tone: 3` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-4__label--color=#ffffff] - Label written on a `tone: 4` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-5__label--color=#ffffff] - Label written on a `tone: 5` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-6__label--color=#ffffff] - Label written on a `tone: 6` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-7__label--color=#ffffff] - Label written on a `tone: 7` segment (falls back to `segment--color`).
+ * @cssproperty {color} [--c2-state-timeline__series-8__label--color=#ffffff] - Label written on a `tone: 8` segment (falls back to `segment--color`).
  * @cssproperty {color} [--c2-state-timeline__empty--color=#71717a] - Colour of the empty-state text.
  * @cssproperty {padding} [--c2-state-timeline__empty--padding=32px 16px] - Padding of the empty state.
  */
@@ -237,6 +250,7 @@ export class StateTimeline extends LitElement {
     if (isServer) return
     this.#resizeObserver ??= new ResizeObserver(() => this.#measure())
     this.#resizeObserver.observe(this)
+    // modern-web-ignore: scroll-listener-visual keeps the open tooltip on its segment; anchor positioning would be a rewrite
     addEventListener('scroll', this.#schedulePlaceTooltip, { capture: true, passive: true })
     addEventListener('resize', this.#schedulePlaceTooltip, { passive: true })
   }

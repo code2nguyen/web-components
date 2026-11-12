@@ -14,7 +14,10 @@
 );
 
 :host {
+  // modern-web-ignore: fixed-overlay-z-index follows the pointer over its own chart, so it shares that chart's layer (a chart in a modal puts it in the modal's top layer); it never has to rise above another modal
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 1000;
   display: block;
   pointer-events: none;

@@ -12,6 +12,7 @@ import type { EchartsFeature } from './engines/echarts-loader.js'
 import { readableOn } from './chart-contrast.js'
 import radialStyles from './radial-bar-chart.scss?inline'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface RadialBarChart {
   addEventListener: TypedAddEventListener<RadialBarChart, ChartEventMap>
@@ -103,6 +104,10 @@ function darken(color: string, amount = 0.3): string {
  */
 @customElement('c2-radial-bar-chart')
 export class RadialBarChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'radialBarChart'
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(radialStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['bar', 'polar']

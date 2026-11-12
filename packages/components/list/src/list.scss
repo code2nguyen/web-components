@@ -75,6 +75,7 @@
   display: none;
 }
 
+// modern-web-ignore: bare-focus-style removes the UA outline only; the rows hold the roving focus and draw their own :focus-visible ring
 :host(:focus) {
   outline: none;
 }

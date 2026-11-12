@@ -5,6 +5,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './questionnaire.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export type QuestionnaireQuestionType = 'select' | 'choice' | 'single' | 'multiple'
 export type QuestionnaireAnswer = string | string[]
@@ -202,7 +203,18 @@ export class Questionnaire extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
+  }
+
+  /** Back/forward cache and autofill restore: the state is the answers as JSON, as the form value stores them. */
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state !== 'string' || !state) return
+    try {
+      const answers: unknown = JSON.parse(state)
+      if (answers && typeof answers === 'object' && !Array.isArray(answers)) this.answers = answers as QuestionnaireAnswers
+    } catch {
+      // Not state this element wrote: keep the current answers.
+    }
   }
 
   private get effectiveDisabled(): boolean {

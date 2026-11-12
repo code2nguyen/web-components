@@ -8,10 +8,12 @@ import styles from './tooltip.scss?inline'
 
 export type { Placement }
 
-const ENTER_EVENTS = ['pointerenter', 'focus'] as const
-const LEAVE_EVENTS = ['pointerleave', 'blur', 'pointerdown'] as const
-
 let uid = 0
+
+/** The focusable element inside a target's shadow root (a `delegatesFocus` button, an inner input). */
+const INNER_CONTROL = 'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
+const normalize = (text: string | null | undefined) => (text ?? '').replace(/\s+/g, ' ').trim()
 
 /** Events fired by {@link Tooltip}, keyed for `addEventListener`. */
 export interface TooltipEventMap {
@@ -31,8 +33,11 @@ export interface Tooltip {
  *
  * The tooltip is a `popover="manual"` element: it renders in the top layer, so it is never clipped by scrolling or
  * `overflow: hidden` ancestors and the target is left untouched. floating-ui keeps it beside the target and flips it
- * when there is no room; the side in use is reflected as `current-placement`. It has `role="tooltip"` and the target
- * gets `aria-describedby`, so assistive technology reads it. Escape, pressing on the target, blur and leaving hide it.
+ * when there is no room; the side in use is reflected as `current-placement`. It has `role="tooltip"` and describes
+ * its target (the focusable control inside a `c2-*` target's shadow root) through `ariaDescribedByElements`, unless its
+ * text repeats the target's accessible name. The pointer can move onto the bubble: it stays open while the target or
+ * the bubble is hovered or the target has focus, and closes a short grace period (`hide-delay`) after both are left.
+ * Escape anywhere on the page and pressing on the target hide it.
  *
  * @tag c2-tooltip
  *
@@ -83,8 +88,11 @@ export class Tooltip extends LitElement {
   /** Delay before showing, in milliseconds. */
   @property({ type: Number }) delay = 300
 
-  /** Delay before hiding, in milliseconds. */
-  @property({ type: Number, attribute: 'hide-delay' }) hideDelay = 0
+  /**
+   * Grace period before hiding, in milliseconds, once the pointer has left both the target and the bubble (and the
+   * target lost focus). It is what lets the pointer cross the gap onto the bubble.
+   */
+  @property({ type: Number, attribute: 'hide-delay' }) hideDelay = 120
 
   /** Hides the arrow that points towards the target. */
   @property({ type: Boolean, reflect: true, attribute: 'hide-arrow' }) hideArrow = false
@@ -113,6 +121,13 @@ export class Tooltip extends LitElement {
   private cleanupPosition: (() => void) | null = null
   private positioningStyleObserver: MutationObserver | null = null
   private positioningStyleValues = ''
+  private hovered = false
+  private bubbleHovered = false
+  private focused = false
+  /** The element whose description currently includes this tooltip, and its `aria-describedby` before that. */
+  private described: HTMLElement | null = null
+  private describedBefore: string | null = null
+  private ownsId = false
 
   /** The element the tooltip describes. Assignable. */
   get target(): HTMLElement | null {
@@ -124,14 +139,93 @@ export class Tooltip extends LitElement {
     this.detachTarget()
     this._target = target
     if (target) {
-      for (const name of ENTER_EVENTS) target.addEventListener(name, this.handleEnter)
-      for (const name of LEAVE_EVENTS) target.addEventListener(name, this.handleLeave)
-      target.addEventListener('keydown', this.handleTargetKeydown)
-      if (!this.id) this.id = `c2-tooltip-${++uid}`
-      const described = (target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)
-      if (!described.includes(this.id)) target.setAttribute('aria-describedby', [...described, this.id].join(' '))
+      target.addEventListener('pointerenter', this.handlePointerEnter)
+      target.addEventListener('pointerleave', this.handlePointerLeave)
+      target.addEventListener('focus', this.handleFocus)
+      target.addEventListener('blur', this.handleBlur)
+      target.addEventListener('pointerdown', this.handlePress)
+      target.addEventListener('keydown', this.handleKeydown)
+      this.syncDescription()
+      // A custom-element target renders its focusable control later: describe that control once it exists.
+      if (target.localName.includes('-')) {
+        void customElements
+          .whenDefined(target.localName)
+          .then(() => (target as HTMLElement & { updateComplete?: Promise<unknown> }).updateComplete)
+          .then(() => {
+            if (this._target === target) this.syncDescription()
+          })
+      }
     }
     this.syncTargetText()
+  }
+
+  /** The element that takes the description: the target, or the focusable control in its open shadow root. */
+  private describedControl(target: HTMLElement): HTMLElement {
+    return target.shadowRoot?.querySelector<HTMLElement>(INNER_CONTROL) ?? target
+  }
+
+  private descriptionText() {
+    return normalize(this.textContent) || normalize(this._target?.dataset.tooltip)
+  }
+
+  /**
+   * Links this tooltip as the description of its target, or unlinks it when its text only repeats the target's
+   * accessible name (an icon button named by its tooltip would be read twice). Element references cross shadow
+   * boundaries and write no id on the tooltip; browsers without ARIA element reflection get the id path instead.
+   */
+  private syncDescription() {
+    const target = this._target
+    const references = 'ariaDescribedByElements' in Element.prototype
+    const control = target ? this.describedControl(target) : null
+    const name = normalize(control?.getAttribute('aria-label') ?? control?.ariaLabel)
+    // An id cannot reach across a shadow boundary, so the id fallback describes the target itself.
+    const next = control && !(name && name === this.descriptionText()) ? (references ? control : target) : null
+    // The control's own template may rewrite `aria-describedby` (a field turning invalid), which drops the element
+    // reference set on top of it: link again rather than assume the earlier link still holds.
+    if (next === this.described && (!next || !references || next.ariaDescribedByElements?.includes(this))) return
+    this.unlinkDescription()
+    if (!next) return
+    this.described = next
+    this.describedBefore = next.getAttribute('aria-describedby')
+    if (references) {
+      next.ariaDescribedByElements = [...(next.ariaDescribedByElements ?? []).filter((element) => element !== this), this]
+      return
+    }
+    if (!this.id) {
+      this.id = `c2-tooltip-${++uid}`
+      this.ownsId = true
+    }
+    const ids = (this.describedBefore ?? '').split(/\s+/).filter(Boolean)
+    // modern-web-ignore: aria-attribute-on-other-element fallback for engines without ariaDescribedByElements
+    if (!ids.includes(this.id)) next.setAttribute('aria-describedby', [...ids, this.id].join(' '))
+  }
+
+  private unlinkDescription() {
+    const element = this.described
+    if (!element) return
+    const before = this.describedBefore
+    this.described = this.describedBefore = null
+    if ('ariaDescribedByElements' in Element.prototype) {
+      // Setting element references leaves the attribute empty. Anything else means the element's owner wrote it
+      // since (and so already dropped this reference): leave its value alone rather than restore a stale one.
+      if (element.getAttribute('aria-describedby') === '') {
+        const rest = (element.ariaDescribedByElements ?? []).filter((other) => other !== this)
+        // Restoring the id list also clears the element references set on top of it.
+        // modern-web-ignore: aria-attribute-on-other-element puts back the value it had before the link
+        if (before) element.setAttribute('aria-describedby', before)
+        else element.ariaDescribedByElements = rest.length ? rest : null
+      }
+    } else {
+      const ids = (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter((id) => id && id !== this.id)
+      // modern-web-ignore: aria-attribute-on-other-element fallback for engines without ariaDescribedByElements
+      if (ids.length) element.setAttribute('aria-describedby', ids.join(' '))
+      else element.removeAttribute('aria-describedby')
+    }
+    if (this.ownsId) {
+      // modern-web-ignore: host-attribute-write removes only the id the fallback path generated above
+      this.removeAttribute('id')
+      this.ownsId = false
+    }
   }
 
   /**
@@ -152,14 +246,19 @@ export class Tooltip extends LitElement {
     if (isServer) return
     if (!this.hasAttribute('popover')) this.setAttribute('popover', 'manual')
     this.internals.role = 'tooltip'
+    this.addEventListener('pointerenter', this.handleBubbleEnter)
+    this.addEventListener('pointerleave', this.handleBubbleLeave)
     this.resolveTarget()
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.removeEventListener('pointerenter', this.handleBubbleEnter)
+    this.removeEventListener('pointerleave', this.handleBubbleLeave)
     this.detachTarget()
     this.clearTimers()
     this.stopPositioning()
+    document.removeEventListener('keydown', this.handleKeydown)
   }
 
   private resolveTarget() {
@@ -181,17 +280,57 @@ export class Tooltip extends LitElement {
   private detachTarget() {
     const target = this._target
     if (!target) return
-    for (const name of ENTER_EVENTS) target.removeEventListener(name, this.handleEnter)
-    for (const name of LEAVE_EVENTS) target.removeEventListener(name, this.handleLeave)
-    target.removeEventListener('keydown', this.handleTargetKeydown)
-    const described = (target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter((id) => id && id !== this.id)
-    if (described.length) target.setAttribute('aria-describedby', described.join(' '))
-    else target.removeAttribute('aria-describedby')
+    target.removeEventListener('pointerenter', this.handlePointerEnter)
+    target.removeEventListener('pointerleave', this.handlePointerLeave)
+    target.removeEventListener('focus', this.handleFocus)
+    target.removeEventListener('blur', this.handleBlur)
+    target.removeEventListener('pointerdown', this.handlePress)
+    target.removeEventListener('keydown', this.handleKeydown)
+    this.unlinkDescription()
+    this.hovered = this.focused = this.bubbleHovered = false
     this._target = null
+  }
+
+  private handlePointerEnter = () => {
+    this.hovered = true
+    this.handleEnter()
+  }
+
+  private handlePointerLeave = () => {
+    this.hovered = false
+    this.handleLeave()
+  }
+
+  private handleFocus = () => {
+    this.focused = true
+    this.handleEnter()
+  }
+
+  private handleBlur = () => {
+    this.focused = false
+    this.handleLeave()
+  }
+
+  private handleBubbleEnter = () => {
+    if (!this.open) return
+    this.bubbleHovered = true
+    clearTimeout(this.hideTimer)
+  }
+
+  private handleBubbleLeave = () => {
+    this.bubbleHovered = false
+    this.handleLeave()
+  }
+
+  /** Pressing on the target dismisses the tooltip at once, like Escape. */
+  private handlePress = () => {
+    this.clearTimers()
+    this.open = false
   }
 
   private handleEnter = () => {
     clearTimeout(this.hideTimer)
+    this.syncDescription()
     if (this.open || this.showTimer) return
     this.showTimer = setTimeout(() => {
       this.showTimer = undefined
@@ -199,20 +338,24 @@ export class Tooltip extends LitElement {
     }, this.delay)
   }
 
+  /** Hides once nothing holds the tooltip open: neither the target nor the bubble is hovered, and the target lost focus. */
   private handleLeave = () => {
+    if (this.hovered || this.focused || this.bubbleHovered) return
     clearTimeout(this.showTimer)
     this.showTimer = undefined
     if (!this.open) return
-    if (this.hideDelay > 0) {
-      clearTimeout(this.hideTimer)
-      this.hideTimer = setTimeout(() => (this.open = false), this.hideDelay)
-    } else {
-      this.open = false
-    }
+    clearTimeout(this.hideTimer)
+    if (this.hideDelay > 0) this.hideTimer = setTimeout(() => (this.open = false), this.hideDelay)
+    else this.open = false
   }
 
-  private handleTargetKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.open) this.open = false
+  /** Escape dismisses the open tooltip wherever focus is (WCAG 1.4.13): listened on the document while open. */
+  private handleKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !this.open) return
+    // This Escape is spent closing the tooltip: an enclosing dialog or popover must not close on it too.
+    event.preventDefault()
+    this.clearTimers()
+    this.open = false
   }
 
   private clearTimers() {
@@ -274,8 +417,13 @@ export class Tooltip extends LitElement {
       strategy: 'fixed',
       middleware,
     })
+    // The host is the popover itself, the top-layer box floating-ui places; this runs only while it is shown (never in a
+    // server render), and `current-placement` is documented API authors style against.
+    // modern-web-ignore: host-style-write the host is the shown top-layer box floating-ui places
     this.style.left = `${x}px`
+    // modern-web-ignore: host-style-write the host is the shown top-layer box floating-ui places
     this.style.top = `${y}px`
+    // modern-web-ignore: host-attribute-write documented `current-placement` output, written only while shown
     this.setAttribute('current-placement', placement)
 
     if (arrowEl && middlewareData.arrow) {
@@ -304,8 +452,11 @@ export class Tooltip extends LitElement {
           /* not connected yet */
         }
         this.startPositioning()
+        document.addEventListener('keydown', this.handleKeydown)
         this.dispatchEvent(new Event('show', { bubbles: true, composed: true }))
       } else if (!this.open && shown) {
+        document.removeEventListener('keydown', this.handleKeydown)
+        this.bubbleHovered = false
         this.stopPositioning()
         try {
           this.hidePopover()

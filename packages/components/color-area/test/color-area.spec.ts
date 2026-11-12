@@ -1,4 +1,4 @@
-import { test, expect, watch } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 
 test('pointer position updates saturation/value and dispatches the chosen color', async ({ page, renderScenario }) => {
   await renderScenario('<c2-color-area hue="120" style="--c2-color-area--width: 200px; --c2-color-area--height: 200px"></c2-color-area>')
@@ -22,4 +22,41 @@ test('dragging outside clamps values and release stops tracking the pointer', as
   await expect(page.locator('c2-color-area')).toHaveJSProperty('value', 1)
   await page.mouse.move(box.x + 20, box.y + 20)
   await expect(page.locator('c2-color-area')).toHaveJSProperty('saturation', 1)
+})
+
+test('the thumb is a keyboard slider: arrows, Shift, Page and Home/End change the colour and fire change', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-color-area hue="200" saturation="0.5" value="0.5"></c2-color-area>')
+  const host = page.locator('c2-color-area')
+  const thumb = page.getByRole('slider', { name: 'Saturation and brightness' })
+  await expect(thumb).toHaveAttribute('aria-valuenow', '50')
+  await expect(thumb).toHaveAttribute('aria-valuetext', 'Saturation 50%, brightness 50%')
+  await watch(host, 'change')
+  await thumb.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(host).toHaveJSProperty('saturation', 0.51)
+  await page.keyboard.press('Shift+ArrowUp')
+  await expect(host).toHaveJSProperty('value', 0.6)
+  await page.keyboard.press('PageDown')
+  await expect(host).toHaveJSProperty('value', 0.5)
+  await page.keyboard.press('End')
+  await expect(host).toHaveJSProperty('saturation', 1)
+  await page.keyboard.press('ArrowRight')
+  await expect(thumb).toHaveAttribute('aria-valuetext', 'Saturation 100%, brightness 50%')
+  await expect(host).toHaveAttribute('data-events', /^\[(\{[^}]*"h":200[^}]*\},?){4}\]$/)
+  await accessible(page)
+})
+
+test('the thumb sits on its colour even when the area had no layout when it rendered, and fits a narrow container', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<div id="box" style="display: none; width: 120px"><c2-color-area saturation="0.75" value="0.25" style="--c2-color-area--width: 200px; --c2-color-area--height: 100px"></c2-color-area></div>',
+  )
+  await page.locator('#box').evaluate((el) => (el.style.display = 'block'))
+  const box = await page.locator('#box').boundingBox()
+  const gradient = await page.locator('.gradient').boundingBox()
+  const thumb = await page.locator('.color-handle').boundingBox()
+  if (!box || !gradient || !thumb) throw new Error('Missing area')
+  // The area shrinks to the 120px container instead of overflowing it, and the thumb follows in percent.
+  expect(gradient.x + gradient.width).toBeLessThanOrEqual(box.x + box.width)
+  expect(thumb.x + thumb.width / 2 - gradient.x).toBeCloseTo(gradient.width * 0.75, 0)
+  expect(thumb.y + thumb.height / 2 - gradient.y).toBeCloseTo(gradient.height * 0.75, 0)
 })

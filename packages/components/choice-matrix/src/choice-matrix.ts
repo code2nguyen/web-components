@@ -8,6 +8,7 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { choiceMatrixMessages } from './messages'
 import styles from './choice-matrix.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { choiceMatrixMessages } from './messages'
 
@@ -188,7 +189,7 @@ export class ChoiceMatrix extends LitElement {
   }
 
   formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   formStateRestoreCallback(state: string | File | FormData | null) {

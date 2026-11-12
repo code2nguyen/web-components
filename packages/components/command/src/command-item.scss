@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-command-item,
@@ -83,8 +84,11 @@
   &.active {
     background: css.cssVar(active--background, background);
     color: css.cssVar(active--color, color);
+    // The highlighted row is drawn by its background alone, which forced colors drop.
+    @include focus.forced-colors-ring($offset: -2px);
   }
 
+  // modern-web-ignore: bare-focus-style only removes the UA outline; the highlighted row is shown by .active (aria-activedescendant), not by focus
   &:focus {
     outline: none;
   }

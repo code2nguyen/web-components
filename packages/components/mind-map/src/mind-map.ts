@@ -5,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { isComposingKey } from '@c2n/core/dom-helper.js'
 import { isApplePlatform } from '@c2n/core/shortcut-helper.js'
 import { easeOutCubic, prefersReducedMotion } from '@c2n/core/pan-zoom.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -1192,7 +1193,7 @@ export class MindMap extends LitElement {
   }
 
   #handleKeydown = (event: KeyboardEvent) => {
-    if (event.defaultPrevented || event.isComposing) return
+    if (event.defaultPrevented || isComposingKey(event)) return
     const target = event.composedPath()[0] as HTMLElement
     if (target.localName === 'textarea') return
     if (target.classList.contains('board')) {
@@ -1347,7 +1348,7 @@ export class MindMap extends LitElement {
 
   #handleEditorKeydown = (event: KeyboardEvent) => {
     event.stopPropagation()
-    if (event.isComposing || !this.#editing) return
+    if (isComposingKey(event) || !this.#editing) return
     const id = this.#editing.id
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()

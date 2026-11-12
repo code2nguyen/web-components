@@ -33,6 +33,7 @@ carry the accent.
     --c2-scheduler__avatar--size: 22px;
     --c2-scheduler__event--border-radius: 4px;
     --c2-scheduler__event--color: #0f766e;
+    --c2-scheduler__avatar--color: #ffffff;
   }
 </style>
 <c2-scheduler
@@ -53,6 +54,7 @@ carry the accent.
   .production-week {
     --c2-scheduler__day--width: 110px;
     --c2-scheduler__event--color: #b45309;
+    --c2-scheduler__avatar--color: #ffffff;
     --c2-scheduler__today--color: light-dark(#b45309, #f59e0b);
     --c2-scheduler__now--color: #b45309;
     --c2-scheduler__event--border-radius: 999px;
@@ -133,7 +135,7 @@ below cover.
   locale="en-GB"
   hide-header
   resource-heading="Team"
-  resources='[{"id":"lea","label":"Léa Moreau","description":"Part time, off Fridays","color":"#0d9488"},{"id":"omar","label":"Omar Haddad","description":"Full time","color":"#2563eb"},{"id":"sofia","label":"Sofia Rossi","description":"Full time","color":"#db2777"}]'
+  resources='[{"id":"lea","label":"Léa Moreau","description":"Part time, off Fridays","color":"#0f766e"},{"id":"omar","label":"Omar Haddad","description":"Full time","color":"#2563eb"},{"id":"sofia","label":"Sofia Rossi","description":"Full time","color":"#db2777"}]'
   events='[{"id":"1","resource":"lea","start":"2026-11-16","end":"2026-11-18","title":"Vacation"},{"id":"2","resource":"omar","start":"2026-11-18","end":"2026-11-21","title":"Vacation","pending":true},{"id":"3","resource":"sofia","start":"2026-11-17T09:00","end":"2026-11-17T13:00","title":"Dentist","pending":true}]'
   bands='[{"start":"2026-11-20","end":"2026-11-21","label":"Non-working day","resource":"lea"}]'
 ></c2-scheduler>

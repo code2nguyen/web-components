@@ -178,6 +178,16 @@ export class AddressField extends LitElement {
     this.formDisabled = disabled
   }
 
+  /** Back/forward cache and autofill restore: the state is the value as JSON, as `syncForm` stores it. */
+  formStateRestoreCallback(state: string | File | FormData | null): void {
+    if (typeof state !== 'string' || !state) return
+    try {
+      this.value = normalize(JSON.parse(state) as Partial<AddressValue>, this.country)
+    } catch {
+      // Not state this element wrote: keep the current value.
+    }
+  }
+
   override connectedCallback(): void {
     super.connectedCallback()
     this.defaultValue ??= normalize(this.value, this.country)

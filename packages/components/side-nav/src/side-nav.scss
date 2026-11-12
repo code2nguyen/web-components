@@ -29,7 +29,7 @@
     divider--color: #e4e4e7,
 
     scrollbar--color: rgba(0, 0, 0, 0.2),
-
+    // modern-web-ignore: fixed-overlay-z-index the over-mode drawer is page navigation: an open modal dialog must cover it, not sit under it
     over--position: fixed,
     over--top: 0px,
     over--height: 100dvh,
@@ -90,6 +90,7 @@ $_duration: css.cssVar(transition-duration);
 }
 
 // Focused only programmatically (tabindex -1) when a pointer opens the overlay; it is a container, not a control.
+// modern-web-ignore: bare-focus-style removes the outline of a drawer focused only by script (tabindex -1); not a focus indicator
 .drawer:focus {
   outline: none;
 }

@@ -67,10 +67,6 @@
   touch-action: none;
 }
 
-.pad:focus {
-  outline: none;
-}
-
 .pad:focus-visible {
   outline: css.cssVar(focus--outline);
   outline-offset: 2px;

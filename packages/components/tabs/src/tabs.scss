@@ -153,3 +153,11 @@
     transition: none;
   }
 }
+
+// One wrapper per panel. It stays unstyled: `hidden="until-found"` keeps a hidden wrapper's box, so any padding,
+// border or display set here would show (or, for `display`, defeat the hiding). The shown one passes the column
+// layout on to the panel, which then sits exactly where it did as a direct child of `.c2-tabs`.
+.c2-tabs-panel:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+}

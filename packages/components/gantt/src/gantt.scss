@@ -230,6 +230,10 @@
   display: flex;
   align-items: center;
   height: var(--_row);
+  // Every task is a row in the DOM: those scrolled out of view skip layout and paint. The height is fixed, so a
+  // skipped row keeps its place beside its bar in the timeline.
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto var(--_row);
   border-bottom: css.cssVar(row--border-bottom);
   cursor: default;
   outline: none;

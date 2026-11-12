@@ -12,6 +12,7 @@ import type { EchartsFeature } from './engines/echarts-loader.js'
 import { columnValue, type NormalizeContext } from './chart-data.js'
 import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
 import './chart-series.js'
+import type { ChartKindMessage } from './messages.js'
 
 export interface BubbleChart {
   addEventListener: TypedAddEventListener<BubbleChart, ChartEventMap>
@@ -159,6 +160,10 @@ function roundNicely(value: number): number {
  */
 @customElement('c2-bubble-chart')
 export class BubbleChart extends EchartsChartBase {
+  protected override get chartKind(): ChartKindMessage {
+    return 'bubbleChart'
+  }
+
   static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(bubbleStyles)]
 
   protected override readonly features: readonly EchartsFeature[] = ['scatter', 'grid']

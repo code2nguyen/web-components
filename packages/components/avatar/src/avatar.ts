@@ -232,6 +232,7 @@ export class Avatar extends LitElement {
     const detail: AvatarRemoveDetail = { file: this.selectedFile, previousSrc: this.previewUrl ?? this.src }
     this.revokePreview()
     this.selectedFile = undefined
+    // modern-web-ignore: host-attribute-write removes the author's own `src` only on an explicit user removal (never on upgrade or render), so the attribute does not contradict the cleared, unreflected property
     this.removeAttribute('src')
     this.src = undefined
     this.imageFailed = false

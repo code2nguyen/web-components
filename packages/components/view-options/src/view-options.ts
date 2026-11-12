@@ -370,7 +370,9 @@ export class ViewOptions extends LitElement {
     const inner = trigger.localName.includes('-') ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]') : null
     if (!inner && !userOpened && !trigger.hasAttribute('aria-expanded')) return
     const target = inner ?? trigger
+    // modern-web-ignore: aria-attribute-on-other-element the disclosure state belongs on the external trigger's button (another component's shadow element, or an author button written only after the user opened the panel, past hydration)
     target.setAttribute('aria-haspopup', 'dialog')
+    // modern-web-ignore: aria-attribute-on-other-element same trigger as above
     target.setAttribute('aria-expanded', String(this.open))
   }
 

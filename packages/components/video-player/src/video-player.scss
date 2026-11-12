@@ -45,6 +45,9 @@
   line-height: 1.3;
   container-type: inline-size;
   user-select: none;
+  // The whole player is always dark (video, controls, tooltips, menus), so native widgets inside it, scrollbars and
+  // form controls, are drawn for a dark surface whatever the page's scheme.
+  color-scheme: dark;
 }
 
 .player.fullscreen {
@@ -207,6 +210,15 @@ svg .fill {
   padding: 28px 12px 8px;
   background: css.cssVar(controls--background);
   transition: opacity css.cssVar(transition--duration) ease;
+}
+
+// Forced colors drop the gradient scrim: give the controls a solid system surface so their text and icons stay legible
+// over the video.
+@media (forced-colors: active) {
+  .chrome {
+    background: Canvas;
+    color: CanvasText;
+  }
 }
 
 .player.idle .chrome {

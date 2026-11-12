@@ -1,0 +1,87 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-input,
+  $theme: (
+    calendar--background: #ffffff,
+    calendar--color: #18181b,
+    calendar--border: 1px solid #e4e4e7,
+    calendar--border-radius: 8px,
+    calendar--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    calendar--padding: 8px,
+    calendar-actions--gap: 4px,
+    calendar-actions--border-top: 1px solid #e4e4e7,
+    calendar-action--padding: 6px 10px,
+    calendar-action--border-radius: 6px,
+    calendar-action--color: #0265dc,
+    calendar-action--font-size: 14px,
+    calendar-action--font-weight: 500,
+    calendar-action__hover--background: #f4f4f5,
+    calendar-action__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    calendar-action__disabled--opacity: 0.38,
+  )
+);
+
+// The calendar popover of `picker="calendar"`, added to the shadow root when the calendar module first loads.
+.calendar {
+  box-sizing: border-box;
+  padding: css.cssVar(calendar--padding);
+  border: css.cssVar(calendar--border);
+  border-radius: css.cssVar(calendar--border-radius);
+  color: css.cssVar(calendar--color);
+  background: css.cssVar(calendar--background);
+  box-shadow: css.cssVar(calendar--box-shadow);
+}
+
+// The popover is the surface: the calendar inside it is drawn flat.
+.calendar c2-date-selector {
+  --c2-date-selector--background: transparent;
+  --c2-date-selector--border: none;
+  --c2-date-selector--box-shadow: none;
+  --c2-date-selector--padding: 4px;
+  --c2-date-selector--min-width: 0px;
+}
+
+.calendar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: css.cssVar(calendar-actions--gap);
+  margin-top: css.cssVar(calendar--padding);
+  padding-top: css.cssVar(calendar--padding);
+  border-top: css.cssVar(calendar-actions--border-top);
+}
+
+.calendar-actions slot {
+  display: contents;
+}
+
+// The slotted actions sit at the start, the built-in ones at the end.
+.calendar-actions .spring {
+  flex: 1;
+}
+
+.calendar-action {
+  margin: 0;
+  padding: css.cssVar(calendar-action--padding);
+  border: 0;
+  border-radius: css.cssVar(calendar-action--border-radius);
+  color: css.cssVar(calendar-action--color);
+  background: transparent;
+  font: inherit;
+  font-size: css.cssVar(calendar-action--font-size);
+  font-weight: css.cssVar(calendar-action--font-weight);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(calendar-action__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(calendar-action__focus--outline);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(calendar-action__disabled--opacity);
+    background: transparent;
+    cursor: default;
+  }
+}

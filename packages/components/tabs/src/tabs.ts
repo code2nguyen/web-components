@@ -1,9 +1,9 @@
 import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { classMap } from 'lit/directives/class-map.js'
+import { repeat } from 'lit/directives/repeat.js'
 import { provide } from '@lit/context'
 import styles from './tabs.scss?inline'
 import { selectedTabContext } from './tab-context'
@@ -12,6 +12,9 @@ import './tab'
 import type { Tab } from './tab'
 
 const TAB_TAG = 'c2-tab'
+
+/** Element reflection lets a panel wrapper in the shadow root be labelled by its tab in the light DOM. */
+const canReferenceElements = typeof Element !== 'undefined' && 'ariaLabelledByElements' in Element.prototype
 
 /** Detail of the `selection-change` event of {@link Tabs}. */
 export interface TabsSelectionChangeEventDetail {
@@ -34,23 +37,29 @@ export interface Tabs {
  *
  * Light-DOM children are split in two groups: every `<c2-tab for="…">` becomes a tab in the header,
  * every other child is a panel whose `id` matches a tab's `for`. Only the panel of the selected tab is
- * rendered. The header is a `tablist`: Arrow keys, Home and End move between tabs, Enter and Space
+ * shown. The header is a `tablist`: Arrow keys, Home and End move between tabs, Enter and Space
  * activate the focused one.
  *
  * The strip assigns its children to its slots itself (manual slot assignment), so neither the tabs nor the
  * panels need a `slot` attribute and none is written on them; a `slot="tab"` already in the markup is
- * harmless. When the shadow root was server-rendered (declarative shadow DOM, which has no manual mode)
- * the strip falls back to writing `slot` on the tabs and the selected panel. The selected tab matches
- * `c2-tab:state(selected)`. Panels without a `role` get `role="tabpanel"` and `aria-labelledby` (and the
- * tab an `id` for it): a plain element has no `ElementInternals`, so write those yourself in
- * server-rendered markup and nothing is added.
+ * harmless. Each panel sits in a wrapper of the shadow root; the shown one carries `role="tabpanel"` and is
+ * labelled by its tab, and the others are `hidden="until-found"`: the browser's find-in-page (and a
+ * text-fragment link) still finds the text of every enabled tab and selects that tab, firing
+ * `selection-change` as a click does. Where `until-found` is unsupported the other panels are simply hidden.
+ * A panel that carries its own `role` keeps it and the wrapper adds none. Without element reflection
+ * (`ariaLabelledByElements`), the selected panel gets `role="tabpanel"` and `aria-labelledby` itself (and the
+ * tab an `id` for it), unless the author wrote them.
+ *
+ * When the shadow root was server-rendered (declarative shadow DOM, which has no manual mode) the strip falls
+ * back to writing `slot` on the tabs and the selected panel, and only that panel is rendered. The selected tab
+ * matches `c2-tab:state(selected)`.
  *
  * @tag c2-tabs
  *
  * @slotcomponent c2-tab
  *
  * @slot tab - The `<c2-tab>` children (assigned by the strip; no `slot` attribute needed).
- * @slot tab-content - The panel of the selected tab (assigned by the strip from the child whose `id` matches `selected-tab`; no `slot` attribute needed).
+ * @slot tab-content - The panel of the selected tab, in a server-rendered shadow root only (assigned from the child whose `id` matches `selected-tab`). Otherwise each panel is assigned to a wrapper of its own; no `slot` attribute is needed either way.
  *
  * @event {CustomEvent<TabsSelectionChangeEventDetail>} selection-change - Fired after the user selects another tab. `detail.value` is the new `selected-tab`. Not fired for programmatic changes. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
@@ -131,14 +140,21 @@ export class Tabs extends LitElement {
   @query('slot[name="tab-content"]')
   private contentSlot!: HTMLSlotElement
 
-  @state()
-  private indicatorStyle = ''
+  @query('.selection-indicator')
+  private indicator?: HTMLElement
 
-  /** False until the indicator has been placed once: the first placement must not animate. */
-  @state()
+  /**
+   * False until the indicator has been placed once: the first placement must not animate. The indicator is placed by
+   * writing its style directly, not through reactive state: it is measured in `updated`, and a state change there
+   * would schedule a second render for every selection.
+   */
   private measured = false
 
   private resizeObserver?: ResizeObserver
+
+  /** Panels, one wrapper each (manual slot assignment only; a server-rendered root uses the `tab-content` slot). */
+  @state()
+  private panels: Element[] = []
 
   /** Tabs and panels added or removed later are (re)assigned to their slots. */
   private childObserver?: MutationObserver
@@ -258,6 +274,8 @@ export class Tabs extends LitElement {
     }
     this.syncTabs()
     this.updateIndicator()
+    // The panel wrappers read the tabs' `disabled`, which an upgrade or a slot change may have changed.
+    this.requestUpdate()
   }
 
   /** Mirrors `selectedTab` onto the tabs (selected state, roving tabindex) and the panels (slot, ARIA). */
@@ -276,15 +294,27 @@ export class Tabs extends LitElement {
     this.syncPanels()
   }
 
-  /** Shows the panel of the selected tab in `tab-content` and gives it the `tabpanel` semantics it lacks. */
+  /**
+   * Updates `panels` (the children named by a tab, each rendered in a wrapper of its own) when the set changed. Called
+   * from `willUpdate` so a render already has them, and from the child observer between renders.
+   */
+  private collectPanels() {
+    const names = new Set([...this.children].filter((child) => child.localName === TAB_TAG).map((tab) => tab.getAttribute('for')))
+    const panels = [...this.children].filter((child) => child.localName !== TAB_TAG && !!child.id && names.has(child.id))
+    if (panels.length !== this.panels.length || panels.some((child, index) => child !== this.panels[index])) this.panels = panels
+  }
+
+  /** Shows the panel of the selected tab and gives the panels the `tabpanel` semantics they lack. */
   private syncPanels() {
     if (!this.contentSlot) return
     const selected = this.tabs.find((t) => t.for === this.selectedTab)
     const panel = [...this.children].find((child) => child.localName !== TAB_TAG && !!child.id && child.id === this.selectedTab)
 
     if (this.manualSlots) {
-      const assigned = this.contentSlot.assignedElements()
-      if (assigned.length !== (panel ? 1 : 0) || assigned[0] !== panel) this.contentSlot.assign(...(panel ? [panel] : []))
+      // Every child named by a tab gets a wrapper of its own (rendered from `panels`), so the hidden ones stay findable.
+      this.collectPanels()
+      if (this.contentSlot.assignedElements().length) this.contentSlot.assign()
+      if (canReferenceElements) return
     } else {
       for (const child of this.children) {
         if (child === panel) child.setAttribute('slot', 'tab-content')
@@ -295,31 +325,82 @@ export class Tabs extends LitElement {
     // A plain element has no ElementInternals, so these can only be attributes. They are skipped when the author
     // wrote them, which is how server-rendered markup avoids any write.
     if (panel) {
+      // modern-web-ignore: aria-attribute-on-other-element fallback only (no manual slot assignment or no element references); skipped when the author wrote it
       if (!panel.hasAttribute('role')) panel.setAttribute('role', 'tabpanel')
       if (selected && !panel.hasAttribute('aria-labelledby')) {
         if (!selected.id) selected.id = `${panel.id}-tab`
+        // modern-web-ignore: aria-attribute-on-other-element same fallback path; the modern path wraps each panel in a shadow element with ariaLabelledByElements
         panel.setAttribute('aria-labelledby', selected.id)
       }
     }
   }
 
+  /**
+   * Find-in-page matched text in a hidden panel: select its tab the way a click does, through a cancelable
+   * `tab-change`. A vetoed switch hides the panel again once the browser has revealed it.
+   */
+  private handleBeforeMatch(event: Event) {
+    const wrapper = event.currentTarget as HTMLElement
+    const tab = this.tabs.find((t) => t.for === wrapper.dataset.panel)
+    if (!tab || tab.disabled) {
+      // A tab disabled since the last render (c2-tab reports no change) left its panel findable. The browser reveals
+      // it right after this event: hide it again, unfindable now, and re-render so the wrappers match the tabs.
+      requestAnimationFrame(() => {
+        if (wrapper.dataset.panel !== this.selectedTab) wrapper.setAttribute('hidden', '')
+        this.requestUpdate()
+      })
+      return
+    }
+    const change = new CustomEvent('tab-change', { bubbles: true, cancelable: true, detail: tab.for })
+    tab.dispatchEvent(change)
+    requestAnimationFrame(() => {
+      if (change.defaultPrevented && tab.for !== this.selectedTab) wrapper.setAttribute('hidden', 'until-found')
+    })
+  }
+
+  private renderPanel(panel: Element) {
+    const tab = this.tabs.find((t) => t.getAttribute('for') === panel.id)
+    const selected = panel.id === this.selectedTab
+    // The panel of a disabled tab is not findable: find-in-page could not select it.
+    const hidden = selected ? nothing : tab && !tab.disabled ? 'until-found' : ''
+    // Only the shown wrapper is a tabpanel: a hidden one would still be an (empty) tabpanel in some accessibility trees.
+    const labelled = selected && canReferenceElements && !panel.hasAttribute('role')
+    return html`<div
+      class="c2-tabs-panel"
+      data-panel=${panel.id}
+      role=${labelled ? 'tabpanel' : nothing}
+      .ariaLabelledByElements=${labelled && tab ? [tab] : null}
+      hidden=${hidden}
+      @beforematch=${this.handleBeforeMatch}
+    >
+      <slot ${assignSlot([panel])}></slot>
+    </div>`
+  }
+
   private updateIndicator() {
+    const indicator = this.indicator
+    if (!indicator) return
     const tab = this.tabs.find((t) => t.for === this.selectedTab)
     if (!tab || !this.header) {
-      this.indicatorStyle = 'width: 0px;'
+      indicator.style.transform = ''
+      indicator.style.width = '0px'
       return
     }
     const tabRect = tab.getBoundingClientRect()
     const headerRect = this.header.getBoundingClientRect()
     const x = tabRect.left - headerRect.left + this.header.scrollLeft
-    this.indicatorStyle = `transform: translateX(${x}px); width: ${tabRect.width}px;`
+    indicator.style.transform = `translateX(${x}px)`
+    indicator.style.width = `${tabRect.width}px`
     if (!this.measured) {
-      // Commit the first position without a transition, then enable transitions from the next update on.
-      this.updateComplete.then(() => (this.measured = true))
+      this.measured = true
+      // Commit the first position without a transition, then enable transitions from the next frame on.
+      requestAnimationFrame(() => indicator.classList.remove('first-position'))
     }
   }
 
   override willUpdate(changed: PropertyValues<this>) {
+    // Collected before rendering, not in `updated`: a state change there would schedule a second update every time.
+    if (!isServer && this.manualSlots) this.collectPanels()
     // Selection cleared (attribute removed, `selectedTab = ''`): fall back to the first enabled tab instead of showing nothing.
     if (changed.has('selectedTab') && !this.selectedTab && this.hasUpdated) {
       const first = this.tabs.find((t) => !t.disabled)
@@ -339,9 +420,14 @@ export class Tabs extends LitElement {
       <div class="c2-tabs">
         <div class="c2-tabs-header" role="tablist" aria-label=${this.ariaLabel || nothing} @tab-change=${this.handleTabChange} @keydown=${this.handleKeydown}>
           <slot name="tab" @slotchange=${this.handleTabSlotChange}></slot>
-          <div class="selection-indicator ${classMap({ 'first-position': !this.measured })}" style=${this.indicatorStyle}></div>
+          <div class="selection-indicator first-position"></div>
         </div>
         <slot name="tab-content"></slot>
+        ${repeat(
+          this.panels,
+          (panel) => panel,
+          (panel) => this.renderPanel(panel),
+        )}
       </div>
     `
   }

@@ -6,6 +6,8 @@ import { GroupItemSizeController } from '@c2n/core/controllers/group-item-size.j
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { chipMessages } from './messages.js'
 import styles from './chip.scss?inline'
 import './chip-part.js'
 
@@ -133,8 +135,13 @@ export class Chip extends LitElement {
   /** Stable identity of the chip, handed back in the `remove` event. Defaults to the chip's text. */
   @property() value = ''
 
-  /** Accessible name of the remove button, followed by the chip's text: `Remove Design`. */
-  @property({ attribute: 'remove-label' }) removeLabel = 'Remove'
+  /**
+   * Accessible name of the remove button, followed by the chip's text: `Remove Design`. Defaults to "Remove" in the
+   * nearest `lang` (English, or a language the app adds).
+   */
+  @property({ attribute: 'remove-label' }) removeLabel = ''
+
+  private readonly msg = new LocalizeController(this, chipMessages)
 
   @state() private text = ''
 
@@ -227,6 +234,11 @@ export class Chip extends LitElement {
     this.requestRemove()
   }
 
+  private removeAccessibleName() {
+    if (this.removeLabel) return this.text ? `${this.removeLabel} ${this.text}` : this.removeLabel
+    return this.text ? this.msg.t('removeItem', this.text) : this.msg.t('remove')
+  }
+
   private requestRemove() {
     this.dispatchEvent(new CustomEvent<ChipRemoveDetail>('remove', { bubbles: true, composed: true, detail: { value: this.value || this.text } }))
   }
@@ -281,7 +293,7 @@ export class Chip extends LitElement {
                 class="remove"
                 part="remove-button"
                 type="button"
-                aria-label=${this.text ? `${this.removeLabel} ${this.text}` : this.removeLabel}
+                aria-label=${this.removeAccessibleName()}
                 ?disabled=${this.disabled}
                 @click=${this.handleRemove}
               >

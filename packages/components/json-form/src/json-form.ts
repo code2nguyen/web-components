@@ -202,6 +202,21 @@ export class JsonForm extends LitElement {
     this.reset()
   }
 
+  /** Back/forward cache and autofill restore: the state is the data as JSON. The reset baseline stays the app's value. */
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state !== 'string' || !state) return
+    let next: unknown
+    try {
+      next = JSON.parse(state)
+    } catch {
+      return
+    }
+    const old = this._data
+    this._data = next
+    this.defaultsPending = true
+    this.requestUpdate('value', old)
+  }
+
   formDisabledCallback(disabled: boolean) {
     this.parentDisabled = disabled
     this.requestUpdate()

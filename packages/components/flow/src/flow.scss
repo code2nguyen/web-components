@@ -1108,8 +1108,8 @@
   cursor: text;
 }
 
-.label-editor:focus-visible,
-.label-editor:focus {
+// A text input matches :focus-visible on pointer focus as well, so this covers every focused state.
+.label-editor:focus-visible {
   outline: css.cssVar(editor__focus--outline);
   outline-offset: 0;
 }

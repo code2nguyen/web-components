@@ -94,3 +94,13 @@ test('the button points at the content by an id that does not vary per instance'
   expect(await page.locator('c2-truncate').evaluate((host) => host.shadowRoot!.querySelector('button')!.getAttribute('aria-controls'))).toBe('content')
   expect(await page.locator('c2-truncate').evaluate((host) => host.shadowRoot!.getElementById('content')?.getAttribute('part'))).toBe('content')
 })
+
+test('the toggle is named in the nearest lang, and a label attribute still wins', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('main').evaluate((element) => element.setAttribute('lang', 'fr'))
+  const toggle = page.getByRole('button', { name: 'Afficher plus', exact: true })
+  await toggle.click()
+  await expect(page.getByRole('button', { name: 'Afficher moins', exact: true })).toBeVisible()
+  await page.locator('c2-truncate').evaluate((element) => element.setAttribute('less-label', 'Moins'))
+  await expect(page.getByRole('button', { name: 'Moins', exact: true })).toBeVisible()
+})

@@ -47,6 +47,53 @@ import '@c2n/components/date-input'
 
 Listen for `input` while the value changes and `change` when it is committed. Call `showPicker()` from a user gesture to open the platform picker programmatically; `valueAsDate` exposes the selected value as a `Date`.
 
+## A themed calendar
+
+The browser's date picker cannot be styled and looks different in every browser. `picker="calendar"` replaces it with
+a calendar popover drawn by the library: the calendar button, or Alt+ArrowDown in the field, opens one month of
+[`c2-date-selector`](../date-selector) with **Today** and **Clear** under it, bounded by `min` and `max`. Picking a
+day stores it, fires `input` and `change`, closes the popover and returns to the field; Escape or a press outside
+closes it without a change. The date can still be typed.
+
+```html tag=UsageBlock,package=@c2n/date-input
+<style>
+  .date-width {
+    width: 220px;
+  }
+</style>
+<div data-label="Calendar popover">
+  <c2-date-input class="date-width" picker="calendar" aria-label="Due date" value="2026-09-15"></c2-date-input>
+  <c2-date-input class="date-width" picker="calendar" aria-label="Booking date" value="2026-09-18" min="2026-09-15" max="2026-10-15"></c2-date-input>
+</div>
+```
+
+The calendar and its popover are loaded the first time one opens, so a form of date fields that never opens one stays
+as small as with the native picker. The popover is the `calendar` part and follows the
+`--c2-date-input__calendar--*` variables; Today and Clear follow `--c2-date-input__calendar-action--*`, and their
+text is the `today` and `clear` messages.
+
+Presets are buttons of your own in the `calendar-actions` slot, beside Today and Clear. Call `pick(date)` from them:
+it stores the date, fires `input` and `change` and closes the popover, as a day of the calendar does. `showCalendar()`
+and `hideCalendar()` open and close the popover from script.
+
+```html tag=CodeBlock
+<c2-date-input id="due" picker="calendar" aria-label="Due date">
+  <c2-button slot="calendar-actions" data-days="7">In a week</c2-button>
+</c2-date-input>
+```
+
+```ts tag=CodeBlock
+const due = document.querySelector<DateInput>('#due')!
+due.querySelector('[data-days]')!.addEventListener('click', (event) => {
+  due.pick(isoDaysFromToday(Number((event.currentTarget as HTMLElement).dataset.days)))
+})
+```
+
+The field is still the browser's date input, so what the browser itself opens from it stays: on a phone a tap in the
+field opens the browser's picker, and so does a click in the field in Firefox. The calendar button and Alt+ArrowDown
+open the themed one. `step` is not drawn in the calendar: a day off the step can be picked and makes the field
+invalid, as a typed one does. If the calendar cannot be loaded, the button falls back to the browser's picker.
+
 ## Limiting the date range
 
 `min` and `max` are inclusive bounds. The platform picker greys out every date outside them, and a date typed outside the range makes the field invalid (`validity.rangeUnderflow` / `rangeOverflow`), which blocks form submission. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:

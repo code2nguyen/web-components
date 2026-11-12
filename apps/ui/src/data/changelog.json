@@ -2,6 +2,143 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.26",
+      "date": "2026-11-12",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["barcode-scanner"],
+              "text": "Add c2-barcode-scanner",
+              "hash": "272c3cd"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Open a themed calendar popover with picker=\"calendar\"",
+              "hash": "3338cb3"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Open a detail panel under a row with detail-height",
+              "hash": "a71ebcd"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Remember the selected filter tab with storage-key",
+              "hash": "862198e"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Open web addresses written on the page as links",
+              "hash": "dfe1fde"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["barcode-scanner"],
+              "text": "Keep focus, read several codes in one picture and retry a failed decoder load",
+              "hash": "fe8e400"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Keep the calendar's state, focus and events right when it closes",
+              "hash": "b6a5ceb"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Keep panel keys with their content, find closed panels in page search, name the chevron by a message",
+              "hash": "1b075f3"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "List, search and describe the components only the installed @c2n/components knows",
+              "hash": "44f8430"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Serve a component the installed @c2n/components added after this server was built",
+              "hash": "410a15a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-12",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["state-timeline"],
+              "text": "Give each tone and series slot its own segment label colour",
+              "hash": "5aa2cbd"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["log-viewer"],
+              "text": "Keep the copy button a scroll hid hidden until the pointer really moves",
+              "hash": "5c339b7"
+            },
+            {
+              "scopes": ["terminal"],
+              "text": "Keep the screen at its end when WebKit measures our own scroll after the output grew",
+              "hash": "4a3f1cc"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Keep the hidden data table from widening a scroller, and document aria-label",
+              "hash": "e1ccbaa"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map label colours that sit on fills which lighten in a dark theme",
+              "hash": "0f3f596"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Adopt modern platform patterns from the platform audit",
+              "hash": "e63fa0a"
+            },
+            {
+              "scopes": ["dashboard"],
+              "text": "Keep grid placement off the host's inline style",
+              "hash": "33a7016"
+            },
+            {
+              "scopes": ["color-area"],
+              "text": "Place the thumb in percent and shrink to its container",
+              "hash": "a28986a"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["gallery"],
+              "text": "Fix contrast, overflow and registration found by the gallery audit",
+              "hash": "0619a85"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.24",
       "date": "2026-11-11",
       "sections": [

@@ -148,3 +148,22 @@ for (const state of ['disabled', 'readonly']) {
     await expect(page.getByRole('button', { name: 'Remove ann@example.com' })).toHaveCount(0)
   })
 }
+
+/** An Enter that ends an IME composition: flagged `isComposing`, or the legacy `keyCode` 229 some engines send instead. */
+async function imeEnter(target: import('@playwright/test').Locator, legacy: boolean) {
+  await target.evaluate((element, legacy) => {
+    const event = new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', isComposing: !legacy, bubbles: true, composed: true, cancelable: true })
+    if (legacy) Object.defineProperty(event, 'keyCode', { get: () => 229 })
+    element.dispatchEvent(event)
+  }, legacy)
+}
+
+test('an IME Enter (isComposing or keyCode 229) does not commit the pending text', async ({ page, scenario }) => {
+  await scenario()
+  await input(page).pressSequentially('ann')
+  for (const legacy of [false, true]) await imeEnter(input(page), legacy)
+  await expect(tags(page)).toHaveCount(0)
+  await expect(input(page)).toHaveValue('ann')
+  await page.keyboard.press('Enter')
+  await expect(tags(page)).toHaveText(['ann'])
+})

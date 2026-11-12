@@ -1,5 +1,6 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-cascader,
   $theme: (
@@ -194,6 +195,7 @@
   &:focus-visible {
     outline: css.cssVar(trigger__focus--outline);
     outline-offset: -2px;
+    @include focus.forced-colors-ring(2px, -2px);
   }
 
   &:disabled {

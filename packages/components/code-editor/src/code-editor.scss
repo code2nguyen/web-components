@@ -128,7 +128,7 @@
   display: block;
   resize: vertical;
 
-  &:focus {
+  &:focus-visible {
     border: css.cssVar(focus--border, border);
     outline: css.cssVar(focus--outline);
     outline-offset: -1px;

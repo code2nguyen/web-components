@@ -7,6 +7,7 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { signaturePadMessages } from './messages'
 import styles from './signature-pad.scss?inline'
+import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { signaturePadMessages } from './messages'
 
@@ -192,10 +193,22 @@ export class SignaturePad extends LitElement {
     this.strokes = (this.defaultStrokes ?? []).map((stroke) => stroke.map((point) => [...point] as SignaturePoint))
   }
 
+  /** Back/forward cache and autofill restore: the state is the strokes as JSON, as `syncFormState` stores them. */
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state !== 'string') return
+    try {
+      const strokes: unknown = state ? JSON.parse(state) : []
+      if (Array.isArray(strokes)) {
+        this.current = null
+        this.strokes = strokes as SignatureStroke[]
+      }
+    } catch {
+      // Not state this element wrote: keep the current strokes.
+    }
+  }
+
   formDisabledCallback(disabled: boolean) {
-    // The state as given: an own `disabled` attribute is combined in `effectiveDisabled`, so removing it inside a
-    // disabled fieldset keeps the pad disabled.
-    this.disabledByForm = disabled
+    this.disabledByForm = disabledByAncestor(this, disabled)
   }
 
   /** Focuses the pad's first visible button (Undo), the control a keyboard reaches it by, or else the pad itself. */
@@ -324,7 +337,8 @@ export class SignaturePad extends LitElement {
   private syncFormState() {
     const empty = this.isEmpty
     const svgMarkup = empty ? '' : this.toSVG()
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || empty ? null : svgMarkup, svgMarkup)
+    // The restore state is the strokes, which `formStateRestoreCallback` can bring back; the submitted value is the SVG.
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || empty ? null : svgMarkup, empty ? '' : JSON.stringify(this.validStrokes()))
     if (this.effectiveDisabled) {
       this.internals.setValidity({})
       return

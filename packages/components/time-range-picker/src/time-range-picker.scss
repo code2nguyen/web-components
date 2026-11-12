@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-time-range-picker,
@@ -373,8 +374,10 @@ select {
   font-family: css.cssVar(input--font-family);
   outline: none;
 
-  &:focus {
+  // A text input matches :focus-visible on every focus; the border alone vanishes in forced colors.
+  &:focus-visible {
     border: css.cssVar(input__focus--border);
+    @include focus.forced-colors-ring;
   }
 
   &.invalid {
@@ -391,6 +394,7 @@ select {
 
   &:focus-within {
     border: css.cssVar(input__focus--border);
+    @include focus.forced-colors-ring;
   }
 
   input {

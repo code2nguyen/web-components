@@ -112,6 +112,7 @@
         "./packages/components/badge:build",
         "./packages/components/banner:build",
         "./packages/components/bar-list:build",
+        "./packages/components/barcode-scanner:build",
         "./packages/components/barcode:build",
         "./packages/components/beam:build",
         "./packages/components/border-beam:build",

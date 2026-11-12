@@ -7,6 +7,8 @@ import '@c2n/modal'
 import '@c2n/button'
 import type { Modal } from '@c2n/modal'
 import type { Button } from '@c2n/button'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { confirmDialogMessages } from './messages.js'
 import styles from './confirm-dialog.scss?inline'
 
 /** Events fired by {@link ConfirmDialog}, keyed for `addEventListener`. */
@@ -92,11 +94,11 @@ export class ConfirmDialog extends LitElement {
   /** Message text, when the default slot is empty. */
   @property() message = ''
 
-  /** Label of the button that confirms. */
-  @property({ attribute: 'confirm-label' }) confirmLabel = 'Confirm'
+  /** Label of the button that confirms. Defaults to "Confirm" in the nearest `lang` (English, or a language the app adds). */
+  @property({ attribute: 'confirm-label' }) confirmLabel = ''
 
-  /** Label of the button that cancels. */
-  @property({ attribute: 'cancel-label' }) cancelLabel = 'Cancel'
+  /** Label of the button that cancels. Defaults to "Cancel" in the nearest `lang`. */
+  @property({ attribute: 'cancel-label' }) cancelLabel = ''
 
   /** The action cannot be undone: error-coloured confirm button, and the initial focus goes to Cancel. */
   @property({ type: Boolean, reflect: true }) destructive = false
@@ -116,6 +118,7 @@ export class ConfirmDialog extends LitElement {
   @query('.c2-confirm-dialog__cancel') private cancelButton!: Button
   @query('.c2-confirm-dialog__confirm') private confirmButton!: Button
 
+  private readonly msg = new LocalizeController(this, confirmDialogMessages)
   private busy = false
   private pending: { promise: Promise<boolean>; resolve: (confirmed: boolean) => void } | undefined
 
@@ -229,10 +232,10 @@ export class ConfirmDialog extends LitElement {
         </div>
         <div part="message" class="c2-confirm-dialog__message"><slot>${this.message || nothing}</slot></div>
         <c2-button slot="footer" part="cancel-button" class="c2-confirm-dialog__cancel" ?disabled=${this.busy} @click=${() => this.close(false)}>
-          ${this.cancelLabel}
+          ${this.cancelLabel || this.msg.t('cancel')}
         </c2-button>
         <c2-button slot="footer" part="confirm-button" class="c2-confirm-dialog__confirm" ?running=${this.busy} @click=${this.handleConfirm}>
-          ${this.confirmLabel}
+          ${this.confirmLabel || this.msg.t('confirm')}
         </c2-button>
       </c2-modal>
     `

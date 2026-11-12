@@ -43,6 +43,26 @@ export interface DrawerControllerOptions {
 }
 
 /**
+ * Whether the event comes from an open popover or `<dialog>` nested inside the drawer (`host`), which handles its own
+ * Escape. Layers outside the host (a dialog the drawer itself sits in) do not count: the drawer is the innermost
+ * layer there and closes first.
+ */
+function inNestedLayer(event: Event, host: Element) {
+  const path = event.composedPath()
+  const hostIndex = path.indexOf(host)
+  return path.slice(0, hostIndex === -1 ? path.length : hostIndex).some((node) => {
+    if (!(node instanceof Element)) return false
+    if (node instanceof HTMLDialogElement) return node.open
+    try {
+      return node.matches(':popover-open')
+    } catch {
+      // No Popover API: no popover can be open.
+      return false
+    }
+  })
+}
+
+/**
  * The modal half of a navigation drawer, shared by `c2-side-nav` and `c2-app-shell`: while the overlay is open it
  * listens for Escape, locks page scrolling (only when the panel is `position: fixed`, i.e. covers the viewport), and
  * moves focus into the panel; when it closes it unlocks and puts focus back where it was, if focus is still inside the
@@ -94,7 +114,9 @@ export class DrawerController implements ReactiveController {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.open) {
+    // Escape that something inside already handled (a menu, a select), or that belongs to an open popover or dialog
+    // nested in the drawer, closes that layer only.
+    if (event.key === 'Escape' && this.open && !event.defaultPrevented && !inNestedLayer(event, this.host)) {
       event.preventDefault()
       this.options.onEscape()
     }

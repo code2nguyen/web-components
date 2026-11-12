@@ -786,6 +786,66 @@ table.loadChildren = async ({ key }) => {
 }
 ```
 
+## Row detail
+
+`detail-height` puts a chevron in the first column of every row and opens a panel of that height under it. The panel is filled from a child in the row's `detail:{key}` slot, or by `renderDetail`, and exists only while it is open. Alt+↓ and Alt+↑ open and close the focused row.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Order lines
+<style>
+  .detail-orders {
+    height: 400px;
+    width: 100%;
+  }
+  .detail-orders .order-lines {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 6px 24px;
+    margin: 0;
+    font-size: 13px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .detail-orders .order-lines b {
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-table client:only="lit" class="detail-orders" row-key="id" detail-height="112" expanded-details="ORD-1042" detail-label="Order lines" rows='[{"id":"ORD-1041","customer":"Northwind Traders","placed":"2026-11-02","total":1240},{"id":"ORD-1042","customer":"Blue Harbor Supply","placed":"2026-11-03","total":389.5},{"id":"ORD-1043","customer":"Cedar & Pine","placed":"2026-11-03","total":2710},{"id":"ORD-1044","customer":"Lumen Works","placed":"2026-11-05","total":96}]'>
+  <c2-table-column field="id" header="Order" width="150px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)"></c2-table-column>
+  <c2-table-column field="placed" header="Placed" width="120px" format="date"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="120px" align="end" format="currency"></c2-table-column>
+  <div class="order-lines" slot="detail:ORD-1041"><b>Item</b><b>Qty</b><b>Amount</b><span>Standing desk frame</span><span>2</span><span>$980.00</span><span>Cable tray</span><span>4</span><span>$260.00</span></div>
+  <div class="order-lines" slot="detail:ORD-1042"><b>Item</b><b>Qty</b><b>Amount</b><span>Marine rope, 10 mm</span><span>50 m</span><span>$212.50</span><span>Stainless shackle</span><span>12</span><span>$177.00</span></div>
+  <div class="order-lines" slot="detail:ORD-1043"><b>Item</b><b>Qty</b><b>Amount</b><span>Oak board, 2 m</span><span>30</span><span>$2,310.00</span><span>Wood oil</span><span>8</span><span>$400.00</span></div>
+  <div class="order-lines" slot="detail:ORD-1044"><b>Item</b><b>Qty</b><b>Amount</b><span>LED strip, warm</span><span>3</span><span>$96.00</span></div>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Detail from a renderer
+<style>
+  .detail-servers {
+    height: 400px;
+    width: 100%;
+    --c2-table__detail--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__detail--padding: 14px 16px 14px 44px;
+  }
+</style>
+<c2-table client:only="lit" class="detail-servers" data-table-example="row-detail" row-key="id" detail-height="96" expanded-details="web-2" detail-label="Server details" rows='[{"id":"web-1","host":"web-1.eu","region":"Frankfurt","cpu":0.41,"note":"Serving 1,240 requests a second. Last deploy 2 hours ago, no errors since."},{"id":"web-2","host":"web-2.eu","region":"Frankfurt","cpu":0.87,"note":"CPU above 80% for 12 minutes. A background reindex started at 09:40 and has 3 shards left."},{"id":"db-1","host":"db-1.eu","region":"Dublin","cpu":0.33,"note":"Primary. Replication lag under 40 ms on both replicas."},{"id":"cache-1","host":"cache-1.us","region":"Virginia","cpu":0.12,"note":"Hit rate 96%. 2.1 GB of 8 GB in use."}]'>
+  <c2-table-column field="host" header="Host" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="140px"></c2-table-column>
+  <c2-table-column field="cpu" header="CPU" width="100px" align="end" format="percent"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+"Detail from a renderer" fills its panels from `renderDetail`, which runs when a row opens and gets the row:
+
+```ts tag=CodeBlock
+table.renderDetail = ({ row }) => html`<p class="server-note">${row.note}</p>`
+```
+
 ## States
 
 `loading` shows a spinner until the data lands — or whatever you slot into `loading` — `error` replaces the body with a message and a way out, and an empty `rows` array shows `empty-message` or the `empty` slot. Give the host a height and the body scrolls inside it; past `virtual-threshold` rows it virtualizes on its own.

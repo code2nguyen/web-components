@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "1.0.24",
+  "version": "1.0.26",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -69,6 +69,7 @@
         "../../components/badge:build",
         "../../components/banner:build",
         "../../components/bar-list:build",
+        "../../components/barcode-scanner:build",
         "../../components/barcode:build",
         "../../components/beam:build",
         "../../components/border-beam:build",

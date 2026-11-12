@@ -278,11 +278,38 @@ export class Dashboard extends LitElement {
     }
   }
 
+  /**
+   * A `:host` rule in a sheet of this element's own, for the private variables the element computes. They are not
+   * written as an inline style on the host: a style the server did not render is a hydration mismatch, and it would
+   * override the author's own `style`.
+   */
+  #hostSheet?: CSSStyleSheet
+  #hostText = ''
+
+  /**
+   * Rewrites the whole sheet rather than editing its rule: WebKit updates a rule edited through the CSSOM but does not
+   * restyle the host, so the grid would keep its old tracks.
+   */
+  #setHostVariables(variables: Record<string, string>): void {
+    const root = this.shadowRoot
+    if (!root) return
+    // The values are track sizes and grid lines; anything that could close the block is dropped.
+    const text = `:host{${Object.entries(variables)
+      .map(([name, value]) => `${name}:${value.replace(/[{};<>]/g, '')}`)
+      .join(';')}}`
+    if (text === this.#hostText) return
+    this.#hostText = text
+    if (!this.#hostSheet) {
+      this.#hostSheet = new CSSStyleSheet()
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, this.#hostSheet]
+    }
+    this.#hostSheet.replaceSync(text)
+  }
+
   protected override updated(changed: PropertyValues) {
     this.pixelCache.clear()
     // The cards are light-DOM children, so the grid lives on the host itself.
-    this.style.setProperty('--_columns', this.columnTracks.join(' '))
-    this.style.setProperty('--_rows', this.rowTracks.join(' '))
+    this.#setHostVariables({ '--_columns': this.columnTracks.join(' '), '--_rows': this.rowTracks.join(' ') })
     if (
       changed.has('columnTracks') ||
       changed.has('rowTracks') ||

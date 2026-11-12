@@ -235,6 +235,7 @@ export class JsonViewer extends LitElement {
     super.connectedCallback()
     if (isServer) return
     // Capture catches the scroll of any ancestor (and of the host itself), since scroll events do not bubble.
+    // modern-web-ignore: scroll-listener-visual drives the virtualized line window (which rows are rendered), not a visual effect
     window.addEventListener('scroll', this.scheduleWindow, { capture: true, passive: true })
     window.addEventListener('resize', this.scheduleWindow, { passive: true })
     this.resizeObserver ??= new ResizeObserver(this.scheduleWindow)

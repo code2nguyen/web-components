@@ -138,6 +138,28 @@ export function lockPageScroll(): () => void {
   }
 }
 
+/**
+ * Whether a keydown belongs to an IME composition (Chinese, Japanese, Korean input…), in which case Enter confirms
+ * the candidate text and must not submit, commit or add anything. `isComposing` alone is not enough: Safari fires
+ * the confirming Enter's keydown after `compositionend`, with `isComposing` already false, but with the legacy
+ * `keyCode` 229 that every engine reports for keys the IME handled.
+ */
+export function isComposingKey(event: KeyboardEvent): boolean {
+  return event.isComposing || event.keyCode === 229
+}
+
+/**
+ * What a form-associated control's `formDisabledCallback(disabled)` should store as "disabled by the form", for the
+ * control to OR with its own `disabled` property. The platform's `disabled` combines the control's own `disabled`
+ * attribute with a disabled ancestor `<fieldset>`, and the attribute counts even as `disabled="false"` (which the
+ * `@property` converter reads as false), so it cannot be stored as given. With the attribute present, only a
+ * disabled ancestor fieldset is a reason of the form's own: removing the attribute inside one keeps the control
+ * disabled, and `disabled="false"` outside one leaves it enabled.
+ */
+export function disabledByAncestor(control: Element, disabled: boolean): boolean {
+  return disabled && (!control.hasAttribute('disabled') || control.closest('fieldset[disabled]') !== null)
+}
+
 export function smartFixedPosition(fixed: boolean) {
   if (isServer) return
   const el = document.documentElement
