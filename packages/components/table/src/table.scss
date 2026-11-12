@@ -645,13 +645,26 @@
   box-sizing: border-box;
 }
 
-.cell--detail {
-  display: block;
+// A closed panel kept for find-in-page (`hidden="until-found"`) takes no room.
+.row--detail[hidden] {
+  height: 0;
+  border-bottom: 0;
+}
+
+.detail {
   grid-column: 1 / -1;
+  box-sizing: border-box;
+  min-width: 0;
   padding: css.cssVar(detail--padding);
   background: css.cssVar(detail--background);
-  white-space: normal;
+  font-size: css.cssVar(cell--font-size);
+  color: css.cssVar(cell--color);
   overflow: auto;
+}
+
+.detail:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: css.cssVar(cell__focus--outline-offset);
 }
 
 .group-label {

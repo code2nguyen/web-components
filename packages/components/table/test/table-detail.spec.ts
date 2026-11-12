@@ -19,7 +19,8 @@ const orders = (attributes = '', children = '') =>
 
 const table = (page: Page) => page.locator('c2-table')
 const toggles = (page: Page) => table(page).locator('[part="detail-toggle"]')
-const panels = (page: Page) => table(page).locator('[part="detail"]')
+/** The open panels: a closed one filled from a slot stays in the page, hidden, for find-in-page. */
+const panels = (page: Page) => table(page).locator('.row--detail:not([hidden]) [part="detail"]')
 
 /** A table of `count` generated rows, 480px tall, with `values` assigned as properties. */
 async function generated(page: Page, renderScenario: (html: string) => Promise<void>, count: number, values: Record<string, unknown> = {}) {
@@ -81,12 +82,12 @@ test('detail-height gives each row a chevron that opens a panel of that height, 
   await expect(toggle).toHaveAttribute('aria-expanded', 'true')
   await expect(panels(page)).toHaveCount(1)
   await expect(page.getByText('Two items, shipped on Monday.')).toBeVisible()
-  expect((await table(page).locator('.row--detail').boundingBox())!.height).toBe(120)
+  expect((await table(page).locator('.row--detail:not([hidden])').boundingBox())!.height).toBe(120)
   await expect(table(page)).toHaveJSProperty('expandedDetails', ['ORD-2'])
   expect(JSON.parse((await table(page).getAttribute('data-events'))!)).toMatchObject([{ key: 'ORD-2', expanded: true, row: { customer: 'Grace Hopper' } }])
   // The panel sits right under its row, and opening it selects nothing.
   const rowBox = (await table(page).getByRole('row', { name: /ORD-2/ }).first().boundingBox())!
-  const panelBox = (await table(page).locator('.row--detail').boundingBox())!
+  const panelBox = (await table(page).locator('.row--detail:not([hidden])').boundingBox())!
   expect(Math.round(panelBox.y - (rowBox.y + rowBox.height))).toBe(0)
   await expect(table(page)).toHaveJSProperty('value', [])
 
@@ -130,6 +131,52 @@ test('Alt+ArrowDown opens the focused row panel and Alt+ArrowUp closes it', asyn
   // Plain arrows still move between rows.
   await page.keyboard.press('ArrowDown')
   await expect(table(page).getByRole('gridcell', { name: 'Grace Hopper' })).toBeFocused()
+
+  // After a click on a chevron the keys act on that row, whichever cell had the focus before.
+  await table(page).getByRole('row', { name: /ORD-3/ }).getByRole('button', { name: 'Details' }).click()
+  await expect(panels(page)).toHaveCount(1)
+  await page.keyboard.press('Alt+ArrowUp')
+  await expect(panels(page)).toHaveCount(0)
+  expect(JSON.parse((await table(page).getAttribute('data-events'))!).map((detail: { key: string }) => detail.key)).toEqual([
+    'ORD-1',
+    'ORD-1',
+    'ORD-3',
+    'ORD-3',
+  ])
+})
+
+test('keys pressed inside a panel stay with its content, and the panel is a tab stop', async ({ page, renderScenario }) => {
+  await renderScenario(orders('detail-height="100" expanded-details="ORD-2"', '<div slot="detail:ORD-2"><button>Refund</button><button>Reship</button></div>'))
+  await page.getByRole('button', { name: 'Refund' }).focus()
+  for (const key of ['ArrowDown', 'ArrowUp', 'Home', 'Alt+ArrowUp']) await page.keyboard.press(key)
+  await expect(page.getByRole('button', { name: 'Refund' })).toBeFocused()
+  await expect(panels(page)).toHaveCount(1)
+  await expect(panels(page)).toHaveAttribute('tabindex', '0')
+  await expect(table(page).getByRole('row', { name: /ORD-2/ }).getByRole('button', { name: 'Details' })).toHaveAttribute(
+    'aria-controls',
+    (await panels(page).getAttribute('id'))!,
+  )
+})
+
+test('a closed panel filled from a slot opens when find-in-page matches its text', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName === 'webkit', 'WebKit has no hidden="until-found": closed panels are not drawn there')
+  await renderScenario(orders('detail-height="100"', '<p slot="detail:ORD-3">Fragile, deliver to the side door.</p>'))
+  await watch(table(page), 'detail-toggle')
+  const closed = table(page).locator('.row--detail[data-detail-key="ORD-3"]')
+  await expect(closed).toHaveAttribute('hidden', 'until-found')
+  expect((await closed.evaluate((element) => element.getBoundingClientRect().height)) ?? 1).toBe(0)
+  // What the browser does when a search matches inside the hidden panel.
+  await closed.evaluate((element) => element.dispatchEvent(new Event('beforematch', { bubbles: true })))
+  await expect(page.getByText('Fragile, deliver to the side door.')).toBeVisible()
+  await expect(table(page)).toHaveJSProperty('expandedDetails', ['ORD-3'])
+  expect(JSON.parse((await table(page).getAttribute('data-events'))!)).toMatchObject([{ key: 'ORD-3', expanded: true }])
+})
+
+test('the chevron is named in the table language, and detail-label overrides it', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${orders('detail-height="100"')}</div>`)
+  await expect(table(page).getByRole('button', { name: 'Détails' })).toHaveCount(4)
+  await props(table(page), { detailLabel: 'Lignes' })
+  await expect(table(page).getByRole('button', { name: 'Lignes' })).toHaveCount(4)
 })
 
 test('without detail-height nothing is added, and it is ignored while the rows are grouped or a tree', async ({ page, renderScenario }) => {
@@ -147,6 +194,8 @@ test('without detail-height nothing is added, and it is ignored while the rows a
 test('with 50,000 rows the window is the same with the feature off, on, and on with nothing open', async ({ page, renderScenario }) => {
   await generated(page, renderScenario, 50_000)
   await scrollTo(page, 400_000)
+  // The scroll event that moves the window comes a frame later.
+  await expect.poll(async () => (await layout(page)).first).not.toBe('')
   const off = await layout(page)
   await props(table(page), { detailHeight: 200 })
   const on = await layout(page)

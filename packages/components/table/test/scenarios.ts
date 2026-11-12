@@ -1,3 +1,5 @@
+// The app's languages: French, added as an app would.
+import './translations'
 import '../src/table'
 import '../src/table-column'
 // The pager is only ever slotted into the table; the table never imports it.
