@@ -13,6 +13,7 @@ import backdrop from '@c2n/backdrop/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import banner from '@c2n/banner/custom-elements.json'
 import barList from '@c2n/bar-list/custom-elements.json'
+import barcodeScanner from '@c2n/barcode-scanner/custom-elements.json'
 import barcode from '@c2n/barcode/custom-elements.json'
 import beam from '@c2n/beam/custom-elements.json'
 import borderBeam from '@c2n/border-beam/custom-elements.json'
@@ -236,6 +237,7 @@ export const componentManifests = (function () {
     banner,
     barList,
     barcode,
+    barcodeScanner,
     beam,
     borderBeam,
     bottomNav,

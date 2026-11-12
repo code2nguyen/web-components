@@ -137,6 +137,10 @@
       "types": "./dist/barcode.d.ts",
       "default": "./dist/barcode.js"
     },
+    "./barcode-scanner": {
+      "types": "./dist/barcode-scanner.d.ts",
+      "default": "./dist/barcode-scanner.js"
+    },
     "./beam": {
       "types": "./dist/beam.d.ts",
       "default": "./dist/beam.js"
@@ -1241,6 +1245,7 @@
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
     "@lezer/highlight": "^1.0.0",
+    "@zxing/library": "^0.23.0",
     "echarts": "^5.5.0 || ^6.0.0",
     "mermaid": "^12.1.0",
     "react": ">=18.0.0",
@@ -1281,6 +1286,9 @@
     "@lezer/highlight": {
       "optional": true
     },
+    "@zxing/library": {
+      "optional": true
+    },
     "echarts": {
       "optional": true
     },
@@ -1313,6 +1321,7 @@
     "@c2n/banner": "*",
     "@c2n/bar-list": "*",
     "@c2n/barcode": "*",
+    "@c2n/barcode-scanner": "*",
     "@c2n/beam": "*",
     "@c2n/border-beam": "*",
     "@c2n/bottom-nav": "*",

@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/camera-capture.ts'],
+      entry: ['src/camera-capture.ts', 'src/camera.ts'],
       formats: ['es'],
     },
     minify: false,

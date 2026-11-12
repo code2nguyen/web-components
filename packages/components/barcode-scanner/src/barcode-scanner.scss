@@ -1,0 +1,407 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-barcode-scanner,
+  $theme: (
+    width: 480px,
+    stage--aspect-ratio: #{'4 / 3'},
+    stage--background: #18181b,
+    stage--color: #fafafa,
+    stage__muted--color: #a1a1aa,
+    stage--border-radius: 8px,
+    window--width: 70%,
+    window--height: 70%,
+    window--aspect-ratio: 1,
+    window--border-radius: 14px,
+    window--border-width: 3px,
+    window--border-color: #ffffff,
+    window__found--border-color: #16a34a,
+    window__scrim--color: rgba(0, 0, 0, 0.45),
+    line--color: #ef4444,
+    line--height: 2px,
+    line--duration: 2s,
+    line--display: block,
+    hint--background: rgba(24, 24, 27, 0.72),
+    hint--color: #fafafa,
+    hint--font-size: 14px,
+    hint--border-radius: 999px,
+    hint--display: block,
+    result--background: rgba(21, 128, 61, 0.92),
+    screen--font-size: 14px,
+    value--font-size: 18px,
+    value--font-weight: 600,
+    value--font-family: #{'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'},
+    done__icon--color: #4ade80,
+    controls--padding: #{'12px 0 0'},
+    controls--gap: 12px,
+    switch--size: 40px,
+    torch__on--background: #fde047,
+    torch__on--color: #18181b,
+    button--background: #ffffff,
+    button__hover--background: #f4f4f5,
+    button--color: #18181b,
+    button--border: 1px solid #bcbcc6,
+    button--border-radius: 6px,
+    button--height: 36px,
+    button--font-size: 14px,
+    button--font-weight: 500,
+    accept--background: rgb(2, 101, 220),
+    accept__hover--background: rgb(1, 84, 184),
+    accept--color: #ffffff,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.scanner {
+  position: relative;
+}
+
+/* The picture */
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: css.cssVar(stage--border-radius);
+  background: css.cssVar(stage--background);
+  color: css.cssVar(stage--color);
+  isolation: isolate;
+}
+
+/* The stage's shape is a minimum: a screen with more text than a short stage holds makes it taller, not cut off. */
+.stage::before {
+  content: '';
+  grid-area: 1 / 1;
+  aspect-ratio: css.cssVar(stage--aspect-ratio);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video--mirrored {
+  transform: scaleX(-1);
+}
+
+.window-area {
+  --_ratio: #{css.cssVar(window--aspect-ratio)};
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: css.cssVar(window--width);
+  height: css.cssVar(window--height);
+  transform: translate(-50%, -50%);
+  container-type: size;
+  pointer-events: none;
+}
+
+/* The largest box of the window's shape that fits the area: its width, or its height times the ratio. */
+.window {
+  box-sizing: border-box;
+  width: min(100cqw, 100cqh * var(--_ratio));
+  aspect-ratio: var(--_ratio);
+}
+
+.frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: css.cssVar(window--border-width) solid css.cssVar(window--border-color);
+  border-radius: css.cssVar(window--border-radius);
+  box-shadow: 0 0 0 100vmax css.cssVar(window__scrim--color);
+  transition: border-color 150ms ease;
+}
+
+.window--found .frame {
+  border-color: css.cssVar(window__found--border-color);
+}
+
+.line {
+  display: css.cssVar(line--display);
+  position: absolute;
+  top: 50%;
+  right: 8%;
+  left: 8%;
+  height: css.cssVar(line--height);
+  border-radius: 999px;
+  background: css.cssVar(line--color);
+  animation: sweep css.cssVar(line--duration) ease-in-out infinite alternate;
+}
+
+.window--found .line {
+  visibility: hidden;
+}
+
+@keyframes sweep {
+  from {
+    top: 12%;
+  }
+
+  to {
+    top: 88%;
+  }
+}
+
+::slotted([slot='window']) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hint {
+  display: css.cssVar(hint--display);
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 6px 14px;
+  transform: translateX(-50%);
+  border-radius: css.cssVar(hint--border-radius);
+  background: css.cssVar(hint--background);
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+  line-height: 20px;
+  text-align: center;
+  white-space: normal;
+}
+
+.hint--result {
+  display: block;
+  overflow: hidden;
+  background: css.cssVar(result--background);
+  font-family: css.cssVar(value--font-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Idle, starting, error and done screens */
+.screen {
+  position: relative;
+  grid-area: 1 / 1;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  text-align: center;
+
+  ::slotted(*) {
+    max-width: 100%;
+  }
+
+  /* The slot lays out its own fallback: `display: contents` on a slot keeps the fallback in WebKit's accessibility tree. */
+  slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+  }
+}
+
+.screen__icon {
+  display: inline-grid;
+  color: css.cssVar(stage__muted--color);
+
+  svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.screen__icon--done {
+  color: css.cssVar(done__icon--color);
+}
+
+.screen__text {
+  max-width: 36ch;
+  margin: 0;
+  font-size: css.cssVar(screen--font-size);
+  line-height: 20px;
+}
+
+.screen__text--muted {
+  color: css.cssVar(stage__muted--color);
+}
+
+.value {
+  max-width: 100%;
+  margin: 0;
+  font-family: css.cssVar(value--font-family);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  /* A long payload (a URL, a vCard) keeps the button in view. */
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+.format {
+  margin: -6px 0 0;
+  color: css.cssVar(stage__muted--color);
+  font-size: css.cssVar(screen--font-size);
+  line-height: 20px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(controls--gap);
+  padding: css.cssVar(controls--padding);
+}
+
+/* Nothing to show under the picture: no padded, empty bar. */
+.controls--empty {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.side-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: css.cssVar(button--height);
+  padding: 0 16px;
+  border: css.cssVar(button--border);
+  border-radius: css.cssVar(button--border-radius);
+  background: css.cssVar(button--background);
+  color: css.cssVar(button--color);
+  font: inherit;
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(button__hover--background);
+  }
+}
+
+.button--accept {
+  border-color: transparent;
+  background: css.cssVar(accept--background);
+  color: css.cssVar(accept--color);
+
+  &:hover {
+    background: css.cssVar(accept__hover--background);
+  }
+}
+
+.round {
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(switch--size);
+  height: css.cssVar(switch--size);
+  padding: 0;
+  border: css.cssVar(button--border);
+  border-radius: 999px;
+  background: css.cssVar(button--background);
+  color: css.cssVar(button--color);
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(button__hover--background);
+  }
+
+  svg,
+  ::slotted(*) {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.round--on,
+.round--on:hover {
+  background: css.cssVar(torch__on--background);
+  color: css.cssVar(torch__on--color);
+}
+
+.stage:focus-visible,
+.button:focus-visible,
+.round:focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+  }
+
+  .line {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .frame {
+    border-color: CanvasText;
+  }
+
+  .window--found .frame {
+    border-color: Highlight;
+  }
+
+  .line {
+    background: Highlight;
+  }
+
+  .round--on {
+    border-color: Highlight;
+  }
+}

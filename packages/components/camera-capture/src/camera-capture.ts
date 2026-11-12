@@ -5,7 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { CameraController, cameraErrorKind, browserCameraSource, type CameraErrorKind, type CameraFacing, type CameraStreamSource } from './camera'
+import { CameraController, cameraErrorKind, browserCameraSource, coverRegion, type CameraErrorKind, type CameraFacing, type CameraStreamSource } from './camera'
 import { analyzeFrame, assessFrame as builtInAssessor, luma, type CameraFrameAssessor, type CameraQualityHint } from './frame-analysis'
 import { cameraCaptureMessages } from './messages'
 import styles from './camera-capture.scss?inline'
@@ -504,29 +504,9 @@ export class CameraCapture extends LitElement {
     return shots[Math.min(this.current, shots.length - 1)]
   }
 
-  /**
-   * The guide's box in the video's own pixels. The video fills the stage with `object-fit: cover`, so the box is
-   * mapped through that scale and offset, and mirrored back for the front camera.
-   */
-  private guideRegion(video: HTMLVideoElement): { x: number; y: number; width: number; height: number } | undefined {
-    const stage = this.stage
-    const box = this.guideBox
-    const vw = video.videoWidth
-    const vh = video.videoHeight
-    if (!stage || !box || !vw || !vh) return undefined
-    const outer = stage.getBoundingClientRect()
-    const inner = box.getBoundingClientRect()
-    if (!outer.width || !outer.height || !inner.width || !inner.height) return undefined
-    const scale = Math.max(outer.width / vw, outer.height / vh)
-    const offsetX = (outer.width - vw * scale) / 2
-    const offsetY = (outer.height - vh * scale) / 2
-    let left = inner.left - outer.left
-    if (this.mirrored) left = outer.width - left - inner.width
-    const x = Math.max(0, (left - offsetX) / scale)
-    const y = Math.max(0, (inner.top - outer.top - offsetY) / scale)
-    const width = Math.min(vw - x, inner.width / scale)
-    const height = Math.min(vh - y, inner.height / scale)
-    return width > 0 && height > 0 ? { x, y, width, height } : undefined
+  /** The guide's box in the video's own pixels. */
+  private guideRegion(video: HTMLVideoElement) {
+    return coverRegion(video, this.stage, this.guideBox, this.mirrored)
   }
 
   private get mirrored() {

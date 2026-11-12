@@ -1,0 +1,218 @@
+---
+/**
+ * Gives the barcode scanner examples a pretend camera: a canvas that films a parcel label with a code printed by
+ * `encodeBarcode`, so the gallery shows the scanner reading real codes without asking the reader for their camera.
+ * Each element marked `data-barcode-scanner-example="<case>"` gets the source when it scrolls into view, and stops
+ * when it leaves. `data-barcode-scanner-codes` lists what passes in front of the camera: `ean13:4006381333931,…`.
+ */
+---
+
+<script>
+  import type { BarcodeDecoder, BarcodeScanner, CameraStreamSource } from '@c2n/components/barcode-scanner'
+  import { encodeBarcode, type BarcodeFormat } from '@c2n/components/barcode'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the language card: the library ships English only, an app adds its languages.
+  addTranslations({
+    fr: {
+      'barcode-scanner': {
+        label: 'Lecteur de codes-barres',
+        idle: 'Scannez un code-barres ou un QR code avec votre caméra.',
+        start: 'Activer la caméra',
+        starting: 'Ouverture de la caméra…',
+        hint: 'Visez un code avec la caméra.',
+        scanned: 'Code lu : {0}',
+        scanAgain: 'Scanner à nouveau',
+        torch: 'Lampe',
+        switchCamera: 'Changer de caméra',
+        errorDenied: 'L’accès à la caméra a été refusé. Autorisez-le dans les réglages du navigateur, puis réessayez.',
+        errorNotFound: 'Aucune caméra sur cet appareil.',
+        errorBusy: 'La caméra est utilisée par une autre application.',
+        errorUnsupported: 'Ce navigateur ne peut pas utiliser de caméra sur cette page.',
+        errorEnded: 'La caméra s’est arrêtée. Vérifiez qu’elle est branchée, puis réessayez.',
+        errorDecoder: 'Ce navigateur ne peut pas lire les codes-barres.',
+        errorUnknown: 'La caméra n’a pas pu démarrer.',
+        retry: 'Réessayer',
+      },
+    },
+  })
+
+  interface Label {
+    value: string
+    format: BarcodeFormat
+  }
+
+  const FPS = 15
+  /** How long one label stays in front of the camera, and how long the belt is empty between two, in milliseconds. */
+  const SHOWN = 3200
+  const GAP = 1400
+  const DEFAULT_CODES = 'ean13:4006381333931'
+
+  function labels(list: string): Label[] {
+    return list
+      .split(',')
+      .map((entry) => {
+        const at = entry.indexOf(':')
+        return { format: entry.slice(0, at).trim() as BarcodeFormat, value: entry.slice(at + 1).trim() }
+      })
+      .filter((label) => label.value)
+  }
+
+  /** One frame: a conveyor belt, and the label of the moment lying flat on it. */
+  function draw(context: CanvasRenderingContext2D, label: Label | undefined, time: number) {
+    const width = 640
+    const height = 480
+    const belt = context.createLinearGradient(0, 0, 0, height)
+    belt.addColorStop(0, '#3f3f46')
+    belt.addColorStop(1, '#27272a')
+    context.fillStyle = belt
+    context.fillRect(0, 0, width, height)
+    // The belt's ribs drift, so the picture is alive between two labels.
+    context.fillStyle = 'rgba(255, 255, 255, 0.05)'
+    const drift = (time / 40) % 64
+    for (let x = -64 + drift; x < width; x += 64) context.fillRect(x, 0, 6, height)
+    if (!label) return
+
+    let code
+    try {
+      code = encodeBarcode(label.value, label.format)
+    } catch {
+      return
+    }
+    const matrix = code.kind === 'matrix'
+    const w = matrix ? 250 : 400
+    const h = matrix ? 250 : 210
+    context.save()
+    context.translate(width / 2, height / 2)
+    context.shadowColor = 'rgba(0, 0, 0, 0.4)'
+    context.shadowBlur = 16
+    context.shadowOffsetY = 6
+    context.fillStyle = '#ffffff'
+    context.beginPath()
+    context.roundRect(-w / 2, -h / 2, w, h, 8)
+    context.fill()
+    context.shadowColor = 'transparent'
+    context.fillStyle = '#000000'
+    if (code.kind === 'linear') {
+      const unit = Math.max(2, Math.floor((w - 60) / code.modules.length))
+      const left = -Math.round((code.modules.length * unit) / 2)
+      code.modules.forEach((bar, x) => bar && context.fillRect(left + x * unit, -h / 2 + 36, unit, 110))
+      context.font = '500 18px ui-monospace, monospace'
+      context.textAlign = 'center'
+      context.fillText(code.encoded, 0, h / 2 - 28)
+    } else {
+      const unit = Math.floor(170 / code.rows.length)
+      const left = -Math.round((code.rows[0].length * unit) / 2)
+      const top = -Math.round((code.rows.length * unit) / 2)
+      code.rows.forEach((row, y) => row.forEach((dark, x) => dark && context.fillRect(left + x * unit, top + y * unit, unit, unit)))
+    }
+    context.restore()
+  }
+
+  /** A pretend camera: the labels pass one after the other, with an empty belt between two. A single label stays. */
+  function demoSource(list: Label[], current: { label?: Label }): CameraStreamSource {
+    return async () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 640
+      canvas.height = 480
+      const context = canvas.getContext('2d')
+      if (!context) throw new DOMException('No canvas', 'NotSupportedError')
+      const start = performance.now()
+      const paint = () => {
+        const time = performance.now() - start
+        // The first label arrives after a moment, so the reader sees the scanner looking for it.
+        const at = time - 900
+        const turn = Math.floor(at / (SHOWN + GAP))
+        const shown = at >= 0 && (list.length === 1 || at % (SHOWN + GAP) < SHOWN)
+        current.label = shown ? list[turn % list.length] : undefined
+        draw(context, current.label, time)
+      }
+      paint()
+      const timer = window.setInterval(paint, 1000 / FPS)
+      const stream = canvas.captureStream(FPS)
+      for (const track of stream.getTracks()) {
+        const stop = track.stop.bind(track)
+        track.stop = () => {
+          window.clearInterval(timer)
+          stop()
+        }
+      }
+      return stream
+    }
+  }
+
+  const deniedSource: CameraStreamSource = () => Promise.reject(new DOMException('The reader said no', 'NotAllowedError'))
+
+  /** What `encodeBarcode` calls a format, as a scanner names it. */
+  const SCAN_FORMAT: Record<string, string> = {
+    code128: 'code_128',
+    ean13: 'ean_13',
+    ean8: 'ean_8',
+    upca: 'upc_a',
+    code39: 'code_39',
+    datamatrix: 'data_matrix',
+  }
+
+  const initialized = new WeakSet<BarcodeScanner>()
+  const later = (delay: number, run: () => void) => window.setTimeout(run, delay)
+
+  // A scanner films only while its card is in view, and closes its pretend camera when the card leaves.
+  const visibility = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const scanner = entry.target as BarcodeScanner
+        if (entry.isIntersecting) {
+          if (scanner.status === 'idle') void scanner.start()
+        } else if (scanner.status !== 'idle') scanner.stop()
+      }
+    },
+    { threshold: 0.25 },
+  )
+
+  function setup(scanner: BarcodeScanner) {
+    if (initialized.has(scanner)) return
+    initialized.add(scanner)
+    const example = scanner.dataset.barcodeScannerExample
+    if (example === 'denied') {
+      scanner.streamSource = deniedSource
+      visibility.observe(scanner)
+      return
+    }
+    const current: { label?: Label } = {}
+    scanner.streamSource = demoSource(labels(scanner.dataset.barcodeScannerCodes || DEFAULT_CODES), current)
+    if (example === 'decoder') {
+      // The app's own decoder of the "Own decoder" card: here it knows what the pretend camera films; a real one
+      // would hand the picture to a WebAssembly library or to a server.
+      const decoder: BarcodeDecoder = () =>
+        current.label ? [{ value: current.label.value, format: SCAN_FORMAT[current.label.format] ?? current.label.format }] : []
+      scanner.decoder = decoder
+    }
+    const log = scanner.dataset.barcodeScannerLog ? document.querySelector<HTMLElement>(scanner.dataset.barcodeScannerLog) : null
+    let count = 0
+    scanner.addEventListener('scan', (event) => {
+      count++
+      if (log) log.textContent = `${count} scanned · last ${event.detail.value}`
+      // A single scan shows its result for a moment, then the demo scans again, as a user pressing Scan again.
+      if (!scanner.continuous && example !== 'manual') later(3500, () => scanner.status === 'done' && scanner.getBoundingClientRect().width && scanner.start())
+    })
+    // A manual example waits for its own button (`data-barcode-scanner-start`), as an app's idle screen does.
+    if (example === 'manual')
+      scanner.addEventListener(
+        'click',
+        (event) => event.composedPath().some((node) => node instanceof HTMLElement && node.hasAttribute('data-barcode-scanner-start')) && scanner.start(),
+      )
+    else visibility.observe(scanner)
+  }
+
+  function setupAll() {
+    // An island upgrades after this script runs: the methods exist once the element is defined.
+    void customElements.whenDefined('c2-barcode-scanner').then(() => {
+      document.querySelectorAll<BarcodeScanner>('c2-barcode-scanner[data-barcode-scanner-example]').forEach(setup)
+    })
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

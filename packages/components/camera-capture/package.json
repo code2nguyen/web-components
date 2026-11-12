@@ -9,6 +9,10 @@
       "types": "./types/src/camera-capture.d.ts",
       "default": "./dist/camera-capture.js"
     },
+    "./camera.js": {
+      "types": "./types/src/camera.d.ts",
+      "default": "./dist/camera.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
