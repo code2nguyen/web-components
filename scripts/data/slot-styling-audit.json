@@ -1182,6 +1182,13 @@
     },
     {
       "tag": "c2-date-input",
+      "slot": "calendar-actions",
+      "decision": "part",
+      "parts": ["calendar-actions"],
+      "reason": "The row under the calendar owns the layout, spacing and separator of the calendar-actions slot."
+    },
+    {
+      "tag": "c2-date-input",
       "slot": "calendar-icon",
       "decision": "assigned-content",
       "reason": "The calendar-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
