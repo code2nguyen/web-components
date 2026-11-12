@@ -166,14 +166,9 @@ test('formats narrows what the fallback reads', async ({ page, renderScenario })
   expect((await events(page))[0]).toMatchObject({ value: 'LOT 42', format: 'data_matrix' })
 })
 
-test("uses the browser's BarcodeDetector when it knows the formats, and the fallback when it does not", async ({ page, renderScenario }) => {
-  await render(
-    page,
-    renderScenario,
-    '<c2-barcode-scanner formats="qr_code"></c2-barcode-scanner><c2-barcode-scanner formats="code_128"></c2-barcode-scanner>',
-    'none',
-  )
-  await page.evaluate(() => {
+/** A stand-in for the browser's detector that knows QR codes and EAN-13 only, and records how it was built. */
+const stubDetector = (page: Page) =>
+  page.evaluate(() => {
     const seen: string[][] = []
     ;(window as unknown as { detectors: string[][] }).detectors = seen
     ;(window as unknown as { BarcodeDetector: unknown }).BarcodeDetector = class {
@@ -184,20 +179,30 @@ test("uses the browser's BarcodeDetector when it knows the formats, and the fall
       detect = async () => [{ rawValue: 'https://example.com/t/81', format: 'qr_code', cornerPoints: [{ x: 4, y: 4 }] }]
     }
   })
-  const [native, other] = [page.locator('c2-barcode-scanner').nth(0), page.locator('c2-barcode-scanner').nth(1)]
-  await watch(native, 'scan')
-  await watch(other, 'scan')
-  await native.evaluate((element: BarcodeScanner) => element.start())
-  await expect(native).toHaveState('done')
-  expect(JSON.parse((await native.getAttribute('data-events'))!)[0]).toMatchObject({ value: 'https://example.com/t/81', format: 'qr_code' })
+const detectors = (page: Page) => page.evaluate(() => (window as unknown as { detectors: string[][] }).detectors)
+
+test("uses the browser's BarcodeDetector when it knows the formats asked for", async ({ page, renderScenario }) => {
+  await render(page, renderScenario, '<c2-barcode-scanner formats="qr_code"></c2-barcode-scanner>', 'none')
+  await stubDetector(page)
+  await watch(scanner(page), 'scan')
+  await scanner(page).evaluate((element: BarcodeScanner) => element.start())
+  await expect(scanner(page)).toHaveState('done')
+  expect((await events(page))[0]).toMatchObject({ value: 'https://example.com/t/81', format: 'qr_code' })
+  expect(await detectors(page)).toEqual([['qr_code']])
   // A value that is an address is shown as text, never as a link.
-  await expect(native.locator('[part="value"]')).toHaveText('https://example.com/t/81')
-  await expect(native.locator('a')).toHaveCount(0)
-  // The detector does not know Code 128: the second scanner reads the printed label with the fallback.
-  await other.evaluate((element: BarcodeScanner) => element.start())
-  await expect(other).toHaveState('done', { timeout: 15000 })
-  expect(JSON.parse((await other.getAttribute('data-events'))!)[0]).toMatchObject({ value: 'C2N-12345', format: 'code_128' })
-  expect(await page.evaluate(() => (window as unknown as { detectors: string[][] }).detectors)).toEqual([['qr_code']])
+  await expect(scanner(page).locator('[part="value"]')).toHaveText('https://example.com/t/81')
+  await expect(scanner(page).locator('a')).toHaveCount(0)
+})
+
+test("reads with the fallback when the browser's BarcodeDetector lacks a format asked for", async ({ page, renderScenario }) => {
+  await render(page, renderScenario, '<c2-barcode-scanner formats="code_128"></c2-barcode-scanner>', 'none')
+  await stubDetector(page)
+  await watch(scanner(page), 'scan')
+  await scanner(page).evaluate((element: BarcodeScanner) => element.start())
+  // The detector does not know Code 128: the printed label is read by the fallback, and no detector is built.
+  await expect(scanner(page)).toHaveState('done', { timeout: 15000 })
+  expect((await events(page))[0]).toMatchObject({ value: 'C2N-12345', format: 'code_128' })
+  expect(await detectors(page)).toEqual([])
 })
 
 test('shows why the camera did not start, and why nothing can read a barcode', async ({ page, renderScenario }) => {
@@ -266,35 +271,34 @@ test('a camera without a torch shows no light button', async ({ page, renderScen
   await expect(scanner(page).locator('[part="controls"]')).toBeHidden()
 })
 
-test('beep sounds once per scan, and not without the attribute', async ({ page, renderScenario }) => {
-  await render(page, renderScenario, '<c2-barcode-scanner beep></c2-barcode-scanner><c2-barcode-scanner></c2-barcode-scanner>')
-  // A stand-in for the sound output: a machine without an audio device (CI) must not decide this test.
-  await page.evaluate(() => {
-    let beeps = 0
-    const node = { connect: () => node, start() {}, stop() {}, frequency: { value: 0 }, gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }
-    ;(window as unknown as { AudioContext: unknown }).AudioContext = class {
-      state = 'running'
-      currentTime = 0
-      destination = {}
-      createOscillator() {
-        beeps++
-        return node
+for (const [markup, beeps] of [
+  ['<c2-barcode-scanner beep></c2-barcode-scanner>', 1],
+  ['<c2-barcode-scanner></c2-barcode-scanner>', 0],
+] as const)
+  test(`a scan sounds ${beeps} beep${beeps === 1 ? ' with the beep attribute' : 's without it'}`, async ({ page, renderScenario }) => {
+    await render(page, renderScenario, markup)
+    // A stand-in for the sound output: a machine without an audio device (CI) must not decide this test.
+    await page.evaluate(() => {
+      let beeps = 0
+      const node = { connect: () => node, start() {}, stop() {}, frequency: { value: 0 }, gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }
+      ;(window as unknown as { AudioContext: unknown }).AudioContext = class {
+        state = 'running'
+        currentTime = 0
+        destination = {}
+        createOscillator() {
+          beeps++
+          return node
+        }
+        createGain = () => node
+        resume = async () => undefined
+        close = async () => undefined
       }
-      createGain = () => node
-      resume = async () => undefined
-      close = async () => undefined
-    }
-    Object.defineProperty(window, 'beeps', { get: () => beeps })
+      Object.defineProperty(window, 'beeps', { get: () => beeps })
+    })
+    await scanner(page).evaluate((element: BarcodeScanner) => element.start())
+    await expect(scanner(page)).toHaveState('done')
+    expect(await page.evaluate(() => (window as unknown as { beeps: number }).beeps)).toBe(beeps)
   })
-  for (const index of [0, 1]) {
-    await page
-      .locator('c2-barcode-scanner')
-      .nth(index)
-      .evaluate((element: BarcodeScanner) => element.start())
-    await expect(page.locator('c2-barcode-scanner').nth(index)).toHaveState('done')
-  }
-  expect(await page.evaluate(() => (window as unknown as { beeps: number }).beeps)).toBe(1)
-})
 
 test('scanImage reads a still picture and fires scan', async ({ page, renderScenario }) => {
   await render(page, renderScenario, '<c2-barcode-scanner></c2-barcode-scanner>', 'fallback')
