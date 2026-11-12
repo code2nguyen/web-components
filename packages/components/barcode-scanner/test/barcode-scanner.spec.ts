@@ -268,14 +268,21 @@ test('a camera without a torch shows no light button', async ({ page, renderScen
 
 test('beep sounds once per scan, and not without the attribute', async ({ page, renderScenario }) => {
   await render(page, renderScenario, '<c2-barcode-scanner beep></c2-barcode-scanner><c2-barcode-scanner></c2-barcode-scanner>')
+  // A stand-in for the sound output: a machine without an audio device (CI) must not decide this test.
   await page.evaluate(() => {
     let beeps = 0
-    const Real = window.AudioContext
-    window.AudioContext = class extends Real {
-      override createOscillator() {
+    const node = { connect: () => node, start() {}, stop() {}, frequency: { value: 0 }, gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }
+    ;(window as unknown as { AudioContext: unknown }).AudioContext = class {
+      state = 'running'
+      currentTime = 0
+      destination = {}
+      createOscillator() {
         beeps++
-        return super.createOscillator()
+        return node
       }
+      createGain = () => node
+      resume = async () => undefined
+      close = async () => undefined
     }
     Object.defineProperty(window, 'beeps', { get: () => beeps })
   })
@@ -292,21 +299,7 @@ test('beep sounds once per scan, and not without the attribute', async ({ page, 
 test('scanImage reads a still picture and fires scan', async ({ page, renderScenario }) => {
   await render(page, renderScenario, '<c2-barcode-scanner></c2-barcode-scanner>', 'fallback')
   await watch(scanner(page), 'scan')
-  const codes = await scanner(page).evaluate(async (element: BarcodeScanner) => {
-    // A picture of the label the fake camera films.
-    const stream = await window.fakeBarcodeCamera.source({ facing: 'environment', width: 640, height: 480 })
-    const video = document.createElement('video')
-    video.muted = true
-    video.srcObject = stream
-    await video.play()
-    const canvas = document.createElement('canvas')
-    canvas.width = 640
-    canvas.height = 480
-    canvas.getContext('2d')!.drawImage(video, 0, 0)
-    stream.getTracks().forEach((track) => track.stop())
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
-    return element.scanImage(blob!)
-  })
+  const codes = await scanner(page).evaluate(async (element: BarcodeScanner) => element.scanImage(await window.fakeBarcodeCamera.picture()))
   expect(codes).toHaveLength(1)
   expect(codes[0]).toMatchObject({ value: 'C2N-12345', format: 'code_128' })
   expect(await events(page)).toHaveLength(1)

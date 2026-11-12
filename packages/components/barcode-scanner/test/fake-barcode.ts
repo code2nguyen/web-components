@@ -11,6 +11,32 @@ export interface FakeBarcodeCamera {
   requests: CameraStreamRequest[]
   streams: MediaStream[]
   source: CameraStreamSource
+  /** A still picture of the label, as a PNG. */
+  picture(): Promise<Blob>
+}
+
+/** Paints the label the camera films: grey desk, white label, and the code when there is one. */
+function paintLabel(context: CanvasRenderingContext2D, label: FakeBarcodeCamera['code'], tick: number) {
+  context.fillStyle = '#6b7280'
+  context.fillRect(0, 0, 640, 480)
+  // A corner mark that changes every frame, outside the scan window: the stream always has a new frame.
+  context.fillStyle = tick % 2 ? '#dc2626' : '#2563eb'
+  context.fillRect(0, 0, 24, 24)
+  context.fillStyle = '#ffffff'
+  context.fillRect(150, 120, 340, 240)
+  if (!label) return
+  const code = encodeBarcode(label.value, label.format)
+  context.fillStyle = '#000000'
+  if (code.kind === 'linear') {
+    const unit = 2
+    const left = Math.round(320 - (code.modules.length * unit) / 2)
+    code.modules.forEach((bar, x) => bar && context.fillRect(left + x * unit, 180, unit, 120))
+  } else {
+    const unit = Math.floor(160 / code.rows.length)
+    const left = Math.round(320 - (code.rows[0].length * unit) / 2)
+    const top = Math.round(240 - (code.rows.length * unit) / 2)
+    code.rows.forEach((row, y) => row.forEach((dark, x) => dark && context.fillRect(left + x * unit, top + y * unit, unit, unit)))
+  }
 }
 
 /** A camera made of a canvas that films a label with a barcode printed by the repo's own encoder. */
@@ -21,6 +47,13 @@ export function fakeBarcodeCamera(): FakeBarcodeCamera {
     torch: [],
     requests: [],
     streams: [],
+    picture: () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 640
+      canvas.height = 480
+      paintLabel(canvas.getContext('2d')!, camera.code, 0)
+      return new Promise<Blob>((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('no picture'))), 'image/png'))
+    },
     source: async (request) => {
       camera.requests.push(request)
       const canvas = document.createElement('canvas')
@@ -28,28 +61,7 @@ export function fakeBarcodeCamera(): FakeBarcodeCamera {
       canvas.height = 480
       const context = canvas.getContext('2d')!
       let tick = 0
-      const draw = () => {
-        context.fillStyle = '#6b7280'
-        context.fillRect(0, 0, 640, 480)
-        // A corner mark that changes every frame, outside the scan window: the stream always has a new frame.
-        context.fillStyle = tick++ % 2 ? '#dc2626' : '#2563eb'
-        context.fillRect(0, 0, 24, 24)
-        context.fillStyle = '#ffffff'
-        context.fillRect(150, 120, 340, 240)
-        if (!camera.code) return
-        const code = encodeBarcode(camera.code.value, camera.code.format)
-        context.fillStyle = '#000000'
-        if (code.kind === 'linear') {
-          const unit = 2
-          const left = Math.round(320 - (code.modules.length * unit) / 2)
-          code.modules.forEach((bar, x) => bar && context.fillRect(left + x * unit, 180, unit, 120))
-        } else {
-          const unit = Math.floor(160 / code.rows.length)
-          const left = Math.round(320 - (code.rows[0].length * unit) / 2)
-          const top = Math.round(240 - (code.rows.length * unit) / 2)
-          code.rows.forEach((row, y) => row.forEach((dark, x) => dark && context.fillRect(left + x * unit, top + y * unit, unit, unit)))
-        }
-      }
+      const draw = () => paintLabel(context, camera.code, tick++)
       draw()
       const timer = setInterval(draw, 33)
       const stream = canvas.captureStream(30)
