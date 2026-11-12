@@ -696,7 +696,7 @@ test('the actions slot puts buttons in the row of the Paper and Tear off buttons
   await expect(page.getByRole('button', { name: 'Delete note' })).toHaveAttribute('data-clicked', '')
 })
 
-test('actions-placement="end" puts the actions after the Paper and Tear off buttons, in keyboard order too', async ({ page, renderScenario }) => {
+test('actions-placement="end" puts the actions after the Paper and Tear off buttons, in keyboard order too', async ({ page, renderScenario, tab }) => {
   await renderScenario(
     '<c2-notepad label="Notes" paper-picker tearable actions-placement="end"><button slot="actions" aria-label="Delete note">×</button></c2-notepad>',
   )
@@ -707,7 +707,7 @@ test('actions-placement="end" puts the actions after the Paper and Tear off butt
   expect(paper.x + paper.width).toBeLessThan(tear.x + 1)
   expect(tear.x + tear.width).toBeLessThan(slotted.x + 1)
   await host.locator('[part="tear-button"]').focus()
-  await page.keyboard.press('Tab')
+  await tab()
   await expect(page.getByRole('button', { name: 'Delete note' })).toBeFocused()
   // Back to the default: the actions move before the Paper button again.
   await host.evaluate((element) => element.removeAttribute('actions-placement'))
