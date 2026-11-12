@@ -372,6 +372,16 @@ export class DateSelector extends LitElement {
       ?.focus()
   }
 
+  /** Moves focus into the calendar: to a selected day, else today, else the first available day shown. */
+  override focus(options?: FocusOptions) {
+    const days = '.day:not(:disabled)'
+    const day =
+      this.renderRoot.querySelector<HTMLElement>(`${days}[aria-selected="true"]`) ??
+      this.renderRoot.querySelector<HTMLElement>(`${days}[aria-current="date"]`) ??
+      this.renderRoot.querySelector<HTMLElement>(`${days}[tabindex="0"]`)
+    day?.focus(options)
+  }
+
   private handleDayKeydown(event: KeyboardEvent, value: string, column: number) {
     let action: Promise<void> | undefined
     if (event.key === 'ArrowLeft') action = this.moveFocus(value, -1)

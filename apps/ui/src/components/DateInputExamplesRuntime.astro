@@ -2,7 +2,8 @@
 /**
  * Resolves relative date bounds for date-input documentation examples. `data-min-days` / `data-max-days` are day
  * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates
- * and flags a typed date outside the range as an error on `change`.
+ * and flags a typed date outside the range as an error on `change`. It also wires the preset buttons of the calendar
+ * popover examples (`slot="calendar-actions"` with `data-days`).
  */
 ---
 
@@ -33,6 +34,15 @@
       input.errorText = input.validationMessage
     })
   }
+
+  // Preset buttons in a calendar popover: `data-days` is a day offset from today.
+  document.addEventListener('click', (event) => {
+    const preset = (event.target as Element | null)?.closest<HTMLElement>('[slot="calendar-actions"][data-days]')
+    const field = preset?.closest<DateInput>('c2-date-input')
+    if (!preset || !field) return
+    field.value = isoDaysFromToday(Number(preset.dataset.days))
+    field.hideCalendar()
+  })
 
   function setupAll() {
     document.querySelectorAll<DateInput>('c2-date-input[data-min-days], c2-date-input[data-max-days]').forEach(setup)

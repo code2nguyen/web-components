@@ -10,6 +10,9 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import styles from './date-input.scss?inline'
 
+/** What the calendar button opens: the browser's own date picker, or the themed calendar popover. */
+export type DateInputPicker = 'native' | 'calendar'
+
 /** Events fired by {@link DateInput}, keyed for `addEventListener`. */
 export interface DateInputEventMap {
   input: InputEvent
@@ -26,13 +29,24 @@ export interface DateInput {
  * calendar ISO strings (`YYYY-MM-DD`). The native picker and keyboard editing remain available while the component
  * adds a consistent field, calendar affordance, helper text, error state and theming surface.
  *
+ * With `picker="calendar"` the calendar button (and Alt+ArrowDown in the field) opens a themed calendar popover in
+ * place of the browser's picker: one month of `c2-date-selector` with Today and Clear, bounded by `min` and `max`.
+ * Picking a day stores it, fires `input` and `change` and closes the popover; Escape or a press outside closes it.
+ * The date can still be typed in the field. The calendar and its popover are loaded the first time one opens, so a
+ * field that never opens it stays as small as the native one. Buttons slotted into `calendar-actions` (presets
+ * such as "In a week") sit beside Today and Clear; set `value` from them and call `hideCalendar()`.
+ *
  * @tag c2-date-input
  *
  * @slot calendar-icon - Replaces the calendar icon at the end of the field.
+ * @slot calendar-actions - Buttons at the bottom of the calendar popover (`picker="calendar"`), before Today and Clear: presets, for example.
  * @slot supporting-text - Rich helper content below the field. `help` and `error-text` are plain-text shortcuts.
  *
  * @event {InputEvent} input - Re-dispatched from the inner date input whenever the value changes.
  * @event {Event} change - Re-dispatched from the inner date input when the value is committed.
+ *
+ * @csspart calendar - The calendar popover's surface (`picker="calendar"`).
+ * @csspart calendar-actions - The row at the bottom of the calendar popover holding the `calendar-actions` slot, Today and Clear.
  *
  * @cssproperty {pixel} [--c2-date-input--min-height=36px]
  * @cssproperty {pixel} [--c2-date-input--gap=8px]
@@ -60,6 +74,22 @@ export interface DateInput {
  * @cssproperty {pixel} [--c2-date-input__supporting-text--line-height=16px]
  * @cssproperty {color} [--c2-date-input__supporting-text--color=#71717a]
  * @cssproperty {color} [--c2-date-input__supporting-text__error--color=#dc2626]
+ * @cssproperty {color} [--c2-date-input__calendar--background=#ffffff] - Surface of the calendar popover (`picker="calendar"`).
+ * @cssproperty {color} [--c2-date-input__calendar--color=#18181b]
+ * @cssproperty {border} [--c2-date-input__calendar--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-date-input__calendar--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-date-input__calendar--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-date-input__calendar--padding=8px]
+ * @cssproperty {pixel} [--c2-date-input__calendar-actions--gap=4px]
+ * @cssproperty {border} [--c2-date-input__calendar-actions--border-top=1px solid #e4e4e7]
+ * @cssproperty {padding} [--c2-date-input__calendar-action--padding=6px 10px] - The Today and Clear buttons.
+ * @cssproperty {border-radius} [--c2-date-input__calendar-action--border-radius=6px]
+ * @cssproperty {color} [--c2-date-input__calendar-action--color=#0265dc]
+ * @cssproperty {font-size} [--c2-date-input__calendar-action--font-size=14px]
+ * @cssproperty {font-weight} [--c2-date-input__calendar-action--font-weight=500]
+ * @cssproperty {color} [--c2-date-input__calendar-action__hover--background=#f4f4f5]
+ * @cssproperty {outline} [--c2-date-input__calendar-action__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {opacity} [--c2-date-input__calendar-action__disabled--opacity=0.38]
  */
 @customElement('c2-date-input')
 export class DateInput extends LitElement {
@@ -76,6 +106,10 @@ export class DateInput extends LitElement {
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   @query('input') private readonly input?: HTMLInputElement
+  @query('.field') private readonly fieldElement?: HTMLElement
+  @state() private calendarOpen = false
+  /** The calendar popover, once its module has loaded. */
+  private calendar?: import('./calendar.js').Calendar
 
   /** Current date as a local-calendar `YYYY-MM-DD` string, or an empty string. */
   @property({ type: String, reflect: true }) value = ''
@@ -101,6 +135,11 @@ export class DateInput extends LitElement {
   @property({ type: String }) help = ''
   /** Message shown below the field while `error` is set. */
   @property({ attribute: 'error-text' }) errorText = ''
+  /**
+   * What the calendar button opens: `native`, the browser's date picker, or `calendar`, a themed calendar popover
+   * with Today and Clear that is loaded the first time it opens.
+   */
+  @property({ type: String }) picker: DateInputPicker = 'native'
   /** Accessible name forwarded to the native date input. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
@@ -139,6 +178,42 @@ export class DateInput extends LitElement {
   /** Opens the browser date picker when supported. Must be called from a user gesture. */
   showPicker() {
     this.input?.showPicker()
+  }
+
+  /** Opens the calendar popover of `picker="calendar"`, loading it first if this is the first time. */
+  async showCalendar() {
+    if (this.picker !== 'calendar' || this.effectiveDisabled || this.readOnly) return
+    if (!this.calendar) {
+      const { createCalendar } = await import('./calendar.js')
+      this.calendar ??= createCalendar(this, {
+        commit: (value) => void this.commitFromCalendar(value),
+        toggled: (open) => {
+          const wasOpen = this.calendarOpen
+          this.calendarOpen = open
+          if (open) void this.updateComplete.then(() => this.calendar?.focus())
+          // Back to the field, unless the popover closed because focus went elsewhere.
+          else if (wasOpen && (this.renderRoot as ShadowRoot).activeElement?.closest('.calendar')) this.input?.focus()
+        },
+      })
+    }
+    this.calendarOpen = true
+  }
+
+  /** Closes the calendar popover. */
+  hideCalendar() {
+    this.calendarOpen = false
+  }
+
+  private async commitFromCalendar(value: string) {
+    const changed = value !== this.value
+    this.value = value
+    this.input?.focus()
+    this.calendarOpen = false
+    if (!changed) return
+    // After the update, so the events report the value the field holds and its validity.
+    await this.updateComplete
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true }))
   }
 
   checkValidity() {
@@ -192,6 +267,11 @@ export class DateInput extends LitElement {
     event.stopPropagation()
     const input = this.input
     if (!input || this.effectiveDisabled || this.readOnly) return
+    if (this.picker === 'calendar') {
+      if (this.calendarOpen) this.hideCalendar()
+      else void this.showCalendar()
+      return
+    }
     input.focus()
     try {
       input.showPicker()
@@ -199,6 +279,12 @@ export class DateInput extends LitElement {
       // showPicker() throws in a cross-origin iframe and where the engine has no date picker for it; the focused
       // input still takes keyboard editing, and the browser's own affordances still open its picker.
     }
+  }
+  private handleKeyDown(event: KeyboardEvent) {
+    // The key that opens the browser's picker opens the calendar in its place.
+    if (this.picker !== 'calendar' || !event.altKey || event.key !== 'ArrowDown') return
+    event.preventDefault()
+    void this.showCalendar()
   }
   private forwardFocus(event: Event) {
     if (event.target !== this.input) this.input?.focus()
@@ -251,6 +337,7 @@ export class DateInput extends LitElement {
           .value=${live(this.value)}
           @input=${this.handleInput}
           @change=${this.handleChange}
+          @keydown=${this.handleKeyDown}
           @focusin=${this.handleFocusIn}
           @focusout=${this.handleFocusOut}
         />
@@ -259,6 +346,8 @@ export class DateInput extends LitElement {
           type="button"
           tabindex="-1"
           aria-label="Open calendar"
+          aria-haspopup=${this.picker === 'calendar' ? 'dialog' : nothing}
+          aria-expanded=${this.picker === 'calendar' ? String(this.calendarOpen) : nothing}
           ?disabled=${this.effectiveDisabled || this.readOnly}
           @mousedown=${this.keepInputFocus}
           @click=${this.openPicker}
@@ -278,7 +367,7 @@ export class DateInput extends LitElement {
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }
-      ${this.field.renderDescription()}
+      ${this.field.renderDescription()} ${this.picker === 'calendar' ? this.calendar?.render(this.calendarOpen, this.fieldElement) : nothing}
     `
   }
 }
