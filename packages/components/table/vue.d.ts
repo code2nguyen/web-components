@@ -46,8 +46,12 @@ declare module 'vue' {
         'children-field'?: unknown
         'expanded-rows'?: unknown
         'tree-expanded'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
+        onDetailToggle?: (event: EventOf<Table, 'detail-toggle'>) => void
         onRowToggle?: (event: EventOf<Table, 'row-toggle'>) => void
         onChildrenError?: (event: EventOf<Table, 'children-error'>) => void
         onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void

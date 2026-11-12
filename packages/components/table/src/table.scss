@@ -93,6 +93,8 @@
     skeleton--background: #f4f4f5,
     skeleton--border-radius: 4px,
 
+    detail--background: #fafafa,
+    detail--padding: 12px,
     state--color: #71717a,
     state--padding: 32px 12px,
     state--font-size: 14px,
@@ -619,6 +621,37 @@
 
 .row-toggle c2-spinner {
   --c2-spinner--size: 100%;
+}
+
+// Row detail (`detail-height`): the chevron is a button before the content of the first column, and the panel a row
+// of the grid with one cell across every column. Its height is set inline: the windowing counts on it.
+.detail-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.detail-toggle--closed {
+  transform: rotate(-90deg);
+}
+
+.detail-toggle:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: 1px;
+}
+
+.row--detail {
+  box-sizing: border-box;
+}
+
+.cell--detail {
+  display: block;
+  grid-column: 1 / -1;
+  padding: css.cssVar(detail--padding);
+  background: css.cssVar(detail--background);
+  white-space: normal;
+  overflow: auto;
 }
 
 .group-label {

@@ -222,6 +222,23 @@ export interface TableRowToggleEventDetail {
   expanded: boolean
 }
 
+/** What a detail panel is drawn for: the row it opens under. */
+export interface TableDetailContext {
+  row: TableRow
+  rowIndex: number
+  key: string
+}
+
+/** Draws the detail panel of an open row; anything Lit can render. */
+export type TableDetailRenderer = (context: TableDetailContext) => unknown
+
+export interface TableDetailToggleEventDetail {
+  key: string
+  row: TableRow
+  /** Whether the row's detail panel is now open. */
+  expanded: boolean
+}
+
 export interface TableChildrenErrorEventDetail {
   key: string
   row: TableRow
