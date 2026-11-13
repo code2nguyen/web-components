@@ -25,6 +25,20 @@ const editor = (page: Page) => table(page).locator('.editor')
 const rows = (page: Page) => table(page).evaluate((element: HTMLElement & { rows: unknown[] }) => element.rows)
 const events = async (locator: Locator) => JSON.parse((await locator.getAttribute('data-events')) ?? '[]')
 
+/**
+ * Pastes `text` into the focused cell. The clipboard is the external boundary, so it is stubbed: `clipboardData` is
+ * set on the event itself, which every engine honours, rather than through the `ClipboardEvent` init dictionary, which
+ * engines treat differently for an event made by script.
+ */
+const paste = (page: Page, text: string) =>
+  page.evaluate((value) => {
+    const data = new DataTransfer()
+    data.setData('text/plain', value)
+    const event = new ClipboardEvent('paste', { bubbles: true, composed: true, cancelable: true })
+    Object.defineProperty(event, 'clipboardData', { value: data })
+    document.querySelector('c2-table')!.shadowRoot!.activeElement!.dispatchEvent(event)
+  }, text)
+
 /** Records `cell-change` without its `column`, an element that does not serialize. */
 const watchChanges = (locator: Locator) =>
   locator.evaluate((element) => {
@@ -141,12 +155,7 @@ test('a block pasted from a spreadsheet fills cells from the focused one and add
   await renderScenario(lines())
   await watch(table(page), 'rows-change')
   await cell(page, 'Launch').click()
-  await page.evaluate(() => {
-    const data = new DataTransfer()
-    data.setData('text/plain', 'Ship\t"1,5"\tDone\r\nRetro\t3\topen\r\n')
-    const target = document.querySelector('c2-table')!.shadowRoot!.activeElement!
-    target.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, composed: true, cancelable: true }))
-  })
+  await paste(page, 'Ship\t"1,5"\tDone\r\nRetro\t3\topen\r\n')
   await expect.poll(async () => (await rows(page)).length).toBe(4)
   const [, , third, fourth] = await rows(page)
   // "1,5" is not a number in this locale: it is kept as text, and the cell says so.
@@ -322,12 +331,7 @@ test('a paste on a paged table fills the next page, and deleteRows keeps the sel
   <c2-table-column field="hours" header="Hours" width="100px" editor="number"></c2-table-column>
 </c2-table>`)
   await cell(page, 'Row 2').click()
-  await page.evaluate(() => {
-    const data = new DataTransfer()
-    data.setData('text/plain', 'Two\nThree\n')
-    const target = document.querySelector('c2-table')!.shadowRoot!.activeElement!
-    target.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, composed: true, cancelable: true }))
-  })
+  await paste(page, 'Two\nThree\n')
   await expect.poll(async () => (await rows(page)).map((row) => (row as { item: string }).item)).toEqual(['Row 0', 'Row 1', 'Two', 'Three', 'Row 4', 'Row 5'])
 
   // Without a row-key a key is a position: after a delete the selection follows its rows, not the positions.
