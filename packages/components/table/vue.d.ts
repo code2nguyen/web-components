@@ -61,6 +61,8 @@ declare module 'vue' {
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
         onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
         onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<Table, 'cell-change'>) => void
+        onRowsChange?: (event: EventOf<Table, 'rows-change'>) => void
       }
     >
     'c2-table-column': DefineComponent<
@@ -71,9 +73,11 @@ declare module 'vue' {
         'cell-class'?: unknown
         'cell-slot'?: unknown
         'summary-label'?: unknown
+        'summary-target'?: unknown
         'summary-align'?: unknown
         'summary-span'?: unknown
         'group-column'?: unknown
+        'count-value'?: unknown
       }
     >
   }

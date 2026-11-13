@@ -86,6 +86,23 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
   </c2-table>
 </div>
+<div data-label="Editable">
+  <c2-table client:only="lit" class="grid" editable row-key="id" rows='[{"id":"1","item":"Standing desk","qty":2,"price":490,"status":"ordered","received":false},{"id":"2","item":"Monitor arm","qty":4,"price":89,"status":"draft","received":false},{"id":"3","item":"Desk lamp","qty":6,"price":42,"status":"received","received":true}]'>
+    <c2-table-column field="item" header="Item" width="2fr" min-width="140" editor="text" required summary-label="Total"></c2-table-column>
+    <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+    <c2-table-column field="price" header="Price" width="100px" align="end" format="currency" editor="number"></c2-table-column>
+    <c2-table-column field="status" header="Status" width="120px" editor="select" options='[{"value":"draft","label":"Draft"},{"value":"ordered","label":"Ordered"},{"value":"received","label":"Received"}]'></c2-table-column>
+    <c2-table-column field="received" header="In" width="70px" align="center" editor="checkbox"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Statuses and balance">
+  <c2-table client:only="lit" class="grid" row-key="id" sort="date:asc" rows='[{"id":"1","date":"2026-11-01","memo":"Rent","debit":2400,"state":"posted"},{"id":"2","date":"2026-11-03","memo":"Invoice INV-1042","credit":5600,"state":"posted"},{"id":"3","date":"2026-11-04","memo":"Hosting","debit":318,"state":"posted"},{"id":"4","date":"2026-11-08","memo":"Invoice INV-1047","credit":1250,"state":"pending"}]'>
+    <c2-table-column field="date" header="Date" width="110px" format="date" summary-label="Closing"></c2-table-column>
+    <c2-table-column field="memo" header="Description" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="state" header="State" width="110px" format="status" options='[{"value":"posted","label":"Posted","color":"#16a34a"},{"value":"pending","label":"Pending","color":"#d97706"}]' summary="tally"></c2-table-column>
+    <c2-table-column column-id="balance" header="Balance" width="110px" align="end" format="currency" running="credit,-debit" opening="1000" summary="last"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Grouped">
   <c2-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
     <c2-table-column field="task" header="Task" width="2fr" min-width="140"></c2-table-column>
@@ -550,3 +567,26 @@ same. The table emits one `page-change`: the pager's own event does not leave th
 one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
 
 `@c2n/components/table` deliberately does **not** import `@c2n/components/pagination` — import it yourself.
+
+### Editing
+
+`editable` lets people type into the cells of the columns that have an `editor` — `text`, `number`, `date`, `url`,
+`select` (with its `options`) or `checkbox` — the way they would in a spreadsheet: Enter, F2, a double click or typing
+opens the editor, Enter or Tab commits and moves on, Escape cancels, and a block copied from Excel or Sheets pastes from
+the focused cell. Only one editor exists at a time and its code loads on the first edit, so a read-only table pays
+nothing for it. The table never mutates your rows: every change fires `cell-change` (cancelable) and `rows-change` with
+a new array, so keep the array in your state from there.
+
+```typescript tag=CodeBlock
+table.addEventListener('rows-change', ({ detail }) => (state.rows = detail.rows))
+// A row rule runs after each edit: recompute what depends on the edited cell.
+table.rowRule = ({ row }) => ({ ...row, total: row.qty * row.price })
+// Lock rows, and check values beyond `required` and the editor's type.
+table.isCellEditable = ({ row }) => row.status !== 'received'
+priceColumn.validate = ({ value }) => (value < 0 ? 'A price cannot be negative' : undefined)
+
+await table.addRow({ id: crypto.randomUUID(), qty: 1 })
+const { added, updated, removed } = table.getChanges()
+await save(added, updated, removed)
+table.acceptChanges()
+```

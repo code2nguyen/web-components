@@ -5,6 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { guard } from 'lit/directives/guard.js'
+import { live } from 'lit/directives/live.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
@@ -25,7 +26,12 @@ import {
   type ColumnPin,
   type SortDirection,
   type SortModel,
+  type TableCellChangeEventDetail,
+  type TableCellContext,
+  type TableCellError,
   type TableCellEventDetail,
+  type TableCellOption,
+  type TableChanges,
   type TableChildrenErrorEventDetail,
   type TableChildrenLoader,
   type TableColumnConfig,
@@ -43,6 +49,8 @@ import {
   type TableRow,
   type TableRowEventDetail,
   type TableRowPartResolver,
+  type TableRowRule,
+  type TableRowsChangeEventDetail,
   type TableRowStyler,
   type TableRowToggleEventDetail,
   type TableSelectionChangeEventDetail,
@@ -53,6 +61,8 @@ import {
 import '@c2n/checkbox'
 import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
+import type { EditTrigger, TableEditing } from './table-editing.js'
+import type { RowsAnimation } from './table-animation.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -73,8 +83,6 @@ interface PinPlacement {
   offset: number
   edge: boolean
 }
-
-type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modified'
 
 const HEADER_ROW = -1
 /** Row index of the summary row in `focusedCell`; body rows are numbered from 0 and the header is `HEADER_ROW`. */
@@ -199,6 +207,15 @@ const rowKeysConverter = {
 /** Keys of the open tree rows: unset until written, like `expanded-groups`, and stored as strings, like `value`. */
 const rowKeysOrUnsetConverter = { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }
 
+/**
+ * The legend entry of `value` in a column's `options`. Compared as text, as `count-value` does: JSON in an attribute
+ * makes `"4"` and `4` easy to mix between the rows and the legend.
+ */
+function optionOf(column: TableColumnConfig, value: unknown): TableCellOption | undefined {
+  const text = String(value)
+  return column.options?.find((entry) => String(typeof entry === 'object' ? entry.value : entry) === text)
+}
+
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value
   if (typeof value === 'string' && value.trim() !== '') return Number(value)
@@ -207,7 +224,14 @@ function toNumber(value: unknown): number {
 
 /** Reduces a column's values to one of the built-in aggregates; non-numeric values are skipped by all but `count`. */
 function aggregate(kind: TableSummaryAggregate, values: unknown[]): unknown {
-  if (kind === 'count') return values.filter((value) => value !== null && value !== undefined && value !== '').length
+  const present = values.filter((value) => value !== null && value !== undefined && value !== '')
+  if (kind === 'count') return present.length
+  if (kind === 'last') return present[present.length - 1]
+  if (kind === 'tally') {
+    const counts = new Map<unknown, number>()
+    for (const value of present) counts.set(value, (counts.get(value) ?? 0) + 1)
+    return counts
+  }
   let sum = 0
   let count = 0
   let min = Number.POSITIVE_INFINITY
@@ -254,55 +278,31 @@ function numberFormatOptions(base: Intl.NumberFormatOptions, extra: Record<strin
   return Object.assign({}, base, extra ?? {})
 }
 
+/**
+ * The column's default style for `format`, and the same written as parts. `Intl` refuses `dateStyle` or `timeStyle`
+ * next to any part, so `format-options` naming one get the parts instead: a date part (`year`, `month`, `day`)
+ * replaces the date's, a time part the time's, and `weekday`, `era` or `timeZoneName` add to them.
+ */
+const DATE_PARTS = { year: 'numeric', month: 'short', day: 'numeric' } as const
+const TIME_PARTS = { hour: 'numeric', minute: '2-digit' } as const
+
 function dateFormatOptions(base: Intl.DateTimeFormatOptions, extra: Record<string, unknown> | undefined): Intl.DateTimeFormatOptions {
-  return Object.assign({}, base, extra ?? {})
+  const keys = Object.keys(extra ?? {})
+  const has = (parts: string[]) => keys.some((key) => parts.includes(key))
+  if (!has(['weekday', 'era', 'year', 'month', 'day', 'dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits', 'timeZoneName']))
+    return Object.assign({}, base, extra ?? {})
+  return Object.assign(
+    {},
+    base.dateStyle && !has(['year', 'month', 'day']) ? DATE_PARTS : {},
+    base.timeStyle && !has(['hour', 'minute', 'second', 'dayPeriod', 'fractionalSecondDigits']) ? TIME_PARTS : {},
+    extra,
+  )
 }
 
 function humanize(field: string): string {
   const last = field.split('.').pop() ?? field
   const spaced = last.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
-  const prototype = Object.getPrototypeOf(value)
-  return prototype === Object.prototype || prototype === null
-}
-
-/**
- * Builds the transient value shown during a row update. Target shape and non-numeric values win immediately; finite
- * numbers are the only values with a meaningful generic interpolation, including numbers nested in arrays/objects.
- */
-function interpolateValue(from: unknown, to: unknown, progress: number): unknown {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to)) return from + (to - from) * progress
-  if (Array.isArray(from) && Array.isArray(to)) return to.map((value, index) => interpolateValue(from[index], value, progress))
-  if (isRecord(from) && isRecord(to)) return Object.fromEntries(Object.entries(to).map(([key, value]) => [key, interpolateValue(from[key], value, progress)]))
-  return to
-}
-
-function hasNumericChange(from: unknown, to: unknown): boolean {
-  if (typeof from === 'number' && typeof to === 'number') return Number.isFinite(from) && Number.isFinite(to) && from !== to
-  if (Array.isArray(from) && Array.isArray(to)) return to.some((value, index) => hasNumericChange(from[index], value))
-  if (isRecord(from) && isRecord(to)) return Object.entries(to).some(([key, value]) => hasNumericChange(from[key], value))
-  return false
-}
-
-function firstNumericDelta(from: unknown, to: unknown): number | undefined {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to) && from !== to) return to - from
-  if (Array.isArray(from) && Array.isArray(to)) {
-    for (let index = 0; index < to.length; index++) {
-      const delta = firstNumericDelta(from[index], to[index])
-      if (delta !== undefined) return delta
-    }
-  }
-  if (isRecord(from) && isRecord(to)) {
-    for (const [key, value] of Object.entries(to)) {
-      const delta = firstNumericDelta(from[key], value)
-      if (delta !== undefined) return delta
-    }
-  }
-  return undefined
 }
 
 /** Events fired by {@link Table}, keyed for `addEventListener`. */
@@ -319,6 +319,8 @@ export interface TableEventMap {
   'row-toggle': CustomEvent<TableRowToggleEventDetail>
   'children-error': CustomEvent<TableChildrenErrorEventDetail>
   'detail-toggle': CustomEvent<TableDetailToggleEventDetail>
+  'cell-change': CustomEvent<TableCellChangeEventDetail>
+  'rows-change': CustomEvent<TableRowsChangeEventDetail>
 }
 
 export interface Table {
@@ -378,7 +380,8 @@ export interface Table {
  * added rows expand in and deleted rows collapse out. Nested numbers in arrays and objects animate too, so a custom
  * `renderCell` such as a sparkline receives the same transient row as the formatted cells around it. Add
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
- * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
+ * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected. The
+ * code loads once `animate-updates` is set; a snapshot assigned before it arrives waits for it, so it animates too.
  *
  * **Row keys.** Selection, `value` and events name a row by its key: the `row-key` field of the row (or
  * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
@@ -445,6 +448,32 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Editing.** `editable` lets the user change the cells of every column with an `editor` (`text`, `number`, `date`,
+ * `url`, `select` with its `options`, or `checkbox`), or a `renderEditor` of its own. Enter, F2, a double click or
+ * typing opens one editor over the cell (never one input per cell, so a long table scrolls as fast as before); Enter
+ * commits and moves down, Tab across, Escape cancels, Delete clears. A block copied from a spreadsheet pastes from the
+ * focused cell, adding rows past the last. Each change fires the cancelable `cell-change`, goes through `rowRule`, and
+ * replaces the row with a copy and `rows` with a new array (`rows-change`): the application's objects are never
+ * mutated. Changed cells are marked (`cell-dirty`), invalid ones too (`required`, the editor's type, the column's
+ * `validate`; `cell-invalid`), and `getChanges()`, `acceptChanges()`, `revertChanges()`, `validate()`, `addRow()`,
+ * `duplicateRow()` and `deleteRows()` are what a toolbar's buttons call. `isCellEditable` locks cells by row. The
+ * editing code loads on the first edit. Not applied to a `dataSource`.
+ *
+ * ```html
+ * <c2-table row-key="id" editable>
+ *   <c2-table-column field="item" editor="text" required></c2-table-column>
+ *   <c2-table-column field="qty" editor="number" align="end" summary="sum"></c2-table-column>
+ *   <c2-table-column field="status" editor="select" options='["Open","Done"]'></c2-table-column>
+ * </c2-table>
+ * ```
+ *
+ * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
+ * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
+ * reads as a status matrix; `summary="tally"` counts each status under its column, and a column with `count-value`
+ * counts the statuses of a row that hold that value. `running="credit,-debit"` makes a running total, such as an
+ * account balance, from `opening` and the fields named, over the rows in their sorted order, and `summary="last"`
+ * puts the closing balance in the summary row. Both are computed once when the rows change, not while scrolling.
+ *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
  * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
@@ -478,6 +507,8 @@ export interface Table {
  * @event {CustomEvent<TableRowToggleEventDetail>} row-toggle - Fired after the user opens or closes a row of a tree, with its `key`, the `row` and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableDetailToggleEventDetail>} detail-toggle - Fired after the user opens or closes a row's detail panel (`detail-height`), with its `key`, the `row` and whether it is now open. Does not bubble.
  * @event {CustomEvent<TableChildrenErrorEventDetail>} children-error - Fired when `loadChildren` rejects, with the row's `key`, the `row` and the `error`. The row has closed again. Does not bubble.
+ * @event {CustomEvent<TableCellChangeEventDetail>} cell-change - Fired when the user commits a new value to a cell of an `editable` table (typed, toggled, cleared or pasted), before the table stores it: `detail.row` is the row as it was, with `key`, `column`, `field`, `value` and `previousValue`. Cancelable: `preventDefault()` keeps the old value. Does not bubble.
+ * @event {CustomEvent<TableRowsChangeEventDetail>} rows-change - Fired after the table replaced `rows` itself: a cell edited or pasted, a row added, duplicated or deleted, changes reverted. `detail.rows` is the new array and `detail.reason` says why. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -498,6 +529,7 @@ export interface Table {
  * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
  * @csspart summary-row - The totals row kept at the bottom of the grid.
  * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
+ * @csspart summary-cell-off-target - A summary cell whose value misses its column's `summary-target`; exposed in addition to `summary-cell`.
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
  * @csspart group-row - Every group row. Also `group-row-level-<n>` (0 for the outermost level), `group-band` with `group-display="band"`, and `group-row-echo` on a copy kept under the header.
  * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
@@ -505,6 +537,13 @@ export interface Table {
  * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
+ * @csspart status - A value of a `status` column: its mark and label. Also `status-<value>`, so one value can be styled.
+ * @csspart status-mark - The dot, or the square holding the `glyph`, of a status.
+ * @csspart status-label - The label of a status.
+ * @csspart cell-dirty - A body cell whose value was edited since the rows were given or `acceptChanges()` ran; exposed in addition to `cell`.
+ * @csspart cell-invalid - A body cell whose value failed its check (`required`, the editor's type, `validate`); exposed in addition to `cell`.
+ * @csspart row-new - A body row added by `addRow`, `duplicateRow` or a paste, until `acceptChanges()`; exposed in addition to `row`.
+ * @csspart editor - The box holding the editor of the cell being edited.
  * @csspart group-label - The group's value, or what `renderGroup` returned.
  * @csspart group-count - The number of rows in the group.
  *
@@ -573,6 +612,31 @@ export interface Table {
  * @cssproperty {outline} [--c2-table__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-table__cell__focus--outline-offset=-2px]
  *
+ * @cssproperty {color} [--c2-table__cell__dirty--color=rgb(2, 101, 220)] - The corner mark of an edited cell.
+ * @cssproperty {pixel} [--c2-table__cell__dirty--size=6px]
+ * @cssproperty {color} [--c2-table__cell__invalid--background=rgba(220, 38, 38, 0.06)]
+ * @cssproperty {box-shadow} [--c2-table__cell__invalid--box-shadow=inset 0 0 0 1px rgb(211, 21, 16)]
+ * @cssproperty {color} [--c2-table__editor--background=#ffffff]
+ * @cssproperty {color} [--c2-table__editor--color=#18181b]
+ * @cssproperty {font-size} [--c2-table__editor--font-size=14px]
+ * @cssproperty {padding} [--c2-table__editor--padding=0 11px]
+ * @cssproperty {box-shadow} [--c2-table__editor--box-shadow=inset 0 0 0 2px rgb(2, 101, 220)] - The ring of the cell being edited.
+ *
+ * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
+ * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
+ * @cssproperty {pixel} [--c2-table__status-mark--size=8px] - The dot of a status without a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark--border-radius=999px]
+ * @cssproperty {pixel} [--c2-table__status-mark__glyph--size=18px] - The square of a status with a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark__glyph--border-radius=4px]
+ * @cssproperty {color} [--c2-table__status-mark__glyph--color=#ffffff]
+ * @cssproperty {font-size} [--c2-table__status-mark__glyph--font-size=11px]
+ * @cssproperty {font-weight} [--c2-table__status-mark__glyph--font-weight=700]
+ * @cssproperty {pixel} [--c2-table__status-label--max-width=none] - `0` leaves only the mark, as in a matrix; the label stays readable by assistive technology.
+ * @cssproperty {pixel} [--c2-table__tally--gap=12px] - Space between the values of a `tally` summary.
+ * @cssproperty {pixel} [--c2-table__tally-entry--gap=4px] - Space between a status's mark and its count in a `tally` summary.
+ * @cssproperty {color} [--c2-table__tally-count--color=#71717a]
+ * @cssproperty {pixel} [--c2-table__tally-label--max-width=0] - Width of each status's label in a `tally` summary: `0` shows the mark and the count only, `none` the whole label.
+ *
  * @cssproperty {box-shadow} [--c2-table__pinned-start--box-shadow=1px 0 0 0 #e4e4e7] - Separator on the last column pinned to the start.
  * @cssproperty {box-shadow} [--c2-table__pinned-end--box-shadow=-1px 0 0 0 #e4e4e7] - Separator on the first column pinned to the end.
  *
@@ -581,6 +645,7 @@ export interface Table {
  * @cssproperty {color} [--c2-table__summary--color=#18181b]
  * @cssproperty {font-size} [--c2-table__summary--font-size=14px]
  * @cssproperty {font-weight} [--c2-table__summary--font-weight=600]
+ * @cssproperty {color} [--c2-table__summary__off-target--color=rgb(211, 21, 16)] - Text of a summary that misses its `summary-target`.
  * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
  *
  * @cssproperty {color} [--c2-table__group-row--background=#fafafa]
@@ -826,6 +891,23 @@ export class Table extends LitElement {
   /** Accessible name of the chevron that opens a row's detail panel. Unset, `Details` in the table's language. */
   @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
 
+  /**
+   * Lets the user edit the cells of the columns that have an `editor` (or a `renderEditor`): Enter, F2, a double click
+   * or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears the
+   * cell, and a block copied from a spreadsheet pastes from the focused cell. Each change fires `cell-change` and
+   * replaces `rows`. The editing code loads on the first edit. Not applied to a `dataSource`.
+   */
+  @property({ type: Boolean }) editable = false
+
+  /** Decides per cell whether an `editable` table lets it be edited, such as `({ row }) => row.status !== 'approved'`. Property only. */
+  @property({ attribute: false }) isCellEditable?: (context: TableCellContext) => boolean
+
+  /**
+   * Adjusts a row after one of its cells is edited or pasted, before the table stores it: return the row to keep, such
+   * as the debit cleared when a credit is typed, or a total recomputed from a quantity. Property only.
+   */
+  @property({ attribute: false }) rowRule?: TableRowRule
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -845,13 +927,16 @@ export class Table extends LitElement {
   /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
   #pagers = new WeakSet<EventTarget>()
   #pendingScrollTop = false
-  #animationFrom = new Map<string, TableRow>()
-  #animationProgress = 1
-  #animationFrame?: number
-  #transitionRows?: TableRow[]
-  #rowUpdateStates = new Map<string, RowUpdateState>()
+  /** The realtime update code (`animate-updates`) once loaded, and its load while it is on the way. */
+  #animation?: RowsAnimation
+  #animationLoad?: Promise<RowsAnimation>
+  /** `rows` was replaced before that code arrived: the update waits for it rather than skip the animation. */
+  #awaitAnimation = false
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
+  /** The totals of each `running` column, by column key. */
+  #runningCache = new WeakMap<TableColumnConfig, { inputs: unknown[]; totals: Map<TableRow, number> }>()
+  #statusCache?: { source: TableColumnConfig[]; columns: TableColumnConfig[] }
   #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
   #warnedGroupedSource = false
   #warnedTreeSource = false
@@ -870,6 +955,9 @@ export class Table extends LitElement {
   #warnedDetail = false
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
+  /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
+  #editing?: TableEditing
+  #editingLoad?: Promise<TableEditing>
   /** The window `range-change` last reported, to fire only when it moves. */
   #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [], rows: [] }
   /** Whether `range-change` has fired yet: the first update reports even an empty window. */
@@ -903,7 +991,7 @@ export class Table extends LitElement {
   get rowCount(): number {
     const lines = this.#grouping()?.items.length ?? this.#treeLines()?.length
     if (lines !== undefined) return this.paginated ? Math.max(0, Math.min(this.pageSize, lines - this.#pageStart)) : lines
-    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
+    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#animation?.transitionRows?.length ?? this.totalRows)
     const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
     if (!this.dataSource) return onPage
     // Once the page is in it is the truth; before that the arithmetic gives the right number of skeleton rows.
@@ -1126,6 +1214,130 @@ export class Table extends LitElement {
     this.#setDetailExpanded(key, false)
   }
 
+  /**
+   * Adds `row` at `index` (the end by default) of `rows`, as a new row of `getChanges()`, and fires `rows-change`.
+   * Resolves to the row once it is drawn, so `scrollToIndex` can reach it.
+   */
+  async addRow(row: TableRow = {}, index?: number): Promise<TableRow> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.addRow(row, index))
+  }
+
+  /**
+   * Adds a copy of `row` under it, without its `row-key` field, with `overrides` written over it: pass the copy's new
+   * key there when `getRowKey` builds keys. Resolves to the copy once it is drawn, or `undefined` when `row` is not a
+   * top-level row.
+   */
+  async duplicateRow(row: TableRow, overrides?: TableRow): Promise<TableRow | undefined> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.duplicateRow(row, overrides))
+  }
+
+  /** Removes `rows` from `rows` (and from the children of a tree), and from the selection; fires `rows-change`. */
+  async deleteRows(rows: TableRow[]): Promise<void> {
+    const editing = await this.#loadEditing()
+    const drop = new Set(rows)
+    await this.#keepSelection(() => editing.deleteRows(rows), drop)
+  }
+
+  /**
+   * Runs a change of the rows and keeps the selection on the same rows (less the `dropped` ones): without a `row-key`
+   * a key is a position, which now points at another row. Fires `selection-change` only if the keys moved.
+   */
+  async #keepSelection<T>(change: () => T, dropped?: Set<TableRow>): Promise<T> {
+    // Every selected row of the dataset, not only the page on show that `getSelectedRows` covers.
+    const keys = new Set(this.value)
+    const selected =
+      keys.size && !this.dataSource ? this.#sortedRows.filter((row, index) => keys.has(this.#keyAt(index, row)) && !dropped?.has(row)) : undefined
+    const result = change()
+    await this.updateComplete
+    if (selected) {
+      const next = selected.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
+      if (next.length !== this.value.length || next.some((key, index) => key !== this.value[index])) this.#commitSelection(next)
+    }
+    return result
+  }
+
+  /** The rows added, edited and deleted since the rows were given or `acceptChanges()` ran. */
+  getChanges(): TableChanges {
+    return this.#editing?.changes() ?? { added: [], updated: [], removed: [] }
+  }
+
+  /** Takes the rows as they are as the new baseline, after a save: no cell is marked as changed any more. */
+  acceptChanges() {
+    this.#editing?.accept()
+  }
+
+  /** Undoes every change since the baseline: edits, added and deleted rows. Fires `rows-change`. */
+  revertChanges() {
+    this.#editing?.revert()
+  }
+
+  /** Checks every cell of the editable columns (`required`, the editor's type, `validate`), marks the invalid ones and resolves to them. */
+  async validate(): Promise<TableCellError[]> {
+    return (await this.#loadEditing()).validate()
+  }
+
+  #loadEditing(): Promise<TableEditing> {
+    this.#editingLoad ??= import('./table-editing.js').then(({ TableEditing }) => {
+      this.#editing = new TableEditing({
+        table: this,
+        columns: () => this.#renderColumns(),
+        rowAt: (line) => {
+          const index = this.#rowIndexAt(line)
+          const row = this.#sourceRowAt(index)
+          return row && { row, index, key: this.#keyAt(index, row) }
+        },
+        canEdit: (line, column) => this.#canEdit(line, column),
+        focus: (line, column) => {
+          this.focusedCell = { row: line, column }
+          this.#pendingFocus = true
+          this.#scrollToLine(line)
+        },
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: string[]) => string).call(this.msg, key, ...args),
+      })
+      this.requestUpdate()
+      return this.#editing
+    })
+    return this.#editingLoad
+  }
+
+  /** Whether the cell on display line `line` can be edited: an editable column, a data row, and `isCellEditable` agrees. */
+  #canEdit(line: number, columnIndex: number): boolean {
+    const column = this.#renderColumns()[columnIndex]
+    if (!this.editable || this.dataSource || !column || !(column.editor || column.renderEditor) || !column.field) return false
+    const index = this.#rowIndexAt(line)
+    const row = this.#sourceRowAt(index)
+    // A parent row of a tree shows the rollup of its leaves in such a column, not a value of its own.
+    if (!row || (column.rollup && this.#treeLines()?.[line]?.children?.length)) return false
+    return this.isCellEditable?.({ value: getFieldValue(row, column.field), row, rowIndex: index, column }) ?? true
+  }
+
+  /** Starts an edit of a cell once the editing module is in. */
+  #beginEdit(line: number, columnIndex: number, trigger: EditTrigger) {
+    void this.#loadEditing().then((editing) => editing.begin(line, columnIndex, trigger))
+  }
+
+  /**
+   * A double click on a cell, or a block pasted from a spreadsheet, in an editable table: handed to the editing module.
+   * One listener each on the grid, so the cells carry none. The pasted text is read now: it is gone once the event ends.
+   */
+  #handleEditGesture = (event: MouseEvent | ClipboardEvent) => {
+    const paste = event instanceof ClipboardEvent
+    if (
+      !this.editable ||
+      this.dataSource ||
+      event.composedPath().some((node) => node instanceof Element && node.matches('input, select, textarea, .editor-host'))
+    )
+      return
+    const text = paste ? event.clipboardData?.getData('text/plain') : ''
+    if (paste && (!text || this.focusedCell.row < 0)) return
+    if (paste) event.preventDefault()
+    // The path is empty once the event has been dispatched, and the module may still be on its way.
+    const path = event.composedPath()
+    void this.#loadEditing().then((editing) => editing.gesture(path, text, this.focusedCell))
+  }
+
   /** Drops the `dataSource` cache and reloads the visible rows. */
   refresh() {
     this.error = ''
@@ -1133,9 +1345,39 @@ export class Table extends LitElement {
     this.requestUpdate()
   }
 
+  #loadAnimation(): Promise<RowsAnimation> {
+    this.#animationLoad ??= import('./table-animation.js').then(({ RowsAnimation }) => {
+      this.#animation = new RowsAnimation({
+        table: this,
+        keyAt: (index, row) => this.#keyAt(index, row),
+        sortRows: (rows) => this.#sortRows(rows),
+        hasIdentity: () => this.#hasRowIdentity,
+      })
+      return this.#animation
+    })
+    return this.#animationLoad
+  }
+
+  override requestUpdate(...args: Parameters<LitElement['requestUpdate']>) {
+    if (args[0] === 'rows' && this.hasUpdated && this.animateUpdates && !this.#animation) this.#awaitAnimation = true
+    super.requestUpdate(...args)
+  }
+
+  /** A snapshot that comes before the realtime code is held for it, so it animates like every later one. */
+  protected override scheduleUpdate(): void | Promise<unknown> {
+    if (!this.#awaitAnimation) return super.scheduleUpdate()
+    this.#awaitAnimation = false
+    return this.#loadAnimation().then(
+      () => super.scheduleUpdate(),
+      () => super.scheduleUpdate(),
+    )
+  }
+
   protected override willUpdate(changed: PropertyValues) {
-    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
-    if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
+    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#animation?.cancel()
+    // Loaded with `animate-updates`, before the first snapshot comes, rather than on it.
+    if (this.animateUpdates) void this.#loadAnimation()
+    if (changed.has('rows')) this.#animation?.prepare(changed.get('rows'))
     const regroup = changed.has('groupBy') || changed.has('dataSource')
     // A tree's keys, rollups and loaded children depend on these too; a flat table does not look at them.
     const retree = changed.has('childrenField') || (this.childrenField && (changed.has('rowKey') || changed.has('getRowKey')))
@@ -1333,6 +1575,8 @@ export class Table extends LitElement {
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
+          @dblclick=${this.#handleEditGesture}
+          @paste=${this.#handleEditGesture}
         >
           ${this.#renderHeaderRow(columns, pins)}
           ${
@@ -1507,12 +1751,7 @@ export class Table extends LitElement {
           </div>`
         }
         const value = values.get(columnKey(column))
-        const content =
-          value === undefined || value === null || value === ''
-            ? ''
-            : column.summary === 'count'
-              ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-              : this.#formatValue(column, value)
+        const content = value === undefined || value === null || value === '' ? '' : this.#formatAggregate(column, value, false)
         return html`<div
           class=${classMap({ cell: true, 'cell--group': true, [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true, ...pinClasses, ...(column.cellClass ? { [column.cellClass]: true } : {}) })}
           role="gridcell"
@@ -1654,7 +1893,7 @@ export class Table extends LitElement {
     const detailColumn = row && this.#detail ? columns.find((column) => column.field !== SELECTION_FIELD) : undefined
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
-    const updateState = key ? this.#rowUpdateStates.get(key) : undefined
+    const updateState = key ? this.#animation?.states.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
     const extraParts = row && updateState !== 'removed' ? this.rowPart?.({ row, rowIndex: index, key }) : undefined
 
@@ -1675,6 +1914,7 @@ export class Table extends LitElement {
           'row',
           selected ? 'row-selected' : '',
           updateState ? `row-${updateState}` : '',
+          row && this.#editing?.isNew(this.#sourceRowAt(index) ?? row) ? 'row-new' : '',
           ...(typeof extraParts === 'string' ? extraParts.split(/\s+/) : (extraParts ?? [])),
         ]
           .filter(Boolean)
@@ -1764,26 +2004,51 @@ export class Table extends LitElement {
     }
 
     const id = columnKey(column)
-    const value = node?.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(row, column.field)
-    const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
+    const value = node?.rollup?.has(id)
+      ? node.rollup.get(id)
+      : row && (column.running || column.countValue !== undefined)
+        ? this.#cellValue(this.#sourceRowAt(rowIndex) ?? row, column)
+        : getFieldValue(row, column.field)
+    const rendered = row
+      ? column.renderCell
+        ? column.renderCell({ value, row, rowIndex, column })
+        : value instanceof Map
+          ? // A tree parent's `tally` rollup: each value with its count, as the summary row draws it.
+            this.#formatAggregate(column, value, false)
+          : column.editor === 'checkbox'
+            ? this.#renderCheckCell(line, columnIndex, column, value)
+            : column.format === 'status'
+              ? this.#renderStatus(column, value)
+              : this.#formatValue(column, value)
+      : undefined
+    // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
+    // module knows rows as the application gave them, not the interpolated copy an animated update draws.
+    const editing = row ? this.#editing : undefined
+    const source = editing && this.#sourceRowAt(rowIndex)
+    const editor = source ? editing!.editor(source, column, rowIndex) : undefined
+    const state = source ? editing!.cellState(source, column) : undefined
     // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
     // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
     // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
-    const content = row
-      ? column.cellSlot
-        ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-        : rendered
-      : html`<span class="skeleton" part="skeleton"></span>`
+    const content = editor
+      ? editor
+      : row
+        ? column.cellSlot
+          ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
+          : rendered
+        : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
     // the cell for its box, the content for the text itself, which is what a pill or a chip needs.
     const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
     return html`
       <div
-        class=${shared.class}
+        class=${state || editor ? classMap({ ...classes, 'cell--editing': Boolean(editor), 'cell--dirty': Boolean(state?.dirty), 'cell--invalid': Boolean(state?.error) }) : shared.class}
         role="gridcell"
-        part="cell cell-${fieldPart}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}"
         aria-colindex=${columnIndex + 1}
+        aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
+        title=${ifDefined(state?.error)}
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
@@ -1795,9 +2060,20 @@ export class Table extends LitElement {
           part="cell-content cell-content-${fieldPart}"
           style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
           >${content}</span
-        >
+        >${state?.error ? html`<span class="cell-error">${state.error}</span>` : nothing}
       </div>
     `
+  }
+
+  /** The checkbox of a `checkbox` column: toggled in place while the cell can be edited, a read-only mark otherwise. */
+  #renderCheckCell(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    return html`<c2-checkbox
+      aria-label=${column.header ?? column.field}
+      .checked=${live(Boolean(value))}
+      ?disabled=${!this.#canEdit(line, columnIndex)}
+      @click=${(event: Event) => event.stopPropagation()}
+      @change=${() => this.#beginEdit(line, columnIndex, 'edit')}
+    ></c2-checkbox>`
   }
 
   /** The chevron of a tree row, indented by its depth; a leaf keeps the room empty so labels line up across levels. */
@@ -1859,7 +2135,7 @@ export class Table extends LitElement {
     if (!keys?.length || !this.#detail) return NO_LINES
     const count = this.rowCount
     const first = this.#pageStart
-    const inputs = [keys, this.#sortedRows, this.#transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
+    const inputs = [keys, this.#sortedRows, this.#animation?.transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
     const cached = this.#detailCache
     if (cached && inputs.every((input, index) => input === cached.inputs[index])) return cached.lines
     const wanted = new Set(keys)
@@ -2007,7 +2283,7 @@ export class Table extends LitElement {
     // presented as a total. Its page, once loaded, is complete; otherwise the server's figures come in `summaryValues`.
     const aggregatable = !this.dataSource || (pageScope && this.paginated)
     const start = pageScope ? this.#pageStart : 0
-    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#transitionRows ?? this.#sortedRows).length
+    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#animation?.transitionRows ?? this.#sortedRows).length
     const inputs = [
       columns.length,
       ...columns.map((column) => column.summary),
@@ -2015,8 +2291,8 @@ export class Table extends LitElement {
       this.columns,
       this.summaryValues,
       this.#sortedRows,
-      this.#transitionRows,
-      this.#animationProgress,
+      this.#animation?.transitionRows,
+      this.#animation?.progress,
       this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
       pageScope ? this.#grouping()?.items : undefined,
       pageScope ? this.#treeLines() : undefined,
@@ -2027,13 +2303,18 @@ export class Table extends LitElement {
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached
 
     const rows: TableRow[] = []
+    // The rows as given, which computed columns (`running`) are keyed by; `rows` may hold an animated update's copies.
+    const sources: TableRow[] = []
     for (let cursor = start; cursor < start + count; cursor++) {
       // The page is made of display lines, so while grouped its rows are those on the page's data lines.
       const index = pageScope ? this.#rowIndexAt(cursor) : cursor
       const row = this.#rowAt(index)
       // A row collapsing out during an animated update is already gone from the data, so it no longer counts. In a
       // tree only the leaves count: a parent's figures are its children's, and would be counted twice.
-      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
+      if (row && this.#animation?.states.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) {
+        rows.push(row)
+        sources.push(this.#sourceRowAt(index) ?? row)
+      }
     }
     const values = new Map<string, unknown>()
     for (const column of columns) {
@@ -2042,12 +2323,12 @@ export class Table extends LitElement {
       // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
       else if (!aggregatable) continue
       else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           key,
           aggregate(
             column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
+            sources.map((row) => this.#cellValue(row, column)),
           ),
         )
     }
@@ -2071,27 +2352,34 @@ export class Table extends LitElement {
     let content: unknown
     if (column.renderSummary) content = column.renderSummary({ column, rows, value })
     else if (value !== undefined && value !== null && value !== '') {
-      // A count is a number of rows, not an amount: a currency or date column must not format it as one.
-      content =
-        column.summary === 'count' && !explicit
-          ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-          : this.#formatValue(column, value)
+      content = this.#formatAggregate(column, value, explicit)
     } else content = column.summaryLabel ?? ''
 
     const focused = this.focusedCell.row === SUMMARY_ROW && this.focusedCell.column >= index && this.focusedCell.column < index + span
     const part = key.replace(/[^\w-]/g, '-')
+    // A total that must reach a value, such as shares adding up to 100%: off target, the cell is marked and says so.
+    const target = column.summaryTarget
+    // Compared as the cell shows them, so 33.33 + 33.33 + 33.34 is on target and a total that reads `100` is never flagged.
+    const off =
+      target !== undefined &&
+      target !== null &&
+      typeof value === 'number' &&
+      this.#formatAggregate(column, value, explicit) !== this.#formatAggregate(column, target, explicit)
+    const offText = off ? this.msg.t('summaryOffTarget', String(this.#formatAggregate(column, target, explicit))) : undefined
     return html`
       <div
         class=${classMap({
           cell: true,
           'cell--summary': true,
+          'cell--off-target': off,
           [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true,
           'cell--selection': column.field === SELECTION_FIELD,
           ...this.#pinClasses(column, pins),
           ...(column.cellClass ? { [column.cellClass]: true } : {}),
         })}
         role="gridcell"
-        part="summary-cell summary-cell-${part}"
+        part="summary-cell summary-cell-${part}${off ? ' summary-cell-off-target' : ''}"
+        title=${ifDefined(offText)}
         aria-colindex=${index + 1}
         aria-colspan=${ifDefined(span > 1 ? span : undefined)}
         tabindex=${focused ? 0 : -1}
@@ -2187,8 +2475,108 @@ export class Table extends LitElement {
     return this.focusedCell.row === rowIndex && this.focusedCell.column === columnIndex ? 0 : -1
   }
 
+  /**
+   * A summary or group value as its cell shows it. A count is a number of rows, not an amount: a currency or date
+   * column must not format it as one. A tally lists each value with its count, as a status where the column has them.
+   */
+  #formatAggregate(column: TableColumnConfig, value: unknown, explicit: boolean): unknown {
+    if (value instanceof Map) {
+      const order = (column.options ?? []).map((option) => String(typeof option === 'object' ? option.value : option))
+      const rank = (entry: unknown) => order.indexOf(String(entry)) + 1 || order.length + 1
+      const entries = [...value].sort(([a], [b]) => rank(a) - rank(b))
+      return html`<span class="tally"
+        >${entries.map(
+          ([entry, count]) =>
+            html`<span class="tally-entry"
+              >${column.format === 'status' ? this.#renderStatus(column, entry) : this.#formatValue(column, entry)}
+              <span class="tally-count">${count}</span></span
+            >`,
+        )}</span
+      >`
+    }
+    if (column.summary === 'count' && !explicit) return this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
+    return this.#formatValue(column, value)
+  }
+
+  /** A value of a `status` column: its mark, painted from its `options` entry, and its label. */
+  #renderStatus(column: TableColumnConfig, value: unknown) {
+    if (value === null || value === undefined || value === '') return ''
+    const option = optionOf(column, value)
+    const legend = typeof option === 'object' ? option : undefined
+    const label = this.#formatValue(column, value)
+    return html`<span
+      class="status"
+      part="status status-${String(value).replace(/[^\w-]/g, '-')}"
+      title=${this.msg.t('statusTitle', column.header ?? column.field, label)}
+      style=${styleMap(legend?.color ? { '--_status-color': legend.color } : {})}
+      ><span class=${legend?.glyph ? 'status-mark status-mark--glyph' : 'status-mark'} part="status-mark" aria-hidden="true">${legend?.glyph ?? nothing}</span
+      ><span class="status-label" part="status-label">${label}</span></span
+    >`
+  }
+
+  /**
+   * The value of a cell: its field, or what a computed column makes of the row. `row` is the row as given, which
+   * `running` totals are keyed by.
+   */
+  #cellValue(row: TableRow, column: TableColumnConfig): unknown {
+    if (column.running) return this.#runningTotals(column).get(row)
+    if (column.countValue !== undefined) {
+      const wanted = String(column.countValue)
+      let count = 0
+      for (const other of this.#statusColumns()) if (String(getFieldValue(row, other.field)) === wanted) count++
+      return count
+    }
+    return getFieldValue(row, column.field)
+  }
+
+  /**
+   * Every `status` column, hidden ones included: hiding a column changes what the table shows, not what a row's
+   * `count-value` counts. Kept until the column definitions change.
+   */
+  #statusColumns(): TableColumnConfig[] {
+    const source = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    if (this.#statusCache?.source !== source) this.#statusCache = { source, columns: source.filter((column) => column.format === 'status') }
+    return this.#statusCache.columns
+  }
+
+  /**
+   * A `running` column's total after each row, accumulated once over the rows in their sorted order whenever they or
+   * the column change. Not computed for a `dataSource`, which only holds the rows it has fetched.
+   */
+  #runningTotals(column: TableColumnConfig): Map<TableRow, number> {
+    const inputs = [this.#sortedRows, column.running, column.opening, this.dataSource]
+    const cached = this.#runningCache.get(column)
+    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.totals
+    const terms = (column.running ?? '')
+      .split(',')
+      .map((term) => term.trim())
+      .filter(Boolean)
+      .map((term) => (term.startsWith('-') ? { field: term.slice(1).trim(), sign: -1 } : { field: term.replace(/^\+/, '').trim(), sign: 1 }))
+    const totals = new Map<TableRow, number>()
+    let total = Number(column.opening) || 0
+    const rows = this.dataSource ? [] : this.#sortedRows
+    for (let index = 0; index < rows.length; index++) {
+      // In a tree only the leaves move the total: a parent's figures are its children's, and would count twice.
+      if (this.#tree?.nodes[index]?.children?.length) continue
+      const row = rows[index]
+      let moved = false
+      for (const { field, sign } of terms) {
+        const number = toNumber(getFieldValue(row, field))
+        if (!Number.isFinite(number)) continue
+        total += sign * number
+        moved = true
+      }
+      if (moved) totals.set(row, total)
+    }
+    this.#runningCache.set(column, { inputs, totals })
+    return totals
+  }
+
   #formatValue(column: TableColumnConfig, value: unknown): string {
     if (value === null || value === undefined || value === '') return ''
+    // A `select` or `status` column shows the label of its option.
+    const option = optionOf(column, value)
+    if (option !== undefined) return typeof option === 'object' ? (option.label ?? String(option.value)) : String(option)
     const locale = column.locale
     const extra = column.formatOptions
     try {
@@ -2220,17 +2608,15 @@ export class Table extends LitElement {
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
-    const row = (this.#transitionRows ?? this.#sortedRows)[index]
-    if (!row || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-    const from = this.#animationFrom.get(this.#keyAt(index, row))
-    return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
+    const row = (this.#animation?.transitionRows ?? this.#sortedRows)[index]
+    return row && this.#animation ? this.#animation.rowAt(index, row) : row
   }
 
   /** The row at `index` as the application gave it: `#rowAt` without the interpolation of an animated update. */
   #sourceRowAt(index: number): TableRow | undefined {
     if (index < 0) return undefined
     if (this.dataSource) return this.#rowAt(index)
-    return (this.#transitionRows ?? this.#sortedRows)[index]
+    return (this.#animation?.transitionRows ?? this.#sortedRows)[index]
   }
 
   #keyAt(index: number, row: TableRow): string {
@@ -2293,10 +2679,13 @@ export class Table extends LitElement {
                   columnKey(column),
                   typeof rollup === 'function'
                     ? rollup({ column, rows: node.leaves })
-                    : aggregate(
-                        rollup,
-                        node.leaves.map((leaf) => getFieldValue(leaf, column.field)),
-                      ),
+                    : column.running
+                      ? // A running total follows the order of the rows, which is only known once the tree is built.
+                        undefined
+                      : aggregate(
+                          rollup,
+                          node.leaves.map((leaf) => this.#cellValue(leaf, column)),
+                        ),
                 )
               }
             }
@@ -2471,7 +2860,7 @@ export class Table extends LitElement {
     if (!this.groupBy?.length || this.#tree) return undefined
     const levels = this.#groupLevels()
     if (this.dataSource || !levels.length) return undefined
-    const source = this.#transitionRows ?? this.#sortedRows
+    const source = this.#animation?.transitionRows ?? this.#sortedRows
     const treeInputs = [source, this.groupBy, this.sortModel, this.columnElements, this.columns, this.rowKey, this.getRowKey]
     const itemInputs = [this.expandedGroups, this.groupsCollapsed]
     const cached = this.#groupingCache
@@ -2614,12 +3003,12 @@ export class Table extends LitElement {
     const values = new Map<string, unknown>()
     for (const column of columns) {
       if (typeof column.summary === 'function') values.set(columnKey(column), column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           columnKey(column),
           aggregate(
             column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
+            rows.map((row) => this.#cellValue(row, column)),
           ),
         )
     }
@@ -2705,7 +3094,7 @@ export class Table extends LitElement {
       const top = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top
       const bottom = top + element.getBoundingClientRect().height
       if (top < header) viewport.scrollTop += top - header
-      else if (bottom > viewport.clientHeight) viewport.scrollTop += bottom - viewport.clientHeight
+      else if (bottom > viewport.clientHeight - this.#footerHeight()) viewport.scrollTop += bottom - viewport.clientHeight + this.#footerHeight()
       return
     }
     const viewport = this.viewport
@@ -2716,13 +3105,14 @@ export class Table extends LitElement {
       // Past the browser's height limit the virtualizer scales the scroll: its own arithmetic is the closer one there.
       const scaled = range.paddingTop + (range.end - range.start) * height + range.paddingBottom < this.rowCount * height - 1
       if (open.length === 0 || !viewport || scaled) {
-        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
+        // The summary row is sticky at the bottom as the header is at the top: a row under either is out of sight.
+        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight() + this.#footerHeight())
         return
       }
       // The panels open above the row push it down by their height.
       const index = line - this.#pageStart
       const rowTop = index * height + open.filter((entry) => entry < index).length * this.detailHeight
-      const room = viewport.clientHeight - this.#headerHeight()
+      const room = viewport.clientHeight - this.#headerHeight() - this.#footerHeight()
       if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop
       else if (rowTop + height > viewport.scrollTop + room) viewport.scrollTop = rowTop + height - room
       return
@@ -2730,7 +3120,7 @@ export class Table extends LitElement {
     if (!viewport) return
     const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
     const covered = this.#depthOf(grouping.items[line]) * height
-    const visible = viewport.clientHeight - this.#headerHeight()
+    const visible = viewport.clientHeight - this.#headerHeight() - this.#footerHeight()
     if (top - covered < viewport.scrollTop) viewport.scrollTop = Math.max(0, top - covered)
     else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
   }
@@ -2752,97 +3142,6 @@ export class Table extends LitElement {
       }
       return 0
     })
-  }
-
-  #prepareRowsAnimation(previous: unknown) {
-    const displayedPrevious = Array.isArray(previous)
-      ? previous.map((row, index) => {
-          if (!isRecord(row) || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-          const from = this.#animationFrom.get(this.#keyAt(index, row))
-          return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
-        })
-      : previous
-    this.#cancelRowsAnimation()
-    if (
-      !this.hasUpdated ||
-      !this.animateUpdates ||
-      // A tree is not animated: its rows are matched by their place in the flattened tree, which `rows` does not hold.
-      this.childrenField ||
-      this.updateDuration <= 0 ||
-      !Array.isArray(displayedPrevious) ||
-      !Array.isArray(this.rows) ||
-      typeof requestAnimationFrame === 'undefined' ||
-      (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)
-    ) {
-      return
-    }
-
-    const previousByKey = new Map<string, TableRow>()
-    displayedPrevious.forEach((row, index) => {
-      if (isRecord(row)) previousByKey.set(this.#keyAt(index, row), row)
-    })
-    const nextKeys = new Set(this.rows.map((row, index) => this.#keyAt(index, row)))
-    const previousKeys = new Set(previousByKey.keys())
-    const hasAdded = this.rows.some((row, index) => !previousKeys.has(this.#keyAt(index, row)))
-    const hasRemoved = displayedPrevious.some((row, index) => isRecord(row) && !nextKeys.has(this.#keyAt(index, row)))
-    const hasModified = this.rows.some((row, index) => hasNumericChange(previousByKey.get(this.#keyAt(index, row)), row))
-    if (!hasAdded && !hasRemoved && !hasModified) return
-
-    this.#animationFrom = previousByKey
-    this.#animationProgress = 0
-    this.rows.forEach((row, index) => {
-      const key = this.#keyAt(index, row)
-      const from = previousByKey.get(key)
-      if (!from) {
-        this.#rowUpdateStates.set(key, 'added')
-        return
-      }
-      if (!hasNumericChange(from, row)) return
-      const watchedFrom = this.updateHighlightField ? getFieldValue(from, this.updateHighlightField) : from
-      const watchedTo = this.updateHighlightField ? getFieldValue(row, this.updateHighlightField) : row
-      const delta = firstNumericDelta(watchedFrom, watchedTo)
-      this.#rowUpdateStates.set(key, delta === undefined ? 'modified' : delta > 0 ? 'increased' : 'decreased')
-    })
-
-    // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
-    // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.#hasRowIdentity && !this.paginated && !this.childrenField) {
-      const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
-      const transitionRows = [...this.#sortRows(this.rows)]
-      previousRows.forEach((row, index) => {
-        const key = this.#keyAt(index, row)
-        if (nextKeys.has(key)) return
-        transitionRows.splice(Math.min(index, transitionRows.length), 0, row)
-        this.#rowUpdateStates.set(key, 'removed')
-      })
-      this.#transitionRows = transitionRows
-    }
-
-    let started: number | undefined
-    const draw = (now: number) => {
-      started ??= now
-      const progress = Math.min(1, (now - started) / this.updateDuration)
-      this.#animationProgress = 1 - Math.pow(1 - progress, 3)
-      this.requestUpdate()
-      if (progress < 1) this.#animationFrame = requestAnimationFrame(draw)
-      else {
-        this.#animationFrame = undefined
-        this.#animationFrom.clear()
-        this.#transitionRows = undefined
-        this.#rowUpdateStates.clear()
-        this.requestUpdate()
-      }
-    }
-    this.#animationFrame = requestAnimationFrame(draw)
-  }
-
-  #cancelRowsAnimation() {
-    if (this.#animationFrame !== undefined) cancelAnimationFrame(this.#animationFrame)
-    this.#animationFrame = undefined
-    this.#animationFrom.clear()
-    this.#animationProgress = 1
-    this.#transitionRows = undefined
-    this.#rowUpdateStates.clear()
   }
 
   #resetRemote() {
@@ -2924,7 +3223,7 @@ export class Table extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.#cancelRowsAnimation()
+    this.#animation?.cancel()
     this.removeEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
   }
 
@@ -3217,6 +3516,25 @@ export class Table extends LitElement {
       return
     }
 
+    // An editable cell opens its editor on Enter or F2, takes a typed character as its new value, and Delete clears it.
+    if (this.editable && row >= 0 && !event.ctrlKey && !event.metaKey && !event.altKey && this.#canEdit(row, column)) {
+      const checkbox = columns[column].editor === 'checkbox' && !columns[column].renderEditor
+      const trigger: EditTrigger | undefined =
+        // modern-web-ignore: ime-enter the grid cell is not a text field; a composing key comes from an input and is dropped by #isFromCellControl above
+        event.key === 'Enter' || event.key === 'F2' || (checkbox && event.key === ' ')
+          ? 'edit'
+          : event.key === 'Delete' || event.key === 'Backspace'
+            ? 'clear'
+            : event.key.length === 1 && event.key !== ' ' && !checkbox
+              ? { text: event.key }
+              : undefined
+      if (trigger) {
+        event.preventDefault()
+        this.#beginEdit(row, column, trigger)
+        return
+      }
+    }
+
     switch (event.key) {
       case 'ArrowDown':
         if (row === SUMMARY_ROW) break
@@ -3307,6 +3625,11 @@ export class Table extends LitElement {
 
   #headerHeight(): number {
     return this.renderRoot.querySelector('.row--header')?.getBoundingClientRect().height ?? 0
+  }
+
+  /** Height of the summary row, which stays at the bottom of the viewport and covers the rows under it. */
+  #footerHeight(): number {
+    return this.renderRoot.querySelector('.row--summary')?.getBoundingClientRect().height ?? 0
   }
 
   #measureRowHeight() {

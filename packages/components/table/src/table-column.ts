@@ -6,7 +6,12 @@ import type {
   ColumnAlign,
   ColumnFormat,
   ColumnPin,
+  TableCellEditor,
+  TableCellEditorRenderer,
+  TableCellOption,
+  TableCellParser,
   TableCellRenderer,
+  TableCellValidator,
   TableColumnConfig,
   TableHeaderRenderer,
   TableSummaryAggregate,
@@ -105,6 +110,12 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Text shown in the column's summary cell when it has no value, such as `Total`. */
   @property({ type: String, attribute: 'summary-label' }) summaryLabel?: string
 
+  /**
+   * The value the summary must reach, such as `1` for a `percent` column whose rows must add up to 100%: while the
+   * summary is another number, its cell is marked (`summary-cell-off-target`) and says what it should be.
+   */
+  @property({ type: Number, attribute: 'summary-target' }) summaryTarget?: number
+
   /** Alignment of the summary cell. Defaults to `align`. */
   @property({ type: String, attribute: 'summary-align' }) summaryAlign?: ColumnAlign
 
@@ -128,6 +139,43 @@ export class TableColumn extends LitElement implements TableColumnConfig {
    * each row's chevron and indentation in a tree (`children-field`). Defaults to the first column.
    */
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
+
+  /**
+   * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added up
+   * over the rows in their sorted order. Comma-separated, and a `-` subtracts a field: `running="credit,-debit"`. A row
+   * with none of them shows nothing and leaves the total as it is. Give the column a `column-id`; it needs no `field`.
+   */
+  @property({ type: String }) running?: string
+
+  /** The value a `running` column starts from, such as an opening balance. */
+  @property({ type: Number }) opening?: number
+
+  /** Makes the column count, in each row, the cells of the `status` columns that hold this value: the failing controls of a row. */
+  @property({ type: String, attribute: 'count-value' }) countValue?: string
+
+  /**
+   * Makes the cells editable while the table is `editable`: `text`, `number`, `date`, `url` and `select` open one input
+   * over the cell being edited, `checkbox` shows a checkbox in every cell and toggles it.
+   */
+  @property({ type: String }) editor?: TableCellEditor
+
+  /**
+   * The column's legend, as JSON in the attribute: values, or `{ "value", "label", "color", "glyph" }` objects. The cell
+   * shows the label, a `select` editor offers them, and `format="status"` paints each value's mark with its `color`.
+   */
+  @property({ converter: jsonPropertyConverter }) options?: TableCellOption[]
+
+  /** An empty value marks the cell invalid while the table is `editable`. */
+  @property({ type: Boolean }) required = false
+
+  /** Checks a cell's value after an edit, a paste or the table's `validate()`: returns the message, or nothing. Property only. */
+  @property({ attribute: false }) validate?: TableCellValidator
+
+  /** Draws the cell's editor in place of the built-in `editor`, and makes the column editable. Property only. */
+  @property({ attribute: false }) renderEditor?: TableCellEditorRenderer
+
+  /** Turns text pasted from a spreadsheet into the column's value; the default follows `editor`. Property only. */
+  @property({ attribute: false }) parseValue?: TableCellParser
 
   override connectedCallback() {
     super.connectedCallback()

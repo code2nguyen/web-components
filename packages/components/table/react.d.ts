@@ -66,17 +66,20 @@ declare module 'react' {
         expandedRows?: Table['expandedRows'] | string
         expandedDetails?: Table['expandedDetails'] | string
       }
-      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
+      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {
         'column-id'?: Attribute
         'min-width'?: Attribute
         'format-options'?: Attribute
         'cell-class'?: Attribute
         'cell-slot'?: Attribute
         'summary-label'?: Attribute
+        'summary-target'?: Attribute
         'summary-align'?: Attribute
         'summary-span'?: Attribute
         'group-column'?: Attribute
+        'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
+        options?: TableColumn['options'] | string
       }
     }
   }
