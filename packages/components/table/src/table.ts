@@ -30,6 +30,7 @@ import {
   type TableCellContext,
   type TableCellError,
   type TableCellEventDetail,
+  type TableCellOption,
   type TableChanges,
   type TableChildrenErrorEventDetail,
   type TableChildrenLoader,
@@ -206,6 +207,15 @@ const rowKeysConverter = {
 /** Keys of the open tree rows: unset until written, like `expanded-groups`, and stored as strings, like `value`. */
 const rowKeysOrUnsetConverter = { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }
 
+/**
+ * The legend entry of `value` in a column's `options`. Compared as text, as `count-value` does: JSON in an attribute
+ * makes `"4"` and `4` easy to mix between the rows and the legend.
+ */
+function optionOf(column: TableColumnConfig, value: unknown): TableCellOption | undefined {
+  const text = String(value)
+  return column.options?.find((entry) => String(typeof entry === 'object' ? entry.value : entry) === text)
+}
+
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value
   if (typeof value === 'string' && value.trim() !== '') return Number(value)
@@ -214,7 +224,14 @@ function toNumber(value: unknown): number {
 
 /** Reduces a column's values to one of the built-in aggregates; non-numeric values are skipped by all but `count`. */
 function aggregate(kind: TableSummaryAggregate, values: unknown[]): unknown {
-  if (kind === 'count') return values.filter((value) => value !== null && value !== undefined && value !== '').length
+  const present = values.filter((value) => value !== null && value !== undefined && value !== '')
+  if (kind === 'count') return present.length
+  if (kind === 'last') return present[present.length - 1]
+  if (kind === 'tally') {
+    const counts = new Map<unknown, number>()
+    for (const value of present) counts.set(value, (counts.get(value) ?? 0) + 1)
+    return counts
+  }
   let sum = 0
   let count = 0
   let min = Number.POSITIVE_INFINITY
@@ -261,8 +278,25 @@ function numberFormatOptions(base: Intl.NumberFormatOptions, extra: Record<strin
   return Object.assign({}, base, extra ?? {})
 }
 
+/**
+ * The column's default style for `format`, and the same written as parts. `Intl` refuses `dateStyle` or `timeStyle`
+ * next to any part, so `format-options` naming one get the parts instead: a date part (`year`, `month`, `day`)
+ * replaces the date's, a time part the time's, and `weekday`, `era` or `timeZoneName` add to them.
+ */
+const DATE_PARTS = { year: 'numeric', month: 'short', day: 'numeric' } as const
+const TIME_PARTS = { hour: 'numeric', minute: '2-digit' } as const
+
 function dateFormatOptions(base: Intl.DateTimeFormatOptions, extra: Record<string, unknown> | undefined): Intl.DateTimeFormatOptions {
-  return Object.assign({}, base, extra ?? {})
+  const keys = Object.keys(extra ?? {})
+  const has = (parts: string[]) => keys.some((key) => parts.includes(key))
+  if (!has(['weekday', 'era', 'year', 'month', 'day', 'dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits', 'timeZoneName']))
+    return Object.assign({}, base, extra ?? {})
+  return Object.assign(
+    {},
+    base.dateStyle && !has(['year', 'month', 'day']) ? DATE_PARTS : {},
+    base.timeStyle && !has(['hour', 'minute', 'second', 'dayPeriod', 'fractionalSecondDigits']) ? TIME_PARTS : {},
+    extra,
+  )
 }
 
 function humanize(field: string): string {
@@ -433,6 +467,13 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
+ * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
+ * reads as a status matrix; `summary="tally"` counts each status under its column, and a column with `count-value`
+ * counts the statuses of a row that hold that value. `running="credit,-debit"` makes a running total, such as an
+ * account balance, from `opening` and the fields named, over the rows in their sorted order, and `summary="last"`
+ * puts the closing balance in the summary row. Both are computed once when the rows change, not while scrolling.
+ *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
  * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
@@ -495,6 +536,9 @@ export interface Table {
  * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
+ * @csspart status - A value of a `status` column: its mark and label. Also `status-<value>`, so one value can be styled.
+ * @csspart status-mark - The dot, or the square holding the `glyph`, of a status.
+ * @csspart status-label - The label of a status.
  * @csspart cell-dirty - A body cell whose value was edited since the rows were given or `acceptChanges()` ran; exposed in addition to `cell`.
  * @csspart cell-invalid - A body cell whose value failed its check (`required`, the editor's type, `validate`); exposed in addition to `cell`.
  * @csspart row-new - A body row added by `addRow`, `duplicateRow` or a paste, until `acceptChanges()`; exposed in addition to `row`.
@@ -576,6 +620,21 @@ export interface Table {
  * @cssproperty {font-size} [--c2-table__editor--font-size=14px]
  * @cssproperty {padding} [--c2-table__editor--padding=0 11px]
  * @cssproperty {box-shadow} [--c2-table__editor--box-shadow=inset 0 0 0 2px rgb(2, 101, 220)] - The ring of the cell being edited.
+ *
+ * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
+ * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
+ * @cssproperty {pixel} [--c2-table__status-mark--size=8px] - The dot of a status without a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark--border-radius=999px]
+ * @cssproperty {pixel} [--c2-table__status-mark__glyph--size=18px] - The square of a status with a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark__glyph--border-radius=4px]
+ * @cssproperty {color} [--c2-table__status-mark__glyph--color=#ffffff]
+ * @cssproperty {font-size} [--c2-table__status-mark__glyph--font-size=11px]
+ * @cssproperty {font-weight} [--c2-table__status-mark__glyph--font-weight=700]
+ * @cssproperty {pixel} [--c2-table__status-label--max-width=none] - `0` leaves only the mark, as in a matrix; the label stays readable by assistive technology.
+ * @cssproperty {pixel} [--c2-table__tally--gap=12px] - Space between the values of a `tally` summary.
+ * @cssproperty {pixel} [--c2-table__tally-entry--gap=4px] - Space between a status's mark and its count in a `tally` summary.
+ * @cssproperty {color} [--c2-table__tally-count--color=#71717a]
+ * @cssproperty {pixel} [--c2-table__tally-label--max-width=0] - Width of each status's label in a `tally` summary: `0` shows the mark and the count only, `none` the whole label.
  *
  * @cssproperty {box-shadow} [--c2-table__pinned-start--box-shadow=1px 0 0 0 #e4e4e7] - Separator on the last column pinned to the start.
  * @cssproperty {box-shadow} [--c2-table__pinned-end--box-shadow=-1px 0 0 0 #e4e4e7] - Separator on the first column pinned to the end.
@@ -873,6 +932,9 @@ export class Table extends LitElement {
   #awaitAnimation = false
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
+  /** The totals of each `running` column, by column key. */
+  #runningCache = new WeakMap<TableColumnConfig, { inputs: unknown[]; totals: Map<TableRow, number> }>()
+  #statusCache?: { source: TableColumnConfig[]; columns: TableColumnConfig[] }
   #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
   #warnedGroupedSource = false
   #warnedTreeSource = false
@@ -1687,12 +1749,7 @@ export class Table extends LitElement {
           </div>`
         }
         const value = values.get(columnKey(column))
-        const content =
-          value === undefined || value === null || value === ''
-            ? ''
-            : column.summary === 'count'
-              ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-              : this.#formatValue(column, value)
+        const content = value === undefined || value === null || value === '' ? '' : this.#formatAggregate(column, value, false)
         return html`<div
           class=${classMap({ cell: true, 'cell--group': true, [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true, ...pinClasses, ...(column.cellClass ? { [column.cellClass]: true } : {}) })}
           role="gridcell"
@@ -1945,13 +2002,22 @@ export class Table extends LitElement {
     }
 
     const id = columnKey(column)
-    const value = node?.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(row, column.field)
+    const value = node?.rollup?.has(id)
+      ? node.rollup.get(id)
+      : row && (column.running || column.countValue !== undefined)
+        ? this.#cellValue(this.#sourceRowAt(rowIndex) ?? row, column)
+        : getFieldValue(row, column.field)
     const rendered = row
       ? column.renderCell
         ? column.renderCell({ value, row, rowIndex, column })
-        : column.editor === 'checkbox'
-          ? this.#renderCheckCell(line, columnIndex, column, value)
-          : this.#formatValue(column, value)
+        : value instanceof Map
+          ? // A tree parent's `tally` rollup: each value with its count, as the summary row draws it.
+            this.#formatAggregate(column, value, false)
+          : column.editor === 'checkbox'
+            ? this.#renderCheckCell(line, columnIndex, column, value)
+            : column.format === 'status'
+              ? this.#renderStatus(column, value)
+              : this.#formatValue(column, value)
       : undefined
     // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
     // module knows rows as the application gave them, not the interpolated copy an animated update draws.
@@ -2235,13 +2301,18 @@ export class Table extends LitElement {
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached
 
     const rows: TableRow[] = []
+    // The rows as given, which computed columns (`running`) are keyed by; `rows` may hold an animated update's copies.
+    const sources: TableRow[] = []
     for (let cursor = start; cursor < start + count; cursor++) {
       // The page is made of display lines, so while grouped its rows are those on the page's data lines.
       const index = pageScope ? this.#rowIndexAt(cursor) : cursor
       const row = this.#rowAt(index)
       // A row collapsing out during an animated update is already gone from the data, so it no longer counts. In a
       // tree only the leaves count: a parent's figures are its children's, and would be counted twice.
-      if (row && this.#animation?.states.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
+      if (row && this.#animation?.states.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) {
+        rows.push(row)
+        sources.push(this.#sourceRowAt(index) ?? row)
+      }
     }
     const values = new Map<string, unknown>()
     for (const column of columns) {
@@ -2250,12 +2321,12 @@ export class Table extends LitElement {
       // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
       else if (!aggregatable) continue
       else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           key,
           aggregate(
             column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
+            sources.map((row) => this.#cellValue(row, column)),
           ),
         )
     }
@@ -2279,11 +2350,7 @@ export class Table extends LitElement {
     let content: unknown
     if (column.renderSummary) content = column.renderSummary({ column, rows, value })
     else if (value !== undefined && value !== null && value !== '') {
-      // A count is a number of rows, not an amount: a currency or date column must not format it as one.
-      content =
-        column.summary === 'count' && !explicit
-          ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-          : this.#formatValue(column, value)
+      content = this.#formatAggregate(column, value, explicit)
     } else content = column.summaryLabel ?? ''
 
     const focused = this.focusedCell.row === SUMMARY_ROW && this.focusedCell.column >= index && this.focusedCell.column < index + span
@@ -2395,10 +2462,107 @@ export class Table extends LitElement {
     return this.focusedCell.row === rowIndex && this.focusedCell.column === columnIndex ? 0 : -1
   }
 
+  /**
+   * A summary or group value as its cell shows it. A count is a number of rows, not an amount: a currency or date
+   * column must not format it as one. A tally lists each value with its count, as a status where the column has them.
+   */
+  #formatAggregate(column: TableColumnConfig, value: unknown, explicit: boolean): unknown {
+    if (value instanceof Map) {
+      const order = (column.options ?? []).map((option) => String(typeof option === 'object' ? option.value : option))
+      const rank = (entry: unknown) => order.indexOf(String(entry)) + 1 || order.length + 1
+      const entries = [...value].sort(([a], [b]) => rank(a) - rank(b))
+      return html`<span class="tally"
+        >${entries.map(
+          ([entry, count]) =>
+            html`<span class="tally-entry"
+              >${column.format === 'status' ? this.#renderStatus(column, entry) : this.#formatValue(column, entry)}
+              <span class="tally-count">${count}</span></span
+            >`,
+        )}</span
+      >`
+    }
+    if (column.summary === 'count' && !explicit) return this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
+    return this.#formatValue(column, value)
+  }
+
+  /** A value of a `status` column: its mark, painted from its `options` entry, and its label. */
+  #renderStatus(column: TableColumnConfig, value: unknown) {
+    if (value === null || value === undefined || value === '') return ''
+    const option = optionOf(column, value)
+    const legend = typeof option === 'object' ? option : undefined
+    const label = this.#formatValue(column, value)
+    return html`<span
+      class="status"
+      part="status status-${String(value).replace(/[^\w-]/g, '-')}"
+      title=${this.msg.t('statusTitle', column.header ?? column.field, label)}
+      style=${styleMap(legend?.color ? { '--_status-color': legend.color } : {})}
+      ><span class=${legend?.glyph ? 'status-mark status-mark--glyph' : 'status-mark'} part="status-mark" aria-hidden="true">${legend?.glyph ?? nothing}</span
+      ><span class="status-label" part="status-label">${label}</span></span
+    >`
+  }
+
+  /**
+   * The value of a cell: its field, or what a computed column makes of the row. `row` is the row as given, which
+   * `running` totals are keyed by.
+   */
+  #cellValue(row: TableRow, column: TableColumnConfig): unknown {
+    if (column.running) return this.#runningTotals(column).get(row)
+    if (column.countValue !== undefined) {
+      const wanted = String(column.countValue)
+      let count = 0
+      for (const other of this.#statusColumns()) if (String(getFieldValue(row, other.field)) === wanted) count++
+      return count
+    }
+    return getFieldValue(row, column.field)
+  }
+
+  /**
+   * Every `status` column, hidden ones included: hiding a column changes what the table shows, not what a row's
+   * `count-value` counts. Kept until the column definitions change.
+   */
+  #statusColumns(): TableColumnConfig[] {
+    const source = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    if (this.#statusCache?.source !== source) this.#statusCache = { source, columns: source.filter((column) => column.format === 'status') }
+    return this.#statusCache.columns
+  }
+
+  /**
+   * A `running` column's total after each row, accumulated once over the rows in their sorted order whenever they or
+   * the column change. Not computed for a `dataSource`, which only holds the rows it has fetched.
+   */
+  #runningTotals(column: TableColumnConfig): Map<TableRow, number> {
+    const inputs = [this.#sortedRows, column.running, column.opening, this.dataSource]
+    const cached = this.#runningCache.get(column)
+    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.totals
+    const terms = (column.running ?? '')
+      .split(',')
+      .map((term) => term.trim())
+      .filter(Boolean)
+      .map((term) => (term.startsWith('-') ? { field: term.slice(1).trim(), sign: -1 } : { field: term.replace(/^\+/, '').trim(), sign: 1 }))
+    const totals = new Map<TableRow, number>()
+    let total = Number(column.opening) || 0
+    const rows = this.dataSource ? [] : this.#sortedRows
+    for (let index = 0; index < rows.length; index++) {
+      // In a tree only the leaves move the total: a parent's figures are its children's, and would count twice.
+      if (this.#tree?.nodes[index]?.children?.length) continue
+      const row = rows[index]
+      let moved = false
+      for (const { field, sign } of terms) {
+        const number = toNumber(getFieldValue(row, field))
+        if (!Number.isFinite(number)) continue
+        total += sign * number
+        moved = true
+      }
+      if (moved) totals.set(row, total)
+    }
+    this.#runningCache.set(column, { inputs, totals })
+    return totals
+  }
+
   #formatValue(column: TableColumnConfig, value: unknown): string {
     if (value === null || value === undefined || value === '') return ''
-    // A `select` column shows the label of its option.
-    const option = column.options?.find((entry) => (typeof entry === 'object' ? entry.value : entry) === value)
+    // A `select` or `status` column shows the label of its option.
+    const option = optionOf(column, value)
     if (option !== undefined) return typeof option === 'object' ? (option.label ?? String(option.value)) : String(option)
     const locale = column.locale
     const extra = column.formatOptions
@@ -2502,10 +2666,13 @@ export class Table extends LitElement {
                   columnKey(column),
                   typeof rollup === 'function'
                     ? rollup({ column, rows: node.leaves })
-                    : aggregate(
-                        rollup,
-                        node.leaves.map((leaf) => getFieldValue(leaf, column.field)),
-                      ),
+                    : column.running
+                      ? // A running total follows the order of the rows, which is only known once the tree is built.
+                        undefined
+                      : aggregate(
+                          rollup,
+                          node.leaves.map((leaf) => this.#cellValue(leaf, column)),
+                        ),
                 )
               }
             }
@@ -2823,12 +2990,12 @@ export class Table extends LitElement {
     const values = new Map<string, unknown>()
     for (const column of columns) {
       if (typeof column.summary === 'function') values.set(columnKey(column), column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           columnKey(column),
           aggregate(
             column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
+            rows.map((row) => this.#cellValue(row, column)),
           ),
         )
     }

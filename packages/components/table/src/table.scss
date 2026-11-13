@@ -94,6 +94,20 @@
     editor--font-size: 14px,
     editor--padding: 0 11px,
     editor--box-shadow: inset 0 0 0 2px rgb(2, 101, 220),
+    status--gap: 6px,
+    status-mark--background: #a1a1aa,
+    status-mark--size: 8px,
+    status-mark--border-radius: 999px,
+    status-mark__glyph--size: 18px,
+    status-mark__glyph--border-radius: 4px,
+    status-mark__glyph--color: #ffffff,
+    status-mark__glyph--font-size: 11px,
+    status-mark__glyph--font-weight: 700,
+    status-label--max-width: none,
+    tally--gap: 12px,
+    tally-label--max-width: 0,
+    tally-entry--gap: 4px,
+    tally-count--color: #71717a,
     pinned-start--box-shadow: 1px 0 0 0 #e4e4e7,
     pinned-end--box-shadow: -1px 0 0 0 #e4e4e7,
 
@@ -422,6 +436,72 @@
 
 .cell--align-end .editor {
   text-align: end;
+}
+
+// `format="status"`: a mark painted with the value's legend colour, and its label. A matrix of statuses can shrink the
+// label to nothing with `--c2-table__status-label--max-width: 0`: it stays in the accessibility tree.
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(status--gap);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.status-mark {
+  flex: none;
+  inline-size: css.cssVar(status-mark--size);
+  block-size: css.cssVar(status-mark--size);
+  border-radius: css.cssVar(status-mark--border-radius);
+  background: var(--_status-color, #{css.cssVar(status-mark--background)});
+}
+
+.status-mark--glyph {
+  display: inline-grid;
+  place-items: center;
+  inline-size: css.cssVar(status-mark__glyph--size);
+  block-size: css.cssVar(status-mark__glyph--size);
+  border-radius: css.cssVar(status-mark__glyph--border-radius);
+  color: css.cssVar(status-mark__glyph--color);
+  font-size: css.cssVar(status-mark__glyph--font-size);
+  font-weight: css.cssVar(status-mark__glyph--font-weight);
+  line-height: 1;
+}
+
+.status-label {
+  min-width: 0;
+  max-width: css.cssVar(status-label--max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// A `tally` summary: each value with its count.
+.tally {
+  display: inline-flex;
+  gap: css.cssVar(tally--gap);
+  min-width: 0;
+  overflow: hidden;
+}
+
+// A summary cell has one line: a tally shows each mark and its count, the labels kept for assistive technology.
+.tally .status {
+  gap: 0;
+}
+
+.tally .status-label {
+  max-width: css.cssVar(tally-label--max-width);
+}
+
+.tally-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(tally-entry--gap);
+}
+
+.tally-count {
+  color: css.cssVar(tally-count--color);
+  font-variant-numeric: tabular-nums;
 }
 
 // `wrap`: body rows grow to their content, so cells top-align, stop clipping and let their text break. The table turns

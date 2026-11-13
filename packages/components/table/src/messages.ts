@@ -3,6 +3,8 @@ import { defineMessages } from '@c2n/core/localize.js'
 const en = {
   /** Accessible name of the chevron that opens a row's detail panel. */
   detailToggle: 'Details',
+  /** Tooltip of a value of a `status` column: `{0}` is the column's header, `{1}` the value's label. */
+  statusTitle: (column: string, label: string) => `${column}: ${label}`,
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

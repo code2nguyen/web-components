@@ -8,7 +8,8 @@ export interface SortModel {
 
 export type ColumnAlign = 'start' | 'center' | 'end'
 export type ColumnPin = 'start' | 'end'
-export type ColumnFormat = 'text' | 'number' | 'percent' | 'currency' | 'date' | 'datetime' | 'time'
+/** `status` draws each value as a mark and a label from the column's `options`, the legend of the column. */
+export type ColumnFormat = 'text' | 'number' | 'percent' | 'currency' | 'date' | 'datetime' | 'time' | 'status'
 
 /** A row is any plain object; values are read by `field`, which may be a dotted path (`user.name`). */
 export type TableRow = Record<string, unknown>
@@ -30,8 +31,12 @@ export interface TableRowContext {
   key: string
 }
 
-/** Built-in aggregates of the summary row. `count` counts the rows whose value is neither empty nor null. */
-export type TableSummaryAggregate = 'sum' | 'avg' | 'min' | 'max' | 'count'
+/**
+ * Built-in aggregates of the summary row. `count` counts the rows whose value is neither empty nor null; `tally` counts
+ * the rows of each value (a `Map` of value to count, drawn as the column's statuses with their counts); `last` is the
+ * value of the last row that has one, such as the closing balance of a `running` column.
+ */
+export type TableSummaryAggregate = 'sum' | 'avg' | 'min' | 'max' | 'count' | 'tally' | 'last'
 
 export interface TableSummaryContext {
   column: TableColumnConfig
@@ -97,8 +102,11 @@ export type TableHeaderRenderer = (context: TableHeaderContext) => unknown
  */
 export type TableCellEditor = 'text' | 'number' | 'date' | 'select' | 'checkbox' | 'url'
 
-/** A choice of a `select` editor: a value, or the value and the label shown for it. The label is also what the cell shows. */
-export type TableCellOption = string | number | { value: unknown; label?: string }
+/**
+ * A value of the column's legend: a value, or the value and the label shown for it. The label is what the cell shows
+ * and what a `select` editor offers; with `format="status"`, `color` paints the value's mark and `glyph` is drawn in it.
+ */
+export type TableCellOption = string | number | { value: unknown; label?: string; color?: string; glyph?: string }
 
 /** What a custom editor (`renderEditor`) is drawn with. */
 export interface TableCellEditorContext extends TableCellContext {
@@ -242,6 +250,16 @@ export interface TableColumnConfig {
    * chevron and indentation. Defaults to the first column.
    */
   groupColumn?: boolean
+  /**
+   * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added
+   * up over the rows in the order they are sorted. Fields are comma-separated and a `-` subtracts one:
+   * `credit,-debit`. A row with none of them shows no value and leaves the total as it is.
+   */
+  running?: string
+  /** The value a `running` column starts from, such as an opening balance. Defaults to 0. */
+  opening?: number
+  /** Makes the column count, in each row, the cells of the `status` columns that hold this value. */
+  countValue?: string
   /** Makes the column's cells editable while the table is `editable`, with this editor. */
   editor?: TableCellEditor
   /** The choices of a `select` editor. The cell shows the label of its value. */

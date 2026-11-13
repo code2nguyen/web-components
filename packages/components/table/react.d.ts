@@ -76,6 +76,7 @@ declare module 'react' {
         'summary-align'?: Attribute
         'summary-span'?: Attribute
         'group-column'?: Attribute
+        'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
         options?: TableColumn['options'] | string
       }

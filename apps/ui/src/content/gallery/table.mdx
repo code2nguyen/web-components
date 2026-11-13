@@ -614,6 +614,87 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 
 </GalleryGrid>
 
+## Statuses and running balances
+
+`format="status"` draws each value of a column as a mark and a label from its `options`, the column's legend (`value`, `label`, `color`, `glyph`), so a grid of controls, skills or close tasks reads as a status matrix: windowed like any table, with its first column pinned. `summary="tally"` counts each status under its column, and a column with `count-value` counts the statuses of a row that hold one value. `running="credit,-debit"` makes a running total from `opening`, over the rows in their sorted order, and `summary="last"` closes it in the summary row: both are computed once when the rows change, never while scrolling.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Status matrix
+<style>
+  .compliance {
+    height: 320px;
+    width: 100%;
+    --c2-table__tally--gap: 8px;
+  }
+  .compliance::part(cell-failing) {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+<c2-table client:only="lit" class="compliance" row-key="id" rows='[{"id":"d1","device":"MacBook-014","owner":"Ada Lovelace","disk":"pass","firewall":"pass","patches":"fail","mdm":"pass"},{"id":"d2","device":"MacBook-027","owner":"Grace Hopper","disk":"fail","firewall":"pass","patches":"fail","mdm":"warn"},{"id":"d3","device":"Surface-003","owner":"Alan Turing","disk":"pass","firewall":"na","patches":"pass","mdm":"pass"},{"id":"d4","device":"ThinkPad-112","owner":"Radia Perlman","disk":"pass","firewall":"pass","patches":"warn","mdm":"pass"},{"id":"d5","device":"MacBook-031","owner":"Barbara Liskov","disk":"pass","firewall":"fail","patches":"pass","mdm":"pass"},{"id":"d6","device":"iPad-008","owner":"Katherine Johnson","disk":"na","firewall":"na","patches":"pass","mdm":"warn"}]'>
+  <c2-table-column field="device" header="Device" width="124px" pinned="start" summary-label="Totals"></c2-table-column>
+  <c2-table-column field="disk" header="Encryption" width="130px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="firewall" header="Firewall" width="140px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="patches" header="Patches" width="134px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="mdm" header="MDM" width="110px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column column-id="failing" header="Failing" width="80px" align="end" count-value="fail" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Skills matrix
+<style>
+  .skills {
+    height: 280px;
+    width: 100%;
+    --c2-table__status-label--max-width: 0;
+    --c2-table__status--gap: 0;
+    --c2-table__status-mark__glyph--size: 24px;
+    --c2-table__status-mark__glyph--border-radius: 6px;
+    --c2-table__status-mark__glyph--font-size: 12px;
+    --c2-table__cell--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<c2-table client:only="lit" class="skills" row-key="id" rows='[{"id":"ada","name":"Ada","lit":4,"css":3,"a11y":2,"perf":4,"sql":1,"ops":3},{"id":"grace","name":"Grace","lit":3,"css":4,"a11y":4,"perf":2,"sql":2,"ops":3},{"id":"alan","name":"Alan","lit":4,"css":2,"a11y":1,"perf":3,"sql":4,"ops":2},{"id":"radia","name":"Radia","lit":2,"css":3,"a11y":4,"perf":4,"sql":3,"ops":1},{"id":"barbara","name":"Barbara","lit":3,"css":4,"a11y":3,"perf":1,"sql":2,"ops":4}]'>
+  <c2-table-column field="name" header="Engineer" width="minmax(110px, 1fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="lit" header="Lit" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="css" header="CSS" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="a11y" header="A11y" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="perf" header="Perf" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="sql" header="SQL" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="ops" header="Ops" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Account statement
+<style>
+  .statement {
+    height: 320px;
+    width: 100%;
+    --c2-table__summary--font-weight: 700;
+  }
+  .statement::part(cell-balance),
+  .statement::part(summary-cell-balance) {
+    font-variant-numeric: tabular-nums;
+  }
+  .statement::part(cell-content-pending) {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    font-style: italic;
+  }
+</style>
+<c2-table client:only="lit" class="statement" row-key="id" sort="date:asc" rows='[{"id":"t1","date":"2026-11-01","memo":"Rent, Harbor Street office","debit":2400,"state":"posted"},{"id":"t2","date":"2026-11-03","memo":"Invoice INV-1042, Northwind","credit":5600,"state":"posted"},{"id":"t3","date":"2026-11-04","memo":"Cloud hosting","debit":318.4,"state":"posted"},{"id":"t4","date":"2026-11-06","memo":"Payroll","debit":3900,"state":"posted"},{"id":"t5","date":"2026-11-08","memo":"Invoice INV-1047, Lumen Works","credit":1250,"state":"posted"},{"id":"t6","date":"2026-11-10","memo":"Card authorisation, travel","pending":412,"state":"pending"}]'>
+  <c2-table-column field="date" header="Date" width="72px" format="date" format-options='{"month":"short","day":"numeric"}' summary-label="Closing balance" summary-span="2"></c2-table-column>
+  <c2-table-column field="memo" header="Description" width="minmax(130px, 2fr)"></c2-table-column>
+  <c2-table-column field="state" header="State" width="98px" format="status" options='[{"value":"posted","label":"Posted","color":"#16a34a"},{"value":"pending","label":"Pending","color":"#d97706"}]'></c2-table-column>
+  <c2-table-column field="pending" header="Pending" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column field="debit" header="Out" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column field="credit" header="In" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column column-id="balance" header="Balance" width="92px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' running="credit,-debit" opening="8250" summary="last"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
 ## Grouping
 
 `group-by` gathers the rows into collapsible groups, outermost level first: `group-by="region,status"` nests the statuses of each region. By default each group is a row of the grid — its label and row count in the first column, and under every column with a `summary` that figure for the group's rows, so subtotals line up with the totals row. `group-display="band"` draws a full-width band per group instead. The groups of the rows at the top of the view stay under the header while they scroll, a group's checkbox selects its rows, and `groups-collapsed` starts them closed. The table does not ship a "group by" picker: the last card builds one from a `c2-button-group` in the `toolbar` slot that sets `groupBy`.

@@ -76,6 +76,7 @@ declare module 'vue' {
         'summary-align'?: unknown
         'summary-span'?: unknown
         'group-column'?: unknown
+        'count-value'?: unknown
       }
     >
   }

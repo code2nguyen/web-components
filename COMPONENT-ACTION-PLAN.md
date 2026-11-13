@@ -79,8 +79,8 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low
 - **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
+- **table-split-1** · `c2-table` · not a candidates row: move grouping (`group-by`) and the tree (`children-field`), about 3.5 kB gzipped of the entry, out of a flat base class into a subclass. `c2-table` stays the full-featured subclass, so nothing breaks; the flat base ships under a new tag for apps that need no grouping. Decided on 2026-11-13 over lazy-loading them, which would flash a flat table and break server rendering. At the next major version the names swap (`c2-table` becomes the flat one), after a release that warns. After table-5, before table-6 · risk high
 
 ### New packages
 

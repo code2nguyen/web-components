@@ -135,12 +135,28 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
 
   /**
+   * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added up
+   * over the rows in their sorted order. Comma-separated, and a `-` subtracts a field: `running="credit,-debit"`. A row
+   * with none of them shows nothing and leaves the total as it is. Give the column a `column-id`; it needs no `field`.
+   */
+  @property({ type: String }) running?: string
+
+  /** The value a `running` column starts from, such as an opening balance. */
+  @property({ type: Number }) opening?: number
+
+  /** Makes the column count, in each row, the cells of the `status` columns that hold this value: the failing controls of a row. */
+  @property({ type: String, attribute: 'count-value' }) countValue?: string
+
+  /**
    * Makes the cells editable while the table is `editable`: `text`, `number`, `date`, `url` and `select` open one input
    * over the cell being edited, `checkbox` shows a checkbox in every cell and toggles it.
    */
   @property({ type: String }) editor?: TableCellEditor
 
-  /** The choices of the `select` editor, as JSON in the attribute: values, or `{ "value", "label" }` objects. The cell shows the label. */
+  /**
+   * The column's legend, as JSON in the attribute: values, or `{ "value", "label", "color", "glyph" }` objects. The cell
+   * shows the label, a `select` editor offers them, and `format="status"` paints each value's mark with its `color`.
+   */
   @property({ converter: jsonPropertyConverter }) options?: TableCellOption[]
 
   /** An empty value marks the cell invalid while the table is `editable`. */

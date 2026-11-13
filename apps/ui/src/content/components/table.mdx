@@ -95,6 +95,14 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="received" header="In" width="70px" align="center" editor="checkbox"></c2-table-column>
   </c2-table>
 </div>
+<div data-label="Statuses and balance">
+  <c2-table client:only="lit" class="grid" row-key="id" sort="date:asc" rows='[{"id":"1","date":"2026-11-01","memo":"Rent","debit":2400,"state":"posted"},{"id":"2","date":"2026-11-03","memo":"Invoice INV-1042","credit":5600,"state":"posted"},{"id":"3","date":"2026-11-04","memo":"Hosting","debit":318,"state":"posted"},{"id":"4","date":"2026-11-08","memo":"Invoice INV-1047","credit":1250,"state":"pending"}]'>
+    <c2-table-column field="date" header="Date" width="110px" format="date" summary-label="Closing"></c2-table-column>
+    <c2-table-column field="memo" header="Description" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="state" header="State" width="110px" format="status" options='[{"value":"posted","label":"Posted","color":"#16a34a"},{"value":"pending","label":"Pending","color":"#d97706"}]' summary="tally"></c2-table-column>
+    <c2-table-column column-id="balance" header="Balance" width="110px" align="end" format="currency" running="credit,-debit" opening="1000" summary="last"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Grouped">
   <c2-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
     <c2-table-column field="task" header="Task" width="2fr" min-width="140"></c2-table-column>
