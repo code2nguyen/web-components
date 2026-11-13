@@ -1072,6 +1072,103 @@ table.renderDetail = ({ row }) => html`<p class="server-note">${row.note}</p>`
 </c2-table>
 ```
 
+```html tag=MdxCodeBlock,label=Line items
+<style>
+  .line-items {
+    height: 340px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__footer--padding: 10px 12px;
+  }
+  .line-items .bar,
+  .line-items .totals {
+    display: flex;
+    align-items: center;
+    gap: 8px 16px;
+    width: 100%;
+  }
+  .line-items .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .line-items .totals {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .line-items .totals strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-table client:only="lit" class="line-items" data-table-example="line-items" editable row-key="id" group-by="section" rows='[{"id":"L1","section":"Hardware","product":"Standing desk frame","sku":"DSK-200","qty":2,"price":490,"discount":0,"tax":"std","total":980},{"id":"L2","section":"Hardware","product":"Monitor arm","sku":"ARM-31","qty":4,"price":89,"discount":10,"tax":"std","total":320.4},{"id":"L3","section":"Services","product":"Assembly and install","sku":"SVC-INS","qty":3,"price":120,"discount":0,"tax":"reduced","total":360}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Quote Q-2026-311</span>
+    <c2-button data-action="add">Add line</c2-button>
+  </div>
+  <c2-table-column field="product" header="Product" width="minmax(170px, 2fr)" editor="text" required></c2-table-column>
+  <c2-table-column field="section" header="Section" hidden></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="56px" align="end" format="number" editor="number" required></c2-table-column>
+  <c2-table-column field="price" header="Price" width="84px" align="end" format="currency" editor="number"></c2-table-column>
+  <c2-table-column field="discount" header="Disc. %" width="70px" align="end" format="number" editor="number"></c2-table-column>
+  <c2-table-column field="tax" header="Tax" width="92px" editor="select" options='[{"value":"std","label":"VAT 20%"},{"value":"reduced","label":"VAT 5.5%"},{"value":"zero","label":"Exempt"}]'></c2-table-column>
+  <c2-table-column field="total" header="Total" width="96px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column column-id="actions" header="" width="104px" align="end"></c2-table-column>
+  <div class="totals" slot="footer" aria-live="polite"></div>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Allocation
+<style>
+  .allocation {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__footer--padding: 10px 12px;
+  }
+  .allocation .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .allocation .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .allocation .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .allocation .remainder {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: light-dark(#b91c1c, #f87171);
+  }
+  .allocation .remainder[data-done] {
+    color: light-dark(#15803d, #4ade80);
+  }
+</style>
+<c2-table client:only="lit" class="allocation" data-table-example="allocation" data-amount="12000" editable row-key="id" rows='[{"id":"A1","account":"6100","department":"Sales","share":50,"amount":6000},{"id":"A2","account":"6100","department":"Support","share":30,"amount":3600},{"id":"A3","account":"6300","department":"Engineering","share":15,"amount":1800}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Invoice INV-8820 · $12,000</span>
+    <c2-button class="ghost" data-action="template">Headcount template</c2-button>
+    <c2-button class="ghost" data-action="even">Split evenly</c2-button>
+    <c2-button data-action="add">Add split</c2-button>
+  </div>
+  <c2-table-column field="account" header="Account" width="minmax(150px, 2fr)" editor="select" required options='[{"value":"6100","label":"6100 \u00b7 Rent"},{"value":"6300","label":"6300 \u00b7 Utilities"},{"value":"6500","label":"6500 \u00b7 Software"}]' summary-label="Total"></c2-table-column>
+  <c2-table-column field="department" header="Department" width="minmax(120px, 1fr)" editor="text" required></c2-table-column>
+  <c2-table-column field="share" header="Share %" width="90px" align="end" format="number" format-options='{"maximumFractionDigits":2}' editor="number" summary="sum" summary-target="100"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="110px" align="end" format="currency" editor="number" summary="sum" summary-target="12000"></c2-table-column>
+  <span class="remainder" slot="footer" aria-live="polite"></span>
+</c2-table>
+```
+
 </GalleryGrid>
 
 "Timesheet grid" edits hours with a `c2-duration-input` (type `1h 30m`, `90m` or `1:30`), recomputes each row's total with `rowRule`, flags a missing day on a workday with `validate`, locks approved and submitted rows with `isCellEditable`, and splits the week total into regular and overtime hours. "Journal entry" keeps a line to a debit or a credit (typing one clears the other) and enables Post only once the entry balances:
@@ -1095,6 +1192,25 @@ journal.addEventListener('rows-change', ({ detail }) => {
   const difference = sum(detail.rows, 'debit') - sum(detail.rows, 'credit')
   post.disabled = difference !== 0
 })
+```
+
+"Line items" looks products up with a `c2-autocomplete` as the editor and fills the SKU, price and tax code from the pick in `rowRule`; the row's buttons are a `renderCell`, and the tax block in the footer is the app's own, recomputed on `rows-change`. "Allocation" keeps percent and amount in step both ways with a `rowRule`, and `summary-target` marks a total that misses 100% or the invoice amount:
+
+```html tag=CodeBlock
+<c2-table-column field="share" format="number" editor="number" summary="sum" summary-target="100"></c2-table-column>
+<c2-table-column field="amount" format="currency" editor="number" summary="sum" summary-target="12000"></c2-table-column>
+```
+
+```ts tag=CodeBlock
+const total = 12000
+const cents = (value: number) => Math.round(value * 100) / 100
+
+allocation.rowRule = ({ row, field }) =>
+  field === 'share'
+    ? { ...row, amount: cents((total * row.share) / 100) }
+    : field === 'amount'
+      ? { ...row, share: cents((row.amount / total) * 100) }
+      : row
 ```
 
 ## States

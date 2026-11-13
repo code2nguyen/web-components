@@ -5,6 +5,8 @@ const en = {
   detailToggle: 'Details',
   /** Tooltip of a value of a `status` column: `{0}` is the column's header, `{1}` the value's label. */
   statusTitle: (column: string, label: string) => `${column}: ${label}`,
+  /** Said after a summary that misses its `summary-target`, `{0}` being the target as the column formats it. */
+  summaryOffTarget: (target: string) => `should be ${target}`,
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

@@ -73,6 +73,7 @@ declare module 'react' {
         'cell-class'?: Attribute
         'cell-slot'?: Attribute
         'summary-label'?: Attribute
+        'summary-target'?: Attribute
         'summary-align'?: Attribute
         'summary-span'?: Attribute
         'group-column'?: Attribute

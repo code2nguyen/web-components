@@ -73,6 +73,7 @@ declare module 'vue' {
         'cell-class'?: unknown
         'cell-slot'?: unknown
         'summary-label'?: unknown
+        'summary-target'?: unknown
         'summary-align'?: unknown
         'summary-span'?: unknown
         'group-column'?: unknown

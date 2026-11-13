@@ -171,3 +171,22 @@ test('weekday and timeZoneName add to the default date style; year, month and da
   await expect(table(page).locator('[part~="cell-day"]')).toHaveText('Tue, Nov 3, 2026')
   await expect(table(page).locator('[part~="cell-zone"]')).toHaveText(/Nov 3, 2026, 12:00\sPM UTC/)
 })
+
+test('summary-target marks a total that misses its target, and says what it should be', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:220px;width:420px" row-key="id" aria-label="Split" rows='[{"id":"a","dept":"Sales","share":0.6},{"id":"b","dept":"Support","share":0.3}]'>
+  <c2-table-column field="dept" header="Department" width="200px" summary-label="Total"></c2-table-column>
+  <c2-table-column field="share" header="Share" width="120px" align="end" format="percent" locale="en-US" summary="sum" summary-target="1"></c2-table-column>
+</c2-table>`)
+  const total = table(page).locator('[part~="summary-cell-share"]')
+  await expect(total).toHaveAttribute('part', /\bsummary-cell-off-target\b/)
+  await expect(total).toHaveAttribute('title', 'should be 100%')
+  await expect(total).toHaveCSS('color', 'rgb(211, 21, 16)')
+  // Said once, as the cell's description: its name stays the figure.
+  await expect(table(page).getByRole('gridcell', { name: '90%', exact: true })).toHaveAccessibleDescription('should be 100%')
+
+  await table(page).evaluate((element: HTMLElement & { rows: Record<string, unknown>[] }) => {
+    element.rows = element.rows.map((row) => (row.id === 'b' ? { ...row, share: 0.4 } : row))
+  })
+  await expect(total).not.toHaveAttribute('part', /off-target/)
+  await expect(total).not.toHaveAttribute('title', /.+/)
+})

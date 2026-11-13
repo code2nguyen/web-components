@@ -529,6 +529,7 @@ export interface Table {
  * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
  * @csspart summary-row - The totals row kept at the bottom of the grid.
  * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
+ * @csspart summary-cell-off-target - A summary cell whose value misses its column's `summary-target`; exposed in addition to `summary-cell`.
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
  * @csspart group-row - Every group row. Also `group-row-level-<n>` (0 for the outermost level), `group-band` with `group-display="band"`, and `group-row-echo` on a copy kept under the header.
  * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
@@ -644,6 +645,7 @@ export interface Table {
  * @cssproperty {color} [--c2-table__summary--color=#18181b]
  * @cssproperty {font-size} [--c2-table__summary--font-size=14px]
  * @cssproperty {font-weight} [--c2-table__summary--font-weight=600]
+ * @cssproperty {color} [--c2-table__summary__off-target--color=rgb(211, 21, 16)] - Text of a summary that misses its `summary-target`.
  * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
  *
  * @cssproperty {color} [--c2-table__group-row--background=#fafafa]
@@ -2355,18 +2357,29 @@ export class Table extends LitElement {
 
     const focused = this.focusedCell.row === SUMMARY_ROW && this.focusedCell.column >= index && this.focusedCell.column < index + span
     const part = key.replace(/[^\w-]/g, '-')
+    // A total that must reach a value, such as shares adding up to 100%: off target, the cell is marked and says so.
+    const target = column.summaryTarget
+    // Compared as the cell shows them, so 33.33 + 33.33 + 33.34 is on target and a total that reads `100` is never flagged.
+    const off =
+      target !== undefined &&
+      target !== null &&
+      typeof value === 'number' &&
+      this.#formatAggregate(column, value, explicit) !== this.#formatAggregate(column, target, explicit)
+    const offText = off ? this.msg.t('summaryOffTarget', String(this.#formatAggregate(column, target, explicit))) : undefined
     return html`
       <div
         class=${classMap({
           cell: true,
           'cell--summary': true,
+          'cell--off-target': off,
           [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true,
           'cell--selection': column.field === SELECTION_FIELD,
           ...this.#pinClasses(column, pins),
           ...(column.cellClass ? { [column.cellClass]: true } : {}),
         })}
         role="gridcell"
-        part="summary-cell summary-cell-${part}"
+        part="summary-cell summary-cell-${part}${off ? ' summary-cell-off-target' : ''}"
+        title=${ifDefined(offText)}
         aria-colindex=${index + 1}
         aria-colspan=${ifDefined(span > 1 ? span : undefined)}
         tabindex=${focused ? 0 : -1}

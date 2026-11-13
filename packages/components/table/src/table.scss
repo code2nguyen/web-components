@@ -60,6 +60,7 @@
     summary--color: #18181b,
     summary--font-size: 14px,
     summary--font-weight: 600,
+    summary__off-target--color: rgb(211, 21, 16),
     summary--box-shadow: 0 -1px 0 0 #e4e4e7,
     group-row--background: #fafafa,
     group-row--color: #18181b,
@@ -399,6 +400,10 @@
 .cell--invalid {
   background: css.cssVar(cell__invalid--background);
   box-shadow: css.cssVar(cell__invalid--box-shadow);
+}
+
+.row--summary .cell--off-target {
+  color: css.cssVar(summary__off-target--color);
 }
 
 .cell-error {

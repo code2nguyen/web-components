@@ -110,6 +110,12 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Text shown in the column's summary cell when it has no value, such as `Total`. */
   @property({ type: String, attribute: 'summary-label' }) summaryLabel?: string
 
+  /**
+   * The value the summary must reach, such as `1` for a `percent` column whose rows must add up to 100%: while the
+   * summary is another number, its cell is marked (`summary-cell-off-target`) and says what it should be.
+   */
+  @property({ type: Number, attribute: 'summary-target' }) summaryTarget?: number
+
   /** Alignment of the summary cell. Defaults to `align`. */
   @property({ type: String, attribute: 'summary-align' }) summaryAlign?: ColumnAlign
 

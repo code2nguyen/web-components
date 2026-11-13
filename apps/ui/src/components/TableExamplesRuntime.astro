@@ -9,8 +9,11 @@
   import type { Table, TableRow } from '@c2n/components/table'
   import type { TableColumn } from '@c2n/components/table/table-column'
   import type { DurationInput } from '@c2n/components/duration-input'
+  import type { Autocomplete } from '@c2n/components/autocomplete'
   import '@c2n/components/table'
   import '@c2n/components/duration-input'
+  import '@c2n/components/autocomplete'
+  import '@c2n/components/button'
 
   // Each region's countries add up to the figures the region shows before it is opened, so the rollup agrees.
   const countries: Record<string, TableRow[]> = {
@@ -64,25 +67,28 @@
     table.rowPart = ({ row }) => (row.status === 'draft' ? undefined : 'row-locked')
     // One editor element per edit, kept while the table re-renders so the text typed so far stays. An edit that ended
     // took its element out of the page, so a disconnected one belongs to an earlier edit.
-    let editor: { row: TableRow; column: string; input: DurationInput } | undefined
+    let editor: { row: TableRow; column: string; input: DurationInput; setDraft(value: unknown): void } | undefined
     for (const day of DAYS) {
       const column = table.querySelector<TableColumn>(`c2-table-column[field="${day}"]`)!
       column.renderEditor = ({ row, draft, setDraft, column }) => {
-        if (!editor?.input.isConnected || editor.row !== row || editor.column !== column.field) {
-          const input = document.createElement('c2-duration-input')
-          input.setAttribute('largest-unit', 'h')
-          input.setAttribute('aria-label', `${column.header} hours`)
-          // Fills the cell: no radius, a 2px ring for the border, and neither the icon nor the `= 1 hour` preview, which
-          // a day column has no room for (the row total shows the result).
-          input.style.cssText =
-            'flex: 1; min-width: 0; --c2-duration-input--min-height: 100%; --c2-duration-input--border-radius: 0; --c2-duration-input__value--padding: 0 8px; --c2-duration-input__icon--size: 0px; --c2-duration-input__preview--font-size: 0px; --c2-duration-input__value--gap: 0px; --c2-duration-input__focus--border: 2px solid var(--c2-theme--color-primary, #0265dc)'
-          input.value = typeof draft === 'number' ? Math.round(draft * 3600) : null
-          const read = () => setDraft(input.value === null ? null : input.value / 3600)
-          input.addEventListener('input', read)
-          input.addEventListener('change', read)
-          editor = { row, column: column.field, input }
+        if (editor?.input.isConnected && editor.row === row && editor.column === column.field) {
+          // The same edit drawn again: its listeners report to the context of this call.
+          editor.setDraft = setDraft
+          return editor.input
         }
-        return editor.input
+        const input = document.createElement('c2-duration-input')
+        input.setAttribute('largest-unit', 'h')
+        input.setAttribute('aria-label', `${column.header} hours`)
+        // Fills the cell: no radius, a 2px ring for the border, and neither the icon nor the `= 1 hour` preview, which
+        // a day column has no room for (the row total shows the result).
+        input.style.cssText =
+          'flex: 1; min-width: 0; --c2-duration-input--min-height: 100%; --c2-duration-input--border-radius: 0; --c2-duration-input__value--padding: 0 8px; --c2-duration-input__icon--size: 0px; --c2-duration-input__preview--font-size: 0px; --c2-duration-input__value--gap: 0px; --c2-duration-input__focus--border: 2px solid var(--c2-theme--color-primary, #0265dc)'
+        input.value = typeof draft === 'number' ? Math.round(draft * 3600) : null
+        const read = () => editor?.setDraft(input.value === null ? null : input.value / 3600)
+        input.addEventListener('input', read)
+        input.addEventListener('change', read)
+        editor = { row, column: column.field, input, setDraft }
+        return input
       }
       // Pasted `7:30` or `1h 30m` reads as hours too.
       column.parseValue = (text) => {
@@ -112,6 +118,157 @@
       table.acceptChanges()
       void table.validate()
     })
+  }
+
+  const PRODUCTS = [
+    { name: 'Standing desk frame', sku: 'DSK-200', price: 490, tax: 'std' },
+    { name: 'Desk top, oak 160 cm', sku: 'TOP-160', price: 310, tax: 'std' },
+    { name: 'Monitor arm', sku: 'ARM-31', price: 89, tax: 'std' },
+    { name: 'Cable tray', sku: 'CBL-07', price: 24, tax: 'std' },
+    { name: 'Assembly and install', sku: 'SVC-INS', price: 120, tax: 'reduced' },
+    { name: 'Ergonomic assessment', sku: 'SVC-ERG', price: 180, tax: 'zero' },
+  ]
+  const TAX: Record<string, { label: string; rate: number }> = {
+    std: { label: 'VAT 20%', rate: 0.2 },
+    reduced: { label: 'VAT 5.5%', rate: 0.055 },
+    zero: { label: 'Exempt', rate: 0 },
+  }
+
+  /** A small button for a row's own actions, made as a node: a renderer's output sits in the table's shadow root. */
+  function rowButton(label: string, text: string, onClick: () => void) {
+    const button = document.createElement('c2-button')
+    button.setAttribute('aria-label', label)
+    button.textContent = text
+    button.style.cssText = [
+      '--c2-button__container--height: 26px',
+      '--c2-button__container--padding-left: 7px',
+      '--c2-button__container--padding-right: 7px',
+      '--c2-button__container--background-color: transparent',
+      '--c2-button__container--color: var(--c2-theme--color-on-surface-variant, #52525b)',
+      '--c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5)',
+      '--c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff))',
+    ].join(';')
+    button.addEventListener('click', onClick)
+    return button
+  }
+
+  /** The line items editor: a product lookup, a computed line total, sections, row actions and the tax block. */
+  function lineItems(table: Table) {
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+    const total = (row: TableRow) => Math.round(amount(row.qty) * amount(row.price) * (1 - amount(row.discount) / 100) * 100) / 100
+    // Picking a product fills its SKU, price and tax code; any change recomputes the line total.
+    table.rowRule = ({ row, field, value }) => {
+      const product = field === 'product' ? PRODUCTS.find((entry) => entry.name === value) : undefined
+      const next = product ? { ...row, sku: product.sku, price: product.price, tax: product.tax, qty: row.qty ?? 1 } : row
+      return { ...next, total: total(next) }
+    }
+    let lookup: { row: TableRow; input: Autocomplete; setDraft(value: unknown): void; commit(value: unknown): void } | undefined
+    table.querySelector<TableColumn>('c2-table-column[field="product"]')!.renderEditor = ({ row, draft, setDraft, commit }) => {
+      if (lookup?.input.isConnected && lookup.row === row) {
+        // The same edit drawn again: its listeners report to the context of this call.
+        Object.assign(lookup, { setDraft, commit })
+      } else {
+        const input = document.createElement('c2-autocomplete')
+        input.setAttribute('aria-label', 'Product')
+        input.setAttribute('label-field', 'name')
+        input.setAttribute('description-field', 'sku')
+        input.suggestions = PRODUCTS
+        input.value = String(draft ?? '')
+        input.style.cssText = 'flex: 1; min-width: 0'
+        input.addEventListener('input', () => lookup?.setDraft(input.value))
+        input.addEventListener('suggestion-select', (event) => lookup?.commit((event as CustomEvent<{ item: { name: string } }>).detail.item.name))
+        lookup = { row, input, setDraft, commit }
+      }
+      return lookup.input
+    }
+    // Each line moves within its section or goes: the table's own methods, called from the row's buttons.
+    // The lines of a section need not sit next to each other in `rows` (a line added later is at the end): swap with
+    // the neighbour the section shows.
+    const move = (row: TableRow, step: number) => {
+      const rows = [...table.rows]
+      const section = rows.filter((entry) => entry.section === row.section)
+      const neighbour = section[section.indexOf(row) + step]
+      if (!neighbour) return
+      const from = rows.indexOf(row)
+      const to = rows.indexOf(neighbour)
+      ;[rows[from], rows[to]] = [rows[to], rows[from]]
+      table.rows = rows
+    }
+    table.querySelector<TableColumn>('c2-table-column[column-id="actions"]')!.renderCell = ({ row }) => {
+      const box = document.createElement('span')
+      box.style.cssText = 'display: inline-flex; gap: 2px'
+      box.append(
+        rowButton(`Move ${row.product || 'line'} up`, '↑', () => move(row, -1)),
+        rowButton(`Move ${row.product || 'line'} down`, '↓', () => move(row, 1)),
+        rowButton(`Remove ${row.product || 'line'}`, '✕', () => void table.deleteRows([row])),
+      )
+      return box
+    }
+    const footer = table.querySelector<HTMLElement>('.totals')!
+    const update = () => {
+      const subtotal = table.rows.reduce((sum, row) => sum + amount(row.total), 0)
+      const taxes = new Map<string, number>()
+      for (const row of table.rows) taxes.set(String(row.tax), (taxes.get(String(row.tax)) ?? 0) + amount(row.total) * (TAX[String(row.tax)]?.rate ?? 0))
+      footer.replaceChildren()
+      const line = (text: string, strong = false) => {
+        const element = document.createElement(strong ? 'strong' : 'span')
+        element.textContent = text
+        footer.append(element)
+      }
+      line(`Subtotal ${money.format(subtotal)}`)
+      for (const [code, tax] of taxes) if (tax) line(`${TAX[code]?.label ?? code} ${money.format(tax)}`)
+      line(`Total ${money.format(subtotal + [...taxes.values()].reduce((sum, tax) => sum + tax, 0))}`, true)
+    }
+    table.addEventListener('rows-change', update)
+    update()
+    let next = 4
+    action(table, 'add')?.addEventListener('click', () =>
+      table.addRow({ id: `L${next++}`, section: 'Hardware', product: '', qty: 1, discount: 0, tax: 'std', total: 0 }),
+    )
+  }
+
+  /** The allocation editor: percent and amount kept in step both ways, and both totals must reach their target. */
+  function allocation(table: Table) {
+    const whole = Number(table.dataset.amount)
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+    const round = (value: number) => Math.round(value * 100) / 100
+    table.rowRule = ({ row, field }) =>
+      field === 'share'
+        ? { ...row, amount: round((whole * amount(row.share)) / 100) }
+        : field === 'amount'
+          ? { ...row, share: round((amount(row.amount) / whole) * 100) }
+          : row
+    const remainder = table.querySelector<HTMLElement>('.remainder')!
+    const update = () => {
+      const left = round(whole - table.rows.reduce((sum, row) => sum + amount(row.amount), 0))
+      remainder.toggleAttribute('data-done', left === 0)
+      remainder.textContent = left === 0 ? 'Fully allocated' : left > 0 ? `${money.format(left)} left to allocate` : `${money.format(-left)} over the invoice`
+    }
+    table.addEventListener('rows-change', update)
+    update()
+    // Splitting evenly gives the last line the cents the others round away, so the total is exact.
+    const spread = (template: number[]) => {
+      const rows = table.rows
+      // Lines beyond the template get no share.
+      const weights = rows.map((_, index) => template[index] ?? 0)
+      const sum = weights.reduce((total, weight) => total + weight, 0)
+      let given = 0
+      let shared = 0
+      table.rows = rows.map((row, index) => {
+        const last = index === rows.length - 1
+        const value = last ? round(whole - given) : round((whole * weights[index]) / sum)
+        const share = last ? round(100 - shared) : round((value / whole) * 100)
+        given += value
+        shared += share
+        return { ...row, amount: value, share }
+      })
+      update()
+    }
+    action(table, 'even')?.addEventListener('click', () => spread(table.rows.map(() => 1)))
+    // A saved template: the shares by headcount, applied to the lines as they are.
+    action(table, 'template')?.addEventListener('click', () => spread([12, 7, 21]))
+    let next = 4
+    action(table, 'add')?.addEventListener('click', () => table.addRow({ id: `A${next++}`, account: null, department: '', share: 0, amount: 0 }))
   }
 
   /** The journal entry: a line is a debit or a credit, and Post waits until the entry balances. */
@@ -152,6 +309,8 @@
       if (table.dataset.tableExample === 'editable') editableGrid(table)
       if (table.dataset.tableExample === 'timesheet') timesheet(table)
       if (table.dataset.tableExample === 'journal') journal(table)
+      if (table.dataset.tableExample === 'line-items') lineItems(table)
+      if (table.dataset.tableExample === 'allocation') allocation(table)
       if (table.dataset.tableExample === 'row-detail') {
         // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
         table.renderDetail = ({ row }) => {

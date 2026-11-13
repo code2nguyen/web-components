@@ -232,6 +232,11 @@ export interface TableColumnConfig {
   summaryLabel?: string
   /** Alignment of the summary cell. Defaults to the column's `align`. */
   summaryAlign?: ColumnAlign
+  /**
+   * The value the column's summary must reach, such as 100 for percentages that must add up: while the summary is
+   * another number, its cell is marked (`summary-cell-off-target`) and says what it should be.
+   */
+  summaryTarget?: number
   /** Number of columns the summary cell spans, starting at this one. The spanned columns' summaries are not shown. */
   summarySpan?: number
   /** Renders the summary cell body instead of the formatted value. */
