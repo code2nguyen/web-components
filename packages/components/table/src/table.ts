@@ -61,6 +61,7 @@ import '@c2n/checkbox'
 import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
 import type { EditTrigger, TableEditing } from './table-editing.js'
+import type { RowsAnimation } from './table-animation.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -81,8 +82,6 @@ interface PinPlacement {
   offset: number
   edge: boolean
 }
-
-type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modified'
 
 const HEADER_ROW = -1
 /** Row index of the summary row in `focusedCell`; body rows are numbered from 0 and the header is `HEADER_ROW`. */
@@ -272,47 +271,6 @@ function humanize(field: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
-  const prototype = Object.getPrototypeOf(value)
-  return prototype === Object.prototype || prototype === null
-}
-
-/**
- * Builds the transient value shown during a row update. Target shape and non-numeric values win immediately; finite
- * numbers are the only values with a meaningful generic interpolation, including numbers nested in arrays/objects.
- */
-function interpolateValue(from: unknown, to: unknown, progress: number): unknown {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to)) return from + (to - from) * progress
-  if (Array.isArray(from) && Array.isArray(to)) return to.map((value, index) => interpolateValue(from[index], value, progress))
-  if (isRecord(from) && isRecord(to)) return Object.fromEntries(Object.entries(to).map(([key, value]) => [key, interpolateValue(from[key], value, progress)]))
-  return to
-}
-
-function hasNumericChange(from: unknown, to: unknown): boolean {
-  if (typeof from === 'number' && typeof to === 'number') return Number.isFinite(from) && Number.isFinite(to) && from !== to
-  if (Array.isArray(from) && Array.isArray(to)) return to.some((value, index) => hasNumericChange(from[index], value))
-  if (isRecord(from) && isRecord(to)) return Object.entries(to).some(([key, value]) => hasNumericChange(from[key], value))
-  return false
-}
-
-function firstNumericDelta(from: unknown, to: unknown): number | undefined {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to) && from !== to) return to - from
-  if (Array.isArray(from) && Array.isArray(to)) {
-    for (let index = 0; index < to.length; index++) {
-      const delta = firstNumericDelta(from[index], to[index])
-      if (delta !== undefined) return delta
-    }
-  }
-  if (isRecord(from) && isRecord(to)) {
-    for (const [key, value] of Object.entries(to)) {
-      const delta = firstNumericDelta(from[key], value)
-      if (delta !== undefined) return delta
-    }
-  }
-  return undefined
-}
-
 /** Events fired by {@link Table}, keyed for `addEventListener`. */
 export interface TableEventMap {
   'selection-change': CustomEvent<TableSelectionChangeEventDetail>
@@ -388,7 +346,8 @@ export interface Table {
  * added rows expand in and deleted rows collapse out. Nested numbers in arrays and objects animate too, so a custom
  * `renderCell` such as a sparkline receives the same transient row as the formatted cells around it. Add
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
- * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
+ * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected. The
+ * code loads once `animate-updates` is set; a snapshot assigned before it arrives waits for it, so it animates too.
  *
  * **Row keys.** Selection, `value` and events name a row by its key: the `row-key` field of the row (or
  * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
@@ -907,11 +866,11 @@ export class Table extends LitElement {
   /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
   #pagers = new WeakSet<EventTarget>()
   #pendingScrollTop = false
-  #animationFrom = new Map<string, TableRow>()
-  #animationProgress = 1
-  #animationFrame?: number
-  #transitionRows?: TableRow[]
-  #rowUpdateStates = new Map<string, RowUpdateState>()
+  /** The realtime update code (`animate-updates`) once loaded, and its load while it is on the way. */
+  #animation?: RowsAnimation
+  #animationLoad?: Promise<RowsAnimation>
+  /** `rows` was replaced before that code arrived: the update waits for it rather than skip the animation. */
+  #awaitAnimation = false
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
   #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
@@ -968,7 +927,7 @@ export class Table extends LitElement {
   get rowCount(): number {
     const lines = this.#grouping()?.items.length ?? this.#treeLines()?.length
     if (lines !== undefined) return this.paginated ? Math.max(0, Math.min(this.pageSize, lines - this.#pageStart)) : lines
-    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
+    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#animation?.transitionRows?.length ?? this.totalRows)
     const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
     if (!this.dataSource) return onPage
     // Once the page is in it is the truth; before that the arithmetic gives the right number of skeleton rows.
@@ -1322,9 +1281,39 @@ export class Table extends LitElement {
     this.requestUpdate()
   }
 
+  #loadAnimation(): Promise<RowsAnimation> {
+    this.#animationLoad ??= import('./table-animation.js').then(({ RowsAnimation }) => {
+      this.#animation = new RowsAnimation({
+        table: this,
+        keyAt: (index, row) => this.#keyAt(index, row),
+        sortRows: (rows) => this.#sortRows(rows),
+        hasIdentity: () => this.#hasRowIdentity,
+      })
+      return this.#animation
+    })
+    return this.#animationLoad
+  }
+
+  override requestUpdate(...args: Parameters<LitElement['requestUpdate']>) {
+    if (args[0] === 'rows' && this.hasUpdated && this.animateUpdates && !this.#animation) this.#awaitAnimation = true
+    super.requestUpdate(...args)
+  }
+
+  /** A snapshot that comes before the realtime code is held for it, so it animates like every later one. */
+  protected override scheduleUpdate(): void | Promise<unknown> {
+    if (!this.#awaitAnimation) return super.scheduleUpdate()
+    this.#awaitAnimation = false
+    return this.#loadAnimation().then(
+      () => super.scheduleUpdate(),
+      () => super.scheduleUpdate(),
+    )
+  }
+
   protected override willUpdate(changed: PropertyValues) {
-    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
-    if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
+    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#animation?.cancel()
+    // Loaded with `animate-updates`, before the first snapshot comes, rather than on it.
+    if (this.animateUpdates) void this.#loadAnimation()
+    if (changed.has('rows')) this.#animation?.prepare(changed.get('rows'))
     const regroup = changed.has('groupBy') || changed.has('dataSource')
     // A tree's keys, rollups and loaded children depend on these too; a flat table does not look at them.
     const retree = changed.has('childrenField') || (this.childrenField && (changed.has('rowKey') || changed.has('getRowKey')))
@@ -1845,7 +1834,7 @@ export class Table extends LitElement {
     const detailColumn = row && this.#detail ? columns.find((column) => column.field !== SELECTION_FIELD) : undefined
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
-    const updateState = key ? this.#rowUpdateStates.get(key) : undefined
+    const updateState = key ? this.#animation?.states.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
     const extraParts = row && updateState !== 'removed' ? this.rowPart?.({ row, rowIndex: index, key }) : undefined
 
@@ -2078,7 +2067,7 @@ export class Table extends LitElement {
     if (!keys?.length || !this.#detail) return NO_LINES
     const count = this.rowCount
     const first = this.#pageStart
-    const inputs = [keys, this.#sortedRows, this.#transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
+    const inputs = [keys, this.#sortedRows, this.#animation?.transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
     const cached = this.#detailCache
     if (cached && inputs.every((input, index) => input === cached.inputs[index])) return cached.lines
     const wanted = new Set(keys)
@@ -2226,7 +2215,7 @@ export class Table extends LitElement {
     // presented as a total. Its page, once loaded, is complete; otherwise the server's figures come in `summaryValues`.
     const aggregatable = !this.dataSource || (pageScope && this.paginated)
     const start = pageScope ? this.#pageStart : 0
-    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#transitionRows ?? this.#sortedRows).length
+    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#animation?.transitionRows ?? this.#sortedRows).length
     const inputs = [
       columns.length,
       ...columns.map((column) => column.summary),
@@ -2234,8 +2223,8 @@ export class Table extends LitElement {
       this.columns,
       this.summaryValues,
       this.#sortedRows,
-      this.#transitionRows,
-      this.#animationProgress,
+      this.#animation?.transitionRows,
+      this.#animation?.progress,
       this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
       pageScope ? this.#grouping()?.items : undefined,
       pageScope ? this.#treeLines() : undefined,
@@ -2252,7 +2241,7 @@ export class Table extends LitElement {
       const row = this.#rowAt(index)
       // A row collapsing out during an animated update is already gone from the data, so it no longer counts. In a
       // tree only the leaves count: a parent's figures are its children's, and would be counted twice.
-      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
+      if (row && this.#animation?.states.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
     }
     const values = new Map<string, unknown>()
     for (const column of columns) {
@@ -2442,17 +2431,15 @@ export class Table extends LitElement {
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
-    const row = (this.#transitionRows ?? this.#sortedRows)[index]
-    if (!row || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-    const from = this.#animationFrom.get(this.#keyAt(index, row))
-    return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
+    const row = (this.#animation?.transitionRows ?? this.#sortedRows)[index]
+    return row && this.#animation ? this.#animation.rowAt(index, row) : row
   }
 
   /** The row at `index` as the application gave it: `#rowAt` without the interpolation of an animated update. */
   #sourceRowAt(index: number): TableRow | undefined {
     if (index < 0) return undefined
     if (this.dataSource) return this.#rowAt(index)
-    return (this.#transitionRows ?? this.#sortedRows)[index]
+    return (this.#animation?.transitionRows ?? this.#sortedRows)[index]
   }
 
   #keyAt(index: number, row: TableRow): string {
@@ -2693,7 +2680,7 @@ export class Table extends LitElement {
     if (!this.groupBy?.length || this.#tree) return undefined
     const levels = this.#groupLevels()
     if (this.dataSource || !levels.length) return undefined
-    const source = this.#transitionRows ?? this.#sortedRows
+    const source = this.#animation?.transitionRows ?? this.#sortedRows
     const treeInputs = [source, this.groupBy, this.sortModel, this.columnElements, this.columns, this.rowKey, this.getRowKey]
     const itemInputs = [this.expandedGroups, this.groupsCollapsed]
     const cached = this.#groupingCache
@@ -2977,97 +2964,6 @@ export class Table extends LitElement {
     })
   }
 
-  #prepareRowsAnimation(previous: unknown) {
-    const displayedPrevious = Array.isArray(previous)
-      ? previous.map((row, index) => {
-          if (!isRecord(row) || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-          const from = this.#animationFrom.get(this.#keyAt(index, row))
-          return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
-        })
-      : previous
-    this.#cancelRowsAnimation()
-    if (
-      !this.hasUpdated ||
-      !this.animateUpdates ||
-      // A tree is not animated: its rows are matched by their place in the flattened tree, which `rows` does not hold.
-      this.childrenField ||
-      this.updateDuration <= 0 ||
-      !Array.isArray(displayedPrevious) ||
-      !Array.isArray(this.rows) ||
-      typeof requestAnimationFrame === 'undefined' ||
-      (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)
-    ) {
-      return
-    }
-
-    const previousByKey = new Map<string, TableRow>()
-    displayedPrevious.forEach((row, index) => {
-      if (isRecord(row)) previousByKey.set(this.#keyAt(index, row), row)
-    })
-    const nextKeys = new Set(this.rows.map((row, index) => this.#keyAt(index, row)))
-    const previousKeys = new Set(previousByKey.keys())
-    const hasAdded = this.rows.some((row, index) => !previousKeys.has(this.#keyAt(index, row)))
-    const hasRemoved = displayedPrevious.some((row, index) => isRecord(row) && !nextKeys.has(this.#keyAt(index, row)))
-    const hasModified = this.rows.some((row, index) => hasNumericChange(previousByKey.get(this.#keyAt(index, row)), row))
-    if (!hasAdded && !hasRemoved && !hasModified) return
-
-    this.#animationFrom = previousByKey
-    this.#animationProgress = 0
-    this.rows.forEach((row, index) => {
-      const key = this.#keyAt(index, row)
-      const from = previousByKey.get(key)
-      if (!from) {
-        this.#rowUpdateStates.set(key, 'added')
-        return
-      }
-      if (!hasNumericChange(from, row)) return
-      const watchedFrom = this.updateHighlightField ? getFieldValue(from, this.updateHighlightField) : from
-      const watchedTo = this.updateHighlightField ? getFieldValue(row, this.updateHighlightField) : row
-      const delta = firstNumericDelta(watchedFrom, watchedTo)
-      this.#rowUpdateStates.set(key, delta === undefined ? 'modified' : delta > 0 ? 'increased' : 'decreased')
-    })
-
-    // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
-    // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.#hasRowIdentity && !this.paginated && !this.childrenField) {
-      const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
-      const transitionRows = [...this.#sortRows(this.rows)]
-      previousRows.forEach((row, index) => {
-        const key = this.#keyAt(index, row)
-        if (nextKeys.has(key)) return
-        transitionRows.splice(Math.min(index, transitionRows.length), 0, row)
-        this.#rowUpdateStates.set(key, 'removed')
-      })
-      this.#transitionRows = transitionRows
-    }
-
-    let started: number | undefined
-    const draw = (now: number) => {
-      started ??= now
-      const progress = Math.min(1, (now - started) / this.updateDuration)
-      this.#animationProgress = 1 - Math.pow(1 - progress, 3)
-      this.requestUpdate()
-      if (progress < 1) this.#animationFrame = requestAnimationFrame(draw)
-      else {
-        this.#animationFrame = undefined
-        this.#animationFrom.clear()
-        this.#transitionRows = undefined
-        this.#rowUpdateStates.clear()
-        this.requestUpdate()
-      }
-    }
-    this.#animationFrame = requestAnimationFrame(draw)
-  }
-
-  #cancelRowsAnimation() {
-    if (this.#animationFrame !== undefined) cancelAnimationFrame(this.#animationFrame)
-    this.#animationFrame = undefined
-    this.#animationFrom.clear()
-    this.#animationProgress = 1
-    this.#transitionRows = undefined
-    this.#rowUpdateStates.clear()
-  }
-
   #resetRemote() {
     this.#requestToken++
     this.#blocks.clear()
@@ -3147,7 +3043,7 @@ export class Table extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.#cancelRowsAnimation()
+    this.#animation?.cancel()
     this.removeEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
   }
 
