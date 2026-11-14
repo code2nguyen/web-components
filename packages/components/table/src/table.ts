@@ -532,6 +532,7 @@ export interface Table {
  * @cssproperty {time} [--c2-table__group-toggle--transition-duration=150ms] - Chevron turn when a group opens or closes; respects reduced motion.
  *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
+ * @cssproperty {pixel} [--c2-table__bulk-selection-cell--width=64px] - The checkbox column with `bulk-select`, which holds the caret of the selection menu too.
  *
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
  * @cssproperty {border-radius} [--c2-table__skeleton--border-radius=4px]
@@ -2419,7 +2420,8 @@ export class Table extends LitElement {
     const selectionColumn: TableColumnConfig = {
       field: SELECTION_FIELD,
       header: '',
-      width: 'var(--c2-table__selection-cell--width, 44px)',
+      // With `bulk-select` the column holds the caret too.
+      width: this.bulkSelect ? 'var(--c2-table__bulk-selection-cell--width, 64px)' : 'var(--c2-table__selection-cell--width, 44px)',
       minWidth: 32,
       align: 'center',
       pinned: 'start',
