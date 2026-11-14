@@ -274,6 +274,28 @@ export interface TableColumnConfig {
    * `cell-variance` part. A cell whose baseline is 0 is marked on any change.
    */
   varianceThreshold?: number
+  /**
+   * Makes the column a series: it stands for one column per key of the object in this field of the rows, such as the
+   * readings of a flowsheet keyed by their time (`{ "2026-11-14T08:00": 82 }`). Every key found in the rows becomes a
+   * column, in order, with the other settings of this one. Assign `rows` again after adding a key.
+   */
+  series?: string
+  /** Keys a `series` column always shows, even with no row holding a value: the next reading's time. */
+  seriesKeys?: string[]
+  /** Order of a `series` column's keys: `asc` (the default) or `desc`, newest first for times. */
+  seriesOrder?: 'asc' | 'desc'
+  /** How a `series` column writes each key as its header: `datetime` (the default), `date`, `time` or `text`. */
+  seriesFormat?: ColumnFormat
+  /**
+   * Flags a cell outside its row's normal range, as a lab result is: `low,high`, each a number or the field of the row
+   * that holds it (`ref_low,ref_high`). Either may be empty. The cell gets the `cell-flag-low` or `cell-flag-high` part
+   * and an `L` or `H` mark.
+   */
+  referenceRange?: string
+  /** Flags a cell past its row's critical limits the same way: `cell-flag-critical-low`, `cell-flag-critical-high`. */
+  criticalRange?: string
+  /** For one column of a `series`: its key in the series object. Set by the table. */
+  seriesKey?: string
   /** Makes the column's cells editable while the table is `editable`, with this editor. */
   editor?: TableCellEditor
   /** The choices of a `select` editor. The cell shows the label of its value. */
@@ -406,6 +428,9 @@ export interface TableFilterChangeEventDetail {
 
 /** How a column compares each cell with the matching row of `baseline`: the change as a number or a share. */
 export type TableCompare = 'delta' | 'percent'
+
+/** Where a cell stands against its row's `reference-range` and `critical-range`. */
+export type TableCellFlag = 'low' | 'high' | 'critical-low' | 'critical-high'
 
 export interface TableRowsResult {
   rows: TableRow[]

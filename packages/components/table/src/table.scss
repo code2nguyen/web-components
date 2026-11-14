@@ -97,6 +97,14 @@
     delta--color: #71717a,
     delta__up--color: #166534,
     delta__down--color: #b91c1c,
+    flag--font-size: 11px,
+    flag--font-weight: 600,
+    flag__low--color: rgb(2, 101, 220),
+    flag__high--color: #b91c1c,
+    flag__critical--color: #ffffff,
+    flag__critical--background: #b91c1c,
+    cell__flag--background: rgba(185, 28, 28, 0.08),
+    cell__critical--background: rgba(185, 28, 28, 0.16),
     cell__variance--background: rgba(217, 119, 6, 0.16),
     cell__variance--box-shadow: inset 3px 0 0 0 #d97706,
     status--gap: 6px,
@@ -850,4 +858,47 @@
   .group-toggle {
     transition: none;
   }
+}
+
+// A value outside its row's `reference-range` (`L`, `H`) or `critical-range` (`LL`, `HH`), as a lab report marks it.
+.flag {
+  margin-inline-start: 4px;
+  padding: 0 3px;
+  border-radius: 4px;
+  font-size: css.cssVar(flag--font-size);
+  font-weight: css.cssVar(flag--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.cell--flag-low .flag {
+  color: css.cssVar(flag__low--color);
+}
+
+.cell--flag-high .flag {
+  color: css.cssVar(flag__high--color);
+}
+
+.cell--flag-low,
+.cell--flag-high {
+  background: css.cssVar(cell__flag--background);
+}
+
+.cell--flag-critical-low,
+.cell--flag-critical-high {
+  background: css.cssVar(cell__critical--background);
+
+  .flag {
+    color: css.cssVar(flag__critical--color);
+    background: css.cssVar(flag__critical--background);
+  }
+}
+
+// The mark's name, for a screen reader: the letter is drawn, the word is read.
+.flag-name {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -97,7 +97,7 @@ declare module 'react' {
         expandedDetails?: Table['expandedDetails'] | string
         baseline?: Table['baseline'] | string
       }
-      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {
+      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'seriesKeys' | 'options'> & {
         'column-id'?: Attribute
         'min-width'?: Attribute
         'format-options'?: Attribute
@@ -109,8 +109,14 @@ declare module 'react' {
         'summary-span'?: Attribute
         'group-column'?: Attribute
         'variance-threshold'?: Attribute
+        'series-keys'?: Attribute
+        'series-order'?: Attribute
+        'series-format'?: Attribute
+        'reference-range'?: Attribute
+        'critical-range'?: Attribute
         'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
+        seriesKeys?: TableColumn['seriesKeys'] | string
         options?: TableColumn['options'] | string
       }
     }

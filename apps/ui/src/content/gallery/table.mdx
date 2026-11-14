@@ -350,6 +350,43 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
 
 </GalleryGrid>
 
+## Flowsheets
+
+A flowsheet is a measure per row and a time per column. `series="readings"` on one column stands for a column per key of each row's `readings` object, in time order, headed by the time in `series-format`; `series-order="desc"` puts the newest first and `series-keys` adds an empty column for the next reading. `reference-range="low,high"` flags a value outside the row's normal range with `H` or `L`, and `critical-range` with `HH` or `LL`; each limit is a number or the field of the row that holds it. In a `c2-group-table`, `group-by` folds the measures into collapsible groups.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Vitals flowsheet
+<style>
+  .flowsheet {
+    height: 400px;
+    width: 100%;
+  }
+</style>
+<c2-group-table client:only="lit" class="flowsheet" row-key="id" group-by="system" rows='[{"id":"hr","system":"Vital signs","measure":"Heart rate","unit":"bpm","low":60,"high":100,"critLow":40,"critHigh":140,"readings":{"2026-11-14T06:00":78,"2026-11-14T10:00":84,"2026-11-14T14:00":104,"2026-11-14T18:00":118,"2026-11-14T22:00":96}},{"id":"sbp","system":"Vital signs","measure":"Systolic BP","unit":"mmHg","low":90,"high":140,"critLow":70,"critHigh":180,"readings":{"2026-11-14T06:00":128,"2026-11-14T10:00":134,"2026-11-14T14:00":146,"2026-11-14T18:00":152,"2026-11-14T22:00":138}},{"id":"spo2","system":"Vital signs","measure":"SpO₂","unit":"%","low":94,"critLow":88,"readings":{"2026-11-14T06:00":97,"2026-11-14T10:00":96,"2026-11-14T14:00":93,"2026-11-14T18:00":86,"2026-11-14T22:00":92}},{"id":"temp","system":"Vital signs","measure":"Temperature","unit":"°C","low":36.1,"high":37.8,"critHigh":39.5,"readings":{"2026-11-14T06:00":36.8,"2026-11-14T10:00":37.4,"2026-11-14T14:00":38.2,"2026-11-14T18:00":38.9,"2026-11-14T22:00":38.1}},{"id":"na","system":"Chemistry","measure":"Sodium","unit":"mmol/L","low":135,"high":145,"critLow":120,"critHigh":160,"readings":{"2026-11-14T06:00":139,"2026-11-14T14:00":136,"2026-11-14T22:00":133}},{"id":"k","system":"Chemistry","measure":"Potassium","unit":"mmol/L","low":3.5,"high":5.1,"critLow":2.8,"critHigh":6.2,"readings":{"2026-11-14T06:00":4.1,"2026-11-14T14:00":5.4,"2026-11-14T22:00":6.4}},{"id":"cr","system":"Chemistry","measure":"Creatinine","unit":"mg/dL","low":0.6,"high":1.2,"readings":{"2026-11-14T06:00":0.9,"2026-11-14T14:00":1.3,"2026-11-14T22:00":1.6}},{"id":"wbc","system":"Hematology","measure":"WBC","unit":"10⁹/L","low":4,"high":11,"readings":{"2026-11-14T06:00":9.8,"2026-11-14T14:00":12.4,"2026-11-14T22:00":14.1}},{"id":"hb","system":"Hematology","measure":"Hemoglobin","unit":"g/dL","low":12,"high":16,"critLow":7,"readings":{"2026-11-14T06:00":12.8,"2026-11-14T14:00":11.6,"2026-11-14T22:00":11.1}}]'>
+  <c2-table-column field="measure" header="Measure" width="minmax(130px, 1fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="unit" header="Unit" width="80px"></c2-table-column>
+  <c2-table-column series="readings" series-format="time" series-keys="2026-11-15T02:00" width="96px" align="end" reference-range="low,high" critical-range="critLow,critHigh"></c2-table-column>
+</c2-group-table>
+```
+
+```html tag=MdxCodeBlock,label=Lab results
+<style>
+  .lab-results {
+    height: 220px;
+    width: 100%;
+    --c2-table__cell__flag--background: transparent;
+  }
+</style>
+<c2-table client:only="lit" class="lab-results" row-key="id" rows='[{"id":"glu","test":"Glucose","unit":"mg/dL","low":70,"high":99,"results":{"2026-11-03T08:00":92,"2026-11-07T08:00":118,"2026-11-11T08:00":131,"2026-11-14T08:00":104}},{"id":"a1c","test":"HbA1c","unit":"%","high":5.6,"results":{"2026-11-03T08:00":5.4,"2026-11-11T08:00":5.9}},{"id":"ldl","test":"LDL cholesterol","unit":"mg/dL","high":129,"results":{"2026-11-03T08:00":96,"2026-11-14T08:00":142}},{"id":"tsh","test":"TSH","unit":"mIU/L","low":0.4,"high":4,"results":{"2026-11-07T08:00":0.3,"2026-11-14T08:00":0.9}}]'>
+  <c2-table-column field="test" header="Test" width="minmax(140px, 1fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="unit" header="Unit" width="80px"></c2-table-column>
+  <c2-table-column series="results" series-format="date" series-order="desc" format-options='{"maximumFractionDigits":1}' format="number" width="110px" align="end" reference-range="low,high"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
 ## Realtime updates
 
 `animate-updates` belongs to the table, so a feed assigns only its next real snapshot—even when it adds, deletes and

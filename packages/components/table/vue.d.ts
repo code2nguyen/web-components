@@ -116,6 +116,11 @@ declare module 'vue' {
         'summary-span'?: unknown
         'group-column'?: unknown
         'variance-threshold'?: unknown
+        'series-keys'?: unknown
+        'series-order'?: unknown
+        'series-format'?: unknown
+        'reference-range'?: unknown
+        'critical-range'?: unknown
         'count-value'?: unknown
       }
     >

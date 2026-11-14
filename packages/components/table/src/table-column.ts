@@ -1,7 +1,7 @@
 import { LitElement, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './table-column.scss?inline'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import type {
   ColumnAlign,
   ColumnFormat,
@@ -155,6 +155,32 @@ export class TableColumn extends LitElement implements TableColumnConfig {
    * `cell-variance` part. A cell whose baseline is 0 is marked on any change.
    */
   @property({ type: Number, attribute: 'variance-threshold' }) varianceThreshold?: number
+
+  /**
+   * Makes the column a series of columns, one per key of the object in this field of the rows, such as a flowsheet's
+   * readings keyed by their time (`{ "2026-11-14T08:00": 82 }`). Each takes this column's other settings, and its
+   * header is the key written in `series-format`. Assign `rows` again after a reading at a new time is added.
+   */
+  @property({ type: String }) series?: string
+
+  /** Keys a `series` column always shows, `;`-separated: an empty column for the next reading. */
+  @property({ converter: arrayPropertyConverter, attribute: 'series-keys' }) seriesKeys?: string[]
+
+  /** Order of a `series` column's keys: `asc` (the default) or `desc`, newest first. */
+  @property({ type: String, attribute: 'series-order' }) seriesOrder?: 'asc' | 'desc'
+
+  /** How a `series` column writes its keys as headers: `datetime` (the default), `date`, `time` or `text`. */
+  @property({ type: String, attribute: 'series-format' }) seriesFormat?: ColumnFormat
+
+  /**
+   * Flags a value outside its row's normal range: `low,high`, each a number or the field of the row that holds it
+   * (`ref_low,ref_high`), either one may be empty. The cell gets the `cell-flag-low` / `cell-flag-high` part and an
+   * `L` or `H` mark, as a lab report shows.
+   */
+  @property({ type: String, attribute: 'reference-range' }) referenceRange?: string
+
+  /** Flags a value past its row's critical limits the same way (`cell-flag-critical-low`, `cell-flag-critical-high`). */
+  @property({ type: String, attribute: 'critical-range' }) criticalRange?: string
 
   /**
    * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added up

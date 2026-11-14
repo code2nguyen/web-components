@@ -30,6 +30,7 @@ import {
   type TableCellEventDetail,
   type TableCellOption,
   type TableChanges,
+  type TableCellFlag,
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
   type TableFilterChangeEventDetail,
@@ -89,6 +90,53 @@ const NO_LINES: number[] = []
 const FINDABLE = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype
 
 export type TableSummaryScope = 'all' | 'page'
+
+/** Orders series keys that are not times: `Visit 2` before `Visit 10`. */
+const NATURAL = new Intl.Collator(undefined, { numeric: true })
+
+/** A key that is a date or a time: `2026-11-14`, `2026-11-14T08:00`. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}(?:$|T)/
+
+/** A series key as a date. A date alone is midnight where the page is, not in UTC, so its header shows that day. */
+function seriesDate(key: string): Date {
+  const [year, month, day] = key.slice(0, 10).split('-').map(Number)
+  return key.length === 10 ? new Date(year, month - 1, day) : new Date(key)
+}
+
+/** What a `series` column hands each of the columns it stands for. */
+const SERIES_SETTINGS = [
+  'width',
+  'minWidth',
+  'align',
+  'format',
+  'formatOptions',
+  'currency',
+  'locale',
+  'sortable',
+  'resizable',
+  'cellClass',
+  'renderCell',
+  'renderHeader',
+  'summary',
+  'summaryAlign',
+  'summaryLabel',
+  'summaryTarget',
+  'renderSummary',
+  'cellSlot',
+  'rollup',
+  'comparator',
+  'filterable',
+  'compare',
+  'varianceThreshold',
+  'referenceRange',
+  'criticalRange',
+  'editor',
+  'options',
+  'required',
+  'validate',
+  'renderEditor',
+  'parseValue',
+] as const satisfies readonly (keyof TableColumnConfig)[]
 
 const FUNNEL = html`<svg
   viewBox="0 0 24 24"
@@ -298,6 +346,11 @@ export interface Table {
  * payroll run: a column with `compare="delta"` (or `percent`) shows each cell's change, the previous value as its
  * tooltip, and `variance-threshold="0.1"` marks a cell that moved by more than 10% (`cell-variance`).
  *
+ * **Flowsheets.** A column with `series="readings"` stands for one column per key of each row's `readings` object, such
+ * as the times of a patient's observations, in time order (`series-order="desc"` for newest first, `series-keys` for an
+ * empty column waiting for the next reading). `reference-range="low,high"` flags a value outside its row's normal range
+ * with `L` or `H`, and `critical-range` with `LL` or `HH`: each limit is a number or the row field holding it.
+ *
  * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
  * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
  * reads as a status matrix; `summary="tally"` counts each status under its column, and a column with `count-value`
@@ -364,6 +417,8 @@ export interface Table {
  * @csspart filter-button - The filter button of a `filterable` column's header. Also `filter-button-active` while the column is filtered.
  * @csspart filter - The popover of a column's filter: its values with their counts, the sort buttons and Clear.
  * @csspart delta - A cell's change from the `baseline` (`compare`). Also `delta-up`, `delta-down` or `delta-flat`.
+ * @csspart flag - The mark of a value outside its row's range. Also `flag-low`, `flag-high`, `flag-critical-low` or `flag-critical-high`.
+ * @csspart cell-flag - A body cell with a flag; exposed in addition to `cell`, with `cell-flag-low`, `cell-flag-high`, `cell-flag-critical-low` or `cell-flag-critical-high`.
  * @csspart cell-variance - A body cell whose change from the `baseline` passes its column's `variance-threshold`; exposed in addition to `cell`.
  * @csspart status - A value of a `status` column: its mark and label. Also `status-<value>`, so one value can be styled.
  * @csspart status-mark - The dot, or the square holding the `glyph`, of a status.
@@ -465,6 +520,14 @@ export interface Table {
  * @cssproperty {color} [--c2-table__delta__down--color=#b91c1c]
  * @cssproperty {color} [--c2-table__cell__variance--background=rgba(217, 119, 6, 0.16)] - A cell past its column's `variance-threshold`.
  * @cssproperty {box-shadow} [--c2-table__cell__variance--box-shadow=inset 3px 0 0 0 #d97706]
+ * @cssproperty {font-size} [--c2-table__flag--font-size=11px] - The `L`/`H` mark of a value outside its row's `reference-range`.
+ * @cssproperty {font-weight} [--c2-table__flag--font-weight=600]
+ * @cssproperty {color} [--c2-table__flag__low--color=rgb(2, 101, 220)]
+ * @cssproperty {color} [--c2-table__flag__high--color=#b91c1c]
+ * @cssproperty {color} [--c2-table__flag__critical--color=#ffffff] - The `LL`/`HH` mark of a value past the `critical-range`.
+ * @cssproperty {color} [--c2-table__flag__critical--background=#b91c1c]
+ * @cssproperty {color} [--c2-table__cell__flag--background=rgba(185, 28, 28, 0.08)] - A cell flagged low or high.
+ * @cssproperty {color} [--c2-table__cell__critical--background=rgba(185, 28, 28, 0.16)] - A cell flagged critical.
  * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
  * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
  * @cssproperty {pixel} [--c2-table__status-mark--size=8px] - The dot of a status without a `glyph`.
@@ -750,6 +813,8 @@ export class Table extends LitElement {
   #filterLoad?: Promise<TableFilter>
   #baselineCache?: { inputs: unknown[]; rows: Map<string, TableRow> }
   #baselineWarned = false
+  #seriesWarned = false
+  #seriesCache = new WeakMap<TableColumnConfig, { inputs: unknown[]; columns: TableColumnConfig[] }>()
   /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
   #editing?: TableEditing
   #editingLoad?: Promise<TableEditing>
@@ -844,13 +909,67 @@ export class Table extends LitElement {
 
   /** The resolved, ordered, visible columns — children first, then the `columns` property, then one per key of the first row. */
   get resolvedColumns(): TableColumnConfig[] {
-    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
+    const declared: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
+    const source = declared.some((column) => column.series)
+      ? declared.flatMap((column) => (column.series && !column.hidden ? this.#seriesColumns(column) : [column]))
+      : declared
     const visible = source.filter((column) => columnKey(column) && !column.hidden)
     return [
       ...visible.filter((column) => column.pinned === 'start'),
       ...visible.filter((column) => !column.pinned),
       ...visible.filter((column) => column.pinned === 'end'),
     ]
+  }
+
+  /**
+   * The columns a `series` column stands for: one per key of the object in its field, across the rows, with its other
+   * settings. Kept until the rows or the column change, so a column keeps its identity between renders.
+   */
+  #seriesColumns(column: TableColumnConfig): TableColumnConfig[] {
+    const series = column.series!
+    const inputs = [
+      this.rows,
+      series,
+      columnKey(column),
+      column.seriesKeys,
+      column.seriesOrder,
+      column.seriesFormat,
+      ...SERIES_SETTINGS.map((name) => column[name]),
+    ]
+    const cached = this.#seriesCache.get(column)
+    if (cached?.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.columns
+    const keys = new Set(column.seriesKeys ?? [])
+    if (this.dataSource && !this.#seriesWarned) {
+      // A data source hands over a window of rows: the columns cannot wait for every key to arrive.
+      console.warn('c2-table: a `series` column takes its keys from `rows`; with a `dataSource`, list them in `series-keys`.')
+      this.#seriesWarned = true
+    }
+    for (const row of Array.isArray(this.rows) ? this.rows : []) {
+      const values = getFieldValue(row, series)
+      if (values && typeof values === 'object' && !Array.isArray(values)) for (const key of Object.keys(values)) keys.add(key)
+    }
+    // ISO dates and times in time order, anything else in natural order (`2` before `10`).
+    const time = (key: string) => (ISO_DATE.test(key) ? seriesDate(key).getTime() : Number.NaN)
+    const ordered = [...keys].sort((a, b) => {
+      const [first, second] = [time(a), time(b)]
+      return Number.isNaN(first) || Number.isNaN(second) ? NATURAL.compare(a, b) : first - second
+    })
+    if (column.seriesOrder === 'desc') ordered.reverse()
+    const settings = Object.fromEntries(SERIES_SETTINGS.map((name) => [name, column[name]])) as Partial<TableColumnConfig>
+    const prefix = columnKey(column) || series
+    const headerFormat: TableColumnConfig = { field: '', format: column.seriesFormat ?? 'datetime', locale: column.locale }
+    const columns = ordered.map((key): TableColumnConfig => ({
+      ...settings,
+      id: `${prefix}:${key}`,
+      // A key with a dot cannot be a field path: such a column shows its values but does not sort or edit.
+      field: key.includes('.') ? '' : `${series}.${key}`,
+      ...(key.includes('.') ? { sortable: false } : {}),
+      series,
+      seriesKey: key,
+      header: this.formatValue(headerFormat, ISO_DATE.test(key) ? seriesDate(key) : key),
+    }))
+    this.#seriesCache.set(column, { inputs, columns })
+    return columns
   }
 
   /**
@@ -1688,7 +1807,7 @@ export class Table extends LitElement {
     const id = columnKey(column)
     const value = level?.rollup?.has(id)
       ? level.rollup.get(id)
-      : row && (column.running || column.countValue !== undefined)
+      : row && (column.running || column.countValue !== undefined || column.seriesKey !== undefined)
         ? this.cellValue(this.#sourceRowAt(rowIndex) ?? row, column)
         : getFieldValue(row, column.field)
     const rendered = row
@@ -1705,6 +1824,7 @@ export class Table extends LitElement {
       : undefined
     // A column comparing with `baseline` shows each cell's change, and marks a change past its threshold.
     const versus = row && this.baseline && (column.compare || column.varianceThreshold !== undefined) ? this.#versus(rowIndex, row, column, value) : undefined
+    const flag = row && (column.referenceRange || column.criticalRange) ? this.#flagOf(this.#sourceRowAt(rowIndex) ?? row, column, value) : undefined
     // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
     // module knows rows as the application gave them, not the interpolated copy an animated update draws.
     const editing = row ? this.#editing : undefined
@@ -1719,8 +1839,8 @@ export class Table extends LitElement {
       : row
         ? column.cellSlot
           ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-          : versus?.delta !== undefined
-            ? html`${rendered}${versus.delta}`
+          : versus?.delta !== undefined || flag
+            ? html`${rendered}${flag?.mark}${versus?.delta}`
             : rendered
         : html`<span class="skeleton" part="skeleton"></span>`
 
@@ -1730,8 +1850,9 @@ export class Table extends LitElement {
     return html`
       <div
         class=${
-          state || editor || versus?.over
+          state || editor || versus?.over || flag
             ? classMap({
+                [`cell--flag-${flag?.flag}`]: Boolean(flag),
                 ...classes,
                 'cell--editing': Boolean(editor),
                 'cell--dirty': Boolean(state?.dirty),
@@ -1741,7 +1862,7 @@ export class Table extends LitElement {
             : shared.class
         }
         role="gridcell"
-        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}${flag ? ` cell-flag cell-flag-${flag.flag}` : ''}"
         aria-colindex=${columnIndex + 1}
         aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
         title=${ifDefined(state?.error)}
@@ -1816,6 +1937,54 @@ export class Table extends LitElement {
     return { delta, over }
   }
 
+  /**
+   * Where a cell stands against its row's `critical-range`, then its `reference-range`, and the mark it shows: the
+   * short letter a lab report prints (`H`, `L`), its name for a screen reader and the range as its tooltip.
+   */
+  #flagOf(row: TableRow, column: TableColumnConfig, value: unknown): { flag: TableCellFlag; mark: unknown } | undefined {
+    const number = toNumber(value)
+    if (!Number.isFinite(number)) return undefined
+    const [criticalLow, criticalHigh] = this.#limits(row, column.criticalRange)
+    const [low, high] = this.#limits(row, column.referenceRange)
+    const flag: TableCellFlag | undefined =
+      criticalLow !== undefined && number < criticalLow
+        ? 'critical-low'
+        : criticalHigh !== undefined && number > criticalHigh
+          ? 'critical-high'
+          : low !== undefined && number < low
+            ? 'low'
+            : high !== undefined && number > high
+              ? 'high'
+              : undefined
+    if (!flag) return undefined
+    const [letter, name] = {
+      low: ['flagLow', 'flagLowName'],
+      high: ['flagHigh', 'flagHighName'],
+      'critical-low': ['flagCriticalLow', 'flagCriticalLowName'],
+      'critical-high': ['flagCriticalHigh', 'flagCriticalHighName'],
+    }[flag] as ['flagLow', 'flagLowName']
+    const limit = (bound: number | undefined) => (bound === undefined ? '' : this.formatValue(column, bound))
+    const range = low === undefined && high === undefined ? '' : `${limit(low)}–${limit(high)}`
+    const label = this.msg.t(name)
+    const mark = html`<span class="flag" part="flag flag-${flag}" title=${range ? this.msg.t('flagRange', label, range) : label}
+      ><span aria-hidden="true">${this.msg.t(letter)}</span><span class="flag-name">${label}</span></span
+    >`
+    return { flag, mark }
+  }
+
+  /** The two limits of a range attribute (`low,high`): each a number, or the field of the row that holds one. */
+  #limits(row: TableRow, range?: string): [number | undefined, number | undefined] {
+    if (!range) return [undefined, undefined]
+    const [low, high] = range.split(',').map((part) => {
+      const text = part.trim()
+      if (!text) return undefined
+      const literal = Number(text)
+      const number = Number.isFinite(literal) ? literal : toNumber(getFieldValue(row, text))
+      return Number.isFinite(number) ? number : undefined
+    })
+    return [low, high]
+  }
+
   /** Whether `column` has a filter in its header: its own `filterable`, else the table's. */
   #isFilterable(column: TableColumnConfig): boolean {
     if (column.field === SELECTION_FIELD || !(column.filterable ?? this.filterable)) return false
@@ -1885,7 +2054,8 @@ export class Table extends LitElement {
     if (!filters || this.dataSource) return undefined
     const active = Object.entries(filters).filter(([id, filter]) => id !== skip && (filter?.include?.length || filter?.exclude?.length))
     if (!active.length) return undefined
-    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    // The columns a `series` stands for are found among the resolved ones; a hidden column, among the declared ones.
+    const source: TableColumnConfig[] = [...this.resolvedColumns, ...(this.columnElements.length ? this.columnElements : (this.columns ?? []))]
     const tests = active.map(([id, filter]) => ({
       column: source.find((column) => columnKey(column) === id) ?? { field: id },
       include: filter.include?.length ? new Set(filter.include) : undefined,
@@ -2139,7 +2309,7 @@ export class Table extends LitElement {
       // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
       else if (!aggregatable) continue
       else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
-      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined || column.seriesKey !== undefined))
         values.set(
           key,
           aggregate(
@@ -2336,6 +2506,8 @@ export class Table extends LitElement {
    */
   protected cellValue(row: TableRow, column: TableColumnConfig): unknown {
     if (column.running) return this.#runningTotals(column).get(row)
+    if (column.seriesKey !== undefined && !column.field)
+      return (getFieldValue(row, column.series ?? '') as Record<string, unknown> | undefined)?.[column.seriesKey]
     if (column.countValue !== undefined) {
       const wanted = String(column.countValue)
       let count = 0
