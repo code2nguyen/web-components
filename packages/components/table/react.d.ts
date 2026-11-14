@@ -17,6 +17,7 @@ import type { Flowsheet } from '@c2n/table/flowsheet.js'
 import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
+import type { TreeTable } from '@c2n/table/tree-table.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -28,18 +29,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-flowsheet': Omit<
         C2Props<Flowsheet>,
-        | 'observations'
-        | 'times'
-        | 'groupBy'
-        | 'expandedGroups'
-        | 'expandedRows'
-        | 'rows'
-        | 'columns'
-        | 'value'
-        | 'sortModel'
-        | 'summaryValues'
-        | 'expandedDetails'
-        | 'baseline'
+        'observations' | 'times' | 'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
       > & {
         'readings-field'?: Attribute
         'time-order'?: Attribute
@@ -49,9 +39,6 @@ declare module 'react' {
         'expanded-groups'?: Attribute
         'groups-collapsed'?: Attribute
         'empty-group-label'?: Attribute
-        'children-field'?: Attribute
-        'expanded-rows'?: Attribute
-        'tree-expanded'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -76,7 +63,6 @@ declare module 'react' {
         times?: Flowsheet['times'] | string
         groupBy?: Flowsheet['groupBy'] | string
         expandedGroups?: Flowsheet['expandedGroups'] | string
-        expandedRows?: Flowsheet['expandedRows'] | string
         rows?: Flowsheet['rows'] | string
         columns?: Flowsheet['columns'] | string
         value?: Flowsheet['value'] | string
@@ -87,16 +73,13 @@ declare module 'react' {
       }
       'c2-group-table': Omit<
         C2Props<GroupTable>,
-        'groupBy' | 'expandedGroups' | 'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+        'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
       > & {
         'group-by'?: Attribute
         'group-display'?: Attribute
         'expanded-groups'?: Attribute
         'groups-collapsed'?: Attribute
         'empty-group-label'?: Attribute
-        'children-field'?: Attribute
-        'expanded-rows'?: Attribute
-        'tree-expanded'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -119,7 +102,6 @@ declare module 'react' {
         'detail-label'?: Attribute
         groupBy?: GroupTable['groupBy'] | string
         expandedGroups?: GroupTable['expandedGroups'] | string
-        expandedRows?: GroupTable['expandedRows'] | string
         rows?: GroupTable['rows'] | string
         columns?: GroupTable['columns'] | string
         value?: GroupTable['value'] | string
@@ -174,6 +156,42 @@ declare module 'react' {
         'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
         options?: TableColumn['options'] | string
+      }
+      'c2-tree-table': Omit<
+        C2Props<TreeTable>,
+        'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+      > & {
+        'children-field'?: Attribute
+        'expanded-rows'?: Attribute
+        'tree-expanded'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        expandedRows?: TreeTable['expandedRows'] | string
+        rows?: TreeTable['rows'] | string
+        columns?: TreeTable['columns'] | string
+        value?: TreeTable['value'] | string
+        sortModel?: TreeTable['sortModel'] | string
+        summaryValues?: TreeTable['summaryValues'] | string
+        expandedDetails?: TreeTable['expandedDetails'] | string
+        baseline?: TreeTable['baseline'] | string
       }
     }
   }

@@ -1041,6 +1041,10 @@
       "types": "./dist/table/group-table.d.ts",
       "default": "./dist/table/group-table.js"
     },
+    "./table/tree-table": {
+      "types": "./dist/table/tree-table.d.ts",
+      "default": "./dist/table/tree-table.js"
+    },
     "./table-of-contents": {
       "types": "./dist/table-of-contents.d.ts",
       "default": "./dist/table-of-contents.js"

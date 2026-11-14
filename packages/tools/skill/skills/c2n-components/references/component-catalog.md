@@ -70,7 +70,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
-- **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows and nested tree rows: aggregates per group, rollups, cascading selection and children loaded on open. Children: `c2-pagination`, `c2-table-column`.
+- **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows: aggregates per group, group bands, groups kept under the header and a group checkbox that selects its rows. Children: `c2-pagination`, `c2-table-column`.
 - **Highlight** — `c2-highlight, c2-find-bar` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Image Compare** — `c2-image-compare` · `@c2n/components/image-compare` — A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.
@@ -98,6 +98,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
 - **Transcript** — `c2-transcript` · `@c2n/components/transcript` — Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
+- **Tree table** — `c2-tree-table, c2-table-column` · `@c2n/components/table/tree-table` — c2-table with rows nested to any depth: rolled-up figures on parent rows, cascading selection, and children loaded the first time a row opens. Children: `c2-pagination`, `c2-table-column`.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
 - **Video Player** — `c2-video-player` · `@c2n/components/video-player` — Themed controls over a real video: chapters on the seek bar, a thumbnail while scrubbing, captions, speed, picture-in-picture and full screen.
 - **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.

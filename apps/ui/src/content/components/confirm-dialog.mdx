@@ -54,3 +54,4 @@ if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.
   <c2-button onclick="const d = document.getElementById('cd-3'); d.confirmAction = () => new Promise((r) => setTimeout(r, 1500)); d.show()">Revoke API key</c2-button>
   <c2-confirm-dialog id="cd-3" destructive heading="Revoke this key?" message="Requests signed with it fail immediately." confirm-label="Revoke"></c2-confirm-dialog>
 </div>
+```

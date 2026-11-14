@@ -1,0 +1,29 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-table,
+  $theme: (
+    group--indent: 24px,
+  )
+);
+@use 'hierarchy';
+
+// The rows `c2-tree-table` adds to `c2-table`. The variables keep the `c2-table` prefix: one set of names styles every
+// table of the package, and `group--indent` is the indentation of a level in a tree as in a grouping.
+
+// The chevron sits before the content of the tree column, indented by depth (`_hierarchy.scss`).
+
+.row-toggle {
+  cursor: pointer;
+}
+
+.row--tree-collapsed .row-toggle {
+  transform: rotate(-90deg);
+}
+
+.row-toggle--leaf {
+  visibility: hidden;
+  cursor: default;
+}
+
+.row-toggle c2-spinner {
+  --c2-spinner--size: 100%;
+}

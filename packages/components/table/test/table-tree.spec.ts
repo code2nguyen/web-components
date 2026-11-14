@@ -30,11 +30,11 @@ const COLUMNS = `<c2-table-column field="name" header="Account" width="260px" su
   <c2-table-column field="amount" header="Amount" width="160px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>`
 
 const accounts = (attributes = '') =>
-  `<c2-group-table style="height:420px;width:480px" row-key="id" children-field="children" rows='${json}' ${attributes}>
+  `<c2-tree-table style="height:420px;width:480px" row-key="id" children-field="children" rows='${json}' ${attributes}>
   ${COLUMNS}
-</c2-group-table>`
+</c2-tree-table>`
 
-const table = (page: Page) => page.locator('c2-group-table')
+const table = (page: Page) => page.locator('c2-tree-table')
 const row = (page: Page, name: string) => table(page).getByRole('row', { name: new RegExp(`\\b${name}\\b`) })
 
 /** Every rendered body row, top to bottom, as `level name | amount`. */
@@ -68,7 +68,7 @@ test('the chevron opens a row and reports it; expanded-rows is the state, in and
   await page.evaluate(() => {
     const log: unknown[] = []
     ;(window as unknown as { log: unknown[] }).log = log
-    document.querySelector('c2-group-table')!.addEventListener('row-toggle', (event) => {
+    document.querySelector('c2-tree-table')!.addEventListener('row-toggle', (event) => {
       const { key, expanded, row } = (event as CustomEvent).detail
       log.push({ key, expanded, name: row.name })
     })
@@ -178,7 +178,7 @@ test('a row whose children field is true loads them from loadChildren on first o
     const state = window as unknown as { calls: unknown[]; settle: (rows?: unknown[]) => void; errors: unknown[] }
     state.calls = []
     state.errors = []
-    const element = document.querySelector('c2-group-table') as HTMLElement & { loadChildren: unknown }
+    const element = document.querySelector('c2-tree-table') as HTMLElement & { loadChildren: unknown }
     element.addEventListener('children-error', (event) => state.errors.push((event as CustomEvent).detail.key))
     element.loadChildren = ({ key, level }: { key: string; level: number }) =>
       new Promise((resolve, reject) => {
@@ -217,7 +217,7 @@ test('a row whose children field is true loads them from loadChildren on first o
 })
 
 test('without children-field a nested array is just a value, and the grid stays a grid', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-group-table style="height:300px" row-key="id" rows='${json}'>${COLUMNS}</c2-group-table>`)
+  await renderScenario(`<c2-tree-table style="height:300px" row-key="id" rows='${json}'>${COLUMNS}</c2-tree-table>`)
   await expect(table(page).getByRole('grid')).toBeVisible()
   await expect(table(page).locator('[part="row-toggle"]')).toHaveCount(0)
   expect(await table(page).evaluate((element) => element.shadowRoot!.querySelectorAll('.row--body:not([aria-level])').length)).toBe(4)
@@ -252,7 +252,7 @@ test('expandedRows takes numeric keys from script, and auto columns leave the ch
     { id: 1, name: 'One', children: [{ id: 11, name: 'One-one' }] },
     { id: 2, name: 'Two' },
   ])
-  await renderScenario(`<c2-group-table style="height:300px" row-key="id" children-field="children" rows='${rows}'></c2-group-table>`)
+  await renderScenario(`<c2-tree-table style="height:300px" row-key="id" children-field="children" rows='${rows}'></c2-tree-table>`)
   await expect(table(page).getByRole('columnheader')).toHaveText(['Id', 'Name'])
   await props(table(page), { expandedRows: [1] })
   await expect(row(page, 'One-one')).toHaveAttribute('aria-level', '2')
@@ -263,7 +263,7 @@ test('children that arrive under a selected parent are selected too, and selecti
   await page.evaluate(() => {
     const state = window as unknown as { changes: string[][] }
     state.changes = []
-    const element = document.querySelector('c2-group-table') as HTMLElement & { loadChildren: unknown }
+    const element = document.querySelector('c2-tree-table') as HTMLElement & { loadChildren: unknown }
     element.addEventListener('selection-change', (event) => state.changes.push([...(event as CustomEvent).detail.value].sort()))
     element.loadChildren = () => Promise.resolve([{ id: 'sales', name: 'Sales', amount: 900 }])
   })

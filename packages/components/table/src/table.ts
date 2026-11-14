@@ -105,8 +105,18 @@ const FUNNEL = html`<svg
   <path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" />
 </svg>`
 
-/** Whether a `c2-table` given `group-by` or `children-field` has said that they are `c2-group-table`'s. */
-let warnedHierarchy = false
+/**
+ * The attributes of the variants, with the property that marks an element owning them and the variant that does. An
+ * element given one it does not own (`children-field` on `c2-group-table`) says where it went, once per attribute.
+ */
+const VARIANT_ATTRIBUTES: [attribute: string, property: string, variant: string][] = [
+  ['group-by', 'groupBy', 'group-table'],
+  ['expanded-groups', 'expandedGroups', 'group-table'],
+  ['children-field', 'childrenField', 'tree-table'],
+  ['expanded-rows', 'expandedRows', 'tree-table'],
+  ['tree-expanded', 'treeExpanded', 'tree-table'],
+]
+const warnedVariants = new Set<string>()
 
 interface SummaryCell {
   column: TableColumnConfig
@@ -273,7 +283,7 @@ export interface Table {
  * reaches while the row is closed and opens. Keys pressed inside a panel belong to its content. Rows open with a click on the chevron,
  * Alt+↓ and Alt+↑ on the row, `expandDetail()` or `expanded-details` (the keys of the open rows), and `detail-toggle`
  * reports a click or a key. The height is declared so the table keeps windowing its rows: an open panel adds a known
- * offset. Give the rows a `row-key`. `c2-group-table` ignores it while its rows are grouped or a tree.
+ * offset. Give the rows a `row-key`. `c2-group-table` ignores it while its rows are grouped, `c2-tree-table` while they are a tree.
  *
  * **Editing.** `editable` lets the user change the cells of every column with an `editor` (`text`, `number`, `date`,
  * `url`, `select` with its `options`, or `checkbox`), or a `renderEditor` of its own. Enter, F2, a double click or
@@ -679,7 +689,7 @@ export class Table extends LitElement {
   /**
    * Height in pixels of a row's detail panel, and the switch of the feature: above 0, every row gets a chevron that
    * opens a panel of this height under it. Declared, like `row-height`, so the rows stay windowed. `c2-group-table`
-   * ignores it while its rows are grouped (`group-by`) or a tree (`children-field`).
+   * ignores it while its rows are grouped (`group-by`), and `c2-tree-table` while they are a tree (`children-field`).
    */
   @property({ type: Number, attribute: 'detail-height' }) detailHeight = 0
 
@@ -1126,7 +1136,7 @@ export class Table extends LitElement {
 
   // ---- Hooks of a table with lines of its own -----------------------------------------------------------------------
   //
-  // A flat table's display lines are its rows. `c2-group-table` overrides these to add group rows and tree rows; the
+  // A flat table's display lines are its rows. `c2-group-table` and `c2-tree-table` override these to add group rows and tree rows; the
   // defaults below keep `c2-table` free of that code, and cost a flat table one call that returns at once.
 
   /** The rows in display order: sorted, and in a subclass gathered by group. Free of side effects. */
@@ -2681,10 +2691,11 @@ export class Table extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    // Groups and trees moved to c2-group-table: say so to an app still asking c2-table for them, once.
-    if (!warnedHierarchy && this.localName === 'c2-table' && (this.hasAttribute('group-by') || this.hasAttribute('children-field'))) {
-      warnedHierarchy = true
-      console.warn("[c2-table] group-by and children-field are c2-group-table's: use <c2-group-table>, from '@c2n/components/table/group-table'.")
+    // Groups and trees are variants of their own: say so to an app asking another element for them, once each.
+    for (const [attribute, property, variant] of VARIANT_ATTRIBUTES) {
+      if (warnedVariants.has(attribute) || property in this || !this.hasAttribute(attribute)) continue
+      warnedVariants.add(attribute)
+      console.warn(`[${this.localName}] ${attribute} is c2-${variant}'s: use <c2-${variant}>, from '@c2n/components/table/${variant}'.`)
     }
     this.addEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
     this.addEventListener(PAGER_CONNECT_EVENT, this.#handlePagerConnect)

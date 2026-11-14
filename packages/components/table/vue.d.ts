@@ -13,6 +13,7 @@ import type { Flowsheet } from '@c2n/table/flowsheet.js'
 import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
+import type { TreeTable } from '@c2n/table/tree-table.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -31,9 +32,6 @@ declare module 'vue' {
         'expanded-groups'?: unknown
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
-        'children-field'?: unknown
-        'expanded-rows'?: unknown
-        'tree-expanded'?: unknown
         'aria-label'?: unknown
         'aria-labelledby'?: unknown
         'row-key'?: unknown
@@ -54,8 +52,6 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
-        onRowToggle?: (event: EventOf<Flowsheet, 'row-toggle'>) => void
-        onChildrenError?: (event: EventOf<Flowsheet, 'children-error'>) => void
         onGroupToggle?: (event: EventOf<Flowsheet, 'group-toggle'>) => void
         onPageChange?: (event: EventOf<Flowsheet, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Flowsheet, 'range-change'>) => void
@@ -78,9 +74,6 @@ declare module 'vue' {
         'expanded-groups'?: unknown
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
-        'children-field'?: unknown
-        'expanded-rows'?: unknown
-        'tree-expanded'?: unknown
         'aria-label'?: unknown
         'aria-labelledby'?: unknown
         'row-key'?: unknown
@@ -101,8 +94,6 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
-        onRowToggle?: (event: EventOf<GroupTable, 'row-toggle'>) => void
-        onChildrenError?: (event: EventOf<GroupTable, 'children-error'>) => void
         onGroupToggle?: (event: EventOf<GroupTable, 'group-toggle'>) => void
         onPageChange?: (event: EventOf<GroupTable, 'page-change'>) => void
         onRangeChange?: (event: EventOf<GroupTable, 'range-change'>) => void
@@ -170,6 +161,47 @@ declare module 'vue' {
         'reference-range'?: unknown
         'critical-range'?: unknown
         'count-value'?: unknown
+      }
+    >
+    'c2-tree-table': DefineComponent<
+      C2Props<TreeTable> & {
+        'children-field'?: unknown
+        'expanded-rows'?: unknown
+        'tree-expanded'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        onRowToggle?: (event: EventOf<TreeTable, 'row-toggle'>) => void
+        onChildrenError?: (event: EventOf<TreeTable, 'children-error'>) => void
+        onPageChange?: (event: EventOf<TreeTable, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<TreeTable, 'range-change'>) => void
+        onSortChange?: (event: EventOf<TreeTable, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<TreeTable, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<TreeTable, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<TreeTable, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<TreeTable, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<TreeTable, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<TreeTable, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<TreeTable, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<TreeTable, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<TreeTable, 'rows-change'>) => void
       }
     >
   }

@@ -19,8 +19,9 @@
     cell--padding: 0 12px,
   )
 );
+@use 'hierarchy';
 
-// The rows `c2-group-table` adds to `c2-table`: group rows, bands, the copies kept under the header, and tree rows.
+// The rows `c2-group-table` adds to `c2-table`: group rows, bands and the copies kept under the header.
 // The variables keep the `c2-table` prefix: one set of names styles both tables.
 
 // Grouping. A group row is a row of the same grid as the data rows, so its aggregate cells sit in their columns'
@@ -45,35 +46,9 @@
   background: css.cssVar(group-band--background);
 }
 
-.group-toggle {
-  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
-}
-
-// Data rows line their text up with the label of the group above them, past its chevron.
-.cell-content--indented {
-  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
-}
 
 .row--group-collapsed .group-toggle {
   transform: rotate(-90deg);
-}
-
-// Tree rows (`children-field`): the chevron sits before the content of the tree column, indented by depth.
-.row-toggle {
-  cursor: pointer;
-}
-
-.row--tree-collapsed .row-toggle {
-  transform: rotate(-90deg);
-}
-
-.row-toggle--leaf {
-  visibility: hidden;
-  cursor: default;
-}
-
-.row-toggle c2-spinner {
-  --c2-spinner--size: 100%;
 }
 
 .group-label {

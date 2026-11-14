@@ -206,6 +206,35 @@ test('c2-table is flat: group-by and children-field are not its attributes, and 
   expect(api).toEqual({ getGroups: false, expandRow: false, groupBy: false })
 })
 
+test('each variant carries only its own structure: a group table has no tree, a tree table no groups', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-group-table style="height:200px" row-key="id" children-field="children" rows='[{"id":"a","children":[{"id":"b"}]}]'></c2-group-table>`,
+  )
+  const grouped = await page
+    .locator('c2-group-table')
+    .evaluate((element) => ({ expandRow: 'expandRow' in element, childrenField: 'childrenField' in element, getGroups: 'getGroups' in element }))
+  expect(grouped).toEqual({ expandRow: false, childrenField: false, getGroups: true })
+  await expect(page.locator('c2-group-table .row--body')).toHaveCount(1)
+
+  await renderScenario(`<c2-tree-table style="height:200px" row-key="id" group-by="id" rows='[{"id":"a"},{"id":"b"}]'></c2-tree-table>`)
+  const tree = await page
+    .locator('c2-tree-table')
+    .evaluate((element) => ({ groupBy: 'groupBy' in element, getGroups: 'getGroups' in element, expandRow: 'expandRow' in element }))
+  expect(tree).toEqual({ groupBy: false, getGroups: false, expandRow: true })
+  await expect(page.locator('c2-tree-table .row--group')).toHaveCount(0)
+})
+
+test('an attribute of another variant says which element has it, once', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => message.type() === 'warning' && warnings.push(message.text()))
+  await renderScenario(`<c2-group-table style="height:200px" row-key="id" children-field="children" rows='[{"id":"a"}]'></c2-group-table>
+<c2-group-table style="height:200px" row-key="id" children-field="children" rows='[{"id":"b"}]'></c2-group-table>`)
+  await expect(page.locator('c2-group-table .row--body')).toHaveCount(2)
+  expect(warnings.filter((text) => text.includes('children-field'))).toEqual([
+    "[c2-group-table] children-field is c2-tree-table's: use <c2-tree-table>, from '@c2n/components/table/tree-table'.",
+  ])
+})
+
 test('with 50,000 rows the window is the same with the feature off, on, and on with nothing open', async ({ page, renderScenario }) => {
   await generated(page, renderScenario, 50_000)
   await scrollTo(page, 400_000)
