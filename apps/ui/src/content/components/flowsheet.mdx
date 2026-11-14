@@ -84,6 +84,20 @@ Times are found in the rows, so a new one appears when `rows` (or `observations`
 the rows arrive a window at a time, so the columns are the `times` only. A date alone (`2026-11-14`) is headed by its day,
 and the header row only grows to two lines when a time is drawn under its day.
 
+### The current time
+
+`now` marks the column of the latest time not after it: its header and cells are tinted (the `time-now` part and
+`cell-now`), and a screen reader hears "now" after the time. A medication or rounding plan shows the round that is due
+this way; the flowsheet does not watch the clock, so update `now` as the time passes:
+
+```typescript tag=CodeBlock
+// The times are local, like the keys: `2026-11-14T14:20`, not the UTC `toISOString()` gives.
+const local = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+const tick = () => (sheet.now = local(new Date()))
+tick()
+setInterval(tick, 60_000)
+```
+
 ### Flags
 
 `reference-range="low,high"` on the template flags a reading outside its row's normal range with `H` or `L`

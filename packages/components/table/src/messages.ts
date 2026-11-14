@@ -33,6 +33,8 @@ const en = {
   flagCriticalHighName: 'Critically high',
   /** Tooltip of a mark: `{0}` is its name, `{1}` the row's normal range (`3.5–5.1`). */
   flagRange: (flag: string, range: string) => `${flag}, normal ${range}`,
+  /** Read after the header of the current time's column of `c2-flowsheet` (`now`). */
+  currentTime: 'now',
   /** The load of a cell of `c2-allocation-grid`, read after its value. */
   allocationUnder: 'under capacity',
   allocationAt: 'at capacity',
