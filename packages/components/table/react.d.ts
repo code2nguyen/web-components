@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { Flowsheet } from '@c2n/table/flowsheet.js'
 import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
@@ -25,6 +26,65 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-flowsheet': Omit<
+        C2Props<Flowsheet>,
+        | 'observations'
+        | 'times'
+        | 'groupBy'
+        | 'expandedGroups'
+        | 'expandedRows'
+        | 'rows'
+        | 'columns'
+        | 'value'
+        | 'sortModel'
+        | 'summaryValues'
+        | 'expandedDetails'
+        | 'baseline'
+      > & {
+        'readings-field'?: Attribute
+        'time-order'?: Attribute
+        'time-format'?: Attribute
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
+        'children-field'?: Attribute
+        'expanded-rows'?: Attribute
+        'tree-expanded'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        observations?: Flowsheet['observations'] | string
+        times?: Flowsheet['times'] | string
+        groupBy?: Flowsheet['groupBy'] | string
+        expandedGroups?: Flowsheet['expandedGroups'] | string
+        expandedRows?: Flowsheet['expandedRows'] | string
+        rows?: Flowsheet['rows'] | string
+        columns?: Flowsheet['columns'] | string
+        value?: Flowsheet['value'] | string
+        sortModel?: Flowsheet['sortModel'] | string
+        summaryValues?: Flowsheet['summaryValues'] | string
+        expandedDetails?: Flowsheet['expandedDetails'] | string
+        baseline?: Flowsheet['baseline'] | string
+      }
       'c2-group-table': Omit<
         C2Props<GroupTable>,
         'groupBy' | 'expandedGroups' | 'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
@@ -97,7 +157,7 @@ declare module 'react' {
         expandedDetails?: Table['expandedDetails'] | string
         baseline?: Table['baseline'] | string
       }
-      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'seriesKeys' | 'options'> & {
+      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {
         'column-id'?: Attribute
         'min-width'?: Attribute
         'format-options'?: Attribute
@@ -109,14 +169,10 @@ declare module 'react' {
         'summary-span'?: Attribute
         'group-column'?: Attribute
         'variance-threshold'?: Attribute
-        'series-keys'?: Attribute
-        'series-order'?: Attribute
-        'series-format'?: Attribute
         'reference-range'?: Attribute
         'critical-range'?: Attribute
         'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
-        seriesKeys?: TableColumn['seriesKeys'] | string
         options?: TableColumn['options'] | string
       }
     }

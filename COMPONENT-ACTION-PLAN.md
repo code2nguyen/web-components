@@ -49,7 +49,8 @@ These wave-1 steps depend on nothing and sit on different tracks, so they can al
 6. **Touch only your lines of `packages/umbrella/size-budget.json`.** Change your entry (and `lazy` when you add a lazy chunk) by hand or with `npm run size:add -w packages/umbrella` for a new entry. Do not commit the full rewrite `size:update` produces: it edits every entry and conflicts with every other open step.
 7. **Finish the package.** Tests in the package's `test/` directory (keyboard paths included), the docs usage row, one gallery card per example row, the rebuilt `custom-elements.json`, and what `npm run build:tools` regenerates. Then the checks CI runs: `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run mcp:smoke`.
 8. **Review before the pull request**, as `CLAUDE.md` requires: `/code-review`, `/security-review`, and the docs screenshot review when a component or its docs changed.
-9. **If the recommendation does not survive contact with the code**, do not force it. Say so in the pull request, propose the alternative (lazy, companion or new package), and leave the step line in place with a note.
+9. **A variant is a companion element, not more attributes on its host.** When a row fixes what a component's items mean and brings its own data shape, derived structure, domain computation or domain chrome, build it as a companion element in the host's package that extends the host, with its own entry and docs page, even if the candidates file says _Extend_. Code two variants share goes in a module both import, never in the host. [`TABLE-VARIANTS.md`](TABLE-VARIANTS.md) has the checklist and classifies the table rows.
+10. **If the recommendation does not survive contact with the code**, do not force it. Say so in the pull request, propose the alternative (lazy, companion or new package), and leave the step line in place with a note.
 
 ## Shared files and merge order
 
@@ -85,7 +86,7 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-8** · `c2-table` · example: allocation grid #306, example: goal tree #358, example: gradebook #422
+- **table-8** · `c2-table` · allocation grid #306 (variant `c2-allocation-grid`, shares `table-series.ts`), example: goal tree #358, example: gradebook #422 · see `TABLE-VARIANTS.md`
 - **virtual-list-1** · `c2-virtual-list` · infinite scroll #471 · +0.5 kB on 17.1 kB · risk low
 - **view-options-1** · `c2-view-options` · saved views #246 · +1.5 kB on 66.1 kB · risk low
 - **choice-matrix-1** · `c2-choice-matrix` · input matrix #248 (companion), record merge #251 · +0.8 kB on 4.8 kB, 3 kB new entry · risk low
@@ -173,7 +174,8 @@ Steps on different tracks edit different packages, but a few generated files are
 ### Existing packages
 
 - **table-9** · `c2-table` · bulk select #244 · +0.4 kB on 31.4 kB · risk low
-- **table-10** · `c2-table` · example: mitre matrix #411, example: dose grid #424, example: requirement tree #433
+- **table-10** · `c2-table` · example: dose grid #424 (on `c2-flowsheet`, with a "now" column), example: requirement tree #433 · mitre matrix #411 is a board, not a table: move it to the kanban track · see `TABLE-VARIANTS.md`
+- **table-11** · `c2-group-table` · split the tree into a variant `c2-tree-table` (breaking: `children-field` moves) · needs sign-off · see `TABLE-VARIANTS.md`
 - **virtual-list-2** · `c2-virtual-list` · data view #245 · +1.5 kB on 17.1 kB · risk medium
 - **choice-matrix-3** · `c2-choice-matrix` · example: rotation editor #353
 - **highlight-4** · `c2-highlight` · example: token heatmap #581, example: text suggestion #585

@@ -1,0 +1,93 @@
+---
+title: 'Flowsheet'
+description: 'A measure per row and a column per reading time, as a chart of vital signs or lab results reads: readings flagged against each row's normal and critical range, measures grouped by system.'
+category: 'Data display'
+package: '@c2n/table'
+tag: 'c2-flowsheet'
+apiTags: ['c2-flowsheet', 'c2-table-column']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Flowsheet } from '@c2n/components/table/flowsheet'
+import { TableColumn } from '@c2n/components/table/table-column'
+
+`c2-flowsheet` is [`c2-group-table`](/web-components/components/group-table) shaped for observations over time: each
+row is a measure (heart rate, potassium), each column a time a reading was taken, and each reading is flagged against
+the row's normal and critical range. Grouping, sorting, filtering, editing, windowing and the rest are the table's and
+work the same.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/table/flowsheet'
+```
+
+The entry registers `c2-flowsheet`, `c2-group-table`, `c2-table`, `c2-table-column`, and the checkbox and spinner they
+render.
+
+## Usage
+
+Rows are the measures, keyed by `row-key`, with their readings in a `readings` object keyed by ISO time. The
+`c2-table-column` whose `field` is `readings` is the template of the time columns: every time found becomes a column with
+its width, format and ranges.
+
+```html tag=UsageBlock,package=@c2n/table
+<style>
+  .sheet {
+    height: 220px;
+    width: 100%;
+  }
+</style>
+<div data-label="Readings">
+  <c2-flowsheet client:only="lit" class="sheet" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"k","measure":"Potassium","low":3.5,"high":5.1,"critHigh":6.2,"readings":{"2026-11-14T08:00":4.1,"2026-11-14T16:00":6.4}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
+    <c2-table-column field="measure" header="Measure" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="readings" width="100px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
+  </c2-flowsheet>
+</div>
+<div data-label="Newest first">
+  <c2-flowsheet client:only="lit" class="sheet" row-key="id" time-order="desc" time-format="date" rows='[{"id":"glu","test":"Glucose","unit":"mg/dL","low":70,"high":99,"readings":{"2026-11-03T08:00":92,"2026-11-07T08:00":118,"2026-11-11T08:00":131,"2026-11-14T08:00":104}},{"id":"a1c","test":"HbA1c","unit":"%","high":5.6,"readings":{"2026-11-03T08:00":5.4,"2026-11-11T08:00":5.9}},{"id":"ldl","test":"LDL cholesterol","unit":"mg/dL","high":129,"readings":{"2026-11-03T08:00":96,"2026-11-14T08:00":142}},{"id":"tsh","test":"TSH","unit":"mIU/L","low":0.4,"high":4,"readings":{"2026-11-07T08:00":0.3,"2026-11-14T08:00":0.9}}]'>
+    <c2-table-column field="test" header="Test" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="readings" width="120px" align="end" reference-range="low,high"></c2-table-column>
+  </c2-flowsheet>
+</div>
+```
+
+### Readings as they arrive
+
+Readings usually come as a list, one per measurement. Hand it to `observations` and the flowsheet sorts it into the
+rows, by `measure` (a row's key) and `time`:
+
+```html tag=CodeBlock
+<c2-flowsheet row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100}]' observations='[{"measure":"hr","time":"2026-11-14T08:00","value":82}]'>
+  <c2-table-column field="measure" header="Measure"></c2-table-column>
+  <c2-table-column field="readings" reference-range="low,high"></c2-table-column>
+</c2-flowsheet>
+```
+
+A reading of a measure no row has is left out. The rows stay your own objects: an edit (with `editable` and an `editor`
+on the template) writes into the row's own readings, which win over an observation at the same time. In a tree
+(`children-field`), nested measures bring their times too.
+
+### Times
+
+Times sort in time order, `time-order="desc"` puts the newest first, and keys that are not ISO times (`Visit 2`) sort in
+natural order. The headers write each time in `time-format`: `time` (the default) puts the day over the first time of
+each day, so a night shift reads across midnight, while `date`, `datetime` and `text` write the whole key. A time with no
+reading yet comes from `times` or `addTime()`, the column the next round fills:
+
+```typescript tag=CodeBlock
+await sheet.addTime('2026-11-14T20:00')
+```
+
+Times are found in the rows, so a new one appears when `rows` (or `observations`) is assigned again. With a `dataSource`
+the rows arrive a window at a time, so the columns are the `times` only. A date alone (`2026-11-14`) is headed by its day,
+and the header row only grows to two lines when a time is drawn under its day.
+
+### Flags
+
+`reference-range="low,high"` on the template flags a reading outside its row's normal range with `H` or `L`
+(`::part(cell-flag-high)`), `critical-range` with `HH` or `LL` on a solid mark; each limit is a number or the field of
+the row that holds it, and either may be empty. The mark's tooltip gives the range, and a screen reader hears the word
+("Critically high"), not the letter. The flags belong to `c2-table`, so a plain lab list can use them too.

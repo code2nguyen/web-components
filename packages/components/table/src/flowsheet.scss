@@ -1,0 +1,36 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-flowsheet,
+  $theme: (
+    header--height: 48px,
+    time-day--color: #71717a,
+    time-day--font-weight: 600,
+  )
+);
+
+// Two lines in a time header, the day (over the first time of each day) and the time, need a taller header row. Only
+// then: a flowsheet headed by dates or visits keeps the table's height.
+.row--header:has(.time-header) {
+  height: css.cssVar(header--height);
+}
+
+.time-header {
+  display: inline-grid;
+  justify-items: inherit;
+  line-height: 1.25;
+}
+
+.time-day {
+  min-block-size: 1.25em;
+  color: css.cssVar(time-day--color);
+  font-weight: css.cssVar(time-day--font-weight);
+}
+
+// The full date and time, for a screen reader: the two lines above are drawn, this is read.
+.time-name {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

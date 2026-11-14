@@ -86,57 +86,12 @@ const HEADER_ROW = -1
 const SUMMARY_ROW = -2
 /** No detail panel is open: the one value `#detailLines` returns for it, so the windowing takes its short path. */
 const NO_LINES: number[] = []
+/** No rows: one array, so a cache keyed on the rows keeps hitting while there are none. */
+const NO_ROWS: TableRow[] = []
 /** Whether the browser can keep a closed panel findable (`hidden="until-found"`), which it tells by firing `beforematch`. */
 const FINDABLE = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype
 
 export type TableSummaryScope = 'all' | 'page'
-
-/** Orders series keys that are not times: `Visit 2` before `Visit 10`. */
-const NATURAL = new Intl.Collator(undefined, { numeric: true })
-
-/** A key that is a date or a time: `2026-11-14`, `2026-11-14T08:00`. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}(?:$|T)/
-
-/** A series key as a date. A date alone is midnight where the page is, not in UTC, so its header shows that day. */
-function seriesDate(key: string): Date {
-  const [year, month, day] = key.slice(0, 10).split('-').map(Number)
-  return key.length === 10 ? new Date(year, month - 1, day) : new Date(key)
-}
-
-/** What a `series` column hands each of the columns it stands for. */
-const SERIES_SETTINGS = [
-  'width',
-  'minWidth',
-  'align',
-  'format',
-  'formatOptions',
-  'currency',
-  'locale',
-  'sortable',
-  'resizable',
-  'cellClass',
-  'renderCell',
-  'renderHeader',
-  'summary',
-  'summaryAlign',
-  'summaryLabel',
-  'summaryTarget',
-  'renderSummary',
-  'cellSlot',
-  'rollup',
-  'comparator',
-  'filterable',
-  'compare',
-  'varianceThreshold',
-  'referenceRange',
-  'criticalRange',
-  'editor',
-  'options',
-  'required',
-  'validate',
-  'renderEditor',
-  'parseValue',
-] as const satisfies readonly (keyof TableColumnConfig)[]
 
 const FUNNEL = html`<svg
   viewBox="0 0 24 24"
@@ -346,10 +301,9 @@ export interface Table {
  * payroll run: a column with `compare="delta"` (or `percent`) shows each cell's change, the previous value as its
  * tooltip, and `variance-threshold="0.1"` marks a cell that moved by more than 10% (`cell-variance`).
  *
- * **Flowsheets.** A column with `series="readings"` stands for one column per key of each row's `readings` object, such
- * as the times of a patient's observations, in time order (`series-order="desc"` for newest first, `series-keys` for an
- * empty column waiting for the next reading). `reference-range="low,high"` flags a value outside its row's normal range
- * with `L` or `H`, and `critical-range` with `LL` or `HH`: each limit is a number or the row field holding it.
+ * **Range flags.** `reference-range="low,high"` on a column flags a value outside its row's normal range with `L` or
+ * `H`, and `critical-range` with `LL` or `HH`, as a lab report does: each limit is a number or the row field holding
+ * it. `c2-flowsheet` (`@c2n/table/flowsheet.js`) builds on them: a measure per row and a column per reading time.
  *
  * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
  * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
@@ -813,8 +767,6 @@ export class Table extends LitElement {
   #filterLoad?: Promise<TableFilter>
   #baselineCache?: { inputs: unknown[]; rows: Map<string, TableRow> }
   #baselineWarned = false
-  #seriesWarned = false
-  #seriesCache = new WeakMap<TableColumnConfig, { inputs: unknown[]; columns: TableColumnConfig[] }>()
   /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
   #editing?: TableEditing
   #editingLoad?: Promise<TableEditing>
@@ -910,10 +862,7 @@ export class Table extends LitElement {
   /** The resolved, ordered, visible columns — children first, then the `columns` property, then one per key of the first row. */
   get resolvedColumns(): TableColumnConfig[] {
     const declared: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
-    const source = declared.some((column) => column.series)
-      ? declared.flatMap((column) => (column.series && !column.hidden ? this.#seriesColumns(column) : [column]))
-      : declared
-    const visible = source.filter((column) => columnKey(column) && !column.hidden)
+    const visible = this.expandColumns(declared).filter((column) => columnKey(column) && !column.hidden)
     return [
       ...visible.filter((column) => column.pinned === 'start'),
       ...visible.filter((column) => !column.pinned),
@@ -921,55 +870,22 @@ export class Table extends LitElement {
     ]
   }
 
+  /** The declared columns as the table draws them: a variant may stand several columns for one (`c2-flowsheet`). */
+  protected expandColumns(declared: TableColumnConfig[]): TableColumnConfig[] {
+    return declared
+  }
+
   /**
-   * The columns a `series` column stands for: one per key of the object in its field, across the rows, with its other
-   * settings. Kept until the rows or the column change, so a column keeps its identity between renders.
+   * A cell's value as drawn and sorted: its field. `row` may be the copy an animated update interpolates, which is why
+   * this is not `cellValue`; a variant reads its derived columns here (`c2-flowsheet`).
    */
-  #seriesColumns(column: TableColumnConfig): TableColumnConfig[] {
-    const series = column.series!
-    const inputs = [
-      this.rows,
-      series,
-      columnKey(column),
-      column.seriesKeys,
-      column.seriesOrder,
-      column.seriesFormat,
-      ...SERIES_SETTINGS.map((name) => column[name]),
-    ]
-    const cached = this.#seriesCache.get(column)
-    if (cached?.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.columns
-    const keys = new Set(column.seriesKeys ?? [])
-    if (this.dataSource && !this.#seriesWarned) {
-      // A data source hands over a window of rows: the columns cannot wait for every key to arrive.
-      console.warn('c2-table: a `series` column takes its keys from `rows`; with a `dataSource`, list them in `series-keys`.')
-      this.#seriesWarned = true
-    }
-    for (const row of Array.isArray(this.rows) ? this.rows : []) {
-      const values = getFieldValue(row, series)
-      if (values && typeof values === 'object' && !Array.isArray(values)) for (const key of Object.keys(values)) keys.add(key)
-    }
-    // ISO dates and times in time order, anything else in natural order (`2` before `10`).
-    const time = (key: string) => (ISO_DATE.test(key) ? seriesDate(key).getTime() : Number.NaN)
-    const ordered = [...keys].sort((a, b) => {
-      const [first, second] = [time(a), time(b)]
-      return Number.isNaN(first) || Number.isNaN(second) ? NATURAL.compare(a, b) : first - second
-    })
-    if (column.seriesOrder === 'desc') ordered.reverse()
-    const settings = Object.fromEntries(SERIES_SETTINGS.map((name) => [name, column[name]])) as Partial<TableColumnConfig>
-    const prefix = columnKey(column) || series
-    const headerFormat: TableColumnConfig = { field: '', format: column.seriesFormat ?? 'datetime', locale: column.locale }
-    const columns = ordered.map((key): TableColumnConfig => ({
-      ...settings,
-      id: `${prefix}:${key}`,
-      // A key with a dot cannot be a field path: such a column shows its values but does not sort or edit.
-      field: key.includes('.') ? '' : `${series}.${key}`,
-      ...(key.includes('.') ? { sortable: false } : {}),
-      series,
-      seriesKey: key,
-      header: this.formatValue(headerFormat, ISO_DATE.test(key) ? seriesDate(key) : key),
-    }))
-    this.#seriesCache.set(column, { inputs, columns })
-    return columns
+  protected readCell(row: TableRow, column: TableColumnConfig): unknown {
+    return getFieldValue(row, column.field)
+  }
+
+  /** The rows the table sorts, filters and draws: `rows`, or what a variant makes of its own input (`c2-flowsheet`). */
+  protected sourceRows(): TableRow[] {
+    return Array.isArray(this.rows) ? this.rows : NO_ROWS
   }
 
   /**
@@ -1122,7 +1038,7 @@ export class Table extends LitElement {
   #selectableRows(): TableRow[] {
     if (!this.rowKey && !this.getRowKey) return this.sortedRows
     const shown = new Set(this.sortedRows)
-    const hidden = (Array.isArray(this.rows) ? this.rows : []).filter((row) => !shown.has(row))
+    const hidden = this.sourceRows().filter((row) => !shown.has(row))
     return hidden.length ? [...this.sortedRows, ...hidden] : this.sortedRows
   }
 
@@ -1807,9 +1723,9 @@ export class Table extends LitElement {
     const id = columnKey(column)
     const value = level?.rollup?.has(id)
       ? level.rollup.get(id)
-      : row && (column.running || column.countValue !== undefined || column.seriesKey !== undefined)
+      : row && (column.running || column.countValue !== undefined || !column.field)
         ? this.cellValue(this.#sourceRowAt(rowIndex) ?? row, column)
-        : getFieldValue(row, column.field)
+        : row && this.readCell(row, column)
     const rendered = row
       ? column.renderCell
         ? column.renderCell({ value, row, rowIndex, column })
@@ -2045,7 +1961,7 @@ export class Table extends LitElement {
 
   /** The rows a column's filter counts its values over: those every other filter lets through. */
   protected filterValueRows(skip: string): TableRow[] {
-    return this.filterRows(Array.isArray(this.rows) ? this.rows : [], skip)
+    return this.filterRows(this.sourceRows(), skip)
   }
 
   /** Whether a row passes every active filter (but `skip`'s); undefined when no filter is active. */
@@ -2054,7 +1970,7 @@ export class Table extends LitElement {
     if (!filters || this.dataSource) return undefined
     const active = Object.entries(filters).filter(([id, filter]) => id !== skip && (filter?.include?.length || filter?.exclude?.length))
     if (!active.length) return undefined
-    // The columns a `series` stands for are found among the resolved ones; a hidden column, among the declared ones.
+    // Columns a variant derives are found among the resolved ones; a hidden column, among the declared ones.
     const source: TableColumnConfig[] = [...this.resolvedColumns, ...(this.columnElements.length ? this.columnElements : (this.columns ?? []))]
     const tests = active.map(([id, filter]) => ({
       column: source.find((column) => columnKey(column) === id) ?? { field: id },
@@ -2309,7 +2225,7 @@ export class Table extends LitElement {
       // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
       else if (!aggregatable) continue
       else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
-      else if (column.summary && (column.field || column.running || column.countValue !== undefined || column.seriesKey !== undefined))
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           key,
           aggregate(
@@ -2506,15 +2422,13 @@ export class Table extends LitElement {
    */
   protected cellValue(row: TableRow, column: TableColumnConfig): unknown {
     if (column.running) return this.#runningTotals(column).get(row)
-    if (column.seriesKey !== undefined && !column.field)
-      return (getFieldValue(row, column.series ?? '') as Record<string, unknown> | undefined)?.[column.seriesKey]
     if (column.countValue !== undefined) {
       const wanted = String(column.countValue)
       let count = 0
       for (const other of this.#statusColumns()) if (String(getFieldValue(row, other.field)) === wanted) count++
       return count
     }
-    return getFieldValue(row, column.field)
+    return this.readCell(row, column)
   }
 
   /**
@@ -2637,8 +2551,7 @@ export class Table extends LitElement {
   }
 
   protected applySort() {
-    const rows = Array.isArray(this.rows) ? this.rows : []
-    this.sortedRows = this.buildRows(this.filterRows(rows))
+    this.sortedRows = this.buildRows(this.filterRows(this.sourceRows()))
   }
 
   /** Scrolls display line `line` into view, below the header and, while grouped, below the groups stuck under it. */
@@ -2682,7 +2595,8 @@ export class Table extends LitElement {
   protected sortBySortModel<T>(items: T[], read?: (item: T, field: string, column?: TableColumnConfig) => unknown): T[] {
     if (this.dataSource || this.sortModel.length === 0) return items
     const columns = this.resolvedColumns
-    const value = (item: T, field: string, column?: TableColumnConfig) => (read ? read(item, field, column) : getFieldValue(item as TableRow, field))
+    const value = (item: T, field: string, column?: TableColumnConfig) =>
+      read ? read(item, field, column) : this.readCell(item as TableRow, column ?? { field })
     // Each sort key's column and comparator, looked up once rather than once per comparison.
     const keys = this.sortModel.map((entry) => {
       const column = columns.find((candidate) => candidate.field === entry.field)

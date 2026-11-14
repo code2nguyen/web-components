@@ -111,10 +111,10 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="gross" header="Gross" width="170px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1"></c2-table-column>
   </c2-table>
 </div>
-<div data-label="Flowsheet">
-  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"k","measure":"Potassium","low":3.5,"high":5.1,"critHigh":6.2,"readings":{"2026-11-14T08:00":4.1,"2026-11-14T16:00":6.4}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
-    <c2-table-column field="measure" header="Measure" width="2fr" min-width="130"></c2-table-column>
-    <c2-table-column series="readings" series-format="time" width="100px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
+<div data-label="Range flags">
+  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"glu","test":"Glucose","result":131,"low":70,"high":99},{"id":"k","test":"Potassium","result":6.4,"low":3.5,"high":5.1,"critHigh":6.2},{"id":"na","test":"Sodium","result":139,"low":135,"high":145},{"id":"tsh","test":"TSH","result":0.3,"low":0.4,"high":4}]'>
+    <c2-table-column field="test" header="Test" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="result" header="Result" width="120px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
   </c2-table>
 </div>
 <div data-label="Empty">
@@ -142,21 +142,12 @@ itself: the request carries `filters`, and the source answers with the rows they
 `compare="percent"` shows the change from it under the value, and `variance-threshold="0.1"` marks a cell that moved by
 more than 10% (`::part(cell-variance)`, `--c2-table__cell__variance--*`).
 
-### Flowsheets: a column per reading
+### Range flags
 
-`series` makes one column stand for a column per key of an object in each row, the shape a flowsheet's readings come
-in: a measure per row, its values keyed by time.
-
-```html tag=CodeBlock
-<c2-table-column series="readings" series-format="time" reference-range="low,high" critical-range="critLow,critHigh"></c2-table-column>
-```
-
-Every key found in the rows becomes a column, in time order (`series-order="desc"` for newest first), with the
-column's other settings; `series-keys` adds a column no row has a value in yet, for the next reading. A new time
-appears when `rows` is assigned again; with a `dataSource` the table sees only a window of the rows, so list the keys
-in `series-keys`. `reference-range` flags a value outside its row's normal range with `H` or `L`
-(`::part(cell-flag-high)`), `critical-range` with `HH` or `LL`, and the mark's tooltip gives the range; each limit is
-a number or the field of the row that holds it, and a screen reader hears the word, not the letter.
+`reference-range="low,high"` flags a value outside its row's normal range with `H` or `L` (`::part(cell-flag-high)`),
+and `critical-range` with `HH` or `LL`; each limit is a number or the field of the row that holds it, the mark's tooltip
+gives the range, and a screen reader hears the word, not the letter. A measure per row and a column per reading time is
+[`c2-flowsheet`](/web-components/components/flowsheet), built on these flags.
 
 ### Columns as data
 
