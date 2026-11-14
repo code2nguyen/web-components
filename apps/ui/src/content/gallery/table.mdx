@@ -778,6 +778,56 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 
 </GalleryGrid>
 
+## Gradebook
+
+A gradebook is a score per student and assignment, with each column's average in the summary row and the final grade as a column of its own. A late, missing or excused mark is data beside the score, and `cellPart` turns it into a part name (`cell-late`, `cell-missing`, `cell-excused`) the card styles from its legend; a failing score gets `cell-failing` the same way.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Gradebook
+<style>
+  .gradebook {
+    height: 320px;
+    width: 100%;
+  }
+  .gradebook::part(cell-late) {
+    box-shadow: inset 3px 0 0 0 #d97706;
+  }
+  .gradebook::part(cell-missing) {
+    background: light-dark(#fee2e2, #3f1a1a);
+  }
+  .gradebook::part(cell-excused) {
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .gradebook::part(cell-failing) {
+    color: light-dark(#b91c1c, #f39a9a);
+    font-weight: 600;
+  }
+  .gradebook .legend {
+    display: flex;
+    gap: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-table client:only="lit" class="gradebook" data-table-example="gradebook" row-key="id" rows='[{"id":"s1","name":"Amara Okafor","hw1":95,"quiz1":88,"essay":91,"midterm":87,"final":89.6,"marks":{}},{"id":"s2","name":"Bruno Silva","hw1":72,"quiz1":64,"essay":null,"midterm":70,"final":61.2,"marks":{"essay":"missing","quiz1":"late"}},{"id":"s3","name":"Chen Wei","hw1":100,"quiz1":92,"essay":84,"midterm":95,"final":92.4,"marks":{}},{"id":"s4","name":"Dana Kowalski","hw1":null,"quiz1":79,"essay":88,"midterm":81,"final":82.7,"marks":{"hw1":"excused"}},{"id":"s5","name":"Elif Yilmaz","hw1":58,"quiz1":45,"essay":67,"midterm":52,"final":55.1,"marks":{"hw1":"late"}}]'>
+  <div slot="toolbar" class="legend"><span>▎Late</span><span>■ Missing</span><span>□ Excused</span><span>Below 60 in red</span></div>
+  <c2-table-column field="name" header="Student" width="minmax(150px, 1fr)" pinned="start" summary-label="Class average"></c2-table-column>
+  <c2-table-column field="hw1" header="HW 1 · 10%" width="96px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="quiz1" header="Quiz 1 · 15%" width="104px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="essay" header="Essay · 25%" width="100px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="midterm" header="Midterm · 50%" width="116px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="final" header="Final" width="80px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+table.cellPart = ({ row, column, value }) => [row.marks?.[column.field] && `cell-${row.marks[column.field]}`, typeof value === 'number' && value < 60 && 'cell-failing'].filter(Boolean)
+```
+
 ## Row detail
 
 `detail-height` puts a chevron in the first column of every row and opens a panel of that height under it. The panel is filled from a child in the row's `detail:{key}` slot, or by `renderDetail`, and exists only while it is open. Alt+↓ and Alt+↑ open and close the focused row.

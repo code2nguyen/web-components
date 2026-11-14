@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { AllocationGrid } from '@c2n/table/allocation-grid.js'
 import type { Flowsheet } from '@c2n/table/flowsheet.js'
 import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
@@ -22,6 +23,52 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-allocation-grid': DefineComponent<
+      C2Props<AllocationGrid> & {
+        'allocations-field'?: unknown
+        'period-format'?: unknown
+        'capacity-field'?: unknown
+        'row-totals'?: unknown
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        onGroupToggle?: (event: EventOf<AllocationGrid, 'group-toggle'>) => void
+        onPageChange?: (event: EventOf<AllocationGrid, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<AllocationGrid, 'range-change'>) => void
+        onSortChange?: (event: EventOf<AllocationGrid, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<AllocationGrid, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<AllocationGrid, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<AllocationGrid, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<AllocationGrid, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<AllocationGrid, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<AllocationGrid, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<AllocationGrid, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<AllocationGrid, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<AllocationGrid, 'rows-change'>) => void
+      }
+    >
     'c2-flowsheet': DefineComponent<
       C2Props<Flowsheet> & {
         'readings-field'?: unknown

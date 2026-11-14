@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { AllocationGrid } from '@c2n/table/allocation-grid.js'
 import type { Flowsheet } from '@c2n/table/flowsheet.js'
 import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
@@ -27,6 +28,50 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-allocation-grid': Omit<
+        C2Props<AllocationGrid>,
+        'periods' | 'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+      > & {
+        'allocations-field'?: Attribute
+        'period-format'?: Attribute
+        'capacity-field'?: Attribute
+        'row-totals'?: Attribute
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        periods?: AllocationGrid['periods'] | string
+        groupBy?: AllocationGrid['groupBy'] | string
+        expandedGroups?: AllocationGrid['expandedGroups'] | string
+        rows?: AllocationGrid['rows'] | string
+        columns?: AllocationGrid['columns'] | string
+        value?: AllocationGrid['value'] | string
+        sortModel?: AllocationGrid['sortModel'] | string
+        summaryValues?: AllocationGrid['summaryValues'] | string
+        expandedDetails?: AllocationGrid['expandedDetails'] | string
+        baseline?: AllocationGrid['baseline'] | string
+      }
       'c2-flowsheet': Omit<
         C2Props<Flowsheet>,
         'observations' | 'times' | 'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'

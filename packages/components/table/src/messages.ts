@@ -33,6 +33,12 @@ const en = {
   flagCriticalHighName: 'Critically high',
   /** Tooltip of a mark: `{0}` is its name, `{1}` the row's normal range (`3.5–5.1`). */
   flagRange: (flag: string, range: string) => `${flag}, normal ${range}`,
+  /** The load of a cell of `c2-allocation-grid`, read after its value. */
+  allocationUnder: 'under capacity',
+  allocationAt: 'at capacity',
+  allocationOver: 'over capacity',
+  /** Header of the total column of `c2-allocation-grid` (`row-totals`). */
+  rowTotal: 'Total',
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

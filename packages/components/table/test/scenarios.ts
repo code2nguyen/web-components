@@ -2,6 +2,7 @@
 import './translations'
 import '../src/table'
 import '../src/group-table'
+import '../src/allocation-grid'
 import '../src/flowsheet'
 import '../src/tree-table'
 import '../src/table-column'

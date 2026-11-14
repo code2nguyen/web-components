@@ -1033,6 +1033,10 @@
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
     },
+    "./table/allocation-grid": {
+      "types": "./dist/table/allocation-grid.d.ts",
+      "default": "./dist/table/allocation-grid.js"
+    },
     "./table/flowsheet": {
       "types": "./dist/table/flowsheet.d.ts",
       "default": "./dist/table/flowsheet.js"

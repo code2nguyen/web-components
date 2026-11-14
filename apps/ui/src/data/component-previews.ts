@@ -12,6 +12,11 @@ export const componentPreviews: Record<string, string> = {
   <c2-action-bar count="3" style="--c2-action-bar__container--padding:4px 4px 4px 12px;--c2-action-bar__container--gap:8px;--c2-button__container--height:28px;--c2-button__container--font-size:13px"><c2-button>Archive</c2-button><c2-button>Delete</c2-button></c2-action-bar>
 </div>`,
   'address-field': `<c2-address-field style="width:280px;--c2-address-field--gap:6px;--c2-address-field--row-gap:6px;--c2-text-field--min-height:28px;--c2-form-field__label--font-size:11px" countries="US" value='{"country":"US","line1":"1 Ferry Building","city":"San Francisco","region":"CA","postalCode":"94111"}'></c2-address-field>`,
+  'allocation-grid': `<c2-allocation-grid row-key="id" capacity="40" style="height:180px;width:100%" rows='[
+  {"id":"ada","name":"Ada","allocations":{"2026-11-09":40,"2026-11-16":44,"2026-11-23":32}},
+  {"id":"alan","name":"Alan","allocations":{"2026-11-09":24,"2026-11-16":40,"2026-11-23":40}},
+  {"id":"grace","name":"Grace","capacity":32,"allocations":{"2026-11-09":32,"2026-11-16":24,"2026-11-23":36}}
+]'><c2-table-column field="name" header="Person" width="2fr"></c2-table-column><c2-table-column field="allocations" width="72px" align="end" format="number"></c2-table-column></c2-allocation-grid>`,
   'angle-slider': `<div class="preview-row">
   <c2-angle-slider label="Gradient angle" value="135" style="--c2-angle-slider--size:104px;--c2-angle-slider__value--font-size:18px"></c2-angle-slider>
   <c2-angle-slider label="Volume" mode="arc" max="100" value="64" style="--c2-angle-slider--size:104px;--c2-angle-slider__value--font-size:18px"></c2-angle-slider>

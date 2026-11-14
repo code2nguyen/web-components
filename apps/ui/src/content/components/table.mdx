@@ -149,6 +149,21 @@ and `critical-range` with `HH` or `LL`; each limit is a number or the field of t
 gives the range, and a screen reader hears the word, not the letter. A measure per row and a column per reading time is
 [`c2-flowsheet`](/web-components/components/flowsheet), built on these flags.
 
+### Parts for a cell's state
+
+`rowPart` returns part names for a row from its data, and `cellPart` does the same for a cell from its value and row,
+so a stylesheet can reach cells by state without a renderer:
+
+```typescript tag=CodeBlock
+table.cellPart = ({ column, value }) => (column.field === 'score' && Number(value) < 50 ? 'cell-failing' : undefined)
+```
+
+```css tag=CodeBlock
+c2-table::part(cell-failing) {
+  color: #b91c1c;
+}
+```
+
 ### Columns as data
 
 `columns` takes the same fields as `c2-table-column`, as an array. Use it when the columns are computed rather than

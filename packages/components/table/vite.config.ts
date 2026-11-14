@@ -9,6 +9,7 @@ export default defineConfig({
       entry: [
         'src/table.ts',
         'src/group-table.ts',
+        'src/allocation-grid.ts',
         'src/flowsheet.ts',
         'src/tree-table.ts',
         'src/table-column.ts',
@@ -26,7 +27,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/table.ts', 'src/group-table.ts', 'src/flowsheet.ts', 'src/tree-table.ts', 'src/table-column.ts'],
+      files: ['src/table.ts', 'src/group-table.ts', 'src/allocation-grid.ts', 'src/flowsheet.ts', 'src/tree-table.ts', 'src/table-column.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],
