@@ -24,6 +24,8 @@
     heading--text-transform: uppercase,
 
     footer--background: transparent,
+    modified--color: rgb(2, 101, 220),
+    modified--font-size: 12px,
     changed--color: rgb(2, 101, 220),
     button--background-color: #ffffff,
     button--color: #18181b,
@@ -72,10 +74,12 @@
   overscroll-behavior: contain;
 }
 
-// The trigger, Add sort and Reset are secondary actions: an outlined button, not the filled accent.
+// The trigger, Add sort, Reset and the Views actions are secondary: an outlined button, not the filled accent.
 .trigger,
 .add-sort,
-.reset {
+.reset,
+.view-actions c2-button,
+.view-revert {
   --c2-button__container--background-color: #{css.cssVar(button--background-color)};
   --c2-button__container--color: #{css.cssVar(button--color)};
   --c2-button__container--border: #{css.cssVar(button--border)};
@@ -184,4 +188,28 @@ c2-select {
   .reset {
     margin-inline-end: auto;
   }
+}
+
+// The Views section: the current view, the "Modified" mark, and its actions in one wrapping row.
+.view-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.view-name {
+  flex: 1 1 100%;
+}
+
+.modified-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modified {
+  color: css.cssVar(modified--color);
+  font-size: css.cssVar(modified--font-size);
 }

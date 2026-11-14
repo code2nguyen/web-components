@@ -24,9 +24,14 @@ declare module 'vue' {
         'default-value'?: unknown
         'max-sorts'?: unknown
         'can-set-default'?: unknown
+        'view-id'?: unknown
         onViewChange?: (event: EventOf<ViewOptions, 'view-change'>) => void
         onDefaultRequest?: (event: EventOf<ViewOptions, 'default-request'>) => void
         onToggle?: (event: EventOf<ViewOptions, 'toggle'>) => void
+        onViewSelect?: (event: EventOf<ViewOptions, 'view-select'>) => void
+        onViewSave?: (event: EventOf<ViewOptions, 'view-save'>) => void
+        onViewRename?: (event: EventOf<ViewOptions, 'view-rename'>) => void
+        onViewDelete?: (event: EventOf<ViewOptions, 'view-delete'>) => void
       }
     >
     'c2-view-toggle': DefineComponent<C2Props<ViewToggle>>

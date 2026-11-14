@@ -24,13 +24,15 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-view-field': C2Props<ViewField>
-      'c2-view-options': Omit<C2Props<ViewOptions>, 'fields' | 'toggles' | 'layouts'> & {
+      'c2-view-options': Omit<C2Props<ViewOptions>, 'fields' | 'toggles' | 'layouts' | 'views'> & {
         'default-value'?: Attribute
         'max-sorts'?: Attribute
         'can-set-default'?: Attribute
+        'view-id'?: Attribute
         fields?: ViewOptions['fields'] | string
         toggles?: ViewOptions['toggles'] | string
         layouts?: ViewOptions['layouts'] | string
+        views?: ViewOptions['views'] | string
       }
       'c2-view-toggle': C2Props<ViewToggle>
     }

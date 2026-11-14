@@ -87,7 +87,6 @@ Steps on different tracks edit different packages, but a few generated files are
 ### Existing packages
 
 - **virtual-list-1** · `c2-virtual-list` · infinite scroll #471 · +0.5 kB on 17.1 kB · risk low
-- **view-options-1** · `c2-view-options` · saved views #246 · +1.5 kB on 66.1 kB · risk low
 - **choice-matrix-1** · `c2-choice-matrix` · input matrix #248 (companion), record merge #251 · +0.8 kB on 4.8 kB, 3 kB new entry · risk low
 - **choice-matrix-2** · `c2-choice-matrix` · scorecard #316, example: rubric #317, example: inspection checklist #318 · +1.2 kB on 4.8 kB · risk low
 - **description-list-2** · `c2-description-list` · property list #253 (lazy), calculation breakdown #337, example: pay stub #354 · +1.2 kB on 5.6 kB, 6 kB lazy · risk low
