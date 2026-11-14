@@ -93,9 +93,9 @@ import { Button } from '@c2n/components/button'
   }
 </style>
 <c2-flowsheet client:only="lit" class="dose-grid" row-key="id" now="2026-11-14T14:20" rows='[{"id":"amox","measure":"Amoxicillin 500 mg PO","route":"q8h","readings":{"2026-11-14T06:00":"given","2026-11-14T14:00":"given","2026-11-14T22:00":"due"}},{"id":"para","measure":"Paracetamol 1 g PO","route":"q6h","readings":{"2026-11-14T06:00":"given","2026-11-14T10:00":"late","2026-11-14T14:00":"due","2026-11-14T18:00":"due","2026-11-14T22:00":"due"}},{"id":"enox","measure":"Enoxaparin 40 mg SC","route":"daily","readings":{"2026-11-14T18:00":"due"}},{"id":"metf","measure":"Metformin 500 mg PO","route":"bid","readings":{"2026-11-14T06:00":"held","2026-11-14T18:00":"due"}},{"id":"morp","measure":"Morphine 2 mg IV PRN","route":"prn","readings":{"2026-11-14T10:00":"given","2026-11-14T14:00":"missed"}}]'>
-  <c2-table-column field="measure" header="Medication" width="minmax(170px, 1fr)" pinned="start"></c2-table-column>
-  <c2-table-column field="route" header="Freq." width="64px"></c2-table-column>
-  <c2-table-column field="readings" width="104px" format="status" options='[{"value":"given","label":"Given","color":"#16a34a","glyph":"✓"},{"value":"late","label":"Given late","color":"#d97706","glyph":"◷"},{"value":"due","label":"Due","color":"#2563eb","glyph":"○"},{"value":"held","label":"Held","color":"#71717a","glyph":"‖"},{"value":"missed","label":"Missed","color":"#dc2626","glyph":"✕"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="measure" header="Medication" width="minmax(200px, 1fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="route" header="Freq." width="58px"></c2-table-column>
+  <c2-table-column field="readings" width="118px" format="status" options='[{"value":"given","label":"Given","color":"#16a34a","glyph":"✓"},{"value":"late","label":"Given late","color":"#d97706","glyph":"◷"},{"value":"due","label":"Due","color":"#2563eb","glyph":"○"},{"value":"held","label":"Held","color":"#71717a","glyph":"‖"},{"value":"missed","label":"Missed","color":"#dc2626","glyph":"✕"}]' summary="tally"></c2-table-column>
 </c2-flowsheet>
 ```
 

@@ -101,7 +101,7 @@ A degree audit is a tree of requirements: each with a status, the credits earned
 ```html tag=MdxCodeBlock,label=Requirement tree
 <style>
   .requirements {
-    height: 360px;
+    height: 392px;
     width: 100%;
   }
   .requirements::part(cell-content-by) {
@@ -110,11 +110,11 @@ A degree audit is a tree of requirements: each with a status, the credits earned
   }
 </style>
 <c2-tree-table client:only="lit" class="requirements" row-key="id" children-field="children" tree-expanded rows='[{"id":"core","req":"Core curriculum","status":"in-progress","children":[{"id":"core-math","req":"Mathematics","status":"met","earned":12,"required":12,"by":"MATH 101, MATH 201, STAT 210"},{"id":"core-writing","req":"Academic writing","status":"met","earned":6,"required":6,"by":"ENG 110, ENG 220"},{"id":"core-sci","req":"Lab science","status":"in-progress","earned":4,"required":8,"by":"BIO 101 (in progress: CHEM 110)"}]},{"id":"major","req":"Computer science major","status":"in-progress","children":[{"id":"major-core","req":"Core courses","status":"in-progress","earned":21,"required":30,"by":"CS 101, CS 201, CS 220, CS 230, CS 310, CS 320, CS 330"},{"id":"major-elect","req":"Upper-level electives","status":"not-started","earned":0,"required":9,"by":""},{"id":"major-cap","req":"Capstone project","status":"not-started","earned":0,"required":3,"by":""}]},{"id":"free","req":"Free electives","status":"met","earned":15,"required":12,"by":"ART 105, MUS 110, PHIL 120, ECON 101, PSY 101"}]'>
-  <c2-table-column field="req" header="Requirement" width="minmax(180px, 1.4fr)"></c2-table-column>
+  <c2-table-column field="req" header="Requirement" width="minmax(220px, 1.6fr)"></c2-table-column>
   <c2-table-column field="status" header="Status" width="124px" format="status" options='[{"value":"met","label":"Met","color":"#16a34a","glyph":"✓"},{"value":"in-progress","label":"In progress","color":"#2563eb","glyph":"◐"},{"value":"not-started","label":"Not started","color":"#a1a1aa","glyph":"○"}]'></c2-table-column>
   <c2-table-column field="earned" header="Earned" width="76px" align="end" rollup="sum"></c2-table-column>
   <c2-table-column field="required" header="Of" width="56px" align="end" rollup="sum"></c2-table-column>
-  <c2-table-column field="by" header="Satisfied by" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="by" header="Satisfied by" width="minmax(160px, 1.6fr)"></c2-table-column>
 </c2-tree-table>
 ```
 
