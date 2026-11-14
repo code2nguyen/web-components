@@ -86,7 +86,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-8** · `c2-table` · allocation grid #306 (variant `c2-allocation-grid`, shares `table-series.ts`), example: goal tree #358, example: gradebook #422 · see `TABLE-VARIANTS.md`
 - **virtual-list-1** · `c2-virtual-list` · infinite scroll #471 · +0.5 kB on 17.1 kB · risk low
 - **view-options-1** · `c2-view-options` · saved views #246 · +1.5 kB on 66.1 kB · risk low
 - **choice-matrix-1** · `c2-choice-matrix` · input matrix #248 (companion), record merge #251 · +0.8 kB on 4.8 kB, 3 kB new entry · risk low

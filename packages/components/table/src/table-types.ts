@@ -63,6 +63,9 @@ export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undef
  */
 export type TableRowPartResolver = (context: TableRowContext) => string | readonly string[] | null | undefined
 
+/** Returns extra part names for a body cell (`cellPart`). */
+export type TableCellPartResolver = (context: TableCellContext) => string | readonly string[] | null | undefined
+
 /** One data row of the rendered window, as `range-change` reports it. */
 export interface TableRenderedRow {
   /**

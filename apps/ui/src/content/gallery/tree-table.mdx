@@ -1,6 +1,6 @@
 ---
 title: 'Tree table gallery'
-description: 'Ready-made c2-tree-table setups: a chart of accounts with rollups, cascading selection, children loaded on open and a file tree.'
+description: 'Ready-made c2-tree-table setups: a chart of accounts with rollups, cascading selection, children loaded on open, a file tree and a goal tree with progress bars.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -89,5 +89,39 @@ The regions in "Children loaded on open" get their countries from `loadChildren`
 table.loadChildren = async ({ key }) => {
   const response = await fetch(`/api/regions/${key}/countries`)
   return response.json() // [{ id: 'de', region: 'Germany', stores: 12, revenue: 1480000 }, …]
+}
+```
+
+## Goals
+
+A goal tree is a tree with a progress column: `rollup="avg"` gives each objective the mean progress of its key results, and a `renderCell` draws it as a `c2-progress` bar. The status is the table's `format="status"`.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Goal tree
+<style>
+  .goal-tree {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<c2-tree-table client:only="lit" class="goal-tree" data-table-example="goal-tree" row-key="id" children-field="children" tree-expanded rows='[{"id":"o1","goal":"Grow self-serve revenue","owner":"Ada","status":"on-track","due":"2026-12-31","children":[{"id":"o1-k1","goal":"Trial to paid at 18%","owner":"Grace","progress":72,"status":"on-track","due":"2026-12-15"},{"id":"o1-k2","goal":"Checkout drop-off under 30%","owner":"Alan","progress":45,"status":"at-risk","due":"2026-12-01"},{"id":"o1-k3","goal":"Launch annual plans","owner":"Ada","progress":100,"status":"done","due":"2026-11-10"}]},{"id":"o2","goal":"Make the platform boring","owner":"Radia","status":"at-risk","due":"2026-12-31","children":[{"id":"o2-k1","goal":"99.95% API uptime","owner":"Radia","progress":88,"status":"on-track","due":"2026-12-31"},{"id":"o2-k2","goal":"Pager alerts halved","owner":"Barbara","progress":20,"status":"off-track","due":"2026-12-20"}]}]'>
+  <c2-table-column field="goal" header="Objective / key result" width="minmax(220px, 2fr)"></c2-table-column>
+  <c2-table-column field="owner" header="Owner" width="90px"></c2-table-column>
+  <c2-table-column field="progress" header="Progress" width="150px" rollup="avg"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="120px" format="status" options='[{"value":"on-track","label":"On track","color":"#16a34a"},{"value":"at-risk","label":"At risk","color":"#d97706"},{"value":"off-track","label":"Off track","color":"#dc2626"},{"value":"done","label":"Done","color":"#2563eb"}]'></c2-table-column>
+  <c2-table-column field="due" header="Due" width="110px" align="end" format="date"></c2-table-column>
+</c2-tree-table>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+progressColumn.renderCell = ({ row, value }) => {
+  const bar = document.createElement('c2-progress')
+  bar.setAttribute('value', String(Math.round(Number(value))))
+  bar.setAttribute('show-value', '')
+  bar.setAttribute('label', `${row.goal}: progress`)
+  return bar
 }
 ```

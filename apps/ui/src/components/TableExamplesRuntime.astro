@@ -18,6 +18,9 @@
   import '@c2n/components/table/group-table'
   import '@c2n/components/table/flowsheet'
   import '@c2n/components/table/tree-table'
+  import '@c2n/components/table/allocation-grid'
+  import '@c2n/components/progress'
+  import '@c2n/components/pagination'
   import '@c2n/components/duration-input'
   import '@c2n/components/autocomplete'
   import '@c2n/components/button'
@@ -41,6 +44,10 @@
         flagCriticalLowName: 'Critique bas',
         flagCriticalHighName: 'Critique haut',
         flagRange: '{0}, normale {1}',
+        allocationUnder: 'sous la capacité',
+        allocationAt: 'à capacité',
+        allocationOver: 'au-delà de la capacité',
+        rowTotal: 'Total',
       },
       'facet-list': {
         clear: 'Effacer',
@@ -350,30 +357,73 @@
     })
   }
 
+  /** The goal tree: a `c2-progress` bar per row, the objectives showing the mean of their key results. */
+  function goalTree(table: Table) {
+    const column = table.querySelector<TableColumn>('c2-table-column[field="progress"]')
+    if (!column) return
+    column.renderCell = ({ row, value }) => {
+      const bar = document.createElement('c2-progress')
+      bar.setAttribute('value', String(Math.round(Number(value) || 0)))
+      bar.setAttribute('show-value', '')
+      bar.setAttribute('label', `${String(row.goal)}: progress`)
+      bar.style.width = '100%'
+      return bar
+    }
+  }
+
+  /** The gradebook: a mark beside a score (late, missing, excused) and a failing score become part names. */
+  function gradebook(table: Table) {
+    table.cellPart = ({ row, column, value }) => {
+      const mark = (row.marks as Record<string, string> | undefined)?.[column.field]
+      return [mark ? `cell-${mark}` : '', typeof value === 'number' && value < 60 ? 'cell-failing' : ''].filter(Boolean)
+    }
+  }
+
+  /** The paged allocation grid: twelve people, a page at a time, after a short delay that stands in for the network. */
+  function allocationSource(table: Table) {
+    const weeks = ['2026-11-09', '2026-11-16', '2026-11-23']
+    const names = ['Ada', 'Grace', 'Alan', 'Radia', 'Barbara', 'Katherine', 'Edsger', 'Margaret', 'Donald', 'Frances', 'Ken', 'Lynn']
+    const people = names.map((name, index) => ({
+      id: `p${index}`,
+      name,
+      allocations: Object.fromEntries(weeks.map((week, offset) => [week, 24 + ((index * 7 + offset * 5) % 24)])),
+    }))
+    table.dataSource = {
+      getRows: ({ start, count }) => new Promise((resolve) => setTimeout(() => resolve({ rows: people.slice(start, start + count), total: people.length }), 600)),
+    }
+  }
+
   function setup() {
-    document.querySelectorAll<Table>('c2-table[data-table-example], c2-group-table[data-table-example], c2-tree-table[data-table-example], c2-flowsheet[data-table-example]').forEach((table) => {
-      if (initialized.has(table)) return
-      initialized.add(table)
-      if (table.dataset.tableExample === 'lazy-children') {
-        // A short delay stands in for the network, so the spinner on the chevron shows.
-        ;(table as TreeTable).loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
-      }
-      if (table.dataset.tableExample === 'editable') editableGrid(table)
-      if (table.dataset.tableExample === 'timesheet') timesheet(table)
-      if (table.dataset.tableExample === 'journal') journal(table)
-      if (table.dataset.tableExample === 'line-items') lineItems(table)
-      if (table.dataset.tableExample === 'allocation') allocation(table)
-      if (table.dataset.tableExample === 'next-round') nextRound(table as Flowsheet)
-      if (table.dataset.tableExample === 'row-detail') {
-        // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
-        table.renderDetail = ({ row }) => {
-          const note = document.createElement('p')
-          note.textContent = String(row.note)
-          note.style.cssText = 'margin: 0; font-size: 13px; line-height: 1.5; max-width: 60ch'
-          return note
+    document
+      .querySelectorAll<Table>(
+        'c2-table[data-table-example], c2-group-table[data-table-example], c2-tree-table[data-table-example], c2-flowsheet[data-table-example], c2-allocation-grid[data-table-example]',
+      )
+      .forEach((table) => {
+        if (initialized.has(table)) return
+        initialized.add(table)
+        if (table.dataset.tableExample === 'lazy-children') {
+          // A short delay stands in for the network, so the spinner on the chevron shows.
+          ;(table as TreeTable).loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
         }
-      }
-    })
+        if (table.dataset.tableExample === 'editable') editableGrid(table)
+        if (table.dataset.tableExample === 'timesheet') timesheet(table)
+        if (table.dataset.tableExample === 'journal') journal(table)
+        if (table.dataset.tableExample === 'line-items') lineItems(table)
+        if (table.dataset.tableExample === 'allocation') allocation(table)
+        if (table.dataset.tableExample === 'next-round') nextRound(table as Flowsheet)
+        if (table.dataset.tableExample === 'goal-tree') goalTree(table)
+        if (table.dataset.tableExample === 'gradebook') gradebook(table)
+      if (table.dataset.tableExample === 'allocation-source') allocationSource(table)
+        if (table.dataset.tableExample === 'row-detail') {
+          // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
+          table.renderDetail = ({ row }) => {
+            const note = document.createElement('p')
+            note.textContent = String(row.note)
+            note.style.cssText = 'margin: 0; font-size: 13px; line-height: 1.5; max-width: 60ch'
+            return note
+          }
+        }
+      })
   }
 
   setup()

@@ -5037,6 +5037,72 @@
       "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
     },
     {
+      "tag": "c2-allocation-grid",
+      "slot": "cell:{line}:{field}",
+      "decision": "assigned-content",
+      "reason": "The cell:{line}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "fallback",
+      "decision": "assigned-content",
+      "reason": "The fallback remains consumer-owned semantic light DOM before upgrade and is intentionally hidden once the interactive grid mounts."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "group:{groupKey}",
+      "decision": "assigned-content",
+      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-allocation-grid",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
+    },
+    {
       "tag": "c2-group-table",
       "slot": "cell:{line}:{field}",
       "decision": "assigned-content",

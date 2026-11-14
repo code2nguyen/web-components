@@ -1,0 +1,117 @@
+---
+title: 'Allocation grid gallery'
+description: 'Ready-made c2-allocation-grid setups: hours per week with totals, projects in percent grouped by team, an editable plan, sprints against velocity, a paged source and the load in French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import TableExamplesRuntime from '../../components/TableExamplesRuntime.astro'
+
+import { AllocationGrid } from '@c2n/components/table/allocation-grid'
+import { TableColumn } from '@c2n/components/table/table-column'
+
+<TableExamplesRuntime />
+
+`c2-allocation-grid` is a `c2-group-table` whose columns are periods and whose cells are compared with each row's capacity. Every card of the table and group table galleries works here too.
+
+## Allocations
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .alloc-hours {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<c2-allocation-grid client:only="lit" class="alloc-hours" row-key="id" row-totals rows='[{"id":"ada","name":"Ada Lovelace","team":"Platform","capacity":40,"allocations":{"2026-11-09":40,"2026-11-16":44,"2026-11-23":36,"2026-11-30":40}},{"id":"grace","name":"Grace Hopper","team":"Platform","capacity":32,"allocations":{"2026-11-09":32,"2026-11-16":24,"2026-11-23":32,"2026-11-30":40,"2026-12-07":32}},{"id":"alan","name":"Alan Turing","team":"Data","capacity":40,"allocations":{"2026-11-09":38,"2026-11-16":40,"2026-11-23":48,"2026-11-30":20}},{"id":"radia","name":"Radia Perlman","team":"Data","capacity":24,"allocations":{"2026-11-09":24,"2026-11-16":24,"2026-11-23":16,"2026-11-30":24,"2026-12-07":24}},{"id":"barbara","name":"Barbara Liskov","team":"Design","capacity":40,"allocations":{"2026-11-09":20,"2026-11-16":40,"2026-11-23":40,"2026-11-30":46,"2026-12-07":40}}]'>
+  <c2-table-column field="name" header="Person" width="minmax(150px, 1fr)" pinned="start" summary-label="Total"></c2-table-column>
+  <c2-table-column field="allocations" width="84px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-allocation-grid>
+```
+
+```html tag=MdxCodeBlock,label=Projects by team
+<style>
+  .alloc-percent {
+    height: 320px;
+    width: 100%;
+    --c2-allocation-grid__under--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-allocation-grid client:only="lit" class="alloc-percent" row-key="id" group-by="team" capacity="100" tolerance="0.1" rows='[{"id":"web","name":"Web relaunch","team":"Product","allocations":{"2026-11-09":60,"2026-11-16":80,"2026-11-23":100,"2026-11-30":100,"2026-12-07":70}},{"id":"api","name":"Billing API","team":"Product","allocations":{"2026-11-09":40,"2026-11-16":40,"2026-11-23":30,"2026-11-30":20,"2026-12-07":20}},{"id":"hire","name":"Hiring loop","team":"Operations","allocations":{"2026-11-09":10,"2026-11-16":10,"2026-11-23":20}},{"id":"ops","name":"On-call","team":"Operations","allocations":{"2026-11-09":20,"2026-11-16":20,"2026-11-23":20,"2026-11-30":20,"2026-12-07":20}}]'>
+  <c2-table-column field="name" header="Project" width="minmax(150px, 1fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" hidden></c2-table-column>
+  <c2-table-column field="allocations" width="84px" align="end" format="number" format-options='{"style":"unit","unit":"percent"}' summary="sum"></c2-table-column>
+</c2-allocation-grid>
+```
+
+```html tag=MdxCodeBlock,label=Editable plan
+<style>
+  .alloc-edit {
+    height: 280px;
+    width: 100%;
+  }
+</style>
+<c2-allocation-grid client:only="lit" class="alloc-edit" row-key="id" editable capacity="40" periods="2026-11-09;2026-11-16;2026-11-23;2026-11-30" rows='[{"id":"ada","name":"Ada Lovelace","allocations":{"2026-11-09":40,"2026-11-16":16}},{"id":"alan","name":"Alan Turing","allocations":{"2026-11-09":44}},{"id":"radia","name":"Radia Perlman","capacity":24,"allocations":{"2026-11-16":24}}]'>
+  <c2-table-column field="name" header="Person" width="minmax(150px, 1fr)"></c2-table-column>
+  <c2-table-column field="allocations" width="96px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+</c2-allocation-grid>
+```
+
+```html tag=MdxCodeBlock,label=Sprints and velocity
+<style>
+  .alloc-sprints {
+    height: 240px;
+    width: 100%;
+  }
+</style>
+<c2-allocation-grid client:only="lit" class="alloc-sprints" row-key="id" allocations-field="points" capacity-field="velocity" period-format="text" tolerance="0.1" rows='[{"id":"t1","name":"Checkout team","velocity":34,"points":{"Sprint 9":30,"Sprint 10":36,"Sprint 11":34,"Sprint 12":21}},{"id":"t2","name":"Search team","velocity":26,"points":{"Sprint 9":26,"Sprint 10":22,"Sprint 11":31,"Sprint 12":26}},{"id":"t3","name":"Mobile team","velocity":20,"points":{"Sprint 9":18,"Sprint 10":20,"Sprint 11":20,"Sprint 12":24}}]'>
+  <c2-table-column field="name" header="Team" width="minmax(150px, 1fr)"></c2-table-column>
+  <c2-table-column field="velocity" header="Velocity" width="90px" align="end"></c2-table-column>
+  <c2-table-column field="points" width="96px" align="end" format="number"></c2-table-column>
+</c2-allocation-grid>
+```
+
+```html tag=MdxCodeBlock,label=Loaded a page at a time
+<style>
+  .alloc-source {
+    height: 280px;
+    width: 100%;
+  }
+</style>
+<c2-allocation-grid client:only="lit" class="alloc-source" data-table-example="allocation-source" row-key="id" capacity="40" paginated page-size="5" periods="2026-11-09;2026-11-16;2026-11-23">
+  <c2-pagination slot="footer"></c2-pagination>
+  <c2-table-column field="name" header="Person" width="minmax(150px, 1fr)"></c2-table-column>
+  <c2-table-column field="allocations" width="96px" align="end" format="number"></c2-table-column>
+</c2-allocation-grid>
+```
+
+```html tag=MdxCodeBlock,label=Charge (French)
+<style>
+  .alloc-fr {
+    height: 220px;
+    width: 100%;
+  }
+</style>
+<div lang="fr">
+  <c2-allocation-grid client:only="lit" class="alloc-fr" row-key="id" row-totals capacity="35" rows='[{"id":"a","name":"Amélie","allocations":{"2026-11-09":35,"2026-11-16":42}},{"id":"b","name":"Bastien","allocations":{"2026-11-09":28,"2026-11-16":35}}]'>
+    <c2-table-column field="name" header="Personne" width="minmax(150px, 1fr)"></c2-table-column>
+    <c2-table-column field="allocations" width="96px" align="end" format="number" locale="fr-FR"></c2-table-column>
+  </c2-allocation-grid>
+</div>
+```
+
+</GalleryGrid>
+
+"Loaded a page at a time" gets its people from a `dataSource` that answers after a short delay, standing in for the network. The table only holds the page it fetched, so the weeks come from `periods`.
+
+```ts tag=CodeBlock
+grid.dataSource = {
+  async getRows({ start, count }) {
+    const response = await fetch(`/api/allocations?start=${start}&count=${count}`)
+    return response.json() // { rows: [{ id, name, capacity, allocations: { '2026-11-09': 32 } }], total }
+  },
+}
+```

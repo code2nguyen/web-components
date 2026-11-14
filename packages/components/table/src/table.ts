@@ -31,6 +31,7 @@ import {
   type TableCellOption,
   type TableChanges,
   type TableCellFlag,
+  type TableCellPartResolver,
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
   type TableFilterChangeEventDetail,
@@ -366,7 +367,7 @@ export interface Table {
  * @csspart selection-header-cell - The header cell containing the select-all checkbox.
  * @csspart resizer - The pointer target used to resize a column.
  * @csspart sort-icon - The sort-direction indicator in a sortable header.
- * @csspart cell - Every body grid cell.
+ * @csspart cell - Every body grid cell. Also carries the names `cellPart` returns for it, such as `cell-failing`.
  * @csspart selection-cell - A body cell containing a row-selection checkbox.
  * @csspart skeleton - Placeholder displayed while a remote row is loading.
  * @csspart cell-content - The content wrapper inside a body cell.
@@ -616,6 +617,13 @@ export class Table extends LitElement {
 
   /** Duration of an animated rows update in milliseconds. */
   @property({ type: Number, attribute: 'update-duration' }) updateDuration = 400
+
+  /**
+   * Returns extra part names for a body cell from its value and row, added beside `cell` so a stylesheet can reach
+   * cells by state: `({ column, value }) => column.field === 'score' && value < 50 ? 'cell-failing' : undefined` and
+   * `c2-table::part(cell-failing)`. A string (whitespace-separated names) or an array. Property only.
+   */
+  @property({ attribute: false }) cellPart?: TableCellPartResolver
 
   /** Returns inline styles for a row from its current data. Property only; animated updates pass the intermediate row. */
   @property({ attribute: false }) rowStyle?: TableRowStyler
@@ -1751,6 +1759,7 @@ export class Table extends LitElement {
     // A column comparing with `baseline` shows each cell's change, and marks a change past its threshold.
     const versus = row && this.baseline && (column.compare || column.varianceThreshold !== undefined) ? this.#versus(rowIndex, row, column, value) : undefined
     const flag = row && (column.referenceRange || column.criticalRange) ? this.#flagOf(this.#sourceRowAt(rowIndex) ?? row, column, value) : undefined
+    const decoration = row && column.field !== SELECTION_FIELD ? this.cellDecoration(this.#sourceRowAt(rowIndex) ?? row, rowIndex, column, value) : undefined
     // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
     // module knows rows as the application gave them, not the interpolated copy an animated update draws.
     const editing = row ? this.#editing : undefined
@@ -1765,8 +1774,8 @@ export class Table extends LitElement {
       : row
         ? column.cellSlot
           ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-          : versus?.delta !== undefined || flag
-            ? html`${rendered}${flag?.mark}${versus?.delta}`
+          : versus?.delta !== undefined || flag || decoration?.mark !== undefined
+            ? html`${rendered}${flag?.mark}${decoration?.mark}${versus?.delta}`
             : rendered
         : html`<span class="skeleton" part="skeleton"></span>`
 
@@ -1788,7 +1797,7 @@ export class Table extends LitElement {
             : shared.class
         }
         role="gridcell"
-        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}${flag ? ` cell-flag cell-flag-${flag.flag}` : ''}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}${flag ? ` cell-flag cell-flag-${flag.flag}` : ''}${decoration?.parts ? ` ${decoration.parts}` : ''}"
         aria-colindex=${columnIndex + 1}
         aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
         title=${ifDefined(state?.error)}
@@ -1909,6 +1918,17 @@ export class Table extends LitElement {
       return Number.isFinite(number) ? number : undefined
     })
     return [low, high]
+  }
+
+  /**
+   * What a body cell adds to its parts and after its content: the names `cellPart` returns, and what a variant adds
+   * (`c2-allocation-grid` marks a week over capacity). Called for every rendered cell, so it stays cheap.
+   */
+  protected cellDecoration(row: TableRow, rowIndex: number, column: TableColumnConfig, value: unknown): { parts?: string; mark?: unknown } | undefined {
+    if (!this.cellPart) return undefined
+    const parts = this.cellPart({ row, rowIndex, column, value })
+    if (!parts) return undefined
+    return { parts: Array.isArray(parts) ? parts.join(' ') : String(parts) }
   }
 
   /** Whether `column` has a filter in its header: its own `filterable`, else the table's. */
@@ -2199,6 +2219,8 @@ export class Table extends LitElement {
     const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#animation?.transitionRows ?? this.sortedRows).length
     const inputs = [
       columns.length,
+      // The ids too: a variant may derive columns (the periods of an allocation grid) whose set changes at one length.
+      ...columns.map(columnKey),
       ...columns.map((column) => column.summary),
       this.columnElements,
       this.columns,

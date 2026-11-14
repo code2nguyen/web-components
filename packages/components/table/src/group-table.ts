@@ -488,7 +488,7 @@ export class GroupTable extends Table {
   /** The column aggregates of a group's rows, keyed by column id; the same `summary` the totals row uses. */
   #groupSummary(node: GroupNode, grouping: Grouping): Map<string, unknown> {
     const columns = this.resolvedColumns
-    const inputs = [this.columnElements, this.columns, ...columns.map((column) => column.summary)]
+    const inputs = [this.columnElements, this.columns, ...columns.map(columnKey), ...columns.map((column) => column.summary)]
     const cached = node.summary
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.values
     const rows = this.#groupRows(node, grouping)

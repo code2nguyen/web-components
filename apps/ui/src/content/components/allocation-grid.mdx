@@ -1,0 +1,86 @@
+---
+title: 'Allocation grid'
+description: 'People down the side and periods across: each cell an amount of the row’s capacity, coloured under, at or over it, with totals per person and per period.'
+category: 'Data display'
+package: '@c2n/table'
+tag: 'c2-allocation-grid'
+apiTags: ['c2-allocation-grid', 'c2-table-column']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { AllocationGrid } from '@c2n/components/table/allocation-grid'
+import { TableColumn } from '@c2n/components/table/table-column'
+
+`c2-allocation-grid` is [`c2-group-table`](/web-components/components/group-table) shaped for resource planning: each
+row is a person (a team, a machine, a room) with a capacity per period, each column a period, and each cell the amount
+allocated, coloured under, at or over the row's capacity. Grouping, sorting, filtering, editing, windowing and the
+rest are the table's and work the same.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/table/allocation-grid'
+```
+
+The entry registers `c2-allocation-grid`, `c2-group-table`, `c2-table`, `c2-table-column`, and the checkbox and spinner
+they render.
+
+## Usage
+
+Rows hold their allocations in an `allocations` object keyed by period, and their `capacity`. The `c2-table-column`
+whose `field` is `allocations` is the template of the period columns.
+
+```html tag=UsageBlock,package=@c2n/table
+<style>
+  .plan {
+    height: 260px;
+    width: 100%;
+  }
+</style>
+<div data-label="Hours per week">
+  <c2-allocation-grid client:only="lit" class="plan" row-key="id" row-totals rows='[{"id":"ada","name":"Ada Lovelace","team":"Platform","capacity":40,"allocations":{"2026-11-09":40,"2026-11-16":44,"2026-11-23":36,"2026-11-30":40}},{"id":"grace","name":"Grace Hopper","team":"Platform","capacity":32,"allocations":{"2026-11-09":32,"2026-11-16":24,"2026-11-23":32,"2026-11-30":40,"2026-12-07":32}},{"id":"alan","name":"Alan Turing","team":"Data","capacity":40,"allocations":{"2026-11-09":38,"2026-11-16":40,"2026-11-23":48,"2026-11-30":20}}]'>
+    <c2-table-column field="name" header="Person" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="allocations" width="90px" align="end" format="number" summary="sum"></c2-table-column>
+  </c2-allocation-grid>
+</div>
+```
+
+### Periods and capacity
+
+Every period found in the rows becomes a column, in order, and `periods` lists those shown even with nothing in them:
+the weeks of the plan. ISO dates are headed by their day (`period-format="date"`, the default); other keys
+(`Sprint 12`) are written as they are with `period-format="text"`, in natural order. A row's capacity per period is its
+`capacity` field (`capacity-field` names another), else the grid's `capacity`, so a team of full-timers needs one
+attribute:
+
+```html tag=CodeBlock
+<c2-allocation-grid row-key="id" capacity="100" tolerance="0.05" periods="2026-11-09;2026-11-16;2026-11-23" rows="...">
+  <c2-table-column field="name" header="Project"></c2-table-column>
+  <c2-table-column field="allocations" align="end" format="number" format-options='{"style":"unit","unit":"percent"}'></c2-table-column>
+</c2-allocation-grid>
+```
+
+### Load
+
+A cell with a number is under, at or over its row's capacity; `tolerance` (a share of the capacity) widens "at". The
+cell takes the `cell-allocation` part and one of `cell-under`, `cell-at` and `cell-over`, styled by the
+`--c2-allocation-grid__under--*`, `__at--*` and `__over--*` variables, and a screen reader hears the load after the
+value ("44, over capacity"). `row-totals` adds a total column after the periods, compared with the capacity of all of
+them, and `summary="sum"` on the template totals each period in the summary row.
+
+### Editing and groups
+
+With `editable` and `editor="number"` on the template, a cell is typed into like any other: the change lands in the
+row's `allocations`, fires `cell-change`, and the cell takes its new load at once. `group-by="team"` folds the people
+into teams, each with a row of its period subtotals.
+
+### For any table: `cellPart`
+
+The load is built on a property every table has: `cellPart` returns extra part names for a cell from its value and
+row, the cell-level twin of `rowPart`.
+
+```typescript tag=CodeBlock
+table.cellPart = ({ column, value }) => (column.field === 'score' && Number(value) < 50 ? 'cell-failing' : undefined)
+```

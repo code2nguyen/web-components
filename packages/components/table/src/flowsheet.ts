@@ -84,10 +84,6 @@ export class Flowsheet extends GroupTable {
     return identity === undefined ? undefined : this.#byMeasure().get(identity)?.[(column as SeriesColumn).seriesKey]
   }
 
-  protected override cellValue(row: TableRow, column: TableColumnConfig): unknown {
-    return 'seriesKey' in column ? this.readCell(row, column) : super.cellValue(row, column)
-  }
-
   protected override needsSort(changed: PropertyValues): boolean {
     // Observations are found by row key, so a new key re-reads them as a new list would.
     return (
