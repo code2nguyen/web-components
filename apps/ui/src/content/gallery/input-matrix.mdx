@@ -1,0 +1,91 @@
+---
+title: 'Input matrix gallery'
+description: 'Ready-made c2-input-matrix setups: quantities with totals, a timesheet in hours, SLA targets with typed cells, a value out of range, French numbers and two looks.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ChoiceMatrixExamplesRuntime from '../../components/ChoiceMatrixExamplesRuntime.astro'
+
+import { InputMatrix } from '@c2n/components/choice-matrix/input-matrix'
+
+<ChoiceMatrixExamplesRuntime />
+
+## Totals and typed cells
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-input-matrix label="Order quantities" row-header="Size" totals="both"
+  columns='[{"value":"black","label":"Black","min":0},{"value":"sand","label":"Sand","min":0}]'
+  rows='[{"value":"s","label":"S"},{"value":"m","label":"M"},{"value":"l","label":"L"}]'
+  value='{"s":{"black":12,"sand":4},"m":{"black":20,"sand":8},"l":{"black":14}}'></c2-input-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Timesheet in hours
+<c2-input-matrix label="Hours" row-header="Project" cell-type="duration" totals="both"
+  columns='[{"value":"mon","label":"Mon"},{"value":"tue","label":"Tue"},{"value":"wed","label":"Wed"}]'
+  rows='[{"value":"atlas","label":"Atlas","group":"Client work"},{"value":"brio","label":"Brio","group":"Client work"},{"value":"ops","label":"Support rota","group":"Internal"}]'
+  value='{"atlas":{"mon":240,"tue":300},"brio":{"mon":120,"wed":450},"ops":{"tue":90}}'></c2-input-matrix>
+```
+
+```html tag=MdxCodeBlock,label=SLA targets
+<c2-input-matrix label="Response targets" row-header="Priority"
+  columns='[{"value":"first","label":"First reply","type":"duration"},{"value":"tier","label":"Owner","type":"select","options":["Tier 1","Tier 2","On call"]},{"value":"from","label":"From","type":"date"}]'
+  rows='[{"value":"urgent","label":"Urgent"},{"value":"normal","label":"Normal"}]'
+  value='{"urgent":{"first":15,"tier":"On call","from":"2026-11-14"},"normal":{"first":480,"tier":"Tier 1"}}'></c2-input-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Out of range
+<c2-input-matrix label="Allocation" row-header="Team" totals="rows"
+  columns='[{"value":"q1","label":"Q1 %","max":100},{"value":"q2","label":"Q2 %","max":100}]'
+  rows='[{"value":"web","label":"Web"},{"value":"data","label":"Data"}]'
+  value='{"web":{"q1":60,"q2":120},"data":{"q1":40}}'></c2-input-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Quantités (French)
+<div lang="fr">
+  <c2-input-matrix client:only="lit" label="Quantités" row-header="Taille" totals="both"
+    columns='[{"value":"poids","label":"Poids (kg)"},{"value":"lot","label":"Lots"}]'
+    rows='[{"value":"a","label":"Palette A"},{"value":"b","label":"Palette B"}]'
+    value='{"a":{"poids":12.5,"lot":3},"b":{"poids":8.25}}'></c2-input-matrix>
+</div>
+```
+
+</GalleryGrid>
+
+## Looks
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Borderless cells
+<style>
+  .matrix-borderless {
+    --c2-input-matrix__input--border: 1px solid transparent;
+    --c2-input-matrix__input--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-input-matrix__total--background-color: transparent;
+    --c2-input-matrix__row--border-bottom: 0;
+  }
+</style>
+<c2-input-matrix class="matrix-borderless" label="Seats" totals="rows"
+  columns='[{"value":"jan","label":"Jan"},{"value":"feb","label":"Feb"},{"value":"mar","label":"Mar"}]'
+  rows='[{"value":"pro","label":"Pro"},{"value":"team","label":"Team"}]'
+  value='{"pro":{"jan":40,"feb":42,"mar":45},"team":{"jan":12,"feb":12,"mar":15}}'></c2-input-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Accent totals
+<style>
+  .matrix-accent {
+    --c2-input-matrix__total--background-color: light-dark(#ecfdf5, #0f2a20);
+    --c2-input-matrix__total--color: light-dark(#047857, #5fd3a6);
+    --c2-input-matrix__input__focus--border-color: #059669;
+    --c2-input-matrix__input__focus--outline: 2px solid rgba(5, 150, 105, 0.35);
+  }
+</style>
+<c2-input-matrix class="matrix-accent" label="Units shipped" totals="both"
+  columns='[{"value":"north","label":"North"},{"value":"south","label":"South"}]'
+  rows='[{"value":"w1","label":"Week 1"},{"value":"w2","label":"Week 2"}]'
+  value='{"w1":{"north":120,"south":80},"w2":{"north":95,"south":110}}'></c2-input-matrix>
+```
+
+</GalleryGrid>

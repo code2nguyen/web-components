@@ -14,6 +14,8 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { ChoiceMatrix } from '@c2n/choice-matrix'
+import type { InputMatrix } from '@c2n/choice-matrix/input-matrix.js'
+import type { RecordMerge } from '@c2n/choice-matrix/record-merge.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -24,9 +26,24 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-choice-matrix': Omit<C2Props<ChoiceMatrix>, 'rows' | 'columns'> & {
+        'use-all'?: Attribute
         'row-header'?: Attribute
         rows?: ChoiceMatrix['rows'] | string
         columns?: ChoiceMatrix['columns'] | string
+      }
+      'c2-input-matrix': Omit<C2Props<InputMatrix>, 'columns' | 'rows'> & {
+        'cell-type'?: Attribute
+        'row-header'?: Attribute
+        columns?: InputMatrix['columns'] | string
+        rows?: InputMatrix['rows'] | string
+      }
+      'c2-record-merge': Omit<C2Props<RecordMerge>, 'records' | 'fields' | 'rows' | 'columns'> & {
+        'use-all'?: Attribute
+        'row-header'?: Attribute
+        records?: RecordMerge['records'] | string
+        fields?: RecordMerge['fields'] | string
+        rows?: RecordMerge['rows'] | string
+        columns?: RecordMerge['columns'] | string
       }
     }
   }

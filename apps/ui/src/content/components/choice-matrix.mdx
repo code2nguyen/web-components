@@ -54,3 +54,22 @@ Under a `name`, the form receives one `name[row]=column` entry per choice, as a 
 ### Accessibility
 
 The matrix is a group named by `label` holding a table: each choice is named by its row and its column, so a screen reader reads both as you move. A radio row is one stop in the tab order, and the arrow keys move along it. On a narrow screen the table scrolls sideways with the row titles held in place.
+
+### Cell content
+
+A cell can show the value it stands for beside its control: `cells` holds text by row and column
+(`{"statin":{"change":"40 mg nightly"}}`), and `renderCell` draws anything Lit renders. The control and the content form
+one label, so the text is a target too and is part of the control's name. With `type="radio"`, `use-all` puts a
+"Use all" button under each column, which chooses it in every row: a medication reconciliation (keep, change,
+stop) or picking the source of each field reads this way.
+
+```typescript tag=CodeBlock
+matrix.renderCell = ({ row, column, checked }) => html`<strong>${price(row.value, column.value)}</strong>`
+```
+
+### Companions
+
+The package has two more elements built on this one:
+[`c2-input-matrix`](/web-components/components/input-matrix), a typed input in every cell with totals, and
+[`c2-record-merge`](/web-components/components/record-merge), duplicate records side by side to pick each field's
+value.

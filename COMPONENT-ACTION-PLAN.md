@@ -86,7 +86,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **choice-matrix-1** · `c2-choice-matrix` · input matrix #248 (companion), record merge #251 · +0.8 kB on 4.8 kB, 3 kB new entry · risk low
 - **choice-matrix-2** · `c2-choice-matrix` · scorecard #316, example: rubric #317, example: inspection checklist #318 · +1.2 kB on 4.8 kB · risk low
 - **description-list-2** · `c2-description-list` · property list #253 (lazy), calculation breakdown #337, example: pay stub #354 · +1.2 kB on 5.6 kB, 6 kB lazy · risk low
 - **autocomplete-1** · `c2-autocomplete` · record picker #252 · +2.5 kB on 26.0 kB · risk low

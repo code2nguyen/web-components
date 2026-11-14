@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/choice-matrix.ts'],
+      entry: ['src/choice-matrix.ts', 'src/input-matrix.ts', 'src/record-merge.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/choice-matrix.ts'],
+      files: ['src/choice-matrix.ts', 'src/matrix-base.ts', 'src/input-matrix.ts', 'src/record-merge.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

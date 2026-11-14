@@ -61,6 +61,14 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
     tag: 'c2-choice-matrix',
     markup: `<c2-choice-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-choice-matrix>`,
   },
+  {
+    tag: 'c2-input-matrix',
+    markup: `<c2-input-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-input-matrix>`,
+  },
+  {
+    tag: 'c2-record-merge',
+    markup: `<c2-record-merge records='[{"id":"a","label":"A","values":{"name":"Ada"}}]'></c2-record-merge>`,
+  },
 ]
 
 for (const { tag, markup, selfLabelled } of controls) {

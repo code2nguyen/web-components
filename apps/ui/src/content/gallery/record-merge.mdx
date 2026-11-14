@@ -1,0 +1,89 @@
+---
+title: 'Record merge gallery'
+description: 'Ready-made c2-record-merge setups: two contacts with a preview, three companies, grouped fields, formatted values, French and an accent look.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChoiceMatrixExamplesRuntime from '../../components/ChoiceMatrixExamplesRuntime.astro'
+
+import { RecordMerge } from '@c2n/components/choice-matrix/record-merge'
+
+<ChoiceMatrixExamplesRuntime />
+
+## Merges
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-record-merge label="Merge contacts" row-header="Field" preview
+  records='[{"id":"a","label":"CRM","values":{"name":"Ada Lovelace","email":"ada@example.com","phone":""}},{"id":"b","label":"Web form","values":{"name":"A. Lovelace","email":"ada@analytical.org","phone":"+44 20 7946 0000"}}]'
+  fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"},{"key":"phone","label":"Phone"}]'
+  value='{"phone":"b"}'></c2-record-merge>
+```
+
+```html tag=MdxCodeBlock,label=Three companies
+<c2-record-merge label="Merge companies" row-header="Field" primary="hub"
+  records='[{"id":"crm","label":"Salesforce","values":{"name":"Brio AB","domain":"brio.se","industry":"Retail"}},{"id":"hub","label":"HubSpot","values":{"name":"Brio","domain":"brio.se","industry":""}},{"id":"erp","label":"ERP","values":{"name":"BRIO AKTIEBOLAG","domain":"","industry":"Toys"}}]'
+  fields='[{"key":"name","label":"Name"},{"key":"domain","label":"Domain"},{"key":"industry","label":"Industry"}]'></c2-record-merge>
+```
+
+```html tag=MdxCodeBlock,label=Grouped fields
+<c2-record-merge label="Merge accounts" row-header="Field" preview
+  records='[{"id":"a","label":"Account 1","values":{"name":"Kiwi Ltd","plan":"Team","seats":12,"billing":"invoice"}},{"id":"b","label":"Account 2","values":{"name":"Kiwi","plan":"Scale","seats":40,"billing":"card"}}]'
+  fields='[{"key":"name","label":"Name","group":"Profile"},{"key":"plan","label":"Plan","group":"Subscription"},{"key":"seats","label":"Seats","group":"Subscription"},{"key":"billing","label":"Billing","group":"Subscription","disabled":true,"description":"Kept from the survivor"}]'></c2-record-merge>
+```
+
+```html tag=MdxCodeBlock,label=Formatted values
+<style>
+  .merge-none {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-record-merge data-record-merge-example="format" label="Merge deals" row-header="Field" preview
+  records='[{"id":"a","label":"Deal 311","values":{"created":"2026-03-02","revenue":12000,"stage":"Won"}},{"id":"b","label":"Deal 340","values":{"created":"2026-04-18","revenue":14500,"stage":""}}]'
+  fields='[{"key":"created","label":"Created"},{"key":"revenue","label":"Revenue"},{"key":"stage","label":"Stage"}]'></c2-record-merge>
+```
+
+```html tag=MdxCodeBlock,label=Fusion (French)
+<div lang="fr">
+  <c2-record-merge client:only="lit" label="Fusionner" row-header="Champ" preview
+    records='[{"id":"a","label":"Fiche 1","values":{"nom":"Marie Curie","ville":"Paris"}},{"id":"b","label":"Fiche 2","values":{"nom":"M. Curie","ville":""}}]'
+    fields='[{"key":"nom","label":"Nom"},{"key":"ville","label":"Ville"}]'></c2-record-merge>
+</div>
+```
+
+</GalleryGrid>
+
+The formatted card sets `formatValue`:
+
+```ts tag=CodeBlock
+merge.formatValue = ({ field, value }) => {
+  if (value === undefined || value === null || value === '') return html`<span class="merge-none">none</span>`
+  if (field.key === 'created') return new Date(String(value)).toLocaleDateString('en-US', { dateStyle: 'medium' })
+  if (field.key === 'revenue') return money.format(Number(value))
+  return String(value)
+}
+```
+
+## Looks
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Accent result
+<style>
+  .merge-accent {
+    --c2-record-merge__result--background-color: light-dark(#eef2ff, #1c2142);
+    --c2-record-merge__result--color: light-dark(#3730a3, #a5b0f5);
+    --c2-choice-matrix__cell__selected--background-color: light-dark(#eef2ff, #1c2142);
+    --c2-choice-matrix__control__selected--background-color: #4f46e5;
+  }
+</style>
+<c2-record-merge class="merge-accent" label="Merge" row-header="Field" preview
+  records='[{"id":"a","label":"Old","values":{"title":"Head of Ops","city":"Lyon"}},{"id":"b","label":"New","values":{"title":"COO","city":"Lyon"}}]'
+  fields='[{"key":"title","label":"Title"},{"key":"city","label":"City"}]'
+  value='{"title":"b"}'></c2-record-merge>
+```
+
+</GalleryGrid>
