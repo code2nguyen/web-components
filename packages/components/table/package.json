@@ -17,6 +17,10 @@
       "types": "./types/src/group-table.d.ts",
       "default": "./dist/group-table.js"
     },
+    "./tree-table.js": {
+      "types": "./types/src/tree-table.d.ts",
+      "default": "./dist/tree-table.js"
+    },
     "./table-column.js": {
       "types": "./types/src/table-column.d.ts",
       "default": "./dist/table-column.js"
@@ -116,7 +120,8 @@
   "c2n": {
     "separateEntries": [
       "./flowsheet.js",
-      "./group-table.js"
+      "./group-table.js",
+      "./tree-table.js"
     ]
   }
 }

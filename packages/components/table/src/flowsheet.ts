@@ -1,7 +1,6 @@
 import { html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { arrayPropertyConverter, jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
-import { getFieldValue } from '@c2n/core/data-helper.js'
 import styles from './flowsheet.scss?inline'
 import { GroupTable } from './group-table.js'
 import { columnKey } from './table-shared.js'
@@ -29,7 +28,7 @@ export interface FlowsheetObservation {
  * Everything `c2-group-table` does applies: `group-by="system"` folds the measures into collapsible groups, a
  * `reference-range` / `critical-range` on the template flags each reading against its row's limits (`L`, `H`, `LL`,
  * `HH`), and a time column sorts, filters and edits like any column. An edit writes into the row's own readings,
- * which win over an observation at the same time. In a tree (`children-field`), the times of nested measures count.
+ * which win over an observation at the same time.
  *
  * @tag c2-flowsheet
  *
@@ -116,23 +115,6 @@ export class Flowsheet extends GroupTable {
     return byMeasure
   }
 
-  /** Every row, nested ones included: the times of a measure under a parent count too. */
-  #allRows(): TableRow[] {
-    const rows = this.sourceRows()
-    const children = this.childrenField
-    if (!children) return rows
-    const all: TableRow[] = []
-    const visit = (list: unknown) => {
-      if (!Array.isArray(list)) return
-      for (const row of list as TableRow[]) {
-        all.push(row)
-        visit(getFieldValue(row, children))
-      }
-    }
-    visit(rows)
-    return all
-  }
-
   /** The columns the template stands for: one per time, kept while the rows and the template are the same. */
   #timeColumns(template: TableColumnConfig): TableColumnConfig[] {
     if (this.dataSource) this.#warn('source', 'c2-flowsheet: with a `dataSource` the times come from `times` only: the rows arrive a window at a time.')
@@ -140,7 +122,6 @@ export class Flowsheet extends GroupTable {
     const inputs = [
       this.dataSource ? undefined : this.rows,
       this.observations,
-      this.childrenField,
       field,
       columnKey(template),
       this.times,
@@ -150,7 +131,7 @@ export class Flowsheet extends GroupTable {
     ]
     const cached = this.#series.get(template)
     if (cached?.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.columns
-    const rows = this.dataSource ? [] : this.#allRows()
+    const rows = this.dataSource ? [] : this.sourceRows()
     // The times of the measures the flowsheet has: a reading of a measure no row has is left out, with its time.
     const byMeasure = this.observations?.length ? this.#byMeasure() : undefined
     const observed = byMeasure ? rows.flatMap((row) => Object.keys(byMeasure.get(this.identityOf(row) ?? '') ?? {})) : []

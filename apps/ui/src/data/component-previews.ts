@@ -615,6 +615,10 @@ Type help for commands.</span></c2-terminal>`,
   </c2-tree-item>
   <c2-tree-item value="design" label="Design"></c2-tree-item>
 </c2-tree-select>`,
+  'tree-table': `<c2-tree-table row-key="id" children-field="children" tree-expanded style="height:180px;width:100%" rows='[
+  {"id":"eng","name":"Engineering","children":[{"id":"web","name":"Web platform","budget":1820000},{"id":"mobile","name":"Mobile","budget":1160000}]},
+  {"id":"ops","name":"Operations","budget":390000}
+]'><c2-table-column field="name" header="Team" width="2fr"></c2-table-column><c2-table-column field="budget" header="Budget" width="120px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' rollup="sum"></c2-table-column></c2-tree-table>`,
   'treemap-chart': `<c2-treemap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart--font-size:10px" aria-label="Market cap by sector" label-field="ticker" group-field="sector" data='[{"sector":"Tech","ticker":"AAPL","cap":34},{"sector":"Tech","ticker":"MSFT","cap":31},{"sector":"Tech","ticker":"NVDA","cap":29},{"sector":"Media","ticker":"GOOGL","cap":21},{"sector":"Media","ticker":"META","cap":14},{"sector":"Retail","ticker":"AMZN","cap":19},{"sector":"Retail","ticker":"TSLA","cap":8}]'><c2-chart-series field="cap" label="Market cap"></c2-chart-series></c2-treemap-chart>`,
   truncate: `<c2-truncate expandable style="max-width: 240px; --c2-truncate__content--line-clamp: 2">Quarterly revenue grew 18% year over year, led by the enterprise segment, while churn in the self-serve tier fell again.</c2-truncate>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,

@@ -3,7 +3,7 @@ import { arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { TableColumn } from './table-column.js'
 import type { ColumnPin, TableColumnConfig, TableSummaryAggregate } from './table-types.js'
 
-// What `c2-table` and `c2-group-table` both use. Not a public entry: it is not in the package's `exports`.
+// What `c2-table` and its variants (`c2-group-table`, `c2-tree-table`, `c2-flowsheet`) share. Not a public entry: it is not in the package's `exports`.
 
 /** Field of the synthetic checkbox column, so it can live in the same render pipeline as the real columns. */
 export const SELECTION_FIELD = '__c2-selection'
@@ -119,4 +119,9 @@ export const rowKeyListConverter = { ...keyListConverter, fromProperty: rowKeysC
 export function filterText(value: unknown): string {
   if (value === null || value === undefined) return ''
   return value instanceof Date ? value.toISOString() : String(value)
+}
+
+/** The column holding a group or tree hierarchy: the one marked `group-column`, else the first data column. */
+export function hierarchyColumn(columns: TableColumnConfig[]): TableColumnConfig | undefined {
+  return columns.find((column) => column.groupColumn && column.field !== SELECTION_FIELD) ?? columns.find((column) => column.field !== SELECTION_FIELD)
 }

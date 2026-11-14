@@ -1,0 +1,13 @@
+// The indentation of a hierarchy, shared by `c2-group-table` and `c2-tree-table`: the chevron and the content under
+// it move in by `group--indent` per level. Each variant keeps `group--indent` in its own `$theme`, which configures
+// the `css` module this partial uses.
+@use '@c2n/sass/css-variable' as css;
+
+.group-toggle {
+  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
+}
+
+// Data rows line their text up with the label above them, past its chevron.
+.cell-content--indented {
+  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
+}

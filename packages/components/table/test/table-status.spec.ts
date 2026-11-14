@@ -153,14 +153,14 @@ test('a tree parent shows the tally of its leaves, and a running total counts th
     },
     { id: 'us', name: 'United States', state: 'pass', debit: 100 },
   ]
-  await renderScenario(`<c2-group-table style="height:240px;width:560px" row-key="id" aria-label="Regions" children-field="children" tree-expanded rows='${JSON.stringify(tree)}'>
+  await renderScenario(`<c2-tree-table style="height:240px;width:560px" row-key="id" aria-label="Regions" children-field="children" tree-expanded rows='${JSON.stringify(tree)}'>
   <c2-table-column field="name" header="Region" width="180px"></c2-table-column>
   <c2-table-column field="state" header="State" width="160px" format="status" rollup="tally" options='[{"value":"pass","label":"Passing","glyph":"✓"},{"value":"fail","label":"Failing","glyph":"✕"}]'></c2-table-column>
   <c2-table-column column-id="balance" header="Balance" width="120px" align="end" running="-debit" opening="1000" summary="last"></c2-table-column>
-</c2-group-table>`)
-  await expect(page.locator('c2-group-table').locator('.row--body').first().locator('[part~="cell-state"]')).toHaveText(/✓Passing\s*1\s*✕Failing\s*1/)
-  await expect(page.locator('c2-group-table').locator('[part~="cell-balance"]')).toHaveText(['', '800', '500', '400'])
-  await expect(page.locator('c2-group-table').locator('[part~="summary-cell-balance"]')).toHaveText('400')
+</c2-tree-table>`)
+  await expect(page.locator('c2-tree-table').locator('.row--body').first().locator('[part~="cell-state"]')).toHaveText(/✓Passing\s*1\s*✕Failing\s*1/)
+  await expect(page.locator('c2-tree-table').locator('[part~="cell-balance"]')).toHaveText(['', '800', '500', '400'])
+  await expect(page.locator('c2-tree-table').locator('[part~="summary-cell-balance"]')).toHaveText('400')
 })
 
 test('weekday and timeZoneName add to the default date style; year, month and day replace it', async ({ page, renderScenario }) => {

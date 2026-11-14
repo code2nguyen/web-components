@@ -3,6 +3,7 @@ import './translations'
 import '../src/table'
 import '../src/group-table'
 import '../src/flowsheet'
+import '../src/tree-table'
 import '../src/table-column'
 // The pager is only ever slotted into the table; the table never imports it.
 import '@c2n/pagination'
@@ -84,8 +85,8 @@ const api: TableBenchApi = {
     tick = 0
     marked = []
     const start = performance.now()
-    // A tree is `c2-group-table`'s; the flat cases measure `c2-table`.
-    const tag = options.childrenField !== undefined ? 'c2-group-table' : 'c2-table'
+    // A tree is `c2-tree-table`'s; the flat cases measure `c2-table`.
+    const tag = options.childrenField !== undefined ? 'c2-tree-table' : 'c2-table'
     main.innerHTML = `
       <${tag} id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36"${options.childrenField !== undefined ? ` children-field="${options.childrenField}"` : ''}>
         <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>

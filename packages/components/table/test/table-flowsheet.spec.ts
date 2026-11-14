@@ -148,18 +148,12 @@ test('with observations the rows stay the app’s own objects, an edit lands in 
   expect(stored).toEqual({ '2026-11-14T08:00': 90 })
 })
 
-test('a date alone is headed by its day, nested measures bring their times, and only two-line headers grow the header row', async ({
-  page,
-  renderScenario,
-}) => {
+test('a date alone is headed by its day, and only two-line headers grow the header row', async ({ page, renderScenario }) => {
   await renderScenario(flowsheet({ rows: [{ id: 'a', measure: 'Glucose', readings: { '2026-11-14': 104, '2026-11-15': 98 } }], ranges: '' }))
   await expect(headers(page)).toHaveText([/Measure/, /Nov 14, 2026/, /Nov 15, 2026/])
   const plain = await sheet(page).evaluate((element) => element.shadowRoot!.querySelector<HTMLElement>('.row--header')!.offsetHeight)
 
-  const panel = [{ id: 'bmp', measure: 'Basic panel', children: [{ id: 'k', measure: 'Potassium', readings: { '2026-11-14T08:00': 4.1 } }] }]
-  await renderScenario(flowsheet({ rows: panel, host: 'children-field="children" tree-expanded', ranges: '' }))
-  await expect(headers(page)).toHaveCount(2)
-  await expect(row(page, 1)).toHaveText([/Potassium/, /4\.1/])
+  await renderScenario(flowsheet({ ranges: '' }))
   const twoLines = await sheet(page).evaluate((element) => element.shadowRoot!.querySelector<HTMLElement>('.row--header')!.offsetHeight)
   expect(twoLines).toBeGreaterThan(plain)
 })

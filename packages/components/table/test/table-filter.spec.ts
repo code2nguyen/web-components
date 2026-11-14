@@ -186,14 +186,14 @@ test('a tree keeps the parents of a matching row, and a data source lists the op
     },
     { id: 'B', name: 'Brio', status: 'Paid' },
   ]
-  await renderScenario(`<c2-group-table style="height:300px;width:420px" row-key="id" aria-label="Projects" children-field="children" expanded-rows="A" filters='{"status":{"include":["Paid"]}}' rows='${JSON.stringify(tree)}'>
+  await renderScenario(`<c2-tree-table style="height:300px;width:420px" row-key="id" aria-label="Projects" children-field="children" expanded-rows="A" filters='{"status":{"include":["Paid"]}}' rows='${JSON.stringify(tree)}'>
   <c2-table-column field="name" header="Name" width="200px"></c2-table-column>
   <c2-table-column field="status" header="Status" width="140px" filterable></c2-table-column>
-</c2-group-table>`)
-  const names = page.locator('c2-group-table [part~="cell-name"]')
+</c2-tree-table>`)
+  const names = page.locator('c2-tree-table [part~="cell-name"]')
   await expect(names).toHaveText([/Atlas\s*$/, /Atlas API/, /Brio/])
-  await page.locator('c2-group-table').getByRole('button', { name: 'Filter Status' }).click()
-  await expect(page.locator('c2-group-table [part="filter"]').getByRole('checkbox')).toHaveCount(2)
+  await page.locator('c2-tree-table').getByRole('button', { name: 'Filter Status' }).click()
+  await expect(page.locator('c2-tree-table [part="filter"]').getByRole('checkbox')).toHaveCount(2)
 
   await renderScenario(`<c2-table style="height:300px;width:420px" row-key="id" aria-label="Remote" filterable>
   <c2-table-column field="id" header="Id" width="120px"></c2-table-column>

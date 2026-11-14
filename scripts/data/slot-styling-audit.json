@@ -4977,6 +4977,66 @@
       "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
     },
     {
+      "tag": "c2-tree-table",
+      "slot": "cell:{line}:{field}",
+      "decision": "assigned-content",
+      "reason": "The cell:{line}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "fallback",
+      "decision": "assigned-content",
+      "reason": "The fallback remains consumer-owned semantic light DOM before upgrade and is intentionally hidden once the interactive grid mounts."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-table",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
+    },
+    {
       "tag": "c2-group-table",
       "slot": "cell:{line}:{field}",
       "decision": "assigned-content",
