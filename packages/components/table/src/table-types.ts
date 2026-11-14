@@ -440,7 +440,12 @@ export interface TableSelectionChangeEventDetail {
   value: string[]
   /** The selected rows themselves; only the loaded ones when a `dataSource` is used. */
   rows: TableRow[]
+  /** How the selection was made: `rows` one by one, `page` the page on show, `all` every row (with a `dataSource`, every row it holds). */
+  scope: TableSelectionScope
 }
+
+/** How a selection was made (`selectionScope`): one row at a time, the page on show, or every row. */
+export type TableSelectionScope = 'rows' | 'page' | 'all'
 
 export interface TableSortChangeEventDetail {
   sort: SortModel[]

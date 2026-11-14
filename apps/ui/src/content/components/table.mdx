@@ -198,6 +198,21 @@ The two ways are exclusive per table, not merged: `c2-table-column` children win
 is the fallback and never a way to patch a child. With neither, the table derives one column per key of the first row,
 which is enough to look at a response before deciding how to present it.
 
+### Selecting a page or every row
+
+The header checkbox selects the rows on show: every row, or the page while the table is paginated. `bulk-select` adds a
+caret beside it with a menu of the three choices a long list needs: this page, all N rows, or none. `selectPage()`,
+`selectAll()` and `clearSelection()` do the same from script.
+
+```html tag=CodeBlock
+<c2-table selection="multiple" checkbox-selection bulk-select paginated page-size="25" row-key="id" rows="..."></c2-table>
+```
+
+`selection-change` says how the selection was made in `detail.scope`, also kept in `selectionScope`: `rows` one by one,
+`page` the page on show, `all` every row. With a `dataSource` the table only holds the pages it fetched, so `value`
+has the loaded keys while `scope` is `all`: act on the whole set server side ("archive every invoice that matches"), and
+the rows that arrive later are drawn selected.
+
 ### Selecting rows: row keys
 
 Selection names a row by its **key**, and so do `value`, the `selection-change` and `row-click` details and the

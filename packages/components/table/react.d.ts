@@ -61,6 +61,8 @@ declare module 'react' {
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         periods?: AllocationGrid['periods'] | string
         groupBy?: AllocationGrid['groupBy'] | string
         expandedGroups?: AllocationGrid['expandedGroups'] | string
@@ -104,6 +106,8 @@ declare module 'react' {
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         observations?: Flowsheet['observations'] | string
         times?: Flowsheet['times'] | string
         groupBy?: Flowsheet['groupBy'] | string
@@ -145,6 +149,8 @@ declare module 'react' {
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         groupBy?: GroupTable['groupBy'] | string
         expandedGroups?: GroupTable['expandedGroups'] | string
         rows?: GroupTable['rows'] | string
@@ -176,6 +182,8 @@ declare module 'react' {
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         rows?: Table['rows'] | string
         columns?: Table['columns'] | string
         value?: Table['value'] | string
@@ -229,6 +237,8 @@ declare module 'react' {
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         expandedRows?: TreeTable['expandedRows'] | string
         rows?: TreeTable['rows'] | string
         columns?: TreeTable['columns'] | string

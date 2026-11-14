@@ -48,6 +48,12 @@
         allocationAt: 'à capacité',
         allocationOver: 'au-delà de la capacité',
         rowTotal: 'Total',
+        selectRow: 'Sélectionner la ligne',
+        selectAllRows: 'Tout sélectionner',
+        selectionOptions: 'Options de sélection',
+        selectPageRows: 'Sélectionner cette page ({0})',
+        selectAllCount: 'Tout sélectionner ({0})',
+        clearSelection: 'Effacer la sélection',
       },
       'facet-list': {
         clear: 'Effacer',
@@ -392,6 +398,17 @@
     }
   }
 
+  /** The bulk selection card: its toolbar says how many invoices the selection holds and how they were chosen. */
+  function bulkSelect(table: Table) {
+    const status = table.querySelector<HTMLElement>('[data-bulk-status]')
+    table.addEventListener('selection-change', (event) => {
+      if (!status) return
+      const { value, scope } = event.detail
+      status.textContent =
+        value.length === 0 ? 'No invoices selected' : scope === 'all' ? `All ${value.length} invoices selected` : scope === 'page' ? `${value.length} invoices on this page selected` : `${value.length} selected`
+    })
+  }
+
   function setup() {
     document
       .querySelectorAll<Table>(
@@ -412,6 +429,7 @@
         if (table.dataset.tableExample === 'next-round') nextRound(table as Flowsheet)
         if (table.dataset.tableExample === 'goal-tree') goalTree(table)
         if (table.dataset.tableExample === 'gradebook') gradebook(table)
+      if (table.dataset.tableExample === 'bulk-select') bulkSelect(table)
       if (table.dataset.tableExample === 'allocation-source') allocationSource(table)
         if (table.dataset.tableExample === 'row-detail') {
           // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.

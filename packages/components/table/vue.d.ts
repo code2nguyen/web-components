@@ -54,6 +54,8 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onGroupToggle?: (event: EventOf<AllocationGrid, 'group-toggle'>) => void
         onPageChange?: (event: EventOf<AllocationGrid, 'page-change'>) => void
         onRangeChange?: (event: EventOf<AllocationGrid, 'range-change'>) => void
@@ -99,6 +101,8 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onGroupToggle?: (event: EventOf<Flowsheet, 'group-toggle'>) => void
         onPageChange?: (event: EventOf<Flowsheet, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Flowsheet, 'range-change'>) => void
@@ -141,6 +145,8 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onGroupToggle?: (event: EventOf<GroupTable, 'group-toggle'>) => void
         onPageChange?: (event: EventOf<GroupTable, 'page-change'>) => void
         onRangeChange?: (event: EventOf<GroupTable, 'range-change'>) => void
@@ -178,6 +184,8 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
@@ -235,6 +243,8 @@ declare module 'vue' {
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onRowToggle?: (event: EventOf<TreeTable, 'row-toggle'>) => void
         onChildrenError?: (event: EventOf<TreeTable, 'children-error'>) => void
         onPageChange?: (event: EventOf<TreeTable, 'page-change'>) => void

@@ -637,6 +637,11 @@
   padding: 0;
 }
 
+// The caret of the bulk selection menu, beside the header checkbox: a `.filter-button`, set close to the checkbox.
+.bulk-button {
+  margin-inline-start: -4px;
+}
+
 .cell--header {
   position: relative;
   gap: css.cssVar(header-cell--gap);

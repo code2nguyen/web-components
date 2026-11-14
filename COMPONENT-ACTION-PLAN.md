@@ -172,7 +172,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-9** · `c2-table` · bulk select #244 · +0.4 kB on 31.4 kB · risk low
 - **table-10** · `c2-table` · example: dose grid #424 (on `c2-flowsheet`, with a "now" column), example: requirement tree #433 · mitre matrix #411 is a board, not a table: move it to the kanban track · see `TABLE-VARIANTS.md`
 - **virtual-list-2** · `c2-virtual-list` · data view #245 · +1.5 kB on 17.1 kB · risk medium
 - **choice-matrix-3** · `c2-choice-matrix` · example: rotation editor #353
