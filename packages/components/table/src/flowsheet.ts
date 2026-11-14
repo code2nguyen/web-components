@@ -33,10 +33,15 @@ export interface FlowsheetObservation {
  * @tag c2-flowsheet
  *
  * @csspart time-day - The day written over the first time of each day in the headers.
+ * @csspart time-now - The header of the current time's column (`now`).
+ * @csspart cell-now - A cell of the current time's column (`now`), in addition to `cell`.
  *
  * @cssproperty {pixel} [--c2-flowsheet__header--height=48px] - The header row, which holds the day over the time.
  * @cssproperty {color} [--c2-flowsheet__time-day--color=#71717a]
  * @cssproperty {font-weight} [--c2-flowsheet__time-day--font-weight=600]
+ * @cssproperty {color} [--c2-flowsheet__now--background=rgba(2, 101, 220, 0.06)] - The cells of the current time's column (`now`).
+ * @cssproperty {color} [--c2-flowsheet__now-header--background=rgba(2, 101, 220, 0.12)]
+ * @cssproperty {box-shadow} [--c2-flowsheet__now-header--box-shadow=inset 0 -2px 0 0 rgb(2, 101, 220)] - The line under the current time's header.
  */
 @customElement('c2-flowsheet')
 export class Flowsheet extends GroupTable {
@@ -60,6 +65,15 @@ export class Flowsheet extends GroupTable {
   /** How the headers write the times: `time` (the default, with the day over the first time of each day), `date`, `datetime` or `text`. */
   @property({ type: String, attribute: 'time-format' }) timeFormat: ColumnFormat = 'time'
 
+  /**
+   * The time it is now, as an ISO time (`2026-11-14T12:10`). The column of the latest time not after it is marked as
+   * the current one (`cell-now`, `time-now`), as a medication or rounding plan shows the round that is due. Update
+   * it as the time passes; unset, no column is marked.
+   */
+  @property({ type: String }) now?: string
+
+  /** The current time's key per list of times (each template's columns share one), kept while `now` is the same. */
+  #nowCache = new WeakMap<string[], { now: string | undefined; key: string | undefined }>()
   #observed?: { inputs: unknown[]; byMeasure: Map<string, Record<string, unknown>> }
   #series = new WeakMap<TableColumnConfig, { inputs: unknown[]; columns: TableColumnConfig[] }>()
   #warned = new Set<string>()
@@ -140,8 +154,10 @@ export class Flowsheet extends GroupTable {
       const when = seriesDate(key)
       // A date alone has no time to show: it is headed by the day whatever the format.
       const dateOnly = key.length === 10
-      if (dateOnly || this.timeFormat !== 'time')
-        return { header: format(when, dateOnly && this.timeFormat === 'time' ? 'date' : this.timeFormat), renderHeader: undefined }
+      if (dateOnly || this.timeFormat !== 'time') {
+        const label = format(when, dateOnly && this.timeFormat === 'time' ? 'date' : this.timeFormat)
+        return { header: label, renderHeader: () => this.#nowMark(keys, key, label) }
+      }
       // The day over the first time of each day where the page is, so a night shift reads across midnight.
       const previous = index > 0 && ISO_DATE.test(keys[index - 1]) ? seriesDate(keys[index - 1]) : undefined
       const first = !previous || dayOf(previous) !== dayOf(when)
@@ -151,14 +167,53 @@ export class Flowsheet extends GroupTable {
       return {
         header,
         renderHeader: () =>
-          html`<span class="time-header"
-            ><span class="time-day" part="time-day" aria-hidden="true">${day}</span><span aria-hidden="true">${time}</span
-            ><span class="time-name">${header}</span></span
-          >`,
+          this.#nowMark(
+            keys,
+            key,
+            html`<span class="time-header"
+              ><span class="time-day" part="time-day" aria-hidden="true">${day}</span><span aria-hidden="true">${time}</span
+              ><span class="time-name">${header}</span></span
+            >`,
+          ),
       }
     })
+    // Each column knows the times of its template, which is what the current time is found among.
+    for (const column of columns) (column as TimeColumn).times = keys
     this.#series.set(template, { inputs, columns })
     return columns
+  }
+
+  /** The key of the current time's column among `keys`: the latest time not after `now`. */
+  #nowKey(keys: string[]): string | undefined {
+    const now = this.now || undefined
+    const cached = this.#nowCache.get(keys)
+    if (cached && cached.now === now) return cached.key
+    // Read like the keys: a date alone, or a time without a zone, is local.
+    const at = now && ISO_DATE.test(now) ? seriesDate(now).getTime() : now ? Date.parse(now) : Number.NaN
+    let key: string | undefined
+    let best = -Infinity
+    if (!Number.isNaN(at)) {
+      for (const candidate of keys) {
+        if (!ISO_DATE.test(candidate)) continue
+        const time = seriesDate(candidate).getTime()
+        if (time <= at && time > best) [key, best] = [candidate, time]
+      }
+    }
+    this.#nowCache.set(keys, { now, key })
+    return key
+  }
+
+  /** A time header, marked when it is the current one: a tint, and ", now" for a screen reader. */
+  #nowMark(keys: string[], key: string, content: unknown): unknown {
+    if (key !== this.#nowKey(keys)) return content
+    return html`<span class="time-now" part="time-now">${content}<span class="time-name">, ${this.msg.t('currentTime')}</span></span>`
+  }
+
+  protected override cellDecoration(row: TableRow, rowIndex: number, column: TableColumnConfig, value: unknown) {
+    const own = super.cellDecoration(row, rowIndex, column, value)
+    const { seriesKey, times } = column as Partial<TimeColumn>
+    if (seriesKey === undefined || !times || seriesKey !== this.#nowKey(times)) return own
+    return { ...own, parts: [own?.parts, 'cell-now'].filter(Boolean).join(' ') }
   }
 
   #warn(key: string, message: string) {
@@ -166,6 +221,11 @@ export class Flowsheet extends GroupTable {
     this.#warned.add(key)
     console.warn(message)
   }
+}
+
+/** A time column, with the times of its template. */
+interface TimeColumn extends SeriesColumn {
+  times: string[]
 }
 
 declare global {

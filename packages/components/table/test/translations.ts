@@ -27,6 +27,7 @@ const fr: typeof tableMessages.en = {
   allocationAt: 'à capacité',
   allocationOver: 'au-delà de la capacité',
   rowTotal: 'Total',
+  currentTime: 'maintenant',
   selectRow: 'Sélectionner la ligne',
   selectAllRows: 'Tout sélectionner',
   selectionOptions: 'Options de sélection',

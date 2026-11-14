@@ -157,3 +157,45 @@ test('a date alone is headed by its day, and only two-line headers grow the head
   const twoLines = await sheet(page).evaluate((element) => element.shadowRoot!.querySelector<HTMLElement>('.row--header')!.offsetHeight)
   expect(twoLines).toBeGreaterThan(plain)
 })
+
+test('now marks the column of the latest time not after it, header and cells, and moves when it changes', async ({ page, renderScenario }) => {
+  await renderScenario(flowsheet({ host: 'now="2026-11-14T13:30"', ranges: '' }))
+  await expect(headers(page).nth(2).locator('[part="time-now"]')).toHaveCount(1)
+  await expect(headers(page).nth(2)).toContainText('now')
+  await expect(row(page, 0).nth(2)).toHaveAttribute('part', /cell-now/)
+  await expect(row(page, 0).nth(1)).not.toHaveAttribute('part', /cell-now/)
+  await sheet(page).evaluate((element: HTMLElement & { now: string }) => (element.now = '2026-11-14T16:05'))
+  await expect(row(page, 0).nth(3)).toHaveAttribute('part', /cell-now/)
+  await expect(row(page, 0).nth(2)).not.toHaveAttribute('part', /cell-now/)
+  await expect(headers(page).nth(3).locator('[part="time-now"]')).toHaveCount(1)
+  // Before the first time, no column is current.
+  await sheet(page).evaluate((element: HTMLElement & { now: string }) => (element.now = '2026-11-14T06:00'))
+  await expect(sheet(page).locator('[part~="cell-now"]')).toHaveCount(0)
+  await accessible(page)
+})
+
+test('a flagged reading in the current column keeps its flag under the tint, and a date alone as now is read like the keys', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(flowsheet({ host: 'now="2026-11-14T13:30"' }))
+  const heart = row(page, 0).nth(2)
+  await expect(heart).toHaveAttribute('part', /cell-flag-high/)
+  await expect(heart).toHaveAttribute('part', /cell-now/)
+  const look = await heart.evaluate((cell) => {
+    const style = getComputedStyle(cell)
+    return { color: style.backgroundColor, image: style.backgroundImage }
+  })
+  expect(look.color).not.toBe('rgba(0, 0, 0, 0)')
+  expect(look.image).toContain('linear-gradient')
+
+  await renderScenario(
+    flowsheet({
+      rows: [{ id: 'a', measure: 'Weight', readings: { '2026-11-13': 70.2, '2026-11-14': 70.6 } }],
+      host: 'time-format="date" now="2026-11-14"',
+      ranges: '',
+    }),
+  )
+  await expect(row(page, 0).nth(2)).toHaveAttribute('part', /cell-now/)
+  await expect(headers(page).nth(2).locator('[part="time-now"]')).toContainText(', now')
+})

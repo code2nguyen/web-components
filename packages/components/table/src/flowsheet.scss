@@ -4,6 +4,9 @@
     header--height: 48px,
     time-day--color: #71717a,
     time-day--font-weight: 600,
+    now--background: rgba(2, 101, 220, 0.06),
+    now-header--background: rgba(2, 101, 220, 0.12),
+    now-header--box-shadow: inset 0 -2px 0 0 rgb(2, 101, 220),
   )
 );
 @use '@c2n/sass/visually-hidden';
@@ -29,4 +32,15 @@
 // The full date and time, for a screen reader: the two lines above are drawn, this is read.
 .time-name {
   @include visually-hidden.visually-hidden;
+}
+
+// The column of the current time (`now`). The tint is a layer over the cell's own background, so a flagged or invalid
+// reading keeps its colour under it, and the header keeps its hover and sorted looks.
+.cell--header:has(.time-now) {
+  background-image: linear-gradient(#{css.cssVar(now-header--background)}, #{css.cssVar(now-header--background)});
+  box-shadow: css.cssVar(now-header--box-shadow);
+}
+
+.cell[part~='cell-now'] {
+  background-image: linear-gradient(#{css.cssVar(now--background)}, #{css.cssVar(now--background)});
 }
