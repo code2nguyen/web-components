@@ -125,6 +125,7 @@
     pinned-end--box-shadow: -1px 0 0 0 #e4e4e7,
 
     selection-cell--width: 44px,
+    bulk-selection-cell--width: 64px,
 
     skeleton--background: #f4f4f5,
     skeleton--border-radius: 4px,
@@ -635,6 +636,11 @@
 .cell--selection {
   justify-content: center;
   padding: 0;
+}
+
+// The caret of the bulk selection menu, beside the header checkbox: a `.filter-button`, set close to the checkbox.
+.bulk-button {
+  margin-inline-start: -4px;
 }
 
 .cell--header {

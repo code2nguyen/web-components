@@ -288,6 +288,30 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
 </c2-table>
 ```
 
+```html tag=MdxCodeBlock,label=Bulk selection
+<style>
+  .bulk-invoices {
+    height: 330px;
+    width: 100%;
+  }
+  .bulk-invoices .bulk-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+</style>
+<c2-table client:only="lit" class="bulk-invoices" data-table-example="bulk-select" row-key="id" selection="multiple" checkbox-selection bulk-select paginated page-size="5" rows='[{"id":"INV-1040","customer":"Acme","amount":180,"status":"Paid"},{"id":"INV-1041","customer":"Brio","amount":247,"status":"Open"},{"id":"INV-1042","customer":"Corvid","amount":314,"status":"Overdue"},{"id":"INV-1043","customer":"Dune","amount":381,"status":"Paid"},{"id":"INV-1044","customer":"Ember","amount":448,"status":"Open"},{"id":"INV-1045","customer":"Fjord","amount":515,"status":"Overdue"},{"id":"INV-1046","customer":"Glint","amount":582,"status":"Paid"},{"id":"INV-1047","customer":"Harbor","amount":649,"status":"Open"},{"id":"INV-1048","customer":"Iris","amount":716,"status":"Overdue"},{"id":"INV-1049","customer":"Juniper","amount":783,"status":"Paid"},{"id":"INV-1050","customer":"Kestrel","amount":850,"status":"Open"},{"id":"INV-1051","customer":"Lumen","amount":917,"status":"Overdue"},{"id":"INV-1052","customer":"Maple","amount":984,"status":"Paid"},{"id":"INV-1053","customer":"Nimbus","amount":1051,"status":"Open"},{"id":"INV-1054","customer":"Onyx","amount":218,"status":"Overdue"},{"id":"INV-1055","customer":"Pike","amount":285,"status":"Paid"},{"id":"INV-1056","customer":"Quartz","amount":352,"status":"Open"},{"id":"INV-1057","customer":"Ridge","amount":419,"status":"Overdue"}]'>
+  <div slot="toolbar" class="bulk-bar"><span data-bulk-status>No invoices selected</span></div>
+  <c2-pagination slot="footer"></c2-pagination>
+  <c2-table-column field="id" header="Invoice" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(140px, 1fr)"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="100px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="110px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
 </GalleryGrid>
 
 ## Filters and comparisons

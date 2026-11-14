@@ -48,6 +48,7 @@ import {
   type TableRowsChangeEventDetail,
   type TableRowStyler,
   type TableSelectionChangeEventDetail,
+  type TableSelectionScope,
   type TableSortChangeEventDetail,
 } from './table-types.js'
 
@@ -69,6 +70,7 @@ import type { Checkbox } from '@c2n/checkbox'
 import type { EditTrigger, TableEditing } from './table-editing.js'
 import type { RowsAnimation } from './table-animation.js'
 import type { TableFilter } from './table-filter.js'
+import type { TableBulk } from './table-bulk.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -261,6 +263,10 @@ export interface Table {
  * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
  * points at another row after a sort, so set one on any selectable table. `keyOf(row)`, `isSelected(row)`,
  * `selectRows(rows)` and `deselectRows(rows)` work from the rows themselves when the key rule is beside the point.
+ * The header checkbox selects the rows on show (the page, while paginated); `bulk-select` adds a caret beside it with
+ * a menu of this page, all N rows and none, loaded on first use. `selectPage()` and `selectAll()` do the same from
+ * script, and `selectionScope` (with `detail.scope`) says which the user chose: with a `dataSource`, `all` means every
+ * row the source holds, though `value` only has the loaded keys.
  *
  * **Summary row.** Give a column `summary="sum"` (or `avg`, `min`, `max`, `count`, or a function of the rows) and the
  * table adds a totals row below the body. It is a row of the same grid, so every value sits under its own column
@@ -344,7 +350,7 @@ export interface Table {
  * @slotcomponent c2-table-column
  * @slotcomponent c2-pagination
  *
- * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
+ * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows, `detail.scope` how they were chosen (`rows`, `page`, `all`). Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<TableSortChangeEventDetail>} sort-change - Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order.
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<TableRowEventDetail>} row-activate - Fired when the user opens a row: a pointer click on it, or Enter on one of its focused cells — so one listener serves a table used for navigation from the mouse and the keyboard alike. Not fired by a click or Enter that belongs to a control inside a cell (a button, link or input), and fired before the selection is applied. Does not bubble: a table nested in another table's cell would otherwise open the outer row too, so the listener belongs on the element itself.
@@ -379,6 +385,8 @@ export interface Table {
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
+ * @csspart bulk-select-button - The caret beside the header checkbox (`bulk-select`) that opens the selection menu.
+ * @csspart bulk-menu - The `c2-menu` of select this page, select all and clear.
  * @csspart filter-button - The filter button of a `filterable` column's header. Also `filter-button-active` while the column is filtered.
  * @csspart filter - The popover of a column's filter: its values with their counts, the sort buttons and Clear.
  * @csspart delta - A cell's change from the `baseline` (`compare`). Also `delta-up`, `delta-down` or `delta-flat`.
@@ -524,6 +532,7 @@ export interface Table {
  * @cssproperty {time} [--c2-table__group-toggle--transition-duration=150ms] - Chevron turn when a group opens or closes; respects reduced motion.
  *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
+ * @cssproperty {pixel} [--c2-table__bulk-selection-cell--width=64px] - The checkbox column with `bulk-select`, which holds the caret of the selection menu too.
  *
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
  * @cssproperty {border-radius} [--c2-table__skeleton--border-radius=4px]
@@ -711,6 +720,20 @@ export class Table extends LitElement {
   @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
 
   /**
+   * Adds a caret beside the header checkbox (`selection="multiple"` with `checkbox-selection`) that opens a menu: select
+   * this page, select all N rows, or clear the selection. The checkbox itself selects the rows on show. Which of them
+   * the user chose is `selectionScope`, and `selection-change` reports it as `scope`.
+   */
+  @property({ type: Boolean, attribute: 'bulk-select' }) bulkSelect = false
+
+  /**
+   * How the current selection was made: `rows` one by one, `page` the page on show, `all` every row. With a
+   * `dataSource`, `all` means every row the source holds, not only the keys in `value` (the loaded ones), and rows
+   * that arrive later are drawn selected: act on the whole set server side. The table writes it with each selection.
+   */
+  @property({ type: String, attribute: 'selection-scope' }) selectionScope: TableSelectionScope = 'rows'
+
+  /**
    * Adds a filter of its values to every column's header; a column's own `filterable` still wins. With a `dataSource`
    * a column lists the values of its `options`, and one without `options` gets no filter.
    */
@@ -783,6 +806,10 @@ export class Table extends LitElement {
   /** The column filter popover once loaded, and its load while it is on the way. */
   #filter?: TableFilter
   #filterLoad?: Promise<TableFilter>
+  #bulk?: TableBulk
+  #committingSelection = false
+  #bulkWasOpen = false
+  #bulkLoad?: Promise<TableBulk>
   #baselineCache?: { inputs: unknown[]; rows: Map<string, TableRow> }
   #baselineWarned = false
   /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
@@ -928,7 +955,17 @@ export class Table extends LitElement {
   /** Whether `row` is selected. */
   isSelected(row: TableRow): boolean {
     const key = this.keyOf(row)
-    return key !== undefined && this.value.includes(key)
+    return key !== undefined && this.#isKeySelected(key)
+  }
+
+  /** Whether the row with `key` is selected: in `value`, or every row of a source after "select all" (`bulk-select`). */
+  #isKeySelected(key: string): boolean {
+    return this.value.includes(key) || this.#allOfSource()
+  }
+
+  /** "Select all" on a `dataSource` table with `bulk-select`: every row the source holds, loaded or not. */
+  #allOfSource(): boolean {
+    return this.bulkSelect && this.selectionScope === 'all' && Boolean(this.dataSource) && this.value.length > 0
   }
 
   /**
@@ -951,31 +988,80 @@ export class Table extends LitElement {
     this.commitSelection(this.value.filter((key) => !keys.has(key)))
   }
 
-  /** The rows currently selected. Only the loaded ones when a `dataSource` is used. */
+  /** The rows currently selected, on every page. Only the loaded ones when a `dataSource` is used. */
   getSelectedRows(): TableRow[] {
     const keys = new Set(this.value)
     const selected: TableRow[] = []
-    for (let index = 0; index < this.rowTotal; index++) {
-      const row = this.#rowAt(index)
-      if (row && keys.has(this.keyAt(index, row))) selected.push(row)
-    }
+    this.#forEachLoadedRow((row, key) => {
+      if (keys.has(key)) selected.push(row)
+    })
     return selected
   }
 
-  /** Selects every loaded row. No-op unless `selection="multiple"`. */
+  /**
+   * Selects every row, on every page. With a `dataSource` only the loaded rows have keys to select: `selectionScope`
+   * becomes `all`, which tells the application the user meant every row the source holds, and with `bulk-select` the
+   * rows that arrive later are drawn selected. No-op unless `selection="multiple"`.
+   */
   selectAll() {
     if (this.selection !== 'multiple') return
     const keys: string[] = []
-    for (let index = 0; index < this.rowTotal; index++) {
-      const row = this.#rowAt(index)
-      if (row) keys.push(this.keyAt(index, row))
-    }
-    this.commitSelection(keys)
+    this.#forEachLoadedRow((_row, key) => keys.push(key))
+    this.commitSelection(keys, 'all')
   }
 
   /**
-   * Upper bound of the row indices `getSelectedRows` and `selectAll` visit: the rows on show, or while grouped or in a
-   * tree every row, including those in closed groups and under closed rows — a parent's checkbox selects them too.
+   * Adds the rows on the page on show to the selection (every row while the table is not paginated), keeping the rows
+   * selected on other pages. No-op unless `selection="multiple"`.
+   */
+  selectPage() {
+    if (this.selection !== 'multiple') return
+    if (!this.paginated) return this.selectAll()
+    const page = this.#pageKeys()
+    const keys = [...new Set([...this.#selectedKeys(), ...page])]
+    this.commitSelection(keys, keys.length === page.length ? 'page' : 'rows')
+  }
+
+  /** Takes the rows on the page on show out of the selection, keeping those of other pages. */
+  #deselectPage() {
+    const page = new Set(this.#pageKeys())
+    this.commitSelection(this.#selectedKeys().filter((key) => !page.has(key)))
+  }
+
+  /** The selected keys as a list: `value`, or every loaded key while "select all" covers a source. */
+  #selectedKeys(): string[] {
+    if (!this.#allOfSource()) return this.value
+    const keys: string[] = []
+    this.#forEachLoadedRow((_row, key) => keys.push(key))
+    return keys
+  }
+
+  /** The keys of the data rows on the page on show, groups and closed rows aside. */
+  #pageKeys(): string[] {
+    const keys: string[] = []
+    const first = this.pageStart
+    for (let line = first; line < first + this.rowCount; line++) {
+      const index = this.rowIndexAt(line)
+      const row = index >= 0 ? this.#rowAt(index) : undefined
+      if (row) keys.push(this.keyAt(index, row))
+    }
+    return keys
+  }
+
+  /** Every row the table holds with its key: all of them on the client, the fetched blocks with a `dataSource`. */
+  #forEachLoadedRow(visit: (row: TableRow, key: string) => void) {
+    if (this.dataSource) {
+      const size = this.#effectiveBlockSize
+      for (const [block, rows] of this.#blocks) rows.forEach((row, offset) => visit(row, this.keyAt(block * size + offset, row)))
+      return
+    }
+    const rows = this.#animation?.transitionRows ?? this.sortedRows
+    rows.forEach((row, index) => visit(row, this.keyAt(index, row)))
+  }
+
+  /**
+   * How many rows the header checkbox counts against on a table that is not paginated: the rows on show, or while
+   * grouped or in a tree every row, including those in closed groups and under closed rows.
    */
   protected get rowTotal(): number {
     return this.rowCount
@@ -983,7 +1069,7 @@ export class Table extends LitElement {
 
   /** Clears the selection. */
   clearSelection() {
-    this.commitSelection([])
+    this.commitSelection([], 'rows')
   }
 
   /**
@@ -1036,7 +1122,7 @@ export class Table extends LitElement {
    * a key is a position, which now points at another row. Fires `selection-change` only if the keys moved.
    */
   async #keepSelection<T>(change: () => T, dropped?: Set<TableRow>): Promise<T> {
-    // Every selected row of the dataset, not only the page on show that `getSelectedRows` covers.
+    // Every selected row of the dataset, on every page, as `getSelectedRows` returns them.
     const keys = new Set(this.value)
     const selected =
       keys.size && !this.dataSource ? this.#selectableRows().filter((row, index) => keys.has(this.keyAt(index, row)) && !dropped?.has(row)) : undefined
@@ -1293,6 +1379,9 @@ export class Table extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues) {
+    // `value` set by the application (not by a selection the table made) is a set of rows: its scope is `rows`.
+    if (changed.has('value') && !changed.has('selectionScope') && !this.#committingSelection && changed.get('value') !== undefined) this.selectionScope = 'rows'
+    this.#committingSelection = false
     if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#animation?.cancel()
     // Loaded with `animate-updates`, before the first snapshot comes, rather than on it.
     if (this.animateUpdates) void this.#loadAnimation()
@@ -1493,7 +1582,7 @@ export class Table extends LitElement {
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
-      ${this.#filter?.render() ?? nothing}
+      ${this.#filter?.render() ?? nothing} ${this.#bulk?.render() ?? nothing}
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
       <slot name="fallback" class="definitions"></slot>
     `
@@ -1548,9 +1637,8 @@ export class Table extends LitElement {
 
   #renderHeaderCell(column: TableColumnConfig, columnIndex: number, pins: Map<string, PinPlacement>) {
     if (column.field === SELECTION_FIELD) {
-      const total = this.rowTotal
-      const selected = this.value.length
-      const allSelected = total > 0 && selected >= total
+      const { all: allSelected, some } = this.#headerSelection()
+      const bulk = this.bulkSelect && this.selection === 'multiple'
       return html`
         <div
           class=${classMap({ cell: true, 'cell--header': true, 'cell--selection': true, ...this.pinClasses(column, pins) })}
@@ -1563,12 +1651,13 @@ export class Table extends LitElement {
           style=${styleMap(this.pinStyle(column, pins))}
         >
           <c2-checkbox
-            aria-label="Select all rows"
+            aria-label=${this.msg.t('selectAllRows')}
             ?checked=${allSelected}
-            ?indeterminate=${selected > 0 && !allSelected}
-            ?disabled=${this.selection !== 'multiple' || Boolean(this.dataSource)}
+            ?indeterminate=${some && !allSelected}
+            ?disabled=${this.selection !== 'multiple' || (Boolean(this.dataSource) && !bulk)}
             @change=${this.#handleSelectAll}
           ></c2-checkbox>
+          ${bulk ? this.#renderBulkButton(columnIndex) : nothing}
         </div>
       `
     }
@@ -1638,7 +1727,7 @@ export class Table extends LitElement {
     const level = this.rowLevel(line, columns)
     const open = level?.expanded
     const detailColumn = row && this.#detail ? columns.find((column) => column.field !== SELECTION_FIELD) : undefined
-    const selected = key !== '' && this.value.includes(key)
+    const selected = key !== '' && this.#isKeySelected(key)
     const selectable = this.selection !== 'none'
     const updateState = key ? this.#animation?.states.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
@@ -1726,8 +1815,8 @@ export class Table extends LitElement {
           ${
             row
               ? html`<c2-checkbox
-                  aria-label="Select row"
-                  ?checked=${this.value.includes(key)}
+                  aria-label=${this.msg.t('selectRow')}
+                  ?checked=${this.#isKeySelected(key)}
                   ?indeterminate=${this.isPartial(key)}
                   @click=${(event: Event) => event.stopPropagation()}
                   @change=${() => this.#handleCheckboxToggle(line)}
@@ -2331,7 +2420,8 @@ export class Table extends LitElement {
     const selectionColumn: TableColumnConfig = {
       field: SELECTION_FIELD,
       header: '',
-      width: 'var(--c2-table__selection-cell--width, 44px)',
+      // With `bulk-select` the column holds the caret too.
+      width: this.bulkSelect ? 'var(--c2-table__bulk-selection-cell--width, 64px)' : 'var(--c2-table__selection-cell--width, 44px)',
       minWidth: 32,
       align: 'center',
       pinned: 'start',
@@ -2851,8 +2941,69 @@ export class Table extends LitElement {
 
   #handleSelectAll = (event: Event) => {
     event.stopPropagation()
-    if ((event.target as Checkbox).checked) this.selectAll()
+    // The rows on show: the page while paginated (the other pages keep theirs), every row otherwise. "All N" is the menu's.
+    const checked = (event.target as Checkbox).checked
+    if (this.paginated) {
+      if (checked) this.selectPage()
+      else this.#deselectPage()
+    } else if (checked) this.selectAll()
     else this.clearSelection()
+  }
+
+  /** What the header checkbox shows: every row on show selected, or some of them. */
+  #headerSelection(): { all: boolean; some: boolean } {
+    if (this.#allOfSource()) return { all: true, some: true }
+    const count = this.value.length
+    // A page is a few dozen rows at most; a table that is not paginated compares counts, never walks its rows.
+    if (this.paginated) {
+      const keys = this.#pageKeys()
+      const selected = new Set(this.value)
+      const onPage = keys.filter((key) => selected.has(key)).length
+      return { all: keys.length > 0 && onPage === keys.length, some: onPage > 0 }
+    }
+    const total = this.dataSource ? this.totalRows : this.rowTotal
+    return { all: total > 0 && count >= total, some: count > 0 }
+  }
+
+  /** The caret beside the header checkbox: a menu of this page, every row and none, loaded on first use. */
+  #renderBulkButton(columnIndex: number) {
+    return html`<button
+      class="filter-button bulk-button"
+      part="bulk-select-button"
+      type="button"
+      tabindex="-1"
+      aria-label=${this.msg.t('selectionOptions')}
+      aria-haspopup="menu"
+      aria-expanded=${String(Boolean(this.#bulk?.isOpen))}
+      @pointerdown=${() => {
+        // The press light-dismisses an open menu before the click: the click must not open it again.
+        this.#bulkWasOpen = Boolean(this.#bulk?.isOpen)
+      }}
+      @click=${(event: Event) => {
+        event.stopPropagation()
+        this.focusedCell = { row: HEADER_ROW, column: columnIndex }
+        if (this.#bulkWasOpen) this.#bulkWasOpen = false
+        else this.#openBulk(event.currentTarget as HTMLElement)
+      }}
+    >
+      ${CHEVRON}
+    </button>`
+  }
+
+  #openBulk(anchor: HTMLElement) {
+    this.#bulkLoad ??= import('./table-bulk.js').then(({ TableBulk }) => {
+      this.#bulk = new TableBulk({
+        table: this,
+        counts: () => ({
+          page: this.paginated || this.dataSource ? this.#pageKeys().length : undefined,
+          all: this.totalRows,
+        }),
+        formatCount: (count) => new Intl.NumberFormat(this.msg.locale).format(count),
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: unknown[]) => string).call(this.msg, key, ...args),
+      })
+      return this.#bulk
+    })
+    void this.#bulkLoad.then((bulk) => bulk.open(anchor))
   }
 
   /** `line` is a display line; a range covers the data rows on the lines between the anchor and it. */
@@ -2887,9 +3038,9 @@ export class Table extends LitElement {
     }
 
     this.#selectionAnchor = line
-    const on = !this.value.includes(key)
+    const on = !this.#isKeySelected(key)
     if (modifiers.toggle) {
-      const keys = new Set(this.value)
+      const keys = new Set(this.#selectedKeys())
       this.cascade(keys, key, on)
       this.commitSelection([...keys])
       return
@@ -2901,11 +3052,13 @@ export class Table extends LitElement {
     this.commitSelection(next.size === this.value.length && this.value.every((entry) => next.has(entry)) ? [] : [...next])
   }
 
-  protected commitSelection(keys: string[]) {
+  protected commitSelection(keys: string[], scope: TableSelectionScope = 'rows') {
     this.value = keys
+    this.selectionScope = scope
+    this.#committingSelection = true
     this.dispatchEvent(
       new CustomEvent<TableSelectionChangeEventDetail>('selection-change', {
-        detail: { value: keys, rows: this.getSelectedRows() },
+        detail: { value: keys, rows: this.getSelectedRows(), scope },
         bubbles: false,
         composed: true,
       }),
@@ -2968,7 +3121,13 @@ export class Table extends LitElement {
     const summaryCellAt = (index: number) => [...summaryCells].reverse().find((cell) => cell.index <= index) ?? summaryCells[0]
     // A hierarchy's own keys come first: the treegrid's ←/→ on a group or a tree row, Enter on a group.
     if (this.handleLineKey(event, columns)) return
-    // Alt+↓ on a header opens the column's filter, as on a select.
+    // Alt+↓ on the selection header opens the bulk selection menu, on another header the column's filter, as on a select.
+    if (row === HEADER_ROW && event.altKey && event.key === 'ArrowDown' && columns[column]?.field === SELECTION_FIELD && this.bulkSelect) {
+      event.preventDefault()
+      const caret = this.renderRoot.querySelector<HTMLElement>('.bulk-button')
+      if (caret) this.#openBulk(caret)
+      return
+    }
     if (row === HEADER_ROW && event.altKey && event.key === 'ArrowDown' && this.#isFilterable(columns[column])) {
       event.preventDefault()
       const button = this.renderRoot.querySelector<HTMLElement>(`.cell--header[data-column-id="${CSS.escape(columnKey(columns[column]))}"] .filter-button`)

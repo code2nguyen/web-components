@@ -39,6 +39,15 @@ const en = {
   allocationOver: 'over capacity',
   /** Header of the total column of `c2-allocation-grid` (`row-totals`). */
   rowTotal: 'Total',
+  /** Accessible name of a row's selection checkbox. */
+  selectRow: 'Select row',
+  /** Accessible name of the header checkbox, which selects the rows on show. */
+  selectAllRows: 'Select all rows',
+  /** Accessible name of the caret beside it (`bulk-select`), and the rows of its menu. */
+  selectionOptions: 'Selection options',
+  selectPageRows: (count: string) => `Select this page (${count})`,
+  selectAllCount: (count: string) => `Select all ${count}`,
+  clearSelection: 'Clear selection',
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */
