@@ -185,10 +185,25 @@ test('without detail-height nothing is added, and it is ignored while the rows a
   await expect(toggles(page)).toHaveCount(0)
   await expect(panels(page)).toHaveCount(0)
 
-  await renderScenario(orders('detail-height="100" expanded-details="ORD-1" group-by="customer"'))
-  await expect(table(page).getByRole('treegrid')).toBeVisible()
-  await expect(toggles(page)).toHaveCount(0)
-  await expect(panels(page)).toHaveCount(0)
+  // Grouping is `c2-group-table`'s: there the panels give way to the group rows.
+  await renderScenario(
+    orders('detail-height="100" expanded-details="ORD-1" group-by="customer"')
+      .replace('<c2-table ', '<c2-group-table ')
+      .replace('</c2-table>', '</c2-group-table>'),
+  )
+  const grouped = page.locator('c2-group-table')
+  await expect(grouped.getByRole('treegrid')).toBeVisible()
+  await expect(grouped.locator('[part="detail-toggle"]')).toHaveCount(0)
+  await expect(grouped.locator('.row--detail:not([hidden]) [part="detail"]')).toHaveCount(0)
+})
+
+test('c2-table is flat: group-by and children-field are not its attributes, and it has no group API', async ({ page, renderScenario }) => {
+  await renderScenario(orders('group-by="customer" children-field="children"'))
+  await expect(table(page).getByRole('grid')).toBeVisible()
+  await expect(table(page).locator('.row--group')).toHaveCount(0)
+  await expect(table(page).locator('.row--body')).toHaveCount(4)
+  const api = await table(page).evaluate((element) => ({ getGroups: 'getGroups' in element, expandRow: 'expandRow' in element, groupBy: 'groupBy' in element }))
+  expect(api).toEqual({ getGroups: false, expandRow: false, groupBy: false })
 })
 
 test('with 50,000 rows the window is the same with the feature off, on, and on with nothing open', async ({ page, renderScenario }) => {

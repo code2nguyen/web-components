@@ -27,11 +27,11 @@ const COLUMNS = `<c2-table-column field="customer" header="Customer" width="220p
   <c2-table-column field="qty" header="Qty" width="100px" align="end" summary="sum"></c2-table-column>`
 
 const orders = (attributes = '', columns = COLUMNS, style = 'height:520px;width:640px') =>
-  `<c2-table style="${style}" row-key="id" rows='${ordersJson}' ${attributes}>
+  `<c2-group-table style="${style}" row-key="id" rows='${ordersJson}' ${attributes}>
   ${columns}
-</c2-table>`
+</c2-group-table>`
 
-const table = (page: Page) => page.locator('c2-table')
+const table = (page: Page) => page.locator('c2-group-table')
 
 /** Every rendered body line, top to bottom: `group <key> <texts…>` or `row <texts…>`. Stuck copies are left out. */
 const lines = (page: Page) =>
@@ -111,7 +111,7 @@ test('clicking a group closes it and reports it; expanded-groups is the state, i
   const events = await page.evaluate(() => {
     const log: unknown[] = []
     ;(window as unknown as { log: unknown[] }).log = log
-    document.querySelector('c2-table')!.addEventListener('group-toggle', (event) => {
+    document.querySelector('c2-group-table')!.addEventListener('group-toggle', (event) => {
       const { key, expanded, group } = (event as CustomEvent).detail
       log.push({ key, expanded, rows: group.rows.length, amount: group.summary.amount })
     })
@@ -163,7 +163,7 @@ test('a group checkbox selects its rows and shows a partial selection; the selec
   const changes = await page.evaluate(() => {
     const log: string[][] = []
     ;(window as unknown as { log: string[][] }).log = log
-    document.querySelector('c2-table')!.addEventListener('selection-change', (event) => log.push((event as CustomEvent).detail.value))
+    document.querySelector('c2-group-table')!.addEventListener('selection-change', (event) => log.push((event as CustomEvent).detail.value))
     return log
   })
   expect(changes).toEqual([])
@@ -222,10 +222,10 @@ const MANY = Array.from({ length: 3000 }, (_, index) => ({
 }))
 
 test('a virtualized grouped table keeps the groups of the rows at the top under the header', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-table style="height:400px;width:520px" row-key="id" group-by="team,squad" rows='${JSON.stringify(MANY)}'>
+  await renderScenario(`<c2-group-table style="height:400px;width:520px" row-key="id" group-by="team,squad" rows='${JSON.stringify(MANY)}'>
     <c2-table-column field="id" header="ID" width="120px"></c2-table-column>
     <c2-table-column field="score" header="Score" width="200px" summary="sum"></c2-table-column>
-  </c2-table>`)
+  </c2-group-table>`)
   expect(await table(page).evaluate((element) => (element as HTMLElement & { isVirtualized: boolean }).isVirtualized)).toBe(true)
   expect(await echoKeys(page)).toEqual([])
   const scroll = (top: number) => table(page).evaluate((element, value) => (element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop = value), top)
@@ -305,10 +305,10 @@ test('group-display="band" draws one band per group that stays in view on a side
 
 test('renderGroup, a group:<key> slot and empty-group-label name the groups', async ({ page, renderScenario }) => {
   const rows = JSON.stringify([...ORDERS.slice(0, 3), { id: 'o13', customer: 'Nobody', region: '', status: 'Paid', amount: 1, qty: 1 }]).replace(/&/g, '&amp;')
-  await renderScenario(`<c2-table style="height:400px;width:640px" row-key="id" group-by="region" empty-group-label="Unassigned" rows='${rows}'>
+  await renderScenario(`<c2-group-table style="height:400px;width:640px" row-key="id" group-by="region" empty-group-label="Unassigned" rows='${rows}'>
     ${COLUMNS}
     <strong slot="group:region=EMEA">Europe</strong>
-  </c2-table>`)
+  </c2-group-table>`)
   await expect(groupRow(page, 'region=')).toContainText('Unassigned')
   await expect(page.locator('strong[slot="group:region=EMEA"]')).toBeVisible()
   await table(page).evaluate((element) => {

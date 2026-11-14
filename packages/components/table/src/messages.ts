@@ -7,6 +7,10 @@ const en = {
   statusTitle: (column: string, label: string) => `${column}: ${label}`,
   /** Said after a summary that misses its `summary-target`, `{0}` being the target as the column formats it. */
   summaryOffTarget: (target: string) => `should be ${target}`,
+  /** Accessible name of a group's checkbox in `c2-group-table`, which selects the group's rows. */
+  selectGroupRows: 'Select group rows',
+  /** Label of the group of rows whose value is empty, in `c2-group-table`. */
+  emptyGroup: 'No value',
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

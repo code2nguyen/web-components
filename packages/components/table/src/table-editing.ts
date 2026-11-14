@@ -35,6 +35,10 @@ export interface TableEditingHost {
   canEdit(line: number, column: number): boolean
   /** Moves the keyboard focus to a cell and scrolls it into view. */
   focus(line: number, column: number): void
+  /** Whether rows can be appended at the end: not while grouped or a tree. */
+  flat(): boolean
+  /** The field holding a row's child rows, or `''` without a tree. */
+  childrenField(): string
   /** The table's message in its language. */
   message(key: 'editCell' | 'errorRequired' | 'errorNumber' | 'errorDate' | 'errorUrl' | 'errorOption', ...args: string[]): string
 }
@@ -438,7 +442,7 @@ export class TableEditing {
 
   /** `rows` with each row `swap` answers for replaced, through the children of a tree too. */
   #map(rows: TableRow[], swap: (row: TableRow) => TableRow | undefined): TableRow[] {
-    const field = this.#table.childrenField
+    const field = this.host.childrenField()
     return rows.map((row) => {
       const next = swap(row)
       if (next) return next
@@ -451,7 +455,7 @@ export class TableEditing {
 
   /** `rows` without the rows of `drop`, through the children of a tree too. */
   #filter(rows: TableRow[], drop: Set<TableRow>): TableRow[] {
-    const field = this.#table.childrenField
+    const field = this.host.childrenField()
     return rows
       .filter((row) => !drop.has(row))
       .map((row) => {
@@ -525,7 +529,7 @@ export class TableEditing {
     this.#sync()
     const columns = this.host.columns()
     // Lines on the next pages of a paged table hold rows too: only past the very last line does a paste add rows.
-    const end = this.#table.grouped || this.#table.childrenField ? Number.POSITIVE_INFINITY : this.#table.totalRows
+    const end = !this.host.flat() ? Number.POSITIVE_INFINITY : this.#table.totalRows
     const replaced = new Map<TableRow, TableRow>()
     const appended: TableRow[] = []
     block.forEach((cells, offset) => {
@@ -594,7 +598,7 @@ export class TableEditing {
     this.#sync()
     const changes: TableChanges = { added: [], updated: [], removed: [...this.#removed] }
     const visit = (rows: TableRow[]) => {
-      const field = this.#table.childrenField
+      const field = this.host.childrenField()
       for (const row of rows) {
         if (this.#added.has(row)) changes.added.push(row)
         const original = this.#original.get(row)
@@ -636,7 +640,7 @@ export class TableEditing {
     this.#errors.clear()
     const errors: TableCellError[] = []
     const visit = (rows: TableRow[]) => {
-      const field = this.#table.childrenField
+      const field = this.host.childrenField()
       for (const row of rows) {
         const columns = this.host.columns()
         for (const [id, message] of this.#check(row)) {

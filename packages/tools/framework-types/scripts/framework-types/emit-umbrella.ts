@@ -35,6 +35,11 @@ interface PackageJson {
   dependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
   peerDependenciesMeta?: Record<string, { optional?: boolean }>
+  /**
+   * Repo metadata. `separateEntries` lists subpaths (`./group-table.js`) the package entry leaves out: a superset of
+   * the package's main element that only its own entry loads, so importing the package does not pay for it.
+   */
+  c2n?: { status?: string; separateEntries?: string[] }
   [key: string]: unknown
 }
 
@@ -43,7 +48,7 @@ export interface UmbrellaEntry {
   pkg: string
   /** Subpath of the umbrella, and the name of its file under `src/` and `dist/`, e.g. `table`. */
   name: string
-  /** Every JavaScript module of the package, e.g. `@c2n/table`, `@c2n/table/table-column.js`. */
+  /** The JavaScript modules the package entry gathers, e.g. `@c2n/table`, `@c2n/table/table-column.js`. */
   modules: string[]
   /**
    * Frameworks the package ships a binding for (`@c2n/table/react`). The binding imports its framework, so it is
@@ -51,6 +56,8 @@ export interface UmbrellaEntry {
    * `/vue` re-export it instead.
    */
   frameworks: Framework[]
+  /** Modules the package entry leaves out (`c2n.separateEntries`): each has its own entry, and the barrel gathers it. */
+  separate: string[]
   /** Modules of the package that define a custom element (`@c2n/chart/line-chart.js`), from its manifest. */
   elementModules: Set<string>
 }
@@ -75,16 +82,20 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
   return packages
     .filter((pkg) => !EXCLUDED.has(pkg.name))
     .map((pkg) => {
-      const exports = readJson(join(pkg.dir, 'package.json')).exports ?? {}
+      const json = readJson(join(pkg.dir, 'package.json'))
+      const exports = json.exports ?? {}
+      const separate = new Set(json.c2n?.separateEntries ?? [])
       const subpaths = Object.entries(exports)
         // A wildcard subpath (`@c2n/chart/maps/*.js`) publishes data modules an element loads on demand; re-exporting
         // them would make the barrel load every one of them up front.
         .filter(([subpath, entry]) => subpath !== '.' && subpath.endsWith('.js') && !subpath.includes('*') && typeof entry !== 'string' && entry.types)
         .map(([subpath]) => `${pkg.name}/${subpath.slice(2)}`)
+      const modules = [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()]
       return {
         pkg: pkg.name,
         name: pkg.name.slice('@c2n/'.length),
-        modules: [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()],
+        modules: modules.filter((module) => !separate.has(`./${module.slice(pkg.name.length + 1)}`)),
+        separate: modules.filter((module) => separate.has(`./${module.slice(pkg.name.length + 1)}`)),
         frameworks: pkg.bindings,
         elementModules: new Set(pkg.elements.map((element) => element.module)),
       }
@@ -97,7 +108,8 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
  * nothing, and their exports remain reachable through the package entry.
  */
 function subpathModules(entry: UmbrellaEntry): string[] {
-  return entry.modules.filter((module) => module.startsWith(`${entry.pkg}/`) && entry.elementModules.has(module))
+  // A separate module is published whatever it holds: the barrel re-exports it from its own entry.
+  return [...entry.modules.filter((module) => module.startsWith(`${entry.pkg}/`) && entry.elementModules.has(module)), ...entry.separate]
 }
 
 export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string, scopeDir: string): UmbrellaFile[] {
@@ -106,7 +118,12 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
   const reexports = (modules: string[]) => modules.map((module) => `export * from '${module}'`)
 
   for (const entry of entries) {
-    const body = [BANNER, `// Every module of ${entry.pkg}. Importing this registers each of its elements.`, ``, ...reexports(entry.modules), ``].join('\n')
+    // A separate entry is named, so the comment does not promise an element this entry leaves out.
+    const left = entry.separate.map((module) => `@c2n/components/${entry.name}/${module.slice(entry.pkg.length + 1).replace(/\.js$/, '')}`)
+    const scope = left.length
+      ? `// Every module of ${entry.pkg} but ${left.join(', ')}, which has an entry of its own. Importing this registers the elements of these modules.`
+      : `// Every module of ${entry.pkg}. Importing this registers each of its elements.`
+    const body = [BANNER, scope, ``, ...reexports(entry.modules), ``].join('\n')
     files.push({ path: `src/${entry.name}.js`, contents: body, parser: 'typescript' })
     files.push({ path: `src/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
     // One module of a multi-module package on its own (`@c2n/components/chart/butterfly-chart`), so an application
@@ -126,7 +143,9 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
     `//`,
     `//     import '@c2n/components/button'`,
     ``,
-    ...reexports(entries.map((entry) => `./${entry.name}.js`)),
+    ...reexports(
+      entries.flatMap((entry) => [`./${entry.name}.js`, ...entry.separate.map((module) => `./${entry.name}/${module.slice(entry.pkg.length + 1)}`)]),
+    ),
     ``,
   ].join('\n')
   files.push({ path: 'src/index.js', contents: barrel, parser: 'typescript' })

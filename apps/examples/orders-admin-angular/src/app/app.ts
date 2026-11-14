@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import type { SplitButtonEventMap } from '@c2n/components/split-button'
-import type { Table, TableEventMap } from '@c2n/components/table'
+import type { GroupTable, GroupTableEventMap } from '@c2n/components/table/group-table'
 import type { TabsEventMap } from '@c2n/components/tabs'
 import type { ViewFieldConfig, ViewOptionsEventMap, ViewOptionsValue, ViewToggleConfig } from '@c2n/components/view-options'
 import { C2_FORM_ACCESSORS } from '@c2n/angular'
@@ -116,7 +116,8 @@ const sameFields = (a: readonly string[], b: readonly string[]) => a.length === 
            component declares it: row-key and empty-message, not rowKey and emptyMessage. Those camelCase names
            only work through a property binding, which is why they are written as [rowKey] / [emptyMessage]
            below. React 19 hides this difference by checking the property first; Angular does not. -->
-      <c2-table
+      <!-- c2-group-table: the view's "Group by" groups the rows, which plain c2-table does not do. -->
+      <c2-group-table
         #table
         class="orders"
         [rows]="visible()"
@@ -141,7 +142,7 @@ const sameFields = (a: readonly string[], b: readonly string[]) => a.length === 
         <c2-table-column field="items" header="Items" width="90px" align="end" format="number" [hidden]="!shows('items')"></c2-table-column>
         <c2-table-column field="total" header="Total" width="130px" align="end" format="currency" currency="USD" [hidden]="!shows('total')"></c2-table-column>
         <c2-table-column field="placed" header="Placed" width="130px" format="date" [hidden]="!shows('placed')"></c2-table-column>
-      </c2-table>
+      </c2-group-table>
 
       <!-- The bar shows while count is above zero and floats over the bottom of the page. It does not own the
            selection: (clear), its × button or Escape, is where the table's selection is emptied. -->
@@ -247,7 +248,7 @@ export class App {
   }
 
   protected handleSortChange(event: Event): void {
-    const orderBy = (event as TableEventMap['sort-change']).detail.sort
+    const orderBy = (event as GroupTableEventMap['sort-change']).detail.sort
     this.view.update((view) => ({ ...view, orderBy }))
   }
 
@@ -257,7 +258,7 @@ export class App {
   }
 
   protected handleSelectionChange(event: Event): void {
-    this.checked.set((event as TableEventMap['selection-change']).detail.value)
+    this.checked.set((event as GroupTableEventMap['selection-change']).detail.value)
   }
 
   /**
@@ -308,7 +309,7 @@ export class App {
    * current cell rather than dropping to the page.
    */
   protected clearChecked(table: HTMLElement): void {
-    ;(table as Table).clearSelection()
+    ;(table as GroupTable).clearSelection()
     table.focus()
   }
 

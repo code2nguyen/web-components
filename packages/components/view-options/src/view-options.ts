@@ -135,8 +135,8 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * The "Display" popover of a collection: which layout it uses, what it is grouped and sub-grouped by, how it is
  * ordered (several levels), which kinds of items it includes and which properties each item shows. The component
  * holds no data and renders no items; it edits one `ViewOptionsValue` and fires `view-change`, and the app applies the
- * value to whatever draws the collection. `orderBy` has the shape of `c2-table`'s `sortModel`, `groupBy` feeds its
- * `group-by` and `properties` its columns' `hidden`.
+ * value to whatever draws the collection. `orderBy` has the shape of `c2-table`'s `sortModel`, `groupBy` feeds
+ * `c2-group-table`'s `group-by` and `properties` its columns' `hidden`.
  *
  * Fields come from `c2-view-field` children or from the `fields` array, which wins when both are present and shares
  * `id`, `label` and `icon` with `c2-filter-builder`'s fields. The Show switches come from `c2-view-toggle` children or

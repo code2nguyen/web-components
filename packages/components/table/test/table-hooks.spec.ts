@@ -181,12 +181,12 @@ test('cell-slot children are needed only for the window range-change reports', a
 // A slot's line is the line `range-change` reports: the page offset is included, and group rows take lines of their
 // own without being reported.
 test('cell-slot lines match range-change with pagination and grouping', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-table style="height:320px;width:520px" row-key="id" page-size="2">
+  await renderScenario(`<c2-group-table style="height:320px;width:520px" row-key="id" page-size="2">
     <c2-table-column field="name" header="Name" width="200px"></c2-table-column>
     <c2-table-column field="note" header="Note" width="200px" cell-slot></c2-table-column>
     <b slot="cell:2:note">paged</b>
-  </c2-table>`)
-  const host = page.locator('c2-table')
+  </c2-group-table>`)
+  const host = page.locator('c2-group-table')
   await props(host, { rows: PEOPLE })
   await props(host, { page: 2 })
   const slottedRowKey = () => page.getByText('paged').evaluate((node) => (node as HTMLElement).assignedSlot?.closest<HTMLElement>('.row')?.dataset.rowKey)
