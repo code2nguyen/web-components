@@ -1,7 +1,11 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ViewOptionsExamplesRuntime from '../../components/ViewOptionsExamplesRuntime.astro'
 
 import { ViewOptions, ViewField, ViewToggle } from '@c2n/components/view-options'
+
+<ViewOptionsExamplesRuntime />
 
 ## Presets
 
@@ -48,3 +52,37 @@ section padding do most of the work.
 ```
 
 </GalleryGrid>
+
+## Saved views
+
+`views` turns the panel into a view switcher: a select of the user's views and the shared ones, "Modified" while the value has moved from the current view, and Save, Save as…, Rename and Delete. The component saves nothing: it fires `view-save`, `view-rename` and `view-delete`, and these cards keep the views in memory the way an app would keep them on its server. A locked view (the shared "Team backlog") can be copied with Save as, not changed.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Saved views
+<c2-view-options data-view-options-example="saved" layouts="list board" view-id="mine" views='[{"id":"mine","name":"My open bugs","value":{"layout":"list","groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}},{"id":"triage","name":"Triage board","value":{"layout":"board","groupBy":"priority"}},{"id":"team","name":"Team backlog","value":{"layout":"list","groupBy":"assignee"},"shared":true,"locked":true}]' value='{"layout":"list","groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}'>
+  <c2-view-field field="status" label="Status" groupable orderable property></c2-view-field>
+  <c2-view-field field="priority" label="Priority" groupable orderable property></c2-view-field>
+  <c2-view-field field="assignee" label="Assignee" groupable property></c2-view-field>
+</c2-view-options>
+```
+
+```html tag=MdxCodeBlock,label=Vues (French)
+<div lang="fr">
+  <c2-view-options data-view-options-example="saved" layouts="list board" view-id="mes" views='[{"id":"mes","name":"Mes tickets","value":{"layout":"list","groupBy":"status"}},{"id":"equipe","name":"Équipe","value":{"layout":"board","groupBy":"assignee"},"shared":true,"locked":true}]' value='{"layout":"list","groupBy":"status"}'>
+    <c2-view-field field="status" label="Statut" groupable orderable property></c2-view-field>
+    <c2-view-field field="assignee" label="Responsable" groupable property></c2-view-field>
+  </c2-view-options>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+options.addEventListener('view-save', async ({ detail }) => {
+  // `id` is null for Save as: the server gives the new view its id.
+  const view = await api.saveView(detail.id, detail.name, detail.value)
+  options.views = await api.listViews()
+  options.viewId = view.id
+})
+```

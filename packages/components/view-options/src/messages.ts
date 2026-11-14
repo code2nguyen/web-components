@@ -27,6 +27,18 @@ const en = {
   properties: 'Display properties',
   reset: 'Reset',
   setDefault: 'Set as default',
+  views: 'Views',
+  view: 'View',
+  chooseView: 'Unsaved view',
+  shared: 'Shared',
+  modified: 'Modified',
+  revert: 'Revert',
+  save: 'Save',
+  saveAs: 'Save as…',
+  rename: 'Rename',
+  remove: 'Delete',
+  viewName: 'View name',
+  cancel: 'Cancel',
 }
 
 /** The view options' interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

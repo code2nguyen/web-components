@@ -4,7 +4,7 @@ import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { Overlay } from '@c2n/overlay'
 import '@c2n/button'
@@ -18,7 +18,19 @@ import '@c2n/switch'
 import { ViewField, VIEW_CHILD_CHANGE } from './view-field'
 import { ViewToggle } from './view-toggle'
 import { viewOptionsMessages } from './messages'
-import type { ViewChangeEventDetail, ViewDefaultRequestEventDetail, ViewFieldConfig, ViewOptionsValue, ViewSort, ViewToggleConfig } from './view-options-types'
+import type {
+  ViewChangeEventDetail,
+  ViewDefaultRequestEventDetail,
+  ViewDeleteEventDetail,
+  ViewFieldConfig,
+  ViewOptionsValue,
+  ViewRenameEventDetail,
+  ViewSavedView,
+  ViewSaveEventDetail,
+  ViewSelectEventDetail,
+  ViewSort,
+  ViewToggleConfig,
+} from './view-options-types'
 import styles from './view-options.scss?inline'
 
 /** The part of `c2-select`'s `selection-change` detail this component reads. */
@@ -33,6 +45,10 @@ export type * from './view-options-types'
 export interface ViewOptionsEventMap {
   'view-change': CustomEvent<ViewChangeEventDetail>
   'default-request': CustomEvent<ViewDefaultRequestEventDetail>
+  'view-select': CustomEvent<ViewSelectEventDetail>
+  'view-save': CustomEvent<ViewSaveEventDetail>
+  'view-rename': CustomEvent<ViewRenameEventDetail>
+  'view-delete': CustomEvent<ViewDeleteEventDetail>
   toggle: ToggleEvent
 }
 
@@ -146,6 +162,13 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * to it and the host matches `:state(changed)` while the value differs (the default trigger shows a dot). On a `board`
  * layout, Grouping and Sub-grouping read Columns and Rows.
  *
+ * **Saved views.** `views` lists named views (`{ id, name, value, shared?, locked? }`) and `view-id` names the current one.
+ * The panel then opens with a Views section: a select of the user's views and the shared ones, "Modified" while the
+ * value differs from the current view (`:state(modified)`), and Save, Save as…, Rename and Delete. Picking a view sets
+ * `value` and fires `view-select` and `view-change`, and Revert (beside "Modified") goes back to the current view; the others fire `view-save` (`id` `null` for Save as),
+ * `view-rename` and `view-delete`. The component stores nothing: the app persists each change and hands back `views`.
+ * The default trigger then reads the current view's name.
+ *
  * The trigger is slotted into `trigger`; without one a "Display" button is drawn. The panel is a non-modal dialog on
  * the top layer, positioned by `c2-overlay`: Escape and a click outside close it and focus returns to the trigger.
  *
@@ -155,9 +178,13 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @slot trigger - The element that opens the panel. Without one, a "Display" button is drawn. A `c2-*` trigger gets `aria-haspopup` and `aria-expanded` on its inner button; a plain element is the author's markup, so write `aria-haspopup="dialog"` on it yourself (`aria-expanded` is kept up to date once the panel has opened).
  * @slot extra - App-specific rows (density, timeline zoom) shown below the Show switches.
  *
- * @event {CustomEvent<ViewChangeEventDetail>} view-change - Fired after the user edits the value. `detail.value` is the whole new value (already in `value`), `detail.changed` the key that changed, or `null` after Reset. Does not bubble.
+ * @event {CustomEvent<ViewChangeEventDetail>} view-change - Fired after the user edits the value. `detail.value` is the whole new value (already in `value`), `detail.changed` the key that changed, or `null` when the whole value was replaced: after Reset or after a saved view was picked. Does not bubble.
  * @event {CustomEvent<ViewDefaultRequestEventDetail>} default-request - Fired by "Set as default" with the current value. The app decides who may save it, then sets `default-value`. Does not bubble.
  * @event {ToggleEvent} toggle - Fired after the panel opens or closes; `newState` is `open` or `closed`.
+ * @event {CustomEvent<ViewSelectEventDetail>} view-select - Fired after the user picks a saved view: `detail.id`, the `view`, and the `value` it gave (already in `value`; `view-change` follows). Does not bubble.
+ * @event {CustomEvent<ViewSaveEventDetail>} view-save - Fired by Save (`detail.id` the current view) and by Save as (`detail.id` `null`, with the typed `name`), with the value to store. The app saves it, then updates `views` and `view-id`. Does not bubble.
+ * @event {CustomEvent<ViewRenameEventDetail>} view-rename - Fired by Rename with the view's `id` and its new `name`. Does not bubble.
+ * @event {CustomEvent<ViewDeleteEventDetail>} view-delete - Fired by Delete with the view's `id`. The app confirms if it wants to, then removes it from `views`. Does not bubble.
  *
  * @cssproperty {pixel} [--c2-view-options__panel--width=320px] - Width of the panel.
  * @cssproperty {color} [--c2-view-options__panel--background=#ffffff]
@@ -177,6 +204,8 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @cssproperty {letter-spacing} [--c2-view-options__heading--letter-spacing=0.06em]
  * @cssproperty {text-transform} [--c2-view-options__heading--text-transform=uppercase]
  * @cssproperty {color} [--c2-view-options__footer--background=transparent]
+ * @cssproperty {color} [--c2-view-options__modified--color=rgb(2, 101, 220)] - The "Modified" mark beside the current view.
+ * @cssproperty {font-size} [--c2-view-options__modified--font-size=12px]
  * @cssproperty {color} [--c2-view-options__changed--color=rgb(2, 101, 220)] - Dot on the default trigger while the value differs from `default-value`.
  * @cssproperty {color} [--c2-view-options__button--background-color=#ffffff] - Background of the outlined buttons: the default trigger, Add sort and Reset.
  * @cssproperty {color} [--c2-view-options__button--color=#18181b] - Text of the outlined buttons.
@@ -188,6 +217,7 @@ function sameView(a: ViewOptionsValue, b: ViewOptionsValue): boolean {
  * @internalcomponent c2-select
  * @internalcomponent c2-switch
  * @internalcomponent c2-chip
+ * @internalcomponent c2-text-field
  *
  * @slotcomponent c2-view-field
  * @slotcomponent c2-view-toggle
@@ -217,6 +247,12 @@ export class ViewOptions extends LitElement {
   /** Show "Set as default", which fires `default-request`. */
   @property({ type: Boolean, attribute: 'can-set-default' }) canSetDefault = false
 
+  /** Saved views to offer, the user's own and shared ones. JSON as an attribute. Without it there is no Views section. */
+  @property({ converter: jsonPropertyConverter }) views: ViewSavedView[] | undefined = undefined
+
+  /** Id of the current saved view, one of `views`. The component compares `value` with it for "Modified". */
+  @property({ type: String, attribute: 'view-id' }) viewId: string | undefined = undefined
+
   /** Whether the panel is showing. Set it to open or close the panel from code. */
   @property({ type: Boolean, reflect: true }) open = false
 
@@ -231,6 +267,9 @@ export class ViewOptions extends LitElement {
   @state() private childFields: ViewFieldConfig[] = []
   @state() private childToggles: ViewToggleConfig[] = []
   @state() private hasExtra = false
+
+  /** The name being typed for Save as (`new`) or Rename (`rename`), while its field is showing. */
+  @state() private naming: { mode: 'new' | 'rename'; name: string; id?: string } | undefined = undefined
 
   /**
    * Whether the app slotted its own trigger. The Display button is then left out of the shadow root rather than kept as
@@ -260,6 +299,17 @@ export class ViewOptions extends LitElement {
   /** The current value with every missing key filled in: what the panel shows and what `view-change` carries. */
   get view(): ViewOptionsValue {
     return this.normalizeView(this.value)
+  }
+
+  /** The current saved view: the one of `views` named by `view-id`. */
+  get currentView(): ViewSavedView | undefined {
+    return this.viewId === undefined ? undefined : this.views?.find((view) => view && view.id === this.viewId)
+  }
+
+  /** Whether the value differs from the current saved view. Always false without one. */
+  get modified(): boolean {
+    const current = this.currentView
+    return current !== undefined && !sameView(this.view, this.normalizeView(current.value))
   }
 
   /** Whether the value differs from `default-value`. Always false without one. */
@@ -540,6 +590,8 @@ export class ViewOptions extends LitElement {
     // Every input of the comparison can change it, the children's state included, and the check is cheap.
     if (this.changed) this.internals.states.add('changed')
     else this.internals.states.delete('changed')
+    if (this.modified) this.internals.states.add('modified')
+    else this.internals.states.delete('modified')
   }
 
   // ---- rendering ----------------------------------------------------------------------------------------------------
@@ -706,6 +758,147 @@ export class ViewOptions extends LitElement {
     </div>`
   }
 
+  /** The Views section: the current view, "Modified", and what can be done with it. */
+  private renderViews(current: ViewSavedView | undefined, modified: boolean) {
+    const views = this.views
+    if (!Array.isArray(views)) return nothing
+    const listed = views.filter((view) => view && view.id)
+    const option = (view: ViewSavedView) =>
+      html`<c2-list-item value=${view.id} label=${view.name} ?selected=${view.id === current?.id}
+        >${view.name}${view.shared ? html`<span slot="description">${this.msg.t('shared')}</span>` : nothing}</c2-list-item
+      >`
+    const naming = this.naming
+    return html`<div class="section views" part="section views">
+      <div class="heading" part="heading">${this.msg.t('views')}</div>
+      <div class="row">
+        <span class="label" part="label">${this.msg.t('view')}</span>
+        <c2-select
+          class="view-select"
+          aria-label=${this.msg.t('view')}
+          placeholder=${this.msg.t('chooseView')}
+          .value=${current ? [current.id] : []}
+          @selection-change=${this.handleViewSelect}
+        >
+          ${listed.filter((view) => !view.shared).map(option)} ${listed.filter((view) => view.shared).map(option)}
+        </c2-select>
+      </div>
+      ${
+        modified
+          ? html`<div class="modified-row">
+              <span class="modified" part="modified">${this.msg.t('modified')}</span>
+              <c2-button class="view-revert" @click=${this.revertView}>${this.msg.t('revert')}</c2-button>
+            </div>`
+          : nothing
+      }
+      ${
+        naming
+          ? html`<div class="view-actions" part="view-actions">
+              <c2-text-field
+                class="view-name"
+                aria-label=${this.msg.t('viewName')}
+                placeholder=${this.msg.t('viewName')}
+                .value=${naming.name}
+                @input=${(event: Event) => (this.naming = { ...naming, name: (event.target as HTMLInputElement).value })}
+                @keydown=${this.handleNameKey}
+              ></c2-text-field>
+              <c2-button class="view-confirm" ?disabled=${!naming.name.trim()} @click=${this.confirmName}
+                >${this.msg.t(naming.mode === 'new' ? 'save' : 'rename')}</c2-button
+              >
+              <c2-button class="view-cancel" @click=${this.cancelNaming}>${this.msg.t('cancel')}</c2-button>
+            </div>`
+          : html`<div class="view-actions" part="view-actions">
+              <c2-button class="view-save" ?disabled=${!current || current.locked || !modified} @click=${this.saveView}>${this.msg.t('save')}</c2-button>
+              <c2-button class="view-save-as" @click=${() => this.startNaming('new')}>${this.msg.t('saveAs')}</c2-button>
+              <c2-button class="view-rename" ?disabled=${!current || current.locked} @click=${() => this.startNaming('rename')}
+                >${this.msg.t('rename')}</c2-button
+              >
+              <c2-button class="view-delete" ?disabled=${!current || current.locked} @click=${this.deleteView}>${this.msg.t('remove')}</c2-button>
+            </div>`
+      }
+    </div>`
+  }
+
+  private handleViewSelect = (event: CustomEvent<SelectionChangeEventDetail>) => {
+    event.stopPropagation()
+    const view = this.views?.find((entry) => entry && entry.id === event.detail.value[0])
+    if (!view || view.id === this.viewId) return
+    this.viewId = view.id
+    this.naming = undefined
+    const value = this.normalizeView(view.value)
+    this.dispatchEvent(new CustomEvent<ViewSelectEventDetail>('view-select', { detail: { id: view.id, view, value: structuredClone(value) } }))
+    this.commit(null, value)
+  }
+
+  /** Shows the name field, loading `c2-text-field` the first time: most users never save a view. */
+  private startNaming(mode: 'new' | 'rename') {
+    void import('@c2n/text-field')
+    const current = this.currentView
+    // Rename keeps the view it started on, whatever `view-id` becomes before the name is confirmed.
+    this.naming = { mode, name: mode === 'rename' ? (current?.name ?? '') : '', id: mode === 'rename' ? current?.id : undefined }
+    void this.updateComplete.then(async () => {
+      const field = this.renderRoot.querySelector<HTMLElement & { updateComplete?: Promise<unknown> }>('.view-name')
+      await customElements.whenDefined('c2-text-field')
+      await field?.updateComplete
+      field?.focus()
+    })
+  }
+
+  private handleNameKey = (event: KeyboardEvent) => {
+    if (isComposingKey(event)) return
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      this.confirmName()
+    } else if (event.key === 'Escape') {
+      // Escape leaves the name, not the panel.
+      event.stopPropagation()
+      event.preventDefault()
+      this.cancelNaming()
+    }
+  }
+
+  /** Ends the name field and gives the focus back to the action that opened it, which the field replaced. */
+  private endNaming(mode: 'new' | 'rename') {
+    this.naming = undefined
+    void this.updateComplete.then(() => this.focusInPanel(mode === 'new' ? '.view-save-as' : '.view-rename', '.view-save-as'))
+  }
+
+  private cancelNaming = () => {
+    if (this.naming) this.endNaming(this.naming.mode)
+  }
+
+  private confirmName = () => {
+    const naming = this.naming
+    const name = naming?.name.trim()
+    if (!naming || !name) return
+    this.endNaming(naming.mode)
+    if (naming.mode === 'new') {
+      this.dispatchEvent(new CustomEvent<ViewSaveEventDetail>('view-save', { detail: { id: null, name, value: structuredClone(this.view) } }))
+      return
+    }
+    const view = this.views?.find((entry) => entry && entry.id === naming.id)
+    if (view && !view.locked) this.dispatchEvent(new CustomEvent<ViewRenameEventDetail>('view-rename', { detail: { id: view.id, name } }))
+  }
+
+  /** Discards the edits made since the current view was picked: its value again. */
+  private revertView = () => {
+    const current = this.currentView
+    if (!current) return
+    this.commit(null, this.normalizeView(current.value))
+    void this.updateComplete.then(() => this.focusInPanel('.view-select'))
+  }
+
+  private saveView = () => {
+    const current = this.currentView
+    if (!current || current.locked) return
+    this.dispatchEvent(new CustomEvent<ViewSaveEventDetail>('view-save', { detail: { id: current.id, name: current.name, value: structuredClone(this.view) } }))
+  }
+
+  private deleteView = () => {
+    const current = this.currentView
+    if (!current || current.locked) return
+    this.dispatchEvent(new CustomEvent<ViewDeleteEventDetail>('view-delete', { detail: { id: current.id } }))
+  }
+
   private renderFooter(changed: boolean) {
     const hasReset = this.defaultValue !== undefined
     if (!hasReset && !this.canSetDefault) return nothing
@@ -718,6 +911,8 @@ export class ViewOptions extends LitElement {
   override render() {
     const view = this.view
     const changed = this.changed
+    const current = this.currentView
+    const modified = current !== undefined && !sameView(view, this.normalizeView(current.value))
     // The Display button sits beside the slot, not inside it as fallback content: browsers disagree on whether
     // fallback content stays exposed, and comes back, while something is assigned to the slot.
     return html`<slot name="trigger" @slotchange=${this.syncAnchor} @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}></slot>
@@ -725,7 +920,9 @@ export class ViewOptions extends LitElement {
         this.hasSlottedTrigger
           ? nothing
           : html`<c2-button id="default-trigger" class="trigger" part="trigger" @pointerdown=${this.handleTriggerPointerDown} @click=${this.handleTriggerClick}
-              >${displayIcon}${this.msg.t('display')}${changed ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing}</c2-button
+              >${displayIcon}${current?.name || this.msg.t('display')}${
+                changed || modified ? html`<span slot="suffix-icon" class="changed" part="changed"></span>` : nothing
+              }</c2-button
             >`
       }
       <c2-overlay
@@ -745,7 +942,8 @@ export class ViewOptions extends LitElement {
           @change=${this.stopInnerEvent}
           @input=${this.stopInnerEvent}
         >
-          ${this.renderLayouts(view)} ${this.renderGrouping(view)} ${this.renderToggles(view)} ${this.renderProperties(view)} ${this.renderFooter(changed)}
+          ${this.renderViews(current, modified)} ${this.renderLayouts(view)} ${this.renderGrouping(view)} ${this.renderToggles(view)}
+          ${this.renderProperties(view)} ${this.renderFooter(changed)}
         </div>
       </c2-overlay>
       <slot class="fields" hidden @slotchange=${this.readChildren}></slot>`

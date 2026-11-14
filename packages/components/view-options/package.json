@@ -49,14 +49,15 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
-        "../button:build",
         "../button-group:build",
+        "../button:build",
         "../chip:build",
         "../icon-button:build",
         "../list-item:build",
         "../overlay:build",
         "../select:build",
-        "../switch:build"
+        "../switch:build",
+        "../text-field:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -77,6 +78,7 @@
     "@c2n/overlay": "*",
     "@c2n/select": "*",
     "@c2n/switch": "*",
+    "@c2n/text-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
