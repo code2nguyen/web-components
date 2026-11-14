@@ -21,6 +21,18 @@ const en = {
   clearFilter: 'Clear filter',
   /** Tooltip of a cell's change from the baseline, `{0}` being the baseline value. */
   previousValue: (value: string) => `Was ${value}`,
+  /** The mark of a cell outside its row's `reference-range` or `critical-range`, as a lab report prints it. */
+  flagLow: 'L',
+  flagHigh: 'H',
+  flagCriticalLow: 'LL',
+  flagCriticalHigh: 'HH',
+  /** What a screen reader says for each mark. */
+  flagLowName: 'Low',
+  flagHighName: 'High',
+  flagCriticalLowName: 'Critically low',
+  flagCriticalHighName: 'Critically high',
+  /** Tooltip of a mark: `{0}` is its name, `{1}` the row's normal range (`3.5–5.1`). */
+  flagRange: (flag: string, range: string) => `${flag}, normal ${range}`,
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

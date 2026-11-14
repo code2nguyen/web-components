@@ -350,6 +350,30 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
 
 </GalleryGrid>
 
+## Range flags
+
+`reference-range="low,high"` on a column flags a value outside its row's normal range with `H` or `L`, and `critical-range` with `HH` or `LL`, as a lab report does; each limit is a number or the field of the row that holds it, and the mark's tooltip gives the range. For a measure per row and a column per reading time, use [`c2-flowsheet`](/web-components/components/flowsheet).
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Lab report
+<style>
+  .lab-report {
+    height: 260px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="lab-report" row-key="id" rows='[{"id":"glu","test":"Glucose","unit":"mg/dL","result":131,"low":70,"high":99},{"id":"k","test":"Potassium","unit":"mmol/L","result":6.4,"low":3.5,"high":5.1,"critHigh":6.2},{"id":"na","test":"Sodium","unit":"mmol/L","result":139,"low":135,"high":145},{"id":"hb","test":"Hemoglobin","unit":"g/dL","result":11.1,"low":12,"high":16,"critLow":7},{"id":"tsh","test":"TSH","unit":"mIU/L","result":0.3,"low":0.4,"high":4}]'>
+  <c2-table-column field="test" header="Test" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="result" header="Result" width="120px" align="end" reference-range="low,high" critical-range="critLow,critHigh"></c2-table-column>
+  <c2-table-column field="unit" header="Unit" width="100px"></c2-table-column>
+  <c2-table-column field="low" header="Low" width="80px" align="end"></c2-table-column>
+  <c2-table-column field="high" header="High" width="80px" align="end"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
 ## Realtime updates
 
 `animate-updates` belongs to the table, so a feed assigns only its next real snapshot—even when it adds, deletes and

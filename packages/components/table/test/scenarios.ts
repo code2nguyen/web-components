@@ -2,6 +2,7 @@
 import './translations'
 import '../src/table'
 import '../src/group-table'
+import '../src/flowsheet'
 import '../src/table-column'
 // The pager is only ever slotted into the table; the table never imports it.
 import '@c2n/pagination'

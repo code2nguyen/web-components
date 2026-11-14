@@ -444,6 +444,10 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  '--c2-table__flag__high--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-table__delta__down--color': {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',

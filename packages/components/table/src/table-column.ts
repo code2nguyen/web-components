@@ -157,6 +157,16 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   @property({ type: Number, attribute: 'variance-threshold' }) varianceThreshold?: number
 
   /**
+   * Flags a value outside its row's normal range: `low,high`, each a number or the field of the row that holds it
+   * (`ref_low,ref_high`), either one may be empty. The cell gets the `cell-flag-low` / `cell-flag-high` part and an
+   * `L` or `H` mark, as a lab report shows.
+   */
+  @property({ type: String, attribute: 'reference-range' }) referenceRange?: string
+
+  /** Flags a value past its row's critical limits the same way (`cell-flag-critical-low`, `cell-flag-critical-high`). */
+  @property({ type: String, attribute: 'critical-range' }) criticalRange?: string
+
+  /**
    * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added up
    * over the rows in their sorted order. Comma-separated, and a `-` subtracts a field: `running="credit,-debit"`. A row
    * with none of them shows nothing and leaves the total as it is. Give the column a `column-id`; it needs no `field`.

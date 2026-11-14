@@ -9,6 +9,10 @@
       "types": "./types/src/table.d.ts",
       "default": "./dist/table.js"
     },
+    "./flowsheet.js": {
+      "types": "./types/src/flowsheet.d.ts",
+      "default": "./dist/flowsheet.js"
+    },
     "./group-table.js": {
       "types": "./types/src/group-table.d.ts",
       "default": "./dist/group-table.js"
@@ -111,6 +115,7 @@
   },
   "c2n": {
     "separateEntries": [
+      "./flowsheet.js",
       "./group-table.js"
     ]
   }

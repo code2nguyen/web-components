@@ -111,6 +111,12 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="gross" header="Gross" width="170px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1"></c2-table-column>
   </c2-table>
 </div>
+<div data-label="Range flags">
+  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"glu","test":"Glucose","result":131,"low":70,"high":99},{"id":"k","test":"Potassium","result":6.4,"low":3.5,"high":5.1,"critHigh":6.2},{"id":"na","test":"Sodium","result":139,"low":135,"high":145},{"id":"tsh","test":"TSH","result":0.3,"low":0.4,"high":4}]'>
+    <c2-table-column field="test" header="Test" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="result" header="Result" width="120px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Empty">
   <c2-table client:only="lit" class="compact" empty-message="No rows match this filter">
     <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
@@ -135,6 +141,13 @@ itself: the request carries `filters`, and the source answers with the rows they
 `baseline` holds the same rows from an earlier period, matched by `row-key`. A column with `compare="delta"` or
 `compare="percent"` shows the change from it under the value, and `variance-threshold="0.1"` marks a cell that moved by
 more than 10% (`::part(cell-variance)`, `--c2-table__cell__variance--*`).
+
+### Range flags
+
+`reference-range="low,high"` flags a value outside its row's normal range with `H` or `L` (`::part(cell-flag-high)`),
+and `critical-range` with `HH` or `LL`; each limit is a number or the field of the row that holds it, the mark's tooltip
+gives the range, and a screen reader hears the word, not the letter. A measure per row and a column per reading time is
+[`c2-flowsheet`](/web-components/components/flowsheet), built on these flags.
 
 ### Columns as data
 

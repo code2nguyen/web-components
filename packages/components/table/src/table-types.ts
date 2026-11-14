@@ -274,6 +274,14 @@ export interface TableColumnConfig {
    * `cell-variance` part. A cell whose baseline is 0 is marked on any change.
    */
   varianceThreshold?: number
+  /**
+   * Flags a cell outside its row's normal range, as a lab result is: `low,high`, each a number or the field of the row
+   * that holds it (`ref_low,ref_high`). Either may be empty. The cell gets the `cell-flag-low` or `cell-flag-high` part
+   * and an `L` or `H` mark.
+   */
+  referenceRange?: string
+  /** Flags a cell past its row's critical limits the same way: `cell-flag-critical-low`, `cell-flag-critical-high`. */
+  criticalRange?: string
   /** Makes the column's cells editable while the table is `editable`, with this editor. */
   editor?: TableCellEditor
   /** The choices of a `select` editor. The cell shows the label of its value. */
@@ -406,6 +414,9 @@ export interface TableFilterChangeEventDetail {
 
 /** How a column compares each cell with the matching row of `baseline`: the change as a number or a share. */
 export type TableCompare = 'delta' | 'percent'
+
+/** Where a cell stands against its row's `reference-range` and `critical-range`. */
+export type TableCellFlag = 'low' | 'high' | 'critical-low' | 'critical-high'
 
 export interface TableRowsResult {
   rows: TableRow[]

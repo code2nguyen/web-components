@@ -887,7 +887,7 @@ export class GroupTable extends Table {
   /** In a tree a column's values are counted over every row the other filters keep, at every level. */
   protected override filterValueRows(skip: string): TableRow[] {
     if (!this.childrenField || this.dataSource) return super.filterValueRows(skip)
-    return this.#buildTree(Array.isArray(this.rows) ? this.rows : [], this.filterTest(skip)).nodes.map((node) => node.row)
+    return this.#buildTree(this.sourceRows(), this.filterTest(skip)).nodes.map((node) => node.row)
   }
 
   protected override needsSort(changed: PropertyValues): boolean {

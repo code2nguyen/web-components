@@ -2,18 +2,21 @@
 /**
  * Enhances table gallery examples whose property-only API (`loadChildren`, `renderDetail`, `renderEditor`, `rowRule`,
  * `isCellEditable`) cannot be expressed as an HTML attribute, wires the buttons of the editing cards' toolbars, and adds
- * the French an app would supply for the card under `lang="fr"` (the table's filter and the facet list inside it).
+ * the French an app would supply for the cards under `lang="fr"` (the table's filter, the facet list inside it, and
+ * the flags of a flowsheet), and adds the next round to the flowsheet's "Next round" card.
  */
 ---
 
 <script>
   import type { Table, TableRow } from '@c2n/components/table'
   import type { GroupTable } from '@c2n/components/table/group-table'
+  import type { Flowsheet } from '@c2n/components/table/flowsheet'
   import type { TableColumn } from '@c2n/components/table/table-column'
   import type { DurationInput } from '@c2n/components/duration-input'
   import type { Autocomplete } from '@c2n/components/autocomplete'
   import '@c2n/components/table'
   import '@c2n/components/table/group-table'
+  import '@c2n/components/table/flowsheet'
   import '@c2n/components/duration-input'
   import '@c2n/components/autocomplete'
   import '@c2n/components/button'
@@ -28,6 +31,15 @@
         sortDescending: 'Trier de Z à A',
         clearFilter: 'Effacer le filtre',
         previousValue: 'Avant : {0}',
+        flagLow: 'B',
+        flagHigh: 'H',
+        flagCriticalLow: 'BB',
+        flagCriticalHigh: 'HH',
+        flagLowName: 'Bas',
+        flagHighName: 'Élevé',
+        flagCriticalLowName: 'Critique bas',
+        flagCriticalHighName: 'Critique haut',
+        flagRange: '{0}, normale {1}',
       },
       'facet-list': {
         clear: 'Effacer',
@@ -328,8 +340,17 @@
     })
   }
 
+  /** The "Next round" card: its toolbar button adds the 4:00 PM column, which the nurse then types into. */
+  function nextRound(sheet: Flowsheet) {
+    const add = sheet.querySelector<HTMLElement & { disabled: boolean }>('[data-add-round]')
+    add?.addEventListener('click', async () => {
+      await sheet.addTime('2026-11-14T16:00')
+      add.disabled = true
+    })
+  }
+
   function setup() {
-    document.querySelectorAll<Table>('c2-table[data-table-example], c2-group-table[data-table-example]').forEach((table) => {
+    document.querySelectorAll<Table>('c2-table[data-table-example], c2-group-table[data-table-example], c2-flowsheet[data-table-example]').forEach((table) => {
       if (initialized.has(table)) return
       initialized.add(table)
       if (table.dataset.tableExample === 'lazy-children') {
@@ -341,6 +362,7 @@
       if (table.dataset.tableExample === 'journal') journal(table)
       if (table.dataset.tableExample === 'line-items') lineItems(table)
       if (table.dataset.tableExample === 'allocation') allocation(table)
+      if (table.dataset.tableExample === 'next-round') nextRound(table as Flowsheet)
       if (table.dataset.tableExample === 'row-detail') {
         // A node rather than a Lit template: the panel is in the table's shadow root, so it is styled inline.
         table.renderDetail = ({ row }) => {

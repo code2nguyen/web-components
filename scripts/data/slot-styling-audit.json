@@ -4911,6 +4911,72 @@
       "reason": "The minimap box sizes and frames the slotted overview; the assigned content keeps its own styles."
     },
     {
+      "tag": "c2-flowsheet",
+      "slot": "cell:{line}:{field}",
+      "decision": "assigned-content",
+      "reason": "The cell:{line}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "fallback",
+      "decision": "assigned-content",
+      "reason": "The fallback remains consumer-owned semantic light DOM before upgrade and is intentionally hidden once the interactive grid mounts."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "group:{groupKey}",
+      "decision": "assigned-content",
+      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-flowsheet",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
+    },
+    {
       "tag": "c2-group-table",
       "slot": "cell:{line}:{field}",
       "decision": "assigned-content",

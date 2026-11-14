@@ -1033,6 +1033,10 @@
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
     },
+    "./table/flowsheet": {
+      "types": "./dist/table/flowsheet.d.ts",
+      "default": "./dist/table/flowsheet.js"
+    },
     "./table/group-table": {
       "types": "./dist/table/group-table.d.ts",
       "default": "./dist/table/group-table.js"
