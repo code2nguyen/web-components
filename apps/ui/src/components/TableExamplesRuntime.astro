@@ -1,7 +1,8 @@
 ---
 /**
  * Enhances table gallery examples whose property-only API (`loadChildren`, `renderDetail`, `renderEditor`, `rowRule`,
- * `isCellEditable`) cannot be expressed as an HTML attribute, and wires the buttons of the editing cards' toolbars.
+ * `isCellEditable`) cannot be expressed as an HTML attribute, wires the buttons of the editing cards' toolbars, and adds
+ * the French an app would supply for the card under `lang="fr"` (the table's filter and the facet list inside it).
  */
 ---
 
@@ -16,6 +17,33 @@
   import '@c2n/components/duration-input'
   import '@c2n/components/autocomplete'
   import '@c2n/components/button'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      table: {
+        filterColumn: 'Filtrer {0}',
+        filterBlank: '(Vides)',
+        sortAscending: 'Trier de A à Z',
+        sortDescending: 'Trier de Z à A',
+        clearFilter: 'Effacer le filtre',
+        previousValue: 'Avant : {0}',
+      },
+      'facet-list': {
+        clear: 'Effacer',
+        clearLabel: 'Effacer {0}',
+        search: 'Filtrer les valeurs',
+        onlyText: 'Seul',
+        only: 'Seulement {0}',
+        exclude: 'Exclure {0}',
+        include: 'Inclure {0}',
+        excluded: '{0}, exclu',
+        showAll: 'Tout afficher ({0})',
+        showFewer: 'Afficher moins',
+        noMatches: 'Aucune valeur',
+      },
+    },
+  })
 
   // Each region's countries add up to the figures the region shows before it is opened, so the rollup agrees.
   const countries: Record<string, TableRow[]> = {

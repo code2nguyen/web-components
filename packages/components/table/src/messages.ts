@@ -11,6 +11,16 @@ const en = {
   selectGroupRows: 'Select group rows',
   /** Label of the group of rows whose value is empty, in `c2-group-table`. */
   emptyGroup: 'No value',
+  /** Accessible name of a column's filter button, `{0}` being the column's header. */
+  filterColumn: (column: string) => `Filter ${column}`,
+  /** The value of an empty cell in a column's filter. */
+  filterBlank: '(Blanks)',
+  /** Buttons of a column's filter. */
+  sortAscending: 'Sort A to Z',
+  sortDescending: 'Sort Z to A',
+  clearFilter: 'Clear filter',
+  /** Tooltip of a cell's change from the baseline, `{0}` being the baseline value. */
+  previousValue: (value: string) => `Was ${value}`,
   /** Accessible name of the input that edits a cell, `{0}` being the column's header. */
   editCell: (column: string) => `Edit ${column}`,
   /** A `required` cell is empty. */

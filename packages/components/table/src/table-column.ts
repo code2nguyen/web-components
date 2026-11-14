@@ -13,6 +13,7 @@ import type {
   TableCellRenderer,
   TableCellValidator,
   TableColumnConfig,
+  TableCompare,
   TableHeaderRenderer,
   TableSummaryAggregate,
   TableSummaryFunction,
@@ -139,6 +140,21 @@ export class TableColumn extends LitElement implements TableColumnConfig {
    * each row's chevron and indentation in a tree (`children-field`). Defaults to the first column.
    */
   @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
+
+  /** Adds a filter of the column's values to its header. Absent inherits the table's `filterable`; `filterable="false"` opts out. */
+  @property({ type: Boolean }) filterable?: boolean
+
+  /**
+   * Shows each cell's change from the matching row of the table's `baseline` (the last payroll run, the previous
+   * period): `delta` as a number in the column's format, `percent` as a share. The previous value is its tooltip.
+   */
+  @property({ type: String }) compare?: TableCompare
+
+  /**
+   * Marks a cell whose value moved from the `baseline` by more than this share of it (`0.1` is 10%) with the
+   * `cell-variance` part. A cell whose baseline is 0 is marked on any change.
+   */
+  @property({ type: Number, attribute: 'variance-threshold' }) varianceThreshold?: number
 
   /**
    * Makes the column a running total, such as a balance: each row shows `opening` plus the fields named here, added up

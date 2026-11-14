@@ -82,6 +82,23 @@
     editor--font-size: 14px,
     editor--padding: 0 11px,
     editor--box-shadow: inset 0 0 0 2px rgb(2, 101, 220),
+    filter-button--size: 22px,
+    filter-panel--background: #ffffff,
+    filter-panel--color: #18181b,
+    filter-panel--border: 1px solid #e4e4e7,
+    filter-panel--border-radius: 8px,
+    filter-panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    filter-panel--padding: 8px,
+    filter-button--color: #a1a1aa,
+    filter-button--border-radius: 4px,
+    filter-button__hover--background: #e4e4e7,
+    filter-button__active--color: rgb(2, 101, 220),
+    delta--font-size: 12px,
+    delta--color: #71717a,
+    delta__up--color: #15803d,
+    delta__down--color: #b91c1c,
+    cell__variance--background: #fef3c7,
+    cell__variance--box-shadow: inset 3px 0 0 0 #d97706,
     status--gap: 6px,
     status-mark--background: #a1a1aa,
     status-mark--size: 8px,
@@ -428,6 +445,79 @@
 
 .cell--align-end .editor {
   text-align: end;
+}
+
+// A filterable column's header button (`filterable`): quiet until hovered, coloured while the column is filtered.
+.filter-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: css.cssVar(filter-button--size);
+  block-size: css.cssVar(filter-button--size);
+  margin-inline-start: auto;
+  padding: 3px;
+  border: 0;
+  border-radius: css.cssVar(filter-button--border-radius);
+  background: none;
+  color: css.cssVar(filter-button--color);
+  cursor: pointer;
+}
+
+.filter-button svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.filter-button:hover {
+  background: css.cssVar(filter-button__hover--background);
+}
+
+.filter-button--active {
+  color: css.cssVar(filter-button__active--color);
+}
+
+.filter-button:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: 0;
+}
+
+.filter-panel {
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: css.cssVar(filter-panel--padding);
+  min-inline-size: 220px;
+  border: css.cssVar(filter-panel--border);
+  border-radius: css.cssVar(filter-panel--border-radius);
+  background: css.cssVar(filter-panel--background);
+  color: css.cssVar(filter-panel--color);
+  box-shadow: css.cssVar(filter-panel--box-shadow);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 6px;
+}
+
+// A cell compared with `baseline`: its change after the value, and a mark when the change passes the threshold.
+.delta {
+  margin-inline-start: 6px;
+  font-size: css.cssVar(delta--font-size);
+  font-variant-numeric: tabular-nums;
+  color: css.cssVar(delta--color);
+}
+
+.delta[part~='delta-up'] {
+  color: css.cssVar(delta__up--color);
+}
+
+.delta[part~='delta-down'] {
+  color: css.cssVar(delta__down--color);
+}
+
+.cell--variance {
+  background: css.cssVar(cell__variance--background);
+  box-shadow: css.cssVar(cell__variance--box-shadow);
 }
 
 // `format="status"`: a mark painted with the value's legend colour, and its label. A matrix of statuses can shrink the

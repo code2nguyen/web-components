@@ -65,7 +65,10 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
+        "../button:build",
         "../checkbox:build",
+        "../facet-list:build",
+        "../overlay:build",
         "../spinner:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
@@ -78,8 +81,11 @@
     }
   },
   "dependencies": {
+    "@c2n/button": "*",
     "@c2n/checkbox": "*",
     "@c2n/core": "*",
+    "@c2n/facet-list": "*",
+    "@c2n/overlay": "*",
     "@c2n/spinner": "*",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"

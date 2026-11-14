@@ -278,8 +278,12 @@ export class TableEditing {
     if (active) {
       // Characters typed before the editor had the focus belong to the edit that is opening.
       if (active.line === line && active.columnIndex === columnIndex) {
-        if (typeof trigger === 'object' && typeof active.draft === 'string') active.draft += trigger.text
-        this.#table.requestUpdate()
+        // Enter (or F2) reaching the grid before the editor had the focus commits what was typed, as it would there.
+        if (trigger === 'edit') this.#commitActive()
+        else {
+          if (typeof trigger === 'object' && typeof active.draft === 'string') active.draft += trigger.text
+          this.#table.requestUpdate()
+        }
         return
       }
       this.#commitActive(false)

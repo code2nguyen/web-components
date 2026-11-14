@@ -104,6 +104,13 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column column-id="balance" header="Balance" width="110px" align="end" format="currency" running="credit,-debit" opening="1000" summary="last"></c2-table-column>
   </c2-table>
 </div>
+<div data-label="Filters and changes">
+  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"E-01","name":"Ada Lovelace","team":"Analytics","gross":9200},{"id":"E-02","name":"Grace Hopper","team":"Compilers","gross":8600},{"id":"E-03","name":"Alan Turing","team":"Research","gross":10450},{"id":"E-04","name":"Barbara Liskov","team":"Research","gross":8800}]' baseline='[{"id":"E-01","gross":9200},{"id":"E-02","gross":8400},{"id":"E-03","gross":8650},{"id":"E-04","gross":8800}]'>
+    <c2-table-column field="name" header="Employee" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="130px" filterable></c2-table-column>
+    <c2-table-column field="gross" header="Gross" width="170px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Empty">
   <c2-table client:only="lit" class="compact" empty-message="No rows match this filter">
     <c2-table-column field="name" header="Name" width="2fr" min-width="140"></c2-table-column>
@@ -111,6 +118,23 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
   </c2-table>
 </div>
 ```
+
+### Filters and baselines
+
+`filterable` (on a column, or on the table for every column) adds a funnel to the header that lists the column's values
+with their counts; the code behind it loads the first time one opens. The choice is kept in `filters`, which is also a
+JSON attribute, so a filtered view can be written in markup:
+
+```html tag=CodeBlock
+<c2-table filterable filters='{"status":{"exclude":["Archived"]}}' rows="..."></c2-table>
+```
+
+`filter-change` reports each change with the whole `filters` object. With a `dataSource` the table filters nothing
+itself: the request carries `filters`, and the source answers with the rows they let through.
+
+`baseline` holds the same rows from an earlier period, matched by `row-key`. A column with `compare="delta"` or
+`compare="percent"` shows the change from it under the value, and `variance-threshold="0.1"` marks a cell that moved by
+more than 10% (`::part(cell-variance)`, `--c2-table__cell__variance--*`).
 
 ### Columns as data
 

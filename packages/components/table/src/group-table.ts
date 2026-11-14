@@ -458,12 +458,12 @@ export class GroupTable extends Table {
    * Builds the tree of `children-field`: nodes and their rollups first, from the leaves up, then every level sorted
    * (by the rolled-up values where a column has them) and numbered depth first — the order of the flattened rows.
    */
-  #buildTree(rows: TableRow[]): TreeRows {
+  #buildTree(rows: TableRow[], test = this.filterTest()): TreeRows {
     const columns = this.resolvedColumns.filter((column) => column.rollup)
     const build = (list: TableRow[], level: number, parent?: TreeNode): TreeNode[] =>
       list
         .filter((row) => row && typeof row === 'object')
-        .map((row) => {
+        .flatMap((row) => {
           const node: TreeNode = { row, index: -1, key: '', level, parent, lazy: false, leaves: [row] }
           const value = getFieldValue(row, this.childrenField)
           const identity = this.identityOf(row)
@@ -490,7 +490,8 @@ export class GroupTable extends Table {
               }
             }
           } else node.lazy = value === true && identity !== undefined
-          return node
+          // A filter keeps a row that passes it and the rows above one that does, so a match is never orphaned.
+          return !test || test(row) || node.children?.length ? [node] : []
         })
     const nodes: TreeNode[] = []
     const byKey = new Map<string, TreeNode>()
@@ -876,6 +877,17 @@ export class GroupTable extends Table {
   protected override buildRows(rows: TableRow[]): TableRow[] {
     this.#tree = this.childrenField && !this.dataSource ? this.#buildTree(rows) : undefined
     return this.#tree ? this.#tree.nodes.map((node) => node.row) : this.orderRows(rows)
+  }
+
+  /** A tree filters while it is built (`#buildTree`): a parent stays while one of its descendants passes. */
+  protected override filterRows(rows: TableRow[], skip?: string): TableRow[] {
+    return this.childrenField && !this.dataSource ? rows : super.filterRows(rows, skip)
+  }
+
+  /** In a tree a column's values are counted over every row the other filters keep, at every level. */
+  protected override filterValueRows(skip: string): TableRow[] {
+    if (!this.childrenField || this.dataSource) return super.filterValueRows(skip)
+    return this.#buildTree(Array.isArray(this.rows) ? this.rows : [], this.filterTest(skip)).nodes.map((node) => node.row)
   }
 
   protected override needsSort(changed: PropertyValues): boolean {
