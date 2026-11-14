@@ -265,6 +265,15 @@ export interface TableColumnConfig {
   opening?: number
   /** Makes the column count, in each row, the cells of the `status` columns that hold this value. */
   countValue?: string
+  /** Adds a filter of the column's values to its header (the table's `filterable` makes every column filterable). */
+  filterable?: boolean
+  /** Shows each cell's change from the matching row of the table's `baseline`: `delta` as a number, `percent` as a share. */
+  compare?: TableCompare
+  /**
+   * Marks a cell whose value moved from the `baseline` by more than this share of it (`0.1` is 10%): the
+   * `cell-variance` part. A cell whose baseline is 0 is marked on any change.
+   */
+  varianceThreshold?: number
   /** Makes the column's cells editable while the table is `editable`, with this editor. */
   editor?: TableCellEditor
   /** The choices of a `select` editor. The cell shows the label of its value. */
@@ -372,7 +381,31 @@ export interface TableRowsRequest {
   count: number
   /** Sort the server should apply, in priority order. */
   sort: SortModel[]
+  /** The column filters the server should apply, keyed by column id (see `filters`). */
+  filters: TableFilters
 }
+
+/**
+ * The filter of one column: the values it keeps (`include`) or drops (`exclude`), compared as text. An empty value is
+ * `''`. With both, a value must be included and not excluded.
+ */
+export interface TableColumnFilter {
+  include?: string[]
+  exclude?: string[]
+}
+
+/** The column filters of a table, keyed by column id (its `field` unless `column-id` is set). */
+export type TableFilters = Record<string, TableColumnFilter>
+
+export interface TableFilterChangeEventDetail {
+  /** Every column's filter, as `filters` now holds them. */
+  filters: TableFilters
+  /** The id of the column whose filter changed. */
+  column: string
+}
+
+/** How a column compares each cell with the matching row of `baseline`: the change as a number or a share. */
+export type TableCompare = 'delta' | 'percent'
 
 export interface TableRowsResult {
   rows: TableRow[]

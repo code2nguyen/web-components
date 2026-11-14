@@ -27,7 +27,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-group-table': Omit<
         C2Props<GroupTable>,
-        'groupBy' | 'expandedGroups' | 'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails'
+        'groupBy' | 'expandedGroups' | 'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
       > & {
         'group-by'?: Attribute
         'group-display'?: Attribute
@@ -66,8 +66,9 @@ declare module 'react' {
         sortModel?: GroupTable['sortModel'] | string
         summaryValues?: GroupTable['summaryValues'] | string
         expandedDetails?: GroupTable['expandedDetails'] | string
+        baseline?: GroupTable['baseline'] | string
       }
-      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails'> & {
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'> & {
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -94,6 +95,7 @@ declare module 'react' {
         sortModel?: Table['sortModel'] | string
         summaryValues?: Table['summaryValues'] | string
         expandedDetails?: Table['expandedDetails'] | string
+        baseline?: Table['baseline'] | string
       }
       'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {
         'column-id'?: Attribute
@@ -106,6 +108,7 @@ declare module 'react' {
         'summary-align'?: Attribute
         'summary-span'?: Attribute
         'group-column'?: Attribute
+        'variance-threshold'?: Attribute
         'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
         options?: TableColumn['options'] | string

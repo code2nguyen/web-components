@@ -32,6 +32,8 @@ import {
   type TableChanges,
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
+  type TableFilterChangeEventDetail,
+  type TableFilters,
   type TableDataSource,
   type TableDetailRenderer,
   type TableDetailToggleEventDetail,
@@ -51,6 +53,7 @@ import {
   aggregate,
   CHEVRON,
   columnKey,
+  filterText,
   rowKeyListConverter,
   rowKeysConverter,
   SELECTION_FIELD,
@@ -63,6 +66,7 @@ import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
 import type { EditTrigger, TableEditing } from './table-editing.js'
 import type { RowsAnimation } from './table-animation.js'
+import type { TableFilter } from './table-filter.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -85,6 +89,18 @@ const NO_LINES: number[] = []
 const FINDABLE = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype
 
 export type TableSummaryScope = 'all' | 'page'
+
+const FUNNEL = html`<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" />
+</svg>`
 
 /** Whether a `c2-table` given `group-by` or `children-field` has said that they are `c2-group-table`'s. */
 let warnedHierarchy = false
@@ -163,6 +179,7 @@ export interface TableEventMap {
   'range-change': CustomEvent<TableRangeChangeEventDetail>
   'detail-toggle': CustomEvent<TableDetailToggleEventDetail>
   'cell-change': CustomEvent<TableCellChangeEventDetail>
+  'filter-change': CustomEvent<TableFilterChangeEventDetail>
   'rows-change': CustomEvent<TableRowsChangeEventDetail>
 }
 
@@ -274,6 +291,13 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Filters and comparisons.** `filterable` (on the table or a column) puts a filter in a column's header: a click,
+ * or Alt+↓ on the header, opens the column's values with their counts, a search, the sort buttons and Clear, loaded
+ * on first use. The choice lands in `filters` (`{ "status": { "include": ["Paid"] } }`, settable from markup too) and
+ * `filter-change`; a `dataSource` receives it in `getRows`. `baseline` takes the rows to compare with, such as the last
+ * payroll run: a column with `compare="delta"` (or `percent`) shows each cell's change, the previous value as its
+ * tooltip, and `variance-threshold="0.1"` marks a cell that moved by more than 10% (`cell-variance`).
+ *
  * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
  * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
  * reads as a status matrix; `summary="tally"` counts each status under its column, and a column with `count-value`
@@ -311,6 +335,7 @@ export interface Table {
  * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
  * @event {CustomEvent<TableDetailToggleEventDetail>} detail-toggle - Fired after the user opens or closes a row's detail panel (`detail-height`), with its `key`, the `row` and whether it is now open. Does not bubble.
  * @event {CustomEvent<TableCellChangeEventDetail>} cell-change - Fired when the user commits a new value to a cell of an `editable` table (typed, toggled, cleared or pasted), before the table stores it: `detail.row` is the row as it was, with `key`, `column`, `field`, `value` and `previousValue`. Cancelable: `preventDefault()` keeps the old value. Does not bubble.
+ * @event {CustomEvent<TableFilterChangeEventDetail>} filter-change - Fired after the user changes a column's filter. `detail.filters` is every column's filter, as `filters` now holds them, and `detail.column` the id of the column that changed.
  * @event {CustomEvent<TableRowsChangeEventDetail>} rows-change - Fired after the table replaced `rows` itself: a cell edited or pasted, a row added, duplicated or deleted, changes reverted. `detail.rows` is the new array and `detail.reason` says why. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
@@ -336,6 +361,10 @@ export interface Table {
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
+ * @csspart filter-button - The filter button of a `filterable` column's header. Also `filter-button-active` while the column is filtered.
+ * @csspart filter - The popover of a column's filter: its values with their counts, the sort buttons and Clear.
+ * @csspart delta - A cell's change from the `baseline` (`compare`). Also `delta-up`, `delta-down` or `delta-flat`.
+ * @csspart cell-variance - A body cell whose change from the `baseline` passes its column's `variance-threshold`; exposed in addition to `cell`.
  * @csspart status - A value of a `status` column: its mark and label. Also `status-<value>`, so one value can be styled.
  * @csspart status-mark - The dot, or the square holding the `glyph`, of a status.
  * @csspart status-label - The label of a status.
@@ -419,6 +448,23 @@ export interface Table {
  * @cssproperty {padding} [--c2-table__editor--padding=0 11px]
  * @cssproperty {box-shadow} [--c2-table__editor--box-shadow=inset 0 0 0 2px rgb(2, 101, 220)] - The ring of the cell being edited.
  *
+ * @cssproperty {pixel} [--c2-table__filter-button--size=22px] - The filter button of a `filterable` column's header.
+ * @cssproperty {color} [--c2-table__filter-button--color=#a1a1aa]
+ * @cssproperty {border-radius} [--c2-table__filter-button--border-radius=4px]
+ * @cssproperty {color} [--c2-table__filter-button__hover--background=#e4e4e7]
+ * @cssproperty {color} [--c2-table__filter-button__active--color=rgb(2, 101, 220)] - The button of a column that is filtered.
+ * @cssproperty {color} [--c2-table__filter-panel--background=#ffffff] - The popover a filter button opens.
+ * @cssproperty {color} [--c2-table__filter-panel--color=#18181b]
+ * @cssproperty {border} [--c2-table__filter-panel--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-table__filter-panel--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-table__filter-panel--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-table__filter-panel--padding=8px]
+ * @cssproperty {font-size} [--c2-table__delta--font-size=12px] - A cell's change from the `baseline` (`compare`).
+ * @cssproperty {color} [--c2-table__delta--color=#71717a] - A change of 0.
+ * @cssproperty {color} [--c2-table__delta__up--color=#166534]
+ * @cssproperty {color} [--c2-table__delta__down--color=#b91c1c]
+ * @cssproperty {color} [--c2-table__cell__variance--background=rgba(217, 119, 6, 0.16)] - A cell past its column's `variance-threshold`.
+ * @cssproperty {box-shadow} [--c2-table__cell__variance--box-shadow=inset 3px 0 0 0 #d97706]
  * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
  * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
  * @cssproperty {pixel} [--c2-table__status-mark--size=8px] - The dot of a status without a `glyph`.
@@ -630,6 +676,25 @@ export class Table extends LitElement {
   @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
 
   /**
+   * Adds a filter of its values to every column's header; a column's own `filterable` still wins. With a `dataSource`
+   * a column lists the values of its `options`, and one without `options` gets no filter.
+   */
+  @property({ type: Boolean }) filterable = false
+
+  /**
+   * The column filters, keyed by column id: `{ "status": { "include": ["Paid"] } }`. A filterable column's header
+   * writes it as the user picks values, and `filter-change` reports it. Applied on the client; with a `dataSource`
+   * they go to `getRows` instead. An object in the property, JSON in the attribute.
+   */
+  @property({ converter: jsonPropertyConverter }) filters: TableFilters = {}
+
+  /**
+   * The rows to compare with, such as the last payroll run: matched by `row-key` (or `getRowKey`, one is needed), they give each column with
+   * `compare` or `variance-threshold` its previous value. An array in the property, JSON in the attribute.
+   */
+  @property({ converter: jsonPropertyConverter }) baseline?: TableRow[]
+
+  /**
    * Lets the user edit the cells of the columns that have an `editor` (or a `renderEditor`): Enter, F2, a double click
    * or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears the
    * cell, and a block copied from a spreadsheet pastes from the focused cell. Each change fires `cell-change` and
@@ -680,6 +745,11 @@ export class Table extends LitElement {
   #windowCache?: { inputs: unknown[]; range: VirtualScrollRange }
   /** Counts the blocks a `dataSource` delivered, which is when a row of an open detail may appear. */
   #blocksVersion = 0
+  /** The column filter popover once loaded, and its load while it is on the way. */
+  #filter?: TableFilter
+  #filterLoad?: Promise<TableFilter>
+  #baselineCache?: { inputs: unknown[]; rows: Map<string, TableRow> }
+  #baselineWarned = false
   /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
   #editing?: TableEditing
   #editingLoad?: Promise<TableEditing>
@@ -915,7 +985,8 @@ export class Table extends LitElement {
   async #keepSelection<T>(change: () => T, dropped?: Set<TableRow>): Promise<T> {
     // Every selected row of the dataset, not only the page on show that `getSelectedRows` covers.
     const keys = new Set(this.value)
-    const selected = keys.size && !this.dataSource ? this.sortedRows.filter((row, index) => keys.has(this.keyAt(index, row)) && !dropped?.has(row)) : undefined
+    const selected =
+      keys.size && !this.dataSource ? this.#selectableRows().filter((row, index) => keys.has(this.keyAt(index, row)) && !dropped?.has(row)) : undefined
     const result = change()
     await this.updateComplete
     if (selected) {
@@ -923,6 +994,17 @@ export class Table extends LitElement {
       if (next.length !== this.value.length || next.some((key, index) => key !== this.value[index])) this.commitSelection(next)
     }
     return result
+  }
+
+  /**
+   * The rows whose selection survives a change: those on show, plus with a key the ones a filter hides (a selected row
+   * stays selected while it is filtered out). Without a key a position is the key, so only the rows on show count.
+   */
+  #selectableRows(): TableRow[] {
+    if (!this.rowKey && !this.getRowKey) return this.sortedRows
+    const shown = new Set(this.sortedRows)
+    const hidden = (Array.isArray(this.rows) ? this.rows : []).filter((row) => !shown.has(row))
+    return hidden.length ? [...this.sortedRows, ...hidden] : this.sortedRows
   }
 
   /** The rows added, edited and deleted since the rows were given or `acceptChanges()` ran. */
@@ -1167,6 +1249,7 @@ export class Table extends LitElement {
       this.needsSort(changed) ||
       changed.has('dataSource') ||
       changed.has('rows') ||
+      changed.has('filters') ||
       changed.has('sortModel') ||
       changed.has('columns') ||
       changed.has('columnElements')
@@ -1174,12 +1257,18 @@ export class Table extends LitElement {
       this.applySort()
     // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
     // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
-    if (changed.has('dataSource') || changed.has('blockSize') || changed.has('pageSize') || (this.dataSource && changed.has('sortModel'))) {
+    if (
+      changed.has('dataSource') ||
+      changed.has('blockSize') ||
+      changed.has('pageSize') ||
+      (this.dataSource && (changed.has('sortModel') || changed.has('filters')))
+    ) {
       this.#resetRemote()
     }
     if (this.paginated) {
       // A new sort is a new dataset; start it at the top rather than on a page that may no longer exist.
-      if (changed.has('sortModel') && changed.get('sortModel') !== undefined) this.page = 1
+      if ((changed.has('sortModel') && changed.get('sortModel') !== undefined) || (changed.has('filters') && changed.get('filters') !== undefined))
+        this.page = 1
       if (!this.dataSource || this.remoteTotal >= 0) {
         const clamped = Math.min(Math.max(1, Math.floor(this.page) || 1), this.pageCount)
         if (clamped !== this.page) this.page = clamped
@@ -1351,6 +1440,7 @@ export class Table extends LitElement {
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
+      ${this.#filter?.render() ?? nothing}
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
       <slot name="fallback" class="definitions"></slot>
     `
@@ -1460,7 +1550,7 @@ export class Table extends LitElement {
         }}
       >
         <span class="cell-content">${label}</span>
-        ${sortable ? this.#renderSortIcon(sort?.direction) : nothing}
+        ${sortable ? this.#renderSortIcon(sort?.direction) : nothing} ${this.#isFilterable(column) ? this.#renderFilterButton(column, columnIndex) : nothing}
         ${sort && this.sortModel.length > 1 ? html`<span class="sort-order">${sortIndex + 1}</span>` : nothing}
         ${resizable ? html`<span class="resizer" part="resizer" @pointerdown=${(event: PointerEvent) => this.#startResize(event, column)}></span>` : nothing}
       </div>
@@ -1613,6 +1703,8 @@ export class Table extends LitElement {
               ? this.#renderStatus(column, value)
               : this.formatValue(column, value)
       : undefined
+    // A column comparing with `baseline` shows each cell's change, and marks a change past its threshold.
+    const versus = row && this.baseline && (column.compare || column.varianceThreshold !== undefined) ? this.#versus(rowIndex, row, column, value) : undefined
     // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
     // module knows rows as the application gave them, not the interpolated copy an animated update draws.
     const editing = row ? this.#editing : undefined
@@ -1627,7 +1719,9 @@ export class Table extends LitElement {
       : row
         ? column.cellSlot
           ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-          : rendered
+          : versus?.delta !== undefined
+            ? html`${rendered}${versus.delta}`
+            : rendered
         : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
@@ -1635,9 +1729,19 @@ export class Table extends LitElement {
     const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
     return html`
       <div
-        class=${state || editor ? classMap({ ...classes, 'cell--editing': Boolean(editor), 'cell--dirty': Boolean(state?.dirty), 'cell--invalid': Boolean(state?.error) }) : shared.class}
+        class=${
+          state || editor || versus?.over
+            ? classMap({
+                ...classes,
+                'cell--editing': Boolean(editor),
+                'cell--dirty': Boolean(state?.dirty),
+                'cell--invalid': Boolean(state?.error),
+                'cell--variance': Boolean(versus?.over),
+              })
+            : shared.class
+        }
         role="gridcell"
-        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}"
         aria-colindex=${columnIndex + 1}
         aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
         title=${ifDefined(state?.error)}
@@ -1655,6 +1759,143 @@ export class Table extends LitElement {
         >${state?.error ? html`<span class="cell-error">${state.error}</span>` : nothing}
       </div>
     `
+  }
+
+  /**
+   * A cell against the matching row of `baseline`: the change as `compare` shows it, and whether it passes the
+   * column's `variance-threshold`. Nothing when either value is not a number.
+   */
+  #versus(rowIndex: number, row: TableRow, column: TableColumnConfig, value: unknown): { delta?: unknown; over: boolean } | undefined {
+    if (!this.rowKey && !this.getRowKey) {
+      // Without a key a position would match the baseline, and a sort or a filter moves the rows.
+      if (!this.#baselineWarned) console.warn('c2-table: `baseline` matches rows by `row-key` (or `getRowKey`); set one to compare.')
+      this.#baselineWarned = true
+      return undefined
+    }
+    const source = this.#sourceRowAt(rowIndex) ?? row
+    const inputs = [this.baseline, this.rowKey, this.getRowKey]
+    // Keyed once per baseline (and key rule): a lookup per cell, not a search.
+    if (!this.#baselineCache?.inputs.every((input, index) => input === inputs[index])) {
+      const rows = new Map<string, TableRow>()
+      ;(Array.isArray(this.baseline) ? this.baseline : []).forEach((entry, index) => rows.set(this.keyAt(index, entry), entry))
+      this.#baselineCache = { inputs, rows }
+    }
+    const before = this.#baselineCache.rows.get(this.keyAt(rowIndex, source))
+    const previous = before && toNumber(this.cellValue(before, column))
+    const current = toNumber(value)
+    if (previous === undefined || !Number.isFinite(previous) || !Number.isFinite(current)) return undefined
+    const change = current - previous
+    const threshold = column.varianceThreshold
+    const over = threshold !== undefined && (previous === 0 ? change !== 0 : Math.abs(change) > Math.abs(previous) * threshold)
+    if (!column.compare) return { over }
+    // An unchanged value shows no change: a column of zeros would hide the rows that moved.
+    const text =
+      change === 0
+        ? ''
+        : column.compare === 'percent'
+          ? previous === 0
+            ? ''
+            : new Intl.NumberFormat(column.locale, { style: 'percent', maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(
+                change / Math.abs(previous),
+              )
+          : this.formatValue(
+              {
+                ...column,
+                options: undefined,
+                format: column.format && column.format !== 'text' && column.format !== 'status' ? column.format : 'number',
+                formatOptions: { ...column.formatOptions, signDisplay: 'exceptZero' },
+              },
+              change,
+            )
+    const delta = html`<span
+      class="delta"
+      part="delta delta-${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}"
+      title=${this.msg.t('previousValue', this.formatValue(column, previous))}
+      >${text}</span
+    >`
+    return { delta, over }
+  }
+
+  /** Whether `column` has a filter in its header: its own `filterable`, else the table's. */
+  #isFilterable(column: TableColumnConfig): boolean {
+    if (column.field === SELECTION_FIELD || !(column.filterable ?? this.filterable)) return false
+    // A data source has no values to list but the ones a column declares in `options`.
+    return !this.dataSource || Boolean(column.options?.length)
+  }
+
+  /** The filter button of a header: it opens the column's values, and shows when the column is filtered. */
+  #renderFilterButton(column: TableColumnConfig, columnIndex: number) {
+    const id = columnKey(column)
+    const filter = this.filters?.[id]
+    const active = Boolean(filter?.include?.length || filter?.exclude?.length)
+    return html`<button
+      class=${classMap({ 'filter-button': true, 'filter-button--active': active })}
+      part=${active ? 'filter-button filter-button-active' : 'filter-button'}
+      type="button"
+      tabindex="-1"
+      aria-label=${this.msg.t('filterColumn', column.header ?? humanize(column.field || id))}
+      aria-haspopup="dialog"
+      aria-expanded=${String(this.#filter?.openColumn === id)}
+      @click=${(event: Event) => {
+        event.stopPropagation()
+        this.focusedCell = { row: HEADER_ROW, column: columnIndex }
+        this.#openFilter(column, event.currentTarget as HTMLElement)
+      }}
+    >
+      ${FUNNEL}
+    </button>`
+  }
+
+  #openFilter(column: TableColumnConfig, anchor: HTMLElement) {
+    this.#filterLoad ??= import('./table-filter.js').then(({ TableFilter }) => {
+      this.#filter = new TableFilter({
+        table: this,
+        rowsFor: (id) => (this.dataSource ? [] : this.filterValueRows(id)),
+        cellValue: (row, target) => this.cellValue(row, target),
+        formatValue: (target, value) => this.formatValue(target, value),
+        sortable: (target) => Boolean(target.field && (target.sortable ?? this.sortable)),
+        sort: (target, direction) => {
+          this.sortModel = [{ field: target.field, direction }]
+          this.dispatchEvent(new CustomEvent<TableSortChangeEventDetail>('sort-change', { detail: { sort: this.sortModel }, bubbles: true, composed: true }))
+        },
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: string[]) => string).call(this.msg, key, ...args),
+      })
+      return this.#filter
+    })
+    void this.#filterLoad.then((filter) => filter.open(column, anchor))
+  }
+
+  /**
+   * `rows` without those the column filters drop; `skip` leaves one column's filter out (its own value list shows the
+   * values the other filters let through). Values compare as text. Not applied to a `dataSource`, which filters itself.
+   */
+  protected filterRows(rows: TableRow[], skip?: string): TableRow[] {
+    const test = this.filterTest(skip)
+    return test ? rows.filter(test) : rows
+  }
+
+  /** The rows a column's filter counts its values over: those every other filter lets through. */
+  protected filterValueRows(skip: string): TableRow[] {
+    return this.filterRows(Array.isArray(this.rows) ? this.rows : [], skip)
+  }
+
+  /** Whether a row passes every active filter (but `skip`'s); undefined when no filter is active. */
+  protected filterTest(skip?: string): ((row: TableRow) => boolean) | undefined {
+    const filters = this.filters
+    if (!filters || this.dataSource) return undefined
+    const active = Object.entries(filters).filter(([id, filter]) => id !== skip && (filter?.include?.length || filter?.exclude?.length))
+    if (!active.length) return undefined
+    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    const tests = active.map(([id, filter]) => ({
+      column: source.find((column) => columnKey(column) === id) ?? { field: id },
+      include: filter.include?.length ? new Set(filter.include) : undefined,
+      exclude: new Set(filter.exclude ?? []),
+    }))
+    return (row) =>
+      tests.every(({ column, include, exclude }) => {
+        const text = filterText(this.cellValue(row, column))
+        return (!include || include.has(text)) && !exclude.has(text)
+      })
   }
 
   /** The checkbox of a `checkbox` column: toggled in place while the cell can be edited, a read-only mark otherwise. */
@@ -2225,7 +2466,7 @@ export class Table extends LitElement {
 
   protected applySort() {
     const rows = Array.isArray(this.rows) ? this.rows : []
-    this.sortedRows = this.buildRows(rows)
+    this.sortedRows = this.buildRows(this.filterRows(rows))
   }
 
   /** Scrolls display line `line` into view, below the header and, while grouped, below the groups stuck under it. */
@@ -2318,7 +2559,7 @@ export class Table extends LitElement {
     const token = this.#requestToken
     try {
       const size = this.#effectiveBlockSize
-      const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel })
+      const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel, filters: this.filters ?? {} })
       if (token !== this.#requestToken) return
       this.#blocks.set(block, result.rows ?? [])
       this.#blocksVersion++
@@ -2608,6 +2849,13 @@ export class Table extends LitElement {
     const summaryCellAt = (index: number) => [...summaryCells].reverse().find((cell) => cell.index <= index) ?? summaryCells[0]
     // A hierarchy's own keys come first: the treegrid's ←/→ on a group or a tree row, Enter on a group.
     if (this.handleLineKey(event, columns)) return
+    // Alt+↓ on a header opens the column's filter, as on a select.
+    if (row === HEADER_ROW && event.altKey && event.key === 'ArrowDown' && this.#isFilterable(columns[column])) {
+      event.preventDefault()
+      const button = this.renderRoot.querySelector<HTMLElement>(`.cell--header[data-column-id="${CSS.escape(columnKey(columns[column]))}"] .filter-button`)
+      if (button) this.#openFilter(columns[column], button)
+      return
+    }
 
     // Alt+↓ opens the row's detail panel and Alt+↑ closes it, from any of its cells.
     if (event.altKey && row >= 0 && (event.key === 'ArrowDown' || event.key === 'ArrowUp') && this.#detail) {

@@ -85,7 +85,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-6** · `c2-table` · value filter #242 (lazy), payroll review grid #355 · +1.2 kB on 31.4 kB, 17 kB lazy · risk low
 - **table-7** · `c2-table` · flowsheet #419 · +1 kB on 31.4 kB · risk low
 - **table-8** · `c2-table` · example: allocation grid #306, example: goal tree #358, example: gradebook #422
 - **virtual-list-1** · `c2-virtual-list` · infinite scroll #471 · +0.5 kB on 17.1 kB · risk low

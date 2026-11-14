@@ -290,6 +290,66 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
 
 </GalleryGrid>
 
+## Filters and comparisons
+
+`filterable` on a column (or on the table, for every column) puts a funnel in its header. It opens a `c2-facet-list` of the column's values with their counts (the rows the other filters let through), searchable, each value included, excluded or picked alone, with the two sorts and a way to clear. Alt+↓ opens it from the header. The filters live in `filters`, a JSON attribute too, so a filtered view can be written in markup and applies before the filter's code loads; `filter-change` reports each change, and a `dataSource` receives them in its request. `baseline` takes last period's rows, matched by `row-key`: a column with `compare="delta"` or `compare="percent"` shows each cell's change from it, and `variance-threshold` marks the cells that moved further than that share.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Column filters
+<style>
+  .order-filters {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="order-filters" row-key="id" sortable filters='{"status":{"exclude":["Paid"]}}' rows='[{"id":"SO-1041","customer":"Acme Corp","region":"EMEA","status":"Paid","channel":"Web","total":1240},{"id":"SO-1042","customer":"Nordlys AS","region":"EMEA","status":"Open","channel":"Partner","total":860},{"id":"SO-1043","customer":"Brio Labs","region":"Americas","status":"Paid","channel":"Web","total":3100},{"id":"SO-1044","customer":"Kiwi Freight","region":"APAC","status":"Overdue","channel":"Sales","total":450},{"id":"SO-1045","customer":"Halcyon","region":"Americas","status":"Open","channel":"Web","total":620},{"id":"SO-1046","customer":"Tessera","region":"APAC","status":"Paid","channel":"Partner","total":1980},{"id":"SO-1047","customer":"Pine & Co","region":"EMEA","status":"Overdue","channel":"Sales","total":2310},{"id":"SO-1048","customer":"Lumen Health","region":"Americas","status":"Paid","channel":"Sales","total":4120}]'>
+  <c2-table-column field="id" header="Order" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(150px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="120px" filterable></c2-table-column>
+  <c2-table-column field="status" header="Status" width="120px" filterable></c2-table-column>
+  <c2-table-column field="channel" header="Channel" width="120px" filterable></c2-table-column>
+  <c2-table-column field="total" header="Total" width="110px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Payroll review
+<style>
+  .payroll-review {
+    height: 320px;
+    width: 100%;
+    --c2-table__delta__up--color: light-dark(#b45309, #f5b45c);
+    --c2-table__delta__down--color: light-dark(#15803d, #5fcf8b);
+  }
+</style>
+<c2-table client:only="lit" class="payroll-review" row-key="id" filterable rows='[{"id":"E-01","name":"Ada Lovelace","team":"Analytics","gross":9200,"tax":2480,"net":6720},{"id":"E-02","name":"Grace Hopper","team":"Compilers","gross":8600,"tax":2290,"net":6310},{"id":"E-03","name":"Alan Turing","team":"Research","gross":10450,"tax":2980,"net":7470},{"id":"E-04","name":"Radia Perlman","team":"Networks","gross":7900,"tax":2050,"net":5850},{"id":"E-05","name":"Barbara Liskov","team":"Research","gross":8800,"tax":2350,"net":6450},{"id":"E-06","name":"Katherine Johnson","team":"Flight","gross":6100,"tax":1490,"net":4610}]' baseline='[{"id":"E-01","gross":9200,"tax":2480,"net":6720},{"id":"E-02","gross":8400,"tax":2230,"net":6170},{"id":"E-03","gross":8650,"tax":2380,"net":6270},{"id":"E-04","gross":7900,"tax":2050,"net":5850},{"id":"E-05","gross":8800,"tax":2350,"net":6450},{"id":"E-06","gross":7400,"tax":1860,"net":5540}]'>
+  <c2-table-column field="name" header="Employee" width="minmax(130px, 1.5fr)" filterable="false"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="100px"></c2-table-column>
+  <c2-table-column field="gross" header="Gross" width="150px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1" filterable="false"></c2-table-column>
+  <c2-table-column field="tax" header="Tax" width="90px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' filterable="false"></c2-table-column>
+  <c2-table-column field="net" header="Net" width="130px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="percent" variance-threshold="0.1" filterable="false"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Filtres (French)
+<style>
+  .order-filters-fr {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<div lang="fr">
+  <c2-table client:only="lit" class="order-filters-fr" row-key="id" filterable rows='[{"id":"SO-1041","customer":"Acme Corp","region":"EMEA","status":"Paid","channel":"Web","total":1240},{"id":"SO-1042","customer":"Nordlys AS","region":"EMEA","status":"Open","channel":"Partner","total":860},{"id":"SO-1043","customer":"Brio Labs","region":"Americas","status":"Paid","channel":"Web","total":3100},{"id":"SO-1044","customer":"Kiwi Freight","region":"APAC","status":"Overdue","channel":"Sales","total":450},{"id":"SO-1045","customer":"Halcyon","region":"Americas","status":"Open","channel":"Web","total":620},{"id":"SO-1046","customer":"Tessera","region":"APAC","status":"Paid","channel":"Partner","total":1980},{"id":"SO-1047","customer":"Pine & Co","region":"EMEA","status":"Overdue","channel":"Sales","total":2310},{"id":"SO-1048","customer":"Lumen Health","region":"Americas","status":"Paid","channel":"Sales","total":4120}]'>
+    <c2-table-column field="customer" header="Client" width="minmax(150px, 2fr)" filterable="false"></c2-table-column>
+    <c2-table-column field="region" header="Région" width="130px"></c2-table-column>
+    <c2-table-column field="status" header="Statut" width="130px"></c2-table-column>
+    <c2-table-column field="total" header="Total" width="120px" align="end" format="currency" filterable="false"></c2-table-column>
+  </c2-table>
+</div>
+```
+
+</GalleryGrid>
+
 ## Realtime updates
 
 `animate-updates` belongs to the table, so a feed assigns only its next real snapshot—even when it adds, deletes and

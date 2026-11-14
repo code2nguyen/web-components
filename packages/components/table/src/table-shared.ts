@@ -114,3 +114,9 @@ export const rowKeysConverter = {
 
 /** Row keys that stay unset until written, like the open groups, and are stored as strings, like `value`. */
 export const rowKeyListConverter = { ...keyListConverter, fromProperty: rowKeysConverter.fromProperty }
+
+/** A value as a column filter compares it: text, `''` for an empty cell, an ISO string for a date. */
+export function filterText(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  return value instanceof Date ? value.toISOString() : String(value)
+}

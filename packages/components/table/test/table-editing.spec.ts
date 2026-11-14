@@ -277,7 +277,7 @@ test('a number cell takes a typed minus sign, and keys in a custom editor stay i
   await cell(page, '12').click()
   await page.keyboard.type('-5.5')
   await page.keyboard.press('Enter')
-  expect((await rows(page))[1]).toMatchObject({ hours: -5.5 })
+  await expect.poll(async () => (await rows(page))[1]).toMatchObject({ hours: -5.5 })
 
   // A picker made into an editor: arrows and letters are its own, not the grid's.
   await table(page).evaluate((element) => {
