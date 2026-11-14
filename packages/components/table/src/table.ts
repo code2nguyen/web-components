@@ -461,9 +461,9 @@ export interface Table {
  * @cssproperty {padding} [--c2-table__filter-panel--padding=8px]
  * @cssproperty {font-size} [--c2-table__delta--font-size=12px] - A cell's change from the `baseline` (`compare`).
  * @cssproperty {color} [--c2-table__delta--color=#71717a] - A change of 0.
- * @cssproperty {color} [--c2-table__delta__up--color=#15803d]
+ * @cssproperty {color} [--c2-table__delta__up--color=#166534]
  * @cssproperty {color} [--c2-table__delta__down--color=#b91c1c]
- * @cssproperty {color} [--c2-table__cell__variance--background=#fef3c7] - A cell past its column's `variance-threshold`.
+ * @cssproperty {color} [--c2-table__cell__variance--background=rgba(217, 119, 6, 0.16)] - A cell past its column's `variance-threshold`.
  * @cssproperty {box-shadow} [--c2-table__cell__variance--box-shadow=inset 3px 0 0 0 #d97706]
  * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
  * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
@@ -1788,20 +1788,25 @@ export class Table extends LitElement {
     const threshold = column.varianceThreshold
     const over = threshold !== undefined && (previous === 0 ? change !== 0 : Math.abs(change) > Math.abs(previous) * threshold)
     if (!column.compare) return { over }
+    // An unchanged value shows no change: a column of zeros would hide the rows that moved.
     const text =
-      column.compare === 'percent'
-        ? previous === 0
-          ? ''
-          : new Intl.NumberFormat(column.locale, { style: 'percent', maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(change / Math.abs(previous))
-        : this.formatValue(
-            {
-              ...column,
-              options: undefined,
-              format: column.format && column.format !== 'text' && column.format !== 'status' ? column.format : 'number',
-              formatOptions: { ...column.formatOptions, signDisplay: 'exceptZero' },
-            },
-            change,
-          )
+      change === 0
+        ? ''
+        : column.compare === 'percent'
+          ? previous === 0
+            ? ''
+            : new Intl.NumberFormat(column.locale, { style: 'percent', maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(
+                change / Math.abs(previous),
+              )
+          : this.formatValue(
+              {
+                ...column,
+                options: undefined,
+                format: column.format && column.format !== 'text' && column.format !== 'status' ? column.format : 'number',
+                formatOptions: { ...column.formatOptions, signDisplay: 'exceptZero' },
+              },
+              change,
+            )
     const delta = html`<span
       class="delta"
       part="delta delta-${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}"

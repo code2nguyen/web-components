@@ -439,6 +439,15 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  // A table cell's change from its baseline: success and error hues mixed with the ink, readable on a dark page.
+  '--c2-table__delta__up--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-table__delta__down--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
