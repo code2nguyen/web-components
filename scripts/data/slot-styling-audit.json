@@ -2033,7 +2033,7 @@
       "tag": "c2-quantity",
       "slot": "decrement-icon",
       "decision": "assigned-content",
-      "reason": "The app's own \u2212 icon, sized by the app; the default glyph is 16px."
+      "reason": "The app's own − icon, sized by the app; the default glyph is 16px."
     },
     {
       "tag": "c2-quantity",
@@ -3509,7 +3509,7 @@
       "tag": "c2-format-number",
       "slot": "",
       "decision": "assigned-content",
-      "reason": "The default slot only projects the consumer's fallback text (\"\u2014\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
+      "reason": "The default slot only projects the consumer's fallback text (\"—\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
     },
     {
       "tag": "c2-radio-group",
@@ -3985,12 +3985,6 @@
       "decision": "part",
       "parts": ["footer"],
       "reason": "The semantic footer region owns the footer slot's component-side presentation."
-    },
-    {
-      "tag": "c2-table",
-      "slot": "group:{groupKey}",
-      "decision": "assigned-content",
-      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-table",
@@ -4915,6 +4909,72 @@
       "decision": "part",
       "parts": ["minimap"],
       "reason": "The minimap box sizes and frames the slotted overview; the assigned content keeps its own styles."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "cell:{line}:{field}",
+      "decision": "assigned-content",
+      "reason": "The cell:{line}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "detail:{key}",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The detail panel under an open row owns the height, padding and background of the detail:{key} slot."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "fallback",
+      "decision": "assigned-content",
+      "reason": "The fallback remains consumer-owned semantic light DOM before upgrade and is intentionally hidden once the interactive grid mounts."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "group:{groupKey}",
+      "decision": "assigned-content",
+      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-group-table",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
     }
   ]
 }

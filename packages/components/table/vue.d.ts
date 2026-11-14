@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
 
@@ -19,6 +20,52 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-group-table': DefineComponent<
+      C2Props<GroupTable> & {
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
+        'children-field'?: unknown
+        'expanded-rows'?: unknown
+        'tree-expanded'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        onRowToggle?: (event: EventOf<GroupTable, 'row-toggle'>) => void
+        onChildrenError?: (event: EventOf<GroupTable, 'children-error'>) => void
+        onGroupToggle?: (event: EventOf<GroupTable, 'group-toggle'>) => void
+        onPageChange?: (event: EventOf<GroupTable, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<GroupTable, 'range-change'>) => void
+        onDetailToggle?: (event: EventOf<GroupTable, 'detail-toggle'>) => void
+        onSortChange?: (event: EventOf<GroupTable, 'sort-change'>) => void
+        onRowClick?: (event: EventOf<GroupTable, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<GroupTable, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<GroupTable, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<GroupTable, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<GroupTable, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<GroupTable, 'cell-change'>) => void
+        onRowsChange?: (event: EventOf<GroupTable, 'rows-change'>) => void
+      }
+    >
     'c2-table': DefineComponent<
       C2Props<Table> & {
         'aria-label'?: unknown
@@ -38,23 +85,12 @@ declare module 'vue' {
         'page-size'?: unknown
         'summary-values'?: unknown
         'summary-scope'?: unknown
-        'group-by'?: unknown
-        'group-display'?: unknown
-        'expanded-groups'?: unknown
-        'groups-collapsed'?: unknown
-        'empty-group-label'?: unknown
-        'children-field'?: unknown
-        'expanded-rows'?: unknown
-        'tree-expanded'?: unknown
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
         onDetailToggle?: (event: EventOf<Table, 'detail-toggle'>) => void
-        onRowToggle?: (event: EventOf<Table, 'row-toggle'>) => void
-        onChildrenError?: (event: EventOf<Table, 'children-error'>) => void
-        onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
         onRowActivate?: (event: EventOf<Table, 'row-activate'>) => void

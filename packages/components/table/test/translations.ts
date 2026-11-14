@@ -6,6 +6,8 @@ const fr: typeof tableMessages.en = {
   detailToggle: 'Détails',
   statusTitle: (column, label) => `${column} : ${label}`,
   summaryOffTarget: (target) => `devrait être ${target}`,
+  selectGroupRows: 'Sélectionner les lignes du groupe',
+  emptyGroup: 'Sans valeur',
   editCell: (column) => `Modifier ${column}`,
   errorRequired: 'Obligatoire',
   errorNumber: 'Saisissez un nombre',

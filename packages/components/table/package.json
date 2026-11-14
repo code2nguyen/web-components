@@ -9,6 +9,10 @@
       "types": "./types/src/table.d.ts",
       "default": "./dist/table.js"
     },
+    "./group-table.js": {
+      "types": "./types/src/group-table.d.ts",
+      "default": "./dist/group-table.js"
+    },
     "./table-column.js": {
       "types": "./types/src/table-column.d.ts",
       "default": "./dist/table-column.js"
@@ -41,7 +45,9 @@
     "data grid",
     "virtual scroll",
     "web component",
-    "lit"
+    "lit",
+    "tree grid",
+    "grouping"
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
@@ -96,5 +102,10 @@
     "vue": {
       "optional": true
     }
+  },
+  "c2n": {
+    "separateEntries": [
+      "./group-table.js"
+    ]
   }
 }

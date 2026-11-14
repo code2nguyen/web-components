@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
 
@@ -24,10 +25,18 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': Omit<
-        C2Props<Table>,
-        'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups' | 'expandedRows' | 'expandedDetails'
+      'c2-group-table': Omit<
+        C2Props<GroupTable>,
+        'groupBy' | 'expandedGroups' | 'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails'
       > & {
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
+        'children-field'?: Attribute
+        'expanded-rows'?: Attribute
+        'tree-expanded'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -45,14 +54,37 @@ declare module 'react' {
         'page-size'?: Attribute
         'summary-values'?: Attribute
         'summary-scope'?: Attribute
-        'group-by'?: Attribute
-        'group-display'?: Attribute
-        'expanded-groups'?: Attribute
-        'groups-collapsed'?: Attribute
-        'empty-group-label'?: Attribute
-        'children-field'?: Attribute
-        'expanded-rows'?: Attribute
-        'tree-expanded'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        groupBy?: GroupTable['groupBy'] | string
+        expandedGroups?: GroupTable['expandedGroups'] | string
+        expandedRows?: GroupTable['expandedRows'] | string
+        rows?: GroupTable['rows'] | string
+        columns?: GroupTable['columns'] | string
+        value?: GroupTable['value'] | string
+        sortModel?: GroupTable['sortModel'] | string
+        summaryValues?: GroupTable['summaryValues'] | string
+        expandedDetails?: GroupTable['expandedDetails'] | string
+      }
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails'> & {
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
@@ -61,9 +93,6 @@ declare module 'react' {
         value?: Table['value'] | string
         sortModel?: Table['sortModel'] | string
         summaryValues?: Table['summaryValues'] | string
-        groupBy?: Table['groupBy'] | string
-        expandedGroups?: Table['expandedGroups'] | string
-        expandedRows?: Table['expandedRows'] | string
         expandedDetails?: Table['expandedDetails'] | string
       }
       'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {

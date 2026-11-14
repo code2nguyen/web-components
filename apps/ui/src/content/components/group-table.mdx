@@ -1,0 +1,139 @@
+---
+title: 'Group table'
+description: 'c2-table with collapsible groups of rows and nested tree rows: aggregates per group, rollups, cascading selection and children loaded on open.'
+category: 'Data display'
+package: '@c2n/table'
+tag: 'c2-group-table'
+apiTags: ['c2-group-table', 'c2-table-column']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { GroupTable } from '@c2n/components/table/group-table'
+import { TableColumn } from '@c2n/components/table/table-column'
+
+`c2-group-table` is [`c2-table`](/web-components/components/table) with two features added: rows gathered into
+collapsible groups (`group-by`), and rows nested to any depth as a tree (`children-field`). Everything else, from
+columns, sorting and selection to windowing, paging, the summary row, editing and realtime updates, is the table's,
+and works the same here. Use `c2-table` when the rows are flat: it leaves this code out.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/table/group-table'
+```
+
+The entry registers `c2-group-table`, `c2-table`, `c2-table-column`, and the checkbox and spinner they render.
+
+## Usage
+
+Give `group-by` the fields to group by, outermost first, or `children-field` the field holding each row's children.
+Columns are the same `c2-table-column` children as in `c2-table`; `summary` adds each group's aggregates, `rollup` a
+parent row's.
+
+```html tag=UsageBlock,package=@c2n/table
+<style>
+  .grid {
+    height: 208px;
+    width: 100%;
+  }
+  .compact {
+    height: 190px;
+    width: 100%;
+    --c2-table__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__header--height: 32px;
+    --c2-table__row--height: 30px;
+    --c2-table__cell--font-size: 13px;
+  }
+</style>
+<div data-label="Grouped">
+  <c2-group-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
+    <c2-table-column field="task" header="Task" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="team" header="Team" hidden></c2-table-column>
+    <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
+    <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
+  </c2-group-table>
+</div>
+<div data-label="Tree">
+  <c2-group-table client:only="lit" class="grid" row-key="id" children-field="children" expanded-rows="eng" selection="multiple" checkbox-selection rows='[{"id":"eng","name":"Engineering","children":[{"id":"web","name":"Web platform","headcount":14,"budget":1820000},{"id":"mobile","name":"Mobile","headcount":9,"budget":1160000}]},{"id":"design","name":"Design","children":[{"id":"brand","name":"Brand","headcount":4,"budget":420000},{"id":"product-design","name":"Product design","headcount":7,"budget":810000}]},{"id":"ops","name":"Operations","headcount":5,"budget":390000}]'>
+    <c2-table-column field="name" header="Team" width="2fr" min-width="160" summary-label="Total"></c2-table-column>
+    <c2-table-column field="headcount" header="People" width="90px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>
+    <c2-table-column field="budget" header="Budget" width="130px" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>
+  </c2-group-table>
+</div>
+```
+
+### Grouping rows
+
+`group-by` gathers the rows into collapsible groups, outermost level first, and turns the grid into a `treegrid`.
+With the default `group-display="row"` a group is a row of the same grid: its label and row count in the first
+column (or the one marked `group-column`, which also indents the rows under it), and under every column with a
+`summary` that aggregate over the group's rows, formatted like the column. So one `summary="sum"` gives the subtotals
+and the total. `group-display="band"` draws a full-width band per group instead, holding its label and count.
+
+```html tag=CodeBlock
+<c2-group-table row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows="...">
+  <c2-table-column field="customer" header="Customer" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="amount" header="Amount" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-group-table>
+```
+
+Groups are ordered by their value: ascending, the direction the table is sorted by that field, or a level's own
+`sort`. The rows inside a group keep the table's sort. A group's label is its value formatted by the column of that
+field (hidden columns included), `empty-group-label` for rows without one, and `renderGroup` or a
+`slot="group:<key>"` child for anything else. From script a level can compute its value:
+
+```typescript tag=CodeBlock
+table.groupBy = [{ field: 'month', getValue: (row) => String(row.placed).slice(0, 7), sort: 'desc' }, 'status']
+table.renderGroup = ({ value, summary }) => `${value} · ${summary.amount} €`
+```
+
+A group is named by its path, `region=EMEA/status=Paid`. Every group is open until `expanded-groups` lists the open
+ones (`;`-separated in the attribute) or `groups-collapsed` starts them closed; the first click writes the whole list
+into `expandedGroups`, so it can be stored and handed back. `group-toggle` reports a click, `expandGroup(key)`,
+`collapseGroup(key)`, `expandAll()` and `collapseAll()` do it from script, and `getGroups()` lists every group with
+its rows and aggregates. A group's checkbox selects the rows under it (the selection still holds row keys only),
+and ←/→ on a group's first cell close, open and climb the tree.
+
+The groups of the rows at the top of the view stay under the header while their rows scroll. Pages count display
+lines, so a closed group takes one line, and a page that starts inside a group repeats that group's headers above
+its first line. Grouping is done on the client: with a `dataSource` the table only holds the rows it fetched, so it
+ignores `group-by` and says so in the console. Style a group with `--c2-table__group-row--*`,
+`--c2-table__group-band--background`, `--c2-table__group--indent`, `--c2-table__group-toggle--*` and
+`--c2-table__group-count--*`, or with the `group-row`, `group-cell`, `group-label` and `group-count` parts.
+
+### Tree rows
+
+`children-field` names the field that holds each row's child rows, nested to any depth, and the grid becomes a
+`treegrid`: a parent is an ordinary row with a chevron, and the first column (or the one marked `group-column`)
+indents each level. Rows start closed; `tree-expanded` opens them all, and `expanded-rows` lists the open ones by key
+(`;`-separated in the attribute; the first click writes the whole list into `expandedRows`). A click on the chevron,
+←/→ on the tree column, `expandRow(key)`, `collapseRow(key)`, `expandAll()` and `collapseAll()` open and close them,
+and `row-toggle` reports a click.
+
+```html tag=CodeBlock
+<c2-group-table row-key="id" children-field="children" selection="multiple" checkbox-selection rows="...">
+  <c2-table-column field="name" header="Account" summary-label="Total"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>
+</c2-group-table>
+```
+
+A column with `rollup` (`sum`, `avg`, `min`, `max`, `count`, or a function of the rows from script) shows in a parent
+row the aggregate of the leaf rows under it, and a sort on that column orders each level by those figures. Sorting
+keeps the tree: rows are ordered among their siblings. The summary row adds up the leaves, so every amount counts
+once. With `selection="multiple"` a row is selected together with the rows under it, a parent is selected once all
+its children are, and its checkbox shows the mixed state in between; the selection still holds row keys only.
+
+A row whose field holds `true` is a parent whose children are not loaded yet. The first time it opens the table asks
+`loadChildren` for them and shows a spinner in place of the chevron; a rejection closes the row again and fires
+`children-error`, and the next open asks again. Lazy children are cached by key, so give the rows a `row-key`.
+
+```typescript tag=CodeBlock
+table.loadChildren = async ({ key }) => (await fetch(`/api/accounts/${key}/children`)).json()
+```
+
+The tree is built on the client and wins over `group-by`; with a `dataSource` it is ignored, with a console warning.
+The chevron is the `row-toggle` part and takes the `--c2-table__group-toggle--*` and `--c2-table__group--indent`
+variables.

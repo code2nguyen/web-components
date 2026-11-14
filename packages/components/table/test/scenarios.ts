@@ -1,6 +1,7 @@
 // The app's languages: French, added as an app would.
 import './translations'
 import '../src/table'
+import '../src/group-table'
 import '../src/table-column'
 // The pager is only ever slotted into the table; the table never imports it.
 import '@c2n/pagination'
@@ -82,14 +83,16 @@ const api: TableBenchApi = {
     tick = 0
     marked = []
     const start = performance.now()
+    // A tree is `c2-group-table`'s; the flat cases measure `c2-table`.
+    const tag = options.childrenField !== undefined ? 'c2-group-table' : 'c2-table'
     main.innerHTML = `
-      <c2-table id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36"${options.childrenField !== undefined ? ` children-field="${options.childrenField}"` : ''}>
+      <${tag} id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36"${options.childrenField !== undefined ? ` children-field="${options.childrenField}"` : ''}>
         <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
         <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
         <c2-table-column field="status" header="Status" width="120px"></c2-table-column>
         <c2-table-column field="score" header="Score" width="110px" align="end" format="number"${options.cellSlot ? ' cell-slot' : ''}></c2-table-column>
         <c2-table-column field="joined" header="Joined" width="130px"></c2-table-column>
-      </c2-table>`
+      </${tag}>`
     table = main.querySelector<Table>('#subject')!
     if (options.cellSlot) {
       const subject = table

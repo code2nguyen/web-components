@@ -7,10 +7,12 @@
 
 <script>
   import type { Table, TableRow } from '@c2n/components/table'
+  import type { GroupTable } from '@c2n/components/table/group-table'
   import type { TableColumn } from '@c2n/components/table/table-column'
   import type { DurationInput } from '@c2n/components/duration-input'
   import type { Autocomplete } from '@c2n/components/autocomplete'
   import '@c2n/components/table'
+  import '@c2n/components/table/group-table'
   import '@c2n/components/duration-input'
   import '@c2n/components/autocomplete'
   import '@c2n/components/button'
@@ -299,12 +301,12 @@
   }
 
   function setup() {
-    document.querySelectorAll<Table>('c2-table[data-table-example]').forEach((table) => {
+    document.querySelectorAll<Table>('c2-table[data-table-example], c2-group-table[data-table-example]').forEach((table) => {
       if (initialized.has(table)) return
       initialized.add(table)
       if (table.dataset.tableExample === 'lazy-children') {
         // A short delay stands in for the network, so the spinner on the chevron shows.
-        table.loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
+        ;(table as GroupTable).loadChildren = ({ key }) => new Promise((resolve) => setTimeout(() => resolve(countries[key] ?? []), 700))
       }
       if (table.dataset.tableExample === 'editable') editableGrid(table)
       if (table.dataset.tableExample === 'timesheet') timesheet(table)

@@ -120,7 +120,11 @@ try {
     }),
   )
   const column = textOf(await umbrellaClient.callTool({ name: 'get_component', arguments: { tag: 'c2-table-column', include: ['attributes'] } }))
-  assert(column.includes("import '@c2n/components/table'") && column.includes('through `@c2n/components`'), 'get_component ignores @c2n/components')
+  // Two docs pages document @c2n/table (c2-table, c2-group-table), so each element is imported from its own entry, as a chart's are.
+  assert(
+    column.includes("import '@c2n/components/table/table-column'") && column.includes('through `@c2n/components`'),
+    'get_component ignores @c2n/components',
+  )
   const installedOnly = textOf(await umbrellaClient.callTool({ name: 'list_components', arguments: { installedOnly: true } }))
   assert(installedOnly.includes('c2-button') && !installedOnly.includes('c2-feather-'), 'list_components installedOnly misreads @c2n/components')
   const umbrellaTheme = textOf(await umbrellaClient.callTool({ name: 'get_theme', arguments: {} }))

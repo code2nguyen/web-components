@@ -18,6 +18,8 @@ export interface RowsAnimationHost {
   sortRows(rows: TableRow[]): TableRow[]
   /** Whether rows carry a key of their own (`row-key`, `getRowKey`) rather than their position. */
   hasIdentity(): boolean
+  /** Whether the rows are a tree, which is not animated. */
+  isTree(): boolean
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -89,7 +91,7 @@ export class RowsAnimation {
       !table.hasUpdated ||
       !table.animateUpdates ||
       // A tree is not animated: its rows are matched by their place in the flattened tree, which `rows` does not hold.
-      table.childrenField ||
+      this.host.isTree() ||
       table.updateDuration <= 0 ||
       !Array.isArray(displayedPrevious) ||
       !Array.isArray(table.rows) ||
@@ -129,7 +131,7 @@ export class RowsAnimation {
 
     // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
     // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.host.hasIdentity() && !table.paginated && !table.childrenField) {
+    if (this.host.hasIdentity() && !table.paginated && !this.host.isTree()) {
       const previousRows = sortRows(displayedPrevious.filter(isRecord))
       const transitionRows = [...sortRows(rows)]
       previousRows.forEach((row, index) => {
