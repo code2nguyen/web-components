@@ -1,7 +1,11 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import VirtualListExamplesRuntime from '../../components/VirtualListExamplesRuntime.astro'
 
 import { VirtualList } from '@c2n/components/virtual-list'
+
+<VirtualListExamplesRuntime />
 
 <GalleryGrid>
 
@@ -191,3 +195,56 @@ variables. A run of adjacent selected rows squares the corners between them on i
 ```
 
 </GalleryGrid>
+
+## Infinite scroll
+
+`has-more` says more items can follow the last one. As the end of the list comes within `load-more-distance` of the view, the list fires `load-more` and shows a loading row; append the page to `items` and clear `has-more` after the last one. A page that fails sets `load-more-error`, which shows the message and a Retry button. These cards answer from the page after a short delay; the second fails its second page once.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Infinite feed
+<style>
+  .feed {
+    height: 300px;
+    width: 100%;
+  }
+</style>
+<c2-virtual-list client:only="lit" class="feed" data-virtual-list-example="feed" aria-label="Activity" item-key="id" label-field="title" description-field="author" item-height="56" has-more></c2-virtual-list>
+```
+
+```html tag=MdxCodeBlock,label=Retry after an error
+<style>
+  .feed-flaky {
+    height: 300px;
+    width: 100%;
+  }
+</style>
+<c2-virtual-list client:only="lit" class="feed-flaky" data-virtual-list-example="flaky" aria-label="Activity" item-key="id" label-field="title" has-more></c2-virtual-list>
+```
+
+```html tag=MdxCodeBlock,label=Fil (French)
+<style>
+  .feed-fr {
+    height: 300px;
+    width: 100%;
+  }
+</style>
+<div lang="fr">
+  <c2-virtual-list client:only="lit" class="feed-fr" data-virtual-list-example="flaky" aria-label="Activité" item-key="id" label-field="title" has-more></c2-virtual-list>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+list.addEventListener('load-more', async () => {
+  try {
+    const { items, next } = await api.page(cursor)
+    list.items = [...list.items, ...items]
+    list.hasMore = Boolean(next)
+    cursor = next
+  } catch {
+    list.loadMoreError = true // Retry clears it and fires load-more again
+  }
+})
+```

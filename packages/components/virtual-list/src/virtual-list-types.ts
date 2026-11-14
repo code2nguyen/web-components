@@ -63,3 +63,9 @@ export interface VirtualListSearchChangeEventDetail {
   /** How many items match, or `-1` while a `dataSource` has not reported a total yet. */
   matchCount: number
 }
+
+/** Detail of `load-more`: the number of items loaded so far, and whether it follows the Retry button. */
+export interface VirtualListLoadMoreEventDetail {
+  count: number
+  retry: boolean
+}
