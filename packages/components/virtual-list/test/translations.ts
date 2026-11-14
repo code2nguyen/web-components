@@ -1,0 +1,11 @@
+import { addTranslations } from '@c2n/core/localize.js'
+import { virtualListMessages } from '../src/messages.js'
+
+// The French an app would add: the library ships its text in English only.
+const fr: typeof virtualListMessages.en = {
+  loadingMore: 'Chargement…',
+  loadMoreFailed: 'Impossible de charger la suite',
+  retry: 'Réessayer',
+}
+
+addTranslations({ fr: { 'virtual-list': fr } })

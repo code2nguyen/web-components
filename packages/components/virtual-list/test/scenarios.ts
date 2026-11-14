@@ -1,3 +1,4 @@
+import './translations'
 import '../src/virtual-list'
 import type { VirtualList } from '../src/virtual-list'
 import type { VirtualListItemsRequest, VirtualListItemsResult } from '../src/virtual-list-types'

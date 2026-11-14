@@ -30,10 +30,14 @@ declare module 'vue' {
         'search-placeholder'?: unknown
         'item-height'?: unknown
         'virtual-threshold'?: unknown
+        'has-more'?: unknown
+        'load-more-distance'?: unknown
+        'load-more-error'?: unknown
         'block-size'?: unknown
         'empty-message'?: unknown
         'no-results-message'?: unknown
         onSearchChange?: (event: EventOf<VirtualList, 'search-change'>) => void
+        onLoadMore?: (event: EventOf<VirtualList, 'load-more'>) => void
         onItemClick?: (event: EventOf<VirtualList, 'item-click'>) => void
         onSelectionChange?: (event: EventOf<VirtualList, 'selection-change'>) => void
       }

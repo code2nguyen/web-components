@@ -1,0 +1,50 @@
+---
+/**
+ * Plays the server for the infinite-scroll cards of the virtual-list gallery (`data-virtual-list-example`): `feed`
+ * answers each `load-more` with the next page after a short delay and clears `has-more` after the last one; `flaky`
+ * fails its second page once so the Retry row shows. Each list starts empty and asks for its first page. Also adds
+ * the French for the card under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { VirtualList } from '@c2n/components/virtual-list'
+  import '@c2n/components/virtual-list'
+
+  addTranslations({ fr: { 'virtual-list': { loadingMore: 'Chargement…', loadMoreFailed: 'Impossible de charger la suite', retry: 'Réessayer' } } })
+
+  const TOPICS = ['Release notes', 'Incident review', 'Design critique', 'Hiring update', 'Roadmap draft', 'Customer call', 'Budget review']
+  const page = (start: number, size: number) =>
+    Array.from({ length: size }, (_, offset) => {
+      const index = start + offset
+      return { id: String(index), title: `${TOPICS[index % TOPICS.length]} #${index + 1}`, author: ['Ada', 'Grace', 'Alan', 'Radia'][index % 4] }
+    })
+
+  // `load-more` does not bubble, but a capture listener on the document sees it: no list needs finding first, and a
+  // list that hydrates late still gets its pages. Each list starts empty and asks for its first page itself.
+  const served = new WeakMap<VirtualList, { pages: number; failed: boolean }>()
+  document.addEventListener(
+    'load-more',
+    (event) => {
+      const list = event.target as VirtualList
+      const example = list.dataset?.virtualListExample
+      if (!example) return
+      const state = served.get(list) ?? { pages: 0, failed: false }
+      served.set(list, state)
+      // A short delay stands in for the network, so the loading row shows.
+      setTimeout(() => {
+        // The flaky feed fails its second page once, so the Retry row shows.
+        if (example === 'flaky' && state.pages === 1 && !state.failed) {
+          state.failed = true
+          list.loadMoreError = true
+          return
+        }
+        state.pages++
+        list.items = [...list.items, ...page(list.items.length, 15)]
+        if (state.pages >= (example === 'flaky' ? 3 : 5)) list.hasMore = false
+      }, 700)
+    },
+    true,
+  )
+</script>
