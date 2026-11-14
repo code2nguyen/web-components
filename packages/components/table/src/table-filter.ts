@@ -73,7 +73,7 @@ export class TableFilter {
       const facets = table.shadowRoot?.querySelector<HTMLElement>('.filter-panel c2-facet-list')
       void (facets as (HTMLElement & { updateComplete?: Promise<unknown> }) | null)?.updateComplete?.then(() => {
         const field = facets?.shadowRoot?.querySelector<HTMLElement>('input, [tabindex]:not([tabindex="-1"]), button')
-        ;(field ?? facets)?.focus()
+        ;(field ?? facets)?.focus({ preventScroll: true })
       })
     })
   }
