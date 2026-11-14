@@ -24,8 +24,9 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-| Component | Severity | Finding |
-| --------- | -------- | ------- |
+| Component                          | Severity | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `c2-progress` in a `c2-table` cell | papercut | A `renderCell` that returns a `c2-progress` (the goal tree card) draws a stub of a bar: `--c2-progress--width` defaults to `100%`, but the cell's content wrapper (`.cell-content`) sizes to its content, so 100% of it is the label's width. The card sets a fixed `--c2-progress--width: 96px`. Smallest fix: let `.cell-content` stretch (`flex: 1`, `min-width: 0`) when the cell holds a rendered node, or document `::part(cell-content-<id>)` with `flex: 1` for block content. |
 
 ## Fixed
 

@@ -1,6 +1,6 @@
 ---
 title: 'Allocation grid gallery'
-description: 'Ready-made c2-allocation-grid setups: hours per week with totals, projects in percent grouped by team, an editable plan, sprints against velocity, a paged source and the load in French.'
+description: 'Ready-made c2-allocation-grid setups: hours per week with totals, people in percent grouped by team, an editable plan, sprints against velocity, a paged source and the load in French.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -32,7 +32,7 @@ import { TableColumn } from '@c2n/components/table/table-column'
 </c2-allocation-grid>
 ```
 
-```html tag=MdxCodeBlock,label=Projects by team
+```html tag=MdxCodeBlock,label=Percent by team
 <style>
   .alloc-percent {
     height: 320px;
@@ -40,8 +40,8 @@ import { TableColumn } from '@c2n/components/table/table-column'
     --c2-allocation-grid__under--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
-<c2-allocation-grid client:only="lit" class="alloc-percent" row-key="id" group-by="team" capacity="100" tolerance="0.1" rows='[{"id":"web","name":"Web relaunch","team":"Product","allocations":{"2026-11-09":60,"2026-11-16":80,"2026-11-23":100,"2026-11-30":100,"2026-12-07":70}},{"id":"api","name":"Billing API","team":"Product","allocations":{"2026-11-09":40,"2026-11-16":40,"2026-11-23":30,"2026-11-30":20,"2026-12-07":20}},{"id":"hire","name":"Hiring loop","team":"Operations","allocations":{"2026-11-09":10,"2026-11-16":10,"2026-11-23":20}},{"id":"ops","name":"On-call","team":"Operations","allocations":{"2026-11-09":20,"2026-11-16":20,"2026-11-23":20,"2026-11-30":20,"2026-12-07":20}}]'>
-  <c2-table-column field="name" header="Project" width="minmax(150px, 1fr)"></c2-table-column>
+<c2-allocation-grid client:only="lit" class="alloc-percent" row-key="id" group-by="team" capacity="100" tolerance="0.1" rows='[{"id":"mia","name":"Mia Chen","team":"Product","allocations":{"2026-11-09":80,"2026-11-16":100,"2026-11-23":120,"2026-11-30":100,"2026-12-07":60}},{"id":"leo","name":"Leo Martin","team":"Product","allocations":{"2026-11-09":100,"2026-11-16":100,"2026-11-23":90,"2026-11-30":110,"2026-12-07":100}},{"id":"ana","name":"Ana Souza","team":"Operations","allocations":{"2026-11-09":50,"2026-11-16":70,"2026-11-23":100,"2026-11-30":100,"2026-12-07":40}},{"id":"sam","name":"Sam Patel","team":"Operations","allocations":{"2026-11-09":100,"2026-11-16":130,"2026-11-23":100,"2026-11-30":80}}]'>
+  <c2-table-column field="name" header="Person" width="minmax(150px, 1fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" hidden></c2-table-column>
   <c2-table-column field="allocations" width="84px" align="end" format="number" format-options='{"style":"unit","unit":"percent"}' summary="sum"></c2-table-column>
 </c2-allocation-grid>
