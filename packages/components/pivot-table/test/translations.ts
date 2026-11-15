@@ -1,5 +1,6 @@
 import { addTranslations } from '@c2n/core/localize.js'
 import { pivotTableMessages } from '../src/messages.js'
+import { agingTableMessages } from '../src/aging-table-messages.js'
 
 // The French an app would add: the library ships its text in English only.
 
@@ -36,3 +37,15 @@ const fr: typeof pivotTableMessages.en = {
 }
 
 addTranslations({ fr: { 'pivot-table': fr } })
+
+const agingFr: typeof agingTableMessages.en = {
+  table: 'Balance âgée',
+  asOf: (date) => `Au ${date}`,
+  current: 'Non échu',
+  range: (from, to) => `${from} à ${to} j`,
+  over: (days) => `Plus de ${days} j`,
+  noDate: 'Sans date',
+  age: 'Ancienneté',
+}
+
+addTranslations({ fr: { 'aging-table': agingFr } })

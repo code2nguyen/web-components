@@ -853,6 +853,10 @@
       "types": "./dist/pivot-table.d.ts",
       "default": "./dist/pivot-table.js"
     },
+    "./pivot-table/aging-table": {
+      "types": "./dist/pivot-table/aging-table.d.ts",
+      "default": "./dist/pivot-table/aging-table.js"
+    },
     "./popconfirm": {
       "types": "./dist/popconfirm.d.ts",
       "default": "./dist/popconfirm.js"

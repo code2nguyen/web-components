@@ -53,6 +53,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Data display
 
+- **Aging table** — `c2-aging-table` · `@c2n/components/pivot-table/aging-table` — Open invoices or bills by customer or vendor, in columns of days past due against an as-of date (Current, 1–30, 31–60, 61–90, Over 90), with row and column totals.
 - **Allocation grid** — `c2-allocation-grid, c2-table-column` · `@c2n/components/table/allocation-grid` — People down the side and periods across: each cell an amount of the row’s capacity, coloured under, at or over it, with totals per person and per period. Children: `c2-pagination`, `c2-table-column`.
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Audio Player** — `c2-audio-player` · `@c2n/components/audio-player` — Waveform playback for voice notes and recordings: the waveform is the seek bar, with the time, a speed toggle and an optional transcript.
