@@ -136,6 +136,12 @@ export class KanbanColumn extends LitElement {
    */
   @state() editable = false
 
+  /**
+   * How to move a card, for screen readers, in the page's language. Set by a translated board; empty reads English.
+   * @internal
+   */
+  @state() instructions = ''
+
   private readonly slotPresence = new SlotPresenceController(this, ['footer'])
   private readonly instructionsId = `c2-kanban-column-instructions-${++instanceCount}`
 
@@ -187,7 +193,7 @@ export class KanbanColumn extends LitElement {
         ${
           this.editable
             ? html`<p id=${this.instructionsId} class="visually-hidden">
-                Press Space to pick up a card. Use the arrow keys, Home or End to move it; Space drops it and Escape cancels.
+                ${this.instructions || 'Press Space to pick up a card. Use the arrow keys, Home or End to move it; Space drops it and Escape cancels.'}
               </p>`
             : nothing
         }

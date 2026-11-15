@@ -278,6 +278,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
 - **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
+- **Matrix board** — `c2-matrix-board` · `@c2n/components/kanban/matrix-board` — A grid of cells, rows by columns, whose cards people drag or move with the keyboard between cells: 9-box talent grids, risk matrices, Eisenhower matrices. Children: `c2-kanban-column`.
 - **Month Planner** — `c2-month-planner` · `@c2n/components/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **Notepad** — `c2-notepad` · `@c2n/components/notepad` — A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.
 - **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.
