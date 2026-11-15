@@ -37,6 +37,7 @@ const submitted: Record<string, string[]> = {
   'c2-mask-input': ['abc'],
   'c2-money-input': ['1250'],
   'c2-month-picker': ['2026-10'],
+  'c2-native-select': ['eu'],
   'c2-notepad': ['Notes'],
   'c2-number-input': ['42'],
   'c2-otp-input': ['1234'],
@@ -123,6 +124,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-mask-input': (e) => (e.value = 'abc'),
         'c2-money-input': (e) => (e.value = '1250'),
         'c2-month-picker': (e) => (e.value = '2026-10'),
+        'c2-native-select': (e) => Object.assign(e, { options: ['us', 'eu'], value: 'eu' }),
         'c2-notepad': (e) => (e.value = 'Notes'),
         'c2-number-input': (e) => (e.value = '42'),
         'c2-otp-input': (e) => (e.value = '1234'),
@@ -200,6 +202,33 @@ test('c2-date-selector reflects end-name and submits the end of the range under 
     return { attribute: element.getAttribute('end-name'), data: Object.fromEntries(new FormData(document.querySelector('form')!)) }
   })
   expect(outcome).toEqual({ attribute: 'end', data: { start: '2026-10-17', end: '2026-10-24' } })
+})
+
+test('a multiple c2-autocomplete submits one entry per pick under the name set as a property', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-autocomplete') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'accounts',
+      multiple: true,
+      itemKey: 'id',
+      value: 'typed query',
+      selectedItems: [
+        { id: 'acme', label: 'Acme' },
+        { id: 'hooli', label: 'Hooli' },
+      ],
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'accounts',
+    entries: [
+      ['accounts', 'acme'],
+      ['accounts', 'hooli'],
+    ],
+  })
 })
 
 test('c2-choice-matrix reflects a name set as a property and submits one name[row] entry per choice', async ({ page, renderScenario }) => {

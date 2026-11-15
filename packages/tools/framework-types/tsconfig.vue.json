@@ -34,6 +34,7 @@
         "c2-mask-input": true,
         "c2-money-input": true,
         "c2-month-picker": true,
+        "c2-native-select": true,
         "c2-notepad": true,
         "c2-number-input": true,
         "c2-otp-input": true,

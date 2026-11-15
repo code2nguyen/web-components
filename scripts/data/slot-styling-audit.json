@@ -1119,6 +1119,13 @@
       "reason": "The icon is sized and coloured through its documented variables."
     },
     {
+      "tag": "c2-confirm-dialog",
+      "slot": "input",
+      "decision": "part",
+      "parts": ["input"],
+      "reason": "The input region wraps the slotted control with its label and error, and owns the slot's component-side presentation."
+    },
+    {
       "tag": "c2-context-menu",
       "slot": "default",
       "decision": "assigned-content",
@@ -2823,6 +2830,20 @@
       "decision": "part",
       "parts": ["heading"],
       "reason": "The semantic heading region owns the heading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-native-select",
+      "slot": "prefix-icon",
+      "decision": "part",
+      "parts": ["prefix-icon"],
+      "reason": "The prefix-icon wrapper owns the icon's box and placement over the select; the icon is sized by --c2-native-select__icon--size."
+    },
+    {
+      "tag": "c2-native-select",
+      "slot": "suffix-icon",
+      "decision": "part",
+      "parts": ["suffix-icon"],
+      "reason": "The suffix-icon wrapper owns the chevron's box and placement over the select; the icon is sized by --c2-native-select__icon--size."
     },
     {
       "tag": "c2-navigation-menu",

@@ -18,8 +18,12 @@
     <script type="module">
       // The app's language: French, added as an app would.
       import './translations.ts'
-      import { confirm } from '../src/confirm-dialog.ts'
+      import { confirm, prompt } from '../src/confirm-dialog.ts'
+      // A control an app slots into the prompt's `input` slot.
+      import '@c2n/select'
+      import '@c2n/list-item'
       window.c2Confirm = confirm
+      window.c2Prompt = prompt
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

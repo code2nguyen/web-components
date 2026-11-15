@@ -1,5 +1,5 @@
 {
-  "lazy": 401896,
+  "lazy": 404045,
   "entries": {
     "accordion": 5182,
     "action-bar": 2376,
@@ -11,7 +11,7 @@
     "attachment/attachment-group": 1482,
     "audio-player": 7512,
     "audio-visualizer": 5286,
-    "autocomplete": 26630,
+    "autocomplete": 21466,
     "avatar": 6130,
     "backdrop": 3592,
     "badge": 2259,
@@ -87,7 +87,7 @@
     "command/command-separator": 1126,
     "comment-thread": 48950,
     "comparison-bar": 2869,
-    "confirm-dialog": 8311,
+    "confirm-dialog": 10441,
     "context-menu": 24756,
     "copy-button": 5926,
     "countdown": 4389,
@@ -223,6 +223,7 @@
     "search-field": 18657,
     "secret-field": 25872,
     "select": 21555,
+    "select/native-select": 4933,
     "selection-toolbar": 13472,
     "separator": 1536,
     "share-sheet": 23103,
