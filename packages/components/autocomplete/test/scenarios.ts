@@ -23,6 +23,26 @@ const suggestions = [
 
 if (scenario === 'local' || scenario === 'form') subject.suggestions = suggestions
 
+const lyon = { value: 'lyon', label: 'Lyon', description: 'France' }
+
+if (scenario === 'multiple' || scenario === 'creatable') {
+  subject.multiple = true
+  subject.suggestions = [...suggestions, lyon]
+}
+
+if (scenario === 'creatable') {
+  subject.creatable = true
+  subject.addEventListener('create-request', (event) => {
+    subject.dataset.create = event.detail.query
+    subject.pick({ value: `new-${event.detail.query.toLowerCase()}`, label: event.detail.query })
+  })
+}
+
+if (scenario === 'recent') {
+  subject.suggestions = [...suggestions, lyon]
+  subject.recentItems = [lyon, suggestions[2]]
+}
+
 if (scenario === 'preserve') {
   subject.selectionBehavior = 'preserve'
   subject.suggestions = suggestions
@@ -83,6 +103,15 @@ subject.addEventListener('suggestion-select', (event) => {
 })
 subject.addEventListener('query-change', (event) => {
   subject.dataset.query = event.detail.query
+})
+subject.addEventListener('item-remove', (event) => {
+  subject.dataset.removed = JSON.stringify(event.detail)
+})
+subject.addEventListener('change', () => {
+  subject.dataset.changes = String(Number(subject.dataset.changes ?? 0) + 1)
+})
+;(subject as HTMLElement).addEventListener('remove', () => {
+  subject.dataset.strayRemove = 'true'
 })
 
 await subject.updateComplete
