@@ -202,6 +202,33 @@ test('c2-date-selector reflects end-name and submits the end of the range under 
   expect(outcome).toEqual({ attribute: 'end', data: { start: '2026-10-17', end: '2026-10-24' } })
 })
 
+test('a multiple c2-autocomplete submits one entry per pick under the name set as a property', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-autocomplete') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'accounts',
+      multiple: true,
+      itemKey: 'id',
+      value: 'typed query',
+      selectedItems: [
+        { id: 'acme', label: 'Acme' },
+        { id: 'hooli', label: 'Hooli' },
+      ],
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'accounts',
+    entries: [
+      ['accounts', 'acme'],
+      ['accounts', 'hooli'],
+    ],
+  })
+})
+
 test('c2-choice-matrix reflects a name set as a property and submits one name[row] entry per choice', async ({ page, renderScenario }) => {
   await renderScenario('<form></form>')
   const outcome = await page.evaluate(async () => {

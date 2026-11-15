@@ -8,6 +8,8 @@ const en = {
   suggestions: 'Suggestions',
   suggestionsFor: (label: string) => `${label} suggestions`,
   valueMissing: 'Please fill out this field.',
+  create: (query: string) => `Create “${query}”`,
+  recent: 'Recent',
 }
 
 /** The autocomplete's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

@@ -332,7 +332,10 @@ test('a failing dataSource shows the error slot', async ({ page, renderScenario 
 test('renderers draw the samples and the preview cells; toolbar and footer show only with content', async ({ page, renderScenario }) => {
   await render(page, renderScenario, '', '<button slot="toolbar">Preview</button>')
   await expect(mapper(page).locator('[part="toolbar"]')).toBeVisible()
-  await expect(mapper(page).locator('[part="footer"]')).toBeHidden()
+  // The mapper's own footer: the column pickers (`c2-select`) have a footer part of their own.
+  const footerHidden = () =>
+    mapper(page).evaluate((element) => ([...element.shadowRoot!.children].find((child) => child.getAttribute('part') === 'footer') as HTMLElement).hidden)
+  expect(await footerHidden()).toBe(true)
   await mapper(page).evaluate(async (element) => {
     Object.assign(element, {
       renderSamples: ({ values }: { values: string[] }) => `${values.length} values`,
