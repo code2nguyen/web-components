@@ -86,7 +86,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **description-list-2** · `c2-description-list` · property list #253 (lazy), calculation breakdown #337, example: pay stub #354 · +1.2 kB on 5.6 kB, 6 kB lazy · risk low
 - **autocomplete-1** · `c2-autocomplete` · record picker #252 · +2.5 kB on 26.0 kB · risk low
 - **select-1** · `c2-select` · select panel #254, status select #255 · +2.2 kB on 24.7 kB · risk low
 - **select-2** · `c2-select` · native select #443 (companion) · 3 kB new entry · risk low

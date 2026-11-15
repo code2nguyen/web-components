@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { DescriptionGroup } from '@c2n/description-list/description-group.js'
 import type { DescriptionItem } from '@c2n/description-list/description-item.js'
 import type { DescriptionList } from '@c2n/description-list'
 import type { DescriptionValue } from '@c2n/description-list/description-value.js'
@@ -20,9 +21,16 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-description-group': DefineComponent<
+      C2Props<DescriptionGroup> & {
+        onCollapsedChange?: (event: EventOf<DescriptionGroup, 'collapsed-change'>) => void
+      }
+    >
     'c2-description-item': DefineComponent<
       C2Props<DescriptionItem> & {
         'empty-text'?: unknown
+        'edit-value'?: unknown
+        onEdit?: (event: EventOf<DescriptionItem, 'edit'>) => void
       }
     >
     'c2-description-list': DefineComponent<

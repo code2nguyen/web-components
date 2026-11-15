@@ -1,0 +1,30 @@
+---
+/**
+ * Plays the page for the property-list card of the description-list gallery (`data-description-list-example`): an
+ * `edit` event writes the committed value into the item, as an app writes it back after saving. Also adds the French
+ * for the card under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import '@c2n/components/description-list'
+  import '@c2n/components/description-list/description-group'
+
+  addTranslations({ fr: { 'description-list': { edit: 'Modifier {0}' } } })
+
+  // `edit` bubbles, so one listener on the document serves every card, however late it hydrates.
+  document.addEventListener('edit', (event) => {
+    const item = event.target as HTMLElement & { editValue?: string; editor?: string }
+    if (!item.closest('[data-description-list-example]')) return
+    const { value } = (event as CustomEvent<{ value: string }>).detail
+    let text = value
+    if (item.editor === 'number') {
+      item.editValue = value
+      text = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value))
+    }
+    // Only the value's own nodes: a slotted label or action stays.
+    for (const node of [...item.childNodes]) if (!(node instanceof Element && node.slot)) node.remove()
+    item.append(text)
+  })
+</script>

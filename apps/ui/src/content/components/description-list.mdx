@@ -122,3 +122,46 @@ import '@c2n/components/description-list'
   </c2-description-list>
 </div>
 ```
+
+### Sections
+
+```typescript tag=CodeBlock
+import '@c2n/components/description-list/description-group'
+```
+
+`c2-description-group` gives a run of items a heading, across the list and in its columns: a record's contact and
+billing details, or the steps of a calculation. `collapsible` lets the reader close and open a section, and
+`collapsed` starts it closed; the browser's find-in-page still finds the text of a closed section and opens it.
+
+### Calculation breakdowns
+
+`kind="subtotal"` and `kind="total"` turn items into the lines of a calculation: a rule above, a heavier weight and,
+for the total, a larger value. Put the steps in sections that end on their subtotal; with `value-labels` the same
+markup carries a current and a year-to-date amount, as a pay stub does.
+
+```html tag=CodeBlock
+<c2-description-list value-labels="Current;Year to date">
+  <c2-description-group label="Earnings">
+    <c2-description-item label="Salary"><c2-description-value>$4,200.00</c2-description-value><c2-description-value>$42,000.00</c2-description-value></c2-description-item>
+    <c2-description-item label="Gross pay" kind="subtotal">…</c2-description-item>
+  </c2-description-group>
+  <c2-description-item label="Net pay" kind="total">…</c2-description-item>
+</c2-description-list>
+```
+
+### Editable properties
+
+An item with an `editor` (`text`, `number`, `date`, `email`, `url`, `select` with `options`, `textarea`) can be
+edited in place: its edit button, or a click on the value, swaps the value for that field. The field's code loads the
+first time an item is edited, so a read-only list never ships it. Enter or leaving the field commits, Escape cancels.
+The item fires `edit` with its `name` (else its label), the new value and the previous one; it does not change its content itself, so
+the page writes the value back once it has saved it. `edit-value` is what the field starts from when the content is
+formatted (an amount, a badge).
+
+```typescript tag=CodeBlock
+list.addEventListener('edit', async (event) => {
+  const { name, value } = event.detail
+  await api.update(record.id, { [name]: value })
+  ;(event.target as HTMLElement).textContent = value
+})
+```

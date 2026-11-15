@@ -11,6 +11,7 @@ import type { DescriptionHighlight } from './description-item.js'
 import styles from './description-list.scss?inline'
 
 export { DescriptionItem, DescriptionValue } from './description-item.js'
+export type { DescriptionEditor, DescriptionItemEditEventDetail } from './description-item.js'
 export type { DescriptionHighlight } from './description-item.js'
 
 /** Detail of the `selection-change` event of {@link DescriptionList}. */
@@ -52,6 +53,12 @@ export interface DescriptionList {
  * the custom state `different` (`c2-description-item:state(different)`), and each highlighted value the state
  * `highlighted`. `selected-column` marks one value column, and `column-selectable` turns the column names into
  * toggle buttons that select it and fire `selection-change`.
+ *
+ * `c2-description-group` children (imported from `@c2n/components/description-list/description-group`) are titled
+ * sections of items, collapsible if wanted: a record's properties by topic, or the steps of a calculation closed by
+ * `kind="subtotal"` items and a `kind="total"`. With an `editor` on its
+ * items the list is a property inspector, each value editable in place (see `c2-description-item`); put an "Add
+ * property" button in the `actions` slot.
  *
  * The list is exposed as a `list` and every item as a `listitem` holding a `term` and its `definition`.
  *
@@ -109,6 +116,7 @@ export interface DescriptionList {
  * @cssproperty [--c2-description-list__value-header__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  *
  * @slotcomponent c2-description-item
+ * @slotcomponent c2-description-group
  */
 @customElement('c2-description-list')
 export class DescriptionList extends LitElement {
@@ -168,8 +176,10 @@ export class DescriptionList extends LitElement {
   protected override updated(changed: PropertyValues<this>) {
     // Items read their column names and comparison settings from the list when they lay out their values.
     if (changed.has('valueLabels') || changed.has('highlight') || changed.has('differencesOnly') || changed.has('selectedColumn')) {
-      for (const item of this.querySelectorAll('c2-description-item'))
-        if (item.parentElement?.closest('c2-description-list') === this) (item as LitElement).requestUpdate()
+      for (const item of this.querySelectorAll('c2-description-item, c2-description-group'))
+        // A section's module may not have loaded yet (it is its own entry): it reads the settings once it upgrades.
+        if (item.parentElement?.closest('c2-description-list') === this && typeof (item as LitElement).requestUpdate === 'function')
+          (item as LitElement).requestUpdate()
     }
     this.observeHeader()
   }

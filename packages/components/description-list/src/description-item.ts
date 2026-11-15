@@ -1,5 +1,7 @@
-import { LitElement, html, isServer, unsafeCSS } from 'lit'
-import { property } from '@c2n/core/lit-helper.js'
+import { LitElement, html, isServer, nothing, unsafeCSS, type TemplateResult } from 'lit'
+import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { state } from 'lit/decorators.js'
@@ -8,9 +10,32 @@ import { styleMap } from 'lit/directives/style-map.js'
 import './description-value.js'
 import type { DescriptionValue } from './description-value.js'
 import { toggleDescriptionState } from './custom-state.js'
+import type { DescriptionEditor, DescriptionEditorContext } from './description-edit.js'
+import { descriptionListMessages } from './messages.js'
 import styles from './description-item.scss?inline'
 
 export { DescriptionValue } from './description-value.js'
+export type { DescriptionEditor } from './description-edit.js'
+
+/** Detail of the `edit` event of {@link DescriptionItem}. */
+export interface DescriptionItemEditEventDetail {
+  /** The item's `name`, else its label. */
+  name: string
+  /** The value the reader committed. */
+  value: string
+  /** The value the editor started from. */
+  previous: string
+}
+
+/** Events fired by {@link DescriptionItem}, keyed for `addEventListener`. */
+export interface DescriptionItemEventMap {
+  edit: CustomEvent<DescriptionItemEditEventDetail>
+}
+
+export interface DescriptionItem {
+  addEventListener: TypedAddEventListener<DescriptionItem, DescriptionItemEventMap>
+  removeEventListener: TypedRemoveEventListener<DescriptionItem, DescriptionItemEventMap>
+}
 
 /** How the values of an item with several are compared: the best `max` or `min` number, or what is `different` from the first column. */
 export type DescriptionHighlight = '' | 'max' | 'min' | 'different' | 'none'
@@ -42,6 +67,15 @@ const toNumber = (key: string) => parseFloat(/-?\d[\d,]*(\.\d+)?/.exec(key)?.[0]
  * can style (`c2-description-item:state(different)`), and the list's `differences-only` hides it while they are.
  * `highlight` picks the values to mark, overriding the list's.
  *
+ * `kind="subtotal"` or `"total"` makes the item a line of a calculation: a rule above it and a heavier weight, so a
+ * breakdown (a fee, a tax, a pay stub) reads down to its result. Group the steps in `c2-description-group` sections.
+ *
+ * An item with an `editor` is a property the reader can change, as a record's sidebar in a CRM: an edit button
+ * beside the value (and a click on the value) swaps it for a field of that type, loaded the first time an item is
+ * edited, so a read-only list never ships it. Enter or leaving the field commits and fires `edit` with the new value;
+ * Escape cancels. The item does not change its own content: the page writes the new value, or ignores the event to
+ * refuse it.
+ *
  * @tag c2-description-item
  *
  * @slot - The value, or several `c2-description-value` elements for one value per column.
@@ -52,6 +86,10 @@ const toNumber = (key: string) => parseFloat(/-?\d[\d,]*(\.\d+)?/.exec(key)?.[0]
  * @csspart value - The value region (`definition`) around the default slot. With `c2-description-value` children it is the row of value columns instead.
  * @csspart empty - The `empty-text` shown while the value is empty.
  * @csspart actions - The wrapper around the actions slot, after the value. Hidden while the slot is empty.
+ * @csspart edit-button - The button that edits the value of an item with an `editor`.
+ * @csspart editor - The field that stands in for the value while it is edited.
+ *
+ * @event {CustomEvent<DescriptionItemEditEventDetail>} edit - The reader changed the value and committed it. Bubbles. `detail.name` is the item's `name` (else its label). The page writes the value into the item's content.
  *
  * @cssproperty [--c2-description-item--grid-column=auto] - Column placement in the list's grid. `1 / -1` spans the full row.
  *
@@ -82,6 +120,24 @@ const toNumber = (key: string) => parseFloat(/-?\d[\d,]*(\.\d+)?/.exec(key)?.[0]
  *
  * @cssproperty {pixel} [--c2-description-item__actions--gap=4px]
  *
+ * @cssproperty {border} [--c2-description-item__subtotal--border-top=1px solid #e4e4e7] - The rule above a `kind="subtotal"` item.
+ * @cssproperty {padding} [--c2-description-item__subtotal--padding-top=8px]
+ * @cssproperty {font-weight} [--c2-description-item__subtotal--font-weight=600]
+ * @cssproperty {border} [--c2-description-item__total--border-top=2px solid #18181b] - The rule above a `kind="total"` item.
+ * @cssproperty {padding} [--c2-description-item__total--padding-top=8px]
+ * @cssproperty {font-weight} [--c2-description-item__total--font-weight=700]
+ * @cssproperty {pixel} [--c2-description-item__total--font-size=16px] - The value of a total.
+ *
+ * @cssproperty {pixel} [--c2-description-item__edit-button--size=24px]
+ * @cssproperty {color} [--c2-description-item__edit-button--color=#71717a]
+ * @cssproperty {color} [--c2-description-item__edit-button__hover--background-color=#f4f4f5]
+ * @cssproperty [--c2-description-item__edit-button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {border} [--c2-description-item__editor--border=1px solid #a1a1aa]
+ * @cssproperty {border-radius} [--c2-description-item__editor--border-radius=6px]
+ * @cssproperty {padding} [--c2-description-item__editor--padding=4px 8px]
+ * @cssproperty {color} [--c2-description-item__editor--background-color=#ffffff]
+ * @cssproperty [--c2-description-item__editor__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ *
  * @slotcomponent c2-description-value
  */
 @customElement('c2-description-item')
@@ -98,6 +154,27 @@ export class DescriptionItem extends LitElement {
 
   /** Overrides the list's `highlight` for this item, such as `min` for a price in a list that highlights `max`. `none` marks nothing. */
   @property() highlight: DescriptionHighlight = ''
+
+  /** The item's role in a calculation: a `subtotal` or the `total`, drawn with a rule above and a heavier weight. */
+  @property() kind: '' | 'subtotal' | 'total' = ''
+
+  /** Makes the value editable with a field of this type; unset, the item is read-only and loads no editor. */
+  @property() editor?: DescriptionEditor
+
+  /** Names the item in the `edit` event (not `key`, which React and Vue keep for themselves); the label when empty. */
+  @property() name = ''
+
+  /** The value the editor starts from, when the content is not it (a formatted amount, a badge); the content's text by default. */
+  @property({ attribute: 'edit-value' }) editValue?: string
+
+  /** The choices of a `select` editor. An array, or `;`-separated in the attribute. */
+  @property({ converter: arrayPropertyConverter }) options: string[] = []
+
+  /** The value is being edited. */
+  @state() private editing = false
+
+  private readonly msg = new LocalizeController(this, descriptionListMessages)
+  #renderEditor?: (context: DescriptionEditorContext) => TemplateResult
 
   /**
    * Whether the default slot holds an element or non-blank text. The server cannot see the light DOM, so it renders
@@ -211,11 +288,118 @@ export class DescriptionItem extends LitElement {
     this.readContent()
   }
 
+  /** The label as text, for the edit button and the field's name. */
+  private get labelText(): string {
+    // The server sees no children: the attribute is all it has.
+    const slotted = isServer ? [] : [...this.children].filter((child) => child.getAttribute('slot') === 'label')
+    return (
+      slotted
+        .map((child) => child.textContent ?? '')
+        .join(' ')
+        .trim() || this.label
+    ).replace(/\s+/g, ' ')
+  }
+
+  /** The value's text: what the editor starts from when `edit-value` is unset. */
+  private get valueText(): string {
+    // Text and unslotted elements only: a framework's marker comments are not part of the value.
+    const nodes = [...this.childNodes].filter((node) => (node instanceof Element ? (node.getAttribute('slot') ?? '') === '' : node.nodeType === Node.TEXT_NODE))
+    return nodes
+      .map((node) => node.textContent ?? '')
+      .join('')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  constructor() {
+    super()
+    // On the host: a click on the value's own text targets the host, so it never enters the shadow tree.
+    this.addEventListener('click', this.#clickValue)
+  }
+
+  /** A click on the value edits it; one on the label, an action, a link in the value or the field itself does not. */
+  #clickValue = (event: MouseEvent) => {
+    if (!this.editor || this.editing || event.defaultPrevented) return
+    // The end of a drag that selected the value, to copy it, is not a request to edit.
+    if (!(getSelection()?.isCollapsed ?? true)) return
+    for (const target of event.composedPath()) {
+      if (target === this) break
+      if (!(target instanceof Element)) continue
+      if (target.matches('a, button, input, select, textarea, [slot="label"], [slot="actions"], .label, .actions')) return
+    }
+    void this.edit()
+  }
+
+  /** Swaps the value for its editor, loading the editor the first time; does nothing without an `editor`. */
+  async edit(): Promise<void> {
+    if (!this.editor || this.editing) return
+    this.#renderEditor ??= (await import('./description-edit.js')).renderEditor
+    this.editing = true
+    await this.updateComplete
+    const field = this.renderRoot.querySelector<HTMLInputElement>('.editor')
+    field?.focus()
+    // Typing replaces the value, as in a sheet; the arrow keys keep it to change a part.
+    if (field && 'select' in field && field.type !== 'date') field.select()
+  }
+
+  #finish(value: string | undefined, previous: string) {
+    // Enter and Escape leave the focus in the field; a click elsewhere has already moved it, and it stays there.
+    const hadFocus = !!this.renderRoot.querySelector('.editor')?.matches(':focus')
+    this.editing = false
+    if (value !== undefined && value !== previous) {
+      this.dispatchEvent(
+        new CustomEvent<DescriptionItemEditEventDetail>('edit', {
+          detail: { name: this.name || this.labelText, value, previous },
+          bubbles: true,
+          composed: true,
+        }),
+      )
+    }
+    // The button stands where the field was, so the focus goes back to it.
+    if (hadFocus) void this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('.edit-button')?.focus())
+  }
+
+  private renderEditing() {
+    const previous = this.editValue ?? this.valueText
+    return this.#renderEditor!({
+      type: this.editor ?? 'text',
+      value: previous,
+      options: this.options ?? [],
+      label: this.labelText,
+      commit: (value) => this.#finish(value, previous),
+      cancel: () => this.#finish(undefined, previous),
+    })
+  }
+
+  private renderEditButton() {
+    if (!this.editor || this.editing) return nothing
+    const name = this.msg.t('edit', this.labelText)
+    return html`<button class="edit-button" part="edit-button" type="button" aria-label=${name} title=${name} @click=${() => void this.edit()}>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      </svg>
+    </button>`
+  }
+
   override render() {
     const group = this.valueCount > 0
     const showEmpty = !group && !this.hasValue && this.emptyText !== ''
+    const editing = this.editing && !!this.#renderEditor
     return html`
-      <div class="c2-description-item">
+      <div
+        class=${classMap({ 'c2-description-item': true, [`is-${this.kind}`]: this.kind === 'subtotal' || this.kind === 'total', 'is-editable': !!this.editor })}
+      >
         <div class="label" part="label" role="term">
           <slot name="label">${this.label}</slot>
         </div>
@@ -225,10 +409,13 @@ export class DescriptionItem extends LitElement {
           role=${group ? 'none' : 'definition'}
           style=${styleMap({ '--_count': String(Math.max(this.valueCount, 1)) })}
         >
-          <slot @slotchange=${this.handleValueSlotChange}></slot>
-          <span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText}</span>
+          ${editing ? this.renderEditing() : nothing}
+          <span class="content" ?hidden=${editing}
+            ><slot @slotchange=${this.handleValueSlotChange}></slot><span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText}</span></span
+          >
         </div>
-        <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
+        <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions') && (!this.editor || editing)}>
+          ${this.renderEditButton()}
           <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
       </div>
