@@ -9,6 +9,8 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { DocumentChecklist } from '@c2n/upload/document-checklist.js'
+import type { ImageUploader } from '@c2n/upload/image-uploader.js'
 import type { Upload } from '@c2n/upload'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +20,41 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-document-checklist': DefineComponent<
+      C2Props<DocumentChecklist> & {
+        'max-files'?: unknown
+        'max-size'?: unknown
+        'auto-upload'?: unknown
+        'aria-label'?: unknown
+        onInput?: (event: EventOf<DocumentChecklist, 'input'>) => void
+        onChange?: (event: EventOf<DocumentChecklist, 'change'>) => void
+        onFilesSelected?: (event: EventOf<DocumentChecklist, 'files-selected'>) => void
+        onFileReject?: (event: EventOf<DocumentChecklist, 'file-reject'>) => void
+        onUploadStart?: (event: EventOf<DocumentChecklist, 'upload-start'>) => void
+        onUploadProgress?: (event: EventOf<DocumentChecklist, 'upload-progress'>) => void
+        onUploadSuccess?: (event: EventOf<DocumentChecklist, 'upload-success'>) => void
+        onUploadError?: (event: EventOf<DocumentChecklist, 'upload-error'>) => void
+        onUploadRemove?: (event: EventOf<DocumentChecklist, 'upload-remove'>) => void
+      }
+    >
+    'c2-image-uploader': DefineComponent<
+      C2Props<ImageUploader> & {
+        'max-files'?: unknown
+        'max-size'?: unknown
+        'auto-upload'?: unknown
+        'aria-label'?: unknown
+        onReorder?: (event: EventOf<ImageUploader, 'reorder'>) => void
+        onInput?: (event: EventOf<ImageUploader, 'input'>) => void
+        onChange?: (event: EventOf<ImageUploader, 'change'>) => void
+        onFilesSelected?: (event: EventOf<ImageUploader, 'files-selected'>) => void
+        onFileReject?: (event: EventOf<ImageUploader, 'file-reject'>) => void
+        onUploadStart?: (event: EventOf<ImageUploader, 'upload-start'>) => void
+        onUploadProgress?: (event: EventOf<ImageUploader, 'upload-progress'>) => void
+        onUploadSuccess?: (event: EventOf<ImageUploader, 'upload-success'>) => void
+        onUploadError?: (event: EventOf<ImageUploader, 'upload-error'>) => void
+        onUploadRemove?: (event: EventOf<ImageUploader, 'upload-remove'>) => void
+      }
+    >
     'c2-upload': DefineComponent<
       C2Props<Upload> & {
         'max-files'?: unknown

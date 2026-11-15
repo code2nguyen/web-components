@@ -1,0 +1,366 @@
+@use 'sass:string';
+@use '@c2n/sass/animation';
+@use '@c2n/sass/focus';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/visually-hidden';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-image-uploader,
+  $theme: (
+    width: 480px,
+    grid--gap: 8px,
+    tile--min-width: 96px,
+    tile--aspect-ratio: 1,
+    tile--border-radius: 8px,
+    tile--background: #f4f4f5,
+    tile--object-fit: cover,
+    single--width: 240px,
+    single--aspect-ratio: string.unquote('4 / 3'),
+    add--background: #ffffff,
+    add--border: 1px dashed #bcbcc6,
+    add--color: #71717a,
+    add--font-size: 12px,
+    add__hover--background: #fafafa,
+    add__hover--border: 1px dashed #a1a1aa,
+    add__drag--background: #e8f2ff,
+    add__drag--border: 1px dashed rgb(2, 101, 220),
+    add-icon--size: 24px,
+    add-icon--color: rgb(2, 101, 220),
+    add-label--color: #18181b,
+    add-label--font-weight: 500,
+    overlay--background: rgba(24, 24, 27, 0.55),
+    overlay__error--background: rgba(127, 29, 29, 0.78),
+    overlay--color: #fafafa,
+    action--size: 24px,
+    action--background: rgba(24, 24, 27, 0.72),
+    action__hover--background: rgba(24, 24, 27, 0.9),
+    action--color: #fafafa,
+    badge--background: rgba(24, 24, 27, 0.72),
+    badge--color: #fafafa,
+    badge--font-size: 12px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    grabbed--outline: 2px solid rgb(2, 101, 220),
+    grabbed--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.2),
+    drop--color: rgb(2, 101, 220),
+    hint--color: #71717a,
+    hint--font-size: 12px,
+    add__error--border-color: #dc2626,
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+.visually-hidden {
+  @include visually-hidden.visually-hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, css.cssVar(tile--min-width)), 1fr));
+  gap: css.cssVar(grid--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid--single {
+  grid-template-columns: min(100%, css.cssVar(single--width));
+
+  .tile,
+  .add {
+    aspect-ratio: css.cssVar(single--aspect-ratio);
+  }
+}
+
+// The tile does not clip, so its corner buttons stay whole on a round tile; the image and its layers take the radius.
+.tile {
+  position: relative;
+  aspect-ratio: css.cssVar(tile--aspect-ratio);
+  border-radius: css.cssVar(tile--border-radius);
+  background: css.cssVar(tile--background);
+  scroll-margin: 8px;
+
+  &:has(.handle:focus-visible) {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+    @include focus.forced-colors-ring;
+  }
+}
+
+.tile--grabbed,
+.tile--dragging {
+  outline: css.cssVar(grabbed--outline);
+  outline-offset: 2px;
+  box-shadow: css.cssVar(grabbed--box-shadow);
+  z-index: 1;
+  @include focus.forced-colors-ring;
+}
+
+.tile--dragging {
+  pointer-events: none;
+}
+
+.tile--drop::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(-0.5 * #{css.cssVar(grid--gap)} - 1.5px);
+  width: 3px;
+  border-radius: 999px;
+  background: css.cssVar(drop--color);
+  z-index: 2;
+  forced-color-adjust: none;
+}
+
+.handle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.tile--dragging .handle {
+  cursor: grabbing;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: css.cssVar(tile--object-fit);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.badge {
+  position: absolute;
+  inset-block-end: 6px;
+  inset-inline-start: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: css.cssVar(badge--background);
+  color: css.cssVar(badge--color);
+  font-size: css.cssVar(badge--font-size);
+  font-weight: 500;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: inherit;
+  background: css.cssVar(overlay--background);
+  color: css.cssVar(overlay--color);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  pointer-events: none;
+}
+
+.overlay--error {
+  background: css.cssVar(overlay__error--background);
+  pointer-events: auto;
+}
+
+.ring {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke-width: 2.5;
+  transform: rotate(-90deg);
+}
+
+.ring-track {
+  stroke: currentColor;
+  opacity: 0.3;
+}
+
+.ring-value {
+  stroke: currentColor;
+  stroke-linecap: round;
+  transition: animation.standard(stroke-dasharray);
+}
+
+.retry {
+  padding: 2px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(250, 250, 250, 0.16);
+  }
+}
+
+.action {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  min-width: css.cssVar(action--size);
+  height: css.cssVar(action--size);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: css.cssVar(action--background);
+  color: css.cssVar(action--color);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(action__hover--background);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+}
+
+.retry,
+.action,
+.add {
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+    @include focus.forced-colors-ring;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.remove {
+  inset-block-start: 6px;
+  inset-inline-end: 6px;
+}
+
+.replace {
+  inset-block-end: 8px;
+  inset-inline-start: 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.add-cell {
+  display: grid;
+}
+
+.add {
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  aspect-ratio: css.cssVar(tile--aspect-ratio);
+  padding: 8px;
+  border: css.cssVar(add--border);
+  border-radius: css.cssVar(tile--border-radius);
+  background: css.cssVar(add--background);
+  color: css.cssVar(add--color);
+  font: inherit;
+  font-size: css.cssVar(add--font-size);
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(border);
+
+  &:hover:not(:disabled) {
+    border: css.cssVar(add__hover--border);
+    background: css.cssVar(add__hover--background);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(disabled--opacity);
+  }
+}
+
+// An enclosing c2-form-field shows an error: the add tile keeps its border style in the error colour.
+:host(:state(error)) .add:not(.add--dragging) {
+  border-color: css.cssVar(add__error--border-color);
+}
+
+.add--dragging,
+.add--dragging:hover:not(:disabled) {
+  border: css.cssVar(add__drag--border);
+  background: css.cssVar(add__drag--background);
+}
+
+.add-icon,
+::slotted([slot='add-icon']) {
+  display: block;
+  width: css.cssVar(add-icon--size);
+  height: css.cssVar(add-icon--size);
+  color: css.cssVar(add-icon--color);
+}
+
+.add-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.add-label {
+  color: css.cssVar(add-label--color);
+  font-weight: css.cssVar(add-label--font-weight);
+}
+
+.keys {
+  visibility: hidden;
+  margin-top: 6px;
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+}
+
+.grid:has(.handle:focus-visible) ~ .keys,
+.keys--active {
+  visibility: visible;
+}
+
+.hint {
+  margin-top: 6px;
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-value,
+  .add {
+    transition: none;
+  }
+}

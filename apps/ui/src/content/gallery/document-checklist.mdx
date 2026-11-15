@@ -1,0 +1,154 @@
+---
+description: 'Document checklists for onboarding and applications: every status, uploads in progress, an action zone, row actions, a compact look, an empty state and French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { DocumentChecklist } from '@c2n/components/upload/document-checklist'
+
+<UploadExamplesRuntime />
+
+Each example has a simulated upload transport. Press a row's button, or drop a file on a row, to watch it upload.
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Default,description=Three documents a new vendor provides,useWhen=An application waits for a short list of documents
+<c2-document-checklist
+  client:only="lit"
+  data-upload-demo
+  today="2026-11-15"
+  aria-label="Vendor documents"
+  requirements='[{"id":"w9","label":"W-9 form","due":"2026-12-15"},{"id":"insurance","label":"Certificate of insurance"},{"id":"bank","label":"Bank letter","description":"On the bank letterhead, with the account number"}]'
+></c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Every status,description=Approved, in review, needed and overdue, rejected with a reason, expired and optional,useWhen=The back office reviews each document
+<c2-document-checklist
+  client:only="lit"
+  data-upload-demo
+  today="2026-11-15"
+  aria-label="KYC documents"
+  requirements='[{"id":"identity","label":"Proof of identity","status":"approved","expires":"2031-03-03"},{"id":"address","label":"Proof of address","status":"in-review"},{"id":"statements","label":"Bank statements","due":"2026-11-01"},{"id":"payslip","label":"Payslip","status":"rejected","reason":"the scan is blurry"},{"id":"permit","label":"Residence permit","status":"approved","expires":"2026-10-02"},{"id":"gift","label":"Gift letter","optional":true}]'
+></c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Uploads in progress,description=A row with several files and a file still uploading,useWhen=A document has several pages or parts
+<c2-document-checklist
+  client:only="lit"
+  data-upload-demo
+  data-seed="statements:august.pdf,statements:september.pdf,contract:contract-slow.pdf"
+  today="2026-11-15"
+  aria-label="Loan documents"
+  requirements='[{"id":"statements","label":"Bank statements","description":"One file per month","multiple":true,"accept":".pdf"},{"id":"contract","label":"Signed contract","due":"2026-11-20"}]'
+></c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Header and action zone,description=Your own heading in the header slot and a submit button in the actions slot,useWhen=The list ends a step of a flow
+<style>
+  .checklist-heading {
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .checklist-heading-note {
+    margin: 2px 0 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-document-checklist
+  client:only="lit"
+  data-upload-demo
+  today="2026-11-15"
+  aria-label="Onboarding documents"
+  requirements='[{"id":"contract","label":"Signed employment contract","status":"approved"},{"id":"tax","label":"Tax withholding form","due":"2026-11-28"},{"id":"rtw","label":"Right to work","description":"Passport, or a birth certificate and a national insurance number"}]'
+>
+  <div slot="header">
+    <p class="checklist-heading">Before your first day</p>
+    <p class="checklist-heading-note">HR reviews each document within two working days.</p>
+  </div>
+  <c2-button slot="actions">Submit for review</c2-button>
+</c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Row actions,description=A View button beside each reviewed document through renderActions,useWhen=People open or download what they sent
+<c2-document-checklist
+  client:only="lit"
+  data-upload-demo
+  data-checklist-example="actions"
+  today="2026-11-15"
+  aria-label="Visa application documents"
+  requirements='[{"id":"passport","label":"Passport","status":"approved","expires":"2033-05-09"},{"id":"photo","label":"Passport photo","status":"in-review"},{"id":"itinerary","label":"Travel itinerary","due":"2026-12-01"}]'
+></c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Compact,description=Smaller rows, square badges and a teal meter through the CSS variables,useWhen=The checklist sits in a side panel
+<style>
+  .compact-checklist {
+    --c2-document-checklist--border-radius: 8px;
+    --c2-document-checklist__header--padding: 10px 12px;
+    --c2-document-checklist__row--padding: 10px 12px;
+    --c2-document-checklist__row--gap: 10px;
+    --c2-document-checklist__label--font-size: 13px;
+    --c2-document-checklist__label--font-weight: 500;
+    --c2-document-checklist__icon--size: 16px;
+    --c2-document-checklist__status--border-radius: 4px;
+    --c2-document-checklist__meter--height: 4px;
+    --c2-document-checklist__meter--color: light-dark(#0f766e, #2dd4bf);
+    --c2-document-checklist__summary--font-size: 13px;
+  }
+</style>
+<c2-document-checklist
+  client:only="lit"
+  class="compact-checklist"
+  data-upload-demo
+  today="2026-11-15"
+  aria-label="Supplier documents"
+  requirements='[{"id":"iso","label":"ISO 9001 certificate","status":"approved","expires":"2027-06-30"},{"id":"nda","label":"Signed NDA","status":"in-review"},{"id":"bank","label":"Bank details","due":"2026-11-25"}]'
+></c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=Nothing requested,description=The empty slot while no document is expected,useWhen=Requirements load from the server or depend on earlier answers
+<style>
+  .checklist-empty {
+    display: block;
+    padding: 24px 16px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 14px;
+    text-align: center;
+  }
+</style>
+<c2-document-checklist client:only="lit" data-upload-demo aria-label="Documents" requirements="[]">
+  <span slot="empty" class="checklist-empty">No document is needed for this application yet.</span>
+</c2-document-checklist>
+```
+
+```html tag=MdxCodeBlock,label=French,description=The checklist's own text and dates in the page language,useWhen=The application is translated
+<div lang="fr">
+  <c2-document-checklist
+    client:only="lit"
+    data-upload-demo
+    today="2026-11-15"
+    aria-label="Pièces justificatives"
+    requirements='[{"id":"identite","label":"Pièce d’identité","status":"approved","expires":"2030-04-12"},{"id":"domicile","label":"Justificatif de domicile","due":"2026-11-10"},{"id":"rib","label":"RIB","status":"rejected","reason":"le nom ne correspond pas"}]'
+  ></c2-document-checklist>
+</div>
+```
+
+</GalleryGrid>
+
+`renderActions` is a property, so the row actions above are set from a script. It receives the requirement, its status
+and its files, and returns anything Lit renders:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+checklist.renderActions = ({ requirement, status }) =>
+  status === 'approved' || status === 'in-review'
+    ? html`<c2-button aria-label=${`View ${requirement.label}`} @click=${() => openDocument(requirement.id)}>View</c2-button>`
+    : undefined
+```
