@@ -2,6 +2,7 @@ import { addTranslations } from '@c2n/core/localize.js'
 import { choiceMatrixMessages } from '../src/messages.js'
 import type { inputMatrixMessages } from '../src/input-matrix-messages.js'
 import type { recordMergeMessages } from '../src/record-merge-messages.js'
+import type { scorecardMessages } from '../src/scorecard-messages.js'
 
 // The French an app would add: the library ships its text in English only.
 
@@ -32,4 +33,19 @@ const recordMerge: typeof recordMergeMessages.en = {
   label: 'Fusionner les fiches',
 }
 
-addTranslations({ fr: { 'choice-matrix': fr, 'input-matrix': inputMatrix, 'record-merge': recordMerge } })
+const scorecard: typeof scorecardMessages.en = {
+  label: "Grille d'évaluation",
+  score: 'Note',
+  total: 'Total',
+  points: (earned, possible) => `${earned} / ${possible}`,
+  notApplicable: 'S.O.',
+  critical: 'Critique',
+  weight: (weight) => `×${weight}`,
+  weightName: (weight) => `, coefficient ${weight}`,
+  separator: ', ',
+  noScore: '–',
+  answered: (answered, total) => `${answered} sur ${total} renseignés`,
+  failed: (criteria) => `Échec : ${criteria}`,
+}
+
+addTranslations({ fr: { 'choice-matrix': fr, 'input-matrix': inputMatrix, 'record-merge': recordMerge, scorecard } })

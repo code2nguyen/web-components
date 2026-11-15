@@ -12,6 +12,7 @@ import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { ChoiceMatrix } from '@c2n/choice-matrix'
 import type { InputMatrix } from '@c2n/choice-matrix/input-matrix.js'
 import type { RecordMerge } from '@c2n/choice-matrix/record-merge.js'
+import type { Scorecard } from '@c2n/choice-matrix/scorecard.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -42,6 +43,15 @@ declare module 'vue' {
         'row-header'?: unknown
         onInput?: (event: EventOf<RecordMerge, 'input'>) => void
         onChange?: (event: EventOf<RecordMerge, 'change'>) => void
+      }
+    >
+    'c2-scorecard': DefineComponent<
+      C2Props<Scorecard> & {
+        'use-all'?: unknown
+        'row-header'?: unknown
+        onScoreChange?: (event: EventOf<Scorecard, 'score-change'>) => void
+        onInput?: (event: EventOf<Scorecard, 'input'>) => void
+        onChange?: (event: EventOf<Scorecard, 'change'>) => void
       }
     >
   }

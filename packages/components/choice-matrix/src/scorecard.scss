@@ -1,0 +1,110 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-scorecard,
+  $theme: (
+    score--color: #18181b,
+    score--font-weight: 600,
+    score--background-color: #f4f4f5,
+    summary--padding: 12px,
+    summary--background-color: #f4f4f5,
+    summary--font-size: 14px,
+    total--font-size: 20px,
+    band--color: light-dark(#18181b, #e4e4e7),
+    band--background-color: light-dark(#e4e4e7, #3f3f46),
+    band__success--color: light-dark(#166534, #86efac),
+    band__success--background-color: light-dark(#dcfce7, #14361f),
+    band__warning--color: light-dark(#854d0e, #fde68a),
+    band__warning--background-color: light-dark(#fef9c3, #3d3210),
+    band__error--color: light-dark(#991b1b, #fecaca),
+    band__error--background-color: light-dark(#fee2e2, #451a1a),
+    critical--color: #dc2626,
+    weight--color: #71717a,
+  )
+);
+@use '@c2n/sass/visually-hidden';
+
+.score-header,
+.score {
+  background-color: css.cssVar(score--background-color);
+  color: css.cssVar(score--color);
+  font-weight: css.cssVar(score--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: normal;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.row-header .row-label {
+  display: inline;
+}
+
+.weight,
+.critical {
+  margin-inline-start: 6px;
+}
+
+.weight {
+  color: css.cssVar(weight--color);
+  font-size: 0.85em;
+}
+
+.critical {
+  color: css.cssVar(critical--color);
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hidden-text {
+  @include visually-hidden.visually-hidden;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: css.cssVar(summary--padding);
+  background-color: css.cssVar(summary--background-color);
+  font-size: css.cssVar(summary--font-size);
+}
+
+.summary-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.total {
+  font-size: css.cssVar(total--font-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.answered {
+  margin-inline-end: auto;
+  opacity: 0.75;
+}
+
+.verdict {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background-color: css.cssVar(band--background-color);
+  color: css.cssVar(band--color);
+  font-weight: 600;
+}
+
+.verdict--success {
+  background-color: css.cssVar(band__success--background-color);
+  color: css.cssVar(band__success--color);
+}
+
+.verdict--warning {
+  background-color: css.cssVar(band__warning--background-color);
+  color: css.cssVar(band__warning--color);
+}
+
+.verdict--error {
+  background-color: css.cssVar(band__error--background-color);
+  color: css.cssVar(band__error--color);
+}

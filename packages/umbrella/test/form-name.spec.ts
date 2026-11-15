@@ -83,6 +83,7 @@ const ownCase: Record<string, string> = {
   'c2-choice-matrix': 'submits one name[row] entry per choice',
   'c2-input-matrix': 'submits one name[row][column] entry per value',
   'c2-record-merge': 'submits one name[field] entry per field, the record chosen for it',
+  'c2-scorecard': 'submits one name[criterion] entry per answer, the point chosen',
   'c2-quantity-picker': "submits one entry per counter, under each c2-quantity's own name (covered in quantity-picker.spec.ts)",
 }
 
@@ -285,6 +286,29 @@ test('c2-record-merge reflects a name set as a property and submits the record c
       ['merge[phone]', 'b'],
     ],
   })
+})
+
+test('c2-scorecard reflects a name set as a property and submits one name[criterion] entry per answer', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-scorecard') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'sc',
+      rows: [
+        { value: 'design', label: 'Design' },
+        { value: 'code', label: 'Code' },
+      ],
+      columns: [
+        { value: '1', label: 'No' },
+        { value: '2', label: 'Yes' },
+      ],
+      value: { design: '2' },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({ attribute: 'sc', entries: [['sc[design]', '2']] })
 })
 
 test('c2-card-input reflects a name set as a property and submits name[number], name[expiry] and name[cvc]', async ({ page, renderScenario }) => {

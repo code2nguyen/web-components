@@ -1,8 +1,8 @@
 ---
 /**
- * Sets the property-only features of the choice-matrix galleries: `renderCell` on a `c2-choice-matrix` marked
- * `data-choice-matrix-example="render-cell"`, and `formatValue` on a `c2-record-merge` marked
- * `data-record-merge-example="format"`. Also adds the French for the cards under `lang="fr"`.
+ * Sets the property-only features of the choice-matrix galleries: `renderCell` and `renderRowDetail` on a
+ * `c2-choice-matrix` marked `data-choice-matrix-example="render-cell"` or `"row-detail"`, and `formatValue` on a
+ * `c2-record-merge` marked `data-record-merge-example="format"`. Also adds the French for the cards under `lang="fr"`.
  */
 ---
 
@@ -19,6 +19,16 @@
       'choice-matrix': { useAll: 'Tout prendre', useAllFrom: 'Tout prendre de {0}' },
       'input-matrix': { label: 'Valeurs', total: 'Total', duration: '{0} h {1}' },
       'record-merge': { result: 'Résultat', emptyValue: 'Vide', label: 'Fusionner les fiches' },
+      scorecard: {
+        label: "Grille d'évaluation",
+        score: 'Note',
+        total: 'Total',
+        notApplicable: 'S.O.',
+        critical: 'Critique',
+        weightName: ', coefficient {0}',
+        answered: '{0} sur {1} renseignés',
+        failed: 'Échec : {0}',
+      },
     },
   })
 
@@ -33,8 +43,12 @@
     document.querySelectorAll<ChoiceMatrix>('c2-choice-matrix[data-choice-matrix-example="render-cell"]').forEach((matrix) => {
       matrix.renderCell = ({ row, column, checked }) => {
         const price = PRICES[row.value]?.[column.value]
-        return price === undefined ? undefined : html`<strong>${money.format(price)}</strong>${checked ? html` <span class="plan-pick">· selected</span>` : ''}`
+        return price === undefined ? undefined : html`<strong>${money.format(price)}</strong>${checked ? html` <span part="plan-pick">· selected</span>` : ''}`
       }
+    })
+    document.querySelectorAll<ChoiceMatrix>('c2-choice-matrix[data-choice-matrix-example="row-detail"]').forEach((matrix) => {
+      matrix.renderRowDetail = ({ row, chosen }) =>
+        chosen.includes('blocked') ? html`<span part="blocked-note">${row.label} is blocking the launch: add an owner and a date.</span>` : undefined
     })
     document.querySelectorAll<RecordMerge>('c2-record-merge[data-record-merge-example="format"]').forEach((merge) => {
       merge.formatValue = ({ field, value }) => {

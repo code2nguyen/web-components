@@ -894,6 +894,13 @@
       "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-choice-matrix",
+      "slot": "detail-<row>",
+      "decision": "part",
+      "parts": ["row-detail"],
+      "reason": "The line under a row owns the detail slot's component-side presentation; the slotted comment or note keeps its own styles."
+    },
+    {
       "tag": "c2-chord-chart",
       "slot": "actions",
       "decision": "part",
@@ -2060,6 +2067,13 @@
       "reason": "The picker slot projects a consumer-owned c2-emoji-picker into the popup; style it through its own --c2-emoji-picker variables."
     },
     {
+      "tag": "c2-record-merge",
+      "slot": "detail-<row>",
+      "decision": "part",
+      "parts": ["row-detail"],
+      "reason": "The line under a row owns the detail slot's component-side presentation; the slotted comment or note keeps its own styles."
+    },
+    {
       "tag": "c2-recurrence-editor",
       "slot": "footer",
       "decision": "part",
@@ -2127,6 +2141,13 @@
       "decision": "variables",
       "variables": ["--c2-save-bar__message--font-size", "--c2-save-bar__message--font-weight", "--c2-save-bar__message--color"],
       "reason": "The message line sets the type the slotted message inherits."
+    },
+    {
+      "tag": "c2-scorecard",
+      "slot": "detail-<row>",
+      "decision": "part",
+      "parts": ["row-detail"],
+      "reason": "The line under a row owns the detail slot's component-side presentation; the slotted comment or note keeps its own styles."
     },
     {
       "tag": "c2-scroll-area",

@@ -31,6 +31,7 @@
     cell__selected--background-color: rgba(71, 110, 249, 0.08),
     column-action--color: #0265dc,
     column-action--font-size: 12px,
+    row-detail--padding: 0 12px 12px,
   )
 );
 @use '@c2n/sass/focus';
@@ -153,7 +154,7 @@
   min-width: 0;
   color: css.cssVar(cell-content--color);
   font-size: css.cssVar(cell-content--font-size);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .column-action {
@@ -184,4 +185,15 @@
     opacity: css.cssVar(control__disabled--opacity);
     cursor: not-allowed;
   }
+}
+
+/* The line under a row: it belongs to the row above, so that row loses its border. */
+.row:has(+ .row-detail-line) > * {
+  border-bottom: 0;
+}
+
+.row-detail {
+  padding: css.cssVar(row-detail--padding);
+  line-height: normal;
+  text-align: start;
 }

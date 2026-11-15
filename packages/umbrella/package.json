@@ -361,6 +361,10 @@
       "types": "./dist/choice-matrix/record-merge.d.ts",
       "default": "./dist/choice-matrix/record-merge.js"
     },
+    "./choice-matrix/scorecard": {
+      "types": "./dist/choice-matrix/scorecard.d.ts",
+      "default": "./dist/choice-matrix/scorecard.js"
+    },
     "./citation": {
       "types": "./dist/citation.d.ts",
       "default": "./dist/citation.js"

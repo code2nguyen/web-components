@@ -1,0 +1,72 @@
+---
+title: 'Scorecard'
+description: 'A rated form: criteria in categories, each answered on a scale, weighted and totalled as you go, with critical criteria and a verdict. Interview scorecards, QA reviews, rubrics, inspections.'
+category: 'Inputs'
+package: '@c2n/choice-matrix'
+tag: 'c2-scorecard'
+apiTags: ['c2-scorecard']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Scorecard } from '@c2n/components/choice-matrix/scorecard'
+
+`c2-scorecard` is a radio [`c2-choice-matrix`](/web-components/components/choice-matrix) that keeps score: each
+criterion is a row answered on the scale in the columns, weighted, and the card totals as you go, with a subtotal per
+category and a verdict at the bottom. A critical criterion answered with a failing point fails the whole card, whatever
+the total. Interview scorecards, support QA reviews, supplier evaluations, grading rubrics and inspections read this
+way.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/choice-matrix/scorecard'
+```
+
+The entry registers `c2-scorecard` and `c2-choice-matrix`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/choice-matrix
+<div data-label="Interview">
+  <c2-scorecard name="interview" label="Interview scorecard" row-header="Criterion"
+    columns='[{"value":"1","label":"Strong no","fail":true},{"value":"2","label":"No"},{"value":"3","label":"Yes"},{"value":"4","label":"Strong yes"}]'
+    rows='[{"value":"design","label":"System design","group":"Skills","weight":2},{"value":"code","label":"Coding","group":"Skills"},{"value":"comms","label":"Communication","group":"Skills"},{"value":"values","label":"Works with others","group":"Culture","critical":true}]'
+    bands='[{"min":75,"label":"Hire","tone":"success"},{"min":50,"label":"Lean hire","tone":"warning"},{"min":0,"label":"No hire","tone":"error"}]'
+    value='{"design":"4","code":"3","comms":"3"}'></c2-scorecard>
+</div>
+<div data-label="Call QA">
+  <c2-scorecard name="qa" label="Call review" row-header="Check"
+    columns='[{"value":"fail","label":"Fail","points":0,"fail":true},{"value":"pass","label":"Pass","points":1},{"value":"na","label":"N/A","na":true}]'
+    rows='[{"value":"greeting","label":"Greets and verifies the caller","critical":true},{"value":"empathy","label":"Acknowledges the problem"},{"value":"resolve","label":"Resolves or sets a next step"},{"value":"upsell","label":"Offers the annual plan"}]'
+    value='{"greeting":"pass","empathy":"pass","resolve":"fail","upsell":"na"}'></c2-scorecard>
+</div>
+```
+
+### The scale
+
+Columns are the points of the scale. A column earns its `points`, else its value read as a number, else its position
+(the first is 0). `na` marks a "not applicable" column: a row answered with it counts towards neither total. `fail`
+marks a failing answer: a `critical` criterion answered with it fails the card.
+
+### Weights, totals and the verdict
+
+A criterion's `weight` multiplies its points and its possible points, and shows beside its label. The score column
+gives each criterion's points out of its possible points, each category header its subtotal, and the summary under
+the card the total, the percentage, how many criteria are answered and the verdict: the highest of `bands` whose `min`
+(a percentage) the score reaches, or the failed critical criteria.
+
+```typescript tag=CodeBlock
+const card = document.querySelector('c2-scorecard')!
+card.addEventListener('score-change', (event) => {
+  const { points, possible, percent, failed, band } = event.detail
+  save({ answers: card.value, percent, verdict: failed.length ? 'fail' : band?.label })
+})
+```
+
+### Comments and rubrics
+
+A comment field goes under a criterion through its `detail-<row>` slot (`<c2-textarea slot="detail-code">`), or
+`renderRowDetail` for every row. `cells` writes what each level means in its cell, which is how a grading rubric
+reads: the descriptions are part of each answer's name.
