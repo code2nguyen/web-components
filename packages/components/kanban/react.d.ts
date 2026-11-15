@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Kanban } from '@c2n/kanban'
 import type { KanbanColumn } from '@c2n/kanban/kanban-column.js'
+import type { MatrixBoard } from '@c2n/kanban/matrix-board.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -33,6 +34,19 @@ declare module 'react' {
       }
       'c2-kanban-column': C2Props<KanbanColumn> & {
         'column-id'?: Attribute
+      }
+      'c2-matrix-board': Omit<C2Props<MatrixBoard>, 'rows' | 'columns' | 'cells' | 'items'> & {
+        'row-field'?: Attribute
+        'row-title'?: Attribute
+        'column-title'?: Attribute
+        'item-key'?: Attribute
+        'column-field'?: Attribute
+        'label-field'?: Attribute
+        'description-field'?: Attribute
+        rows?: MatrixBoard['rows'] | string
+        columns?: MatrixBoard['columns'] | string
+        cells?: MatrixBoard['cells'] | string
+        items?: MatrixBoard['items'] | string
       }
     }
   }

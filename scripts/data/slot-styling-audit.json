@@ -2646,6 +2646,13 @@
       "reason": "The default slot projects a bare Material Symbols ligature text node, which inherits the host's documented font-size, font-weight, and color custom properties because the text itself cannot receive a class."
     },
     {
+      "tag": "c2-matrix-board",
+      "slot": "",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the default slot's placement under the grid; the assigned legend or note stays consumer-owned."
+    },
+    {
       "tag": "c2-menu",
       "slot": "default",
       "decision": "assigned-content",

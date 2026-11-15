@@ -1,0 +1,113 @@
+---
+title: 'Matrix board'
+description: 'A grid of cells, rows by columns, whose cards people drag or move with the keyboard between cells: 9-box talent grids, risk matrices, Eisenhower matrices.'
+category: 'Planning'
+package: '@c2n/kanban'
+tag: 'c2-matrix-board'
+apiTags: ['c2-matrix-board']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KanbanExamplesRuntime from '../../components/KanbanExamplesRuntime.astro'
+
+import { MatrixBoard } from '@c2n/components/kanban/matrix-board'
+
+`c2-matrix-board` is a [`c2-kanban`](/web-components/components/kanban) laid out in two dimensions: an item sits in the
+cell its row and its column name, and people move it to any other cell with a pointer or the keyboard. Each cell shows
+its card count, can carry a name and a colour band, and the axes take a title. A 9-box talent grid (performance by
+potential), a 5 by 5 risk matrix (likelihood by impact) and an Eisenhower matrix (urgent by important) read this way.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/kanban/matrix-board'
+```
+
+The entry registers `c2-matrix-board` and `c2-kanban-column`, which draws each cell.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/kanban
+<div data-label="9-box talent grid">
+  <style>
+    .usage-matrix {
+      width: 100%;
+      --c2-matrix-board__cell--min-width: 130px;
+      --c2-matrix-board__cell--min-height: 84px;
+    }
+    .usage-matrix-status {
+      margin: 0;
+      color: var(--c2-theme--color-on-surface-variant, #71717a);
+      font-size: 12px;
+    }
+  </style>
+  <c2-matrix-board
+    client:only="lit"
+    class="usage-matrix"
+    data-matrix-example="people"
+    editable
+    aria-label="Talent review"
+    row-title="Potential"
+    column-title="Performance"
+    rows='[{"id":"high","label":"High"},{"id":"medium","label":"Medium"},{"id":"low","label":"Low"}]'
+    columns='[{"id":"low","label":"Low"},{"id":"medium","label":"Medium"},{"id":"high","label":"High"}]'
+    cells='[{"row":"high","column":"low","label":"Rough diamond","band":3},{"row":"high","column":"medium","label":"Future star","band":2},{"row":"high","column":"high","label":"Star","band":1},{"row":"medium","column":"low","label":"Inconsistent","band":4},{"row":"medium","column":"medium","label":"Core player","band":3},{"row":"medium","column":"high","label":"High performer","band":2},{"row":"low","column":"low","label":"Risk","band":5},{"row":"low","column":"medium","label":"Effective","band":4},{"row":"low","column":"high","label":"Trusted pro","band":3}]'
+    items='[{"id":"p1","row":"high","column":"high","name":"Ana Lima","role":"Staff engineer"},{"id":"p2","row":"medium","column":"high","name":"Mo Kader","role":"Designer"},{"id":"p3","row":"medium","column":"medium","name":"Vinh Nguyen","role":"Engineer"},{"id":"p4","row":"high","column":"low","name":"Sara Holm","role":"Analyst"},{"id":"p5","row":"low","column":"medium","name":"Tom Reyes","role":"Support lead"}]'
+  >
+    <p class="usage-matrix-status" data-matrix-status>Move a card to see card-move</p>
+  </c2-matrix-board>
+</div>
+<div data-label="Risk matrix, read-only">
+  <c2-matrix-board
+    client:only="lit"
+    class="usage-matrix"
+    aria-label="Risk register"
+    row-title="Likelihood"
+    column-title="Impact"
+    row-field="likelihood"
+    column-field="impact"
+    rows='[{"id":3,"label":"Likely"},{"id":2,"label":"Possible"},{"id":1,"label":"Rare"}]'
+    columns='[{"id":1,"label":"Minor"},{"id":2,"label":"Major"},{"id":3,"label":"Severe"}]'
+    cells='[{"row":3,"column":1,"band":3},{"row":3,"column":2,"band":4},{"row":3,"column":3,"band":5},{"row":2,"column":1,"band":2},{"row":2,"column":2,"band":3},{"row":2,"column":3,"band":4},{"row":1,"column":1,"band":1},{"row":1,"column":2,"band":2},{"row":1,"column":3,"band":3}]'
+    items='[{"id":"r1","likelihood":2,"impact":3,"title":"Payment provider outage"},{"id":"r2","likelihood":3,"impact":1,"title":"Slow search"},{"id":"r3","likelihood":1,"impact":3,"title":"Data center fire"}]'
+  ></c2-matrix-board>
+</div>
+```
+
+<KanbanExamplesRuntime />
+
+The axes come from `rows` (top to bottom) and `columns` (left to right): `{ "id", "label" }` objects, or plain values
+that are their own label (`rows='[5, 4, 3, 2, 1]'`). An item sits in the cell its `row` and `column` fields name
+(`row-field`, `column-field`); an item whose row or column matches none is not shown. Ids may be numbers: they are
+compared as text, and a move writes back the id as `rows` or `columns` gave it.
+
+`cells` names cells and colours them: `{ "row", "column", "label", "band" }`, where `band` is 1 to 5 and picks
+`--c2-matrix-board__band-<n>--background-color`. The default bands run from green (1) to red (5) as translucent washes,
+so they read in both themes; a 9-box usually runs the other way, which is a matter of which band a cell takes. A cell
+left out of `cells` has no name and the plain cell background. Every cell shows its count; an empty cell shows no hint.
+
+`row-title` and `column-title` label the axes: the row title reads bottom to top left of the row labels, the column
+title sits under the column labels. Both are read in each cell's accessible name ("Star (Potential: High, Performance:
+High)"), which is also what moves announce. Anything in the board's default slot shows under the grid, such as a
+legend of the bands.
+
+Everything else is the kanban's: `items`, `item-key`, `label-field`, `description-field`, `renderItem` and `editable`
+work the same, and a card's box takes the `--c2-kanban-column__card--*` variables, set on the board. With the keyboard
+the board is one tab stop; the arrow keys move focus within a cell and on to the nearest cell with cards. Space picks a
+card up, the arrow keys move it (Up from a cell's first card reaches the bottom of the cell above, Down from its last
+the top of the cell below, Left and Right the next column), Home and End move it within its cell, Space drops it and
+Escape returns it.
+
+A drop fires `card-move` with the kanban's detail plus the rows: `fromRow`/`toRow` and `fromColumn`/`toColumn` are
+the axis ids of the two cells, as strings.
+
+```js tag=CodeBlock
+board.addEventListener('card-move', (event) => {
+  const { key, toRow, toColumn } = event.detail
+  saveRating(key, { potential: toRow, performance: toColumn })
+})
+```
+
+The announcements and the screen-reader instructions are message tokens of the `matrix-board` catalog, translated with
+`addTranslations({ fr: { 'matrix-board': { … } } })`; the API tab lists them.

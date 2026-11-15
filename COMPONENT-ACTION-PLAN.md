@@ -92,7 +92,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **select-2** · `c2-select` · native select #443 (companion) · 3 kB new entry · risk low
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
 - **pivot-table-3** · `c2-pivot-table` · aging table #333 · +0.8 kB on 32.3 kB · risk low
-- **kanban-1** · `c2-kanban` · matrix board #257 · +1.5 kB on 9.4 kB · risk medium
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
 - **highlight-3** · `c2-highlight` · text annotator #279 · +0.3 kB on 2.9 kB · risk low
 - **key-value-editor-1** · `c2-key-value-editor` · tier editor #264 · +1.2 kB on 7.2 kB · risk low

@@ -1,9 +1,10 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { KanbanColumn, KANBAN_COLUMN_CHANGE_EVENT, type KanbanCardView } from './kanban-column'
+import { kanbanText, type KanbanTextArgs, type KanbanTextKey } from './kanban-text'
 import styles from './kanban.scss?inline'
 
 export { KanbanColumn } from './kanban-column'
@@ -12,6 +13,9 @@ export { KanbanColumn } from './kanban-column'
 export type KanbanItem = Record<string, unknown>
 
 export type KanbanInputMethod = 'mouse' | 'touch' | 'pen' | 'keyboard'
+
+/** A direction the arrow keys move in, as `neighbourColumn` receives it. */
+export type KanbanDirection = 'left' | 'right' | 'up' | 'down'
 
 /** What `renderItem` receives for each card. */
 export interface KanbanRenderContext<T extends KanbanItem = KanbanItem> {
@@ -111,7 +115,7 @@ const EDGE_SCROLL_STEP = 10
  */
 @customElement('c2-kanban')
 export class Kanban extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The cards' data, in display order within each column. An array in the property, JSON in the attribute. */
   @property({ converter: jsonPropertyConverter }) items: KanbanItem[] = []
@@ -136,7 +140,8 @@ export class Kanban extends LitElement {
 
   @query('.board') private boardElement?: HTMLElement
 
-  @state() private columns: readonly KanbanColumn[] = []
+  /** The columns the board lays cards out in, in display order. A variant that renders its own columns sets it in `update()`. */
+  protected columnElements: readonly KanbanColumn[] = []
   @state() private session: MoveSession | null = null
   @state() private announcement = ''
   @state() private focusedKey: string | null = null
@@ -159,8 +164,8 @@ export class Kanban extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('editable') && !this.editable && this.session) this.cancelSession('Moving canceled because the board is no longer editable.')
-    if (changed.has('items') && this.session && changed.get('items') !== undefined) this.cancelSession('Cards changed. Moving canceled.')
+    if (changed.has('editable') && !this.editable && this.session) this.cancelSession(this.text('readOnly'))
+    if (changed.has('items') && this.session && changed.get('items') !== undefined) this.cancelSession(this.text('itemsChanged'))
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -170,7 +175,7 @@ export class Kanban extends LitElement {
     if (this.pendingFocus) {
       const key = this.pendingFocus
       this.pendingFocus = null
-      void Promise.all(this.columns.map((column) => column.updateComplete)).then(() => this.wrapperFor(key)?.focus())
+      void Promise.all(this.columnElements.map((column) => column.updateComplete)).then(() => this.wrapperFor(key)?.focus())
     }
   }
 
@@ -189,10 +194,21 @@ export class Kanban extends LitElement {
         @keydown=${this.handleKeyDown}
         @focusin=${this.handleFocusIn}
       >
-        <slot @slotchange=${this.handleSlotChange}></slot>
+        ${this.renderColumns()}
       </div>
       <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement || nothing}</p>
     `
+  }
+
+  /** What goes inside the board's scrolling row: the slot of `c2-kanban-column` children. */
+  protected renderColumns(): unknown {
+    return html`<slot @slotchange=${this.handleSlotChange}></slot>`
+  }
+
+  /** An announcement in English; a variant overrides it to translate. */
+  protected text<K extends KanbanTextKey>(key: K, ...args: KanbanTextArgs<K>): string {
+    const value = kanbanText[key]
+    return typeof value === 'function' ? (value as (...values: unknown[]) => string)(...args) : value
   }
 
   // ---- data ----
@@ -208,7 +224,8 @@ export class Kanban extends LitElement {
     return key
   }
 
-  private columnOf(item: KanbanItem): string {
+  /** The id of the column an item belongs in. */
+  protected columnOf(item: KanbanItem): string {
     const value = item?.[this.columnField]
     return value === undefined || value === null ? '' : String(value)
   }
@@ -217,10 +234,15 @@ export class Kanban extends LitElement {
     return Array.isArray(this.items) ? this.items : []
   }
 
+  /** The items as the board shows them: with a card mid-move at its current destination. */
+  protected get shownItems(): KanbanItem[] {
+    return this.session?.candidate ?? this.sourceItems
+  }
+
   /** Items of every column, in display order, keyed by `column-id`. */
-  private layoutOf(items: readonly KanbanItem[]): Map<string, KanbanItem[]> {
+  protected layoutOf(items: readonly KanbanItem[]): Map<string, KanbanItem[]> {
     const layout = new Map<string, KanbanItem[]>()
-    for (const column of this.columns) if (!layout.has(column.columnId)) layout.set(column.columnId, [])
+    for (const column of this.columnElements) if (!layout.has(column.columnId)) layout.set(column.columnId, [])
     for (const item of items) layout.get(this.columnOf(item))?.push(item)
     return layout
   }
@@ -244,7 +266,7 @@ export class Kanban extends LitElement {
     const rest = items.filter((candidate) => candidate !== item)
     let moved = item
     if (this.columnOf(item) !== column) {
-      moved = { ...item, [this.columnField]: column }
+      moved = this.withColumn(item, column)
       const generated = this.generatedKeys.get(item)
       if (generated) this.generatedKeys.set(moved, generated)
     }
@@ -258,11 +280,40 @@ export class Kanban extends LitElement {
     return rest
   }
 
+  /** A copy of the item placed in another column. */
+  protected withColumn(item: KanbanItem, column: string): KanbanItem {
+    return { ...item, [this.columnField]: column }
+  }
+
+  /** The column next to another one in a direction, or `undefined` at the edge: a board's columns sit side by side. */
+  protected neighbourColumn(column: string, direction: KanbanDirection): string | undefined {
+    if (direction === 'up' || direction === 'down') return undefined
+    const ids = this.columnElements.map((element) => element.columnId)
+    return ids[ids.indexOf(column) + (direction === 'left' ? -1 : 1)]
+  }
+
+  /** The column a dragged card is over: the nearest one horizontally. */
+  protected columnAt(point: { x: number; y: number }): KanbanColumn | null {
+    let best: { column: KanbanColumn; distance: number } | null = null
+    for (const column of this.columnElements) {
+      const rect = column.getBoundingClientRect()
+      const distance = point.x < rect.left ? rect.left - point.x : point.x > rect.right ? point.x - rect.right : 0
+      if (!best || distance < best.distance) best = { column, distance }
+    }
+    return best?.column ?? null
+  }
+
+  /** The `card-move` detail as the board reports it; a variant adds its own fields. */
+  protected moveDetail(detail: KanbanCardMoveDetail): KanbanCardMoveDetail {
+    return detail
+  }
+
   // ---- columns ----
 
   private handleSlotChange(event: Event): void {
     const slot = event.target as HTMLSlotElement
-    this.columns = slot.assignedElements().filter((element): element is KanbanColumn => element instanceof KanbanColumn)
+    this.columnElements = slot.assignedElements().filter((element): element is KanbanColumn => element instanceof KanbanColumn)
+    this.requestUpdate()
   }
 
   private readonly handleColumnChange = (event: Event): void => {
@@ -276,7 +327,7 @@ export class Kanban extends LitElement {
     const layout = this.layoutOf(items)
     const dragging = session?.phase === 'dragging' ? session : null
     const tabbable = this.tabbableKey(layout)
-    for (const column of this.columns) {
+    for (const column of this.columnElements) {
       const list = layout.get(column.columnId) ?? []
       column.editable = this.editable
       column.target = !!dragging && this.positionOf(items, dragging.key)?.column === column.columnId
@@ -307,7 +358,7 @@ export class Kanban extends LitElement {
   private tabbableKey(layout: Map<string, KanbanItem[]>): string | null {
     const keys = [...layout.values()].flat().map((item) => this.keyOf(item))
     if (this.focusedKey && keys.includes(this.focusedKey)) return this.focusedKey
-    for (const column of this.columns) {
+    for (const column of this.columnElements) {
       const first = layout.get(column.columnId)?.[0]
       if (first) return this.keyOf(first)
     }
@@ -336,7 +387,7 @@ export class Kanban extends LitElement {
       if (!from) return
       this.session = { phase: 'keyboard', inputMethod: 'keyboard', key, from, candidate: [...this.sourceItems] }
       const count = this.layoutOf(this.sourceItems).get(from.column)?.length ?? 0
-      this.announcement = `${this.labelFor(key)} picked up in ${this.columnLabel(from.column)}, position ${from.index + 1} of ${count}. Use the arrow keys to move it, Space to drop it, Escape to cancel.`
+      this.announcement = this.text('pickedUp', this.labelFor(key), this.columnLabel(from.column), from.index + 1, count)
       return
     }
     const target = this.navigationTarget(event.key, key)
@@ -352,18 +403,21 @@ export class Kanban extends LitElement {
     if (!position) return undefined
     const cards = layout.get(position.column) ?? []
     const pick = (item: KanbanItem | undefined) => (item ? this.keyOf(item) : null)
-    if (keyName === 'ArrowUp') return pick(cards[position.index - 1])
-    if (keyName === 'ArrowDown') return pick(cards[position.index + 1])
+    /** Cards of the nearest column that has any, going one way from the card's column. */
+    const along = (direction: KanbanDirection): KanbanItem[] | undefined => {
+      for (let id = this.neighbourColumn(position.column, direction); id !== undefined; id = this.neighbourColumn(id, direction)) {
+        const next = layout.get(id) ?? []
+        if (next.length) return next
+      }
+      return undefined
+    }
+    if (keyName === 'ArrowUp') return position.index > 0 ? pick(cards[position.index - 1]) : pick(along('up')?.slice(-1)[0])
+    if (keyName === 'ArrowDown') return position.index < cards.length - 1 ? pick(cards[position.index + 1]) : pick(along('down')?.[0])
     if (keyName === 'Home') return pick(cards[0])
     if (keyName === 'End') return pick(cards[cards.length - 1])
     if (keyName !== 'ArrowLeft' && keyName !== 'ArrowRight') return undefined
-    const step = keyName === 'ArrowLeft' ? -1 : 1
-    const ids = this.columns.map((column) => column.columnId)
-    for (let index = ids.indexOf(position.column) + step; index >= 0 && index < ids.length; index += step) {
-      const next = layout.get(ids[index]) ?? []
-      if (next.length) return pick(next[Math.min(position.index, next.length - 1)])
-    }
-    return null
+    const next = along(keyName === 'ArrowLeft' ? 'left' : 'right')
+    return next ? pick(next[Math.min(position.index, next.length - 1)]) : null
   }
 
   private handleKeyboardMove(event: KeyboardEvent, session: MoveSession): void {
@@ -376,28 +430,37 @@ export class Kanban extends LitElement {
     if (event.key === 'Escape') {
       event.preventDefault()
       this.pendingFocus = key
-      this.cancelSession(`${this.labelFor(key)} returned to ${this.columnLabel(session.from.column)}, position ${session.from.index + 1}.`)
+      this.cancelSession(this.text('returned', this.labelFor(key), this.columnLabel(session.from.column), session.from.index + 1))
       return
     }
     const position = this.positionOf(session.candidate, key)
     if (!position) return
     const layout = this.layoutOf(session.candidate)
-    const ids = this.columns.map((column) => column.columnId)
     const count = layout.get(position.column)?.length ?? 0
     let column = position.column
     let index = position.index
-    let edge = ''
+    let edge: 'atTop' | 'atBottom' | 'atStart' | 'atEnd' | '' = ''
     if (event.key === 'ArrowUp') {
+      const above = index > 0 ? undefined : this.neighbourColumn(column, 'up')
       if (index > 0) index--
-      else edge = 'at the top of its column'
+      else if (above === undefined) edge = 'atTop'
+      else {
+        column = above
+        index = layout.get(above)?.length ?? 0
+      }
     } else if (event.key === 'ArrowDown') {
+      const below = index < count - 1 ? undefined : this.neighbourColumn(column, 'down')
       if (index < count - 1) index++
-      else edge = 'at the bottom of its column'
+      else if (below === undefined) edge = 'atBottom'
+      else {
+        column = below
+        index = 0
+      }
     } else if (event.key === 'Home') index = 0
     else if (event.key === 'End') index = count - 1
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      const next = ids[ids.indexOf(position.column) + (event.key === 'ArrowLeft' ? -1 : 1)]
-      if (next === undefined) edge = `in the ${event.key === 'ArrowLeft' ? 'first' : 'last'} column`
+      const next = this.neighbourColumn(position.column, event.key === 'ArrowLeft' ? 'left' : 'right')
+      if (next === undefined) edge = event.key === 'ArrowLeft' ? 'atStart' : 'atEnd'
       else {
         column = next
         index = Math.min(position.index, (layout.get(next) ?? []).length)
@@ -405,13 +468,13 @@ export class Kanban extends LitElement {
     } else return
     event.preventDefault()
     if (edge) {
-      this.announcement = `${this.labelFor(key)} is already ${edge}.`
+      this.announcement = this.text(edge, this.labelFor(key))
       return
     }
     if (column === position.column && index === position.index) return
     session.candidate = this.placeItem(session.candidate, key, column, index)
     this.pendingFocus = key
-    this.announcement = `${this.labelFor(key)} moved to ${this.columnLabel(column)}, position ${index + 1} of ${this.layoutOf(session.candidate).get(column)?.length}.`
+    this.announcement = this.text('moved', this.labelFor(key), this.columnLabel(column), index + 1, this.layoutOf(session.candidate).get(column)?.length ?? 0)
     this.requestUpdate()
   }
 
@@ -461,7 +524,7 @@ export class Kanban extends LitElement {
       session.size = { width: rect.width, height: rect.height }
       this.releasingCapture = false
       this.boardElement?.setPointerCapture(event.pointerId)
-      this.announcement = `${this.labelFor(session.key)} picked up.`
+      this.announcement = this.text('dragStarted', this.labelFor(session.key))
       this.requestUpdate()
     }
     if (session.phase !== 'dragging') return
@@ -488,16 +551,16 @@ export class Kanban extends LitElement {
       event.clientY >= rect.top - margin &&
       event.clientY <= rect.bottom + margin
     if (inside) this.commitSession()
-    else this.cancelSession(`${this.labelFor(session.key)} returned to where it was.`)
+    else this.cancelSession(this.text('returnedInPlace', this.labelFor(session.key)))
   }
 
   private handlePointerCancel(event: PointerEvent): void {
-    if (this.session?.pointerId === event.pointerId) this.cancelSession(`${this.labelFor(this.session.key)} returned to where it was.`)
+    if (this.session?.pointerId === event.pointerId) this.cancelSession(this.text('returnedInPlace', this.labelFor(this.session.key)))
   }
 
   private handleLostPointerCapture(event: PointerEvent): void {
     if (!this.releasingCapture && this.session?.phase === 'dragging' && this.session.pointerId === event.pointerId) {
-      this.cancelSession(`${this.labelFor(this.session.key)} returned to where it was.`)
+      this.cancelSession(this.text('returnedInPlace', this.labelFor(this.session.key)))
     }
   }
 
@@ -505,7 +568,7 @@ export class Kanban extends LitElement {
     const session = this.session
     if (event.key !== 'Escape' || !session || session.phase === 'keyboard') return
     event.preventDefault()
-    this.cancelSession(`${this.labelFor(session.key)} returned to where it was.`)
+    this.cancelSession(this.text('returnedInPlace', this.labelFor(session.key)))
   }
 
   /** Column under the pointer (the nearest one horizontally), then the slot among its other cards by vertical midpoint. */
@@ -513,14 +576,9 @@ export class Kanban extends LitElement {
     const session = this.session
     const point = session?.latest
     if (!session || session.phase !== 'dragging' || !point) return
-    let best: { column: KanbanColumn; distance: number } | null = null
-    for (const column of this.columns) {
-      const rect = column.getBoundingClientRect()
-      const distance = point.x < rect.left ? rect.left - point.x : point.x > rect.right ? point.x - rect.right : 0
-      if (!best || distance < best.distance) best = { column, distance }
-    }
-    if (!best) return
-    const wrappers = [...(best.column.cardsElement?.querySelectorAll<HTMLElement>(':scope > .card[data-key]') ?? [])]
+    const target = this.columnAt(point)
+    if (!target) return
+    const wrappers = [...(target.cardsElement?.querySelectorAll<HTMLElement>(':scope > .card[data-key]') ?? [])]
     let index = wrappers.length
     for (let position = 0; position < wrappers.length; position++) {
       const rect = wrappers[position].getBoundingClientRect()
@@ -529,7 +587,7 @@ export class Kanban extends LitElement {
         break
       }
     }
-    const column = best.column.columnId
+    const column = target.columnId
     const current = this.positionOf(session.candidate, session.key)
     if (current?.column === column && current.index === index) return
     session.candidate = this.placeItem(session.candidate, session.key, column, index)
@@ -538,7 +596,7 @@ export class Kanban extends LitElement {
 
   private positionDraggedCard(): void {
     const session = this.session
-    const element = this.columns.find((column) => column.columnId === session?.from.column)?.draggedElement
+    const element = this.columnElements.find((column) => column.columnId === session?.from.column)?.draggedElement
     if (!session?.latest || !session.offset || !session.size || !element) return
     if (!session.fixedOrigin) {
       // `position: fixed` is relative to the viewport only while no ancestor creates a containing block.
@@ -572,7 +630,7 @@ export class Kanban extends LitElement {
         moved ||= board.scrollLeft !== before
       }
       const target = this.positionOf(session.candidate, session.key)?.column
-      const list = this.columns.find((column) => column.columnId === target)?.cardsElement
+      const list = this.columnElements.find((column) => column.columnId === target)?.cardsElement
       if (list && list.scrollHeight > list.clientHeight) {
         const listRect = list.getBoundingClientRect()
         const dy = point.y < listRect.top + EDGE_SCROLL_ZONE ? -1 : point.y > listRect.bottom - EDGE_SCROLL_ZONE ? 1 : 0
@@ -601,12 +659,12 @@ export class Kanban extends LitElement {
     this.focusedKey = session.key
     if (keyboard) this.pendingFocus = session.key
     if (!to || (to.column === session.from.column && to.index === session.from.index)) {
-      if (keyboard) this.announcement = `${label} dropped where it was.`
+      if (keyboard) this.announcement = this.text('droppedInPlace', label)
       return
     }
     const item = this.itemByKey(this.sourceItems, session.key)
     if (!item) return
-    const detail: KanbanCardMoveDetail = {
+    const detail = this.moveDetail({
       item,
       key: session.key,
       fromColumn: session.from.column,
@@ -615,14 +673,14 @@ export class Kanban extends LitElement {
       toIndex: to.index,
       inputMethod: session.inputMethod,
       items: session.candidate,
-    }
+    })
     const accepted = this.dispatchEvent(new CustomEvent<KanbanCardMoveDetail>('card-move', { bubbles: true, composed: true, cancelable: true, detail }))
     if (!accepted) {
-      this.announcement = `${label} could not move to ${this.columnLabel(to.column)} and returned to where it was.`
+      this.announcement = this.text('refused', label, this.columnLabel(to.column))
       return
     }
     this.items = session.candidate
-    this.announcement = `${label} dropped in ${this.columnLabel(to.column)}, position ${to.index + 1} of ${this.layoutOf(session.candidate).get(to.column)?.length}.`
+    this.announcement = this.text('dropped', label, this.columnLabel(to.column), to.index + 1, this.layoutOf(session.candidate).get(to.column)?.length ?? 0)
   }
 
   private cancelSession(message: string): void {
@@ -650,7 +708,7 @@ export class Kanban extends LitElement {
   }
 
   private wrapperFor(key: string): HTMLElement | null {
-    for (const column of this.columns) {
+    for (const column of this.columnElements) {
       const wrapper = [...(column.cardsElement?.querySelectorAll<HTMLElement>(':scope > .card[data-key]') ?? [])].find((element) => element.dataset.key === key)
       if (wrapper) return wrapper
     }
@@ -671,11 +729,11 @@ export class Kanban extends LitElement {
   }
 
   private labelFor(key: string): string {
-    return this.itemLabel(this.itemByKey(this.session?.candidate ?? this.sourceItems, key)) || 'Card'
+    return this.itemLabel(this.itemByKey(this.shownItems, key)) || this.text('card')
   }
 
   private columnLabel(id: string): string {
-    const column = this.columns.find((candidate) => candidate.columnId === id)
+    const column = this.columnElements.find((candidate) => candidate.columnId === id)
     return column?.label || id
   }
 

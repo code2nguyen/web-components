@@ -645,6 +645,10 @@
       "types": "./dist/kanban/kanban-column.d.ts",
       "default": "./dist/kanban/kanban-column.js"
     },
+    "./kanban/matrix-board": {
+      "types": "./dist/kanban/matrix-board.d.ts",
+      "default": "./dist/kanban/matrix-board.js"
+    },
     "./kbd": {
       "types": "./dist/kbd.d.ts",
       "default": "./dist/kbd.js"
