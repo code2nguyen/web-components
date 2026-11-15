@@ -26,6 +26,8 @@ declare module 'react' {
       'c2-confirm-dialog': C2Props<ConfirmDialog> & {
         'confirm-label'?: Attribute
         'cancel-label'?: Attribute
+        'confirm-text'?: Attribute
+        'input-label'?: Attribute
       }
     }
   }
