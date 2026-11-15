@@ -66,6 +66,10 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
     markup: `<c2-input-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-input-matrix>`,
   },
   {
+    tag: 'c2-scorecard',
+    markup: `<c2-scorecard rows='[{"value":"a","label":"A"}]' columns='[{"value":"1","label":"1"}]'></c2-scorecard>`,
+  },
+  {
     tag: 'c2-record-merge',
     markup: `<c2-record-merge records='[{"id":"a","label":"A","values":{"name":"Ada"}}]'></c2-record-merge>`,
   },

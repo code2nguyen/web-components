@@ -16,6 +16,7 @@ import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { ChoiceMatrix } from '@c2n/choice-matrix'
 import type { InputMatrix } from '@c2n/choice-matrix/input-matrix.js'
 import type { RecordMerge } from '@c2n/choice-matrix/record-merge.js'
+import type { Scorecard } from '@c2n/choice-matrix/scorecard.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -44,6 +45,13 @@ declare module 'react' {
         fields?: RecordMerge['fields'] | string
         rows?: RecordMerge['rows'] | string
         columns?: RecordMerge['columns'] | string
+      }
+      'c2-scorecard': Omit<C2Props<Scorecard>, 'rows' | 'columns' | 'bands'> & {
+        'use-all'?: Attribute
+        'row-header'?: Attribute
+        rows?: Scorecard['rows'] | string
+        columns?: Scorecard['columns'] | string
+        bands?: Scorecard['bands'] | string
       }
     }
   }

@@ -207,6 +207,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Record Merge** — `c2-record-merge` · `@c2n/components/choice-matrix/record-merge` — Duplicate records side by side, one row per field, to pick the value each field keeps: the duplicate merge of a CRM, with a preview of the result.
 - **Recurrence Editor** — `c2-recurrence-editor` · `@c2n/components/recurrence-editor` — Edits how something repeats: every N days, weeks, months or years, weekdays, the third Tuesday, an end; reads and writes RRULE or cron.
 - **Rich Text Editor** — `c2-rich-text-editor` · `@c2n/components/rich-text-editor` — A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.
+- **Scorecard** — `c2-scorecard` · `@c2n/components/choice-matrix/scorecard` — A rated form: criteria in categories, each answered on a scale, weighted and totalled as you go, with critical criteria and a verdict. Interview scorecards, QA reviews, rubrics, inspections.
 - **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.
 - **Secret Field** — `c2-secret-field` · `@c2n/components/secret-field` — Shows an API key or other secret masked, with buttons to reveal it, copy it and ask for a new one.
 - **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.

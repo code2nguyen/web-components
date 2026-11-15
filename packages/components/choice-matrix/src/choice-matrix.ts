@@ -23,6 +23,16 @@ export interface ChoiceMatrixCellContext {
 /** Draws the content of a cell beside its control: anything Lit can render. */
 export type ChoiceMatrixCellRenderer = (context: ChoiceMatrixCellContext) => unknown
 
+/** What `renderRowDetail` is handed for each row. */
+export interface ChoiceMatrixRowDetailContext {
+  row: ChoiceMatrixRow
+  /** The columns chosen in the row. */
+  chosen: string[]
+}
+
+/** Draws what goes under a row, across the whole matrix: a comment field, a note, a photo. Return nothing to leave the row without. */
+export type ChoiceMatrixRowDetailRenderer = (context: ChoiceMatrixRowDetailContext) => unknown
+
 /** Text shown in each cell beside its control, by row value then column value. */
 export type ChoiceMatrixCells = Record<string, Record<string, string>>
 
@@ -56,6 +66,9 @@ type Mixed = 'all' | 'some' | 'none'
  * (`{"email":{"a":"ada@example.com"}}`) or anything `renderCell` draws. That is how a cell shows the value it stands
  * for, as a merge of duplicate records does (`c2-record-merge`).
  *
+ * Under a row, a line across the matrix can hold a comment field, a note or a photo: put an element in the row's slot,
+ * `detail-<row value>` (`<c2-textarea slot="detail-q1">`), or set `renderRowDetail`. A row with neither has no line.
+ *
  * `value` maps each row's `value` to the checked columns' values (a string for radio rows). Under a `name`, a form
  * receives one `name[row]=column` entry per choice. `required` asks for at least one choice, or for every row to be
  * answered with `type="radio"`. The control takes part in `c2-form-field`, which names and describes it.
@@ -64,6 +77,8 @@ type Mixed = 'all' | 'some' | 'none'
  * moves along a row. On a narrow screen the table scrolls sideways with its first column held in place.
  *
  * @tag c2-choice-matrix
+ *
+ * @slot detail-<row> - Content under the row whose value follows `detail-`, across the matrix: a comment, a note, a photo. Wins over `renderRowDetail`.
  *
  * @event {Event} input - Fired when the user changes a choice, before `change`. Read `value`.
  * @event {CustomEvent<{ value: ChoiceMatrixValue }>} change - Fired after the user changes a choice. `detail.value` is the new `value`. Not fired for programmatic changes.
@@ -77,6 +92,7 @@ type Mixed = 'all' | 'some' | 'none'
  * @csspart control - A checkbox or radio button, the toggles included.
  * @csspart cell-content - The content of a cell beside its control (`cells`, `renderCell`); the control and it form one label.
  * @csspart column-action - The "Use all" button under a column title of a radio matrix (`use-all`).
+ * @csspart row-detail - Cell under a row, across the matrix, containing the row's `detail-<row>` slot (fallback: what `renderRowDetail` draws); a row with neither has no such cell.
  *
  * @cssproperty {padding} [--c2-choice-matrix__cell--padding=10px 12px]
  * @cssproperty {border} [--c2-choice-matrix__row--border-bottom=1px solid #e4e4e7]
@@ -110,6 +126,7 @@ type Mixed = 'all' | 'some' | 'none'
  * @cssproperty {color} [--c2-choice-matrix__cell__selected--background-color=rgba(71, 110, 249, 0.08)] - A cell with content whose control is chosen.
  * @cssproperty {color} [--c2-choice-matrix__column-action--color=#0265dc]
  * @cssproperty {font-size} [--c2-choice-matrix__column-action--font-size=12px]
+ * @cssproperty {padding} [--c2-choice-matrix__row-detail--padding=0 12px 12px] - The line under a row (`detail-<row>`, `renderRowDetail`).
  */
 @customElement('c2-choice-matrix')
 export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
@@ -136,6 +153,49 @@ export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
   /** Draws each cell's content beside its control; wins over `cells`. */
   @property({ attribute: false }) renderCell?: ChoiceMatrixCellRenderer
 
+  /** Draws a line under a row, across the matrix: a comment field or a note. A row's `detail-<row>` slot wins. */
+  @property({ attribute: false }) renderRowDetail?: ChoiceMatrixRowDetailRenderer
+
+  /** The rows with a `detail-<row>` child, kept in step with the children. */
+  #detailSlots = new Set<string>()
+  #children?: MutationObserver
+  /**
+   * Rendered on the server: the server saw no children, so its rows have no detail line, and the first client render
+   * must draw the same to hydrate. The children are read once it has.
+   */
+  #hydrating = this.shadowRoot !== null
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!this.#hydrating) this.#readDetailSlots()
+    this.#children ??= new MutationObserver(() => this.#readDetailSlots())
+    // `subtree` so a child's own `slot` changing is seen too; only the direct children are read.
+    this.#children.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
+  }
+
+  protected override firstUpdated(): void {
+    super.firstUpdated()
+    if (!this.#hydrating) return
+    this.#hydrating = false
+    this.#readDetailSlots()
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.#children?.disconnect()
+  }
+
+  #readDetailSlots() {
+    const next = new Set<string>()
+    for (const child of Array.from(this.children ?? [])) {
+      const slot = child.getAttribute('slot')
+      if (slot?.startsWith('detail-')) next.add(slot.slice('detail-'.length))
+    }
+    if (next.size === this.#detailSlots.size && [...next].every((key) => this.#detailSlots.has(key))) return
+    this.#detailSlots = next
+    this.requestUpdate()
+  }
+
   protected readonly msg = new LocalizeController(this, choiceMatrixMessages)
   protected readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
@@ -143,23 +203,23 @@ export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
     return Object.fromEntries(Object.entries(value ?? {}).map(([row, choice]) => [row, Array.isArray(choice) ? [...choice] : choice]))
   }
 
-  private get radio(): boolean {
+  protected get radio(): boolean {
     return this.type === 'radio'
   }
 
   /** The columns chosen for a row, always as a list. */
-  private chosen(row: string): string[] {
+  protected chosen(row: string): string[] {
     const choice = Object.prototype.hasOwnProperty.call(this.value, row) ? this.value[row] : undefined
     if (Array.isArray(choice)) return choice.filter((item) => typeof item === 'string')
     return typeof choice === 'string' && choice ? [choice] : []
   }
 
-  private isChecked(row: string, column: string): boolean {
+  protected isChecked(row: string, column: string): boolean {
     const chosen = this.chosen(row)
     return this.radio ? chosen[0] === column : chosen.includes(column)
   }
 
-  private cellDisabled(row: ChoiceMatrixRow, column: ChoiceMatrixColumn): boolean {
+  protected cellDisabled(row: ChoiceMatrixRow, column: ChoiceMatrixColumn): boolean {
     return this.effectiveDisabled || !!row.disabled || !!column.disabled
   }
 
@@ -285,16 +345,16 @@ export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
                               }
                             </td>`,
                         )}
-                        ${this.renderTrailing('group')}
+                        ${this.renderTrailing('group', groupRows[0])}
                       </tr>`
                     : nothing
                 }
-                ${groupRows.map((row) => this.renderRow(row, rowIndex++, columns, rowToggles))}
+                ${groupRows.map((row) => [this.renderRow(row, rowIndex++, columns, rowToggles), this.renderDetail(row, columns.length + 1 + (rowToggles ? 1 : 0))])}
               </tbody>`,
           )}
         </table>
       </div>
-      ${this.field.renderDescription()}`
+      ${this.renderSummary()} ${this.field.renderDescription()}`
   }
 
   private renderRow(row: ChoiceMatrixRow, index: number, columns: ChoiceMatrixColumn[], rowToggle: boolean) {
@@ -341,6 +401,26 @@ export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
     </tr>`
   }
 
+  /** The line under a row: its `detail-<row>` slot, else what `renderRowDetail` draws; nothing when it has neither. */
+  private renderDetail(row: ChoiceMatrixRow, span: number) {
+    const slotted = this.#detailSlots.has(row.value)
+    const drawn = slotted || !this.renderRowDetail ? undefined : this.renderRowDetail({ row, chosen: this.chosen(row.value) })
+    if (!slotted && (drawn === undefined || drawn === null || drawn === '' || drawn === nothing)) return nothing
+    return html`<tr class="row-detail-line">
+      <td class="row-detail" part="row-detail" colspan=${span + this.trailingColumns}><slot name="detail-${row.value}">${drawn}</slot></td>
+    </tr>`
+  }
+
+  /** How many cells `renderTrailing` adds to each row, which the line under a row spans too. */
+  protected get trailingColumns(): number {
+    return 0
+  }
+
+  /** Drawn after the matrix, outside its sideways scroll: a variant's totals or verdict. Nothing here. */
+  protected renderSummary(): unknown {
+    return nothing
+  }
+
   /** What a cell shows beside its control: `renderCell`'s content, else the text in `cells`. A variant draws its own. */
   protected cellContent(context: ChoiceMatrixCellContext): unknown {
     return this.renderCell ? this.renderCell(context) : this.cells?.[context.row.value]?.[context.column.value]
@@ -351,7 +431,7 @@ export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
     return this.msg.t('label')
   }
 
-  /** Cells after the last column, in each kind of row; none here. A variant adds a column of its own this way. */
+  /** Cells after the last column, in each kind of row (a group header is handed its first row); none here. A variant adds a column of its own this way. */
   protected renderTrailing(_kind: 'header' | 'toggle' | 'group' | 'row', _row?: ChoiceMatrixRow): unknown {
     return nothing
   }

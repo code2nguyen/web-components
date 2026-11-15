@@ -17,6 +17,10 @@
       "types": "./types/src/record-merge.d.ts",
       "default": "./dist/record-merge.js"
     },
+    "./scorecard.js": {
+      "types": "./types/src/scorecard.d.ts",
+      "default": "./dist/scorecard.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -78,7 +82,8 @@
   "c2n": {
     "separateEntries": [
       "./input-matrix.js",
-      "./record-merge.js"
+      "./record-merge.js",
+      "./scorecard.js"
     ]
   }
 }

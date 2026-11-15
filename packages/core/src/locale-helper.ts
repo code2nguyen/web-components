@@ -42,3 +42,15 @@ export function firstDayOfWeek(locale: string): Weekday {
   if (SATURDAY_REGIONS.has(region)) return 6
   return 1
 }
+
+// `Intl.ListFormat` is ES2021, above the library's ES2020 typings; every engine the components support has it.
+const ListFormat = (
+  Intl as unknown as {
+    ListFormat?: new (locale: string, options: { type: 'conjunction' | 'unit'; style: 'long' | 'short' }) => { format(items: string[]): string }
+  }
+).ListFormat
+
+/** Items as a list in `locale`'s words: `a, b and c` for `conjunction`, `a, b, c` for `unit`. */
+export function formatList(locale: string, items: string[], type: 'conjunction' | 'unit' = 'unit'): string {
+  return ListFormat ? new ListFormat(locale, { type, style: type === 'unit' ? 'short' : 'long' }).format(items) : items.join(', ')
+}

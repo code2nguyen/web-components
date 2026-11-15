@@ -47,6 +47,7 @@
         "c2-record-merge": true,
         "c2-recurrence-editor": true,
         "c2-rich-text-editor": true,
+        "c2-scorecard": true,
         "c2-search-field": true,
         "c2-select": true,
         "c2-slider": true,

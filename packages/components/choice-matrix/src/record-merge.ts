@@ -5,12 +5,9 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { ChoiceMatrix, type ChoiceMatrixCellContext, type ChoiceMatrixColumn, type ChoiceMatrixRow } from './choice-matrix'
 import styles from './record-merge.scss?inline'
 import { recordMergeMessages } from './record-merge-messages'
+import { formatList } from '@c2n/core/locale-helper.js'
 
 export { recordMergeMessages } from './record-merge-messages'
-
-// `Intl.ListFormat` is ES2021, above the library's ES2020 typings; every engine the components support has it.
-const ListFormat = (Intl as unknown as { ListFormat?: new (locale: string, options: { type: 'unit'; style: 'short' }) => { format(items: string[]): string } })
-  .ListFormat
 
 /** One of the records being merged: a column. */
 export interface RecordMergeRecord {
@@ -165,6 +162,10 @@ export class RecordMerge extends ChoiceMatrix {
     return this.mergeMsg.t('label')
   }
 
+  protected override get trailingColumns(): number {
+    return this.preview ? 1 : 0
+  }
+
   protected override renderTrailing(kind: 'header' | 'toggle' | 'group' | 'row', row?: ChoiceMatrixRow): unknown {
     if (!this.preview) return nothing
     if (kind === 'header') return html`<th class="result-header" part="result-header" scope="col">${this.mergeMsg.t('result')}</th>`
@@ -182,8 +183,7 @@ export class RecordMerge extends ChoiceMatrix {
       return html`<span class="empty" part="empty">${this.mergeMsg.t('emptyValue')}</span>`
     }
     // A list reads as one in the page's language.
-    if (Array.isArray(value))
-      return ListFormat ? new ListFormat(this.mergeMsg.locale, { type: 'unit', style: 'short' }).format(value.map(String)) : value.join(', ')
+    if (Array.isArray(value)) return formatList(this.mergeMsg.locale, value.map(String))
     return typeof value === 'object' ? JSON.stringify(value) : String(value)
   }
 
