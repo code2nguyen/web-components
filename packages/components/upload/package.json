@@ -9,6 +9,14 @@
       "types": "./types/src/upload.d.ts",
       "default": "./dist/upload.js"
     },
+    "./document-checklist.js": {
+      "types": "./types/src/document-checklist.d.ts",
+      "default": "./dist/document-checklist.js"
+    },
+    "./image-uploader.js": {
+      "types": "./types/src/image-uploader.d.ts",
+      "default": "./dist/image-uploader.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -30,6 +38,8 @@
   ],
   "keywords": [
     "upload",
+    "document checklist",
+    "image uploader",
     "web component",
     "lit"
   ],
@@ -70,5 +80,11 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./document-checklist.js",
+      "./image-uploader.js"
+    ]
+  }
 }

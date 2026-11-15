@@ -1,0 +1,62 @@
+---
+title: 'Image uploader'
+description: 'A grid of image thumbnails with an add tile: per-tile progress, retry and removal, a count, drag or keyboard reordering, a cover, and a single-image mode.'
+category: 'Inputs'
+package: '@c2n/upload'
+tag: 'c2-image-uploader'
+apiTags: ['c2-image-uploader']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { ImageUploader } from '@c2n/components/upload/image-uploader'
+
+`c2-image-uploader` is a [`c2-upload`](/web-components/components/upload) drawn as a grid of thumbnails that ends in
+an add tile, as listing photos, claim evidence or a profile picture are attached. Each tile shows its upload progress,
+a failure with a retry button, and a remove button; the add tile counts the images against `max-files` and takes files
+dropped on the grid.
+
+<UploadExamplesRuntime />
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/upload/image-uploader'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/upload
+<div data-label="Listing photos">
+  <c2-image-uploader
+    client:only="lit"
+    data-upload-demo
+    data-seed="living-room.svg,kitchen.svg,garden.svg"
+    multiple
+    reorderable
+    cover
+    max-files="8"
+    aria-label="Listing photos"
+  >
+    <span slot="hint">PNG, JPG or WebP · the first photo is the cover</span>
+  </c2-image-uploader>
+</div>
+<div data-label="Profile photo">
+  <c2-image-uploader client:only="lit" data-upload-demo capture="user" aria-label="Profile photo"></c2-image-uploader>
+</div>
+```
+
+`accept` defaults to `image/*`. With `multiple` the grid holds up to `max-files` images and the add tile disappears when
+it is full; without it the uploader holds one image in a larger tile, and a new image replaces it (a **Replace** button,
+or a file dropped on it). `capture` (`user` or `environment`) opens the front or back camera instead of the file browser
+on a phone that supports it.
+
+With `reorderable`, an image moves by dragging its tile, or from the keyboard: Tab to a tile, Space picks it up, the
+arrow keys, Home and End move it, Space drops it and Escape puts it back. Each move is announced, and fires `reorder`
+with the item and its old and new positions, then `input` and `change`; `value` keeps the new order. `moveItem(id, to)`
+moves an image from code. `cover` marks the first image with a badge, and `renderBadge` draws your own badge per tile.
+
+Uploads, validation, events and the form value are those of [`c2-upload`](/web-components/components/upload): set an
+`uploadHandler` and the tiles follow its progress.

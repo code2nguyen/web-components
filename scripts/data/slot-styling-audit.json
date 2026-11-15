@@ -1403,6 +1403,27 @@
       "reason": "The header-end slot projects consumer-owned light DOM, such as a total or a link; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-document-checklist",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions region places the application's commands beside the summary; each command keeps its own public contract."
+    },
+    {
+      "tag": "c2-document-checklist",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty part is the slot itself, shown in place of the rows; the assigned message stays consumer-owned."
+    },
+    {
+      "tag": "c2-document-checklist",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header region owns the padding and divider around the summary or the assigned heading."
+    },
+    {
       "tag": "c2-fieldset",
       "slot": "",
       "decision": "assigned-content",
@@ -1743,6 +1764,27 @@
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-image-uploader",
+      "slot": "add-icon",
+      "decision": "variables",
+      "variables": ["--c2-image-uploader__add-icon--size", "--c2-image-uploader__add-icon--color"],
+      "reason": "The add tile sizes and colours the slotted icon and its fallback through the add-icon variables."
+    },
+    {
+      "tag": "c2-image-uploader",
+      "slot": "add-label",
+      "decision": "part",
+      "parts": ["add-label"],
+      "reason": "The add-label region owns the label's colour and weight inside the add tile."
+    },
+    {
+      "tag": "c2-image-uploader",
+      "slot": "hint",
+      "decision": "part",
+      "parts": ["hint"],
+      "reason": "The hint region owns the spacing and supporting-text look under the grid."
     },
     {
       "tag": "c2-import-mapper",

@@ -175,6 +175,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range, one date or several dates.
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
 - **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
+- **Document checklist** — `c2-document-checklist` · `@c2n/components/upload/document-checklist` — A list of expected documents, each with a status, a due or expiry date and its own upload target: KYC, mortgage, vendor and HR onboarding portals.
 - **Duration Input** — `c2-duration-input` · `@c2n/components/duration-input` — A text field for an amount of time: reads 1h 30m, 90m, 1.5h or 1:30 and stores seconds.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
 - **Facet List** — `c2-facet-list` · `@c2n/components/facet-list` — One facet of a filter sidebar: an attribute’s values with counts, to include or exclude from a search.
@@ -183,6 +184,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Form** — `c2-form, c2-form-list` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
 - **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
+- **Image uploader** — `c2-image-uploader` · `@c2n/components/upload/image-uploader` — A grid of image thumbnails with an add tile: per-tile progress, retry and removal, a count, drag or keyboard reordering, a cover, and a single-image mode.
 - **Import Mapper** — `c2-import-mapper` · `@c2n/components/import-mapper` — The mapping step of a spreadsheet import: match each column of the file to a field, check the required ones, then preview the rows with their errors.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **Input Matrix** — `c2-input-matrix` · `@c2n/components/choice-matrix/input-matrix` — Rows × columns of typed inputs in one form control, with row, column and grand totals: quantities by size and colour, hours by person and day, SLA targets by priority.

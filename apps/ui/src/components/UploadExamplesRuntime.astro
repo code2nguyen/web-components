@@ -1,10 +1,60 @@
 ---
-/** Adds a local simulated transport to upload documentation examples. */
+/**
+ * Adds a local simulated transport to upload documentation examples (`c2-upload`, `c2-document-checklist`,
+ * `c2-image-uploader`), and the property-only parts of their examples: seeded images, row actions, French text.
+ */
 ---
 
 <script>
+  import { html } from 'lit'
   import type { Upload, UploadHandlerContext } from '@c2n/components/upload'
+  import type { DocumentChecklist } from '@c2n/components/upload/document-checklist'
+  import type { ImageUploader } from '@c2n/components/upload/image-uploader'
   import '@c2n/components/upload'
+  import '@c2n/components/upload/document-checklist'
+  import '@c2n/components/upload/image-uploader'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'document-checklist': {
+        summary: { one: '{0} document obligatoire fourni sur {1}', other: '{0} documents obligatoires fournis sur {1}' },
+        optional: '(facultatif)',
+        needed: 'À fournir',
+        uploaded: 'Envoyé',
+        'in-review': 'En vérification',
+        approved: 'Validé',
+        rejected: 'Refusé',
+        expired: 'Expiré',
+        due: 'À fournir avant le {0}',
+        overdue: 'En retard · attendu le {0}',
+        expires: 'Expire le {0}',
+        expiredOn: 'Expiré le {0}',
+        reason: 'Refusé : {0}',
+        upload: 'Envoyer',
+        replace: 'Remplacer',
+        addFile: 'Ajouter un fichier',
+        uploadLabel: '{0} : {1}',
+        files: 'Fichiers de {0}',
+      },
+      'image-uploader': {
+        add: 'Ajouter une photo',
+        addMany: 'Ajouter des photos',
+        cover: 'Couverture',
+        uploading: 'Envoi de {0}',
+        failed: 'Échec de l’envoi',
+        retry: 'Réessayer',
+        retryLabel: 'Réessayer {0}',
+        remove: 'Retirer {0}',
+        cancel: 'Annuler l’envoi de {0}',
+        replace: 'Remplacer',
+        replaceLabel: 'Remplacer {0}',
+        reorder: 'Déplacer {0}, position {1} sur {2}',
+        grabHint: 'Espace pour déplacer',
+        movingHint: 'Flèches pour déplacer · Espace pour poser · Échap pour annuler',
+      },
+    },
+  })
 
   const initialized = new WeakSet<Upload>()
 
@@ -22,18 +72,70 @@
     })
   }
 
+  // A file whose name contains "fail" fails once; one with "slow" takes a minute, so its progress stays on screen.
+  const failedOnce = new WeakSet<File>()
   async function simulatedUpload(file: File, { signal, onProgress }: UploadHandlerContext) {
-    for (const progress of [18, 42, 68, 86, 100]) {
-      await wait(360, signal)
+    const slow = file.name.includes('slow')
+    if (slow) onProgress(64)
+    for (const progress of slow ? [86, 100] : [18, 42, 68, 86, 100]) {
+      await wait(slow ? 30000 : 360, signal)
+      if (file.name.includes('fail') && progress > 40 && !failedOnce.has(file)) {
+        failedOnce.add(file)
+        throw new Error('Network unavailable')
+      }
       onProgress(progress)
     }
     return { name: file.name }
+  }
+
+  // Photos drawn as SVG, so the seeded examples need no image files and no network.
+  const palettes = [
+    ['#93c5fd', '#1e3a8a', '#fde68a'],
+    ['#fde68a', '#b45309', '#fff7ed'],
+    ['#a7f3d0', '#047857', '#ecfdf5'],
+    ['#fbcfe8', '#9d174d', '#fdf2f8'],
+    ['#c4b5fd', '#4c1d95', '#f5f3ff'],
+    ['#fed7aa', '#9a3412', '#fffbeb'],
+  ]
+  function photo(name: string, index: number): File {
+    const [sky, hill, sun] = palettes[index % palettes.length]
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky}"/><stop offset="1" stop-color="${hill}"/></linearGradient></defs><rect width="160" height="120" fill="url(#g)"/><circle cx="${40 + index * 17}" cy="38" r="14" fill="${sun}"/><path d="M0 92 L48 58 L82 84 L116 50 L160 88 V120 H0 Z" fill="${hill}" opacity="0.85"/></svg>`
+    return new File([svg], name, { type: 'image/svg+xml' })
+  }
+
+  function seedImages(uploader: ImageUploader) {
+    const names = (uploader.dataset.seed ?? '').split(',').filter(Boolean)
+    if (names.length) uploader.addFiles(names.map((name, index) => photo(name.trim(), index)))
+  }
+
+  function seedChecklist(checklist: DocumentChecklist) {
+    const seeds = (checklist.dataset.seed ?? '').split(',').filter(Boolean)
+    for (const seed of seeds) {
+      const [target, name] = seed.split(':')
+      checklist.addFiles([new File(['%PDF-1.4'], name, { type: 'application/pdf' })], target)
+    }
   }
 
   function setup(upload: Upload) {
     if (initialized.has(upload)) return
     initialized.add(upload)
     upload.uploadHandler = simulatedUpload
+    void customElements.whenDefined(upload.localName).then(async () => {
+      await upload.updateComplete
+      if (upload.localName === 'c2-image-uploader') {
+        const uploader = upload as ImageUploader
+        if (uploader.dataset.imageExample === 'numbered') uploader.renderBadge = ({ index }) => `${index + 1}`
+        seedImages(uploader)
+      }
+      if (upload.localName === 'c2-document-checklist') {
+        const checklist = upload as DocumentChecklist
+        if (checklist.dataset.checklistExample === 'actions') {
+          checklist.renderActions = ({ requirement, status }) =>
+            status === 'approved' || status === 'in-review' ? html`<c2-button aria-label=${`View ${requirement.label}`}>View</c2-button>` : undefined
+        }
+        seedChecklist(checklist)
+      }
+    })
   }
 
   function setupAll() {
