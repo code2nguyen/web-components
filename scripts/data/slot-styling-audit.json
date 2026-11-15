@@ -1119,6 +1119,13 @@
       "reason": "The icon is sized and coloured through its documented variables."
     },
     {
+      "tag": "c2-confirm-dialog",
+      "slot": "input",
+      "decision": "part",
+      "parts": ["input"],
+      "reason": "The input region wraps the slotted control with its label and error, and owns the slot's component-side presentation."
+    },
+    {
       "tag": "c2-context-menu",
       "slot": "default",
       "decision": "assigned-content",

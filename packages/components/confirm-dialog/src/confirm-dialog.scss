@@ -1,3 +1,4 @@
+@use '@c2n/sass/visually-hidden';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-confirm-dialog,
   $theme: (
@@ -7,6 +8,19 @@
     icon--color: rgb(2, 101, 220),
     icon__destructive--color: #dc2626,
     message--color: #71717a,
+
+    field--margin-top: 16px,
+    field--gap: 6px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    phrase--font-family: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    phrase--font-weight: 600,
+    phrase--color: #18181b,
+    phrase--background-color: #f4f4f5,
+    phrase--border-radius: 4px,
+    phrase--padding: 1px 4px,
+    error--color: #dc2626,
+    error--font-size: 12px,
 
     cancel-button--border: 1px solid #bcbcc6,
     cancel-button--background-color: #ffffff,
@@ -73,6 +87,53 @@
   ::slotted(p:not(:first-child)) {
     margin-top: 8px;
   }
+}
+
+.c2-confirm-dialog__field {
+  position: relative;
+  display: grid;
+  gap: css.cssVar(field--gap);
+  margin-top: css.cssVar(field--margin-top);
+
+  &[hidden] {
+    display: none;
+  }
+
+  // The field and a slotted control take the dialog's width.
+  c2-text-field,
+  ::slotted(*) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+// With no message, the first input sits right under the heading.
+.c2-confirm-dialog__field--flush {
+  margin-top: 0;
+}
+
+.c2-confirm-dialog__label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  overflow-wrap: anywhere;
+}
+
+.c2-confirm-dialog__phrase {
+  padding: css.cssVar(phrase--padding);
+  border-radius: css.cssVar(phrase--border-radius);
+  background-color: css.cssVar(phrase--background-color);
+  color: css.cssVar(phrase--color);
+  font-family: css.cssVar(phrase--font-family);
+  font-weight: css.cssVar(phrase--font-weight);
+}
+
+.c2-confirm-dialog__announce {
+  @include visually-hidden.visually-hidden;
+}
+
+.c2-confirm-dialog__error {
+  color: css.cssVar(error--color);
+  font-size: css.cssVar(error--font-size);
 }
 
 .c2-confirm-dialog__cancel {

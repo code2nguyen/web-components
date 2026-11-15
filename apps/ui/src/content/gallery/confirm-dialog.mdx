@@ -1,16 +1,20 @@
 ---
-description: 'Ready-made looks for c2-confirm-dialog: destructive, icon heading, centred alert, frosted and a soft warning. Open a card, then the dialog, to see it.'
+description: 'Ready-made looks for c2-confirm-dialog: destructive, icon heading, centred alert, frosted, a soft warning, typed confirmations and prompts. Open a card, then the dialog, to see it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ConfirmDialogExamplesRuntime from '../../components/ConfirmDialogExamplesRuntime.astro'
 
 import { ConfirmDialog } from '@c2n/components/confirm-dialog'
 import { Button } from '@c2n/components/button'
+import { Select } from '@c2n/components/select'
+import { ListItem } from '@c2n/components/list-item'
 
 ## Presets
 
-Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialog to see the look. The buttons are `__confirm-button` and `__cancel-button` (with `__destructive` states), the icon is `__icon` and the message `__message`; the frame is the inner modal's `--c2-modal--*` variables.
+Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialog to see the look. The buttons are `__confirm-button` and `__cancel-button` (with `__destructive` states), the icon is `__icon` and the message `__message`; the frame is the inner modal's `--c2-modal--*` variables. A typed confirmation (`confirm-text`) and a prompt add a field under the message, styled through `__field`, `__label`, `__phrase` and `__error`.
 
 <GalleryGrid>
 
@@ -96,4 +100,115 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
 </c2-confirm-dialog>
 ```
 
+```html tag=MdxCodeBlock,label=Typed confirmation
+<style>
+  .loss-list {
+    margin: 8px 0 0;
+    padding-left: 20px;
+  }
+</style>
+<c2-button onclick="document.getElementById('cdg-7').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-7" destructive heading="Delete repository?" confirm-label="Delete this repository" confirm-text="acme/web-components">
+  <p>This permanently deletes <strong>acme/web-components</strong>:</p>
+  <ul class="loss-list">
+    <li>243 pull requests and 1,208 issues</li>
+    <li>the wiki, releases and packages</li>
+  </ul>
+</c2-confirm-dialog>
+```
+
+```html tag=MdxCodeBlock,label=Phrase and field
+<style>
+  .typed-ink {
+    --c2-confirm-dialog__field--margin-top: 20px;
+    --c2-confirm-dialog__field--gap: 8px;
+    --c2-confirm-dialog__label--font-size: 13px;
+    --c2-confirm-dialog__label--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff));
+    --c2-confirm-dialog__phrase--font-family: inherit;
+    --c2-confirm-dialog__phrase--font-weight: 700;
+    --c2-confirm-dialog__phrase--color: light-dark(#b91c1c, #f07a7a);
+    --c2-confirm-dialog__phrase--background-color: light-dark(#fef2f2, #3b1414);
+    --c2-confirm-dialog__phrase--border-radius: 6px;
+  }
+</style>
+<c2-button onclick="document.getElementById('cdg-8').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-8" class="typed-ink" destructive heading="Remove production?" message="Traffic to this environment stops at once." confirm-label="Remove" confirm-text="production"></c2-confirm-dialog>
+```
+
+```html tag=MdxCodeBlock,label=Prompt
+<c2-button data-confirm-dialog-example="rename">Rename file</c2-button>
+<c2-confirm-dialog heading="Rename file" message="The link to this file keeps working." confirm-label="Rename"></c2-confirm-dialog>
+<p class="confirm-dialog-example-result" role="status" data-confirm-dialog-result></p>
+```
+
+```html tag=MdxCodeBlock,label=Async validation
+<style>
+  .prompt-error {
+    --c2-confirm-dialog__error--font-size: 13px;
+    --c2-confirm-dialog__error--color: light-dark(#b91c1c, #f07a7a);
+  }
+</style>
+<c2-button data-confirm-dialog-example="invite">Invite</c2-button>
+<c2-confirm-dialog class="prompt-error" heading="Invite by email" confirm-label="Send invite"></c2-confirm-dialog>
+<p class="confirm-dialog-example-result" role="status" data-confirm-dialog-result></p>
+```
+
+```html tag=MdxCodeBlock,label=Select in the input slot
+<c2-button data-confirm-dialog-example="move">Move 3 tasks</c2-button>
+<c2-confirm-dialog heading="Move 3 tasks" message="Choose the board they move to." input-label="Board" confirm-label="Move">
+  <c2-select slot="input" required placeholder="Choose a board">
+    <c2-list-item value="roadmap">Roadmap</c2-list-item>
+    <c2-list-item value="design">Design</c2-list-item>
+    <c2-list-item value="launch">Launch</c2-list-item>
+  </c2-select>
+</c2-confirm-dialog>
+<p class="confirm-dialog-example-result" role="status" data-confirm-dialog-result></p>
+```
+
+```html tag=MdxCodeBlock,label=No markup
+<c2-button data-confirm-dialog-example="helper">New folder</c2-button>
+<p class="confirm-dialog-example-result" role="status" data-confirm-dialog-result></p>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<div lang="fr">
+  <c2-button onclick="document.getElementById('cdg-9').show()">Ouvrir</c2-button>
+  <c2-confirm-dialog id="cdg-9" destructive heading="Supprimer l’espace ?" message="Ses 12 projets sont supprimés pour tous les membres." confirm-label="Supprimer" confirm-text="marketing"></c2-confirm-dialog>
+</div>
+```
+
 </GalleryGrid>
+
+<ConfirmDialogExamplesRuntime />
+
+"Prompt", "Async validation" and "Select in the input slot" open with `prompt()`, which resolves with the value the user confirmed, or `null` when they cancel. A `validate` function returns the message to show, and a promise keeps the confirm button spinning while it settles:
+
+```ts tag=CodeBlock
+const dialog = document.querySelector('c2-confirm-dialog')!
+const name = await dialog.prompt({
+  label: 'File name',
+  value: file.name,
+  required: true,
+  validate: (value) => (value.includes('/') ? 'A file name cannot contain a slash.' : null),
+})
+if (name !== null) rename(file, name)
+
+// A control in the input slot (here a c2-select) is read instead of the built-in field.
+const board = await moveDialog.prompt<string[]>()
+```
+
+"No markup" uses the `prompt()` helper, which mounts a temporary dialog:
+
+```ts tag=CodeBlock
+import { prompt } from '@c2n/components/confirm-dialog'
+
+const folder = await prompt({ heading: 'New folder', label: 'Folder name', confirmLabel: 'Create', required: true })
+```
+
+"En français" sits under `lang="fr"`: the Cancel label and the typed-confirmation instruction show the translation the page registered.
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'confirm-dialog': { cancel: 'Annuler', typeToConfirm: 'Saisissez {0} pour confirmer' } } })
+```
