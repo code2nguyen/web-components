@@ -52,7 +52,8 @@
       "dependencies": [
         "../../core:build",
         "../modal:build",
-        "../button:build"
+        "../button:build",
+        "../text-field:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -67,6 +68,7 @@
     "@c2n/button": "*",
     "@c2n/core": "*",
     "@c2n/modal": "*",
+    "@c2n/text-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-text-field', markup: '<c2-text-field></c2-text-field>' },
   { tag: 'c2-textarea', markup: '<c2-textarea></c2-textarea>' },
   { tag: 'c2-select', markup: '<c2-select><c2-list-item value="a">A</c2-list-item></c2-select>' },
+  { tag: 'c2-native-select', markup: '<c2-native-select><option value="a">A</option></c2-native-select>' },
   { tag: 'c2-checkbox', markup: '<c2-checkbox>Agree</c2-checkbox>', selfLabelled: true },
   { tag: 'c2-switch', markup: '<c2-switch>Digest</c2-switch>', selfLabelled: true },
   { tag: 'c2-mask-input', markup: '<c2-mask-input mask="99999"></c2-mask-input>' },

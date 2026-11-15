@@ -22,6 +22,8 @@ declare module 'vue' {
       C2Props<ConfirmDialog> & {
         'confirm-label'?: unknown
         'cancel-label'?: unknown
+        'confirm-text'?: unknown
+        'input-label'?: unknown
         onCancel?: (event: EventOf<ConfirmDialog, 'cancel'>) => void
         onClose?: (event: EventOf<ConfirmDialog, 'close'>) => void
         onConfirm?: (event: EventOf<ConfirmDialog, 'confirm'>) => void
