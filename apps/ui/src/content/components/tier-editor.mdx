@@ -1,0 +1,131 @@
+---
+title: 'Tier editor'
+description: 'Contiguous numeric tiers edited as rows (from, up to, rate) for tiered pricing, commission accelerators and grading schemes, with an open last tier, gap and order checks, and a live preview of what a quantity comes to.'
+category: 'Inputs'
+package: '@c2n/key-value-editor'
+tag: 'c2-tier-editor'
+apiTags: ['c2-tier-editor']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TierEditor } from '@c2n/components/key-value-editor/tier-editor'
+
+`c2-tier-editor` edits bands of a numeric scale, the tiered prices of Stripe and Chargebee, a sales team's commission
+accelerators, a grading scheme or a set of thresholds. Each row is a tier: where it starts, its upper bound and its rate.
+A tier starts where the one before ends, so the bands never leave a gap, and the last one can leave its bound empty to
+cover everything above. It is [`c2-key-value-editor`](/web-components/components/key-value-editor) with its rows fixed
+to tiers: adding, removing, the keyboard, view mode, locked keys and the form behave as there.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/key-value-editor/tier-editor'
+```
+
+The entry registers `c2-tier-editor` and `c2-key-value-editor`, the element it extends.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/key-value-editor
+<style>
+  .tiers {
+    width: 100%;
+    max-width: 560px;
+  }
+</style>
+<div data-label="Graduated pricing">
+  <c2-tier-editor
+    class="tiers"
+    label="Usage pricing"
+    start="1"
+    step="1"
+    quantity="1200"
+    total-format='{"style":"currency","currency":"USD"}'
+    tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'
+  ></c2-tier-editor>
+</div>
+<div data-label="Volume pricing">
+  <c2-tier-editor
+    class="tiers"
+    label="Volume pricing"
+    pricing="volume"
+    start="1"
+    step="1"
+    quantity="1200"
+    total-format='{"style":"currency","currency":"USD"}'
+    tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'
+  ></c2-tier-editor>
+</div>
+<div data-label="Commission">
+  <c2-tier-editor
+    class="tiers"
+    label="Commission accelerators"
+    key-label="Revenue up to"
+    value-label="Commission"
+    quantity="180000"
+    total-format='{"style":"currency","currency":"EUR","maximumFractionDigits":0}'
+    tiers='[{"upTo":100000,"value":"5%"},{"upTo":150000,"value":"8%"},{"upTo":null,"value":"12%"}]'
+  ></c2-tier-editor>
+</div>
+<div data-label="Validation">
+  <c2-tier-editor class="tiers" label="Shipping rates" tiers='[{"upTo":1,"value":4.5},{"upTo":0.5,"value":6},{"upTo":null,"value":9},{"upTo":null,"value":14}]'></c2-tier-editor>
+</div>
+<div data-label="View mode">
+  <c2-tier-editor
+    class="tiers"
+    label="Grading scheme"
+    mode="view"
+    key-label="Score up to"
+    value-label="Grade"
+    tiers='[{"upTo":59,"value":"F"},{"upTo":69,"value":"D"},{"upTo":79,"value":"C"},{"upTo":89,"value":"B"},{"upTo":null,"value":"A"}]'
+  ></c2-tier-editor>
+</div>
+```
+
+### Tiers and bounds
+
+Each tier has an upper bound (`upTo`) and a value. The first tier starts at `start` (0 by default) and every other
+tier at the bound before it plus `step`: with the default `step` of 0 the scale is continuous (0 to 1,000, then 1,000
+to 5,000, a bound belonging to the lower tier), while `step="1"` counts whole units the way Stripe's "first unit, last
+unit" columns do (1 to 1,000, then 1,001 to 5,000). The "From" column is drawn from those bounds and cannot be typed
+into, so moving a bound moves the start of the next tier with it.
+
+Only the last tier may leave its bound empty ("No limit"). A bound that does not rise above the one before, a bound
+that is not a number, and an empty bound on any other tier are flagged under their row and keep the form invalid. A
+row with neither a bound nor a rate is skipped, so a tier just added shows no error before it is typed into.
+
+**Add tier** inserts a tier above the open last one. From the keyboard, Enter moves from a bound to its rate and on to
+the next tier (adding one from the last rate), and Backspace in an empty tier removes it. Rows copied from a
+spreadsheet, with the bound and the rate (or from, to and rate) separated by tabs, paste as tiers.
+
+### Pricing preview
+
+Set `quantity` and a line under the tiers shows what it comes to. With `pricing="graduated"` (the default) each tier's
+rate applies to the part of the quantity inside it: 1,200 units are 1,000 × 0.05 + 200 × 0.04. With
+`pricing="volume"` the whole quantity takes the rate of the tier it falls in: 1,200 × 0.04. The tiers the quantity
+reaches are highlighted. A rate written as a percentage (`5%`) counts as a factor, so commission tiers preview the
+commission on a revenue; a rate that is not a number (a grade) shows as the value of the tier the quantity falls in.
+`total-format` formats the total with `Intl.NumberFormat` options, for a currency. Set `renderPreview` to draw the line
+yourself:
+
+```ts tag=CodeBlock
+const editor = document.querySelector('c2-tier-editor')!
+editor.renderPreview = ({ quote, formatTotal }) => (quote.total === null ? 'Not priced' : `Estimated invoice: ${formatTotal(quote.total)}`)
+
+// The same quote anywhere, for example on the server:
+import { quoteTiers } from '@c2n/components/key-value-editor/tier-editor'
+quoteTiers(editor.tiers, 1200, { pricing: 'graduated', start: 1, step: 1 }).total // 58
+```
+
+### Data and form
+
+`tiers` holds the tiers that are filled in as numbers, `[{ "upTo": 1000, "value": 0.05 }, { "upTo": null, "value":
+0.03 }]`; read from the element each tier also carries its `from`. Set it as a JSON attribute or a property; `entries`
+holds the same rows as text (the bound as the key, the rate as the value) and is used only when `tiers` is not given.
+`input` fires on each keystroke and `change` when a field is left or a tier is added, removed or pasted. With `name`,
+the form submits the tiers as that JSON, `required` needs at least one tier, and a reset restores the first tiers.
+
+`mode="view"` lists the tiers as text, `lock-keys` fixes the bounds so only the rates change, and the `actions`, `hint`
+and `empty` slots, the icons and the field variables are those of `c2-key-value-editor`.

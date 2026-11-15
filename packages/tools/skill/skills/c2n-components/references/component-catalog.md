@@ -215,6 +215,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/components/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/components/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
+- **Tier editor** — `c2-tier-editor` · `@c2n/components/key-value-editor/tier-editor` — Contiguous numeric tiers edited as rows (from, up to, rate) for tiered pricing, commission accelerators and grading schemes, with an open last tier, gap and order checks, and a live preview of what a quantity comes to.
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
 - **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.

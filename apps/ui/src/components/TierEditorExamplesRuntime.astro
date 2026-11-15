@@ -1,0 +1,53 @@
+---
+/** Wires the tier editor examples that need script: a custom preview, a pricing switch in the actions slot and the French text an app adds. */
+---
+
+<script>
+  import type { TierEditor } from '@c2n/components/key-value-editor/tier-editor'
+  import '@c2n/components/key-value-editor/tier-editor'
+  import '@c2n/components/button-group'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'tier-editor': {
+        from: 'De',
+        upTo: "Jusqu'à",
+        rate: 'Taux',
+        boundField: '{0}, palier {1}, à partir de {2}',
+        rateField: '{0}, palier {1}',
+        noLimit: 'Sans limite',
+        to: 'à',
+        addTier: 'Ajouter un palier',
+        removeTier: 'Supprimer le palier {0}',
+        empty: 'Aucun palier',
+        valueMissing: 'Ajoutez au moins un palier.',
+        notNumber: 'Saisissez un nombre.',
+        notAbove: 'Doit dépasser {0}.',
+        notBelow: 'Doit valoir au moins {0}.',
+        openNotLast: 'Seul le dernier palier peut être sans limite.',
+        previewAt: 'Pour {0}',
+        term: '{0} × {1}',
+        total: '= {0}',
+        tierValue: 'palier {0} : {1}',
+        noTier: 'Aucun palier ne couvre {0}.',
+      },
+    },
+  })
+
+  document.querySelectorAll<TierEditor>('c2-tier-editor[data-tier-example="preview"]').forEach((editor) => {
+    editor.renderPreview = ({ quote, tiers, format, formatTotal }) => {
+      if (quote.total === null) return 'Not priced'
+      const tier = tiers[quote.tier]
+      return `${format(quote.quantity)} API calls this month: ${formatTotal(quote.total)} (tier ${quote.tier + 1} from ${format(tier?.from ?? 0)})`
+    }
+  })
+
+  // The pricing switch's group may hydrate after this runs, so listen once on the document; its `change` bubbles.
+  document.addEventListener('change', (event) => {
+    const group = event.target as HTMLElement & { value: string }
+    if (group.localName !== 'c2-button-group') return
+    const editor = group.closest<TierEditor>('c2-tier-editor[data-tier-example="pricing-switch"]')
+    if (editor) editor.pricing = group.value === 'volume' ? 'volume' : 'graduated'
+  })
+</script>

@@ -661,6 +661,10 @@
       "types": "./dist/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
     },
+    "./key-value-editor/tier-editor": {
+      "types": "./dist/key-value-editor/tier-editor.d.ts",
+      "default": "./dist/key-value-editor/tier-editor.js"
+    },
     "./keypad": {
       "types": "./dist/keypad.d.ts",
       "default": "./dist/keypad.js"

@@ -89,7 +89,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
 - **highlight-3** · `c2-highlight` · text annotator #279 · +0.3 kB on 2.9 kB · risk low
-- **key-value-editor-1** · `c2-key-value-editor` · tier editor #264 · +1.2 kB on 7.2 kB · risk low
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-1** · `c2-rich-text-editor` · merge field input #266 · +1 kB on 54.6 kB · risk low
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium

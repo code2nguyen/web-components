@@ -4257,6 +4257,54 @@
       "reason": "The system-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tier-editor",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned controls next to the add button, such as a pricing switch; style them through their own class or public contract."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "add-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__add--color"],
+      "reason": "The add button sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the add colour."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "empty",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__empty--color"],
+      "reason": "The empty slot passes its colour on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "hide-icon",
+      "decision": "delegated",
+      "delegateTag": "c2-key-value-editor",
+      "reason": "Inherited from c2-key-value-editor, whose reveal toggle draws it; the tier editor shows no masked values, so the slot is styled there."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "hint",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__hint--color", "--c2-key-value-editor__hint--font-size"],
+      "reason": "The hint slot passes its colour and font size on to the assigned text by inheritance."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "remove-icon",
+      "decision": "variables",
+      "variables": ["--c2-key-value-editor__button__icon--size", "--c2-key-value-editor__button--color", "--c2-key-value-editor__button__hover--color"],
+      "reason": "The remove button of each tier sizes the slotted icon and its SVG fallback through the button icon size, and colours it through the button colour variables."
+    },
+    {
+      "tag": "c2-tier-editor",
+      "slot": "show-icon",
+      "decision": "delegated",
+      "delegateTag": "c2-key-value-editor",
+      "reason": "Inherited from c2-key-value-editor, whose reveal toggle draws it; the tier editor shows no masked values, so the slot is styled there."
+    },
+    {
       "tag": "c2-time-input",
       "slot": "clock-icon",
       "decision": "assigned-content",

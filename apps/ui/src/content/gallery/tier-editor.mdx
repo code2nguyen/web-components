@@ -1,0 +1,215 @@
+---
+title: 'Tier editor gallery'
+description: 'Tiered pricing, volume pricing, commission accelerators, a grading scheme, validation, view mode, locked bounds, a custom preview, a pricing switch and French tiers.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import TierEditorExamplesRuntime from '../../components/TierEditorExamplesRuntime.astro'
+
+import { TierEditor } from '@c2n/components/key-value-editor/tier-editor'
+import { ButtonGroup } from '@c2n/components/button-group'
+import { Button } from '@c2n/components/button'
+
+<TierEditorExamplesRuntime />
+
+## Presets
+
+Usage-based pricing priced graduated or by volume, a sales team's commission accelerators, a grading scheme, the
+checks on the bounds, a read-only rate card, a form with fixed bounds, a restyled preview, a preview drawn by the app, a
+pricing switch in the `actions` slot and tiers in French.
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-tier-editor label="Pricing tiers" tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Graduated usage pricing
+<c2-tier-editor
+  label="API pricing"
+  start="1"
+  step="1"
+  quantity="6000"
+  total-format='{"style":"currency","currency":"USD"}'
+  tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'
+>
+  <span slot="hint">Per API call. The first 1,000 calls of each month are billed at the first rate.</span>
+</c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Volume pricing
+<c2-tier-editor
+  label="Seat pricing"
+  pricing="volume"
+  start="1"
+  step="1"
+  quantity="40"
+  key-label="Seats up to"
+  value-label="Price per seat"
+  add-label="Add band"
+  total-format='{"style":"currency","currency":"USD","maximumFractionDigits":0}'
+  tiers='[{"upTo":10,"value":12},{"upTo":50,"value":10},{"upTo":200,"value":8},{"upTo":null,"value":6}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Commission accelerators
+<c2-tier-editor
+  label="Commission accelerators"
+  key-label="Revenue up to"
+  value-label="Commission"
+  quantity="180000"
+  total-format='{"style":"currency","currency":"EUR","maximumFractionDigits":0}'
+  tiers='[{"upTo":100000,"value":"5%"},{"upTo":150000,"value":"8%"},{"upTo":null,"value":"12%"}]'
+>
+  <span slot="hint">Quota is €100,000 a quarter. Each band pays its rate on the revenue inside it.</span>
+</c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Grading scheme
+<c2-tier-editor
+  label="Grading scheme"
+  pricing="volume"
+  key-label="Score up to"
+  value-label="Grade"
+  quantity="84"
+  tiers='[{"upTo":59,"value":"F"},{"upTo":69,"value":"D"},{"upTo":79,"value":"C"},{"upTo":89,"value":"B"},{"upTo":null,"value":"A"}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Gaps and overlaps flagged
+<c2-tier-editor
+  label="Shipping rates"
+  key-label="Weight up to (kg)"
+  value-label="Price"
+  tiers='[{"upTo":1,"value":4.5},{"upTo":0.5,"value":6},{"upTo":"5 kg","value":9},{"upTo":null,"value":14},{"upTo":null,"value":22}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Rate card (view mode)
+<style>
+  .tiers-card {
+    width: 100%;
+  }
+</style>
+<c2-tier-editor
+  class="tiers-card"
+  label="Storage pricing"
+  mode="view"
+  key-label="GB up to"
+  value-label="Per GB"
+  tiers='[{"upTo":50,"value":"$0.023"},{"upTo":500,"value":"$0.022"},{"upTo":null,"value":"$0.021"}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Fixed bounds
+<style>
+  .tiers-fixed {
+    width: 100%;
+  }
+</style>
+<c2-tier-editor
+  class="tiers-fixed"
+  label="Rates for the standard plan"
+  lock-keys
+  start="1"
+  step="1"
+  value-label="Rate"
+  tiers='[{"upTo":1000,"value":""},{"upTo":10000,"value":""},{"upTo":null,"value":""}]'
+>
+  <span slot="hint">The bands are set by the plan; enter a rate for each.</span>
+</c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Restyled preview
+<style>
+  .tiers-accent {
+    --c2-tier-editor__from--background: light-dark(#fef3c7, #3b2a06);
+    --c2-tier-editor__from--color: light-dark(#92400e, #f5c66b);
+    --c2-tier-editor__from__used--background: light-dark(#fde68a, #4d3708);
+    --c2-tier-editor__from__used--color: light-dark(#78350f, #f8d48a);
+    --c2-tier-editor__from__match--background: light-dark(#fde68a, #4d3708);
+    --c2-tier-editor__from__match--color: light-dark(#78350f, #f8d48a);
+    --c2-tier-editor__from__match--border: 1px solid #d97706;
+    --c2-tier-editor__preview--background: light-dark(#fffbeb, #2a1f07);
+    --c2-tier-editor__preview--border: 1px solid light-dark(#fcd34d, #5c430d);
+    --c2-tier-editor__preview--border-radius: 8px;
+    --c2-tier-editor__breakdown--color: light-dark(#92400e, #f5c66b);
+    --c2-tier-editor__total--font-weight: 700;
+    --c2-key-value-editor__field--border-radius: 8px;
+    --c2-key-value-editor__add--color: light-dark(#b45309, #f5b45e);
+  }
+</style>
+<c2-tier-editor
+  class="tiers-accent"
+  label="Energy tariff"
+  key-label="kWh up to"
+  value-label="Price per kWh"
+  quantity="420"
+  total-format='{"style":"currency","currency":"EUR"}'
+  tiers='[{"upTo":100,"value":0.18},{"upTo":300,"value":0.24},{"upTo":null,"value":0.31}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Preview drawn by the app
+<c2-tier-editor
+  data-tier-example="preview"
+  label="API pricing"
+  start="1"
+  step="1"
+  quantity="12500"
+  total-format='{"style":"currency","currency":"USD","minimumFractionDigits":2,"maximumFractionDigits":4}'
+  tiers='[{"upTo":1000,"value":0.05},{"upTo":10000,"value":0.03},{"upTo":null,"value":0.02}]'
+></c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Pricing switch in the actions slot
+<c2-tier-editor
+  data-tier-example="pricing-switch"
+  label="Pricing tiers"
+  start="1"
+  step="1"
+  quantity="1200"
+  total-format='{"style":"currency","currency":"USD"}'
+  tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'
+>
+  <c2-button-group slot="actions" appearance="segmented" selection="single" size="s" value="graduated" aria-label="Pricing">
+    <c2-button value="graduated">Graduated</c2-button>
+    <c2-button value="volume">Volume</c2-button>
+  </c2-button-group>
+</c2-tier-editor>
+```
+
+```html tag=MdxCodeBlock,label=Paliers (French)
+<div lang="fr">
+  <c2-tier-editor
+    label="Tarifs dégressifs"
+    start="1"
+    step="1"
+    quantity="1200"
+    total-format='{"style":"currency","currency":"EUR"}'
+    tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'
+  ></c2-tier-editor>
+</div>
+```
+
+</GalleryGrid>
+
+The preview drawn by the app and the pricing switch are wired from script:
+
+```ts tag=CodeBlock
+import '@c2n/components/key-value-editor/tier-editor'
+
+const editor = document.querySelector('c2-tier-editor')!
+editor.renderPreview = ({ quote, tiers, format, formatTotal }) => {
+  if (quote.total === null) return 'Not priced'
+  const tier = tiers[quote.tier]
+  return `${format(quote.quantity)} API calls this month: ${formatTotal(quote.total)} (tier ${quote.tier + 1} from ${format(tier?.from ?? 0)})`
+}
+
+// A c2-button-group in the actions slot switches between graduated and volume pricing.
+editor.querySelector('c2-button-group')!.addEventListener('change', (event) => {
+  editor.pricing = event.detail.value === 'volume' ? 'volume' : 'graduated'
+})
+```
