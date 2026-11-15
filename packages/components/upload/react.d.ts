@@ -13,6 +13,8 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { DocumentChecklist } from '@c2n/upload/document-checklist.js'
+import type { ImageUploader } from '@c2n/upload/image-uploader.js'
 import type { Upload } from '@c2n/upload'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +25,19 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-document-checklist': Omit<C2Props<DocumentChecklist>, 'requirements'> & {
+        'max-files'?: Attribute
+        'max-size'?: Attribute
+        'auto-upload'?: Attribute
+        'aria-label'?: Attribute
+        requirements?: DocumentChecklist['requirements'] | string
+      }
+      'c2-image-uploader': C2Props<ImageUploader> & {
+        'max-files'?: Attribute
+        'max-size'?: Attribute
+        'auto-upload'?: Attribute
+        'aria-label'?: Attribute
+      }
       'c2-upload': C2Props<Upload> & {
         'max-files'?: Attribute
         'max-size'?: Attribute
