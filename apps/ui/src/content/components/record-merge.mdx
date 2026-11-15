@@ -1,0 +1,62 @@
+---
+title: 'Record Merge'
+description: 'Duplicate records side by side, one row per field, to pick the value each field keeps: the duplicate merge of a CRM, with a preview of the result.'
+category: 'Inputs'
+package: '@c2n/choice-matrix'
+tag: 'c2-record-merge'
+apiTags: ['c2-record-merge']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RecordMerge } from '@c2n/components/choice-matrix/record-merge'
+
+`c2-record-merge` is a radio [`c2-choice-matrix`](/web-components/components/choice-matrix) shaped for merging
+duplicates: each record is a column whose cells show its values, each field a row, and choosing a cell keeps that
+record's value for the field. Every field starts on the surviving record, so the merge only asks for what differs, and
+"Use all" under a record takes every field from it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/choice-matrix/record-merge'
+```
+
+The entry registers `c2-record-merge` and `c2-choice-matrix`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/choice-matrix
+<div data-label="Contacts">
+  <c2-record-merge name="merge" label="Merge contacts" row-header="Field" preview
+    records='[{"id":"crm-1042","label":"Ada Lovelace · CRM","values":{"name":"Ada Lovelace","email":"ada@example.com","phone":"","company":"Analytical Engines","owner":"Grace"}},{"id":"web-88","label":"A. Lovelace · Web form","values":{"name":"A. Lovelace","email":"ada@analytical.org","phone":"+44 20 7946 0000","company":"Analytical Engines Ltd","owner":"Alan"}}]'
+    fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"},{"key":"phone","label":"Phone"},{"key":"company","label":"Company"},{"key":"owner","label":"Owner","description":"Who follows up"}]'></c2-record-merge>
+</div>
+```
+
+### Records and fields
+
+`records` are `{ id, label, values }`, one column each. `fields` (`{ key, label, description, group }`) are the rows in
+order; left out, every key of the records is a row. A field marked `disabled` keeps the primary record's value.
+
+### The surviving record
+
+`primary` names the record that survives (the first by default): every field starts on it. `merged` is the merged
+record, the primary's values with each field taken from the record chosen for it, and `preview` adds a column showing
+it. `value` is the record chosen for each field (`{"phone":"web-88"}`), and a form receives `name[field]=record`.
+
+```typescript tag=CodeBlock
+const merge = document.querySelector('c2-record-merge')!
+merge.addEventListener('change', () => preview(merge.merged))
+await api.merge({ survivor: merge.primary || records[0].id, values: merge.merged })
+```
+
+### Writing the values
+
+A value shows as text, a list joined by commas and an object as JSON; a field with no value shows "Empty". Set
+`formatValue` to write them yourself, for a date, an amount or a link.
+
+```typescript tag=CodeBlock
+merge.formatValue = ({ field, value }) => (field.key === 'created' ? new Date(String(value)).toLocaleDateString() : String(value ?? '—'))
+```

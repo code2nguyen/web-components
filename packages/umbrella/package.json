@@ -353,6 +353,14 @@
       "types": "./dist/choice-matrix.d.ts",
       "default": "./dist/choice-matrix.js"
     },
+    "./choice-matrix/input-matrix": {
+      "types": "./dist/choice-matrix/input-matrix.d.ts",
+      "default": "./dist/choice-matrix/input-matrix.js"
+    },
+    "./choice-matrix/record-merge": {
+      "types": "./dist/choice-matrix/record-merge.d.ts",
+      "default": "./dist/choice-matrix/record-merge.js"
+    },
     "./citation": {
       "types": "./dist/citation.d.ts",
       "default": "./dist/citation.js"

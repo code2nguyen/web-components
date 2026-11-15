@@ -26,102 +26,19 @@
     control__error--border-color: #dc2626,
     control__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
     control__disabled--opacity: 0.38,
+    cell-content--color: #18181b,
+    cell-content--font-size: 14px,
+    cell__selected--background-color: rgba(71, 110, 249, 0.08),
+    column-action--color: #0265dc,
+    column-action--font-size: 12px,
   )
 );
+@use '@c2n/sass/focus';
 
-:host {
-  display: block;
-  max-width: 100%;
-}
-
-:host([hidden]) {
-  display: none;
-}
-
-.matrix {
-  overflow-x: auto;
-  background-color: css.cssVar(background-color);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: css.cssVar(cell--padding);
-  border-bottom: css.cssVar(row--border-bottom);
-  text-align: center;
-  vertical-align: middle;
-}
-
-thead th {
-  color: css.cssVar(column-header--color);
-  font-size: css.cssVar(column-header--font-size);
-  font-weight: css.cssVar(column-header--font-weight);
-  white-space: nowrap;
-}
-
-.toggle-row > * {
-  padding-top: 0;
-}
-
-thead tr:has(+ .toggle-row) > * {
-  padding-bottom: 4px;
-  border-bottom: 0;
-}
-
-.toggle-cell {
-  width: 1px;
-  padding-right: 0;
-  line-height: 0;
-}
-
-/* The first column stays in place while a wide matrix scrolls sideways. */
-.corner,
-.row-header,
-.group-title {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background-color: css.cssVar(background-color);
-  text-align: start;
-}
-
-.row:hover > * {
-  background-color: css.cssVar(row__hover--background-color);
-}
-
-.row-header {
-  color: css.cssVar(row-header--color);
-  font-size: css.cssVar(row-header--font-size);
-  font-weight: css.cssVar(row-header--font-weight);
-}
-
-.row-label {
-  display: block;
-}
-
-.description {
-  display: block;
-  margin-top: 2px;
-  color: css.cssVar(description--color);
-  font-size: css.cssVar(description--font-size);
-}
+@use 'matrix';
 
 .row--disabled .row-header {
   opacity: css.cssVar(control__disabled--opacity);
-}
-
-.group-header > * {
-  background-color: css.cssVar(group-header--background-color);
-}
-
-.group-title {
-  color: css.cssVar(group-header--color);
-  font-size: css.cssVar(row-header--font-size);
-  font-weight: css.cssVar(group-header--font-weight);
 }
 
 .cell {
@@ -212,5 +129,59 @@ thead tr:has(+ .toggle-row) > * {
   .control:checked,
   .control:not([type='radio']):indeterminate {
     background-color: Highlight;
+  }
+}
+
+/* A cell with content: the control and the content form one label, the whole cell a target. */
+.cell--content {
+  line-height: normal;
+  text-align: start;
+}
+
+.cell--checked {
+  background-color: css.cssVar(cell__selected--background-color);
+}
+
+.cell-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.cell-content {
+  min-width: 0;
+  color: css.cssVar(cell-content--color);
+  font-size: css.cssVar(cell-content--font-size);
+  overflow-wrap: anywhere;
+}
+
+.column-action {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(column-action--color);
+  font: inherit;
+  font-size: css.cssVar(column-action--font-size);
+  font-weight: 600;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(control__focus--outline);
+    outline-offset: 2px;
+
+    @include focus.forced-colors-ring;
+  }
+
+  &:disabled {
+    opacity: css.cssVar(control__disabled--opacity);
+    cursor: not-allowed;
   }
 }

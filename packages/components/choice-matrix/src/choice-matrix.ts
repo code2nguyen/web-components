@@ -1,5 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { state } from 'lit/decorators.js'
+import { html, nothing, unsafeCSS, type CSSResultGroup } from 'lit'
 import { live } from 'lit/directives/live.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -8,27 +7,24 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { choiceMatrixMessages } from './messages'
 import styles from './choice-matrix.scss?inline'
-import { disabledByAncestor } from '@c2n/core/dom-helper.js'
+import { MatrixBase, type ChoiceMatrixColumn, type ChoiceMatrixRow } from './matrix-base'
 
 export { choiceMatrixMessages } from './messages'
+export type { ChoiceMatrixColumn, ChoiceMatrixRow } from './matrix-base'
 
-/** One row: a thing to choose for, such as a resource, a notification or a statement. */
-export interface ChoiceMatrixRow {
-  value: string
-  label: string
-  /** A second line under the label. */
-  description?: string
-  /** Rows with the same group are listed together under a header row with that title. */
-  group?: string
-  disabled?: boolean
+/** What `renderCell` is handed for each cell. */
+export interface ChoiceMatrixCellContext {
+  row: ChoiceMatrixRow
+  column: ChoiceMatrixColumn
+  checked: boolean
+  disabled: boolean
 }
 
-/** One column: a choice offered for every row, such as a permission, a channel or a point of a scale. */
-export interface ChoiceMatrixColumn {
-  value: string
-  label: string
-  disabled?: boolean
-}
+/** Draws the content of a cell beside its control: anything Lit can render. */
+export type ChoiceMatrixCellRenderer = (context: ChoiceMatrixCellContext) => unknown
+
+/** Text shown in each cell beside its control, by row value then column value. */
+export type ChoiceMatrixCells = Record<string, Record<string, string>>
 
 /** The choices: for each row's `value`, the checked columns' values (`checkbox`) or the chosen column's value (`radio`). */
 export type ChoiceMatrixValue = Record<string, string[] | string>
@@ -53,7 +49,12 @@ type Mixed = 'all' | 'some' | 'none'
  * With `type="checkbox"` each row takes any number of columns; with `type="radio"` exactly one, and the arrow keys move
  * along the row. `toggles` adds tri-state checkboxes that check or clear a whole row, a whole column, or a column within
  * a group of rows (rows that share a `group` are listed under a header row). A disabled row or column keeps its
- * choices and is skipped by the toggles.
+ * choices and is skipped by the toggles. With `type="radio"`, `use-all` puts a "Use all" button under each column
+ * title, which chooses that column in every row.
+ *
+ * A cell can hold content beside its control, which also names the control: text from `cells`
+ * (`{"email":{"a":"ada@example.com"}}`) or anything `renderCell` draws. That is how a cell shows the value it stands
+ * for, as a merge of duplicate records does (`c2-record-merge`).
  *
  * `value` maps each row's `value` to the checked columns' values (a string for radio rows). Under a `name`, a form
  * receives one `name[row]=column` entry per choice. `required` asks for at least one choice, or for every row to be
@@ -74,6 +75,8 @@ type Mixed = 'all' | 'some' | 'none'
  * @csspart group-header - The header row of a group.
  * @csspart cell - The cell of one choice.
  * @csspart control - A checkbox or radio button, the toggles included.
+ * @csspart cell-content - The content of a cell beside its control (`cells`, `renderCell`); the control and it form one label.
+ * @csspart column-action - The "Use all" button under a column title of a radio matrix (`use-all`).
  *
  * @cssproperty {padding} [--c2-choice-matrix__cell--padding=10px 12px]
  * @cssproperty {border} [--c2-choice-matrix__row--border-bottom=1px solid #e4e4e7]
@@ -101,18 +104,16 @@ type Mixed = 'all' | 'some' | 'none'
  * @cssproperty {color} [--c2-choice-matrix__control__error--border-color=#dc2626]
  * @cssproperty {outline} [--c2-choice-matrix__control__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
  * @cssproperty {opacity} [--c2-choice-matrix__control__disabled--opacity=0.38]
+ *
+ * @cssproperty {color} [--c2-choice-matrix__cell-content--color=#18181b]
+ * @cssproperty {font-size} [--c2-choice-matrix__cell-content--font-size=14px]
+ * @cssproperty {color} [--c2-choice-matrix__cell__selected--background-color=rgba(71, 110, 249, 0.08)] - A cell with content whose control is chosen.
+ * @cssproperty {color} [--c2-choice-matrix__column-action--color=#0265dc]
+ * @cssproperty {font-size} [--c2-choice-matrix__column-action--font-size=12px]
  */
 @customElement('c2-choice-matrix')
-export class ChoiceMatrix extends LitElement {
-  static formAssociated = true
-
-  static override styles = unsafeCSS(styles)
-
-  /** The rows. As an attribute, a JSON array of `{ value, label, description, group, disabled }`. */
-  @property({ converter: jsonPropertyConverter }) rows: ChoiceMatrixRow[] = []
-
-  /** The columns. As an attribute, a JSON array of `{ value, label, disabled }`. */
-  @property({ converter: jsonPropertyConverter }) columns: ChoiceMatrixColumn[] = []
+export class ChoiceMatrix extends MatrixBase<ChoiceMatrixValue> {
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The choices, by row value. As an attribute, JSON: `{"issues":["read","write"]}`, or `{"q1":"agree"}` for radio rows. */
   @property({ converter: jsonPropertyConverter }) value: ChoiceMatrixValue = {}
@@ -123,111 +124,27 @@ export class ChoiceMatrix extends LitElement {
   /** Tri-state checkboxes that check or clear a whole row, a whole column (and a column within each group), or both. Checkbox matrices only. */
   @property() toggles: 'none' | 'rows' | 'columns' | 'both' = 'none'
 
-  /** Form field name: the form receives `name[row]=column` for each choice. */
-  @property({ reflect: true }) name = ''
+  /** A "Use all" button under each column title that chooses that column in every row. Radio matrices only. */
+  @property({ type: Boolean, attribute: 'use-all' }) useAll = false
 
   /** Asks for at least one choice, or for every row to be answered with `type="radio"`. */
   @property({ type: Boolean, reflect: true }) required = false
 
-  /** Turns every choice and toggle off; the value is kept and, as for a disabled form control, not submitted. */
-  @property({ type: Boolean, reflect: true }) disabled = false
+  /** Text shown in each cell beside its control, by row then column. As an attribute, JSON: `{"email":{"a":"ada@example.com"}}`. */
+  @property({ converter: jsonPropertyConverter }) cells?: ChoiceMatrixCells
 
-  /** The title above the row labels. */
-  @property({ attribute: 'row-header' }) rowHeader = ''
+  /** Draws each cell's content beside its control; wins over `cells`. */
+  @property({ attribute: false }) renderCell?: ChoiceMatrixCellRenderer
 
-  /** The accessible name of the matrix. Inside a `c2-form-field`, the field's label names it. */
-  @property() label = ''
+  protected readonly msg = new LocalizeController(this, choiceMatrixMessages)
+  protected readonly field = new FieldContextConsumer(this, { kind: 'choice' })
 
-  @state() private disabledByForm = false
-
-  private readonly internals = this.attachInternals()
-  private readonly msg = new LocalizeController(this, choiceMatrixMessages)
-  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
-  private customValidityMessage = ''
-  private defaultValue: ChoiceMatrixValue | undefined
-
-  protected override firstUpdated(): void {
-    // A value a framework binds right after inserting the element is in place by the first update, so it is the default a form reset returns to.
-    this.defaultValue ??= this.copy(this.value)
-  }
-
-  get form() {
-    return this.internals.form
-  }
-
-  get labels() {
-    return this.internals.labels
-  }
-
-  get validity() {
-    return this.internals.validity
-  }
-
-  get validationMessage() {
-    return this.internals.validationMessage
-  }
-
-  get willValidate() {
-    return this.internals.willValidate
-  }
-
-  checkValidity() {
-    return this.internals.checkValidity()
-  }
-
-  reportValidity() {
-    return this.internals.reportValidity()
-  }
-
-  setCustomValidity(message: string) {
-    this.customValidityMessage = message
-    this.syncFormState()
-  }
-
-  formResetCallback() {
-    this.value = this.copy(this.defaultValue ?? {})
-  }
-
-  formDisabledCallback(disabled: boolean) {
-    this.disabledByForm = disabledByAncestor(this, disabled)
-  }
-
-  formStateRestoreCallback(state: string | File | FormData | null) {
-    if (typeof state !== 'string') return
-    try {
-      const restored: unknown = JSON.parse(state)
-      if (restored && typeof restored === 'object' && !Array.isArray(restored)) this.value = restored as ChoiceMatrixValue
-    } catch {
-      // Not a state this element wrote; keep the current value.
-    }
-  }
-
-  protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('value') && (!this.value || typeof this.value !== 'object' || Array.isArray(this.value))) this.value = {}
-  }
-
-  protected override updated(): void {
-    this.syncFormState()
-  }
-
-  private copy(value: ChoiceMatrixValue): ChoiceMatrixValue {
+  protected copy(value: ChoiceMatrixValue): ChoiceMatrixValue {
     return Object.fromEntries(Object.entries(value ?? {}).map(([row, choice]) => [row, Array.isArray(choice) ? [...choice] : choice]))
   }
 
   private get radio(): boolean {
     return this.type === 'radio'
-  }
-
-  private get effectiveDisabled(): boolean {
-    return this.disabled || this.disabledByForm
-  }
-
-  private get rowList(): ChoiceMatrixRow[] {
-    return Array.isArray(this.rows) ? this.rows.filter((row) => row && typeof row.value === 'string') : []
-  }
-
-  private get columnList(): ChoiceMatrixColumn[] {
-    return Array.isArray(this.columns) ? this.columns.filter((column) => column && typeof column.value === 'string') : []
   }
 
   /** The columns chosen for a row, always as a list. */
@@ -253,7 +170,7 @@ export class ChoiceMatrix extends LitElement {
     return !enabled.length || checked === 0 ? 'none' : checked === enabled.length ? 'all' : 'some'
   }
 
-  private syncFormState(): void {
+  protected syncFormState(): void {
     const rows = this.rowList
     const entries = this.name ? new FormData() : null
     for (const row of rows) {
@@ -271,7 +188,7 @@ export class ChoiceMatrix extends LitElement {
   }
 
   /** Sets the checked state of `cells`, then announces the change. */
-  private commit(cells: [ChoiceMatrixRow, ChoiceMatrixColumn][], checked: boolean): void {
+  protected commit(cells: [ChoiceMatrixRow, ChoiceMatrixColumn][], checked: boolean): void {
     const next = this.copy(this.value)
     for (const [row, column] of cells) {
       if (this.cellDisabled(row, column)) continue
@@ -299,19 +216,16 @@ export class ChoiceMatrix extends LitElement {
     const columns = this.columnList
     const toggles = this.radio ? 'none' : this.toggles
     const rowToggles = toggles === 'rows' || toggles === 'both'
-    const columnToggles = toggles === 'columns' || toggles === 'both'
-    const groups = new Map<string, ChoiceMatrixRow[]>()
-    for (const row of rows) {
-      const key = row.group ?? ''
-      if (!groups.has(key)) groups.set(key, [])
-      groups.get(key)!.push(row)
-    }
+    const useAll = this.radio && this.useAll
+    // The column toggles, or the "Use all" buttons of a radio matrix, sit in a row of their own under the titles.
+    const columnToggles = useAll || toggles === 'columns' || toggles === 'both'
+    const groups = this.groupRows(rows)
     const invalid = this.field.invalid
     let rowIndex = 0
     return html`<div
         class="matrix ${invalid ? 'matrix--invalid' : ''}"
         role="group"
-        aria-label=${this.label || this.field.label || this.msg.t('label')}
+        aria-label=${this.label || this.field.label || this.defaultLabel}
         aria-describedby=${this.field.describedBy()}
         aria-invalid=${invalid ? 'true' : nothing}
       >
@@ -324,6 +238,7 @@ export class ChoiceMatrix extends LitElement {
                 (column, at) =>
                   html`<th class="column-header" part="column-header" scope="col"><span class="column-label" id="column-${at}">${column.label}</span></th>`,
               )}
+              ${this.renderTrailing('header')}
             </tr>
             ${
               // The column toggles get a row of their own, so a column title is named by its text alone.
@@ -334,12 +249,17 @@ export class ChoiceMatrix extends LitElement {
                     ${columns.map(
                       (column) =>
                         html`<td class="cell">
-                          ${this.renderToggle(
-                            rows.map((row) => [row, column]),
-                            this.msg.t('toggleColumn', column.label),
-                          )}
+                          ${
+                            useAll
+                              ? this.renderUseAll(column, rows)
+                              : this.renderToggle(
+                                  rows.map((row) => [row, column]),
+                                  this.msg.t('toggleColumn', column.label),
+                                )
+                          }
                         </td>`,
                     )}
+                    ${this.renderTrailing('toggle')}
                   </tr>`
                 : nothing
             }
@@ -356,7 +276,7 @@ export class ChoiceMatrix extends LitElement {
                           (column) =>
                             html`<td class="cell">
                               ${
-                                columnToggles
+                                columnToggles && !useAll
                                   ? this.renderToggle(
                                       groupRows.map((row) => [row, column]),
                                       this.msg.t('toggleGroup', column.label, group),
@@ -365,6 +285,7 @@ export class ChoiceMatrix extends LitElement {
                               }
                             </td>`,
                         )}
+                        ${this.renderTrailing('group')}
                       </tr>`
                     : nothing
                 }
@@ -390,28 +311,65 @@ export class ChoiceMatrix extends LitElement {
             </td>`
           : nothing
       }
-      <th class="row-header" part="row-header" scope="row">
-        <span class="row-label" id=${headerId}>${row.label}</span>
-        ${row.description ? html`<span class="description" part="description">${row.description}</span>` : nothing}
-      </th>
-      ${columns.map(
-        (column, at) =>
-          html`<td class="cell" part="cell">
-            <input
-              class="control cell-control ${this.radio ? 'control--radio' : ''}"
-              part="control"
-              type=${this.radio ? 'radio' : 'checkbox'}
-              name=${this.radio ? `row-${index}` : nothing}
-              aria-labelledby="${headerId} column-${at}"
-              .checked=${live(this.isChecked(row.value, column.value))}
-              ?disabled=${this.cellDisabled(row, column)}
-              aria-invalid=${this.field.invalid ? 'true' : nothing}
-              @input=${this.stopNativeInput}
-              @change=${(event: Event) => this.commit([[row, column]], (event.target as HTMLInputElement).checked)}
-            />
-          </td>`,
-      )}
+      ${this.renderRowHeader(row, headerId)}
+      ${columns.map((column, at) => {
+        const checked = this.isChecked(row.value, column.value)
+        const disabled = this.cellDisabled(row, column)
+        const content = this.cellContent({ row, column, checked, disabled })
+        const hasContent = content !== undefined && content !== null && content !== '' && content !== nothing
+        const contentId = `cell-${index}-${at}`
+        const control = html`<input
+          class="control cell-control ${this.radio ? 'control--radio' : ''}"
+          part="control"
+          type=${this.radio ? 'radio' : 'checkbox'}
+          name=${this.radio ? `row-${index}` : nothing}
+          aria-labelledby="${headerId} column-${at}${hasContent ? ` ${contentId}` : ''}"
+          .checked=${live(checked)}
+          ?disabled=${disabled}
+          aria-invalid=${this.field.invalid ? 'true' : nothing}
+          @input=${this.stopNativeInput}
+          @change=${(event: Event) => this.commit([[row, column]], (event.target as HTMLInputElement).checked)}
+        />`
+        // With content, the control and it form one label, so the content is a target too.
+        return hasContent
+          ? html`<td class="cell cell--content ${checked ? 'cell--checked' : ''}" part="cell">
+              <label class="cell-choice">${control}<span class="cell-content" part="cell-content" id=${contentId}>${content}</span></label>
+            </td>`
+          : html`<td class="cell" part="cell">${control}</td>`
+      })}
+      ${this.renderTrailing('row', row)}
     </tr>`
+  }
+
+  /** What a cell shows beside its control: `renderCell`'s content, else the text in `cells`. A variant draws its own. */
+  protected cellContent(context: ChoiceMatrixCellContext): unknown {
+    return this.renderCell ? this.renderCell(context) : this.cells?.[context.row.value]?.[context.column.value]
+  }
+
+  /** The accessible name when there is no `label` and no field label. */
+  protected get defaultLabel(): string {
+    return this.msg.t('label')
+  }
+
+  /** Cells after the last column, in each kind of row; none here. A variant adds a column of its own this way. */
+  protected renderTrailing(_kind: 'header' | 'toggle' | 'group' | 'row', _row?: ChoiceMatrixRow): unknown {
+    return nothing
+  }
+
+  /** The "Use all" button of a radio matrix's column: chooses it in every row where it can be chosen. */
+  private renderUseAll(column: ChoiceMatrixColumn, rows: ChoiceMatrixRow[]) {
+    const cells = rows.map((row): [ChoiceMatrixRow, ChoiceMatrixColumn] => [row, column])
+    const enabled = cells.some(([row]) => !this.cellDisabled(row, column))
+    return html`<button
+      class="column-action"
+      part="column-action"
+      type="button"
+      aria-label=${this.msg.t('useAllFrom', column.label)}
+      ?disabled=${!enabled}
+      @click=${() => this.commit(cells, true)}
+    >
+      ${this.msg.t('useAll')}
+    </button>`
   }
 
   /** A tri-state checkbox over `cells`: checked when all are, mixed when some are. Pressing it checks them all, or clears them all when all were. */

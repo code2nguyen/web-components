@@ -18,7 +18,7 @@ export interface ComponentMessages {
 }
 
 // Every component that has interface text keeps it in `src/messages.ts`, exporting its catalog.
-const modules = import.meta.glob<Record<string, unknown>>('../../../../packages/components/*/src/messages.ts', { eager: true })
+const modules = import.meta.glob<Record<string, unknown>>('../../../../packages/components/*/src/{messages,*-messages}.ts', { eager: true })
 
 const isCatalog = (value: unknown): value is MessageCatalog<Messages> =>
   !!value && typeof value === 'object' && typeof (value as MessageCatalog<Messages>).name === 'string' && 'en' in value

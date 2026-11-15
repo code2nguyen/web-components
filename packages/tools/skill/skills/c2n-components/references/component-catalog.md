@@ -185,6 +185,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
 - **Import Mapper** — `c2-import-mapper` · `@c2n/components/import-mapper` — The mapping step of a spreadsheet import: match each column of the file to a field, check the required ones, then preview the rows with their errors.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
+- **Input Matrix** — `c2-input-matrix` · `@c2n/components/choice-matrix/input-matrix` — Rows × columns of typed inputs in one form control, with row, column and grand totals: quantities by size and colour, hours by person and day, SLA targets by priority.
 - **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.
 - **Keypad** — `c2-keypad` · `@c2n/components/keypad` — A phone-style numeric keypad that types an amount, fills PIN dots or drives another field, with a slot for a biometric key.
@@ -203,6 +204,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Quick time menu** — `c2-quick-time-menu` · `@c2n/components/quick-time-menu` — A menu of quick times (Later today, Tomorrow, Next week), each showing when it falls, plus a date and time picker for anything else.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
+- **Record Merge** — `c2-record-merge` · `@c2n/components/choice-matrix/record-merge` — Duplicate records side by side, one row per field, to pick the value each field keeps: the duplicate merge of a CRM, with a preview of the result.
 - **Recurrence Editor** — `c2-recurrence-editor` · `@c2n/components/recurrence-editor` — Edits how something repeats: every N days, weeks, months or years, weekdays, the third Tuesday, an end; reads and writes RRULE or cron.
 - **Rich Text Editor** — `c2-rich-text-editor` · `@c2n/components/rich-text-editor` — A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.
 - **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.

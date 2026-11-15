@@ -12,6 +12,10 @@ const en = {
   /** The validation message of a required matrix. */
   rowsMissing: 'Please answer every row.',
   valueMissing: 'Please select at least one option.',
+  /** The visible text of the button under a column of a radio matrix that chooses it in every row. */
+  useAll: 'Use all',
+  /** That button's accessible name: it must keep the visible text. */
+  useAllFrom: (column: string) => `Use all from ${column}`,
 }
 
 /** The choice matrix's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

@@ -10,6 +10,8 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { ChoiceMatrix } from '@c2n/choice-matrix'
+import type { InputMatrix } from '@c2n/choice-matrix/input-matrix.js'
+import type { RecordMerge } from '@c2n/choice-matrix/record-merge.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -20,9 +22,26 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-choice-matrix': DefineComponent<
       C2Props<ChoiceMatrix> & {
+        'use-all'?: unknown
         'row-header'?: unknown
         onInput?: (event: EventOf<ChoiceMatrix, 'input'>) => void
         onChange?: (event: EventOf<ChoiceMatrix, 'change'>) => void
+      }
+    >
+    'c2-input-matrix': DefineComponent<
+      C2Props<InputMatrix> & {
+        'cell-type'?: unknown
+        'row-header'?: unknown
+        onInput?: (event: EventOf<InputMatrix, 'input'>) => void
+        onChange?: (event: EventOf<InputMatrix, 'change'>) => void
+      }
+    >
+    'c2-record-merge': DefineComponent<
+      C2Props<RecordMerge> & {
+        'use-all'?: unknown
+        'row-header'?: unknown
+        onInput?: (event: EventOf<RecordMerge, 'input'>) => void
+        onChange?: (event: EventOf<RecordMerge, 'change'>) => void
       }
     >
   }

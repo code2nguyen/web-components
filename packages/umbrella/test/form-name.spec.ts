@@ -81,6 +81,8 @@ const ownCase: Record<string, string> = {
   'c2-address-field': 'submits name[line1], name[city]… and name[country], one entry per part of the country format',
   'c2-card-input': 'submits name[number], name[expiry] and name[cvc], typed in by the user only',
   'c2-choice-matrix': 'submits one name[row] entry per choice',
+  'c2-input-matrix': 'submits one name[row][column] entry per value',
+  'c2-record-merge': 'submits one name[field] entry per field, the record chosen for it',
   'c2-quantity-picker': "submits one entry per counter, under each c2-quantity's own name (covered in quantity-picker.spec.ts)",
 }
 
@@ -225,6 +227,62 @@ test('c2-choice-matrix reflects a name set as a property and submits one name[ro
       ['perm[issues]', 'read'],
       ['perm[issues]', 'write'],
       ['perm[pulls]', 'read'],
+    ],
+  })
+})
+
+test('c2-input-matrix reflects a name set as a property and submits one name[row][column] entry per value', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-input-matrix') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'qty',
+      rows: [
+        { value: 's', label: 'S' },
+        { value: 'm', label: 'M' },
+      ],
+      columns: [
+        { value: 'red', label: 'Red' },
+        { value: 'blue', label: 'Blue' },
+      ],
+      value: { s: { red: 4, blue: 2 }, m: { blue: 1.5 } },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'qty',
+    entries: [
+      ['qty[s][red]', '4'],
+      ['qty[s][blue]', '2'],
+      ['qty[m][blue]', '1.5'],
+    ],
+  })
+})
+
+test('c2-record-merge reflects a name set as a property and submits the record chosen for each field', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-record-merge') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'merge',
+      records: [
+        { id: 'a', label: 'A', values: { name: 'Ada', phone: '' } },
+        { id: 'b', label: 'B', values: { name: 'A.', phone: '+44' } },
+      ],
+      value: { phone: 'b' },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  // Every field without a choice is on the primary record, the first.
+  expect(outcome).toEqual({
+    attribute: 'merge',
+    entries: [
+      ['merge[name]', 'a'],
+      ['merge[phone]', 'b'],
     ],
   })
 })

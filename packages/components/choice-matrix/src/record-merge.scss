@@ -1,0 +1,29 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-record-merge,
+  $theme: (
+    result--background-color: #f4f4f5,
+    result--color: #18181b,
+    result--font-weight: 500,
+    empty--color: #63636b,
+  )
+);
+
+.result-header,
+.result,
+.result-gap {
+  background-color: css.cssVar(result--background-color);
+  text-align: start;
+}
+
+.result-header,
+.result {
+  color: css.cssVar(result--color);
+  font-weight: css.cssVar(result--font-weight);
+  line-height: normal;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  color: css.cssVar(empty--color);
+  font-style: italic;
+}

@@ -1,0 +1,94 @@
+// The table both matrices draw: headers, groups and a first column held in place while a wide matrix scrolls sideways.
+// It reads the variables of the element that uses it, whose `$theme` map defines the keys below.
+@use '@c2n/sass/css-variable' as css;
+
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.matrix {
+  overflow-x: auto;
+  background-color: css.cssVar(background-color);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: css.cssVar(cell--padding);
+  border-bottom: css.cssVar(row--border-bottom);
+  text-align: center;
+  vertical-align: middle;
+}
+
+thead th {
+  color: css.cssVar(column-header--color);
+  font-size: css.cssVar(column-header--font-size);
+  font-weight: css.cssVar(column-header--font-weight);
+  white-space: nowrap;
+}
+
+.toggle-row > * {
+  padding-top: 0;
+}
+
+thead tr:has(+ .toggle-row) > * {
+  padding-bottom: 4px;
+  border-bottom: 0;
+}
+
+.toggle-cell {
+  width: 1px;
+  padding-right: 0;
+  line-height: 0;
+}
+
+/* The first column stays in place while a wide matrix scrolls sideways. */
+.corner,
+.row-header,
+.group-title {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: css.cssVar(background-color);
+  text-align: start;
+}
+
+.row:hover > * {
+  background-color: css.cssVar(row__hover--background-color);
+}
+
+.row-header {
+  color: css.cssVar(row-header--color);
+  font-size: css.cssVar(row-header--font-size);
+  font-weight: css.cssVar(row-header--font-weight);
+}
+
+.row-label {
+  display: block;
+}
+
+.description {
+  display: block;
+  margin-top: 2px;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+}
+
+.group-header > * {
+  background-color: css.cssVar(group-header--background-color);
+}
+
+.group-title {
+  color: css.cssVar(group-header--color);
+  font-size: css.cssVar(row-header--font-size);
+  font-weight: css.cssVar(group-header--font-weight);
+}

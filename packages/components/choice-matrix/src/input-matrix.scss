@@ -1,0 +1,112 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-input-matrix,
+  $theme: (
+    cell--padding: 4px 6px,
+    header--padding: 8px 6px,
+    row--border-bottom: 1px solid #e4e4e7,
+    row__hover--background-color: #fafafa,
+    background-color: #ffffff,
+    column-header--color: #71717a,
+    column-header--font-size: 12px,
+    column-header--font-weight: 500,
+    row-header--color: #18181b,
+    row-header--font-size: 14px,
+    row-header--font-weight: 400,
+    description--color: #71717a,
+    description--font-size: 12px,
+    group-header--background-color: #f4f4f5,
+    group-header--color: #18181b,
+    group-header--font-weight: 600,
+    input--min-width: 72px,
+    input--height: 32px,
+    input--padding: 0 8px,
+    input--border: 1px solid #d4d4d8,
+    input--border-radius: 6px,
+    input--background-color: #ffffff,
+    input--color: #18181b,
+    input--font-size: 14px,
+    input__hover--border-color: #a1a1aa,
+    input__focus--border-color: #476ef9,
+    input__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    input__error--border-color: #dc2626,
+    input__disabled--opacity: 0.38,
+    total--color: #18181b,
+    total--font-weight: 600,
+    total--background-color: #f4f4f5,
+  )
+);
+@use '@c2n/sass/focus';
+@use 'matrix';
+
+th {
+  padding: css.cssVar(header--padding);
+}
+
+.row--disabled .row-header {
+  opacity: css.cssVar(input__disabled--opacity);
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: css.cssVar(input--min-width);
+  height: css.cssVar(input--height);
+  margin: 0;
+  padding: css.cssVar(input--padding);
+  border: css.cssVar(input--border);
+  border-radius: css.cssVar(input--border-radius);
+  background-color: css.cssVar(input--background-color);
+  color: css.cssVar(input--color);
+  font: inherit;
+  font-size: css.cssVar(input--font-size);
+  color-scheme: inherit;
+
+  &:hover:not(:disabled) {
+    border-color: css.cssVar(input__hover--border-color);
+  }
+
+  &:focus-visible {
+    border-color: css.cssVar(input__focus--border-color);
+    outline: css.cssVar(input__focus--outline);
+    outline-offset: 0;
+
+    @include focus.forced-colors-ring;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: css.cssVar(input__error--border-color);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(input__disabled--opacity);
+    cursor: not-allowed;
+  }
+}
+
+.input--select {
+  // As wide as its longest option, which a cell squeezed to the column would cut.
+  width: auto;
+}
+
+.input--number {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.total {
+  background-color: css.cssVar(total--background-color);
+  color: css.cssVar(total--color);
+  font-weight: css.cssVar(total--font-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.total-header {
+  text-align: end;
+}
+
+.totals-row > .row-header {
+  background-color: css.cssVar(total--background-color);
+  font-weight: css.cssVar(total--font-weight);
+}
