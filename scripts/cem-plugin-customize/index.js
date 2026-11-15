@@ -1,6 +1,11 @@
 /* eslint-disable no-case-declarations */
 export function customLitCemPlugin() {
   const partDescription = (name) => `Shadow DOM styling hook for the ${name.replaceAll('-', ' ')} element.`
+  // Classes tagged `@owntemplate` extend a component but draw a template of their own (`c2-image-uploader` over
+  // `c2-upload`): the superclass's slots, CSS parts and CSS variables do not reach their shadow DOM, so the manifest
+  // keeps only what the class documents itself. Members, attributes and events are still inherited.
+  // Declaration → the slot, CSS part and CSS variable names it documents itself, taken before inheritance.
+  const ownTemplates = new Map()
 
   return {
     // Make sure to always give your plugins a name, this helps when debugging
@@ -20,6 +25,8 @@ export function customLitCemPlugin() {
               } else if (tag.tagName.getText() === 'slotcomponent') {
                 classDeclaration.slotComponents = classDeclaration.slotComponents ?? []
                 classDeclaration.slotComponents.push(tag.comment)
+              } else if (tag.tagName.getText() === 'owntemplate') {
+                ownTemplates.set(classDeclaration, undefined)
               }
             })
           })
@@ -52,9 +59,24 @@ export function customLitCemPlugin() {
           }
       }
     },
+    // Runs once for the whole package, after inheritance has been applied.
+    packageLinkPhase() {
+      for (const [declaration, own] of ownTemplates) {
+        for (const key of ['slots', 'cssParts', 'cssProperties']) {
+          if (!declaration[key]) continue
+          declaration[key] = declaration[key].filter((entry) => own?.has(`${key}:${entry.name}`))
+          for (const entry of declaration[key]) delete entry.inheritedFrom
+          if (declaration[key].length === 0) delete declaration[key]
+        }
+      }
+    },
     // Runs once per module, after every analyze phase.
     moduleLinkPhase({ moduleDoc }) {
       for (const declaration of moduleDoc.declarations ?? []) {
+        if (ownTemplates.has(declaration)) {
+          const keys = ['slots', 'cssParts', 'cssProperties'].flatMap((key) => (declaration[key] ?? []).map((entry) => `${key}:${entry.name}`))
+          ownTemplates.set(declaration, new Set(keys))
+        }
         // `dispatchEvent(new CustomEvent(COLUMN_CHANGE_EVENT))` is recorded under the constant's *name*, since the
         // analyzer does not resolve identifiers. Every such event is an undocumented protocol between a component
         // and its parent (`c2-table-column` → `c2-table`, a pager → its host), not public API — a documented one has

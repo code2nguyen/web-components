@@ -93,7 +93,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-1** · `c2-rich-text-editor` · merge field input #266 · +1 kB on 54.6 kB · risk low
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
-- **upload-1** · `c2-upload` · document checklist #272, image uploader #282 · +2.5 kB on 13.0 kB · risk low
 - **attachment-1** · `c2-attachment` · file preview #273 (lazy) · +0.4 kB on 5.3 kB, 8 kB lazy · risk low · absorbs roadmap #46 `c2-pdf-viewer` and the `c2-image` gallery extension (#42)
 - **image-annotator-1** · `c2-image-annotator` · extraction review #275, pinned comments #276, example: image pins #368 · +1.4 kB on 26.1 kB · risk low
 - **core-1** · `@c2n/core` · drop zone #284 (core), sync status #384 (core)

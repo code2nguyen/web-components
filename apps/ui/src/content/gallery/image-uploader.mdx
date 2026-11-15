@@ -1,0 +1,134 @@
+---
+description: 'Image uploaders for listings, claims and profiles: reorderable photos with a cover, upload states, a round avatar, a custom add tile, numbered badges, dense tiles and French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { ImageUploader } from '@c2n/components/upload/image-uploader'
+
+<UploadExamplesRuntime />
+
+Each example has a simulated upload transport and, where it shows photos, images drawn in the page. Add your own images
+to watch them upload.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default,description=An empty grid that takes up to six images,useWhen=People attach a few photos to a record
+<c2-image-uploader client:only="lit" data-upload-demo multiple max-files="6" aria-label="Photos"></c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=Listing photos,description=Reorder by drag or keyboard; the first photo is the cover,useWhen=The order of the photos matters
+<c2-image-uploader
+  client:only="lit"
+  data-upload-demo
+  data-seed="living-room.svg,kitchen.svg,garden.svg,bedroom.svg"
+  multiple
+  reorderable
+  cover
+  max-files="10"
+  aria-label="Listing photos"
+>
+  <span slot="hint">Drag a photo, or press Space on it, to change the order</span>
+</c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=Upload states,description=A photo uploading and one that failed with a retry button,useWhen=Uploads are slow or the connection drops
+<c2-image-uploader
+  client:only="lit"
+  data-upload-demo
+  data-seed="front-bumper.svg,side-slow.svg,rear-fail.svg"
+  multiple
+  max-files="6"
+  aria-label="Claim photos"
+></c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=Round avatar,description=One image in a round tile that offers to replace it,useWhen=A profile picture or a logo
+<style>
+  .avatar-uploader {
+    --c2-image-uploader--width: 140px;
+    --c2-image-uploader__single--width: 140px;
+    --c2-image-uploader__single--aspect-ratio: 1;
+    --c2-image-uploader__tile--border-radius: 999px;
+  }
+  .avatar-row {
+    display: flex;
+    gap: 24px;
+  }
+</style>
+<div class="avatar-row">
+  <c2-image-uploader client:only="lit" class="avatar-uploader" data-upload-demo aria-label="Profile picture"></c2-image-uploader>
+  <c2-image-uploader client:only="lit" class="avatar-uploader" data-upload-demo data-seed="portrait.svg" aria-label="Team logo"></c2-image-uploader>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Custom add tile,description=Your own icon and label in the add tile and a violet look,useWhen=The add tile should match the product voice
+<style>
+  .camera-uploader {
+    --c2-image-uploader__add--border: 1px solid light-dark(#ddd6fe, #4c1d95);
+    --c2-image-uploader__add--background: light-dark(#f5f3ff, #1e1238);
+    --c2-image-uploader__add__hover--background: light-dark(#ede9fe, #2a1a4d);
+    --c2-image-uploader__add__hover--border: 1px solid #8b5cf6;
+    --c2-image-uploader__add-icon--color: light-dark(#7c3aed, #a78bfa);
+    --c2-image-uploader__add-label--color: light-dark(#6d28d9, #c4b5fd);
+    --c2-image-uploader__tile--border-radius: 14px;
+  }
+</style>
+<c2-image-uploader client:only="lit" class="camera-uploader" data-upload-demo multiple max-files="4" capture="environment" aria-label="Receipt photos">
+  <svg slot="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle>
+  </svg>
+  <span slot="add-label">Take a photo</span>
+  <span slot="hint">Opens the camera on a phone</span>
+</c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=Numbered,description=renderBadge numbers each tile in its order,useWhen=The images are steps or pages in sequence
+<c2-image-uploader
+  client:only="lit"
+  data-upload-demo
+  data-image-example="numbered"
+  data-seed="step-1.svg,step-2.svg,step-3.svg"
+  multiple
+  reorderable
+  aria-label="Assembly steps"
+></c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=Dense,description=Smaller tiles and a tighter grid,useWhen=Many images in a narrow column
+<style>
+  .dense-uploader {
+    --c2-image-uploader__tile--min-width: 64px;
+    --c2-image-uploader__grid--gap: 4px;
+    --c2-image-uploader__tile--border-radius: 4px;
+    --c2-image-uploader__add-icon--size: 18px;
+    --c2-image-uploader__action--size: 20px;
+  }
+</style>
+<c2-image-uploader
+  client:only="lit"
+  class="dense-uploader"
+  data-upload-demo
+  data-seed="a.svg,b.svg,c.svg,d.svg,e.svg,f.svg"
+  multiple
+  max-files="12"
+  aria-label="Inspection photos"
+></c2-image-uploader>
+```
+
+```html tag=MdxCodeBlock,label=French,description=The uploader's own text in the page language,useWhen=The application is translated
+<div lang="fr">
+  <c2-image-uploader client:only="lit" data-upload-demo data-seed="facade.svg" multiple reorderable cover max-files="5" aria-label="Photos du logement"></c2-image-uploader>
+</div>
+```
+
+</GalleryGrid>
+
+`renderBadge` is a property, so the numbered tiles above are set from a script:
+
+```ts tag=CodeBlock
+uploader.renderBadge = ({ index }) => `${index + 1}`
+```

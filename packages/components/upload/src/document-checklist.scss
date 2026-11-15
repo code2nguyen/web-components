@@ -1,0 +1,286 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-document-checklist,
+  $theme: (
+    width: 640px,
+    background: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    divider--border: 1px solid #e4e4e7,
+    header--padding: 14px 16px,
+    summary--color: #18181b,
+    summary--font-size: 14px,
+    summary--font-weight: 600,
+    meter--height: 6px,
+    meter--background: #e4e4e7,
+    meter--color: rgb(2, 101, 220),
+    row--padding: 14px 16px,
+    row--gap: 12px,
+    row__drag--background: #e8f2ff,
+    row__drag--outline: 1px dashed rgb(2, 101, 220),
+    icon--size: 20px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 600,
+    description--color: #71717a,
+    description--font-size: 12px,
+    overdue--color: #dc2626,
+    reason--color: light-dark(#991b1b, #fecaca),
+    status--padding: 2px 8px,
+    status--border-radius: 999px,
+    status--font-size: 12px,
+    status--font-weight: 500,
+    status__needed--color: light-dark(#52525b, #d4d4d8),
+    status__needed--background-color: light-dark(#f4f4f5, #27272a),
+    status__uploaded--color: light-dark(#0265dc, #9cc9ff),
+    status__uploaded--background-color: light-dark(#edf1fe, #0f2a4d),
+    status__in-review--color: light-dark(#854d0e, #fde68a),
+    status__in-review--background-color: light-dark(#fef9c3, #3d3210),
+    status__approved--color: light-dark(#166534, #86efac),
+    status__approved--background-color: light-dark(#dcfce7, #14361f),
+    status__rejected--color: light-dark(#991b1b, #fecaca),
+    status__rejected--background-color: light-dark(#fee2e2, #3f1515),
+    files--gap: 8px,
+    error--border-color: #dc2626,
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  width: css.cssVar(width);
+  max-width: 100%;
+}
+
+.checklist {
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+}
+
+// An enclosing c2-form-field shows an error.
+:host(:state(error)) .checklist {
+  border-color: css.cssVar(error--border-color);
+}
+
+.checklist--disabled {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+.header[hidden] {
+  display: none;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: css.cssVar(header--padding);
+  border-bottom: css.cssVar(divider--border);
+}
+
+slot[name='header'] {
+  display: block;
+  flex: 1 1 200px;
+}
+
+.summary {
+  display: grid;
+  gap: 6px;
+}
+
+.summary-text {
+  color: css.cssVar(summary--color);
+  font-size: css.cssVar(summary--font-size);
+  font-weight: css.cssVar(summary--font-weight);
+  line-height: 1.4;
+}
+
+.meter {
+  display: block;
+  height: css.cssVar(meter--height);
+  overflow: hidden;
+  border-radius: 999px;
+  background: css.cssVar(meter--background);
+}
+
+.meter-value {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: css.cssVar(meter--color);
+  forced-color-adjust: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  --status-color: #{css.cssVar(status__needed--color)};
+  --status-background: #{css.cssVar(status__needed--background-color)};
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 4px css.cssVar(row--gap);
+  padding: css.cssVar(row--padding);
+
+  & + & {
+    border-top: css.cssVar(divider--border);
+  }
+}
+
+.row[data-status='uploaded'] {
+  --status-color: #{css.cssVar(status__uploaded--color)};
+  --status-background: #{css.cssVar(status__uploaded--background-color)};
+}
+
+.row[data-status='in-review'] {
+  --status-color: #{css.cssVar(status__in-review--color)};
+  --status-background: #{css.cssVar(status__in-review--background-color)};
+}
+
+.row[data-status='approved'] {
+  --status-color: #{css.cssVar(status__approved--color)};
+  --status-background: #{css.cssVar(status__approved--background-color)};
+}
+
+.row[data-status='rejected'],
+.row[data-status='expired'] {
+  --status-color: #{css.cssVar(status__rejected--color)};
+  --status-background: #{css.cssVar(status__rejected--background-color)};
+}
+
+.row--drag {
+  background: css.cssVar(row__drag--background);
+  outline: css.cssVar(row__drag--outline);
+  outline-offset: -4px;
+}
+
+.icon {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--status-color);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-ring--open {
+  stroke-dasharray: 3 3;
+}
+
+.content {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.optional {
+  color: css.cssVar(description--color);
+  font-weight: 400;
+}
+
+.description,
+.dates,
+.reason {
+  font-size: css.cssVar(description--font-size);
+  line-height: 1.4;
+}
+
+.description,
+.dates {
+  color: css.cssVar(description--color);
+}
+
+.dates--alert {
+  color: css.cssVar(overdue--color);
+  font-weight: 600;
+}
+
+.reason {
+  color: css.cssVar(reason--color);
+}
+
+.side {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: css.cssVar(status--padding);
+  border-radius: css.cssVar(status--border-radius);
+  background: var(--status-background);
+  color: var(--status-color);
+  font-size: css.cssVar(status--font-size);
+  font-weight: css.cssVar(status--font-weight);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.row-button {
+  --c2-button__container--height: 32px;
+}
+
+.files {
+  grid-column: 2 / -1;
+  display: grid;
+  gap: css.cssVar(files--gap);
+  margin-top: 6px;
+}
+
+c2-attachment {
+  --c2-attachment--min-height: 52px;
+  --c2-attachment--padding: 8px 10px;
+  --c2-attachment--border-radius: 8px;
+  --c2-attachment__media--size: 32px;
+}
+
+// Narrow: the badge and the upload button move under the text.
+@container (max-width: 420px) {
+  .row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .side {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .files {
+    grid-column: 1 / -1;
+  }
+}
+
+:host {
+  container-type: inline-size;
+}

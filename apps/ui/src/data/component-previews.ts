@@ -204,6 +204,7 @@ item: article.product
 price: .price
 "></c2-diff-viewer>`,
   'distribution-bar': `<c2-distribution-bar style="width:260px" label="Languages" items='[{"label":"TypeScript","value":820},{"label":"SCSS","value":120},{"label":"Astro","value":50},{"label":"Shell","value":10}]'></c2-distribution-bar>`,
+  'document-checklist': `<c2-document-checklist style="--c2-document-checklist--width:280px;--c2-document-checklist__header--padding:8px 10px;--c2-document-checklist__row--padding:8px 10px;--c2-document-checklist__row--gap:8px;--c2-document-checklist__label--font-size:12px;--c2-document-checklist__summary--font-size:12px;--c2-document-checklist__icon--size:16px;--c2-button__container--height:26px" today="2026-11-15" aria-label="Documents" requirements='[{"id":"id","label":"Passport","status":"approved"}]'></c2-document-checklist>`,
   'duration-input': `<div class="preview-row" style="flex-direction:column;gap:10px">
   <c2-duration-input aria-label="Estimate" value="5400" style="width:200px"></c2-duration-input>
   <c2-duration-input aria-label="Time spent" format="long" value="9000" style="width:200px"></c2-duration-input>
@@ -274,6 +275,7 @@ price: .price
   'image-annotator': `<c2-image-annotator readonly style="width:280px" src="/web-components/images/image-invoice-screen.svg" shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":5},{"id":"b","type":"arrow","x":520,"y":200,"w":-140,"h":-20,"color":"#e11d48","stroke":6},{"id":"c","type":"redact","x":436,"y":96,"w":70,"h":18,"color":"#000000","stroke":4},{"id":"d","type":"number","x":276,"y":246,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":5}]'></c2-image-annotator>`,
   'image-compare': `<c2-image-compare style="width:240px" position="45"><img slot="before" src="/web-components/images/compare-before.svg" alt="Room before" width="800" height="500" /><img slot="after" src="/web-components/images/compare-after.svg" alt="Room after" width="800" height="500" /></c2-image-compare>`,
   'image-cropper': `<c2-image-cropper style="width:240px;--c2-image-cropper__image--max-height:150px;--c2-image-cropper__handle--size:8px" aspect-ratio="1" shape="ellipse" src="/web-components/images/image-mountains.svg" alt="Mountains at sunset"></c2-image-cropper>`,
+  'image-uploader': `<c2-image-uploader style="--c2-image-uploader--width:220px;--c2-image-uploader__tile--min-width:70px" multiple max-files="6" aria-label="Photos"><span slot="hint">Up to 6 photos</span></c2-image-uploader>`,
   'import-mapper': `<c2-import-mapper style="width:300px;--c2-import-mapper--padding:10px;--c2-import-mapper--font-size:12px;--c2-import-mapper__cell--padding:4px 8px" view="preview" fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email","type":"email"}]' csv="Full name,E-mail
 Ada Lovelace,ada@analytical.io
 Grace Hopper,grace(at)navy"></c2-import-mapper>`,
