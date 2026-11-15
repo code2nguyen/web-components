@@ -299,14 +299,14 @@ that, and the `toggle` slot adds a chevron — both off by default.
     --c2-steps--gap: 4px;
     --c2-step__rail__horizontal--width: 0px;
     --c2-step__row__horizontal--grid-template-areas: 'text text text';
-    --c2-step__row__horizontal--min-width: 88px;
+    --c2-step__row__horizontal--min-width: 56px;
     --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
     --c2-step__row--padding-block: 8px;
-    --c2-step__row--padding-inline: 22px;
+    --c2-step__row--padding-inline: 16px;
     --c2-step__row--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-step__row--outline: 2px solid var(--c2-theme--color-on-surface, #18181b);
     --c2-step__label--font-family: inherit;
-    --c2-step__label--font-size: 13px;
+    --c2-step__label--font-size: 12px;
     --c2-step__label--color: var(--c2-theme--color-on-surface, #18181b);
   }
   /* Islands wrap every step, so the first one is named rather than found by its position. */
@@ -332,15 +332,14 @@ that, and the `toggle` slot adds a chevron — both off by default.
   }
 </style>
 <div data-steps-example="stage-path">
-  <c2-steps class="stage-path" orientation="horizontal" interactive marker="none" current="2" selected="proposal" aria-label="Opportunity stage">
+  <c2-steps class="stage-path" orientation="horizontal" interactive marker="none" current="2" selected="propose" aria-label="Opportunity stage">
     <c2-button slot="actions" data-steps-action="mark-current">Mark as current stage</c2-button>
-    <c2-step class="stage-first" value="prospecting" label="Prospecting"></c2-step>
-    <c2-step value="qualification" label="Qualification"></c2-step>
-    <c2-step value="proposal" label="Proposal"></c2-step>
-    <c2-step value="negotiation" label="Negotiation"></c2-step>
+    <c2-step class="stage-first" value="lead" label="Lead"></c2-step>
+    <c2-step value="qualify" label="Qualify"></c2-step>
+    <c2-step value="propose" label="Propose"></c2-step>
     <c2-step value="closed" label="Closed"></c2-step>
   </c2-steps>
-  <p class="stage-path-guidance" data-steps-guidance>Proposal: send the quote and agree a decision date.</p>
+  <p class="stage-path-guidance" data-steps-guidance>Propose: send the quote and agree a decision date.</p>
 </div>
 ```
 
@@ -350,14 +349,14 @@ that, and the `toggle` slot adds a chevron — both off by default.
     --c2-steps--gap: 4px;
     --c2-step__rail__horizontal--width: 0px;
     --c2-step__row__horizontal--grid-template-areas: 'text text text';
-    --c2-step__row__horizontal--min-width: 88px;
+    --c2-step__row__horizontal--min-width: 56px;
     --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
     --c2-step__row--padding-block: 8px;
-    --c2-step__row--padding-inline: 22px;
+    --c2-step__row--padding-inline: 16px;
     --c2-step__row--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-step__row--outline: 2px solid var(--c2-theme--color-on-surface, #18181b);
     --c2-step__label--font-family: inherit;
-    --c2-step__label--font-size: 13px;
+    --c2-step__label--font-size: 12px;
     --c2-step__label--color: var(--c2-theme--color-on-surface, #18181b);
   }
   /* Islands wrap every step, so the first one is named rather than found by its position. */
@@ -390,19 +389,17 @@ that, and the `toggle` slot adds a chevron — both off by default.
   }
 </style>
 <div class="closed-paths">
-  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="5" aria-label="Won opportunity">
-    <c2-step class="stage-first" label="Prospecting"></c2-step>
-    <c2-step label="Qualification"></c2-step>
-    <c2-step label="Proposal"></c2-step>
-    <c2-step label="Negotiation"></c2-step>
-    <c2-step class="stage-outcome" label="Closed won"></c2-step>
+  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="4" aria-label="Won opportunity">
+    <c2-step class="stage-first" label="Lead"></c2-step>
+    <c2-step label="Qualify"></c2-step>
+    <c2-step label="Propose"></c2-step>
+    <c2-step class="stage-outcome" label="Won"></c2-step>
   </c2-steps>
-  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="4" aria-label="Lost opportunity">
-    <c2-step class="stage-first" label="Prospecting"></c2-step>
-    <c2-step label="Qualification"></c2-step>
-    <c2-step label="Proposal"></c2-step>
-    <c2-step label="Negotiation"></c2-step>
-    <c2-step class="stage-outcome" status="error" label="Closed lost"></c2-step>
+  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="3" aria-label="Lost opportunity">
+    <c2-step class="stage-first" label="Lead"></c2-step>
+    <c2-step label="Qualify"></c2-step>
+    <c2-step label="Propose"></c2-step>
+    <c2-step class="stage-outcome" status="error" label="Lost"></c2-step>
   </c2-steps>
 </div>
 ```

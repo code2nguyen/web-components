@@ -55,8 +55,10 @@
 }
 
 // The header: the summary line and the app's actions, above the steps. Not drawn unless asked for.
+// The actions wrap under the summary when they do not fit beside it, rather than squeezing it.
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: css.cssVar(header--gap);
   box-sizing: border-box;
