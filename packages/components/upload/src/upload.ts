@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, svg, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, svg, unsafeCSS, type CSSResultGroup } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -24,6 +24,8 @@ export interface UploadItem {
   result?: unknown
   error?: unknown
   previewUrl?: string
+  /** Upload target the file was added through, when a component has several (a `c2-document-checklist` row's id). */
+  target?: string
 }
 
 export type UploadRejectionReason = 'type' | 'size' | 'limit' | 'multiple'
@@ -37,6 +39,8 @@ export interface UploadRejection {
 export interface UploadHandlerContext {
   signal: AbortSignal
   onProgress: (progress: number) => void
+  /** The item's `target`, when the component has several upload targets. */
+  target?: string
 }
 
 /** Application upload function. Resolve with server data; throw to show the attachment error/retry state. */
@@ -145,18 +149,18 @@ let uploadItemId = 0
 export class Upload extends LitElement {
   static formAssociated = true
 
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
   private readonly controllers = new Map<string, AbortController>()
   private dragDepth = 0
   private customValidityMessage = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
-  private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  protected readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private readonly msg = new LocalizeController(this, uploadMessages)
-  @state() private uploadItems: UploadItem[] = []
-  @state() private rejections: UploadRejection[] = []
-  @state() private dragging = false
+  @state() protected uploadItems: UploadItem[] = []
+  @state() protected rejections: UploadRejection[] = []
+  @state() protected dragging = false
   @state() private disabledByForm = false
 
   /** Accept several files in one browse or drop operation. */
@@ -192,7 +196,7 @@ export class Upload extends LitElement {
   /** Application-provided transport. Report percentages through `onProgress`; respect `signal` to support cancel. */
   @property({ attribute: false }) uploadHandler: UploadHandler | undefined
 
-  @query('input', true) private input!: HTMLInputElement
+  @query('input', true) protected input!: HTMLInputElement
 
   /** Current queue, including ready, uploading, complete and failed items. */
   get items(): readonly UploadItem[] {
@@ -263,20 +267,20 @@ export class Upload extends LitElement {
     this.syncFormState()
   }
 
-  private get effectiveDisabled(): boolean {
+  protected get effectiveDisabled(): boolean {
     return this.disabled || this.disabledByForm
   }
 
-  private get remainingCapacity(): number | undefined {
+  protected get remainingCapacity(): number | undefined {
     return this.maxFiles > 0 ? Math.max(0, this.maxFiles - this.uploadItems.length) : undefined
   }
 
-  private get canAddMore(): boolean {
+  protected get canAddMore(): boolean {
     if (!this.multiple) return this.uploadItems.length === 0
     return this.remainingCapacity === undefined || this.remainingCapacity > 0
   }
 
-  private get pickerDisabled(): boolean {
+  protected get pickerDisabled(): boolean {
     return this.effectiveDisabled || !this.canAddMore
   }
 
@@ -295,25 +299,34 @@ export class Upload extends LitElement {
 
     incoming.forEach((file, index) => {
       let reason: UploadRejectionReason | undefined
-      let message = ''
-      if (!this.multiple && (this.uploadItems.length > 0 || index > 0)) {
-        reason = 'multiple'
-        message = 'Only one file can be selected.'
-      } else if (accepted.length >= available) {
-        reason = 'limit'
-        message = `A maximum of ${this.maxFiles} files is allowed.`
-      } else if (!this.accepts(file)) {
-        reason = 'type'
-        message = `${file.name} is not an accepted file type.`
-      } else if (this.maxSize > 0 && file.size > this.maxSize) {
-        reason = 'size'
-        message = `${file.name} exceeds the ${this.formatBytes(this.maxSize)} size limit.`
-      }
+      if (!this.multiple && (this.uploadItems.length > 0 || index > 0)) reason = 'multiple'
+      else if (accepted.length >= available) reason = 'limit'
+      else if (!this.accepts(file)) reason = 'type'
+      else if (this.maxSize > 0 && file.size > this.maxSize) reason = 'size'
 
-      if (reason) rejected.push({ file, reason, message })
+      if (reason) rejected.push({ file, reason, message: this.rejectionMessage(reason, file) })
       else accepted.push(this.createItem(file))
     })
 
+    this.enqueue(accepted, rejected)
+    return accepted
+  }
+
+  /** The message shown for a rejected file. Companions with a message catalog of their own translate it. */
+  protected rejectionMessage(reason: UploadRejectionReason, file: File): string {
+    if (reason === 'multiple') return 'Only one file can be selected.'
+    if (reason === 'limit') return `A maximum of ${this.maxFiles} files is allowed.`
+    if (reason === 'type') return `${file.name} is not an accepted file type.`
+    return `${file.name} exceeds the ${this.formatBytes(this.maxSize)} size limit.`
+  }
+
+  /** The form-data name a queued file is appended under. */
+  protected formEntryName(_item: UploadItem): string {
+    return this.name
+  }
+
+  /** Adds validated items to the queue and reports them and the rejected files, as `addFiles` does after validating. */
+  protected enqueue(accepted: UploadItem[], rejected: UploadRejection[]): void {
     if (accepted.length) {
       this.uploadItems = [...this.uploadItems, ...accepted]
       this.emit('files-selected', { files: accepted.map((item) => item.file), items: accepted })
@@ -322,7 +335,6 @@ export class Upload extends LitElement {
     }
     this.rejections = rejected
     if (rejected.length) this.emit('file-reject', { rejections: rejected })
-    return accepted
   }
 
   /** Upload every ready/error item, or one item by id. */
@@ -368,21 +380,22 @@ export class Upload extends LitElement {
     }
   }
 
-  private notifyValueChange(): void {
+  protected notifyValueChange(): void {
     this.syncFormState()
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
-  private emit<K extends keyof UploadEventMap>(type: K, detail: UploadEventMap[K] extends CustomEvent<infer D> ? D : never): void {
+  protected emit<K extends keyof UploadEventMap>(type: K, detail: UploadEventMap[K] extends CustomEvent<infer D> ? D : never): void {
     const event = new CustomEvent(type, { detail, bubbles: true, composed: true })
     this.dispatchEvent(event)
   }
 
-  private createItem(file: File): UploadItem {
+  protected createItem(file: File, target?: string): UploadItem {
     return {
       id: `upload-${++uploadItemId}`,
       file,
+      ...(target === undefined ? {} : { target }),
       status: 'ready',
       progress: 0,
       previewUrl: file.type.startsWith('image/') && typeof URL.createObjectURL === 'function' ? URL.createObjectURL(file) : undefined,
@@ -413,6 +426,7 @@ export class Upload extends LitElement {
     try {
       const result = await this.uploadHandler(current.file, {
         signal: controller.signal,
+        ...(current.target === undefined ? {} : { target: current.target }),
         onProgress: (progress) => {
           if (controller.signal.aborted) return
           const safeProgress = Math.min(100, Math.max(0, Number.isFinite(progress) ? progress : 0))
@@ -432,8 +446,8 @@ export class Upload extends LitElement {
     }
   }
 
-  private accepts(file: File): boolean {
-    const rules = this.accept
+  protected accepts(file: File, accept = this.accept): boolean {
+    const rules = accept
       .split(',')
       .map((rule) => rule.trim().toLowerCase())
       .filter(Boolean)
@@ -447,24 +461,24 @@ export class Upload extends LitElement {
     })
   }
 
-  private formatBytes(bytes: number): string {
+  protected formatBytes(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`
   }
 
-  private revokePreview(item: UploadItem): void {
+  protected revokePreview(item: UploadItem): void {
     if (item.previewUrl) URL.revokeObjectURL(item.previewUrl)
   }
 
-  private handleInputChange(event: Event): void {
+  protected handleInputChange(event: Event): void {
     event.stopPropagation()
     const input = event.currentTarget as HTMLInputElement
     if (input.files) this.addFiles(input.files)
     input.value = ''
   }
 
-  private stopNativeInput(event: Event): void {
+  protected stopNativeInput(event: Event): void {
     event.stopPropagation()
   }
 
@@ -474,26 +488,26 @@ export class Upload extends LitElement {
     this.browse()
   }
 
-  private handleDragEnter(event: DragEvent): void {
+  protected handleDragEnter(event: DragEvent): void {
     event.preventDefault()
     if (this.pickerDisabled || !event.dataTransfer?.types.includes('Files')) return
     this.dragDepth += 1
     this.dragging = true
   }
 
-  private handleDragOver(event: DragEvent): void {
+  protected handleDragOver(event: DragEvent): void {
     if (this.pickerDisabled) return
     event.preventDefault()
     if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
   }
 
-  private handleDragLeave(event: DragEvent): void {
+  protected handleDragLeave(event: DragEvent): void {
     event.preventDefault()
     this.dragDepth = Math.max(0, this.dragDepth - 1)
     if (this.dragDepth === 0) this.dragging = false
   }
 
-  private handleDrop(event: DragEvent): void {
+  protected handleDrop(event: DragEvent): void {
     event.preventDefault()
     this.dragDepth = 0
     this.dragging = false
@@ -505,17 +519,27 @@ export class Upload extends LitElement {
     if (this.effectiveDisabled || !this.name || this.uploadItems.length === 0) this.internals.setFormValue(null)
     else {
       const data = new FormData()
-      for (const item of this.uploadItems) data.append(this.name, item.file, item.file.name)
+      for (const item of this.uploadItems) data.append(this.formEntryName(item), item.file, item.file.name)
       this.internals.setFormValue(data)
     }
-    const missing = this.required && this.uploadItems.length === 0
+    const missing = this.valueMissing
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
+    const message = this.customValidityMessage || (missing ? this.valueMissingText : '')
     const anchor = (this.renderRoot?.querySelector('.picker') as HTMLElement | null | undefined) ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
 
-  private renderIcon() {
+  /** Whether `required` is unmet. Companions with several upload targets redefine what a complete value is. */
+  protected get valueMissing(): boolean {
+    return this.required && this.uploadItems.length === 0
+  }
+
+  /** The validation message while `valueMissing`. */
+  protected get valueMissingText(): string {
+    return this.msg.t('valueMissing')
+  }
+
+  protected renderIcon() {
     return svg`<svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 16l-4-4-4 4M12 12v9"></path><path d="M20.4 17.5A5 5 0 0 0 18 8.2 7 7 0 0 0 4.3 10.8 4.5 4.5 0 0 0 5.5 19H7"></path></svg>`
   }
 
@@ -534,7 +558,7 @@ export class Upload extends LitElement {
     return this.remainingCapacity === undefined ? 'Upload more' : `Upload more (${this.remainingCapacity} remaining)`
   }
 
-  private renderPicker() {
+  protected renderPicker() {
     if (!this.canAddMore) return nothing
     if (this.variant === 'compact') {
       return html`
@@ -576,7 +600,7 @@ export class Upload extends LitElement {
     `
   }
 
-  override render() {
+  protected renderInput() {
     return html`
       <input
         type="file"
@@ -588,38 +612,42 @@ export class Upload extends LitElement {
         @input=${this.stopNativeInput}
         @change=${this.handleInputChange}
       />
-      ${this.renderPicker()}
-      ${
-        this.rejections.length
-          ? html`<div part="errors" class="errors" role="status">${this.rejections.map((rejection) => html`<div>${rejection.message}</div>`)}</div>`
-          : nothing
-      }
-      ${
-        this.uploadItems.length
-          ? html`<div part="list" class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label=${this.msg.t('selectedFiles')}>
-              ${this.uploadItems.map(
-                (item) => html`
-                  <c2-attachment
-                    role="listitem"
-                    layout="row"
-                    .name=${item.file.name}
-                    .type=${item.file.type || undefined}
-                    .size=${this.formatBytes(item.file.size)}
-                    .src=${item.previewUrl}
-                    .status=${item.status}
-                    .progress=${item.progress}
-                    removable
-                    ?disabled=${this.effectiveDisabled}
-                    @attachment-remove=${() => this.removeFile(item.id)}
-                    @attachment-retry=${() => void this.retry(item.id)}
-                  ></c2-attachment>
-                `,
-              )}
-            </div>`
-          : html`<slot part="empty" name="empty"></slot>`
-      }
-      ${this.field.renderDescription()}
     `
+  }
+
+  protected renderErrors() {
+    return this.rejections.length
+      ? html`<div part="errors" class="errors" role="status">${this.rejections.map((rejection) => html`<div>${rejection.message}</div>`)}</div>`
+      : nothing
+  }
+
+  protected renderQueue() {
+    return this.uploadItems.length
+      ? html`<div part="list" class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label=${this.msg.t('selectedFiles')}>
+          ${this.uploadItems.map(
+            (item) => html`
+              <c2-attachment
+                role="listitem"
+                layout="row"
+                .name=${item.file.name}
+                .type=${item.file.type || undefined}
+                .size=${this.formatBytes(item.file.size)}
+                .src=${item.previewUrl}
+                .status=${item.status}
+                .progress=${item.progress}
+                removable
+                ?disabled=${this.effectiveDisabled}
+                @attachment-remove=${() => this.removeFile(item.id)}
+                @attachment-retry=${() => void this.retry(item.id)}
+              ></c2-attachment>
+            `,
+          )}
+        </div>`
+      : html`<slot part="empty" name="empty"></slot>`
+  }
+
+  override render() {
+    return html`${this.renderInput()} ${this.renderPicker()} ${this.renderErrors()} ${this.renderQueue()} ${this.field.renderDescription()}`
   }
 }
 

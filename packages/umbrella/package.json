@@ -1189,6 +1189,14 @@
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
     },
+    "./upload/document-checklist": {
+      "types": "./dist/upload/document-checklist.d.ts",
+      "default": "./dist/upload/document-checklist.js"
+    },
+    "./upload/image-uploader": {
+      "types": "./dist/upload/image-uploader.d.ts",
+      "default": "./dist/upload/image-uploader.js"
+    },
     "./video-grid": {
       "types": "./dist/video-grid.d.ts",
       "default": "./dist/video-grid.js"
