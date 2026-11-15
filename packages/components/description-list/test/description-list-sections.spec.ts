@@ -7,8 +7,10 @@ test('a section titles its items across the list, and a collapsible one opens on
   await expect(groups.first()).toHaveHostAria('role', 'listitem')
   await expect(page.getByRole('heading', { name: 'Contact', level: 3 })).toBeVisible()
   await expect(page.getByText('ada@example.com')).toBeVisible()
-  // The second section starts closed: its value is there but not shown.
-  await expect(page.getByText('Visa ending 4242')).toBeHidden()
+  // The second section starts closed: its value is there but not shown. The browser hides a closed <details>; WebKit
+  // does it with content-visibility, which Playwright's visibility check does not see through the shadow roots.
+  const billingOpen = () => groups.nth(1).evaluate((group) => group.shadowRoot!.querySelector('details')!.open)
+  expect(await billingOpen()).toBe(false)
   await groups
     .nth(1)
     .evaluate((group) =>
@@ -25,7 +27,7 @@ test('a section titles its items across the list, and a collapsible one opens on
   await expect(toggle).toHaveAttribute('aria-expanded', 'true')
   await toggle.focus()
   await page.keyboard.press('Enter')
-  await expect(page.getByText('Visa ending 4242')).toBeHidden()
+  await expect.poll(billingOpen).toBe(false)
   expect((await new AxeBuilder({ page }).include('main').analyze()).violations).toEqual([])
 })
 
