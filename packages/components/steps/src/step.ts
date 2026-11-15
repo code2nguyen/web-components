@@ -71,6 +71,9 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * lands under its parent's label. `--c2-step__text--flex-direction: column` still stacks the detail under the
  * label, which a wizard's descriptions want — that is two lines on purpose, and each of them is still one line.
  *
+ * **With `href` a row is a link** — a task in a task list, which opens its own page. A group's row stays its
+ * disclosure, and a `disabled` step drops its link.
+ *
  * **In an `interactive` list a row is a button.** Pressing it selects the step — the list keeps one selected step and
  * says so with `selection-change` — so a view can show what belongs to it: the log of the step that ran, the result
  * of the step that produced one. A group's row stays its disclosure; `disabled` keeps a step from being selected.
@@ -99,7 +102,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @event {CustomEvent<StepToggleEventDetail>} step-toggle - A group was folded away or brought back. Bubbles.
  *
  * @csspart frame - The box around the whole step, which is what grows when a new step arrives.
- * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`, and a selectable row in an `interactive` list is a `<button>`.
+ * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`, a step with `href` is an `<a>`, and a selectable row in an `interactive` list is a `<button>`.
  * @csspart toggle - Disclosure region containing the assigned `toggle` slot for a group.
  * @csspart marker - Round marker region containing the `marker` slot or status fallback at the start of the row.
  * @csspart rail - The connector between this marker and the next.
@@ -120,6 +123,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {color} --c2-step__row__selected--background - Background of the selected row in an `interactive` list. None by default: the label colour alone marks the selection.
  * @cssproperty {box-shadow} --c2-step__row__selected--box-shadow - An indicator for the selected row — `inset 0 -2px 0 currentColor` underlines it.
  * @cssproperty {opacity} [--c2-step__row__disabled--opacity=0.38] - A `disabled` step in an `interactive` list.
+ * @cssproperty {clip-path} --c2-step__row--clip-path - Cuts the row to a shape: a chevron, for a stage path — `polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%)` with the rail off and a background per status.
  * @cssproperty {border} [--c2-step__row__horizontal--border-bottom=none] - The hairline under each step of a horizontal list, which has none by default.
  * @cssproperty {pixel} [--c2-step__row__horizontal--min-width=96px] - The narrowest a step of a horizontal list gets before the list scrolls.
  * @cssproperty {grid-template-areas} [--c2-step__row__horizontal--grid-template-areas="marker rail rail" "text text text" "trailing trailing trailing"] - Where the text sits around the marker in a horizontal list. The cells are `marker`, `rail`, `text` and `trailing`, over three columns sized `auto auto 1fr`; the rail always takes the last one and runs on to the next step. Text over the marker: `"text text text" "trailing trailing trailing" "marker rail rail"`, with `--c2-step__row__horizontal--align-content: end`. Beside it: `"marker text rail" ". trailing ."`. Before it: `"text marker rail" "trailing . ."`.
@@ -153,6 +157,9 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {font-family} [--c2-step__label--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
  * @cssproperty {color} [--c2-step__label__selected--color=rgb(2, 101, 220)] - Label colour of the selected row: what marks the selection by default.
  * @cssproperty {font-weight} --c2-step__label__selected--font-weight - Label weight of the selected row. Falls back to the label weight.
+ * @cssproperty {color} --c2-step__label__link--color - Label colour of a step with `href`. Falls back to the label colour.
+ * @cssproperty {text-decoration} [--c2-step__label__link--text-decoration=none] - Underline of a linked label at rest.
+ * @cssproperty {text-decoration} [--c2-step__label__link__hover--text-decoration=underline] - Underline of a linked label while the pointer is on its row or the row has focus.
  * @cssproperty {color} [--c2-step__detail--color=#71717a]
  * @cssproperty {font-size} --c2-step__detail--font-size - Falls back to the label size.
  * @cssproperty {font-weight} [--c2-step__detail--font-weight=400]
@@ -206,6 +213,13 @@ export class Step extends LitElement {
 
   /** In an `interactive` list, keeps the step from being selected. Its row stays visible, and its status still shows. */
   @property({ type: Boolean, reflect: true }) disabled = false
+
+  /**
+   * Makes the row a link to this URL — a task in a task list. A group's row stays its disclosure, and a `disabled`
+   * step is drawn without its link: a task that cannot start yet. In an `interactive` list, following the link also
+   * selects the step.
+   */
+  @property() href = ''
 
   /**
    * Whether this group is folded away. A group is expanded by default — every step in the list is a row you can
@@ -358,8 +372,10 @@ export class Step extends LitElement {
   }
 
   /** The list owns the selection; the row only asks for it. */
-  private handleSelect() {
+  private handleSelect(event?: MouseEvent) {
     if (this.disabled) return
+    // A link opened in another tab or window leaves this view where it is, so it selects nothing either.
+    if (event?.currentTarget instanceof HTMLAnchorElement && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0)) return
     this.dispatchEvent(
       new CustomEvent<StepSelectRequestDetail>(STEP_SELECT_EVENT, { detail: { value: this.value || this.path }, bubbles: true, composed: true }),
     )
@@ -412,8 +428,18 @@ export class Step extends LitElement {
     `
   }
 
-  /** A leaf's row: a button in an `interactive` list, which is what makes it focusable and pressable. */
+  /** A leaf's row: a link with `href`, a button in an `interactive` list, which is what makes it focusable and pressable. */
   private renderLeafRow(rowClass: ReturnType<typeof classMap>): TemplateResult {
+    if (this.href && !this.disabled) {
+      return html`<a
+        class=${rowClass}
+        part="row"
+        href=${this.href}
+        aria-current=${this.interactive && this.selected ? 'true' : nothing}
+        @click=${this.interactive ? this.handleSelect : nothing}
+        >${this.renderRowContent()}</a
+      >`
+    }
     if (!this.interactive) return html`<div class=${rowClass} part="row">${this.renderRowContent()}</div>`
     return html`<button
       type="button"
