@@ -98,6 +98,24 @@ The examples below are real application patterns rather than visual variants. Th
     <span slot="empty">No products match this search.</span>
   </c2-autocomplete>
 </div>
+<div data-label="Record picker">
+  <c2-autocomplete
+    client:only="lit"
+    class="autocomplete-example"
+    multiple
+    creatable
+    data-autocomplete-example="create"
+    name="accounts"
+    aria-label="Related accounts"
+    placeholder="Search or create an account…"
+    item-key="id"
+    label-field="name"
+    description-field="city"
+    suggestions='[{"id":"acme","name":"Acme Corporation","city":"Chicago"},{"id":"globex","name":"Globex","city":"Springfield"},{"id":"initech","name":"Initech","city":"Austin"},{"id":"hooli","name":"Hooli","city":"Palo Alto"}]'
+    selected-items='[{"id":"acme","name":"Acme Corporation","city":"Chicago"}]'
+    recent-items='[{"id":"hooli","name":"Hooli","city":"Palo Alto"},{"id":"initech","name":"Initech","city":"Austin"}]'
+  ></c2-autocomplete>
+</div>
 ```
 
 <AutocompleteExamplesRuntime />
@@ -168,3 +186,24 @@ autocomplete.renderItem = ({ item }) => html`
 ```
 
 For structures that cannot be described by fields, set `matcher(item, normalizedQuery)` to replace local matching. Remote `dataSource` results are assumed to be filtered by the server.
+
+### Record picker
+
+Three opt-in attributes make the field a lookup of another entity's records, as in a CRM:
+
+- `multiple` keeps every choice in `selectedItems` (`selected-items` as JSON), drawn as removable `c2-chip`s before the input. The chips stay out of the Tab order: in an empty input Backspace removes the last pick and Left Arrow moves to the picks, where Left and Right move and Backspace or Delete removes the focused one. Each removal fires `item-remove` followed by `input` and `change`. Because `value` stays the query, a two-way binding of `value` (`v-model`, an Angular form control) does not carry the picks: read `selectedItems` on `change`. Picked records leave the suggestions, the form submits one entry per pick under `name`, and `required` means at least one pick. `renderPick({ item, index })` replaces a chip's label. The chip element loads the first time `multiple` is set, so a single-value field never downloads it.
+- `creatable` adds a "Create “query”" row after the results when no suggestion's label equals the query. Arrow keys or the pointer reach it (Enter on an unmatched query does not create anything by accident). Choosing it fires `create-request` with the query; the app creates the record and calls `pick(record)`, which adds it as a choice would and fires `input` and `change`.
+- `recent-items` (an array property, JSON in the attribute) is shown under a "Recent" heading while the input is focused and the query is shorter than `min-query-length`. The app keeps that list; the component stores nothing.
+
+The advanced search of a full record picker, a dialog with a filterable multi-column table, is an app composition: put a button in the `footer` slot that opens a `c2-modal` holding a `c2-table`, and `pick()` each row the person chooses.
+
+```ts tag=CodeBlock
+accounts.addEventListener('create-request', async ({ detail }) => {
+  const account = await api.createAccount({ name: detail.query })
+  accounts.pick(account)
+})
+
+accounts.addEventListener('change', () => {
+  const ids = accounts.selectedItems.map((account) => account.id)
+})
+```

@@ -9,6 +9,25 @@
   import '@c2n/components/avatar'
   import '@c2n/components/badge'
   import '@c2n/components/kbd'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French an app would add for the gallery's French card: the library ships English only.
+  addTranslations({
+    fr: {
+      autocomplete: {
+        loading: 'Chargement des suggestions…',
+        loadError: 'Impossible de charger les suggestions.',
+        empty: 'Aucune suggestion trouvée.',
+        clear: 'Effacer',
+        suggestions: 'Suggestions',
+        suggestionsFor: 'Suggestions pour {0}',
+        valueMissing: 'Veuillez renseigner ce champ.',
+        create: 'Créer « {0} »',
+        recent: 'Récents',
+      },
+      chip: { remove: 'Retirer', removeItem: 'Retirer {0}' },
+    },
+  })
 
   interface TeamMember {
     id: string
@@ -134,6 +153,22 @@
     })
   }
 
+  /** The app owns record creation: here the new label is made in memory and handed back with `pick()`. */
+  function setupCreate(field: Autocomplete) {
+    field.addEventListener('create-request', ({ detail }) => {
+      const record = field.itemKey ? { [field.itemKey]: `new-${Date.now()}`, [field.labelField || 'label']: detail.query } : detail.query
+      field.suggestions = [...field.suggestions, record]
+      field.pick(record)
+    })
+  }
+
+  function setupAvatarPicks(field: Autocomplete) {
+    field.renderPick = ({ item }) => {
+      const person = item as TeamMember
+      return html`<c2-avatar slot="prefix" name=${person.name} auto-color aria-hidden="true"></c2-avatar>${person.name}`
+    }
+  }
+
   function setup() {
     document.querySelectorAll<Autocomplete>('[data-autocomplete-example]').forEach((field) => {
       if (initialized.has(field)) return
@@ -148,6 +183,12 @@
           break
         case 'commands':
           setupCommandLauncher(field)
+          break
+        case 'create':
+          setupCreate(field)
+          break
+        case 'avatar-picks':
+          setupAvatarPicks(field)
           break
       }
     })

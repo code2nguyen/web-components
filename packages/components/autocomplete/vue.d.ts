@@ -30,9 +30,13 @@ declare module 'vue' {
         'min-query-length'?: unknown
         'max-results'?: unknown
         'show-empty'?: unknown
-        onSuggestionSelect?: (event: EventOf<Autocomplete, 'suggestion-select'>) => void
+        'selected-items'?: unknown
+        'recent-items'?: unknown
         onInput?: (event: EventOf<Autocomplete, 'input'>) => void
         onChange?: (event: EventOf<Autocomplete, 'change'>) => void
+        onSuggestionSelect?: (event: EventOf<Autocomplete, 'suggestion-select'>) => void
+        onCreateRequest?: (event: EventOf<Autocomplete, 'create-request'>) => void
+        onItemRemove?: (event: EventOf<Autocomplete, 'item-remove'>) => void
         onQueryChange?: (event: EventOf<Autocomplete, 'query-change'>) => void
       }
     >

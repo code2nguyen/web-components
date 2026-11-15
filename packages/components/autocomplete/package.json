@@ -49,6 +49,7 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
+        "../chip:build",
         "../list:build",
         "../list-item:build",
         "../overlay:build"
@@ -63,6 +64,7 @@
     }
   },
   "dependencies": {
+    "@c2n/chip": "*",
     "@c2n/core": "*",
     "@c2n/list": "*",
     "@c2n/list-item": "*",

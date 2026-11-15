@@ -46,10 +46,35 @@ export interface AutocompleteSelectEventDetail {
   index: number
 }
 
+export interface AutocompletePickContext {
+  /** A picked item, as held in `selectedItems`. */
+  item: unknown
+  /** Its position in `selectedItems`. */
+  index: number
+}
+
+/** Returns anything Lit can render. The result is the label of the pick's `c2-chip`. */
+export type AutocompletePickRenderer = (context: AutocompletePickContext) => unknown
+
+export interface AutocompleteCreateRequestEventDetail {
+  /** The trimmed query the person asked to create a record from. */
+  query: string
+}
+
+export interface AutocompleteItemRemoveEventDetail {
+  /** The removed pick's key (its label when there is no `itemKey`). */
+  value: string
+  item: unknown
+  /** Its former position in `selectedItems`. */
+  index: number
+}
+
 /** Events fired by {@link Autocomplete}, keyed for `addEventListener`. */
 export interface AutocompleteEventMap {
   'query-change': CustomEvent<{ query: string }>
   'suggestion-select': CustomEvent<AutocompleteSelectEventDetail>
+  'create-request': CustomEvent<AutocompleteCreateRequestEventDetail>
+  'item-remove': CustomEvent<AutocompleteItemRemoveEventDetail>
   input: InputEvent
   change: Event
 }
@@ -62,6 +87,8 @@ export interface Autocomplete {
 /** Default of `--c2-autocomplete__list--min-height`. */
 const LIST_MIN_HEIGHT = 96
 const IMPLICIT_LABEL_FIELDS = ['label', 'name', 'title', 'value']
+/** List key of the "create" row; a NUL never appears in a key the app chose. */
+const CREATE_KEY = '\u0000create'
 let autocompleteId = 0
 
 /**
@@ -73,6 +100,13 @@ let autocompleteId = 0
  * Local suggestions are filtered in the browser. `dataSource(query, signal)` delegates matching to a server and is
  * debounced; every superseded request is aborted. The overlay is structurally a header slot, the list, and a footer
  * slot, with loading / empty / error states rendered inside the list surface.
+ *
+ * As a record picker, `multiple` keeps every choice in `selectedItems`, shown as removable `c2-chip`s before the
+ * input and submitted as one form entry per pick; picked items leave the suggestions. The chips are out of the Tab
+ * order: in an empty input Backspace removes the last pick and Left Arrow moves to the picks, where Left and Right move
+ * and Backspace or Delete removes the focused one. `creatable` adds a "Create “query”" row when nothing matches the query exactly: choosing
+ * it fires `create-request`, and the app creates the record and hands it back with `pick(record)`. `recent-items`
+ * are offered under a "Recent" heading while the query is shorter than `min-query-length`.
  *
  * @tag c2-autocomplete
  *
@@ -89,6 +123,11 @@ let autocompleteId = 0
  * @event {CustomEvent<AutocompleteSelectEventDetail>} suggestion-select - Fired after a row is chosen. The detail contains the selected key (the label when there is no `itemKey`), original item and visible index.
  * @event {InputEvent} input - Re-dispatched from the inner input on every edit; also fired after a suggestion replaces the value.
  * @event {Event} change - Fired after the typed value is committed or a suggestion replaces it.
+ * @event {CustomEvent<AutocompleteCreateRequestEventDetail>} create-request - The "create" row of a `creatable` autocomplete was chosen. Create the record, then call `pick(record)`.
+ * @event {CustomEvent<AutocompleteItemRemoveEventDetail>} item-remove - A pick of a `multiple` autocomplete was removed with its chip or Backspace; `input` and `change` follow.
+ *
+ * @csspart pick - The `c2-chip` of each picked item in `multiple` mode.
+ * @csspart create-option - The "create" row of a `creatable` autocomplete.
  *
  * @cssproperty {pixel} [--c2-autocomplete--min-height=40px]
  * @cssproperty {padding} [--c2-autocomplete--padding=8px 10px]
@@ -137,10 +176,16 @@ let autocompleteId = 0
  * @cssproperty {font-weight} [--c2-autocomplete__highlight--font-weight=600]
  * @cssproperty {color} [--c2-autocomplete__status--color=#71717a]
  * @cssproperty {padding} [--c2-autocomplete__status--padding=14px 12px]
+ * @cssproperty {pixel} [--c2-autocomplete__picks--gap=4px] - Space between the picks and the input in `multiple` mode, which wraps.
+ * @cssproperty {pixel} [--c2-autocomplete__pick--height=24px]
+ * @cssproperty {font-size} [--c2-autocomplete__pick--font-size=12px]
+ * @cssproperty {pixel} [--c2-autocomplete__input--min-width=80px] - Narrowest the input gets beside the picks before it wraps to a line of its own.
+ * @cssproperty {color} [--c2-autocomplete__create--color=rgb(2, 101, 220)] - Text of the "create" row.
  *
  * @internalcomponent c2-overlay
  * @internalcomponent c2-list
  * @internalcomponent c2-list-item
+ * @internalcomponent c2-chip
  */
 @customElement('c2-autocomplete')
 export class Autocomplete extends LitElement {
@@ -155,6 +200,7 @@ export class Autocomplete extends LitElement {
   private readonly uid = ++autocompleteId
   private defaultValue = ''
   private defaultValueCaptured = false
+  private defaultSelectedItems: unknown[] = []
   private debounceTimer: ReturnType<typeof setTimeout> | undefined
   private requestController: AbortController | undefined
   private pendingQuery: string | undefined
@@ -236,12 +282,37 @@ export class Autocomplete extends LitElement {
   /** Original item selected most recently, or `undefined` after the input is edited. */
   @property({ attribute: false }) selectedItem: unknown
 
+  /**
+   * Keeps every choice instead of one: the picks are `selectedItems`, shown as chips, and the form value is one entry
+   * per pick. The input only holds the query, which a choice clears unless `selectionBehavior` is `preserve`, so a
+   * two-way binding of `value` (`v-model`, an Angular form control) sees the query: read `selectedItems` on `change`.
+   */
+  @property({ type: Boolean }) multiple = false
+
+  /** The picks of a `multiple` autocomplete. An array in the property, JSON in the attribute; a form reset restores the initial picks. */
+  @property({ converter: jsonPropertyConverter, attribute: 'selected-items' }) selectedItems: unknown[] = []
+
+  /** Replaces the label of each pick's chip; the chip itself, its remove button and keyboard stay the component's. */
+  @property({ attribute: false }) renderPick: AutocompletePickRenderer | undefined
+
+  /** Adds a "Create “query”" row when no suggestion's label equals the query; choosing it fires `create-request`. */
+  @property({ type: Boolean }) creatable = false
+
+  /**
+   * Items offered under a "Recent" heading while the input is focused and the query is shorter than
+   * `minQueryLength`. An array in the property, JSON in the attribute. The app keeps the list (for example from
+   * `suggestion-select`); the component stores nothing.
+   */
+  @property({ converter: jsonPropertyConverter, attribute: 'recent-items' }) recentItems: unknown[] = []
+
   @state() private results: unknown[] = []
   @state() private loading = false
   @state() private loadError: unknown
   @state() private focused = false
   @state() private activeIndex = -1
   @state() private disabledByForm = false
+  /** The results are `recentItems`, shown under their heading. */
+  @state() private showingRecent = false
   /** The panel has too little room for its header and footer; only the list is shown. */
   @state() private compactPanel = false
   /** Height of the header and footer, measured while they are shown (hidden, they measure 0). */
@@ -261,6 +332,7 @@ export class Autocomplete extends LitElement {
     this.ownerDocument.addEventListener('keydown', this.handleDocumentKeydown, true)
     if (!this.defaultValueCaptured) {
       this.defaultValue = this.getAttribute('value') ?? this.value
+      this.defaultSelectedItems = this.selectedItems
       this.defaultValueCaptured = true
     }
   }
@@ -277,6 +349,7 @@ export class Autocomplete extends LitElement {
   formResetCallback() {
     this.value = this.defaultValue
     this.selectedItem = undefined
+    if (this.multiple) this.selectedItems = [...this.defaultSelectedItems]
     this.close()
   }
 
@@ -286,6 +359,11 @@ export class Autocomplete extends LitElement {
 
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = state
+    else if (state instanceof FormData && this.multiple) {
+      // Only keys were saved: find the records they belong to, else keep the key itself.
+      const known = [...this.selectedItems, ...this.suggestions, ...this.recentItems]
+      this.selectedItems = state.getAll(this.name).map((key) => known.find((item) => this.pickKey(item) === key) ?? key)
+    }
   }
 
   get form() {
@@ -326,14 +404,52 @@ export class Autocomplete extends LitElement {
     this.input?.focus(options)
   }
 
+  /**
+   * Picks `item` as a choice from the list would: in `multiple` mode it joins `selectedItems` (once), otherwise it
+   * becomes `selectedItem`. Unless `selectionBehavior` is `preserve`, the query is cleared (`multiple`) or replaced by
+   * the item's key. Fires `input` and `change` when the form value changed, not `suggestion-select`. A
+   * `create-request` handler hands the new record back this way.
+   */
+  pick(item: unknown) {
+    if (this.applyPick(item)) {
+      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+      this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
+    }
+  }
+
+  /** Records a pick without events; returns whether the form value changed. */
+  private applyPick(item: unknown): boolean {
+    const replaceValue = this.selectionBehavior !== 'preserve'
+    if (this.multiple) {
+      const added = !this.isPicked(item)
+      if (added) this.selectedItems = [...this.selectedItems, item]
+      if (replaceValue) this.value = ''
+      return added
+    }
+    this.selectedItem = item
+    if (!replaceValue) return false
+    const value = this.pickKey(item)
+    const changed = value !== this.value
+    this.value = value
+    return changed
+  }
+
   /** Runs local matching or the remote data source immediately, bypassing the debounce. */
   async load(query = this.value): Promise<void> {
     this.cancelPendingRequest()
+    this.showingRecent = false
     const normalizedQuery = query.trim()
     if (normalizedQuery.length < this.minQueryLength || this.effectiveDisabled || this.readonly) {
       this.results = []
       this.loading = false
       this.loadError = undefined
+      const recent = this.focused && normalizedQuery.length < this.minQueryLength ? this.visible(this.recentItems) : []
+      if (recent.length && !this.effectiveDisabled && !this.readonly) {
+        this.results = recent
+        this.showingRecent = true
+        this.finishResults()
+        return
+      }
       this.close()
       return
     }
@@ -341,7 +457,7 @@ export class Autocomplete extends LitElement {
     if (!this.dataSource) {
       this.loading = false
       this.loadError = undefined
-      this.results = this.suggestions.filter((item) => this.itemMatches(item, normalizedQuery)).slice(0, Math.max(0, this.maxResults))
+      this.results = this.visible(this.suggestions.filter((item) => this.itemMatches(item, normalizedQuery)))
       this.finishResults()
       return
     }
@@ -361,7 +477,7 @@ export class Autocomplete extends LitElement {
       this.cachedDataSource = dataSource
       this.cachedQuery = normalizedQuery
       this.cachedResults = loaded
-      this.results = this.cachedResults.slice(0, Math.max(0, this.maxResults))
+      this.results = this.visible(this.cachedResults)
     } catch (error) {
       if (controller.signal.aborted || sequence !== this.requestSequence) return
       this.results = []
@@ -415,6 +531,33 @@ export class Autocomplete extends LitElement {
     return this.labelOf(item) || key
   }
 
+  /** A pick's key: `selectionValueOf` without the row index, so an unlabelled object without `itemKey` has none. */
+  private pickKey(item: unknown): string {
+    const fieldValue = this.itemKey ? getFieldValue(item, this.itemKey) : undefined
+    if (fieldValue !== undefined && fieldValue !== null) return String(fieldValue)
+    return item !== null && typeof item === 'object' ? this.labelOf(item) : this.textOf(item)
+  }
+
+  private isPicked(item: unknown): boolean {
+    const key = this.pickKey(item)
+    return this.selectedItems.some((picked) => picked === item || (key !== '' && this.pickKey(picked) === key))
+  }
+
+  /** What a list shows of `items`: in `multiple` mode without the picks, then capped at `maxResults`. */
+  private visible(items: unknown[]): unknown[] {
+    return (this.multiple ? items.filter((item) => !this.isPicked(item)) : items).slice(0, Math.max(0, this.maxResults))
+  }
+
+  /** The "create" row follows the results once they settle, unless a result or a pick already has the query as its label. */
+  private get showCreate(): boolean {
+    const query = this.value.trim().toLocaleLowerCase()
+    if (!this.creatable || !query || query.length < this.minQueryLength || this.loading || this.loadError || this.showingRecent) return false
+    // Every known record counts, not only the shown page: `results` is capped at `maxResults`. The key counts too, which
+    // is what a single-value field shows after a choice.
+    const taken = [...this.results, ...(this.dataSource ? this.cachedResults : this.suggestions), ...this.selectedItems, this.selectedItem]
+    return !taken.some((item) => item !== undefined && [this.labelOf(item), this.pickKey(item)].some((text) => text.trim().toLocaleLowerCase() === query))
+  }
+
   private labelOf(item: unknown): string {
     if (this.labelField) return this.textOf(getFieldValue(item, this.labelField))
     if (item === null || typeof item !== 'object') return this.textOf(item)
@@ -442,19 +585,20 @@ export class Autocomplete extends LitElement {
 
   private finishResults() {
     this.activeIndex = this.results.findIndex((item) => !this.isDisabled(item))
-    this.open = this.focused && (this.results.length > 0 || this.showEmpty || !!this.loadError)
+    this.open = this.focused && (this.results.length > 0 || this.showEmpty || !!this.loadError || this.showCreate)
   }
 
   private restoreCachedResults(query: string): boolean {
     if (!this.dataSource || this.cachedDataSource !== this.dataSource || this.cachedQuery !== query) return false
     this.loading = false
     this.loadError = undefined
-    this.results = this.cachedResults.slice(0, Math.max(0, this.maxResults))
+    this.results = this.visible(this.cachedResults)
     this.finishResults()
     return true
   }
 
   private scheduleLoad() {
+    this.showingRecent = false
     const normalizedQuery = this.value.trim()
     if (this.pendingQuery === normalizedQuery) {
       this.open = this.focused
@@ -498,7 +642,7 @@ export class Autocomplete extends LitElement {
 
   private handleFocus = () => {
     this.focused = true
-    if (this.value.trim().length >= this.minQueryLength) this.scheduleLoad()
+    if (this.value.trim().length >= this.minQueryLength || this.recentItems.length) this.scheduleLoad()
   }
 
   private handleBlur = () => {
@@ -510,7 +654,7 @@ export class Autocomplete extends LitElement {
 
   private handleFieldClick = () => {
     this.focus()
-    if (this.value.trim().length < this.minQueryLength || this.effectiveDisabled || this.readonly) return
+    if ((this.value.trim().length < this.minQueryLength && !this.recentItems.length) || this.effectiveDisabled || this.readonly) return
     if (!this.loading && this.results.length === 0 && !this.showEmpty && !this.loadError) this.scheduleLoad()
     else {
       if (this.activeIndex < 0) this.activeIndex = this.results.findIndex((item) => !this.isDisabled(item))
@@ -534,6 +678,19 @@ export class Autocomplete extends LitElement {
     // While an IME composes, Enter confirms the candidate and the arrows move through the IME's own list.
     if (isComposingKey(event)) return
     const enabledIndexes = this.results.map((item, index) => ({ item, index })).filter(({ item }) => !this.isDisabled(item))
+    if (this.showCreate) enabledIndexes.push({ item: undefined, index: this.results.length })
+    if (this.multiple && this.selectedItems.length && !this.value && !this.effectiveDisabled && !this.readonly) {
+      if (event.key === 'Backspace') {
+        this.removePick(this.selectedItems.length - 1)
+        return
+      }
+      // The picks are out of the Tab order (a field of ten picks would be ten stops before the input); the arrows reach them.
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        this.focusPick(this.selectedItems.length - 1)
+        return
+      }
+    }
     if (event.key === 'Escape' || event.key === 'Tab') {
       this.close()
       return
@@ -563,12 +720,18 @@ export class Autocomplete extends LitElement {
     }
     if (event.key === 'Enter' && this.open && this.activeIndex >= 0) {
       event.preventDefault()
-      this.selectItem(this.results[this.activeIndex], this.activeIndex)
+      if (this.activeIndex === this.results.length) {
+        if (this.showCreate) this.requestCreate()
+      } else this.selectItem(this.results[this.activeIndex], this.activeIndex)
     }
   }
 
   private handleListSelection = (event: CustomEvent<SelectionChangeEventDetail>) => {
     const key = event.detail.value[0]
+    if (key === CREATE_KEY) {
+      this.requestCreate()
+      return
+    }
     const index = this.results.findIndex((item, itemIndex) => this.keyOf(item, itemIndex) === key)
     if (index >= 0) this.selectItem(this.results[index], index)
   }
@@ -577,9 +740,19 @@ export class Autocomplete extends LitElement {
     if (this.isDisabled(item)) return
     const value = this.selectionValueOf(item, index)
     const replaceValue = this.selectionBehavior !== 'preserve'
-    if (replaceValue) this.value = value
-    this.selectedItem = item
-    this.close()
+    if (this.multiple) {
+      this.applyPick(item)
+      if (replaceValue) this.close()
+      else {
+        // The query stays, so the remaining matches stay open for the next pick.
+        this.results = this.results.filter((result) => result !== item)
+        this.finishResults()
+      }
+    } else {
+      if (replaceValue) this.value = value
+      this.selectedItem = item
+      this.close()
+    }
     this.input?.focus()
     this.dispatchEvent(
       new CustomEvent<AutocompleteSelectEventDetail>('suggestion-select', {
@@ -588,10 +761,47 @@ export class Autocomplete extends LitElement {
         composed: true,
       }),
     )
-    if (replaceValue) {
+    if (replaceValue || this.multiple) {
       this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
     }
+  }
+
+  private requestCreate() {
+    const query = this.value.trim()
+    this.close()
+    this.input?.focus()
+    this.dispatchEvent(new CustomEvent<AutocompleteCreateRequestEventDetail>('create-request', { detail: { query }, bubbles: true, composed: true }))
+  }
+
+  private focusPick(index: number) {
+    const chips = this.renderRoot.querySelectorAll<HTMLElement>('.pick')
+    if (index >= 0 && index < chips.length) chips[index].focus()
+    else this.input?.focus()
+  }
+
+  /** Left and Right move between the picks and back to the input; Backspace or Delete removes the focused pick. */
+  private handlePickKeydown(event: KeyboardEvent, index: number) {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault()
+      this.focusPick(event.key === 'ArrowLeft' ? Math.max(0, index - 1) : index + 1)
+    } else if ((event.key === 'Backspace' || event.key === 'Delete') && !this.effectiveDisabled && !this.readonly) {
+      event.preventDefault()
+      const next = event.key === 'Backspace' ? index - 1 : index
+      this.removePick(index, false)
+      void this.updateComplete.then(() => this.focusPick(next < 0 && this.selectedItems.length ? 0 : next))
+    }
+  }
+
+  private removePick(index: number, focusInput = true) {
+    const item = this.selectedItems[index]
+    this.selectedItems = this.selectedItems.filter((_, itemIndex) => itemIndex !== index)
+    if (focusInput) this.input?.focus()
+    this.dispatchEvent(
+      new CustomEvent<AutocompleteItemRemoveEventDetail>('item-remove', { detail: { value: this.pickKey(item), item, index }, bubbles: true, composed: true }),
+    )
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
   private handleClear = (event: Event) => {
@@ -673,26 +883,81 @@ export class Autocomplete extends LitElement {
     >`
   }
 
+  private renderCreateRow() {
+    const index = this.results.length
+    const text = this.msg.t('create', this.value.trim())
+    return html`<c2-list-item
+      id=${`${this.listboxId}-option-${index}`}
+      class="create"
+      part="create-option"
+      .value=${CREATE_KEY}
+      .label=${text}
+      @pointerenter=${() => (this.activeIndex = index)}
+      >${text}</c2-list-item
+    >`
+  }
+
   private renderRows() {
     if (this.loading) return html`<div class="status" role="status"><slot name="loading">${this.msg.t('loading')}</slot></div>`
     if (this.loadError) return html`<div class="status status--error" role="status"><slot name="error">${this.msg.t('loadError')}</slot></div>`
-    if (this.results.length === 0) return html`<div class="status" role="status"><slot name="empty">${this.msg.t('empty')}</slot></div>`
+    const create = this.showCreate ? this.renderCreateRow() : nothing
+    if (this.results.length === 0)
+      return create === nothing ? html`<div class="status" role="status"><slot name="empty">${this.msg.t('empty')}</slot></div>` : create
 
-    return this.results.map((item, index) => this.renderListItem(item, index))
+    const rows = this.results.map((item, index) => this.renderListItem(item, index))
+    if (!this.showingRecent && create === nothing) return rows
+    return html`${this.showingRecent ? html`<h3>${this.msg.t('recent')}</h3>` : nothing}${rows}${create}`
+  }
+
+  private renderPicks() {
+    if (!this.multiple) return nothing
+    const removable = !this.effectiveDisabled && !this.readonly
+    return this.selectedItems.map(
+      (item, index) =>
+        html`<c2-chip
+          class="pick"
+          part="pick"
+          .value=${this.pickKey(item)}
+          tabindex="-1"
+          ?removable=${removable}
+          @keydown=${(event: KeyboardEvent) => this.handlePickKeydown(event, index)}
+          @remove=${(event: Event) => {
+            // The chip's own event would reach the page as a stray `remove` from the autocomplete.
+            event.stopPropagation()
+            this.removePick(index)
+          }}
+          >${this.renderPick?.({ item, index }) ?? this.labelOf(item)}</c2-chip
+        >`,
+    )
   }
 
   private syncFormState() {
-    this.internals.setFormValue(this.effectiveDisabled ? null : this.value, this.value)
+    const keys = this.multiple ? this.selectedItems.map((item) => this.pickKey(item)) : []
+    if (this.multiple) {
+      const entries = new FormData()
+      for (const key of keys) entries.append(this.name, key)
+      this.internals.setFormValue(this.effectiveDisabled || !this.name ? null : entries, entries)
+    } else this.internals.setFormValue(this.effectiveDisabled ? null : this.value, this.value)
     if (this.effectiveDisabled) {
       this.internals.setValidity({})
       return
     }
     if (this.customValidityMessage) this.internals.setValidity({ customError: true }, this.customValidityMessage, this.input)
-    else if (this.required && !this.value) this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), this.input)
+    else if (this.required && (this.multiple ? !keys.length : !this.value))
+      this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), this.input)
     else this.internals.setValidity({})
   }
 
+  protected override willUpdate(changed: PropertyValues) {
+    // Chips only exist in `multiple` mode, so a single-value autocomplete never loads them.
+    if (changed.has('multiple') && this.multiple && !customElements.get('c2-chip')) void import('@c2n/chip')
+  }
+
   protected override updated(changed: PropertyValues) {
+    // A pick added or removed elsewhere (or new recent items) changes what the open panel should offer.
+    if (this.open && this.focused && ((this.multiple && changed.has('selectedItems')) || (this.showingRecent && changed.has('recentItems')))) {
+      this.scheduleLoad()
+    }
     // New results change how much room the list needs, which need not move the overlay.
     if (this.panelSpaceObserver && (changed.has('results') || changed.has('loading') || changed.has('loadError'))) this.measurePanelSpace()
     if (changed.has('dataSource')) {
@@ -711,11 +976,17 @@ export class Autocomplete extends LitElement {
   }
 
   override render() {
-    const selectedValue = this.activeIndex >= 0 ? [this.keyOf(this.results[this.activeIndex], this.activeIndex)] : []
+    const selectedValue =
+      this.activeIndex === this.results.length && this.showCreate
+        ? [CREATE_KEY]
+        : this.activeIndex >= 0
+          ? [this.keyOf(this.results[this.activeIndex], this.activeIndex)]
+          : []
     const label = this.ariaLabel || this.field.label
     const invalid = this.field.invalid && !this.effectiveDisabled
-    return html`<div class=${classMap({ field: true, error: invalid })} @click=${this.handleFieldClick}>
+    return html`<div class=${classMap({ field: true, error: invalid, multiple: this.multiple })} @click=${this.handleFieldClick}>
         <slot name="prefix-icon"></slot>
+        ${this.renderPicks()}
         <input
           class="input"
           type="text"
