@@ -1,0 +1,96 @@
+---
+title: 'Unit Input'
+description: 'A quantity with its unit of measure: a number field with a unit picker that converts the number on a pick and shows the equivalent in the base unit.'
+category: 'Inputs'
+package: '@c2n/number-input'
+tag: 'c2-unit-input'
+apiTags: ['c2-unit-input']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { UnitInput } from '@c2n/components/number-input/unit-input'
+
+`c2-unit-input` is [`c2-number-input`](/web-components/components/number-input) with units of measure, the quantity
+field of an inventory, purchase or recipe form: each, dozen and case, or kilograms and pounds. `units` lists them with
+the number of base units each holds; picking another unit converts the number (24 ea becomes 2 dozen), and while a unit
+other than the base one is selected the equivalent in the base unit follows the number. The field, the step controls,
+validation and the `--c2-number-input--*` variables are the number input's and work the same.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/number-input/unit-input'
+```
+
+The entry registers `c2-unit-input` and `c2-number-input`. The unit picker is the browser's own select element, so it costs no popover code.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/number-input
+<style>
+  .unit-width {
+    width: 240px;
+  }
+</style>
+<div data-label="Packs">
+  <c2-unit-input
+    class="unit-width"
+    aria-label="Eggs"
+    value="2"
+    unit="dozen"
+    units='[{"value":"ea","factor":1},{"value":"dozen","factor":12},{"value":"case","factor":144}]'
+  ></c2-unit-input>
+</div>
+<div data-label="Weight">
+  <c2-unit-input
+    class="unit-width"
+    aria-label="Parcel weight"
+    value="2.5"
+    unit="lb"
+    units='[{"value":"kg","factor":1,"step":"0.01"},{"value":"lb","factor":0.45359237,"step":"0.1"}]'
+  ></c2-unit-input>
+</div>
+<div data-label="Short form">
+  <c2-unit-input class="unit-width" aria-label="Boxes" value="3" units="box=1;pallet=40"></c2-unit-input>
+  <c2-unit-input class="unit-width" aria-label="Body weight" value="72" units="kg"></c2-unit-input>
+</div>
+<div data-label="States">
+  <c2-unit-input class="unit-width" aria-label="Order quantity" value="0.5" unit="dozen" units="ea=1;dozen=12" error error-text="Order whole dozens."></c2-unit-input>
+  <c2-unit-input class="unit-width" aria-label="Received" value="3" unit="case" units="ea=1;case=144" readonly></c2-unit-input>
+</div>
+```
+
+`units` is a JSON array of `{ value, label?, factor?, step? }`, or the short form `ea=1;dozen=12;case=144`. The unit
+whose `factor` is 1 is the base unit; a unit without a factor is a label only, and picking it keeps the number. With a
+single unit there is no picker, only its label.
+
+`value`, `min`, `max` and `step` are in the selected unit. A unit's own `step` replaces `step` while it is selected, and
+a converted number is rounded to its decimals (to 6 without one); converting back and forth does not drift. A
+conversion never rounds a quantity away: 5 ea in whole dozens is 0.416667 dozen, which fails the step check until the
+user corrects it. Setting
+`unit` from code selects a unit without converting, which is what loading a saved record needs; `convertTo()` converts,
+and `baseValue` reads and writes the quantity in the base unit:
+
+```ts tag=CodeBlock
+const eggs = document.querySelector('c2-unit-input')!
+eggs.addEventListener('unit-change', (event) => console.log(event.detail.previousUnit, '→', event.detail.unit))
+eggs.baseValue // 24, whatever unit is selected
+eggs.convertTo('case') // 0.166667 case, no event
+```
+
+In a form the number is submitted under `name` and the unit under `unit-name`. The picker's accessible name is "Unit"
+and the equivalent reads `= 24 ea`; an app translates both under `unit-input`, and the step controls under
+`number-input`. They follow the nearest `lang`:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'number-input': { decrease: 'Diminuer la valeur', increase: 'Augmenter la valeur' },
+    'unit-input': { unit: 'Unité', equivalent: '= {0} {1}', approximately: '≈ {0} {1}' },
+  },
+})
+```

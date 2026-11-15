@@ -1,0 +1,277 @@
+---
+description: 'Looks for c2-unit-input: field and picker variants, packs and weights, label-only units, states, forms, the base quantity read from script and a French card. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UnitInputExamplesRuntime from '../../components/UnitInputExamplesRuntime.astro'
+
+import { UnitInput } from '@c2n/components/number-input/unit-input'
+import { FormField } from '@c2n/components/form-field'
+
+## Field
+
+The field, the number and the step controls take the `--c2-number-input--*` variables; the unit picker, the unit label
+and the equivalent take `--c2-unit-input--*`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 240px;
+  }
+</style>
+<c2-unit-input
+  class="default"
+  aria-label="Eggs"
+  value="2"
+  unit="dozen"
+  units='[{"value":"ea","factor":1},{"value":"dozen","factor":12},{"value":"case","factor":144}]'
+></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 200px;
+    --c2-number-input--min-height: 30px;
+    --c2-number-input--font-size: 13px;
+    --c2-number-input__value--padding: 3px 8px;
+    --c2-number-input__stepper--width: 24px;
+    --c2-unit-input__picker--font-size: 13px;
+    --c2-unit-input__picker--padding: 0 26px 0 8px;
+    --c2-unit-input__icon--size: 14px;
+    --c2-unit-input__equivalent--font-size: 11px;
+  }
+</style>
+<c2-unit-input class="compact" aria-label="Screws" value="3" unit="box" units="pc=1;box=100"></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Accent picker
+<style>
+  .accent {
+    width: 250px;
+    --c2-number-input--border-radius: 8px;
+    --c2-number-input__focus--border: 1px solid #0d9488;
+    --c2-unit-input__picker--background: light-dark(#f0fdfa, #0d2a27);
+    --c2-unit-input__picker__hover--background: light-dark(#ccfbf1, #134a43);
+    --c2-unit-input__picker--color: light-dark(#0f766e, #5eead4);
+    --c2-unit-input__icon--color: light-dark(#0f766e, #5eead4);
+    --c2-unit-input__picker--border-left: 1px solid light-dark(#99f6e4, #1f5c55);
+    --c2-unit-input__equivalent--color: light-dark(#0f766e, #5eead4);
+  }
+</style>
+<c2-unit-input
+  class="accent"
+  aria-label="Flour"
+  value="1.5"
+  unit="kg"
+  units='[{"value":"g","factor":1,"step":"1"},{"value":"kg","factor":1000,"step":"0.1"},{"value":"lb","factor":453.59237,"step":"0.1"}]'
+></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Unit on the side
+<style>
+  .side {
+    width: 210px;
+    --c2-unit-input__picker--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-unit-input__picker--font-weight: 600;
+    --c2-unit-input__picker--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-unit-input__equivalent--display: none;
+  }
+</style>
+<c2-unit-input class="side" aria-label="Distance" value="5" unit="mi" units='[{"value":"km","factor":1,"step":"0.1"},{"value":"mi","factor":1.609344,"step":"0.1"}]' hide-steppers></c2-unit-input>
+```
+
+</GalleryGrid>
+
+## Units
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Packs
+<style>
+  .packs {
+    width: 250px;
+  }
+</style>
+<c2-unit-input
+  class="packs"
+  aria-label="Cans"
+  value="1"
+  unit="case"
+  units='[{"value":"ea","label":"each","factor":1},{"value":"pack","label":"6-pack","factor":6},{"value":"case","factor":24}]'
+></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Weight with unit steps
+<style>
+  .weight {
+    width: 240px;
+  }
+</style>
+<c2-unit-input
+  class="weight"
+  aria-label="Parcel weight"
+  value="2.5"
+  unit="lb"
+  units='[{"value":"kg","factor":1,"step":"0.01"},{"value":"lb","factor":0.45359237,"step":"0.1"},{"value":"oz","factor":0.028349523,"step":"1"}]'
+></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Short form
+<style>
+  .short {
+    width: 240px;
+  }
+</style>
+<c2-unit-input class="short" aria-label="Rolls" value="2" unit="carton" units="roll=1;sleeve=4;carton=48"></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Single unit
+<style>
+  .single {
+    width: 180px;
+  }
+</style>
+<c2-unit-input class="single" aria-label="Body weight" value="72" units="kg"></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Label-only units
+<style>
+  .labels {
+    width: 200px;
+  }
+</style>
+<c2-unit-input class="labels" aria-label="Gap" value="16" units="px;rem;%"></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Custom chevron
+<style>
+  .chevron {
+    width: 240px;
+    --c2-unit-input__icon--size: 14px;
+    --c2-unit-input__icon--color: var(--c2-theme--color-primary, #476ef9);
+  }
+</style>
+<c2-unit-input class="chevron" aria-label="Water" value="2" unit="l" units='[{"value":"ml","factor":1,"step":"10"},{"value":"l","factor":1000,"step":"0.1"}]'>
+  <svg slot="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="7 15 12 20 17 15"></polyline>
+    <polyline points="7 9 12 4 17 9"></polyline>
+  </svg>
+</c2-unit-input>
+```
+
+</GalleryGrid>
+
+A unit without a `factor` is a label only: picking `rem` keeps 16 and shows no equivalent. The short form gives each unit
+its factor after `=`.
+
+## States
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Error
+<style>
+  .error {
+    width: 240px;
+  }
+</style>
+<c2-unit-input class="error" aria-label="Order quantity" value="0.5" unit="dozen" units="ea=1;dozen=12" error error-text="Order whole dozens."></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Read-only
+<style>
+  .read-only {
+    width: 240px;
+  }
+</style>
+<c2-unit-input class="read-only" aria-label="Received" value="3" unit="case" units="ea=1;case=144" readonly></c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Disabled
+<style>
+  .disabled {
+    width: 240px;
+  }
+</style>
+<c2-unit-input class="disabled" aria-label="Received" value="3" unit="case" units="ea=1;case=144" disabled></c2-unit-input>
+```
+
+</GalleryGrid>
+
+## Forms and script
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=In a form field
+<style>
+  .in-field {
+    width: 260px;
+  }
+</style>
+<c2-form-field label="Reorder quantity" hint="Received in cases of 24." class="in-field">
+  <c2-unit-input name="quantity" unit-name="uom" value="2" unit="case" min="0" units="ea=1;case=24"></c2-unit-input>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Base quantity
+<style>
+  .stock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .stock c2-unit-input {
+    width: 240px;
+  }
+  .stock output {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 13px;
+  }
+</style>
+<div class="stock" data-unit-input-example="stock">
+  <c2-unit-input aria-label="Stock" value="3" unit="dozen" units="ea=1;dozen=12;case=144"></c2-unit-input>
+  <output>Stock: 36 ea</output>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=French
+<style>
+  .french {
+    width: 240px;
+  }
+</style>
+<div lang="fr">
+  <c2-unit-input class="french" aria-label="Poids" value="2.5" unit="lb" units='[{"value":"kg","factor":1,"step":"0.01"},{"value":"lb","factor":0.45359237,"step":"0.1"}]'></c2-unit-input>
+</div>
+```
+
+</GalleryGrid>
+
+The base quantity card reads `baseValue` whenever the number or the unit changes, whatever unit is selected:
+
+```ts tag=CodeBlock
+const stock = document.querySelector('c2-unit-input')!
+const show = () => (output.textContent = `Stock: ${stock.baseValue} ${stock.baseUnit?.value}`)
+stock.addEventListener('input', show)
+stock.addEventListener('unit-change', show)
+```
+
+The French card's picker name and equivalent come from the app's translations:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'number-input': { decrease: 'Diminuer la valeur', increase: 'Augmenter la valeur' },
+    'unit-input': { unit: 'Unité', equivalent: '= {0} {1}', approximately: '≈ {0} {1}' },
+  },
+})
+```
+
+<UnitInputExamplesRuntime />

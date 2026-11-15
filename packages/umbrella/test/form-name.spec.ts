@@ -67,6 +67,7 @@ const submitted: Record<string, string[]> = {
   'c2-time-input': ['09:30'],
   'c2-time-slot-picker': ['2026-10-17T09:00:00Z'],
   'c2-tree-select': ['eu'],
+  'c2-unit-input': ['42'],
   'c2-upload': ['notes.txt'],
   'c2-wheel-picker': ['5;10'],
 }
@@ -159,6 +160,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-time-input': (e) => (e.value = '09:30'),
         'c2-time-slot-picker': (e) => (e.value = '2026-10-17T09:00:00Z'),
         'c2-tree-select': (e) => (e.value = ['eu']),
+        'c2-unit-input': (e) => (e.value = '42'),
         'c2-upload': (e) => (e.value = [new File(['hello'], 'notes.txt', { type: 'text/plain' })]),
         'c2-wheel-picker': (e) => Object.assign(e, { columns: [{ options: ['4', '5', '6'] }, { options: ['0', '5', '10'] }], value: ['5', '10'] }),
         'c2-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),

@@ -1,13 +1,15 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { disabledByAncestor, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
+import { numberInputMessages } from './messages.js'
 import styles from './number-input.scss?inline'
 
 /** Events fired by {@link NumberInput}, keyed for `addEventListener`. */
@@ -73,7 +75,7 @@ export interface NumberInput {
 @customElement('c2-number-input')
 export class NumberInput extends LitElement {
   static formAssociated = true
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
   private customValidityMessage = ''
@@ -84,6 +86,7 @@ export class NumberInput extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, numberInputMessages)
   @query('input') private readonly input?: HTMLInputElement
 
   /** Current numeric text, or an empty string. Use `valueAsNumber` for a parsed value. */
@@ -183,11 +186,36 @@ export class NumberInput extends LitElement {
     if (typeof state === 'string') this.value = state
   }
 
-  private get effectiveDisabled() {
+  // Whether the field is disabled, by its own `disabled` or by a disabled fieldset or form.
+  protected get effectiveDisabled() {
     return this.disabled || this.disabledByForm
   }
   private get steppersDisabled() {
-    return this.effectiveDisabled || this.readOnly || this.step === 'any'
+    return this.effectiveDisabled || this.readOnly || this.effectiveStep === 'any'
+  }
+  // The step the native input uses. A companion element overrides it (`c2-unit-input` takes the unit's own step).
+  protected get effectiveStep(): string {
+    return this.step
+  }
+  // What the form submits. A companion element overrides it to add entries (`c2-unit-input` adds the unit).
+  protected formValue(): string | FormData {
+    return this.value
+  }
+  // What the browser keeps to restore the field (back navigation, autofill); `formStateRestoreCallback` reads it.
+  protected formState(): string | FormData {
+    return this.value
+  }
+  // Ids in the shadow root that also describe the number, for a companion element's own text.
+  protected descriptionIds(): string[] {
+    return []
+  }
+  // Content a companion element adds after the number, inside the value area.
+  protected renderValueEnd(): unknown {
+    return nothing
+  }
+  // Content a companion element adds at the end of the field, after the step controls.
+  protected renderFieldEnd(): unknown {
+    return nothing
   }
   private get atMinimum() {
     const value = Number(this.value)
@@ -218,7 +246,7 @@ export class NumberInput extends LitElement {
     event.preventDefault()
   }
   private forwardFocus(event: Event) {
-    if (!(event.target as HTMLElement).closest('.stepper')) this.input?.focus()
+    if (!(event.target as HTMLElement).closest('.stepper, select')) this.input?.focus()
   }
   private stepBy(amount: number) {
     if (!this.input || this.steppersDisabled) return
@@ -245,7 +273,7 @@ export class NumberInput extends LitElement {
       this.internals.setValidity({})
       return
     }
-    this.internals.setFormValue(this.value, this.value)
+    this.internals.setFormValue(this.formValue(), this.formState())
     this.input.setCustomValidity(this.customValidityMessage)
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
@@ -257,7 +285,7 @@ export class NumberInput extends LitElement {
       class="stepper ${direction}"
       type="button"
       tabindex="-1"
-      aria-label=${down ? 'Decrease value' : 'Increase value'}
+      aria-label=${this.msg.t(down ? 'decrease' : 'increase')}
       ?disabled=${disabled}
       @pointerdown=${this.keepInputFocus}
       @click=${() => (down ? this.stepDown() : this.stepUp())}
@@ -288,12 +316,12 @@ export class NumberInput extends LitElement {
             inputmode="decimal"
             aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
             aria-invalid=${invalid ? 'true' : nothing}
-            aria-describedby=${this.field.describedBy(showSupporting && 'supporting-text')}
+            aria-describedby=${this.field.describedBy(...this.descriptionIds(), showSupporting && 'supporting-text')}
             name=${ifDefined(this.name || undefined)}
             autocomplete=${ifDefined(this.autocomplete || undefined)}
             min=${ifDefined(this.min)}
             max=${ifDefined(this.max)}
-            step=${this.step}
+            step=${this.effectiveStep}
             placeholder=${this.placeholder || nothing}
             ?required=${this.required}
             ?readonly=${this.readOnly}
@@ -305,8 +333,9 @@ export class NumberInput extends LitElement {
             @focusout=${this.handleFocusOut}
           />
           <slot name="suffix"></slot>
+          ${this.renderValueEnd()}
         </div>
-        ${this.hideSteppers ? nothing : html`<div class="steppers">${this.renderStepper('up')}${this.renderStepper('down')}</div>`}
+        ${this.hideSteppers ? nothing : html`<div class="steppers">${this.renderStepper('up')}${this.renderStepper('down')}</div>`}${this.renderFieldEnd()}
       </div>
       ${
         showSupporting

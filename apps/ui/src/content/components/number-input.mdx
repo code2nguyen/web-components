@@ -2,6 +2,7 @@
 title: 'Number Input'
 description: 'Form-associated numeric input with native validation, step controls, adornments and helper states.'
 category: 'Inputs'
+apiTags: ['c2-number-input']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,7 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { NumberInput } from '@c2n/components/number-input'
 
-`c2-number-input` keeps native number parsing, constraints and Arrow Up/Down behavior, then replaces browser-specific spinners with consistent step controls. Use `min`, `max` and `step` for the range, add currency or units through the `prefix` and `suffix` slots, or set `hide-steppers` for a plain numeric field.
+`c2-number-input` keeps native number parsing, constraints and Arrow Up/Down behavior, then replaces browser-specific spinners with consistent step controls. Use `min`, `max` and `step` for the range, add currency or units through the `prefix` and `suffix` slots, or set `hide-steppers` for a plain numeric field. For a quantity whose unit the user picks and converts (each, dozen, case; kg and lb), use [`c2-unit-input`](/web-components/components/unit-input), which has an entry of its own (`@c2n/components/number-input/unit-input`).
 
 ## Import
 

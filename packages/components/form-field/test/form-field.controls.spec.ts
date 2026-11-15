@@ -13,6 +13,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-mask-input', markup: '<c2-mask-input mask="99999"></c2-mask-input>' },
   { tag: 'c2-money-input', markup: '<c2-money-input currency="EUR"></c2-money-input>' },
   { tag: 'c2-number-input', markup: '<c2-number-input></c2-number-input>' },
+  { tag: 'c2-unit-input', markup: '<c2-unit-input units="ea=1;dozen=12"></c2-unit-input>' },
   { tag: 'c2-duration-input', markup: '<c2-duration-input></c2-duration-input>' },
   { tag: 'c2-password-field', markup: '<c2-password-field></c2-password-field>' },
   { tag: 'c2-search-field', markup: '<c2-search-field></c2-search-field>' },

@@ -9,6 +9,10 @@
       "types": "./types/src/number-input.d.ts",
       "default": "./dist/number-input.js"
     },
+    "./unit-input.js": {
+      "types": "./types/src/unit-input.d.ts",
+      "default": "./dist/unit-input.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +70,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./unit-input.js"
+    ]
+  }
 }
