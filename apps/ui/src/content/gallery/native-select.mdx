@@ -1,0 +1,306 @@
+---
+description: 'Looks for c2-native-select: field variants, icons, option groups, options from data, states, forms and a translated required message. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import NativeSelectExamplesRuntime from '../../components/NativeSelectExamplesRuntime.astro'
+
+import { NativeSelect } from '@c2n/components/select/native-select'
+import { FormField } from '@c2n/components/form-field'
+import { Button } from '@c2n/components/button'
+
+## Field
+
+The field is the `--c2-native-select--*` family, with `__hover`, `__focus` and `__error` states. The picker itself is
+the browser's: only its options' colours follow the field, in the browsers that colour it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 200px;
+  }
+</style>
+<c2-native-select aria-label="Country" value="FR" class="default">
+  <option value="US">United States</option>
+  <option value="FR">France</option>
+  <option value="VN">Vietnam</option>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Soft filled
+<style>
+  .soft-filled {
+    width: 200px;
+    --c2-native-select--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-native-select--border: 1px solid transparent;
+    --c2-native-select__hover--border: 1px solid transparent;
+    --c2-native-select__focus--border: 1px solid var(--c2-theme--color-primary, #476ef9);
+    --c2-native-select--border-radius: 10px;
+    --c2-native-select--min-height: 40px;
+  }
+</style>
+<c2-native-select aria-label="Country" value="FR" class="soft-filled">
+  <option value="US">United States</option>
+  <option value="FR">France</option>
+  <option value="VN">Vietnam</option>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Underline
+<style>
+  .underline {
+    width: 200px;
+    --c2-native-select--border: 1px solid transparent;
+    --c2-native-select__hover--border: 1px solid transparent;
+    --c2-native-select__focus--border: 1px solid transparent;
+    --c2-native-select--border-radius: 0;
+    --c2-native-select--background: transparent;
+    --c2-native-select--padding-inline-start: 0;
+    --c2-native-select--padding-inline-end: 0;
+  }
+  .underline::part(field) {
+    border-bottom: 2px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .underline::part(field):focus-within {
+    border-bottom-color: var(--c2-theme--color-primary, #476ef9);
+  }
+</style>
+<c2-native-select aria-label="Sort by" value="recent" class="underline">
+  <option value="recent">Most recent</option>
+  <option value="popular">Most popular</option>
+  <option value="price">Price, low to high</option>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    width: 170px;
+    --c2-native-select--border-radius: 999px;
+    --c2-native-select--min-height: 32px;
+    --c2-native-select--padding-block: 4px;
+    --c2-native-select--padding-inline-start: 14px;
+    --c2-native-select--font-size: 13px;
+    --c2-native-select--background: light-dark(#eef2ff, #1d2347);
+    --c2-native-select--color: light-dark(#3730a3, #a5b0f4);
+    --c2-native-select__icon--color: light-dark(#3730a3, #a5b0f4);
+    --c2-native-select--border: 1px solid light-dark(#c7d2fe, #2f3a74);
+    --c2-native-select__hover--border: 1px solid light-dark(#a5b4fc, #4451a0);
+  }
+</style>
+<c2-native-select aria-label="Status" value="open" class="pill">
+  <option value="open">Open</option>
+  <option value="review">In review</option>
+  <option value="closed">Closed</option>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 120px;
+    --c2-native-select--min-height: 28px;
+    --c2-native-select--padding-block: 2px;
+    --c2-native-select--padding-inline-start: 8px;
+    --c2-native-select--padding-inline-end: 6px;
+    --c2-native-select--gap: 4px;
+    --c2-native-select--font-size: 12px;
+    --c2-native-select--line-height: 16px;
+    --c2-native-select__icon--size: 14px;
+    --c2-native-select--border-radius: 4px;
+  }
+</style>
+<c2-native-select aria-label="Rows per page" value="25" class="compact" options='["10","25","50","100"]'></c2-native-select>
+```
+
+</GalleryGrid>
+
+## Icons
+
+`prefix-icon` takes an inline SVG or an icon element, sized by `--c2-native-select__icon--size`; the select keeps that
+room free so the text never runs under it. `suffix-icon` replaces the chevron. Clicks pass through both to the select.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Prefix icon
+<style>
+  .prefix-icon {
+    width: 210px;
+  }
+</style>
+<c2-native-select aria-label="Language" value="en" class="prefix-icon">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="2" y1="12" x2="22" y2="12"></line>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+  </svg>
+  <option value="en">English</option>
+  <option value="fr">Français</option>
+  <option value="vi">Tiếng Việt</option>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Custom chevron
+<style>
+  .custom-chevron {
+    width: 200px;
+    --c2-native-select__icon--size: 14px;
+    --c2-native-select__icon--color: var(--c2-theme--color-primary, #476ef9);
+  }
+</style>
+<c2-native-select aria-label="Quantity" value="2" class="custom-chevron" options='["1","2","3","4","5"]'>
+  <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="7 15 12 20 17 15"></polyline>
+    <polyline points="7 9 12 4 17 9"></polyline>
+  </svg>
+</c2-native-select>
+```
+
+</GalleryGrid>
+
+## Options
+
+Options are written as `<option>` and `<optgroup>` children, or given as `options`: JSON in markup or an array from
+script. The children win when both are given.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Option groups
+<style>
+  .groups {
+    width: 220px;
+  }
+</style>
+<c2-native-select aria-label="Time zone" value="Asia/Tokyo" class="groups">
+  <optgroup label="Europe">
+    <option value="Europe/London">London</option>
+    <option value="Europe/Paris">Paris</option>
+  </optgroup>
+  <optgroup label="Asia">
+    <option value="Asia/Ho_Chi_Minh">Ho Chi Minh City</option>
+    <option value="Asia/Tokyo">Tokyo</option>
+  </optgroup>
+  <optgroup label="Retired" disabled>
+    <option value="Asia/Saigon">Saigon</option>
+  </optgroup>
+</c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Options as JSON
+<style>
+  .json-options {
+    width: 220px;
+  }
+</style>
+<c2-native-select
+  aria-label="Plan"
+  value="team"
+  class="json-options"
+  options='[{"value":"free","label":"Free"},{"value":"team","label":"Team · $29"},{"value":"scale","label":"Scale · $99"},{"value":"enterprise","label":"Enterprise (contact us)","disabled":true}]'
+></c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Options loaded later
+<style>
+  .later {
+    width: 200px;
+  }
+</style>
+<c2-native-select aria-label="Country" value="JP" class="later" data-native-select-example="later"></c2-native-select>
+```
+
+</GalleryGrid>
+
+The last card's options arrive from script after a delay, as a fetch would; the `value` set in markup waits for them:
+
+```ts tag=CodeBlock
+const country = document.querySelector('c2-native-select')!
+country.options = await fetchCountries() // [{ value: 'JP', label: 'Japan' }, …]
+```
+
+## States
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Placeholder
+<style>
+  .placeholder {
+    width: 200px;
+  }
+</style>
+<c2-native-select aria-label="Size" placeholder="Choose a size" required class="placeholder" options='["S","M","L","XL"]'></c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Error
+<style>
+  .error {
+    width: 200px;
+  }
+</style>
+<c2-native-select aria-label="Size" error class="error" options='["S","M","L","XL"]'></c2-native-select>
+```
+
+```html tag=MdxCodeBlock,label=Disabled
+<style>
+  .disabled {
+    width: 200px;
+  }
+</style>
+<c2-native-select aria-label="Plan" disabled value="team" class="disabled" options='[{"value":"team","label":"Team"}]'></c2-native-select>
+```
+
+</GalleryGrid>
+
+## Forms
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=In a form field
+<style>
+  .in-field {
+    width: 240px;
+  }
+</style>
+<c2-form-field label="Shipping country" hint="We ship to these countries only." class="in-field">
+  <c2-native-select name="country" placeholder="Select a country" required>
+    <option value="CA">Canada</option>
+    <option value="DE">Germany</option>
+    <option value="JP">Japan</option>
+  </c2-native-select>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=French
+<style>
+  .french {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .french c2-native-select {
+    width: 180px;
+  }
+</style>
+<form lang="fr" class="french" data-native-select-example="form">
+  <c2-native-select name="taille" aria-label="Taille" placeholder="Choisir une taille" required options='["S","M","L"]'></c2-native-select>
+  <c2-button type="submit">Envoyer</c2-button>
+</form>
+```
+
+</GalleryGrid>
+
+Sending the French form with no size shows the browser's bubble with the select's own message, translated by the page
+and following the form's `lang`:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'native-select': { valueMissing: 'Veuillez sélectionner une option.' } } })
+```
+
+<NativeSelectExamplesRuntime />

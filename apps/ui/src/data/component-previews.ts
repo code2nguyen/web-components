@@ -375,6 +375,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'money-input': `<c2-money-input value="250000" locale="en-US" currencies="USD;EUR;GBP" aria-label="Payout amount" style="width:220px"></c2-money-input>`,
   'month-picker': `<c2-month-picker value="2026-05" style="--c2-month-picker--width:230px;--c2-month-picker__cell--height:30px;--c2-month-picker--padding:8px;--c2-month-picker__grid--gap:2px"></c2-month-picker>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
+  'native-select': `<c2-native-select aria-label="Country" value="FR" style="width:190px"><option value="US">United States</option><option value="FR">France</option><option value="VN">Vietnam</option></c2-native-select>`,
   'navigation-menu': `<c2-navigation-menu aria-label="Main">
   <c2-navigation-menu-item value="products">
     Products

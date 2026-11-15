@@ -53,6 +53,7 @@ interface Manifest {
       members?: { kind: string; name: string; static?: boolean; privacy?: string }[]
       internalComponents?: string[]
       slotComponents?: string[]
+      superclass?: { name: string; module?: string; package?: string }
     }[]
   }[]
 }
@@ -306,13 +307,21 @@ for (const dir of packageDirs.sort()) {
   const docs = docPages.filter((d) => (d.frontmatter.package ?? `@c2n/${d.id}`) === pkg.name)
 
   const elements: ElementEntry[] = []
-  const internal = new Set<string>()
-  const slotted = new Set<string>()
+  // Per element, with what its superclasses in the package compose (`c2-group-table` takes `c2-table`'s columns), so a
+  // page of a multi-page package lists only what its own elements compose.
+  const declarations = new Map((manifest.modules ?? []).flatMap((mod) => (mod.declarations ?? []).map((decl) => [decl.name, decl] as const)))
+  const composition = (tag: string, kind: 'internalComponents' | 'slotComponents'): string[] => {
+    const found: string[] = []
+    let decl = [...declarations.values()].find((candidate) => candidate.tagName === tag)
+    for (let depth = 0; decl && depth < 10; depth++) {
+      found.push(...(decl[kind] ?? []))
+      decl = decl.superclass && !decl.superclass.package ? declarations.get(decl.superclass.name) : undefined
+    }
+    return found
+  }
   for (const mod of manifest.modules ?? []) {
     for (const decl of mod.declarations ?? []) {
       if (!decl.tagName) continue
-      decl.internalComponents?.forEach((t) => internal.add(t))
-      decl.slotComponents?.forEach((t) => slotted.add(t))
       const cssProperties: CssProperty[] = []
       for (const prop of decl.cssProperties ?? []) {
         if (!prop.name) continue
@@ -462,7 +471,11 @@ for (const dir of packageDirs.sort()) {
       elements: docElements,
       tagPattern,
       icons,
-      composition: { internal: [...internal].sort(), slotted: [...slotted].sort(), usedBy: [] },
+      composition: {
+        internal: [...new Set(docElements.flatMap((element) => composition(element.tag, 'internalComponents')))].sort(),
+        slotted: [...new Set(docElements.flatMap((element) => composition(element.tag, 'slotComponents')))].sort(),
+        usedBy: [],
+      },
       install: {
         npm: umbrellaPackages.has(pkg.name) ? `npm install ${UMBRELLA}` : `npm install ${pkg.name} @c2n/theme`,
         // A package whose elements are documented one page at a time is also imported one element at a time.

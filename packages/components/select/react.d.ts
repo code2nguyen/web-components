@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { NativeSelect } from '@c2n/select/native-select.js'
 import type { Select } from '@c2n/select'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-native-select': Omit<C2Props<NativeSelect>, 'options'> & {
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        options?: NativeSelect['options'] | string
+      }
       'c2-select': Omit<C2Props<Select>, 'value'> & {
         'fit-size'?: Attribute
         'search-placeholder'?: Attribute

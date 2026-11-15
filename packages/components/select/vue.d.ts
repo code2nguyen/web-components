@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { NativeSelect } from '@c2n/select/native-select.js'
 import type { Select } from '@c2n/select'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,14 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-native-select': DefineComponent<
+      C2Props<NativeSelect> & {
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        onInput?: (event: EventOf<NativeSelect, 'input'>) => void
+        onChange?: (event: EventOf<NativeSelect, 'change'>) => void
+      }
+    >
     'c2-select': DefineComponent<
       C2Props<Select> & {
         'fit-size'?: unknown

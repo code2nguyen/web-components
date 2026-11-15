@@ -9,6 +9,10 @@
       "types": "./types/src/select.d.ts",
       "default": "./dist/select.js"
     },
+    "./native-select.js": {
+      "types": "./types/src/native-select.d.ts",
+      "default": "./dist/native-select.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -69,5 +73,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./native-select.js"
+    ]
+  }
 }

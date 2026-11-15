@@ -1,5 +1,6 @@
 import { addTranslations } from '@c2n/core/localize.js'
 import { selectMessages } from '../src/messages.js'
+import { nativeSelectMessages } from '../src/native-select-messages.js'
 
 // The French and Vietnamese an app would add: the library ships its text in English only.
 
@@ -21,4 +22,7 @@ const vi: typeof selectMessages.en = {
   create: (label: string) => `Tạo “${label}”`,
 }
 
-addTranslations({ fr: { select: fr }, vi: { select: vi } })
+const nativeFr: typeof nativeSelectMessages.en = { valueMissing: 'Veuillez sélectionner une option.' }
+const nativeVi: typeof nativeSelectMessages.en = { valueMissing: 'Vui lòng chọn một mục.' }
+
+addTranslations({ fr: { select: fr, 'native-select': nativeFr }, vi: { select: vi, 'native-select': nativeVi } })
