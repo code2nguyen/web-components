@@ -17,6 +17,10 @@
       "types": "./types/src/description-value.d.ts",
       "default": "./dist/description-value.js"
     },
+    "./description-group.js": {
+      "types": "./types/src/description-group.d.ts",
+      "default": "./dist/description-group.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -74,5 +78,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./description-group.js"
+    ]
+  }
 }
