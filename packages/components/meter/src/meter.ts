@@ -6,6 +6,7 @@ import { LocalizeController } from '@c2n/core/localize.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { meterMessages } from './messages'
+import { clamp, finite, numberFormat } from './meter-format'
 import styles from './meter.scss?inline'
 
 /** One part of a segmented meter: a storage category, a plan's quota line. */
@@ -29,7 +30,9 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * the native `<meter>` thresholds `low`, `high` and `optimum` judge the value as optimum, sub-optimum or critical,
  * which colours the bar (and is exposed as the `:state(optimum)`, `:state(suboptimum)` and `:state(critical)` custom
  * states for styling around it). Give it `segments` instead of a `value` to split the bar into parts, such as
- * photos, documents and mail in a storage quota, with a legend underneath.
+ * photos, documents and mail in a storage quota, with a legend underneath. A segmented meter with `overage` may pass
+ * `max`, as seats assigned past a licence's limit do: the part past `max` is drawn as an overage segment after a limit
+ * mark, listed in the legend and announced, and the host matches `:state(overage)`.
  *
  * The value shows as a percentage of the range in the page's language; `value-text` replaces it with your own words
  * ("12.4 GB of 15 GB"), which are also what a screen reader announces, and the `value` slot replaces only what is
@@ -46,6 +49,7 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * @csspart track - The bar's full range; carries `role="meter"`.
  * @csspart indicator - The filled part of a single-value meter.
  * @csspart segment - Each filled part of a segmented meter.
+ * @csspart overage - The segment past `max` of a segmented meter with `overage`; it also carries the `segment` part.
  * @csspart legend - List of the segments under the bar.
  * @csspart legend-item - One entry of the legend.
  * @csspart swatch - Colour mark of a legend entry.
@@ -71,6 +75,9 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * @cssproperty {color} [--c2-meter__segment-6--background-color=#7c3aed]
  * @cssproperty {color} [--c2-meter__segment-7--background-color=#0891b2]
  * @cssproperty {color} [--c2-meter__segment-8--background-color=#52525b]
+ * @cssproperty {color} [--c2-meter__overage--background-color=#dc2626] - Fill of the overage segment, and its legend swatch.
+ * @cssproperty {color} [--c2-meter__limit--color=#18181b] - Mark at `max` between the segments and the overage.
+ * @cssproperty {pixel} [--c2-meter__limit--width=2px]
  *
  * @cssproperty {color} [--c2-meter__label--color=#18181b]
  * @cssproperty {font-size} [--c2-meter__label--font-size=14px]
@@ -117,6 +124,13 @@ export class Meter extends LitElement {
   /** Parts of a segmented meter, `{ label, value, color? }`, in range units. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) segments: MeterSegment[] = []
 
+  /**
+   * Lets a segmented meter pass `max`. Its bar then spans up to the segments' sum, the part past `max` is drawn as an
+   * overage segment after a limit mark, and the shown and announced total is the real sum ("56 of 50"). Without it a
+   * sum past `max` is cut at the end of the track. A single-value meter is always clamped.
+   */
+  @property({ type: Boolean }) overage = false
+
   /** Label when the default slot is empty. */
   @property() label = ''
 
@@ -138,11 +152,24 @@ export class Meter extends LitElement {
     return Array.isArray(this.segments) && this.segments.length > 0
   }
 
+  /** `value`, or the segments' sum counted from `min`, before clamping. */
+  private get raw(): number {
+    const raw = this.segmented ? this.segments.reduce((sum, segment) => sum + positive(segment.value), this.range[0]) : this.value
+    return Number.isFinite(raw) ? raw : this.range[0]
+  }
+
   /** The value the bar and the tone use: `value`, or the segments' sum, clamped to the range. */
   get current(): number {
     const [min, max] = this.range
-    const raw = this.segmented ? this.segments.reduce((sum, segment) => sum + positive(segment.value), min) : this.value
-    return clamp(Number.isFinite(raw) ? raw : min, min, max)
+    return clamp(this.raw, min, max)
+  }
+
+  /** How far the segments' sum passes `max` in a segmented meter with `overage`; 0 otherwise. */
+  get excess(): number {
+    const [min, max] = this.range
+    const excess = this.overage && this.segmented ? this.raw - max : 0
+    // A sum that only passes `max` by a rounding error (0.1 + 0.2 against 0.3) is not over it.
+    return excess > 1e-9 * Math.max(1, max - min) ? excess : 0
   }
 
   /** How good the current value is, judged from `low`, `high` and `optimum` the way the native `<meter>` does. */
@@ -164,6 +191,8 @@ export class Meter extends LitElement {
       if (state === tone) this.internals.states.add(state)
       else this.internals.states.delete(state)
     }
+    if (this.excess > 0) this.internals.states.add('overage')
+    else this.internals.states.delete('overage')
   }
 
   private format(value: number, options?: Intl.NumberFormatOptions): string {
@@ -176,15 +205,21 @@ export class Meter extends LitElement {
    */
   private shownValue(min: number, max: number, current: number): string {
     if (this.valueText) return this.valueText
-    if (this.segmented) return this.msg.t('total', this.format(current - min), this.format(max - min))
+    if (this.segmented) return this.msg.t('total', this.format(current + this.excess - min), this.format(max - min))
     const fraction = max > min ? (current - min) / (max - min) : 0
     return this.format(fraction, { style: 'percent', maximumFractionDigits: 0 })
   }
 
-  /** What a screen reader hears: the shown value, after each segment by name in a segmented meter. */
+  /** The segments as the legend lists them: with the overage after them while there is one. */
+  private get entries(): MeterSegment[] {
+    const excess = this.excess
+    return excess > 0 ? [...this.segments, { label: this.msg.t('overage'), value: excess }] : this.segments
+  }
+
+  /** What a screen reader hears: the shown value, after each segment (and the overage) by name in a segmented meter. */
   private announcedValue(shown: string): string {
     if (this.valueText || !this.segmented) return shown
-    const parts = this.segments.map((segment) => this.msg.t('segment', segment.label, this.format(positive(segment.value))))
+    const parts = this.entries.map((segment) => this.msg.t('segment', segment.label, this.format(positive(segment.value))))
     return [...parts, shown].join(', ')
   }
 
@@ -216,7 +251,7 @@ export class Meter extends LitElement {
           aria-valuenow=${String(current)}
           aria-valuetext=${this.announcedValue(shown)}
         >
-          ${this.segmented ? this.renderSegments(min, span) : this.renderIndicator(min, span, current)}
+          ${this.segmented ? this.renderSegments(min, span, this.excess) : this.renderIndicator(min, span, current)}
         </div>
         ${this.segmented ? this.renderLegend() : nothing}
       </div>
@@ -228,17 +263,19 @@ export class Meter extends LitElement {
     return html`<div class="c2-meter-indicator" part="indicator" style=${styleMap({ width: `${width}%` })}></div>`
   }
 
-  private renderSegments(min: number, span: number) {
-    // Each segment fills its share of the range; a sum past `max` is cut at the end of the track.
+  private renderSegments(min: number, span: number, excess: number) {
+    // Each segment fills its share of the range; a sum past `max` is cut at the end of the range, and with `overage`
+    // the bar spans the whole sum so the excess shows as one more segment.
+    const scale = span + excess
     let used = min
     const widths = this.segments.map((segment) => {
       const value = Math.min(positive(segment.value), min + span - used)
       used += value
-      return span > 0 ? (value / span) * 100 : 0
+      return scale > 0 ? (value / scale) * 100 : 0
     })
     // The rounded end goes on the last segment that shows, not on an empty one after it.
-    let last = widths.length - 1
-    while (last >= 0 && widths[last] === 0) last--
+    let last = excess > 0 ? widths.length : widths.length - 1
+    while (last >= 0 && last < widths.length && widths[last] === 0) last--
     return html`<div class="c2-meter-segments">
       ${this.segments.map((segment, index) => {
         const width = widths[index]
@@ -248,14 +285,23 @@ export class Meter extends LitElement {
           style=${styleMap({ width: `${width}%`, backgroundColor: segment.color || undefined })}
         ></div>`
       })}
+      ${
+        excess > 0
+          ? html`<div
+              class="c2-meter-segment c2-meter-overage is-last"
+              part="segment overage"
+              style=${styleMap({ width: `${(excess / scale) * 100}%` })}
+            ></div>`
+          : nothing
+      }
     </div>`
   }
 
   private renderLegend() {
     return html`<ul class="c2-meter-legend" part="legend" aria-hidden="true">
-      ${this.segments.map(
-        (segment) =>
-          html`<li class="c2-meter-legend-item" part="legend-item">
+      ${this.entries.map(
+        (segment, index) =>
+          html`<li class=${classMap({ 'c2-meter-legend-item': true, 'c2-meter-legend-overage': index === this.segments.length })} part="legend-item">
             <span class="c2-meter-swatch" part="swatch" style=${styleMap({ backgroundColor: segment.color || undefined })}></span>
             <span class="c2-meter-legend-label">${segment.label}</span>
             <span class="c2-meter-legend-value">${this.format(positive(segment.value))}</span>
@@ -263,32 +309,6 @@ export class Meter extends LitElement {
       )}
     </ul>`
   }
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value))
-}
-
-function finite(value: number | undefined): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined
-}
-
-/** One `Intl.NumberFormat` per locale and options, shared by every meter and every render. */
-const formats = new Map<string, Intl.NumberFormat>()
-
-function numberFormat(locale: string, options: Intl.NumberFormatOptions = {}): Intl.NumberFormat {
-  const key = `${locale}|${JSON.stringify(options)}`
-  let format = formats.get(key)
-  if (!format) {
-    try {
-      format = new Intl.NumberFormat(locale, options)
-    } catch {
-      // An invalid `lang` falls back to English rather than breaking the render.
-      format = new Intl.NumberFormat('en', options)
-    }
-    formats.set(key, format)
-  }
-  return format
 }
 
 function positive(value: unknown): number {

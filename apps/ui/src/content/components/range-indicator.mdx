@@ -1,0 +1,79 @@
+---
+title: 'Range Indicator'
+description: 'One value placed on a banded scale — a lab result against its reference ranges, a salary inside its pay band — with labelled bands, a pointer and off-scale ends.'
+category: 'Data display'
+package: '@c2n/meter'
+tag: 'c2-range-indicator'
+apiTags: ['c2-range-indicator']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RangeIndicator } from '@c2n/components/meter/range-indicator'
+
+`c2-range-indicator` shows where one value sits among named stretches of a scale: a fasting glucose of 88 mg/dL inside "Normal", a salary between the "Mid" and "High" of its band, a PHQ-9 score among its severity levels. The bands are drawn side by side along a track with their labels under them and the numbers where they meet; a pointer marks the value, and the label of the band it falls in shows beside the value. Where [`c2-meter`](/web-components/components/meter) fills a bar up to the value, this one keeps the whole scale in view, because the reader's question is which band, not how full.
+
+Each band is `{ label, from?, to?, tone?, color? }` in scale units. A band starts where the one before it ends (or at `min`) and ends at its `to` (or at `max`); a value equal to `to` belongs to the next band, so a normal range of 70 to 99 is written `"from": 70, "to": 100`. A band given `from` can leave part of the scale bare, which is how a lone reference range is drawn. A `tone` of `optimum`, `suboptimum` or `critical`, as in `c2-meter`, colours the band green, amber or red, and while the value is in it the host matches `:state(optimum)`, `:state(suboptimum)` or `:state(critical)`.
+
+A value outside `min`–`max` turns the pointer into an arrow at that end, pointing off the scale, and still counts in the band at that end: a potassium of 2.1 on a 2.5–6 scale reads "Low". The host then matches `:state(below-scale)` or `:state(above-scale)`.
+
+It is announced as a meter: its label is the name and the shown value followed by the band's label is the value ("88 mg/dL, Normal").
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/meter/range-indicator'
+```
+
+The entry is separate from `@c2n/components/meter`, so importing it does not load `c2-meter`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/meter
+<style>
+  .range-row {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+    max-width: 360px;
+  }
+</style>
+<div data-label="Lab result">
+  <div class="range-row">
+    <c2-range-indicator
+      min="40"
+      max="160"
+      value="88"
+      value-text="88 mg/dL"
+      bands='[{"label":"Low","to":70,"tone":"suboptimum"},{"label":"Normal","to":100,"tone":"optimum"},{"label":"Prediabetes","to":126,"tone":"suboptimum"},{"label":"Diabetes","tone":"critical"}]'>Fasting glucose</c2-range-indicator>
+  </div>
+</div>
+<div data-label="Off the scale">
+  <div class="range-row">
+    <c2-range-indicator
+      min="2.5"
+      max="6"
+      value="2.1"
+      value-text="2.1 mmol/L"
+      bands='[{"label":"Low","to":3.5,"tone":"critical"},{"label":"Normal","to":5.2,"tone":"optimum"},{"label":"High","tone":"critical"}]'>Potassium</c2-range-indicator>
+  </div>
+</div>
+<div data-label="Reference range only">
+  <div class="range-row">
+    <c2-range-indicator min="0" max="10" value="7.4" value-text="7.4 mg/L" bands='[{"label":"Reference","from":0,"to":5}]'>C-reactive protein</c2-range-indicator>
+  </div>
+</div>
+<div data-label="Salary band">
+  <div class="range-row">
+    <c2-range-indicator
+      min="90000"
+      max="140000"
+      value="118000"
+      value-text="$118,000"
+      bands='[{"label":"Low","to":105000},{"label":"Mid","to":125000,"color":"#0265dc"},{"label":"High"}]'>Base salary</c2-range-indicator>
+  </div>
+</div>
+```
+
+To hide the numbers of the scale, set `--c2-range-indicator__ticks--display: none`; to hide the band labels under the track, `--c2-range-indicator__band-labels--display: none`; to hide the band label beside the value (it is still announced), `--c2-range-indicator__status--display: none`.

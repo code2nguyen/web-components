@@ -19,6 +19,9 @@
     segment-6--background-color: #7c3aed,
     segment-7--background-color: #0891b2,
     segment-8--background-color: #52525b,
+    overage--background-color: #dc2626,
+    limit--color: #18181b,
+    limit--width: 2px,
     label--color: #18181b,
     label--font-size: 14px,
     label--font-weight: 500,
@@ -56,14 +59,18 @@
 
 .c2-meter-header {
   display: flex;
+  // A long label or value text moves the value to its own line instead of overlapping the label.
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  column-gap: 12px;
   line-height: 1.4;
 }
 
 .c2-meter-label {
   min-width: 0;
+  // The header wraps the value to its own line first; a label too long for the line alone breaks rather than overflows.
+  overflow-wrap: anywhere;
   color: css.cssVar(label--color);
   font-size: css.cssVar(label--font-size);
   font-weight: css.cssVar(label--font-weight);
@@ -75,8 +82,9 @@
 
 .c2-meter-value {
   display: css.cssVar(value--display);
-  flex: none;
+  min-width: 0;
   margin-inline-start: auto;
+  text-align: end;
   color: css.cssVar(value--color);
   font-size: css.cssVar(value--font-size);
   font-weight: css.cssVar(value--font-weight);
@@ -139,6 +147,34 @@
   .c2-meter-segment:nth-child(8n + #{$n}),
   .c2-meter-legend-item:nth-child(8n + #{$n}) .c2-meter-swatch {
     background-color: css.cssVar(segment-#{$n}--background-color);
+  }
+}
+
+// After the palette, which would otherwise colour it as the next segment.
+.c2-meter-segment.c2-meter-overage,
+.c2-meter-legend-item.c2-meter-legend-overage .c2-meter-swatch {
+  background-color: css.cssVar(overage--background-color);
+}
+
+.c2-meter-overage {
+  position: relative;
+  overflow: visible;
+
+  // The limit mark sits in the gap before the overage, where the segments up to `max` end, whatever the gap.
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(-0.5 * #{css.cssVar(segment--gap)} - 0.5 * #{css.cssVar(limit--width)});
+    width: css.cssVar(limit--width);
+    background-color: css.cssVar(limit--color);
+  }
+}
+
+@media (forced-colors: active) {
+  .c2-meter-overage::before {
+    forced-color-adjust: none;
+    background-color: CanvasText;
   }
 }
 

@@ -761,6 +761,10 @@
       "types": "./dist/meter.d.ts",
       "default": "./dist/meter.js"
     },
+    "./meter/range-indicator": {
+      "types": "./dist/meter/range-indicator.d.ts",
+      "default": "./dist/meter/range-indicator.js"
+    },
     "./mind-map": {
       "types": "./dist/mind-map.d.ts",
       "default": "./dist/mind-map.js"

@@ -84,6 +84,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
+- **Range Indicator** — `c2-range-indicator` · `@c2n/components/meter/range-indicator` — One value placed on a banded scale — a lab result against its reference ranges, a salary inside its pay band — with labelled bands, a pointer and off-scale ends.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.

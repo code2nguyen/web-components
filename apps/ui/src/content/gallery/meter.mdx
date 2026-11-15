@@ -1,7 +1,11 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
+import MeterExamplesRuntime from '../../components/MeterExamplesRuntime.astro'
+
 import { Meter } from '@c2n/components/meter'
+
+<MeterExamplesRuntime />
 
 ## Presets
 
@@ -90,6 +94,46 @@ Meters for quotas, storage and strength. The track height and radius set the sha
   }
 </style>
 <c2-meter class="figure" value="73" value-text="73%">CPU</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Seat meter
+<style>
+  .seats {
+    width: 280px;
+    --c2-meter__segment-2--background-color: #d97706;
+  }
+  .seats:state(overage) {
+    --c2-meter__value--color: var(--c2-theme--color-error, #dc2626);
+    --c2-meter__value--font-weight: 600;
+  }
+</style>
+<c2-meter class="seats" max="50" overage segments='[{"label":"Assigned","value":48},{"label":"Pending invites","value":8}]'>Licensed seats</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=Quota with soft overage
+<style>
+  .soft-overage {
+    width: 280px;
+    --c2-meter__track--height: 12px;
+    --c2-meter__track--border-radius: 4px;
+    --c2-meter__segment--gap: 4px;
+    --c2-meter__limit--width: 3px;
+    --c2-meter__swatch--border-radius: 2px;
+    --c2-meter__overage--background-color: #db2777;
+  }
+</style>
+<c2-meter class="soft-overage" max="1000" overage value-text="1,140 of 1,000 GB · billed as overage" segments='[{"label":"Production","value":780},{"label":"Staging","value":360}]'>Storage this month</c2-meter>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .french {
+    width: 260px;
+  }
+</style>
+<div lang="fr" class="french">
+  <c2-meter max="25" overage segments='[{"label":"Attribués","value":24},{"label":"En attente","value":3}]'>Licences</c2-meter>
+</div>
 ```
 
 </GalleryGrid>

@@ -2138,6 +2138,20 @@
       "reason": "The app's own chevron, sized by the app; the default glyph is 16px."
     },
     {
+      "tag": "c2-range-indicator",
+      "slot": "",
+      "decision": "variables",
+      "variables": ["--c2-range-indicator__label--color", "--c2-range-indicator__label--font-size", "--c2-range-indicator__label--font-weight"],
+      "reason": "The label region sets the type the slotted label inherits."
+    },
+    {
+      "tag": "c2-range-indicator",
+      "slot": "value",
+      "decision": "part",
+      "parts": ["value"],
+      "reason": "The value region owns the value slot's component-side presentation, like the meter's."
+    },
+    {
       "tag": "c2-reaction-bar",
       "slot": "picker",
       "decision": "assigned-content",
