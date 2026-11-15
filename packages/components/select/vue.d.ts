@@ -21,11 +21,14 @@ declare module 'vue' {
     'c2-select': DefineComponent<
       C2Props<Select> & {
         'fit-size'?: unknown
+        'search-placeholder'?: unknown
         'aria-label'?: unknown
         'aria-labelledby'?: unknown
         onInput?: (event: EventOf<Select, 'input'>) => void
         onChange?: (event: EventOf<Select, 'change'>) => void
+        onCreateOption?: (event: EventOf<Select, 'create-option'>) => void
         onSelectionChange?: (event: EventOf<Select, 'selection-change'>) => void
+        onSearchChange?: (event: EventOf<Select, 'search-change'>) => void
       }
     >
   }

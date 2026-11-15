@@ -25,6 +25,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-select': Omit<C2Props<Select>, 'value'> & {
         'fit-size'?: Attribute
+        'search-placeholder'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         value?: Select['value'] | string

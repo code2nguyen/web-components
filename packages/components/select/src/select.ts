@@ -9,15 +9,29 @@ import { classMap } from 'lit/directives/class-map.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import { ListItem } from '@c2n/list-item'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
-import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 import '@c2n/overlay'
 import '@c2n/list'
 
+/** Detail of the select's `search-change` event. */
+export interface SelectSearchChangeEventDetail {
+  /** The text in the search field. */
+  query: string
+}
+
+/** Detail of the select's `create-option` event. */
+export interface SelectCreateOptionEventDetail {
+  /** The search text, trimmed: the label of the option to create. */
+  label: string
+}
+
 /** Events fired by {@link Select}, keyed for `addEventListener`. */
 export interface SelectEventMap {
   'selection-change': CustomEvent<SelectionChangeEventDetail>
+  'search-change': CustomEvent<SelectSearchChangeEventDetail>
+  'create-option': CustomEvent<SelectCreateOptionEventDetail>
   input: Event
   change: Event
 }
@@ -30,6 +44,13 @@ export interface Select {
 /** Once per page: the cause is always the same, and one select with the problem usually means all of them. */
 let warnedUnupgraded = false
 
+/** Lower case without accents, so `cafe` finds `Café`. */
+const fold = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase().trim()
+
+/** The `c2-list-item` a slotted element stands for: itself, or the row a framework island wraps. */
+const rowOf = (element: Element): ListItem | undefined =>
+  element instanceof ListItem ? element : element.firstElementChild instanceof ListItem ? element.firstElementChild : undefined
+
 /**
  * A dropdown built from a trigger button and a `c2-list` of `c2-list-item` rows inside a `c2-overlay` popover. The
  * rows are the light-DOM children of the select, so they are themed with the `--c2-list-item--*` variables directly on
@@ -41,16 +62,42 @@ let warnedUnupgraded = false
  * option (else the first). The list then takes arrows, Home/End and typeahead; Enter or Space picks. Picking (single
  * select) or Escape closes it and returns focus to the trigger; Tab leaves the select and closes the dropdown.
  *
+ * Groups: `<h3>` (any heading level) and `<hr>` among the options are group headings and dividers; the list skips
+ * them for selection and keyboard. They are styled by the `--c2-list__heading--*` and `--c2-list__divider--*`
+ * variables, set on the select.
+ *
+ * Search: `searchable` puts a search field above the options. It takes focus when the dropdown opens and hides every
+ * option whose text does not contain what was typed (case and accents ignored), and a group heading with nothing left
+ * under it. ArrowDown moves to the first match, Enter picks it, ArrowUp from the first match returns to the field and
+ * typing on an option goes on in the field. Hidden options are hidden by a style rule in the select's own shadow
+ * root: nothing is written on them. The search runs only while the dropdown is open; closing it clears the text. Each
+ * keystroke fires `search-change`: cancel it to filter yourself (replace the options with a server's answer, setting
+ * `loading` meanwhile). `creatable` adds a "Create" row while no option's text equals the search; it fires
+ * `create-option`, and the app adds the option and selects it. The `footer` slot below the options is the place for
+ * the panel's actions (Clear, Apply), the app's own buttons.
+ *
  * @tag c2-select
  *
  * @slot default - The options: `c2-list-item` elements, each with a `value`.
  * @slot button-prefix-icon - Icon shown at the start of the trigger: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`.
  * @slot button-suffix-icon - Icon shown at the end of the trigger. Defaults to a chevron that flips while open.
  * @slot button-content - Replaces the trigger text entirely (selected labels or placeholder) with custom markup.
+ * @slot footer - Below the options, inside the dropdown: the panel's actions (a Clear and an Apply `c2-button`, a "Manage" link). Hidden when empty.
+ * @slot empty - Replaces the "No matching options" message shown, with `searchable`, while no option matches.
+ * @slot loading - Replaces the "Loading…" message shown while `loading` is set.
+ *
+ * @csspart panel - The dropdown's box around the search field, the options, the messages and the footer.
+ * @csspart search - The search field shown with `searchable`.
+ * @csspart footer - The wrapper of the `footer` slot.
+ * @csspart empty - The wrapper of the `empty` slot.
+ * @csspart loading - The wrapper of the `loading` slot.
+ * @csspart create - The "Create" row shown with `creatable`.
  *
  * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user picks an option. `detail.value` is the array of selected values (one entry unless `multiple`), `detail.data` the `data` of each selected row. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {Event} input - Fired with `selection-change`, after `value` is updated. Carries no detail: it exists so the select behaves like the other form controls, which is what `v-model`, `ngModel` and any generic form binding listen for.
  * @event {Event} change - Fired with `input`. A select commits on every pick, so the two always fire together.
+ * @event {CustomEvent<SelectSearchChangeEventDetail>} search-change - Fired, with `searchable`, when the search text changes (and with an empty `detail.query` when closing clears it). Cancel it to filter the options yourself: the select then shows every option it holds. Does not bubble.
+ * @event {CustomEvent<SelectCreateOptionEventDetail>} create-option - Fired when the "Create" row of a `creatable` select is chosen. `detail.label` is the trimmed search text; add the option and set `value`. Does not bubble.
  *
  * @cssproperty {pixel} [--c2-select__button--min-height=36px]
  * @cssproperty {padding} [--c2-select__button--padding=6px 10px 6px 12px]
@@ -124,6 +171,29 @@ let warnedUnupgraded = false
  * @cssproperty {pixel} [--c2-select__list--min-width=auto] - Floor for the dropdown's width; it is never narrower than the trigger.
  * @cssproperty {pixel} [--c2-select__list--max-height=280px] - The dropdown scrolls past this height.
  *
+ * @cssproperty {padding} [--c2-select__search--padding=10px 12px]
+ * @cssproperty {font-size} [--c2-select__search--font-size=14px]
+ * @cssproperty {color} [--c2-select__search--color=#18181b]
+ * @cssproperty {color} [--c2-select__search--background=transparent]
+ * @cssproperty {border} [--c2-select__search--border-bottom=1px solid #e4e4e7]
+ * @cssproperty {color} [--c2-select__search__placeholder--color=#71717a]
+ *
+ * @cssproperty {padding} [--c2-select__status--padding=10px 12px] - Padding of the empty and loading messages.
+ * @cssproperty {font-size} [--c2-select__status--font-size=14px]
+ * @cssproperty {color} [--c2-select__status--color=#71717a]
+ *
+ * @cssproperty {padding} [--c2-select__create--padding=8px 10px]
+ * @cssproperty {font-size} [--c2-select__create--font-size=14px]
+ * @cssproperty {color} [--c2-select__create--color=#18181b]
+ * @cssproperty {border-radius} [--c2-select__create--border-radius=6px]
+ * @cssproperty {color} [--c2-select__create__hover--background=#f4f4f5]
+ * @cssproperty {outline} [--c2-select__create__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
+ *
+ * @cssproperty {padding} [--c2-select__footer--padding=8px]
+ * @cssproperty {pixel} [--c2-select__footer--gap=8px]
+ * @cssproperty {justify-content} [--c2-select__footer--justify-content=flex-end]
+ * @cssproperty {border} [--c2-select__footer--border-top=1px solid #e4e4e7]
+ *
  * @internalcomponent c2-list
  * @internalcomponent c2-overlay
  *
@@ -164,6 +234,47 @@ export class Select extends LitElement {
 
   /** Text shown in the trigger while nothing is selected. */
   @property({ type: String }) placeholder = ''
+
+  /** Show a search field above the options that hides the options not matching it. See the class description. */
+  @property({ type: Boolean }) searchable = false
+
+  /** Placeholder of the search field. Empty: the translated "Search…". */
+  @property({ attribute: 'search-placeholder' }) searchPlaceholder = ''
+
+  /** With `searchable`, offer a "Create" row for search text no option equals; choosing it fires `create-option`. */
+  @property({ type: Boolean }) creatable = false
+
+  /** Show the loading message (the `loading` slot) above the options, while the app fetches them. */
+  @property({ type: Boolean }) loading = false
+
+  /** The search text, while the dropdown is open. */
+  @state() private query = ''
+
+  /** False while the app filters (it cancelled `search-change`): every option is then shown. */
+  private localFilter = true
+
+  /** Bumped when the options change, so the search runs again over the new ones. */
+  @state() private rowsVersion = 0
+
+  /** Options and headings the search hides; the visible count and whether one equals the search. */
+  private hiddenRows = new Set<Element>()
+  private matchCount = 0
+  private exactMatch = false
+  private filterSheet?: CSSStyleSheet
+  private childObserver?: MutationObserver
+  /** Each option's text folded for the search, kept until the text changes. */
+  private folded = new WeakMap<ListItem, [string, string]>()
+
+  private foldedText(row: ListItem): string {
+    const text = row.displayText
+    const cached = this.folded.get(row)
+    if (cached?.[0] === text) return cached[1]
+    const folded = fold(text)
+    this.folded.set(row, [text, folded])
+    return folded
+  }
+
+  private readonly slotPresence = new SlotPresenceController(this, ['footer'])
 
   /** Accessible name of the trigger and option list. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
@@ -227,6 +338,9 @@ export class Select extends LitElement {
   @query('#button', true) public button!: HTMLButtonElement
   @query('#menu-overlay', true) public menu!: HTMLElement
   @query('slot:not([name])', true) public listItemSlot?: HTMLSlotElement
+  @query('#search') private searchInput?: HTMLInputElement
+  @query('#create') private createButton?: HTMLButtonElement
+  @query('#list') private list?: LitElement
 
   @state() private displayText = ''
 
@@ -248,6 +362,7 @@ export class Select extends LitElement {
   }
 
   override disconnectedCallback() {
+    this.childObserver?.disconnect()
     this.removeEventListener('click', this.handleHostActivation)
     super.disconnectedCallback()
   }
@@ -324,7 +439,7 @@ export class Select extends LitElement {
     const updates: Promise<unknown>[] = [new Promise((res) => requestAnimationFrame(() => res(true)))]
     if (this.listItemSlot) {
       for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
-        const listItem = slotItem instanceof ListItem ? slotItem : (slotItem.firstChild as ListItem)
+        const listItem = rowOf(slotItem)
         if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
           updates.push(listItem.updateComplete)
         }
@@ -340,7 +455,7 @@ export class Select extends LitElement {
     let unupgraded = 0
     if (this.listItemSlot) {
       for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
-        const listItem = slotItem instanceof ListItem ? slotItem : (slotItem.firstChild as ListItem)
+        const listItem = rowOf(slotItem)
         if (listItem instanceof ListItem) {
           if (this.value.includes(listItem.value)) displayText.push(listItem.displayText)
         } else if (slotItem.localName === 'c2-list-item' || slotItem.firstElementChild?.localName === 'c2-list-item') {
@@ -383,6 +498,12 @@ export class Select extends LitElement {
   private handleSelectionChange(event: CustomEvent<SelectionChangeEventDetail>) {
     this.value = event.detail.value
     this.data = event.detail.data
+    // The list puts its roving tabindex back on the option it last knew, which the search may hide, once it has
+    // drawn the new value: follow the focused option again after that.
+    const active = this.activeInTree
+    if (this.hiddenRows.size && active instanceof ListItem) {
+      this.updateComplete.then(() => this.list?.updateComplete).then(() => this.hiddenRows.size && this.rove(active))
+    }
     if (!this.multiple) {
       this.toggle(false)
     }
@@ -402,7 +523,158 @@ export class Select extends LitElement {
     // However it opened (a click, Enter, an arrow key, `open`), the list takes focus so its own keyboard handling —
     // arrows, Home/End, typeahead, Enter — picks an option. Only while the trigger still holds focus: an app that
     // opened the select from elsewhere keeps its focus.
-    if (this.open && this.focusIsOnTrigger()) this.focusedOption()?.focus()
+    if (this.open && this.focusIsOnTrigger()) (this.searchable ? this.searchInput : this.focusedOption())?.focus()
+    if (!this.open) this.setQuery('')
+  }
+
+  /** Stores the search text and asks the app, through `search-change`, whether the select filters it. */
+  private setQuery(query: string) {
+    if (this.searchInput) this.searchInput.value = query
+    if (query === this.query) return
+    this.query = query
+    const event = new CustomEvent<SelectSearchChangeEventDetail>('search-change', { cancelable: true, detail: { query } })
+    this.localFilter = this.dispatchEvent(event)
+  }
+
+  private handleSearchInput(event: Event) {
+    // The field's own `input` would leave the shadow root as the select's: that event means "the value changed",
+    // which is what `v-model` and a `ControlValueAccessor` listen for, and typing a search changes no value.
+    event.stopPropagation()
+    this.setQuery((event.target as HTMLInputElement).value)
+  }
+
+  /**
+   * Moves focus to an option, and the list's roving tabindex with it: the list would otherwise keep it on an option
+   * the search hid, which Shift+Tab from the footer could not reach.
+   */
+  private focusRow(next: HTMLElement) {
+    if (next instanceof ListItem) this.rove(next)
+    next.focus()
+  }
+
+  private rove(to: ListItem) {
+    for (const row of this.visibleRows(true)) row.tabIndex = row === to ? 0 : -1
+  }
+
+  /** The options the search leaves visible and enabled, in order: where the keyboard may go. `all` keeps the hidden ones. */
+  private visibleRows(all = false): ListItem[] {
+    return (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
+      .filter((element) => all || !this.hiddenRows.has(element))
+      .map(rowOf)
+      .filter((row): row is ListItem => !!row && (all || !row.disabled))
+  }
+
+  private handleSearchKeydown(event: KeyboardEvent) {
+    if (isComposingKey(event)) return
+    const first = this.visibleRows()[0]
+    if (event.key === 'ArrowDown') {
+      if (first) this.focusRow(first)
+      else this.createButton?.focus()
+    } else if (event.key === 'Enter') (first ?? this.createButton)?.click()
+    else return
+    event.preventDefault()
+  }
+
+  /**
+   * With `searchable`, the keyboard on an option moves among the visible ones only (the list itself would land on a
+   * hidden one), leaves for the search field above the first and the Create row below the last, and sends typing to
+   * the search field. Runs in the capture phase, before the list's own handling.
+   */
+  private handleListKeydown = {
+    capture: true,
+    handleEvent: (event: KeyboardEvent) => {
+      if (!this.searchable) return
+      const rows = this.visibleRows()
+      const index = rows.indexOf(event.target as ListItem)
+      if (index < 0) return
+      const typing = !event.ctrlKey && !event.metaKey && !event.altKey && (event.key === 'Backspace' || (event.key.length === 1 && event.key !== ' '))
+      let next: HTMLElement | undefined
+      // The arrows, Home and End are taken whatever the modifiers: the list would move onto a hidden option.
+      if (event.key === 'ArrowDown') next = rows[index + 1] ?? this.createButton ?? rows[index]
+      else if (event.key === 'ArrowUp') next = rows[index - 1] ?? this.searchInput
+      else if (event.key === 'Home') next = rows[0]
+      else if (event.key === 'End') next = rows[rows.length - 1]
+      else if (typing) {
+        next = this.searchInput
+        this.setQuery(event.key === 'Backspace' ? this.query.slice(0, -1) : this.query + event.key)
+      }
+      if (!next) return
+      event.preventDefault()
+      event.stopPropagation()
+      this.focusRow(next)
+    },
+  }
+
+  private handleCreateKeydown(event: KeyboardEvent) {
+    if (event.key !== 'ArrowUp') return
+    event.preventDefault()
+    const last = this.visibleRows().pop()
+    if (last) this.focusRow(last)
+    else this.searchInput?.focus()
+  }
+
+  private handleCreate() {
+    const label = this.query.trim()
+    this.dispatchEvent(new CustomEvent<SelectCreateOptionEventDetail>('create-option', { detail: { label } }))
+    if (this.multiple) {
+      this.setQuery('')
+      this.searchInput?.focus()
+    } else this.toggle(false)
+  }
+
+  /**
+   * Works out which options the search hides, and hides them with a rule in the select's own shadow root, by position:
+   * the options are the author's light DOM, and nothing is written on them. While there is search text, a heading with
+   * no visible option left in its group hides, and so does every divider.
+   */
+  private filterRows() {
+    // Only while open: closed, nothing is hidden and nothing needs counting. Opening runs it again.
+    const elements = this.open ? (this.listItemSlot?.assignedElements({ flatten: true }) ?? []) : []
+    const typed = fold(this.query)
+    const query = this.searchable && this.localFilter ? typed : ''
+    const hidden = new Set<Element>()
+    let heading: Element | undefined
+    let headingShown = false
+    const closeGroup = () => query && heading && !headingShown && hidden.add(heading)
+    this.matchCount = 0
+    this.exactMatch = false
+    for (const element of elements) {
+      if (/^h[1-6]$/.test(element.localName) || element.localName === 'hr') {
+        closeGroup()
+        heading = element.localName === 'hr' ? undefined : element
+        headingShown = false
+        if (query && !heading) hidden.add(element)
+        continue
+      }
+      const row = rowOf(element)
+      if (!row) continue
+      const text = this.foldedText(row)
+      if (typed && text === typed) this.exactMatch = true
+      if (text.includes(query)) {
+        this.matchCount += 1
+        headingShown = true
+      } else hidden.add(element)
+    }
+    closeGroup()
+    this.hiddenRows = hidden
+    const position = new Map([...this.children].map((child, index) => [child, index + 1]))
+    const selectors = [...hidden].filter((element) => position.has(element)).map((element) => `::slotted(:nth-child(${position.get(element)}))`)
+    // The rule hides by position, so a child added or removed anywhere (a footer button, a `button-content` badge)
+    // must run it again; the default slot's own `slotchange` does not see the named slots.
+    if (selectors.length) {
+      this.childObserver ??= new MutationObserver(() => (this.rowsVersion += 1))
+      this.childObserver.observe(this, { childList: true })
+    } else this.childObserver?.disconnect()
+    // Re-sort the list's roving tabindex if the search hid the option holding it.
+    const tabbed = this.visibleRows(true).find((row) => row.tabIndex === 0)
+    const first = this.visibleRows()[0]
+    if (first && [...hidden].some((element) => rowOf(element) === tabbed)) this.rove(first)
+    if (!selectors.length && !this.filterSheet) return
+    if (!this.filterSheet) {
+      this.filterSheet = new CSSStyleSheet()
+      this.shadowRoot!.adoptedStyleSheets = [...this.shadowRoot!.adoptedStyleSheets, this.filterSheet]
+    }
+    this.filterSheet.replaceSync(selectors.length ? `${selectors.join(',')}{display:none!important}` : '')
   }
 
   /**
@@ -430,7 +702,8 @@ export class Select extends LitElement {
   private spacePressedInList = false
 
   private handleOverlayKeydown(event: KeyboardEvent) {
-    this.spacePressedInList = event.key === ' '
+    // A space typed in the search field is text, not a pick.
+    this.spacePressedInList = event.key === ' ' && event.target !== this.searchInput
   }
 
   /** Set while a pointer is down on the trigger: that click toggles the dropdown itself, so focusout must not. */
@@ -472,9 +745,11 @@ export class Select extends LitElement {
     return this.activeInTree === this && this.shadowRoot?.activeElement === this.button
   }
 
+  /** Focus is on a row or a footer control (light DOM), or on the search field or Create row (the dropdown's shadow DOM). */
   private focusIsOnOption(): boolean {
     const active = this.activeInTree
-    return !!active && active !== this && this.contains(active)
+    if (active === this) return this.menu.contains(this.shadowRoot!.activeElement)
+    return !!active && this.contains(active)
   }
 
   /**
@@ -493,6 +768,14 @@ export class Select extends LitElement {
     // Frameworks (and Astro islands) may set `value` as a `;`-separated string property instead of an attribute.
     if (changedProperties.has('value') && typeof this.value === 'string') {
       this.value = arrayPropertyConverter.fromAttribute(this.value)
+    }
+    const changed = changedProperties as Map<PropertyKey, unknown>
+    if (
+      this.hasUpdated &&
+      (changed.has('query') || changed.has('rowsVersion') || changed.has('searchable') || changed.has('open')) &&
+      (this.searchable || this.filterSheet)
+    ) {
+      this.filterRows()
     }
   }
 
@@ -535,6 +818,40 @@ export class Select extends LitElement {
 
   private handleSlotChange() {
     this.updateDisplayText()
+    if (this.searchable) this.rowsVersion += 1
+  }
+
+  private renderPanelTop() {
+    const search = html`<input
+      id="search"
+      part="search"
+      class="search"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      enterkeyhint="go"
+      aria-label=${this.msg.t('searchLabel')}
+      aria-controls="list"
+      placeholder=${this.searchPlaceholder || this.msg.t('searchPlaceholder')}
+      @input=${this.handleSearchInput}
+      @keydown=${this.handleSearchKeydown}
+    />`
+    return html`${this.searchable ? search : nothing}${
+      this.loading ? html`<div class="status" part="loading" role="status"><slot name="loading">${this.msg.t('loading')}</slot></div>` : nothing
+    }`
+  }
+
+  private renderPanelBottom() {
+    const label = this.query.trim()
+    const empty = this.searchable && !this.loading && this.matchCount === 0
+    const create = this.searchable && this.creatable && !this.loading && label && !this.exactMatch
+    return html`${empty ? html`<div class="status" part="empty" role="status"><slot name="empty">${this.msg.t('empty')}</slot></div>` : nothing}${
+      create
+        ? html`<button id="create" class="create" part="create" type="button" @click=${this.handleCreate} @keydown=${this.handleCreateKeydown}>
+            ${this.msg.t('create', label)}
+          </button>`
+        : nothing
+    }`
   }
 
   /**
@@ -594,17 +911,25 @@ export class Select extends LitElement {
         @keydown=${this.handleOverlayKeydown}
         ?fit-anchor=${this.fitSize}
       >
-        <c2-list
-          id="list"
-          aria-labelledby="button"
-          .value=${this.value}
-          class="list"
-          ?multiple=${this.multiple}
-          @selection-change=${this.handleSelectionChange}
-          ?required=${this.required}
-        >
-          <slot @slotchange=${this.handleSlotChange}></slot>
-        </c2-list>
+        <div class=${classMap({ panel: true, boxed: this.searchable || this.loading || this.slotPresence.has('footer') })} part="panel">
+          ${this.renderPanelTop()}
+          <c2-list
+            id="list"
+            aria-labelledby="button"
+            .value=${this.value}
+            class="list"
+            ?multiple=${this.multiple}
+            @selection-change=${this.handleSelectionChange}
+            @keydown=${this.handleListKeydown}
+            ?required=${this.required}
+          >
+            <slot @slotchange=${this.handleSlotChange}></slot>
+          </c2-list>
+          ${this.renderPanelBottom()}
+          <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
+            <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+          </div>
+        </div>
       </c2-overlay>
       ${this.field.renderDescription()}
     </div> `

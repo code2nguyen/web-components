@@ -4,9 +4,13 @@ description: 'Ready-made looks for c2-select: trigger variants, sizes, icons, dr
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import SelectExamplesRuntime from '../../components/SelectExamplesRuntime.astro'
 
 import { Select } from '@c2n/components/select'
 import { ListItem } from '@c2n/components/list-item'
+import { Badge } from '@c2n/components/badge'
+import { Button } from '@c2n/components/button'
 
 ## Trigger
 
@@ -467,3 +471,195 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
 ```
 
 </GalleryGrid>
+
+## Search, groups and actions
+
+`searchable` puts a filter field above the options, headings and dividers among the options group them, `creatable` offers to create the option a search did not find, and the `footer` slot holds the panel's own actions. Open a card to try it: the search field takes focus, ArrowDown moves to the first match and Enter picks it.
+
+<SelectExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Searchable
+<style>
+  .searchable {
+    width: 220px;
+  }
+</style>
+<c2-select searchable placeholder="Time zone" class="searchable" client:only="lit">
+  <c2-list-item value="-8">Los Angeles (UTC−8)</c2-list-item>
+  <c2-list-item value="-5">New York (UTC−5)</c2-list-item>
+  <c2-list-item value="-3">São Paulo (UTC−3)</c2-list-item>
+  <c2-list-item value="0">London (UTC+0)</c2-list-item>
+  <c2-list-item value="1">Paris (UTC+1)</c2-list-item>
+  <c2-list-item value="2">Cairo (UTC+2)</c2-list-item>
+  <c2-list-item value="5.5">Mumbai (UTC+5:30)</c2-list-item>
+  <c2-list-item value="7">Hanoi (UTC+7)</c2-list-item>
+  <c2-list-item value="9">Tokyo (UTC+9)</c2-list-item>
+  <c2-list-item value="10">Sydney (UTC+10)</c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Option groups
+<style>
+  .groups {
+    width: 220px;
+  }
+</style>
+<c2-select searchable value="paris" placeholder="Office" class="groups" client:only="lit">
+  <h3>Americas</h3>
+  <c2-list-item value="nyc">New York</c2-list-item>
+  <c2-list-item value="sao">São Paulo</c2-list-item>
+  <h3>Europe</h3>
+  <c2-list-item value="london">London</c2-list-item>
+  <c2-list-item value="paris">Paris</c2-list-item>
+  <h3>Asia Pacific</h3>
+  <c2-list-item value="hanoi">Hanoi</c2-list-item>
+  <c2-list-item value="tokyo">Tokyo</c2-list-item>
+  <c2-list-item value="sydney">Sydney</c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Status with stages
+<style>
+  .status-stages {
+    width: 200px;
+    --c2-list-item--gap: 0px;
+  }
+</style>
+<c2-select searchable creatable value="doing" placeholder="Status" class="status-stages" data-select-example="status" client:only="lit">
+  <h3>Not started</h3>
+  <c2-list-item value="backlog"><c2-badge tone="neutral">Backlog</c2-badge></c2-list-item>
+  <c2-list-item value="todo"><c2-badge tone="neutral">To do</c2-badge></c2-list-item>
+  <h3>In progress</h3>
+  <c2-list-item value="doing"><c2-badge tone="primary">Doing</c2-badge></c2-list-item>
+  <c2-list-item value="review"><c2-badge tone="warning">In review</c2-badge></c2-list-item>
+  <hr />
+  <h3>Complete</h3>
+  <c2-list-item value="done"><c2-badge tone="success">Done</c2-badge></c2-list-item>
+  <c2-list-item value="cancelled"><c2-badge tone="danger">Cancelled</c2-badge></c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Label picker with actions
+<style>
+  .label-picker {
+    width: 240px;
+    --c2-select__list--min-width: 260px;
+  }
+  .label-picker .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+  }
+  .label-picker .swatch--bug {
+    background: #dc2626;
+  }
+  .label-picker .swatch--feature {
+    background: #2563eb;
+  }
+  .label-picker .swatch--docs {
+    background: #0891b2;
+  }
+  .label-picker .swatch--perf {
+    background: #d97706;
+  }
+  .label-picker .swatch--a11y {
+    background: #7c3aed;
+  }
+  .label-picker c2-button {
+    --c2-button__container--height: 30px;
+  }
+  .label-picker c2-button.quiet {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-select multiple searchable value="bug;a11y" placeholder="Labels" class="label-picker" data-select-example="actions" client:only="lit">
+  <c2-list-item value="bug"><span slot="prefix-icon" class="swatch swatch--bug"></span>bug</c2-list-item>
+  <c2-list-item value="feature"><span slot="prefix-icon" class="swatch swatch--feature"></span>feature</c2-list-item>
+  <c2-list-item value="docs"><span slot="prefix-icon" class="swatch swatch--docs"></span>documentation</c2-list-item>
+  <c2-list-item value="perf"><span slot="prefix-icon" class="swatch swatch--perf"></span>performance</c2-list-item>
+  <c2-list-item value="a11y"><span slot="prefix-icon" class="swatch swatch--a11y"></span>accessibility</c2-list-item>
+  <c2-button slot="footer" class="quiet" data-action="clear">Clear</c2-button>
+  <c2-button slot="footer" data-action="apply">Apply</c2-button>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Server search
+<style>
+  .remote {
+    width: 220px;
+  }
+</style>
+<c2-select searchable placeholder="Assignee" search-placeholder="Search people…" class="remote" data-select-example="remote" client:only="lit"></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Custom empty state
+<style>
+  .custom-empty {
+    width: 220px;
+    --c2-select__search--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-select__status--padding: 14px 12px;
+  }
+  .custom-empty .empty-hint {
+    display: grid;
+    gap: 2px;
+  }
+  .custom-empty .empty-hint strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+</style>
+<c2-select searchable placeholder="Fruit" class="custom-empty" client:only="lit">
+  <c2-list-item value="apple">Apple</c2-list-item>
+  <c2-list-item value="banana">Banana</c2-list-item>
+  <c2-list-item value="cherry">Cherry</c2-list-item>
+  <span slot="empty" class="empty-hint"><strong>No fruit found</strong>Check the spelling, or try a shorter word.</span>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .french {
+    width: 220px;
+  }
+</style>
+<div lang="fr">
+  <c2-select searchable creatable placeholder="Statut" class="french" client:only="lit">
+    <c2-list-item value="todo">À faire</c2-list-item>
+    <c2-list-item value="doing">En cours</c2-list-item>
+    <c2-list-item value="done">Terminé</c2-list-item>
+  </c2-select>
+</div>
+```
+
+</GalleryGrid>
+
+The status, label and server cards are wired by the page, as an application would: the select fires events and never adds, removes or fetches an option itself.
+
+```ts tag=CodeBlock
+// Footer actions: the app's own buttons.
+clearButton.addEventListener('click', () => (select.value = []))
+applyButton.addEventListener('click', () => (select.open = false))
+
+// "Create": add the option and select it.
+select.addEventListener('create-option', (event) => {
+  const item = document.createElement('c2-list-item')
+  item.value = slugify(event.detail.label)
+  item.textContent = event.detail.label
+  select.append(item)
+  select.value = [item.value]
+})
+
+// Server search: cancel the built-in filter, show the loading state, replace the options.
+select.addEventListener('search-change', async (event) => {
+  event.preventDefault()
+  select.loading = true
+  const people = await searchPeople(event.detail.query)
+  select.replaceChildren(...people.map(toListItem))
+  select.loading = false
+})
+```
