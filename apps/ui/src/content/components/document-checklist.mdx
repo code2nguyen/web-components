@@ -1,0 +1,79 @@
+---
+title: 'Document checklist'
+description: 'A list of expected documents, each with a status, a due or expiry date and its own upload target: KYC, mortgage, vendor and HR onboarding portals.'
+category: 'Inputs'
+package: '@c2n/upload'
+tag: 'c2-document-checklist'
+apiTags: ['c2-document-checklist']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { DocumentChecklist } from '@c2n/components/upload/document-checklist'
+
+`c2-document-checklist` is a [`c2-upload`](/web-components/components/upload) whose queue is a list of the documents
+an application expects: proof of identity, three bank statements, a signed contract. Each row shows its status, its due
+or expiry date and a rejection reason, and is its own upload target, with an upload button and a drop area. A summary
+counts the required documents provided.
+
+<UploadExamplesRuntime />
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/upload/document-checklist'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/upload
+<div data-label="Mortgage application">
+  <c2-document-checklist
+    client:only="lit"
+    data-upload-demo
+    data-seed="statements:august.pdf"
+    today="2026-11-15"
+    aria-label="Mortgage documents"
+    requirements='[{"id":"identity","label":"Proof of identity","description":"Passport or national ID card","status":"approved","expires":"2031-03-03"},{"id":"address","label":"Proof of address","description":"A utility bill from the last 3 months","status":"in-review"},{"id":"statements","label":"Bank statements","description":"The last 3 months, every page","due":"2026-11-01","accept":".pdf","multiple":true},{"id":"payslip","label":"Payslip","status":"rejected","reason":"the scan is blurry, upload a sharper copy","due":"2026-11-30"},{"id":"gift","label":"Gift letter","optional":true}]'
+  ></c2-document-checklist>
+</div>
+```
+
+`requirements` lists the documents in order, as a JSON attribute or an array property. Each one has an `id` and a
+`label`, and may have a `description`, a `due` or `expires` date (`YYYY-MM-DD`), a `reason` shown while it is rejected,
+`optional`, its own `accept` and `multiple`.
+
+A row's status is `needed`, `uploaded`, `in-review`, `approved`, `rejected` or `expired`. The application sets the
+review statuses (`in-review`, `approved`, `rejected`) in `requirements` as its back office decides, assigning a new
+array when one changes. The checklist works out the rest: a file in a row's queue makes it `uploaded` (also over a
+rejected or expired document, until the application says otherwise), an `expires` date before `today` makes it
+`expired`, and a `due` date before `today` marks a document still needed as overdue. `today` defaults to the current
+date; set it when the dates come from a server clock.
+
+Approved and in-review rows have no upload button. A row takes one file, and a new file replaces it; with `multiple` it
+takes several. Every file goes through the `uploadHandler` of [`c2-upload`](/web-components/components/upload), which
+receives the row's id as `target`, and every queue item carries it as `item.target` in the upload events.
+
+```js tag=CodeBlock
+const checklist = document.querySelector('c2-document-checklist')
+
+checklist.uploadHandler = async (file, { target, signal }) => {
+  const body = new FormData()
+  body.append('document', target)
+  body.append('file', file)
+  const response = await fetch('/api/documents', { method: 'POST', body, signal })
+  if (!response.ok) throw new Error('Upload failed')
+  return response.json()
+}
+```
+
+`addFiles(files, id)` adds files to a row from code, and `browseFor(id)` opens the file browser for it. Without an id,
+files go to the first documents still needed whose type they match. `statusOf(id)` and `itemsFor(id)` read a row.
+With `required`, the checklist is invalid in a form until every non-optional document is provided; with `name`, each
+file is appended to the form data under that name.
+
+The `actions` slot beside the summary is the place for the application's own commands, such as "Submit for review",
+and `renderActions` adds a row's own actions (view, download a template) beside its upload button. `multiple`,
+`max-files` and `variant` of `c2-upload` do not apply.
