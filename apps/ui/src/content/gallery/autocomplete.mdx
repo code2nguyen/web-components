@@ -1,5 +1,5 @@
 ---
-description: 'Production-shaped autocomplete patterns: people mentions, asynchronous catalog search and a command launcher.'
+description: 'Production-shaped autocomplete patterns: people mentions, asynchronous catalog search, a command launcher and a record picker.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -116,7 +116,133 @@ These examples exercise different capabilities instead of repeating the same dat
 
 </GalleryGrid>
 
+## Record picker
+
+`multiple` turns the field into a lookup that keeps several records as chips, `creatable` adds a row that asks the app to create the record the query names, and `recent-items` fills the panel before anything is typed. The advanced search dialog of a full record picker is an app composition of `c2-modal` and `c2-table`, opened from the `footer` slot.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Pick several records
+<style>
+  .record-picker {
+    width: 100%;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="record-picker"
+  multiple
+  name="accounts"
+  aria-label="Related accounts"
+  placeholder="Search accounts…"
+  item-key="id"
+  label-field="name"
+  description-field="city"
+  suggestions='[{"id":"acme","name":"Acme Corporation","city":"Chicago"},{"id":"globex","name":"Globex","city":"Springfield"},{"id":"initech","name":"Initech","city":"Austin"},{"id":"umbrella","name":"Umbrella Health","city":"Raccoon City"},{"id":"hooli","name":"Hooli","city":"Palo Alto"}]'
+  selected-items='[{"id":"acme","name":"Acme Corporation","city":"Chicago"},{"id":"hooli","name":"Hooli","city":"Palo Alto"}]'
+></c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Create a missing record
+<style>
+  .create-picker {
+    width: 100%;
+    --c2-autocomplete__create--color: light-dark(#047857, #6fcfa6);
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="create-picker"
+  data-autocomplete-example="create"
+  multiple
+  creatable
+  aria-label="Labels"
+  placeholder="Type a label, e.g. Billing…"
+  suggestions='["Bug","Feature request","Documentation","Performance"]'
+></c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Recent items
+<style>
+  .recent-picker {
+    width: 100%;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="recent-picker"
+  aria-label="Assign to"
+  placeholder="Click to see recent people…"
+  item-key="id"
+  label-field="name"
+  description-field="team"
+  suggestions='[{"id":"ada","name":"Ada Lovelace","team":"Platform"},{"id":"grace","name":"Grace Hopper","team":"Compilers"},{"id":"katherine","name":"Katherine Johnson","team":"Data"},{"id":"alan","name":"Alan Turing","team":"Research"}]'
+  recent-items='[{"id":"grace","name":"Grace Hopper","team":"Compilers"},{"id":"alan","name":"Alan Turing","team":"Research"}]'
+></c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Avatar chips (renderPick)
+<style>
+  .avatar-picker {
+    width: 100%;
+    --c2-autocomplete__pick--height: 28px;
+    --c2-chip__container--padding-left: 3px;
+    --c2-avatar--size: 22px;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="avatar-picker"
+  data-autocomplete-example="avatar-picks"
+  multiple
+  aria-label="Attendees"
+  placeholder="Add attendees…"
+  item-key="id"
+  label-field="name"
+  description-field="role"
+  suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist"}]'
+  selected-items='[{"id":"grace","name":"Grace Hopper","role":"Compiler lead"}]'
+></c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Choisir des comptes (French)
+<style>
+  .french-picker-frame,
+  .french-picker {
+    width: 100%;
+  }
+</style>
+<div class="french-picker-frame" lang="fr">
+  <c2-autocomplete
+    client:only="lit"
+    class="french-picker"
+    data-autocomplete-example="create"
+    multiple
+    creatable
+    aria-label="Comptes"
+    placeholder="Rechercher un compte…"
+    suggestions='["Air Liberté","Banque du Rhône","Café Lumière"]'
+    recent-items='["Banque du Rhône"]'
+  ></c2-autocomplete>
+</div>
+```
+
+</GalleryGrid>
+
 <AutocompleteExamplesRuntime />
+
+The "create" row only asks: the app creates the record (on its server, in a dialog) and hands it back with `pick()`, which adds it as a choice would. `renderPick` replaces a chip's label, and its output may fill the chip's `prefix` slot.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+labels.addEventListener('create-request', async ({ detail }) => {
+  const label = await api.createLabel(detail.query)
+  labels.pick(label)
+})
+
+attendees.renderPick = ({ item }) => html`<c2-avatar slot="prefix" name=${item.name} auto-color aria-hidden="true"></c2-avatar>${item.name}`
+```
 
 ## Custom row renderer
 

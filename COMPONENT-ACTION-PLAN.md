@@ -86,7 +86,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **autocomplete-1** · `c2-autocomplete` · record picker #252 · +2.5 kB on 26.0 kB · risk low
 - **select-2** · `c2-select` · native select #443 (companion) · 3 kB new entry · risk low
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
