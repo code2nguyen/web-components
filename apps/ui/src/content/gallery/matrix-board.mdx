@@ -1,0 +1,198 @@
+---
+description: 'Matrix boards for talent reviews, risk registers and priorities: named and banded cells, numeric axes, custom cards, a legend, a compact look and French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KanbanExamplesRuntime from '../../components/KanbanExamplesRuntime.astro'
+
+import { MatrixBoard } from '@c2n/components/kanban/matrix-board'
+
+<KanbanExamplesRuntime />
+
+## Grids
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-matrix-board
+  client:only="lit"
+  editable
+  aria-label="Talent review"
+  row-title="Potential"
+  column-title="Performance"
+  rows='[{"id":"high","label":"High"},{"id":"medium","label":"Medium"},{"id":"low","label":"Low"}]'
+  columns='[{"id":"low","label":"Low"},{"id":"medium","label":"Medium"},{"id":"high","label":"High"}]'
+  items='[{"id":"1","row":"high","column":"high","title":"Ana Lima"},{"id":"2","row":"medium","column":"high","title":"Mo Kader"},{"id":"3","row":"medium","column":"medium","title":"Vinh Nguyen"},{"id":"4","row":"low","column":"medium","title":"Tom Reyes"}]'
+></c2-matrix-board>
+```
+
+```html tag=MdxCodeBlock,label=9-box with named bands
+<c2-matrix-board
+  client:only="lit"
+  editable
+  aria-label="Talent review"
+  row-title="Potential"
+  column-title="Performance"
+  rows='[{"id":"high","label":"High"},{"id":"medium","label":"Medium"},{"id":"low","label":"Low"}]'
+  columns='[{"id":"low","label":"Low"},{"id":"medium","label":"Medium"},{"id":"high","label":"High"}]'
+  cells='[{"row":"high","column":"low","label":"Rough diamond","band":3},{"row":"high","column":"medium","label":"Future star","band":2},{"row":"high","column":"high","label":"Star","band":1},{"row":"medium","column":"low","label":"Inconsistent","band":4},{"row":"medium","column":"medium","label":"Core player","band":3},{"row":"medium","column":"high","label":"High performer","band":2},{"row":"low","column":"low","label":"Risk","band":5},{"row":"low","column":"medium","label":"Effective","band":4},{"row":"low","column":"high","label":"Trusted pro","band":3}]'
+  items='[{"id":"1","row":"high","column":"high","title":"Ana Lima","description":"Staff engineer"},{"id":"2","row":"medium","column":"high","title":"Mo Kader","description":"Designer"},{"id":"3","row":"medium","column":"medium","title":"Vinh Nguyen","description":"Engineer"},{"id":"4","row":"high","column":"low","title":"Sara Holm","description":"Analyst"}]'
+></c2-matrix-board>
+```
+
+```html tag=MdxCodeBlock,label=5 by 5 risk matrix
+<style>
+  .risk-matrix {
+    --c2-matrix-board--gap: 4px;
+    --c2-matrix-board__cell--min-width: 92px;
+    --c2-matrix-board__cell--min-height: 64px;
+    --c2-matrix-board__cell--padding: 4px;
+    --c2-kanban-column__card--padding: 4px 6px;
+    --c2-kanban-column__card--font-size: 12px;
+  }
+</style>
+<c2-matrix-board
+  client:only="lit"
+  class="risk-matrix"
+  editable
+  aria-label="Risk register"
+  row-title="Likelihood"
+  column-title="Impact"
+  row-field="likelihood"
+  column-field="impact"
+  rows='[5, 4, 3, 2, 1]'
+  columns='[1, 2, 3, 4, 5]'
+  cells='[{"row":5,"column":1,"band":2},{"row":5,"column":2,"band":3},{"row":5,"column":3,"band":4},{"row":5,"column":4,"band":5},{"row":5,"column":5,"band":5},{"row":4,"column":1,"band":2},{"row":4,"column":2,"band":3},{"row":4,"column":3,"band":4},{"row":4,"column":4,"band":4},{"row":4,"column":5,"band":5},{"row":3,"column":1,"band":1},{"row":3,"column":2,"band":2},{"row":3,"column":3,"band":3},{"row":3,"column":4,"band":4},{"row":3,"column":5,"band":4},{"row":2,"column":1,"band":1},{"row":2,"column":2,"band":2},{"row":2,"column":3,"band":2},{"row":2,"column":4,"band":3},{"row":2,"column":5,"band":3},{"row":1,"column":1,"band":1},{"row":1,"column":2,"band":1},{"row":1,"column":3,"band":1},{"row":1,"column":4,"band":2},{"row":1,"column":5,"band":2}]'
+  items='[{"id":"R-12","likelihood":4,"impact":4,"title":"Vendor outage"},{"id":"R-07","likelihood":2,"impact":5,"title":"Data breach"},{"id":"R-03","likelihood":3,"impact":2,"title":"Key hire leaves"},{"id":"R-15","likelihood":5,"impact":1,"title":"Slow builds"}]'
+></c2-matrix-board>
+```
+
+```html tag=MdxCodeBlock,label=Eisenhower matrix with a legend
+<style>
+  .priority-matrix {
+    --c2-matrix-board__cell--min-height: 110px;
+    --c2-matrix-board__band-1--background-color: light-dark(#fee2e2, #3b1717);
+    --c2-matrix-board__band-2--background-color: light-dark(#dbeafe, #172554);
+    --c2-matrix-board__band-3--background-color: light-dark(#fef3c7, #3a2a0c);
+    --c2-matrix-board__band-4--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .priority-legend {
+    margin: 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-matrix-board
+  client:only="lit"
+  class="priority-matrix"
+  editable
+  aria-label="This week's priorities"
+  row-title="Importance"
+  column-title="Urgency"
+  rows='[{"id":"important","label":"Important"},{"id":"minor","label":"Not important"}]'
+  columns='[{"id":"urgent","label":"Urgent"},{"id":"later","label":"Not urgent"}]'
+  cells='[{"row":"important","column":"urgent","label":"Do","band":1},{"row":"important","column":"later","label":"Schedule","band":2},{"row":"minor","column":"urgent","label":"Delegate","band":3},{"row":"minor","column":"later","label":"Drop","band":4}]'
+  items='[{"id":"1","row":"important","column":"urgent","title":"Fix the checkout bug"},{"id":"2","row":"important","column":"later","title":"Plan the Q3 roadmap"},{"id":"3","row":"minor","column":"urgent","title":"Book the offsite room"},{"id":"4","row":"minor","column":"later","title":"Tidy the wiki"}]'
+>
+  <p class="priority-legend">Do it now, schedule it, hand it over, or let it go.</p>
+</c2-matrix-board>
+```
+
+</GalleryGrid>
+
+## Cards and looks
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Custom cards
+<style>
+  .people-matrix {
+    --c2-matrix-board__cell--min-width: 140px;
+  }
+  .people-status {
+    margin: 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-matrix-board
+  client:only="lit"
+  class="people-matrix"
+  data-matrix-example="people"
+  editable
+  aria-label="Talent review"
+  row-title="Potential"
+  column-title="Performance"
+  rows='[{"id":"high","label":"High"},{"id":"low","label":"Low"}]'
+  columns='[{"id":"low","label":"Low"},{"id":"high","label":"High"}]'
+  cells='[{"row":"high","column":"high","label":"Star","band":1},{"row":"low","column":"low","label":"Risk","band":5}]'
+  items='[{"id":"p1","row":"high","column":"high","name":"Ana Lima","role":"Staff engineer"},{"id":"p2","row":"high","column":"low","name":"Sara Holm","role":"Analyst"},{"id":"p3","row":"low","column":"high","name":"Mo Kader","role":"Designer"}]'
+>
+  <p class="people-status" data-matrix-status>Move a card to see card-move</p>
+</c2-matrix-board>
+```
+
+```html tag=MdxCodeBlock,label=Compact with accent titles
+<style>
+  .compact-matrix {
+    --c2-matrix-board--gap: 3px;
+    --c2-matrix-board__cell--min-width: 110px;
+    --c2-matrix-board__cell--min-height: 72px;
+    --c2-matrix-board__cell--padding: 4px;
+    --c2-matrix-board__cell--background-color: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-matrix-board__title--color: light-dark(#6d28d9, #b49af0);
+    --c2-matrix-board__label--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-kanban-column--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-kanban-column--border-radius: 4px;
+    --c2-kanban-column__header--padding: 2px 4px;
+    --c2-kanban-column__card--padding: 4px 8px;
+    --c2-kanban-column__card--font-size: 12px;
+    --c2-kanban-column__card--border-radius: 999px;
+  }
+</style>
+<c2-matrix-board
+  client:only="lit"
+  class="compact-matrix"
+  editable
+  aria-label="Feature bets"
+  row-title="Value"
+  column-title="Effort"
+  rows='["High", "Medium", "Low"]'
+  columns='["Small", "Medium", "Large"]'
+  items='[{"id":"1","row":"High","column":"Small","title":"Saved filters"},{"id":"2","row":"High","column":"Large","title":"Offline mode"},{"id":"3","row":"Medium","column":"Small","title":"Dark charts"},{"id":"4","row":"Low","column":"Medium","title":"Custom fonts"}]'
+></c2-matrix-board>
+```
+
+```html tag=MdxCodeBlock,label=Grille 9 cases (French)
+<div lang="fr">
+  <c2-matrix-board
+    client:only="lit"
+    editable
+    aria-label="Revue des talents"
+    row-title="Potentiel"
+    column-title="Performance"
+    rows='[{"id":"haut","label":"Élevé"},{"id":"moyen","label":"Moyen"},{"id":"bas","label":"Faible"}]'
+    columns='[{"id":"bas","label":"Faible"},{"id":"moyen","label":"Moyenne"},{"id":"haut","label":"Élevée"}]'
+    cells='[{"row":"haut","column":"haut","label":"Étoile","band":1},{"row":"bas","column":"bas","label":"À risque","band":5}]'
+    items='[{"id":"1","row":"haut","column":"haut","title":"Ana Lima"},{"id":"2","row":"moyen","column":"moyen","title":"Vinh Nguyen"},{"id":"3","row":"bas","column":"moyen","title":"Tom Reyes"}]'
+  ></c2-matrix-board>
+</div>
+```
+
+</GalleryGrid>
+
+The custom cards come from `renderItem`, a JavaScript property; the board still draws the card box, its focus ring
+and its drag lift:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+board.renderItem = ({ item }) => html`
+  <c2-avatar name=${item.name} auto-color></c2-avatar>
+  <span>${item.name}</span>
+  <span>${item.role}</span>
+`
+board.addEventListener('card-move', ({ detail }) => save(detail.key, { potential: detail.toRow, performance: detail.toColumn }))
+```

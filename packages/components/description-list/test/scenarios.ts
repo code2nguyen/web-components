@@ -1,4 +1,6 @@
+import './translations'
 import '../src/description-list'
+import '../src/description-group'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -57,13 +59,41 @@ const markup: Record<string, string> = {
     <c2-description-item label="Empty" empty-text="Not set">  </c2-description-item>
     <c2-description-item label="Blank" empty-text=""></c2-description-item>
   </c2-description-list>`,
+  sections: `<c2-description-list aria-label="Contact" style="--c2-description-item__label--width: 120px">
+    <c2-description-group label="Contact">
+      <c2-description-item label="Email">ada@example.com</c2-description-item>
+      <c2-description-item label="Phone">+44 20 7946 0000</c2-description-item>
+    </c2-description-group>
+    <c2-description-group label="Billing" collapsible collapsed>
+      <c2-description-item label="Plan">Business</c2-description-item>
+      <c2-description-item label="Card">Visa ending 4242</c2-description-item>
+    </c2-description-group>
+  </c2-description-list>`,
+  'pay-stub': `<c2-description-list aria-label="Pay stub" value-labels="Current;Year to date" label-heading="Line">
+    <c2-description-group label="Earnings">
+      <c2-description-item label="Salary"><c2-description-value>$4,200.00</c2-description-value><c2-description-value>$42,000.00</c2-description-value></c2-description-item>
+      <c2-description-item label="Gross pay" kind="subtotal"><c2-description-value>$4,200.00</c2-description-value><c2-description-value>$42,000.00</c2-description-value></c2-description-item>
+    </c2-description-group>
+    <c2-description-item label="Net pay" kind="total"><c2-description-value>$3,150.00</c2-description-value><c2-description-value>$31,500.00</c2-description-value></c2-description-item>
+  </c2-description-list>`,
+  properties: `<c2-description-list aria-label="Deal" style="--c2-description-item__label--width: 120px">
+    <c2-description-item label="Name" editor="text">Acme renewal</c2-description-item>
+    <c2-description-item label="Amount" name="amount" editor="number" edit-value="12000">$12,000</c2-description-item>
+    <c2-description-item label="Stage" editor="select" options="Lead;Qualified;Won">Qualified</c2-description-item>
+    <c2-description-item label="Owner">Grace Hopper</c2-description-item>
+  </c2-description-list>`,
+  'properties-fr': `<div lang="fr"><c2-description-list aria-label="Affaire">
+    <c2-description-item label="Nom" editor="text">Renouvellement Acme</c2-description-item>
+  </c2-description-list></div>`,
 }
 
 main.innerHTML = markup[scenario] ?? markup.default
 
 await Promise.all(
-  [...document.querySelectorAll<HTMLElement & { updateComplete: Promise<boolean> }>('c2-description-list, c2-description-item, c2-description-value')].map(
-    (el) => el.updateComplete,
-  ),
+  [
+    ...document.querySelectorAll<HTMLElement & { updateComplete: Promise<boolean> }>(
+      'c2-description-list, c2-description-item, c2-description-value, c2-description-group',
+    ),
+  ].map((el) => el.updateComplete),
 )
 main.dataset.ready = 'true'

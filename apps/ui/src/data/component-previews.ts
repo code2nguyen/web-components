@@ -346,6 +346,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-mat-icon>search</c2-mat-icon>
 </div>`,
   math: `<c2-math style="--c2-math--font-size:1.5em" display value="x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}"></c2-math>`,
+  'matrix-board': `<c2-matrix-board editable aria-label="Talent review" style="width:280px;--c2-matrix-board--gap:3px;--c2-matrix-board__cell--min-width:60px;--c2-matrix-board__cell--min-height:46px;--c2-matrix-board__cell--padding:3px;--c2-matrix-board__label--font-size:10px;--c2-matrix-board__cell-count--font-size:10px;--c2-kanban-column__header--padding:0 2px;--c2-kanban-column__header--gap:2px;--c2-kanban-column--gap:3px;--c2-kanban-column__cards--gap:3px;--c2-kanban-column__card--padding:3px 5px;--c2-kanban-column__card--font-size:10px" rows='["High","Mid","Low"]' columns='["Low","Mid","High"]' cells='[{"row":"High","column":"High","band":1},{"row":"Mid","column":"Mid","band":3},{"row":"Low","column":"Low","band":5},{"row":"High","column":"Mid","band":2},{"row":"Mid","column":"High","band":2},{"row":"Mid","column":"Low","band":4},{"row":"Low","column":"Mid","band":4},{"row":"High","column":"Low","band":3},{"row":"Low","column":"High","band":3}]' items='[{"id":"1","row":"High","column":"High","title":"Ana"},{"id":"2","row":"Mid","column":"High","title":"Mo"},{"id":"3","row":"Low","column":"Mid","title":"Tom"}]'></c2-matrix-board>`,
   menu: `<c2-menu aria-label="Row actions">
   <c2-button slot="trigger">Actions</c2-button>
   <c2-menu-item value="edit"><c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>Edit</c2-menu-item>

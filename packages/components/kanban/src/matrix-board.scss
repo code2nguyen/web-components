@@ -1,0 +1,138 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-matrix-board,
+  $theme: (
+    gap: 6px,
+    cell--min-width: 150px,
+    cell--min-height: 96px,
+    cell--padding: 6px,
+    cell--background-color: #f4f4f5,
+    cell-header--gap: 6px,
+    band-1--background-color: rgba(22, 163, 74, 0.14),
+    band-2--background-color: rgba(101, 163, 13, 0.16),
+    band-3--background-color: rgba(217, 119, 6, 0.16),
+    band-4--background-color: rgba(234, 88, 12, 0.18),
+    band-5--background-color: rgba(220, 38, 38, 0.16),
+    cell-label--color: #18181b,
+    cell-label--font-size: 12px,
+    cell-label--font-weight: 600,
+    cell-count--color: #71717a,
+    cell-count--font-size: 12px,
+    label--color: #71717a,
+    label--font-size: 12px,
+    label--font-weight: 500,
+    row-label--max-width: 120px,
+    title--color: #18181b,
+    title--font-size: 12px,
+    title--font-weight: 600,
+  )
+);
+
+// The kanban board lays columns out in a row; here it stacks the grid and the footer.
+.board {
+  flex-direction: column;
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(var(--_lead), auto) repeat(var(--_columns), minmax(css.cssVar(cell--min-width), 1fr));
+  gap: css.cssVar(gap);
+}
+
+.cell {
+  --c2-kanban-column--width: auto;
+  --c2-kanban-column--padding: #{css.cssVar(cell--padding)};
+  // The host paints the cell background and the column a band over it, so a translucent band never shows the page through.
+  --c2-kanban-column--background-color: transparent;
+
+  min-width: 0;
+  min-height: css.cssVar(cell--min-height);
+  background-color: css.cssVar(cell--background-color);
+  border-radius: var(--c2-kanban-column--border-radius, 8px);
+
+  // The count in the header already says a cell is empty; a hint in each of 9 to 36 cells would be noise.
+  &::part(empty) {
+    display: none;
+  }
+}
+
+.band-1 {
+  --c2-kanban-column--background-color: #{css.cssVar(band-1--background-color)};
+}
+
+.band-2 {
+  --c2-kanban-column--background-color: #{css.cssVar(band-2--background-color)};
+}
+
+.band-3 {
+  --c2-kanban-column--background-color: #{css.cssVar(band-3--background-color)};
+}
+
+.band-4 {
+  --c2-kanban-column--background-color: #{css.cssVar(band-4--background-color)};
+}
+
+.band-5 {
+  --c2-kanban-column--background-color: #{css.cssVar(band-5--background-color)};
+}
+
+.cell-header {
+  display: flex;
+  align-items: baseline;
+  gap: css.cssVar(cell-header--gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.cell-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: css.cssVar(cell-label--color);
+  font-size: css.cssVar(cell-label--font-size);
+  font-weight: css.cssVar(cell-label--font-weight);
+}
+
+.cell-count {
+  margin-inline-start: auto;
+  color: css.cssVar(cell-count--color);
+  font-size: css.cssVar(cell-count--font-size);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.label--row {
+  align-self: center;
+  max-width: css.cssVar(row-label--max-width);
+  text-align: end;
+}
+
+.label--column {
+  text-align: center;
+}
+
+.title {
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  text-align: center;
+}
+
+.title--row {
+  grid-column: 1;
+  align-self: center;
+  justify-self: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.footer[hidden] {
+  display: none;
+}

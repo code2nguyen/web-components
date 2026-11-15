@@ -64,7 +64,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
-- **Description List** — `c2-description-list, c2-description-item, c2-description-value` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-item`, `c2-description-value`.
+- **Description List** — `c2-description-list, c2-description-item, c2-description-value, c2-description-group` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-group`, `c2-description-item`, `c2-description-value`.
 - **Distribution Bar** — `c2-distribution-bar` · `@c2n/components/distribution-bar` — One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.
 - **File browser** — `c2-file-browser` · `@c2n/components/file-browser` — Folders and files with a folder tree, breadcrumbs, search, list and grid views, selection, a context menu, renaming and drag and drop.
 - **Flowsheet** — `c2-flowsheet, c2-table-column` · `@c2n/components/table/flowsheet` — A measure per row and a column per reading time, as a chart of vital signs or lab results reads: readings flagged against each row’s normal and critical range, measures grouped by system. Children: `c2-pagination`, `c2-table-column`.
@@ -278,6 +278,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
 - **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
+- **Matrix board** — `c2-matrix-board` · `@c2n/components/kanban/matrix-board` — A grid of cells, rows by columns, whose cards people drag or move with the keyboard between cells: 9-box talent grids, risk matrices, Eisenhower matrices. Children: `c2-kanban-column`.
 - **Month Planner** — `c2-month-planner` · `@c2n/components/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **Notepad** — `c2-notepad` · `@c2n/components/notepad` — A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.
 - **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.

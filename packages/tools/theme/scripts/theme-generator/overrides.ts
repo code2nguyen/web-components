@@ -79,6 +79,12 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline',
     value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
   },
+  // Matrix board bands are translucent hue washes on purpose: they read over the light and the dark surface alike.
+  '--c2-matrix-board__band-1--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-2--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-3--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-4--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-5--background-color': { exclude: 'translucent band wash' },
   // The click-to-load placeholder keeps its dashed outline while following the theme outline and surface.
   '--c2-image__load-button--border': {
     token: 'color-outline',

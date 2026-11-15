@@ -465,6 +465,10 @@
       "types": "./dist/description-list/description-value.d.ts",
       "default": "./dist/description-list/description-value.js"
     },
+    "./description-list/description-group": {
+      "types": "./dist/description-list/description-group.d.ts",
+      "default": "./dist/description-list/description-group.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
@@ -644,6 +648,10 @@
     "./kanban/kanban-column": {
       "types": "./dist/kanban/kanban-column.d.ts",
       "default": "./dist/kanban/kanban-column.js"
+    },
+    "./kanban/matrix-board": {
+      "types": "./dist/kanban/matrix-board.d.ts",
+      "default": "./dist/kanban/matrix-board.js"
     },
     "./kbd": {
       "types": "./dist/kbd.d.ts",

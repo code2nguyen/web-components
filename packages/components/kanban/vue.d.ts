@@ -11,6 +11,7 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Kanban } from '@c2n/kanban'
 import type { KanbanColumn } from '@c2n/kanban/kanban-column.js'
+import type { MatrixBoard } from '@c2n/kanban/matrix-board.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -31,6 +32,18 @@ declare module 'vue' {
     'c2-kanban-column': DefineComponent<
       C2Props<KanbanColumn> & {
         'column-id'?: unknown
+      }
+    >
+    'c2-matrix-board': DefineComponent<
+      C2Props<MatrixBoard> & {
+        'row-field'?: unknown
+        'row-title'?: unknown
+        'column-title'?: unknown
+        'item-key'?: unknown
+        'column-field'?: unknown
+        'label-field'?: unknown
+        'description-field'?: unknown
+        onCardMove?: (event: EventOf<MatrixBoard, 'card-move'>) => void
       }
     >
   }

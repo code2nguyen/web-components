@@ -1268,6 +1268,27 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-description-group",
+      "slot": "",
+      "decision": "part",
+      "parts": ["grid"],
+      "reason": "The section's grid owns the layout of its items, with the list's column variables; each slotted item keeps its own variables."
+    },
+    {
+      "tag": "c2-description-group",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions wrapper at the end of the heading row owns the slot's placement; the slotted controls keep their own styles."
+    },
+    {
+      "tag": "c2-description-group",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The heading element around the label slot owns its typography through the heading variables."
+    },
+    {
       "tag": "c2-description-item",
       "slot": "",
       "decision": "assigned-content",
@@ -2646,6 +2667,13 @@
       "reason": "The default slot projects a bare Material Symbols ligature text node, which inherits the host's documented font-size, font-weight, and color custom properties because the text itself cannot receive a class."
     },
     {
+      "tag": "c2-matrix-board",
+      "slot": "",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the default slot's placement under the grid; the assigned legend or note stays consumer-owned."
+    },
+    {
       "tag": "c2-menu",
       "slot": "default",
       "decision": "assigned-content",
@@ -3678,6 +3706,27 @@
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "empty",
+      "decision": "variables",
+      "variables": ["--c2-select__status--padding", "--c2-select__status--font-size", "--c2-select__status--color"],
+      "reason": "The empty message wrapper sets the padding and the type the slotted message inherits."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "footer",
+      "decision": "variables",
+      "variables": ["--c2-select__footer--padding", "--c2-select__footer--gap", "--c2-select__footer--justify-content", "--c2-select__footer--border-top"],
+      "reason": "The footer row lays out the slotted actions; each action is styled through its own public contract."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "loading",
+      "decision": "variables",
+      "variables": ["--c2-select__status--padding", "--c2-select__status--font-size", "--c2-select__status--color"],
+      "reason": "The loading message wrapper sets the padding and the type the slotted message inherits."
     },
     {
       "tag": "c2-separator",

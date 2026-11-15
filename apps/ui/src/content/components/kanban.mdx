@@ -2,6 +2,7 @@
 title: 'Kanban'
 description: 'Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem.'
 category: 'Planning'
+apiTags: ['c2-kanban', 'c2-kanban-column']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -120,3 +121,7 @@ The board's own variables are the gap, padding and scroll snapping of the row (`
 column and its cards is a `--c2-kanban-column__*` variable, which can be set on the board to reach every column. For
 columns that scroll, set `--c2-kanban-column--max-height` with `--c2-kanban-column__cards--overflow-y: auto`; for a
 phone layout that snaps to columns, set `--c2-kanban--scroll-snap-type: x mandatory`.
+
+For a board in two dimensions, where a card sits in a cell of rows by columns (a 9-box talent grid, a risk matrix),
+use [`c2-matrix-board`](/web-components/components/matrix-board) from the same package: the same cards, `renderItem`
+and `card-move`, with the arrow keys moving between rows as well as columns.

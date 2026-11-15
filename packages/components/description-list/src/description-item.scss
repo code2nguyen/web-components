@@ -29,8 +29,27 @@
     empty--color: #71717a,
 
     actions--gap: 4px,
+
+    subtotal--border-top: 1px solid #e4e4e7,
+    subtotal--padding-top: 8px,
+    subtotal--font-weight: 600,
+    total--border-top: 2px solid #18181b,
+    total--padding-top: 8px,
+    total--font-weight: 700,
+    total--font-size: 16px,
+
+    edit-button--size: 24px,
+    edit-button--color: #71717a,
+    edit-button__hover--background-color: #f4f4f5,
+    edit-button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    editor--border: 1px solid #a1a1aa,
+    editor--border-radius: 6px,
+    editor--padding: 4px 8px,
+    editor--background-color: #ffffff,
+    editor__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
+@use '@c2n/sass/focus';
 
 :host {
   display: block;
@@ -108,4 +127,88 @@
   align-items: center;
   align-self: center;
   gap: css.cssVar(actions--gap);
+}
+
+// Not a box: the slotted values stay items of the value row, which lays them out in columns.
+.content {
+  display: contents;
+}
+
+.is-editable .content {
+  cursor: text;
+}
+
+// A line of a calculation: a rule above it and a heavier weight down to the result.
+.is-subtotal {
+  padding-top: css.cssVar(subtotal--padding-top);
+  border-top: css.cssVar(subtotal--border-top);
+
+  .label,
+  .value {
+    font-weight: css.cssVar(subtotal--font-weight);
+  }
+}
+
+.is-total {
+  padding-top: css.cssVar(total--padding-top);
+  border-top: css.cssVar(total--border-top);
+
+  .label,
+  .value {
+    font-weight: css.cssVar(total--font-weight);
+  }
+
+  .value {
+    font-size: css.cssVar(total--font-size);
+  }
+}
+
+.edit-button {
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(edit-button--size);
+  height: css.cssVar(edit-button--size);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(edit-button--color);
+  cursor: pointer;
+
+  &:hover {
+    background-color: css.cssVar(edit-button__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(edit-button__focus--outline);
+    outline-offset: 1px;
+
+    @include focus.forced-colors-ring;
+  }
+}
+
+.editor {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: css.cssVar(editor--padding);
+  border: css.cssVar(editor--border);
+  border-radius: css.cssVar(editor--border-radius);
+  background-color: css.cssVar(editor--background-color);
+  color: inherit;
+  font: inherit;
+  color-scheme: inherit;
+
+  &:focus-visible {
+    outline: css.cssVar(editor__focus--outline);
+    outline-offset: 0;
+
+    @include focus.forced-colors-ring;
+  }
+}
+
+.editor--area {
+  min-height: 64px;
+  resize: vertical;
 }
