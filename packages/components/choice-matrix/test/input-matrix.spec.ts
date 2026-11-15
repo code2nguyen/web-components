@@ -60,7 +60,10 @@ test('pasting cells from a sheet fills the matrix from the cell pasted into, in 
   await page.getByRole('textbox', { name: 'Small Red' }).evaluate((input) => {
     const data = new DataTransfer()
     data.setData('text/plain', '4\t6\n1\toops\n9\t9\n')
-    input.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true, composed: true }))
+    // Firefox drops `clipboardData` given to the ClipboardEvent constructor: a real paste carries it, so define it here.
+    const paste = new Event('paste', { bubbles: true, cancelable: true, composed: true })
+    Object.defineProperty(paste, 'clipboardData', { value: data })
+    input.dispatchEvent(paste)
   })
   // "oops" is not a number and Large is disabled: both are left alone.
   expect(await value(page)).toEqual({ s: { red: 4, blue: 6 }, m: { red: 1 } })
@@ -128,7 +131,10 @@ test('a new value or a form reset replaces typed text; a French duration reads b
   await page.getByRole('textbox', { name: 'Medium Red' }).evaluate((input) => {
     const data = new DataTransfer()
     data.setData('text/plain', '7\t30\t12/31/2026\n')
-    input.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true, composed: true }))
+    // Firefox drops `clipboardData` given to the ClipboardEvent constructor: a real paste carries it, so define it here.
+    const paste = new Event('paste', { bubbles: true, cancelable: true, composed: true })
+    Object.defineProperty(paste, 'clipboardData', { value: data })
+    input.dispatchEvent(paste)
   })
   // A date not written as a date input writes it is left out.
   expect(await value(page)).toEqual({ s: { red: 4, d: 105 }, m: { red: 7, d: 30 } })
