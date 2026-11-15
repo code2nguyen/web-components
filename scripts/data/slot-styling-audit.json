@@ -4006,6 +4006,20 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-steps",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions region owns the action zone's placement at the end of the header; the assigned buttons stay consumer-owned."
+    },
+    {
+      "tag": "c2-steps",
+      "slot": "summary",
+      "decision": "part",
+      "parts": ["summary"],
+      "reason": "The summary region owns the summary line's colour, size and weight through variables; assigned text stays consumer-owned."
+    },
+    {
       "tag": "c2-switch",
       "slot": "",
       "decision": "assigned-content",

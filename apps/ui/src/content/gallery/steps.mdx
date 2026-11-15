@@ -3,6 +3,10 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Steps } from '@c2n/components/steps'
 import { Step } from '@c2n/components/steps/step'
+import { Badge } from '@c2n/components/badge'
+import { Button } from '@c2n/components/button'
+import CodeBlock from '../../components/CodeBlock.astro'
+import StepsExamplesRuntime from '../../components/StepsExamplesRuntime.astro'
 
 ## Presets
 
@@ -227,4 +231,255 @@ that, and the `toggle` slot adds a chevron — both off by default.
 </c2-steps>
 ```
 
+```html tag=MdxCodeBlock,label=Task list
+<style>
+  .task-list {
+    --c2-steps__header--padding-inline: 0px;
+    --c2-steps__header--padding-block: 6px;
+    --c2-step__row--padding-inline: 0px;
+    --c2-step__row--padding-block: 10px;
+    --c2-step__row--indent: 0px;
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__label__link--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-step__detail--font-size: 13px;
+  }
+  .task-list c2-step c2-step {
+    --c2-step__label--font-weight: 500;
+  }
+</style>
+<c2-steps class="task-list" summary marker="none" aria-label="Your application">
+  <c2-step label="Prepare application">
+    <c2-step status="success" label="Company details" href="#company-details">
+      <c2-badge slot="trailing" tone="success">Completed</c2-badge>
+    </c2-step>
+    <c2-step status="success" label="Directors" href="#directors">
+      <c2-badge slot="trailing" tone="success">Completed</c2-badge>
+    </c2-step>
+    <c2-step status="current" label="Bank account" detail="Ana · due 21 Nov" href="#bank-account">
+      <c2-badge slot="trailing" tone="primary">In progress</c2-badge>
+    </c2-step>
+  </c2-step>
+  <c2-step label="Apply">
+    <c2-step label="Declarations" href="#declarations">
+      <c2-badge slot="trailing" tone="neutral">Not started</c2-badge>
+    </c2-step>
+    <c2-step label="Submit" href="#submit" disabled>
+      <c2-badge slot="trailing" tone="neutral">Cannot start yet</c2-badge>
+    </c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Task list from data
+<style>
+  .onboarding {
+    --c2-step__row--padding-block: 9px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label__link--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-step__detail--font-size: 13px;
+    --c2-steps__summary--font-size: 13px;
+  }
+</style>
+<c2-steps
+  class="onboarding"
+  summary
+  data-steps-example="task-list"
+  aria-label="Onboarding"
+  steps='[{"id":"contract","label":"Sign your contract","detail":"HR","status":"success","href":"#contract"},{"id":"laptop","label":"Pick up your laptop","detail":"IT · due Mon","status":"current","href":"#laptop"},{"id":"benefits","label":"Choose your benefits","detail":"Due Fri","href":"#benefits"},{"id":"payroll","label":"Payroll details","detail":"After benefits","href":"#payroll","disabled":true}]'
+></c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Stage path
+<style>
+  .stage-path {
+    --c2-steps--gap: 4px;
+    --c2-step__rail__horizontal--width: 0px;
+    --c2-step__row__horizontal--grid-template-areas: 'text text text';
+    --c2-step__row__horizontal--min-width: 88px;
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+    --c2-step__row--padding-block: 8px;
+    --c2-step__row--padding-inline: 22px;
+    --c2-step__row--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-step__row--outline: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 13px;
+    --c2-step__label--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  /* Islands wrap every step, so the first one is named rather than found by its position. */
+  .stage-path .stage-first {
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+  .stage-path c2-step:state(success) {
+    --c2-step__row--background: light-dark(#dcfce7, #14532d);
+    --c2-step__label--color: light-dark(#166534, #bbf7d0);
+  }
+  .stage-path c2-step:state(current) {
+    --c2-step__row--background: #0265dc;
+    --c2-step__label--color: #ffffff;
+  }
+  .stage-path c2-step {
+    --c2-step__label__selected--color: var(--c2-step__label--color);
+    --c2-step__row__selected--box-shadow: inset 0 -3px 0 var(--c2-step__label--color);
+  }
+  .stage-path-guidance {
+    margin: 12px 0 0;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 13px;
+  }
+</style>
+<div data-steps-example="stage-path">
+  <c2-steps class="stage-path" orientation="horizontal" interactive marker="none" current="2" selected="proposal" aria-label="Opportunity stage">
+    <c2-button slot="actions" data-steps-action="mark-current">Mark as current stage</c2-button>
+    <c2-step class="stage-first" value="prospecting" label="Prospecting"></c2-step>
+    <c2-step value="qualification" label="Qualification"></c2-step>
+    <c2-step value="proposal" label="Proposal"></c2-step>
+    <c2-step value="negotiation" label="Negotiation"></c2-step>
+    <c2-step value="closed" label="Closed"></c2-step>
+  </c2-steps>
+  <p class="stage-path-guidance" data-steps-guidance>Proposal: send the quote and agree a decision date.</p>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Closed won and lost
+<style>
+  .stage-path {
+    --c2-steps--gap: 4px;
+    --c2-step__rail__horizontal--width: 0px;
+    --c2-step__row__horizontal--grid-template-areas: 'text text text';
+    --c2-step__row__horizontal--min-width: 88px;
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+    --c2-step__row--padding-block: 8px;
+    --c2-step__row--padding-inline: 22px;
+    --c2-step__row--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-step__row--outline: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 13px;
+    --c2-step__label--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  /* Islands wrap every step, so the first one is named rather than found by its position. */
+  .stage-path .stage-first {
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+  .stage-path c2-step:state(success) {
+    --c2-step__row--background: light-dark(#dcfce7, #14532d);
+    --c2-step__label--color: light-dark(#166534, #bbf7d0);
+  }
+  .stage-path c2-step:state(current) {
+    --c2-step__row--background: #0265dc;
+    --c2-step__label--color: #ffffff;
+  }
+  .stage-path c2-step {
+    --c2-step__label__selected--color: var(--c2-step__label--color);
+    --c2-step__row__selected--box-shadow: inset 0 -3px 0 var(--c2-step__label--color);
+  }
+  .stage-path .stage-outcome:state(success) {
+    --c2-step__row--background: #16a34a;
+    --c2-step__label--color: #ffffff;
+  }
+  .stage-path c2-step:state(error) {
+    --c2-step__row--background: #dc2626;
+    --c2-step__label--color: #ffffff;
+  }
+  .closed-paths {
+    display: grid;
+    gap: 16px;
+  }
+</style>
+<div class="closed-paths">
+  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="5" aria-label="Won opportunity">
+    <c2-step class="stage-first" label="Prospecting"></c2-step>
+    <c2-step label="Qualification"></c2-step>
+    <c2-step label="Proposal"></c2-step>
+    <c2-step label="Negotiation"></c2-step>
+    <c2-step class="stage-outcome" label="Closed won"></c2-step>
+  </c2-steps>
+  <c2-steps class="stage-path" orientation="horizontal" marker="none" current="4" aria-label="Lost opportunity">
+    <c2-step class="stage-first" label="Prospecting"></c2-step>
+    <c2-step label="Qualification"></c2-step>
+    <c2-step label="Proposal"></c2-step>
+    <c2-step label="Negotiation"></c2-step>
+    <c2-step class="stage-outcome" status="error" label="Closed lost"></c2-step>
+  </c2-steps>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Header actions
+<style>
+  .run-header {
+    --c2-steps__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-steps__header--padding-block: 6px;
+    --c2-steps__summary--font-size: 12px;
+  }
+</style>
+<c2-steps class="run-header" summary data-steps-example="header-actions" aria-label="Pipeline">
+  <c2-button slot="actions" data-steps-action="expand">Expand all</c2-button>
+  <c2-button slot="actions" data-steps-action="collapse">Collapse all</c2-button>
+  <c2-step label="build" trailing="24 s">
+    <c2-step status="success" label="install" trailing="19 s"></c2-step>
+    <c2-step status="success" label="compile" trailing="5 s"></c2-step>
+  </c2-step>
+  <c2-step label="test">
+    <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+    <c2-step status="running" label="e2e"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Summary of your own
+<style>
+  .own-summary {
+    --c2-steps__summary--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+  }
+</style>
+<c2-steps class="own-summary" marker="none" aria-label="Lessons">
+  <span slot="summary">You have finished 2 of 3 lessons — one to go</span>
+  <c2-step status="success" label="Introduction" trailing="4 min"></c2-step>
+  <c2-step status="success" label="Your first form" trailing="12 min"></c2-step>
+  <c2-step label="Validation" trailing="9 min"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Summary in French
+<style>
+  .french-tasks {
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+  }
+</style>
+<c2-steps class="french-tasks" lang="fr" summary aria-label="Démarches">
+  <c2-step status="success" label="Identité" href="#identite"></c2-step>
+  <c2-step status="success" label="Adresse" href="#adresse"></c2-step>
+  <c2-step status="current" label="Justificatifs" href="#justificatifs"></c2-step>
+  <c2-step label="Signature" href="#signature"></c2-step>
+</c2-steps>
+```
+
 </GalleryGrid>
+
+<StepsExamplesRuntime />
+
+The task list from data hands each row its status tag through `renderTrailing`. The stage path's action and its
+guidance, and the trace's header buttons, are a few lines of the app's own code:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+const TAGS = { success: ['success', 'Completed'], current: ['primary', 'In progress'], pending: ['neutral', 'Not started'] }
+tasks.renderTrailing = ({ node, status }) => {
+  const [tone, text] = node.disabled ? ['neutral', 'Cannot start yet'] : (TAGS[status] ?? TAGS.pending)
+  return html`<c2-badge tone=${tone}>${text}</c2-badge>`
+}
+
+path.addEventListener('selection-change', ({ detail }) => (guidance.textContent = GUIDANCE[detail.value]))
+markCurrent.addEventListener('click', () => {
+  const index = Number(path.querySelector(`c2-step[value="${path.selected}"]`).path) - 1
+  if (index >= 0) path.current = index
+})
+expandAll.addEventListener('click', () => trace.expandAll())
+```

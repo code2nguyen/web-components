@@ -10,6 +10,14 @@
     overflow-y: visible,
     max-height: none,
     horizontal--overflow-x: auto,
+    header--gap: 12px,
+    header--padding-block: 4px,
+    header--padding-inline: 12px,
+    header--border-bottom: none,
+    actions--gap: 8px,
+    summary--color: #71717a,
+    summary--font-size: 14px,
+    summary--font-weight: 500,
   )
 );
 
@@ -44,4 +52,53 @@
 :host([orientation='horizontal']) c2-step {
   flex: 1 1 0;
   min-width: 0;
+}
+
+// The header: the summary line and the app's actions, above the steps. Not drawn unless asked for.
+.header {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(header--gap);
+  box-sizing: border-box;
+  padding: css.cssVar(header--padding-block) css.cssVar(header--padding-inline);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+.summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: css.cssVar(summary--color);
+  font-size: css.cssVar(summary--font-size);
+  font-weight: css.cssVar(summary--font-weight);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  margin-inline-start: auto;
+}
+
+.header[hidden],
+.summary[hidden],
+.actions[hidden] {
+  display: none;
+}
+
+// The steps, slotted or rendered from data. Transparent to layout unless a horizontal list has a header.
+.body {
+  display: contents;
+}
+
+// A horizontal list is one row of steps; its header takes a line of its own above them.
+:host([orientation='horizontal']:state(has-header)) {
+  flex-direction: column;
+}
+
+:host([orientation='horizontal']:state(has-header)) .body {
+  display: flex;
+  align-items: stretch;
+  gap: css.cssVar(gap);
 }

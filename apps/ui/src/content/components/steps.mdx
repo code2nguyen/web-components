@@ -165,6 +165,48 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     --c2-step__row__horizontal--grid-template-areas: 'marker text rail' '. trailing .';
     --c2-step__rail--gap: 8px;
   }
+  /* A task list: no markers, the tasks are links, and the status is a tag at the end of the row. */
+  .tasks {
+    --c2-step__row--padding-block: 9px;
+    --c2-step__row--indent: 0px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__label__link--color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .tasks c2-step c2-step {
+    --c2-step__label--font-weight: 500;
+  }
+  /* A stage path: no rail, no marker, every row cut to a chevron and filled by its status. */
+  .stages {
+    --c2-steps--gap: 4px;
+    --c2-step__rail__horizontal--width: 0px;
+    --c2-step__row__horizontal--grid-template-areas: 'text text text';
+    --c2-step__row__horizontal--min-width: 88px;
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+    --c2-step__row--padding-block: 8px;
+    --c2-step__row--padding-inline: 22px;
+    --c2-step__row--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-step__row--outline: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  /* Islands wrap every step, so the first one is named rather than found by its position. */
+  .stages .stage-first {
+    --c2-step__row--clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  }
+  .stages c2-step:state(success) {
+    --c2-step__row--background: light-dark(#dcfce7, #14532d);
+    --c2-step__label--color: light-dark(#166534, #bbf7d0);
+  }
+  .stages c2-step:state(current) {
+    --c2-step__row--background: #0265dc;
+    --c2-step__label--color: #ffffff;
+  }
+  .stages c2-step {
+    --c2-step__label__selected--color: var(--c2-step__label--color);
+    --c2-step__row__selected--box-shadow: inset 0 -3px 0 var(--c2-step__label--color);
+  }
 </style>
 
 <div data-label="A task mid-run — every step is a row, indented under the stage it belongs to">
@@ -312,6 +354,37 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
   </c2-steps>
 </div>
 
+<div data-label="A task list — sections of linked tasks, a status tag each, and how many are done">
+  <c2-steps class="tasks" summary marker="none" aria-label="Your application">
+    <c2-step label="Prepare application">
+      <c2-step status="success" label="Company details" href="#task-lists-and-stage-paths">
+        <c2-badge slot="trailing" tone="success">Completed</c2-badge>
+      </c2-step>
+      <c2-step status="current" label="Bank account" detail="Ana · due 21 Nov" href="#task-lists-and-stage-paths">
+        <c2-badge slot="trailing" tone="primary">In progress</c2-badge>
+      </c2-step>
+    </c2-step>
+    <c2-step label="Apply">
+      <c2-step label="Declarations" href="#task-lists-and-stage-paths">
+        <c2-badge slot="trailing" tone="neutral">Not started</c2-badge>
+      </c2-step>
+      <c2-step label="Submit" href="#task-lists-and-stage-paths" disabled>
+        <c2-badge slot="trailing" tone="neutral">Cannot start yet</c2-badge>
+      </c2-step>
+    </c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="A stage path — chevrons filled by status; press a stage to select it">
+  <c2-steps class="stages" orientation="horizontal" interactive marker="none" current="2" selected="proposal" aria-label="Opportunity stage">
+    <c2-step class="stage-first" value="prospecting" label="Prospecting"></c2-step>
+    <c2-step value="qualification" label="Qualification"></c2-step>
+    <c2-step value="proposal" label="Proposal"></c2-step>
+    <c2-step value="negotiation" label="Negotiation"></c2-step>
+    <c2-step value="closed" label="Closed"></c2-step>
+  </c2-steps>
+</div>
+
 <div data-label="Every status">
   <c2-steps class="wizard" aria-label="Statuses">
     <c2-step status="success" label="Completed"></c2-step>
@@ -367,6 +440,39 @@ showPanel('result')
 Press **Run the task**, then select **Process** again once the result is in:
 
 <StepsTaskDemo />
+
+## Task lists and stage paths
+
+A **task list** is a process the reader works through in any order: sections of tasks, each a link to its own page
+with a status tag, and a line saying how far they have got. Three things make `c2-steps` one:
+
+- `href` on a `c2-step` (or on a node of `steps`) makes its row a link. A group's row stays its disclosure, and a
+  `disabled` step is drawn without its link — a task that cannot start yet. Links are in the tab order like any
+  other; in an `interactive` list, following one also selects its step.
+- `summary` adds a line above the steps — "2 of 5 completed" — counting every step that is not a group;
+  `success`, `warning` and `skipped` count as done. The text is the `summary` message, translatable with
+  `addTranslations({ fr: { steps: { summary: '{0} sur {1} terminées' } } })`, and the `summary` slot replaces it.
+  `progress` returns the same `{ completed, total }` for a progress bar of your own.
+- The status tag is a `c2-badge` in the `trailing` slot, or from `renderTrailing` for a list built from data.
+  `marker="none"` drops the status glyphs when the tags say it already.
+
+A **stage path** is the lifecycle of a record across the top of its page — Prospecting, Qualification, Proposal,
+Closed. It is a horizontal, `interactive` list with `current` on the stage the record is in: the stages before it
+read as done and the ones after as future. The chevrons are `--c2-step__row--clip-path` with the rail turned off,
+and each status fills its row through page CSS on the step's state (`c2-step:state(current)`). An end state is an
+explicit status on the last stage — `current` past the end makes every stage `success` (closed won), and
+`status="error"` on the last one is closed lost.
+
+The **header**'s `actions` slot is where the app puts its commands, beside the summary: "Mark as current stage" on a
+stage path is one line that sets `current` from `selected`, and "Expand all" on a trace calls `expandAll()`. The
+header is not drawn until `summary` is set or one of its slots is filled.
+
+```js tag=CodeBlock
+path.querySelector('[slot="actions"]').addEventListener('click', () => {
+  const index = Number(path.querySelector(`c2-step[value="${path.selected}"]`).path) - 1
+  if (index >= 0) path.current = index
+})
+```
 
 ## Driving a run
 
