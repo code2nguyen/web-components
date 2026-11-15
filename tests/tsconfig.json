@@ -10,8 +10,12 @@
     "useDefineForClassFields": false,
     "types": ["node", "vite/client"],
     // A sibling whose own tests load its source: reached through its built declarations as well (c2-table's filter
-    // imports @c2n/facet-list), its class would be declared twice and the second HTMLElementTagNameMap entry rejected.
-    "paths": { "@c2n/facet-list": ["../packages/components/facet-list/src/facet-list.ts"] }
+    // imports @c2n/facet-list, c2-autocomplete loads @c2n/chip), its class would be declared twice and the second
+    // HTMLElementTagNameMap entry rejected.
+    "paths": {
+      "@c2n/chip": ["../packages/components/chip/src/chip.ts"],
+      "@c2n/facet-list": ["../packages/components/facet-list/src/facet-list.ts"]
+    }
   },
   "include": ["../playwright.config.ts", "./**/*.ts", "../packages/components/*/test/**/*.ts", "../open-packages/*/test/**/*.ts"]
 }

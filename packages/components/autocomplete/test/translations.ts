@@ -11,6 +11,8 @@ const fr: typeof autocompleteMessages.en = {
   suggestions: 'Suggestions',
   suggestionsFor: (label) => `Suggestions pour ${label}`,
   valueMissing: 'Veuillez renseigner ce champ.',
+  create: (query) => `Créer « ${query} »`,
+  recent: 'Récents',
 }
 
 const vi: typeof autocompleteMessages.en = {
@@ -21,6 +23,8 @@ const vi: typeof autocompleteMessages.en = {
   suggestions: 'Gợi ý',
   suggestionsFor: (label) => `Gợi ý cho ${label}`,
   valueMissing: 'Vui lòng điền vào trường này.',
+  create: (query) => `Tạo “${query}”`,
+  recent: 'Gần đây',
 }
 
 addTranslations({ fr: { autocomplete: fr }, vi: { autocomplete: vi } })

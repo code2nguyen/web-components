@@ -33,7 +33,7 @@ const umbrellaExports = new Set(
 )
 const umbrellaPackages = new Set([...umbrellaExports].filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath)).map((subpath) => `@c2n/${subpath.slice(2)}`))
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
-const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Editors & viewers', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
+const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Table', 'Editors & viewers', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
 
 interface Manifest {
@@ -454,6 +454,9 @@ for (const dir of packageDirs.sort()) {
 
     const presetGroup = componentPresets[docElements[0].tag]
     const category = doc?.section === 'icons' ? 'Icons' : (doc?.frontmatter.category ?? 'Layout')
+    // `list_components` filters through `z.enum(registry.categories)`: a category missing here would be unfilterable.
+    if (!CATEGORIES.includes(category))
+      throw new Error(`${id}: category '${category}' is not in CATEGORIES (keep it in step with apps/ui/src/schemas/index.ts)`)
     const intro = doc?.body
       .split('\n')
       .map((l) => l.trim())

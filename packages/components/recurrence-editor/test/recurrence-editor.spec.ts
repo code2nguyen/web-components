@@ -282,7 +282,9 @@ test('none: "Does not repeat" is an empty value, required asks for a rule, the f
 
 test('renderOccurrence draws each occurrence; the footer slot shows only with content', async ({ page, renderScenario }) => {
   await renderScenario('<c2-recurrence-editor start="2026-11-11" value="FREQ=DAILY" preview-count="2"></c2-recurrence-editor>')
-  await expect(editor(page).locator('.footer')).toBeHidden()
+  // The editor's own footer: its pickers (`c2-select`) have a `.panel > .footer` of their own.
+  const footer = editor(page).locator('.footer:not(.panel > .footer)')
+  await expect(footer).toBeHidden()
   await editor(page).evaluate(async (element) => {
     const host = element as HTMLElement & { renderOccurrence: (context: { index: number; date: Date }) => string; updateComplete: Promise<boolean> }
     host.renderOccurrence = ({ index, date }) => `#${index + 1} ${date.getDate()}`
@@ -293,7 +295,7 @@ test('renderOccurrence draws each occurrence; the footer slot shows only with co
     await host.updateComplete
   })
   await expect(editor(page).locator('.occurrence')).toHaveText(['#1 11', '#2 12'])
-  await expect(editor(page).locator('.footer')).toBeVisible()
+  await expect(footer).toBeVisible()
   await props(editor(page), { previewCount: 0 })
   await expect(editor(page).locator('.occurrences')).toHaveCount(0)
 })
