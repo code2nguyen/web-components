@@ -1,0 +1,42 @@
+---
+/**
+ * Plays the application's part in the native select gallery: the French of the card under `lang="fr"`, the options of
+ * the `c2-native-select` marked `data-native-select-example="later"` (assigned after a short delay, as a fetch would),
+ * and a submit handler that keeps the example forms on the page.
+ */
+---
+
+<script>
+  import type { NativeSelect } from '@c2n/components/select/native-select'
+  import '@c2n/components/select/native-select'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { 'native-select': { valueMissing: 'Veuillez sélectionner une option.' } } })
+
+  const COUNTRIES = [
+    { value: 'BR', label: 'Brazil' },
+    { value: 'FR', label: 'France' },
+    { value: 'JP', label: 'Japan' },
+    { value: 'KE', label: 'Kenya' },
+    { value: 'VN', label: 'Vietnam' },
+  ]
+
+  const wired = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<NativeSelect>('c2-native-select[data-native-select-example="later"]').forEach((select) => {
+      if (wired.has(select)) return
+      wired.add(select)
+      // The value was set in markup before any option existed: it is kept, and selected once the list arrives.
+      setTimeout(() => (select.options = COUNTRIES), 800)
+    })
+    document.querySelectorAll<HTMLFormElement>('form[data-native-select-example="form"]').forEach((form) => {
+      if (wired.has(form)) return
+      wired.add(form)
+      form.addEventListener('submit', (event) => event.preventDefault())
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+</script>

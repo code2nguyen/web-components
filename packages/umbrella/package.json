@@ -949,6 +949,10 @@
       "types": "./dist/select.d.ts",
       "default": "./dist/select.js"
     },
+    "./select/native-select": {
+      "types": "./dist/select/native-select.d.ts",
+      "default": "./dist/select/native-select.js"
+    },
     "./selection-toolbar": {
       "types": "./dist/selection-toolbar.d.ts",
       "default": "./dist/selection-toolbar.js"

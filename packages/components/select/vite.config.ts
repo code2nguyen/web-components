@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/select.ts'],
+      entry: ['src/select.ts', 'src/native-select.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/select.ts'],
+      files: ['src/select.ts', 'src/native-select.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],
