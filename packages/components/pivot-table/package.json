@@ -9,6 +9,10 @@
       "types": "./types/src/pivot-table.d.ts",
       "default": "./dist/pivot-table.js"
     },
+    "./aging-table.js": {
+      "types": "./types/src/aging-table.d.ts",
+      "default": "./dist/aging-table.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -32,6 +36,7 @@
     "pivot table",
     "pivot grid",
     "crosstab",
+    "aging report",
     "web component",
     "lit"
   ],
@@ -70,5 +75,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./aging-table.js"
+    ]
+  }
 }

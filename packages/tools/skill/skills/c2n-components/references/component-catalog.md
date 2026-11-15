@@ -281,6 +281,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Table
 
+- **Aging table** — `c2-aging-table` · `@c2n/components/pivot-table/aging-table` — Open invoices or bills by customer or vendor, in columns of days past due against an as-of date (Current, 1–30, 31–60, 61–90, Over 90), with row and column totals.
 - **Allocation grid** — `c2-allocation-grid, c2-table-column` · `@c2n/components/table/allocation-grid` — People down the side and periods across: each cell an amount of the row’s capacity, coloured under, at or over it, with totals per person and per period. Children: `c2-pagination`, `c2-table-column`.
 - **Flowsheet** — `c2-flowsheet, c2-table-column` · `@c2n/components/table/flowsheet` — A measure per row and a column per reading time, as a chart of vital signs or lab results reads: readings flagged against each row’s normal and critical range, measures grouped by system. Children: `c2-pagination`, `c2-table-column`.
 - **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows: aggregates per group, group bands, groups kept under the header and a group checkbox that selects its rows. Children: `c2-pagination`, `c2-table-column`.

@@ -1,0 +1,49 @@
+---
+/** Wires the aging table examples that need script: the French text an app adds, a drill-down list and an as-of date input. */
+---
+
+<script>
+  import type { AgingTable } from '@c2n/components/pivot-table/aging-table'
+  import '@c2n/components/pivot-table/aging-table'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'pivot-table': {
+        table: 'Tableau croisé',
+        total: 'Total',
+        grandTotal: 'Total général',
+        groupTotal: 'Total {0}',
+        empty: 'Aucune donnée',
+        sortBy: 'Trier par {0}',
+      },
+      'aging-table': {
+        table: 'Balance âgée',
+        asOf: 'Au {0}',
+        current: 'Non échu',
+        range: '{0} à {1} j',
+        over: 'Plus de {0} j',
+        noDate: 'Sans date',
+        age: 'Ancienneté',
+      },
+    },
+  })
+
+  const euro = new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+
+  document.querySelectorAll<AgingTable>('c2-aging-table[data-aging-example="drill"]').forEach((table) => {
+    const list = table.parentElement?.querySelector<HTMLElement>('[data-aging-drill]')
+    table.addEventListener('cell-click', ({ detail }) => {
+      if (!list) return
+      const items = detail.records as { invoice?: string; dueDate?: string; amount?: number }[]
+      list.textContent = items.length ? items.map((item) => `${item.invoice} · due ${item.dueDate} · ${euro.format(item.amount ?? 0)}`).join('\n') : '—'
+    })
+  })
+
+  document.querySelectorAll<AgingTable>('c2-aging-table[data-aging-example="as-of"]').forEach((table) => {
+    table.querySelector('c2-date-input')?.addEventListener('change', (event) => {
+      const value = (event.currentTarget as HTMLInputElement).value
+      if (value) table.asOf = value
+    })
+  })
+</script>

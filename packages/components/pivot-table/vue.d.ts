@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { AgingTable } from '@c2n/pivot-table/aging-table.js'
 import type { PivotTable } from '@c2n/pivot-table'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,17 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-aging-table': DefineComponent<
+      C2Props<AgingTable> & {
+        'as-of'?: unknown
+        'date-field'?: unknown
+        'invert-signs'?: unknown
+        'field-labels'?: unknown
+        'expand-depth'?: unknown
+        onCellClick?: (event: EventOf<AgingTable, 'cell-click'>) => void
+        onPivotChange?: (event: EventOf<AgingTable, 'pivot-change'>) => void
+      }
+    >
     'c2-pivot-table': DefineComponent<
       C2Props<PivotTable> & {
         'invert-signs'?: unknown

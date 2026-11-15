@@ -1243,4 +1243,10 @@ export const overrides: Record<string, Override> = {
     token: 'color-error',
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  // Aging table: the oldest amounts are text on the total row's container surface too, where the error red alone
+  // reaches 4.39:1; mixed with the ink like the import mapper's error text.
+  '--c2-aging-table__oldest--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
 }

@@ -30,6 +30,13 @@
       "reason": "The count line sets the type the slotted label inherits."
     },
     {
+      "tag": "c2-aging-table",
+      "slot": "as-of",
+      "decision": "part",
+      "parts": ["as-of"],
+      "reason": "The as-of line owns the slot's placement above the grid; its margin, colour and size are variables, and the assigned date field stays consumer-owned."
+    },
+    {
       "tag": "c2-angle-slider",
       "slot": "",
       "decision": "variables",

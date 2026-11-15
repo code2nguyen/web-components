@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -33,7 +33,9 @@ export interface PivotTable {
   removeEventListener: TypedRemoveEventListener<PivotTable, PivotTableEventMap>
 }
 
-type Zone = 'fields' | 'rows' | 'columns' | 'values'
+/** A zone of the field list: the unused fields, the rows, the columns or the values. */
+export type PivotZone = 'fields' | 'rows' | 'columns' | 'values'
+type Zone = PivotZone
 
 /** One data column of the grid: a column path (empty for the total) and a value. */
 interface Column {
@@ -120,7 +122,7 @@ const KEY = '\u001f'
  */
 @customElement('c2-pivot-table')
 export class PivotTable extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The rows to summarise. */
   @property({ converter: jsonPropertyConverter }) data: unknown[] = []
@@ -205,7 +207,18 @@ export class PivotTable extends LitElement {
     const lines: string[][] = []
     const columnDepth = this.columns.length
     for (let level = 0; level < columnDepth; level += 1) {
-      lines.push(['', ...this.dataColumns.map((column) => (column.total ? (level === 0 ? this.msg.t('total') : '') : (column.path[level] ?? '')))])
+      lines.push([
+        '',
+        ...this.dataColumns.map((column) =>
+          column.total
+            ? level === 0
+              ? this.msg.t('total')
+              : ''
+            : column.path[level] === undefined
+              ? ''
+              : this.memberLabel(this.columns[level], column.path[level]),
+        ),
+      ])
     }
     if (this.values.length > 1 || !columnDepth) lines.push(['', ...this.dataColumns.map((column) => this.valueLabel(this.values[column.value]))])
     for (const row of this.bodyRows) {
@@ -221,22 +234,58 @@ export class PivotTable extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    this.internals.ariaLabel = this.label || this.msg.t('table')
+    this.internals.ariaLabel = this.accessibleName()
     if (!Array.isArray(this.data)) this.data = []
     if (!Array.isArray(this.values)) this.values = []
-    if (['data', 'rows', 'columns', 'values', 'invertSigns'].some((key) => changed.has(key as keyof PivotTable))) {
-      this.result = pivot(this.data, { rows: this.rows, columns: this.columns, values: this.values, invertSigns: this.invertSigns ?? {} })
-    }
+    const repivot = this.repivot(changed)
+    if (repivot) this.result = pivot(this.pivotData(), this.pivotConfig())
     if (changed.has('rows') || changed.has('columns')) this.sort = null
     // The cursor, a drag, an announcement or the language alone leave the rows and columns as they are.
-    const layoutKeys = ['data', 'invertSigns', 'rows', 'columns', 'values', 'toggled', 'sort', 'subtotals', 'totals', 'expandDepth', 'heatmap']
-    if (!this.hasUpdated || layoutKeys.some((key) => changed.has(key as keyof PivotTable))) this.layout()
+    const layoutKeys = ['toggled', 'sort', 'subtotals', 'totals', 'expandDepth', 'heatmap']
+    if (!this.hasUpdated || repivot || layoutKeys.some((key) => changed.has(key as keyof PivotTable))) this.layout()
     this.formatters.clear()
+  }
+
+  // ------------------------------------------------------------------------------------------------- variant hooks
+
+  /** The grid's accessible name: `label`, else the built-in one. */
+  protected accessibleName(): string {
+    return this.label || this.msg.t('table')
+  }
+
+  /** Whether an update must run `pivot()` again. A variant adds the properties its derived data reads. */
+  protected repivot(changed: PropertyValues<this>): boolean {
+    return ['data', 'rows', 'columns', 'values', 'invertSigns'].some((key) => changed.has(key as keyof PivotTable))
+  }
+
+  /** The records `pivot()` runs on, one per record of `data` and in its order, so `cell-click` maps back to them. */
+  protected pivotData(): readonly unknown[] {
+    return this.data
+  }
+
+  /** The layout `pivot()` runs with. */
+  protected pivotConfig(): PivotConfig {
+    return { rows: this.rows, columns: this.columns, values: this.values, invertSigns: this.invertSigns ?? {} }
+  }
+
+  /** The text shown for a group of `field`; the group's own value by default. */
+  protected memberLabel(_field: string, member: string): string {
+    return member
+  }
+
+  /** Whether the field list may move `field` to zone `to`; any move by default. */
+  protected canMove(_field: string, _to: PivotZone): boolean {
+    return true
+  }
+
+  /** Extra classes for a value cell that shows a number, by its column path; none by default. */
+  protected cellClass(_columnPath: readonly string[]): string {
+    return ''
   }
 
   // ------------------------------------------------------------------------------------------------------------ model
 
-  private fieldLabel(field: string): string {
+  protected fieldLabel(field: string): string {
     return this.fieldLabels?.[field] ?? field
   }
 
@@ -464,6 +513,7 @@ export class PivotTable extends LitElement {
   move(field: string, to: Zone, index?: number): void {
     // A computed value has no field in the records to group by.
     if ((to === 'rows' || to === 'columns') && this.values.some((value) => value.compute && value.field === field)) return
+    if (!this.canMove(field, to)) return
     const rows = this.rows.filter((name) => name !== field)
     const columns = this.columns.filter((name) => name !== field)
     let values = this.values
@@ -563,14 +613,14 @@ export class PivotTable extends LitElement {
         <button slot="trigger" class="chip-menu" type="button" aria-label=${this.msg.t('fieldOptions', this.fieldLabel(field))}>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
         </button>
-        ${commands.filter(([target]) => target !== zone).map(([target, text]) => html`<c2-menu-item value=${target}>${text}</c2-menu-item>`)}
+        ${commands.filter(([target]) => target !== zone && this.canMove(field, target as Zone)).map(([target, text]) => html`<c2-menu-item value=${target}>${text}</c2-menu-item>`)}
         ${
           value && !value.compute
             ? html`<hr />
                 ${AGGREGATES.map((aggregate) => html`<c2-menu-item value=${aggregate} type="radio" ?checked=${(value.aggregate ?? 'sum') === aggregate}>${this.msg.t(aggregate)}</c2-menu-item>`)}`
             : nothing
         }
-        ${zone !== 'fields' ? html`${commands.length ? html`<hr />` : nothing} <c2-menu-item value="remove">${this.msg.t('remove')}</c2-menu-item>` : nothing}
+        ${zone !== 'fields' && this.canMove(field, 'fields') ? html`${commands.length ? html`<hr />` : nothing} <c2-menu-item value="remove">${this.msg.t('remove')}</c2-menu-item>` : nothing}
       </c2-menu>
     </span>`
   }
@@ -615,8 +665,8 @@ export class PivotTable extends LitElement {
   private rowLabel(row: Row): string {
     if (row.kind === 'grand') return this.msg.t('grandTotal')
     if (!row.node || !row.node.path.length) return this.msg.t('total')
-    if (row.kind === 'subtotal') return this.msg.t('groupTotal', row.node.label)
-    return row.node.label
+    const label = this.memberLabel(this.rows[row.node.path.length - 1], row.node.label)
+    return row.kind === 'subtotal' ? this.msg.t('groupTotal', label) : label
   }
 
   private renderHead() {
@@ -651,13 +701,14 @@ export class PivotTable extends LitElement {
       }
       collect(result.columns)
       const lastLevel = level === columnDepth - 1 && !valueRow
+      const label = (node: PivotNode) => this.memberLabel(this.columns[level], node.label)
       lines.push(
         html`<tr role="row">
           ${level === 0 ? html`<th class="corner" part="header" role="columnheader" rowspan=${headRows}>${corner}</th>` : nothing}
           ${nodes.map((node) =>
             lastLevel
-              ? sortable({ path: node.path, value: 0, total: false }, node.label)
-              : html`<th part="header" role="columnheader" class="group" colspan=${pivotLeaves(node).length * valueCount || valueCount}>${node.label}</th>`,
+              ? sortable({ path: node.path, value: 0, total: false }, label(node))
+              : html`<th part="header" role="columnheader" class="group" colspan=${pivotLeaves(node).length * valueCount || valueCount}>${label(node)}</th>`,
           )}
           ${
             level === 0 && showColumnTotal
@@ -695,10 +746,11 @@ export class PivotTable extends LitElement {
     }
     // Coloured by what is shown: a variance that rounds to zero is neither.
     const computed = value !== null && this.values[column.value]?.compute && /[1-9]/.test(text) ? (value < 0 ? 'negative' : 'positive') : ''
+    const extra = value !== null && !column.total ? this.cellClass(column.path) : ''
     return html`<td
       part="cell"
       role="gridcell"
-      class="${column.total ? 'total' : ''} ${heat ? 'heat' : ''} ${hot ? 'hot' : ''} ${row.values && value === null ? 'empty' : ''} ${computed}"
+      class="${column.total ? 'total' : ''} ${heat ? 'heat' : ''} ${hot ? 'hot' : ''} ${row.values && value === null ? 'empty' : ''} ${computed} ${extra}"
       style=${heat}
       data-cell="${rowIndex}:${columnIndex + 1}"
       tabindex=${this.cursor.row === rowIndex && this.cursor.column === columnIndex + 1 ? 0 : -1}
@@ -746,7 +798,7 @@ export class PivotTable extends LitElement {
       <div class="scroll" part="scroll">
         ${
           ready
-            ? html`<table part="table" role="treegrid" aria-label=${this.label || this.msg.t('table')} @keydown=${this.onKeydown}>
+            ? html`<table part="table" role="treegrid" aria-label=${this.accessibleName()} @keydown=${this.onKeydown}>
                 ${this.renderHead()}
                 <tbody>
                   ${this.bodyRows.map((row, index) => this.renderRow(row, index))}

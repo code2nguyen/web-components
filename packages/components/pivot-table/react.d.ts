@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { AgingTable } from '@c2n/pivot-table/aging-table.js'
 import type { PivotTable } from '@c2n/pivot-table'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,20 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-aging-table': Omit<C2Props<AgingTable>, 'buckets' | 'data' | 'rows' | 'columns' | 'values' | 'invertSigns' | 'fieldLabels'> & {
+        'as-of'?: Attribute
+        'date-field'?: Attribute
+        'invert-signs'?: Attribute
+        'field-labels'?: Attribute
+        'expand-depth'?: Attribute
+        buckets?: AgingTable['buckets'] | string
+        data?: AgingTable['data'] | string
+        rows?: AgingTable['rows'] | string
+        columns?: AgingTable['columns'] | string
+        values?: AgingTable['values'] | string
+        invertSigns?: AgingTable['invertSigns'] | string
+        fieldLabels?: AgingTable['fieldLabels'] | string
+      }
       'c2-pivot-table': Omit<C2Props<PivotTable>, 'data' | 'rows' | 'columns' | 'values' | 'invertSigns' | 'fieldLabels'> & {
         'invert-signs'?: Attribute
         'field-labels'?: Attribute
