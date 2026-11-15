@@ -157,6 +157,16 @@ Put one `c2-list-item` per option in the default slot and read the selection fro
     <c2-list-item value="10">Sydney (UTC+10)</c2-list-item>
   </c2-select>
 </div>
+<div data-label="Searchable">
+  <c2-select client:only="lit" searchable placeholder="Office" class="team">
+    <h3>Europe</h3>
+    <c2-list-item value="london">London</c2-list-item>
+    <c2-list-item value="paris">Paris</c2-list-item>
+    <h3>Asia Pacific</h3>
+    <c2-list-item value="hanoi">Hanoi</c2-list-item>
+    <c2-list-item value="tokyo">Tokyo</c2-list-item>
+  </c2-select>
+</div>
 <div data-label="Fit size">
   <c2-select client:only="lit" fit-size placeholder="Wraps long options" class="country">
     <c2-list-item value="1">A very long option that wraps inside the trigger width</c2-list-item>
@@ -181,6 +191,26 @@ select.querySelector('c2-list-item[value="FR"]').data = { code: 'FR', name: 'Fra
 select.value = ['FR']
 select.open = true
 ```
+
+## Search, groups and actions
+
+- **Groups.** An `<h3>` (any heading level) or an `<hr>` among the options is a group heading or a divider. The list skips them for selection and the keyboard; style them with the `--c2-list__heading--*` and `--c2-list__divider--*` variables on the select.
+- **Search.** `searchable` puts a filter field above the options. It takes focus when the dropdown opens and hides the options whose text does not contain what was typed (case and accents ignored), and a heading with nothing left in its group. ArrowDown moves to the first match and Enter picks it; ArrowUp from the first match returns to the field, and typing on an option goes on in the field. The search lives only while the dropdown is open. When nothing matches, the `empty` slot (default "No matching options") shows.
+- **Server search.** Every keystroke fires `search-change` with `detail.query`. Cancel it to filter yourself: the select then shows every option it holds, so replace them with the server's answer, and set `loading` meanwhile (the `loading` slot, default "Loading…").
+- **Create.** With `creatable`, a "Create “…”" row follows the matches while no option's text equals the search. Choosing it (or Enter when nothing matches) fires `create-option` with `detail.label`; add the option and set `value`.
+- **Actions.** The `footer` slot below the options is the panel's action zone: put your own Clear and Apply `c2-button`s there and give them one line each (`select.value = []`, `select.open = false`).
+
+```ts tag=CodeBlock
+select.addEventListener('create-option', (event) => {
+  const item = document.createElement('c2-list-item')
+  item.value = event.detail.label.toLowerCase()
+  item.textContent = event.detail.label
+  select.append(item)
+  select.value = [item.value]
+})
+```
+
+The Gallery tab has a status select with coloured badges in stages, a label picker with Clear and Apply, and a server search.
 
 ## Theming
 

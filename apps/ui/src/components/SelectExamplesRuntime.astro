@@ -1,0 +1,103 @@
+---
+/**
+ * Plays the application's part in the select gallery's search examples: the Clear / Apply actions of a panel, the
+ * option a `creatable` select asks for, a server search behind a cancelled `search-change`, and a status badge echoed
+ * in the trigger. The select never does these itself: it fires the events and leaves the options to their owner.
+ */
+---
+
+<script>
+  import type { Select, SelectCreateOptionEventDetail, SelectSearchChangeEventDetail } from '@c2n/components/select'
+  import '@c2n/components/select'
+  import '@c2n/components/badge'
+  import '@c2n/components/button'
+
+  const TONES = ['primary', 'success', 'warning', 'info', 'danger']
+  const PEOPLE = [
+    'Ada Lovelace',
+    'Alan Turing',
+    'Barbara Liskov',
+    'Donald Knuth',
+    'Edsger Dijkstra',
+    'Grace Hopper',
+    'Ken Thompson',
+    'Linus Torvalds',
+    'Margaret Hamilton',
+    'Radia Perlman',
+  ]
+
+  const examples = (name: string) => document.querySelectorAll<Select>(`c2-select[data-select-example="${name}"]`)
+  const wired = new WeakSet<Select>()
+  const once = (select: Select) => !wired.has(select) && !!wired.add(select)
+
+  function row(value: string, content: Node | string): HTMLElement {
+    const item = document.createElement('c2-list-item')
+    item.setAttribute('value', value)
+    item.append(content)
+    return item
+  }
+
+  /** Clear empties the selection; Apply closes the panel and keeps it. Both are the app's own buttons in the footer. */
+  function wireActions(select: Select) {
+    select.querySelector('[data-action="clear"]')?.addEventListener('click', () => (select.value = []))
+    select.querySelector('[data-action="apply"]')?.addEventListener('click', () => (select.open = false))
+  }
+
+  /** Echoes the selected status's badge in the trigger, and turns "Create" into a new status in the last group. */
+  function wireStatus(select: Select) {
+    const echo = () => {
+      select.querySelector('[slot="button-content"]')?.remove()
+      const badge = select.querySelector(`c2-list-item[value="${CSS.escape(select.value[0] ?? '')}"] c2-badge`)
+      if (!badge) return
+      const copy = badge.cloneNode(true) as HTMLElement
+      copy.setAttribute('slot', 'button-content')
+      select.prepend(copy)
+    }
+    select.addEventListener('selection-change', echo)
+    select.addEventListener('create-option', (event) => {
+      const { label } = (event as CustomEvent<SelectCreateOptionEventDetail>).detail
+      const value = `custom-${select.querySelectorAll('c2-list-item').length}`
+      const badge = document.createElement('c2-badge')
+      badge.setAttribute('tone', TONES[select.querySelectorAll('c2-list-item').length % TONES.length])
+      badge.textContent = label
+      select.append(row(value, badge))
+      select.value = [value]
+      requestAnimationFrame(echo)
+    })
+    requestAnimationFrame(echo)
+  }
+
+  /** Searches a pretend server: the select shows "Loading…" and then whatever came back. */
+  function wireRemote(select: Select) {
+    let request = 0
+    const load = (query: string) => {
+      const id = ++request
+      select.loading = true
+      setTimeout(() => {
+        if (id !== request) return // a newer search superseded this one
+        const folded = query.trim().toLowerCase()
+        const found = PEOPLE.filter((name) => name.toLowerCase().includes(folded)).slice(0, 6)
+        const kept = [...select.querySelectorAll('c2-list-item')].filter((item) => select.value.includes(item.getAttribute('value') ?? ''))
+        const fresh = found.filter((name) => !kept.some((item) => item.getAttribute('value') === name)).map((name) => row(name, name))
+        select.replaceChildren(...kept, ...fresh)
+        select.loading = false
+      }, 450)
+    }
+    select.addEventListener('search-change', (event) => {
+      event.preventDefault()
+      load((event as CustomEvent<SelectSearchChangeEventDetail>).detail.query)
+    })
+    load('')
+  }
+
+  function wire() {
+    for (const select of examples('actions')) if (once(select)) wireActions(select)
+    for (const select of examples('status')) if (once(select)) wireStatus(select)
+    for (const select of examples('remote')) if (once(select)) wireRemote(select)
+  }
+
+  // The examples are `client:only` islands: they may render after this script runs.
+  wire()
+  new MutationObserver(wire).observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', wire)
+</script>
