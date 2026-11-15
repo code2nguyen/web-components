@@ -760,6 +760,11 @@ export const overrides: Record<string, Override> = {
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
+  // The tier a previewed quantity falls in is outlined in the accent, as a selected item is.
+  '--c2-tier-editor__from__match--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },

@@ -64,6 +64,7 @@ const submitted: Record<string, string[]> = {
   'c2-text-field': ['Ada'],
   'c2-text-field-clear': ['Ada'],
   'c2-textarea': ['Long text'],
+  'c2-tier-editor': ['[{"upTo":1000,"value":0.05},{"upTo":null,"value":0.03}]'],
   'c2-time-input': ['09:30'],
   'c2-time-slot-picker': ['2026-10-17T09:00:00Z'],
   'c2-tree-select': ['eu'],
@@ -156,6 +157,11 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-text-field': (e) => (e.value = 'Ada'),
         'c2-text-field-clear': (e) => (e.value = 'Ada'),
         'c2-textarea': (e) => (e.value = 'Long text'),
+        'c2-tier-editor': (e) =>
+          (e.tiers = [
+            { upTo: 1000, value: 0.05 },
+            { upTo: null, value: 0.03 },
+          ]),
         'c2-time-input': (e) => (e.value = '09:30'),
         'c2-time-slot-picker': (e) => (e.value = '2026-10-17T09:00:00Z'),
         'c2-tree-select': (e) => (e.value = ['eu']),

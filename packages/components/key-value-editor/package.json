@@ -9,6 +9,10 @@
       "types": "./types/src/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
     },
+    "./tier-editor.js": {
+      "types": "./types/src/tier-editor.d.ts",
+      "default": "./dist/tier-editor.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -30,6 +34,8 @@
   ],
   "keywords": [
     "key-value-editor",
+    "tier editor",
+    "tiered pricing",
     "web component",
     "lit"
   ],
@@ -66,5 +72,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./tier-editor.js"
+    ]
+  }
 }
