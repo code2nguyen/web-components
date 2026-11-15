@@ -53,7 +53,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Data display
 
-- **Allocation grid** — `c2-allocation-grid, c2-table-column` · `@c2n/components/table/allocation-grid` — People down the side and periods across: each cell an amount of the row’s capacity, coloured under, at or over it, with totals per person and per period. Children: `c2-pagination`, `c2-table-column`.
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Audio Player** — `c2-audio-player` · `@c2n/components/audio-player` — Waveform playback for voice notes and recordings: the waveform is the seek bar, with the time, a speed toggle and an optional transcript.
 - **Audio Visualizer** — `c2-audio-visualizer` · `@c2n/components/audio-visualizer` — Live audio level as bars, a waveform or an orb: the mic meter of a call, a voice message, a voice assistant.
@@ -67,11 +66,9 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value, c2-description-group` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-group`, `c2-description-item`, `c2-description-value`.
 - **Distribution Bar** — `c2-distribution-bar` · `@c2n/components/distribution-bar` — One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.
 - **File browser** — `c2-file-browser` · `@c2n/components/file-browser` — Folders and files with a folder tree, breadcrumbs, search, list and grid views, selection, a context menu, renaming and drag and drop.
-- **Flowsheet** — `c2-flowsheet, c2-table-column` · `@c2n/components/table/flowsheet` — A measure per row and a column per reading time, as a chart of vital signs or lab results reads: readings flagged against each row’s normal and critical range, measures grouped by system. Children: `c2-pagination`, `c2-table-column`.
 - **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
 - **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
-- **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows: aggregates per group, group bands, groups kept under the header and a group checkbox that selects its rows. Children: `c2-pagination`, `c2-table-column`.
 - **Highlight** — `c2-highlight, c2-find-bar` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Image Compare** — `c2-image-compare` · `@c2n/components/image-compare` — A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.
@@ -86,20 +83,17 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Order Book** — `c2-order-book` · `@c2n/components/order-book` — Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
-- **Pivot table** — `c2-pivot-table` · `@c2n/components/pivot-table` — Summarises flat rows by the fields set on rows and columns, with subtotals, totals, sorting, a heatmap and a field list.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed.
 - **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`.
-- **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
 - **Text Effect** — `c2-text-effect` · `@c2n/components/text-effect` — Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
 - **Transcript** — `c2-transcript` · `@c2n/components/transcript` — Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
-- **Tree table** — `c2-tree-table, c2-table-column` · `@c2n/components/table/tree-table` — c2-table with rows nested to any depth: rolled-up figures on parent rows, cascading selection, and children loaded the first time a row opens. Children: `c2-pagination`, `c2-table-column`.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
 - **Video Player** — `c2-video-player` · `@c2n/components/video-player` — Themed controls over a real video: chapters on the seek bar, a thumbnail while scrubbing, captions, speed, picture-in-picture and full screen.
 - **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.
@@ -120,7 +114,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
 - **Pan Zoom** — `c2-pan-zoom` · `@c2n/components/pan-zoom` — A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.
 - **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
-- **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
 - **Terminal** — `c2-terminal` · `@c2n/components/terminal` — An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.
 
 ## Feedback
@@ -284,3 +277,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.
 - **Todo List** — `c2-todo-list` · `@c2n/components/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
 - **Week Planner** — `c2-week-planner` · `@c2n/components/week-planner` — Weekly schedule with time blocks: a typical week with optional odd and even weeks, or a dated week the user edits.
+
+## Table
+
+- **Allocation grid** — `c2-allocation-grid, c2-table-column` · `@c2n/components/table/allocation-grid` — People down the side and periods across: each cell an amount of the row’s capacity, coloured under, at or over it, with totals per person and per period. Children: `c2-pagination`, `c2-table-column`.
+- **Flowsheet** — `c2-flowsheet, c2-table-column` · `@c2n/components/table/flowsheet` — A measure per row and a column per reading time, as a chart of vital signs or lab results reads: readings flagged against each row’s normal and critical range, measures grouped by system. Children: `c2-pagination`, `c2-table-column`.
+- **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows: aggregates per group, group bands, groups kept under the header and a group checkbox that selects its rows. Children: `c2-pagination`, `c2-table-column`.
+- **Pivot table** — `c2-pivot-table` · `@c2n/components/pivot-table` — Summarises flat rows by the fields set on rows and columns, with subtotals, totals, sorting, a heatmap and a field list.
+- **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
+- **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
+- **Tree table** — `c2-tree-table, c2-table-column` · `@c2n/components/table/tree-table` — c2-table with rows nested to any depth: rolled-up figures on parent rows, cascading selection, and children loaded the first time a row opens. Children: `c2-pagination`, `c2-table-column`.
