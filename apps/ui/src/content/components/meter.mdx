@@ -2,6 +2,7 @@
 title: 'Meter'
 description: 'A measurement inside a known range — storage, quota, strength — with native meter thresholds and an optional segmented breakdown.'
 category: 'Data display'
+apiTags: ['c2-meter']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -14,6 +15,10 @@ import { Meter } from '@c2n/components/meter'
 `low`, `high` and `optimum` work like the native `<meter>`: they judge the value as optimum, sub-optimum or critical, and the bar turns blue, amber or red. Put `optimum` below `low` when less is better (disk usage) and above `high` when more is better (battery). The tone is also exposed as `:state(optimum)`, `:state(suboptimum)` and `:state(critical)`, so you can style things around the meter, such as a warning next to a critical one.
 
 Give it `segments` instead of a `value` to split the bar into parts, like a storage quota by file type. Each segment is `{ label, value, color? }` in range units; without a `color` it takes the next of eight palette variables, which follow the theme's chart series, so a category reads the same in a chart and a meter. A legend lists the segments under the bar, and a screen reader hears each one by name followed by the total.
+
+A segmented meter normally stops at `max`. Add `overage` when the sum may pass it, as seats assigned past a licence's limit do: the bar then spans the whole sum, the part past `max` is drawn as a red overage segment after a limit mark, the value reads "56 of 50", and the legend and the announcement add "Over limit: 6". The host matches `:state(overage)` while it is over, and the `excess` property holds the amount.
+
+To place one value among named bands (a lab result against its reference ranges) rather than fill a bar, use its companion [`c2-range-indicator`](/web-components/components/range-indicator).
 
 ## Import
 
@@ -47,6 +52,12 @@ import '@c2n/components/meter'
 <div data-label="More is better: optimum above high">
   <div class="meter-row">
     <c2-meter value="12" low="20" high="60" optimum="100">Battery</c2-meter>
+  </div>
+</div>
+<div data-label="Seats past the limit: overage">
+  <div class="meter-row">
+    <c2-meter max="50" overage segments='[{"label":"Assigned","value":42},{"label":"Pending","value":4}]'>Seats</c2-meter>
+    <c2-meter max="50" overage segments='[{"label":"Assigned","value":48},{"label":"Pending","value":8}]'>Seats</c2-meter>
   </div>
 </div>
 <div data-label="Segments">

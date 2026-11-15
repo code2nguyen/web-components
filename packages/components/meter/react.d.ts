@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Meter } from '@c2n/meter'
+import type { RangeIndicator } from '@c2n/meter/range-indicator.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -26,6 +27,10 @@ declare module 'react' {
       'c2-meter': Omit<C2Props<Meter>, 'segments'> & {
         'value-text'?: Attribute
         segments?: Meter['segments'] | string
+      }
+      'c2-range-indicator': Omit<C2Props<RangeIndicator>, 'bands'> & {
+        'value-text'?: Attribute
+        bands?: RangeIndicator['bands'] | string
       }
     }
   }

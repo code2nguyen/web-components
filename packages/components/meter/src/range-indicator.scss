@@ -1,0 +1,229 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-range-indicator,
+  $theme: (
+    width: 100%,
+    gap: 6px,
+    track--height: 8px,
+    track--border-radius: 999px,
+    track--background-color: #e4e4e7,
+    band--gap: 2px,
+    band--background-color: #a1a1aa,
+    band__optimum--background-color: #16a34a,
+    band__suboptimum--background-color: #d97706,
+    band__critical--background-color: #dc2626,
+    pointer--color: #18181b,
+    pointer--size: 12px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    value--color: #71717a,
+    value--font-size: 14px,
+    value--font-weight: 400,
+    status--color: #18181b,
+    status--font-weight: 500,
+    status--font-size: 14px,
+    status--display: inline,
+    header--gap: 6px,
+    band-labels--display: block,
+    band-label--color: #18181b,
+    ticks--display: block,
+    tick--color: #71717a,
+    tick--font-size: 12px,
+  )
+);
+
+:host {
+  display: block;
+  // On the host, not the inner box: as a flex or grid item an auto-width host would leave the percentages indefinite.
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-range-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.c2-range-indicator-header {
+  display: flex;
+  // A long label or value text moves the value to its own line instead of overlapping the label.
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: css.cssVar(header--gap);
+  line-height: 1.4;
+}
+
+.c2-range-indicator-label {
+  // Shrinks no narrower than its longest word, so the value never draws over it.
+  overflow-wrap: break-word;
+  padding-inline-end: css.cssVar(header--gap);
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.c2-range-indicator-value {
+  min-width: 0;
+  margin-inline-start: auto;
+  text-align: end;
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.c2-range-indicator-status {
+  display: css.cssVar(status--display);
+  flex: none;
+  color: css.cssVar(status--color);
+  font-size: css.cssVar(status--font-size);
+  font-weight: css.cssVar(status--font-weight);
+}
+
+.c2-range-indicator-scale {
+  position: relative;
+  // Room for the pointer above the track.
+  padding-block-start: calc(#{css.cssVar(pointer--size)} * 0.75 + 2px);
+}
+
+.c2-range-indicator-track {
+  position: relative;
+  overflow: hidden;
+  height: css.cssVar(track--height);
+  border-radius: css.cssVar(track--border-radius);
+  background-color: css.cssVar(track--background-color);
+}
+
+.c2-range-indicator-band {
+  position: absolute;
+  inset-block: 0;
+  box-sizing: border-box;
+  background-color: css.cssVar(band--background-color);
+  // The gap is a transparent end border, so the band keeps its exact place on the scale and the track shows through.
+  background-clip: padding-box;
+
+  &.is-joined {
+    border-inline-end: css.cssVar(band--gap) solid transparent;
+  }
+
+  &.is-optimum {
+    background-color: css.cssVar(band__optimum--background-color);
+  }
+
+  &.is-suboptimum {
+    background-color: css.cssVar(band__suboptimum--background-color);
+  }
+
+  &.is-critical {
+    background-color: css.cssVar(band__critical--background-color);
+  }
+}
+
+// A zero-width box at the value, its mark centred on it whatever the writing direction.
+.c2-range-indicator-pointer,
+.c2-range-indicator-tick {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 0;
+}
+
+.c2-range-indicator-pointer {
+  inset-block-start: 0;
+
+  &::before {
+    content: '';
+    flex: none;
+    width: css.cssVar(pointer--size);
+    height: calc(#{css.cssVar(pointer--size)} * 0.75);
+    background-color: css.cssVar(pointer--color);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+
+  // Off the scale: an arrow at that end, pointing away from it.
+  &.is-below-scale,
+  &.is-above-scale {
+    &::before {
+      width: calc(#{css.cssVar(pointer--size)} * 0.75);
+      height: css.cssVar(pointer--size);
+      margin-block-start: calc(#{css.cssVar(pointer--size)} * -0.125);
+    }
+  }
+
+  &.is-below-scale {
+    justify-content: flex-start;
+
+    &::before {
+      clip-path: polygon(100% 0, 100% 100%, 0 50%);
+    }
+  }
+
+  &.is-above-scale {
+    justify-content: flex-end;
+
+    &::before {
+      clip-path: polygon(0 0, 0 100%, 100% 50%);
+    }
+  }
+}
+
+:host(:dir(rtl)) .c2-range-indicator-pointer::before {
+  scale: -1 1;
+}
+
+.c2-range-indicator-band-labels,
+.c2-range-indicator-ticks {
+  position: relative;
+  height: 1.4em;
+  font-size: css.cssVar(tick--font-size);
+  line-height: 1.4;
+}
+
+.c2-range-indicator-band-labels {
+  display: css.cssVar(band-labels--display);
+  color: css.cssVar(band-label--color);
+}
+
+.c2-range-indicator-band-label {
+  position: absolute;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-inline: 2px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c2-range-indicator-ticks {
+  display: css.cssVar(ticks--display);
+  color: css.cssVar(tick--color);
+  font-variant-numeric: tabular-nums;
+}
+
+.c2-range-indicator-tick > span {
+  flex: none;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .c2-range-indicator-track {
+    border: 1px solid CanvasText;
+  }
+
+  .c2-range-indicator-band {
+    forced-color-adjust: none;
+  }
+
+  .c2-range-indicator-pointer::before {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+}

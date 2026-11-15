@@ -443,6 +443,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-radio value="pro" label="Pro"></c2-radio>
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
+  'range-indicator': `<c2-range-indicator style="width:220px" min="40" max="160" value="88" value-text="88 mg/dL" bands='[{"label":"Low","to":70,"tone":"suboptimum"},{"label":"Normal","to":100,"tone":"optimum"},{"label":"High","tone":"critical"}]'>Glucose</c2-range-indicator>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
   'reaction-bar': `<c2-reaction-bar reactions='[{"emoji":"👍","count":4,"reacted":true},{"emoji":"🎉","count":2},{"emoji":"👀","count":1}]'></c2-reaction-bar>`,
   'record-merge': `<c2-record-merge label="Merge contacts" style="width:300px;--c2-choice-matrix__cell--padding:6px 8px" records='[{"id":"a","label":"CRM","values":{"name":"Ada Lovelace","phone":""}},{"id":"b","label":"Web","values":{"name":"A. Lovelace","phone":"+44 20 7946"}}]' fields='[{"key":"name","label":"Name"},{"key":"phone","label":"Phone"}]' value='{"phone":"b"}'></c2-record-merge>`,

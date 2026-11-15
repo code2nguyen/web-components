@@ -1,0 +1,12 @@
+---
+/**
+ * Plays the application's part in the meter gallery: the French of the card under `lang="fr"`, whose overage the
+ * legend lists as "Dépassement".
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { meter: { label: 'Jauge', total: '{0} sur {1}', segment: '{0} : {1}', overage: 'Dépassement' } } })
+</script>
