@@ -68,8 +68,9 @@
 }
 
 .c2-meter-label {
-  // Shrinks no narrower than its longest word, so the value never draws over it.
-  overflow-wrap: break-word;
+  min-width: 0;
+  // The header wraps the value to its own line first; a label too long for the line alone breaks rather than overflows.
+  overflow-wrap: anywhere;
   color: css.cssVar(label--color);
   font-size: css.cssVar(label--font-size);
   font-weight: css.cssVar(label--font-weight);

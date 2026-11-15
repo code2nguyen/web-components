@@ -42,7 +42,7 @@ const STATES = ['optimum', 'suboptimum', 'critical', 'below-scale', 'above-scale
  * PHQ-9 or BMI score against its categories. The bands are drawn side by side along a track with their labels under
  * them and the numbers where they meet; a pointer marks the value, and the label of the band it falls in shows beside
  * the value. A value outside `min`–`max` pins the pointer to that end as an arrow pointing off the scale, and still
- * counts in the first or last band.
+ * counts in the band that reaches that end of the scale, if any.
  *
  * A band's `tone` (`optimum`, `suboptimum`, `critical`, as in `c2-meter`) colours it, and while the value is in it the
  * host matches `:state(<tone>)`; `:state(below-scale)` and `:state(above-scale)` say the value is off the scale.
@@ -161,7 +161,7 @@ export class RangeIndicator extends LitElement {
     return list
   }
 
-  /** The band the value falls in, a value off the scale counting in the band at that end; undefined between bands. */
+  /** The band the value falls in, a value off the scale counting in the band that reaches that end; undefined outside every band. */
   get band(): RangeIndicatorBand | undefined {
     const [, max] = this.range
     const value = this.placed
@@ -193,12 +193,15 @@ export class RangeIndicator extends LitElement {
 
   /** Text of the label children, read from the light DOM so a server-rendered label names the host too. */
   private get labelText(): string {
-    return Array.from(this.childNodes)
-      .filter((node) => !(node instanceof Element && node.hasAttribute('slot')))
-      .map((node) => node.textContent ?? '')
-      .join('')
-      .replace(/\s+/g, ' ')
-      .trim()
+    return (
+      Array.from(this.childNodes)
+        // Text and unslotted elements only: comments (a framework's or a server renderer's markers) are not label text.
+        .filter((node) => node.nodeType === Node.TEXT_NODE || (node instanceof Element && !node.hasAttribute('slot')))
+        .map((node) => node.textContent ?? '')
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim()
+    )
   }
 
   private format(value: number): string {

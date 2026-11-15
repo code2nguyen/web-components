@@ -156,6 +156,9 @@ test('the name follows the label text when it changes in place', async ({ page, 
   // A framework updating the text node fires no slotchange; the value slot's text is not part of the name.
   await host.evaluate((el) => (el.firstChild!.textContent = 'Potassium'))
   await expect(host).toHaveHostAria('aria-label', 'Potassium')
+  // A framework's marker comments are not label text.
+  await host.evaluate((el) => el.prepend(document.createComment('?lit$123$')))
+  await expect(host).toHaveHostAria('aria-label', 'Potassium')
 })
 
 test('a long label and value text in a narrow box wrap instead of overlapping', async ({ page, renderScenario }) => {
