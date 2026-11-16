@@ -151,12 +151,13 @@ test.describe('show-when-hidden', () => {
     expect(await page.evaluate(() => document.activeElement?.textContent)).not.toBe('Buy from the bar')
   })
 
-  test('keeps the focused stand-in in view until focus leaves it', async ({ page, scenario, tab }) => {
+  test('keeps the focused stand-in in view until focus leaves it', async ({ page, scenario }) => {
     await scenario('cta')
     await scrollTo(page, 400)
     await expect.poll(() => hasState(page, 'concealed')).toBe(false)
-    await page.getByRole('button', { name: 'Buy now' }).focus({ preventScroll: true } as never)
-    await tab()
+    // Shift+Tab from the document reaches the bar, the last control, without scrolling the main button into view.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.keyboard.press('Shift+Tab')
     await expect(barButton(page)).toBeFocused()
 
     await scrollTo(page, 0)
