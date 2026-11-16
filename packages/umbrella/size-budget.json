@@ -1,5 +1,5 @@
 {
-  "lazy": 404045,
+  "lazy": 405029,
   "entries": {
     "accordion": 6073,
     "action-bar": 4528,
@@ -155,7 +155,7 @@
     "label": 1661,
     "link-button": 1948,
     "list": 7572,
-    "list-item": 6161,
+    "list-item": 6005,
     "list-item/list-group": 2232,
     "loading-overlay": 3986,
     "log-viewer": 16907,

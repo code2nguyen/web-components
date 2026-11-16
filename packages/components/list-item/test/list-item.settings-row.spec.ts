@@ -154,3 +154,24 @@ test('a control that upgrades after the row is still named by it', async ({ page
   })
   await expect(page.locator('x-late').getByRole('button')).toHaveAccessibleName('Late control')
 })
+
+test('ordinary rows never load the settings-row module; the first control slot does', async ({ page, renderScenario }) => {
+  const requested: string[] = []
+  page.on('request', (request) => requested.push(request.url()))
+  const loaded = () => requested.some((url) => url.includes('list-item-control'))
+  await renderScenario(
+    '<c2-list-item id="inbox">Inbox</c2-list-item><c2-list-item selected>Sent</c2-list-item><c2-list-item href="#drafts">Drafts</c2-list-item>',
+  )
+  await page.locator('#inbox').click()
+  expect(loaded()).toBe(false)
+  await page.locator('main').evaluate((main) => {
+    const row = document.createElement('c2-list-item')
+    row.textContent = 'Wi-Fi'
+    const control = document.createElement('c2-switch')
+    control.slot = 'control'
+    row.append(control)
+    main.append(row)
+  })
+  await expect(page.getByRole('switch', { name: 'Wi-Fi' })).toBeVisible()
+  expect(loaded()).toBe(true)
+})

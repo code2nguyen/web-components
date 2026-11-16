@@ -8,7 +8,21 @@ import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
-import { FIELD_CONNECT_EVENT, fieldConsumerOf, type FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { FIELD_CONNECT_EVENT } from '@c2n/core/contexts/field.js'
+
+// The settings-row behaviour (naming and activating the control in the `control` slot) loads the first time a row has
+// a control; from then on it runs synchronously. A failed load (offline, a stale deploy) is tried again next time.
+type ControlModule = typeof import('./list-item-control.js')
+let controlModule: ControlModule | undefined
+let controlModuleLoad: Promise<void> | undefined
+function withControlModule(run: (module: ControlModule) => void) {
+  if (controlModule) return run(controlModule)
+  controlModuleLoad ??= import('./list-item-control.js').then(
+    (module) => void (controlModule = module),
+    () => void (controlModuleLoad = undefined),
+  )
+  void controlModuleLoad.then(() => controlModule && run(controlModule))
+}
 
 /** Events fired by {@link ListItem}, keyed for `addEventListener`. */
 export interface ListItemEventMap {
@@ -212,17 +226,15 @@ export class ListItem extends LitElement {
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
 
+  private hadControl = false
+
   /** The element in the `control` slot, or `null`. */
   get controlElement(): HTMLElement | null {
-    let control = this.querySelector<Element>(':scope > [slot="control"]')
+    let control = this.querySelector(':scope > [slot="control"]')
     // A wrapper around a single element (Astro's `<astro-island>`, a `<label>`) stands for the element it holds.
     while (control && !control.shadowRoot && control.childElementCount === 1) control = control.firstElementChild
     return control as HTMLElement | null
   }
-
-  // The control the row names through the field protocol, and the observer that keeps its name current.
-  private fieldConsumer: FieldContextConsumer | undefined
-  private textObserver?: MutationObserver
 
   /** The text a `c2-select` shows for this row: `label` when set, otherwise the text content of the default slot. */
   get displayText(): string {
@@ -244,6 +256,8 @@ export class ListItem extends LitElement {
     this.addEventListener('keydown', this.handleKeydown)
     this.addEventListener('click', this.blockDisabledClick, true)
     this.addEventListener(FIELD_CONNECT_EVENT, this.handleFieldConnect)
+    // A settings row let its control go when it left the page; name it again.
+    if (this.hadControl) this.requestUpdate()
   }
 
   override disconnectedCallback() {
@@ -251,7 +265,7 @@ export class ListItem extends LitElement {
     this.removeEventListener('keydown', this.handleKeydown)
     this.removeEventListener('click', this.blockDisabledClick, true)
     this.removeEventListener(FIELD_CONNECT_EVENT, this.handleFieldConnect)
-    this.releaseControl()
+    if (this.hadControl) withControlModule((module) => module.releaseControl(this))
   }
 
   // A control that upgrades after the row: name it, and keep an outer field from claiming it.
@@ -259,49 +273,6 @@ export class ListItem extends LitElement {
     if (event.target !== this.controlElement) return
     event.stopPropagation()
     this.requestUpdate()
-  }
-
-  // As a c2-form-field's label does: focus the control and, for a self-labelled one (a switch, a checkbox) or a native
-  // control, click the element that took the focus. A select or a text field only takes the focus.
-  private activateControl(control: HTMLElement) {
-    control.focus()
-    const consumer = fieldConsumerOf(control)
-    if (consumer && !consumer.selfLabelled) return
-    let target: Element = control
-    while (target.shadowRoot?.activeElement) target = target.shadowRoot.activeElement
-    ;(target as HTMLElement).click()
-  }
-
-  private slotText(slot: HTMLSlotElement | null) {
-    return (slot?.assignedNodes({ flatten: true }) ?? [])
-      .map((node) => node.textContent)
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-  }
-
-  // Names and describes a switch, checkbox or select in the control slot, or lets go of one that left it. A text field
-  // is left alone: claiming it would hide its own hint and error line, which the row cannot show for it.
-  private syncControl() {
-    let consumer = fieldConsumerOf(this.controlElement)
-    if (consumer?.kind === 'text') consumer = undefined
-    if (consumer !== this.fieldConsumer) this.releaseControl()
-    if (!consumer) return
-    this.fieldConsumer = consumer
-    // Text edited in place (a framework switching language) fires no slotchange.
-    this.textObserver ??= new MutationObserver(() => this.requestUpdate())
-    this.textObserver.observe(this, { subtree: true, childList: true, characterData: true })
-    consumer.attach(this, {
-      label: this.slotText(this.contentSlot),
-      description: this.slotText(this.renderRoot.querySelector<HTMLSlotElement>('[name=description]')),
-      invalid: false,
-    })
-  }
-
-  private releaseControl() {
-    this.fieldConsumer?.detach(this)
-    this.fieldConsumer = undefined
-    this.textObserver?.disconnect()
   }
 
   private handleSlotChange = (event: Event) => {
@@ -320,7 +291,7 @@ export class ListItem extends LitElement {
   activate() {
     if (this.disabled) return
     const control = this.controlElement
-    if (control) return this.activateControl(control)
+    if (control) return withControlModule((module) => module.activateControl(control))
     const dispatched = this.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, cancelable: true }))
     if (dispatched && !this.applyContext) this.selected = !this.selected
   }
@@ -336,7 +307,7 @@ export class ListItem extends LitElement {
     // A settings row hands the click to its control, which reports the change itself.
     const control = this.controlElement
     if (control) {
-      if (!event.composedPath().includes(control)) this.activateControl(control)
+      if (!event.composedPath().includes(control)) withControlModule((module) => module.activateControl(control))
       return
     }
     const dispatched = redispatchEvent(this, event)
@@ -383,7 +354,12 @@ export class ListItem extends LitElement {
       )
     }
     this.syncAria()
-    this.syncControl()
+    // A settings row names its control from a module loaded the first time a control slot is filled.
+    // Once a row has had a control, it keeps syncing so that it lets the control go when it leaves.
+    if (this.controlElement || this.hadControl) {
+      this.hadControl = !!this.controlElement
+      withControlModule((module) => module.syncControl(this))
+    }
   }
 
   private toggleState(name: string, on: boolean) {
