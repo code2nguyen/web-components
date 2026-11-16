@@ -31,7 +31,8 @@ export interface CheckboxGroup {
 /**
  * Groups `c2-checkbox` options into one form control with one value array — the multi-select counterpart of
  * `c2-radio-group`. The group owns the `name` (every checked option is submitted under it), group-level `disabled`
- * and a `required` rule meaning "at least one". Options may sit anywhere inside the group, wrapped in other elements,
+ * and a `required` rule meaning "at least one"; `min` and `max` bound how many options may be checked ("choose up to 3"), which
+ * is what a menu's modifier group or a ballot's "vote for up to N" needs. Options may sit anywhere inside the group, wrapped in other elements,
  * and each stays its own tab stop, as native checkboxes are. The `label` and `description` slots name the group for
  * assistive technology (`role="group"`).
  *
@@ -85,6 +86,20 @@ export class CheckboxGroup extends LitElement {
 
   /** Requires at least one option to be checked for the form to be valid. */
   @property({ type: Boolean, reflect: true }) required = false
+
+  /**
+   * Fewest options that must be checked for the form to be valid ("choose at least 2"). It counts an empty group too, so
+   * `min="1"` also asks for at least one option, reported as `rangeUnderflow` with the `groupRangeUnderflow` message
+   * where `required` reports `valueMissing`. A `min` above `max` is read as `max`. Unset (or 0): no minimum.
+   */
+  @property({ type: Number }) min?: number
+
+  /**
+   * Most options that may be checked ("choose up to 3"). Once that many are checked, the unchecked options are disabled
+   * until one is unchecked again, so the user cannot pass it. A `value` set from script or markup with more is kept and
+   * reported invalid with the `groupRangeOverflow` message. Unset (or 0): no maximum.
+   */
+  @property({ type: Number }) max?: number
 
   /** Lays the options out in a row instead of a column. */
   @property({ reflect: true }) orientation: CheckboxGroupOrientation = 'vertical'
@@ -175,7 +190,7 @@ export class CheckboxGroup extends LitElement {
   }
 
   override updated(changed: PropertyValues) {
-    if (changed.has('value') || changed.has('disabled') || changed.has('disabledByForm')) this.syncCheckboxes()
+    if (changed.has('value') || changed.has('disabled') || changed.has('disabledByForm') || changed.has('max')) this.syncCheckboxes()
     this.syncFormState()
   }
 
@@ -202,25 +217,46 @@ export class CheckboxGroup extends LitElement {
     this.syncCheckboxes()
   }
 
-  /** Mirrors `value` and the group's disabled state onto the options. */
+  /** Mirrors `value` and the group's disabled state onto the options; at `max`, the unchecked ones are disabled too. */
   private syncCheckboxes() {
     if (!this.adopted) return
     const disabled = this.effectiveDisabled
-    for (const checkbox of this.checkboxes) {
+    const checkboxes = this.checkboxes
+    // Count the options the value checks: a value that matches no option must not lock the others.
+    const full = this.maxCount > 0 && checkboxes.filter((checkbox) => this.value.includes(checkbox.value)).length >= this.maxCount
+    for (const checkbox of checkboxes) {
       checkbox.checked = this.value.includes(checkbox.value)
-      checkbox.groupDisabled = disabled
+      checkbox.groupDisabled = disabled || (full && !checkbox.checked)
     }
+  }
+
+  /** Never above `max`: a `min` the user could not reach would leave the group invalid for good. */
+  private get minCount() {
+    const min = Number.isFinite(this.min) ? Math.max(0, Math.floor(this.min!)) : 0
+    return this.maxCount > 0 ? Math.min(min, this.maxCount) : min
+  }
+
+  private get maxCount() {
+    return Number.isFinite(this.max) ? Math.max(0, Math.floor(this.max!)) : 0
+  }
+
+  /** The first rule the value breaks, as validity flags and the message to show. */
+  private get validityState(): [ValidityStateFlags, string] {
+    const count = this.value.length
+    if (this.customValidityMessage) return [{ customError: true }, this.customValidityMessage]
+    if (this.required && count === 0) return [{ valueMissing: true }, this.msg.t('groupValueMissing')]
+    if (count < this.minCount) return [{ rangeUnderflow: true }, this.msg.t('groupRangeUnderflow', this.minCount)]
+    if (this.maxCount > 0 && count > this.maxCount) return [{ rangeOverflow: true }, this.msg.t('groupRangeOverflow', this.maxCount)]
+    return [{}, '']
   }
 
   private syncFormState() {
     const entries = this.name && this.value.length > 0 ? new FormData() : null
     for (const value of entries ? this.value : []) entries?.append(this.name, value)
     this.internals.setFormValue(entries, JSON.stringify(this.value))
-    const missing = this.required && this.value.length === 0
-    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('groupValueMissing') : '')
+    const [flags, message] = this.validityState
     // Anchor the validation bubble on the first enabled option's own input, when it has rendered one.
-    const anchor = this.checkboxes.find((checkbox) => !checkbox.disabled)?.shadowRoot?.querySelector('input') ?? undefined
+    const anchor = this.checkboxes.find((checkbox) => !checkbox.disabled && !checkbox.groupDisabled)?.shadowRoot?.querySelector('input') ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
 
@@ -241,6 +277,13 @@ export class CheckboxGroup extends LitElement {
   private handleOptionChange = (event: Event) => {
     if (!this.isOwnOption(event.target)) return
     event.stopImmediatePropagation()
+    const checked = this.checkboxes.filter((checkbox) => checkbox.checked)
+    // An option the lock has not reached yet (added inside a wrapper after the group filled up) cannot pass `max`.
+    if (this.maxCount > 0 && event.target.checked && checked.length > this.maxCount) {
+      event.target.checked = false
+      this.syncCheckboxes()
+      return
+    }
     this.value = this.checkboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value)
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new CustomEvent('change', { detail: { value: [...this.value] }, bubbles: true, composed: true }))

@@ -877,6 +877,13 @@
     },
     {
       "tag": "c2-checkbox",
+      "slot": "trailing",
+      "decision": "part",
+      "parts": ["trailing"],
+      "reason": "The semantic trailing region owns the trailing slot's component-side presentation at the end of the row."
+    },
+    {
+      "tag": "c2-checkbox",
       "slot": "uncheckmark",
       "decision": "part",
       "parts": ["uncheckmark"],
