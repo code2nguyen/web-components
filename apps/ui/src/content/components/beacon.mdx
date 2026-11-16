@@ -1,0 +1,55 @@
+---
+title: 'Beacon'
+description: 'Pulsing hotspots that point at new or unfamiliar features and open a short tip when clicked, dismissed once and remembered.'
+category: 'Feedback'
+package: '@c2n/tour'
+tag: 'c2-beacon'
+apiTags: ['c2-beacon', 'c2-tour-step']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/components/button'
+import { Beacon } from '@c2n/components/tour/beacon'
+
+`c2-beacon` puts a pulsing dot on each element worth a word and opens a short tip when the user clicks it. It is the companion of [`c2-tour`](/web-components/components/tour) for help that does not interrupt: the tips stand alone, in no order, several dots show at once, and nothing opens or takes focus by itself. Each tip is a `c2-tour-step` child, as in a tour: a `target` (a CSS selector), a `heading` and the explanation as its content. The dot sits on the target's top end corner and follows it as the page scrolls; a target that is not rendered or scrolled out of view shows no dot, and one added to the page later gets its dot then.
+
+Clicking a dot opens its tip in the tour's panel, beside a ring around the target, with focus on **Got it**. Got it dismisses the tip: its dot goes away, focus moves to the target, and `dismiss` fires with the tip's index and key. The close button, Escape, a click outside or a second click on the dot close the tip and keep the dot. The panel takes the tour's `--c2-tour--*` variables and parts; the page is not dimmed unless `--c2-beacon__backdrop--color` asks for it. `--c2-beacon__dot--*` styles the dot (`--c2-beacon__dot--translate` moves it off the corner) and `--c2-beacon__pulse--*` its pulse, which stops while the tip is open and for users who prefer reduced motion.
+
+Give the beacon a `storage-key` and the dismissed tips are remembered in `localStorage` as `{ "dismissed": ["tip-export", "2"] }`, so a dot dismissed once does not come back; `dismissed` lists them and `reset()` forgets them. A tip is remembered by its step's `id`, else by its position: give each step an `id` of its own (not its target's) so adding a tip later does not bring the others back. The dots are in the tab order where the `c2-beacon` sits, so place it right after the content it explains.
+
+```html tag=CodeBlock
+<c2-beacon storage-key="reports-tips-v1">
+  <c2-tour-step id="tip-export" target="#export" heading="Export to CSV">Download any view as a spreadsheet.</c2-tour-step>
+  <c2-tour-step id="tip-share" target="#share" heading="Share a link">Anyone with the link sees a read-only copy.</c2-tour-step>
+</c2-beacon>
+```
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/tour/beacon'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tour
+<style>
+  .usage-beacon-toolbar {
+    display: flex;
+    gap: 16px;
+    padding: 8px;
+  }
+</style>
+<div data-label="New features">
+  <div class="usage-beacon-toolbar">
+    <c2-button id="usage-beacon-export">Export</c2-button>
+    <c2-button id="usage-beacon-share">Share</c2-button>
+  </div>
+  <c2-beacon client:only="lit">
+    <c2-tour-step id="tip-export" target="#usage-beacon-export" heading="Export to CSV">Download any view as a spreadsheet.</c2-tour-step>
+    <c2-tour-step id="tip-share" target="#usage-beacon-share" heading="Share a link" placement="right">Anyone with the link sees a read-only copy.</c2-tour-step>
+  </c2-beacon>
+</div>
+```

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type CSSResultGroup, type PropertyValues } from 'lit'
 import { query } from 'lit/decorators.js'
 import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -168,7 +168,7 @@ export interface Tour {
  */
 @customElement('c2-tour')
 export class Tour extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
   static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, slotAssignment: 'manual' }
 
   /** Visible state. Set it, or call `start()`, to begin the tour; setting it fires `show` / `hide` but no `finish` or `skip`. */
@@ -212,12 +212,13 @@ export class Tour extends LitElement {
   @query('.next') private nextButton?: HTMLButtonElement
   @query('.measure') private measure?: HTMLElement
 
-  private readonly msg = new LocalizeController(this, tourMessages)
+  protected readonly msg = new LocalizeController(this, tourMessages)
   private readonly childObserver = isServer ? null : new MutationObserver(() => this.requestUpdate())
   private cleanupPosition: (() => void) | null = null
   private shownStep: TourStep | null = null
   private shownTarget: HTMLElement | null = null
-  private returnFocus: HTMLElement | null = null
+  /** Where focus goes back to when the panel closes. */
+  protected returnFocus: HTMLElement | null = null
 
   override connectedCallback() {
     super.connectedCallback()
@@ -269,7 +270,7 @@ export class Tour extends LitElement {
     return status === 'finished' || (status === 'skipped' && this.skipLimit > 0 && skips >= this.skipLimit)
   }
 
-  private saveProgress(status: TourStatus) {
+  protected saveProgress(status: TourStatus) {
     if (!this.storageKey) return
     const stored = this.progress
     // Replaying a settled tour from its trigger does not make `autostart` open it again, and finishing is final.
@@ -528,7 +529,6 @@ export class Tour extends LitElement {
     const steps = this.steps
     const index = this.currentIndex(steps)
     const step = steps[index] ?? null
-    const last = index >= steps.length - 1
     const heading = step?.heading ?? ''
     return html`
       <slot name="trigger" ${assignSlot(this.triggers)} @click=${() => !this.open && this.start()}></slot>
@@ -559,14 +559,20 @@ export class Tour extends LitElement {
             <slot name="step" ${assignSlot(step ? [step] : [])}></slot>
           </div>
         </div>
-        <div class="footer" part="footer">
-          <span class="progress" part="progress">${steps.length > 1 ? this.msg.t('progress', index + 1, steps.length) : nothing}</span>
-          <button class="button skip" part="skip" type="button" ?hidden=${last} @click=${() => this.skip()}>${this.msg.t('skip')}</button>
-          <button class="button previous" part="previous" type="button" ?hidden=${index === 0} @click=${this.handlePrevious}>${this.msg.t('previous')}</button>
-          <button class="button next" part="next" type="button" @click=${() => this.next()}>${last ? this.msg.t('done') : this.msg.t('next')}</button>
-        </div>
+        ${this.renderFooter(index, steps.length)}
       </div>
     `
+  }
+
+  /** The panel's footer for step `index` of `count`. Its focus target is the `.next` button. */
+  protected renderFooter(index: number, count: number) {
+    const last = index >= count - 1
+    return html`<div class="footer" part="footer">
+      <span class="progress" part="progress">${count > 1 ? this.msg.t('progress', index + 1, count) : nothing}</span>
+      <button class="button skip" part="skip" type="button" ?hidden=${last} @click=${() => this.skip()}>${this.msg.t('skip')}</button>
+      <button class="button previous" part="previous" type="button" ?hidden=${index === 0} @click=${this.handlePrevious}>${this.msg.t('previous')}</button>
+      <button class="button next" part="next" type="button" @click=${() => this.next()}>${last ? this.msg.t('done') : this.msg.t('next')}</button>
+    </div>`
   }
 
   constructor() {

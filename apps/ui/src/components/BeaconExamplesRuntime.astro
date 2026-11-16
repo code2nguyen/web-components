@@ -1,0 +1,35 @@
+---
+/**
+ * Plays the application's part in the beacon gallery: the French of the card under `lang="fr"`, and the button of the
+ * Remembered card, which calls `reset()` (a method, so it cannot be written in the fence) to bring the dismissed tip back.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { Beacon } from '@c2n/components/tour/beacon'
+
+  addTranslations({
+    fr: {
+      tour: {
+        label: 'Visite',
+        next: 'Suivant',
+        previous: 'Retour',
+        done: 'Terminé',
+        skip: 'Passer',
+        close: 'Fermer',
+        progress: '{0} sur {1}',
+        dismiss: 'Compris',
+        beacon: 'Voir l’astuce : {0}',
+        beaconUnnamed: 'Voir l’astuce',
+      },
+    },
+  })
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-beacon-example="reset"]')
+    if (!button) return
+    const beacon = button.closest('figure')?.querySelector<Beacon>('c2-beacon[storage-key]') ?? document.querySelector<Beacon>('c2-beacon[storage-key]')
+    beacon?.reset()
+  })
+</script>
