@@ -296,11 +296,7 @@ export class UnitInput extends NumberInput {
     const label = unit.label || unit.value
     return html`${
       this.units.length === 1 ? html`<span id="unit-name" class="unit" part="unit">${label}</span>` : html`<span id="unit-name" hidden>${label}</span>`
-    }${
-      // A property binding, not text: hydration writes properties but keeps the server's text, and a server cannot see
-      // a `lang` outside the element, so its number format (`1.13`) may not be the page's (`1,13`).
-      this.equivalent ? html`<span id="equivalent" class="equivalent" part="equivalent" .textContent=${this.equivalent}></span>` : nothing
-    }`
+    }${this.equivalent ? html`<span id="equivalent" class="equivalent" part="equivalent">${this.equivalent}</span>` : nothing}`
   }
 
   protected override renderFieldEnd() {

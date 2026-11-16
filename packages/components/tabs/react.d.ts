@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Tab } from '@c2n/tabs/tab.js'
+import type { TabNav } from '@c2n/tabs/tab-nav.js'
 import type { Tabs } from '@c2n/tabs'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -25,9 +26,11 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-tab': C2Props<Tab>
+      'c2-tab-nav': C2Props<TabNav>
       'c2-tabs': C2Props<Tabs> & {
         'aria-label'?: Attribute
         'selected-tab'?: Attribute
+        'sync-key'?: Attribute
       }
     }
   }

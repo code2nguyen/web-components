@@ -125,7 +125,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low
 - **list-item-2** · `c2-list-item` · settings row #476 · +0.3 kB on 3.3 kB · risk low
 - **page-header-1** · `c2-page-header` · nav bar #467 · +0.6 kB on 29.8 kB · risk low
-- **tabs-1** · `c2-tab` · tab nav #468, code tabs #510 · +0.7 kB on 1.9 kB · risk low
 - **table-of-contents-1** · `c2-table-of-contents` · index bar #470 · +1.2 kB on 5.1 kB · risk low
 - **action-bar-1** · `c2-action-bar` · floating toolbar #473 · +0.5 kB on 2.3 kB · risk low
 - **sticky-1** · `c2-sticky` · sticky cta #475 · +0.3 kB on 1.5 kB · risk low

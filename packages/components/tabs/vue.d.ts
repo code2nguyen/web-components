@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Tab } from '@c2n/tabs/tab.js'
+import type { TabNav } from '@c2n/tabs/tab-nav.js'
 import type { Tabs } from '@c2n/tabs'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -24,10 +25,12 @@ declare module 'vue' {
         onTabChange?: (event: EventOf<Tab, 'tab-change'>) => void
       }
     >
+    'c2-tab-nav': DefineComponent<C2Props<TabNav>>
     'c2-tabs': DefineComponent<
       C2Props<Tabs> & {
         'aria-label'?: unknown
         'selected-tab'?: unknown
+        'sync-key'?: unknown
         onSelectionChange?: (event: EventOf<Tabs, 'selection-change'>) => void
       }
     >

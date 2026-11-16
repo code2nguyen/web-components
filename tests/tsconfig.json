@@ -17,5 +17,8 @@
       "@c2n/facet-list": ["../packages/components/facet-list/src/facet-list.ts"]
     }
   },
-  "include": ["../playwright.config.ts", "./**/*.ts", "../packages/components/*/test/**/*.ts", "../open-packages/*/test/**/*.ts"]
+  "include": ["../playwright.config.ts", "./**/*.ts", "../packages/components/*/test/**/*.ts", "../open-packages/*/test/**/*.ts"],
+  // Server-only test code, run in Node through Vite's SSR loader: @lit-labs/ssr's declarations add a global
+  // `Array.flat(depth: number): Array<T>` overload that would leak into every browser test of this program.
+  "exclude": ["../packages/components/number-input/test/hydration-server.ts"]
 }
