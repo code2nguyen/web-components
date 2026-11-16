@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { Delta } from '@c2n/format-number/delta.js'
 import type { FormatNumber } from '@c2n/format-number'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,19 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-delta': C2Props<Delta> & {
+        'sign-display'?: Attribute
+        'compact-display'?: Attribute
+        'currency-display'?: Attribute
+        'currency-sign'?: Attribute
+        'unit-display'?: Attribute
+        'no-grouping'?: Attribute
+        'minimum-integer-digits'?: Attribute
+        'minimum-fraction-digits'?: Attribute
+        'maximum-fraction-digits'?: Attribute
+        'minimum-significant-digits'?: Attribute
+        'maximum-significant-digits'?: Attribute
+      }
       'c2-format-number': C2Props<FormatNumber> & {
         'compact-display'?: Attribute
         'currency-display'?: Attribute

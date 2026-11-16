@@ -3652,6 +3652,33 @@
       "reason": "The default slot only projects the consumer's fallback text (\"—\") while no valid number is set; it inherits the host's --c2-format-number--* typography and is otherwise styled by the consumer."
     },
     {
+      "tag": "c2-delta",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "As in c2-format-number, the default slot only projects the consumer's fallback text while no valid number is set; it inherits the host's typography and is otherwise styled by the consumer."
+    },
+    {
+      "tag": "c2-delta",
+      "slot": "comparison",
+      "decision": "part",
+      "parts": ["comparison"],
+      "reason": "The comparison slot is itself the part: its colour and size are variables the label inherits, and its spacing from the number is a variable on the assigned element."
+    },
+    {
+      "tag": "c2-delta",
+      "slot": "decrease-icon",
+      "decision": "part",
+      "parts": ["arrow"],
+      "reason": "The arrow part wraps the icon slot and owns its spacing and accessible name; the default arrow's size is a variable and a replacement icon is consumer-owned."
+    },
+    {
+      "tag": "c2-delta",
+      "slot": "increase-icon",
+      "decision": "part",
+      "parts": ["arrow"],
+      "reason": "The arrow part wraps the icon slot and owns its spacing and accessible name; the default arrow's size is a variable and a replacement icon is consumer-owned."
+    },
+    {
       "tag": "c2-radio-group",
       "slot": "label",
       "decision": "assigned-content",

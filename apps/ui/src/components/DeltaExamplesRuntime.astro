@@ -1,0 +1,16 @@
+---
+/**
+ * Plays the application's part in the delta gallery: the French of the card under `lang="fr"`, whose arrow a
+ * screen reader names "Hausse, mieux" or "Baisse, pire".
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'format-number': { increaseBetter: 'Hausse, mieux', increaseWorse: 'Hausse, pire', decreaseBetter: 'Baisse, mieux', decreaseWorse: 'Baisse, pire' },
+    },
+  })
+</script>
