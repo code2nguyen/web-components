@@ -7,6 +7,8 @@ const en = {
   clear: 'Clear selection',
   /** Accessible name of the bar itself. */
   actions: 'Selection actions',
+  /** Accessible name of an `open` bar while nothing is selected, when the app gives it none. */
+  toolbar: 'Actions',
 }
 
 /** The action bar's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

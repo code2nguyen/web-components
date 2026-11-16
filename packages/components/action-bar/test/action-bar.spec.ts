@@ -114,15 +114,31 @@ test('gives no scrollbar to a container its content just fills, open or closed',
   expect(await overflow()).toBe(0)
 })
 
+/**
+ * Counts the slides the bar starts from now on. Reading `getAnimations()` right after an update raced the 150ms slide
+ * on a loaded machine (WebKit had finished it already); counting the `animate()` calls does not depend on timing.
+ */
+const countSlides = (page: Page) =>
+  surface(page).evaluate((element) => {
+    const counted = element as HTMLElement & { slides: number }
+    counted.slides = 0
+    const animate = element.animate.bind(element)
+    element.animate = (...args: Parameters<Element['animate']>) => {
+      counted.slides++
+      return animate(...args)
+    }
+  })
+const slides = (page: Page) => surface(page).evaluate((element) => (element as HTMLElement & { slides: number }).slides)
+
 test('slides as it shows and hides, but not when it first renders open', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-action-bar count="1">${actions}</c2-action-bar>`)
-  const slides = () => surface(page).evaluate((element) => element.getAnimations().filter((a) => !('transitionProperty' in a)).length)
-  expect(await slides()).toBe(0)
+  expect(await surface(page).evaluate((element) => element.getAnimations().filter((a) => !('transitionProperty' in a)).length)).toBe(0)
+  await countSlides(page)
   await props(bar(page), { count: 0 })
-  expect(await slides()).toBe(1)
+  expect(await slides(page)).toBe(1)
   await expect(surface(page)).toBeHidden()
   await props(bar(page), { count: 3 })
-  expect(await slides()).toBe(1)
+  expect(await slides(page)).toBe(2)
 })
 
 test('the built-in text follows the nearest lang, with plurals', async ({ page, renderScenario }) => {
@@ -197,4 +213,284 @@ test('actions that still do not fit scroll sideways, fading the edge that has mo
 test('actions that fit are not faded', async ({ page, renderScenario }) => {
   await renderScenario(owned(2))
   await expect(bar(page).locator('.actions')).not.toHaveClass(/fade-/)
+})
+
+test.describe('open, as a floating toolbar', () => {
+  const toolbar = `<button id="before">Before</button><c2-action-bar open>${actions}</c2-action-bar><button id="after">After</button>`
+
+  test('shows the actions alone, with no count, divider or clear button, and needs no selection', async ({ page, renderScenario, tab }) => {
+    await renderScenario(toolbar)
+    await expect(surface(page)).toBeVisible()
+    await expect(bar(page)).toHaveState('open')
+    await expect(bar(page).locator('.bar > .label, .bar > .divider, .bar > .clear')).toHaveCount(0)
+    await expect(page.getByRole('status')).toHaveText('')
+    await expect(bar(page)).toHaveHostAria('role', 'group')
+    await expect(bar(page)).toHaveHostAria('aria-label', 'Actions')
+    await page.locator('#before').focus()
+    await tab()
+    await expect(page.locator('#archive')).toBeFocused()
+    await tab()
+    await expect(page.locator('#delete')).toBeFocused()
+    await tab()
+    await expect(page.locator('#after')).toBeFocused()
+    await accessible(page)
+  })
+
+  test('pads the actions evenly', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    const box = (await surface(page).boundingBox())!
+    const first = (await page.locator('#archive').boundingBox())!
+    const last = (await page.locator('#delete').boundingBox())!
+    // 6px of padding inside the 1px border, at either end.
+    expect(Math.round(first.x - box.x)).toBe(7)
+    expect(Math.round(box.x + box.width - (last.x + last.width))).toBe(7)
+  })
+
+  test('switches to the selection layout while something is selected, and back', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    await ownSelection(page)
+    await props(bar(page), { count: 2 })
+    await expect(page.getByRole('status')).toHaveText('2 selected')
+    await expect(bar(page)).toHaveHostAria('aria-label', 'Selection actions')
+    await expect(clearButton(page)).toBeVisible()
+    await page.locator('#archive').focus()
+    await page.keyboard.press('Escape')
+    // The app empties the selection; the toolbar stays.
+    await expect(bar(page).locator('.bar > .clear')).toHaveCount(0)
+    await expect(surface(page)).toBeVisible()
+    await expect(bar(page)).toHaveHostAria('aria-label', 'Actions')
+  })
+
+  test('Escape does nothing while nothing is selected', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    await watch(bar(page), 'clear')
+    await page.locator('#archive').focus()
+    await page.keyboard.press('Escape')
+    await expect(bar(page)).toHaveAttribute('data-events', '[]')
+    await expect(surface(page)).toBeVisible()
+  })
+
+  test('closing slides it away, and a toolbar that first renders open does not slide in', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    expect(await surface(page).evaluate((element) => element.getAnimations().filter((a) => !('transitionProperty' in a)).length)).toBe(0)
+    await countSlides(page)
+    await props(bar(page), { open: false })
+    await expect(surface(page)).toBeHidden()
+    expect(await slides(page)).toBe(1)
+  })
+
+  test('closing keeps the toolbar layout while it fades out', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    await props(bar(page), { open: false })
+    await expect(bar(page).locator('.bar > .label, .bar > .clear')).toHaveCount(0)
+    await expect(surface(page)).toBeHidden()
+  })
+
+  test('emptying the selection from the clear button leaves focus on the first action', async ({ page, renderScenario }) => {
+    await renderScenario(toolbar)
+    await ownSelection(page)
+    await props(bar(page), { count: 2 })
+    await clearButton(page).focus()
+    await page.keyboard.press('Enter')
+    await expect(bar(page).locator('.bar > .clear')).toHaveCount(0)
+    await expect(page.locator('#archive')).toBeFocused()
+  })
+
+  test('a c2-button-group toolbar inside gives one Tab stop and arrow keys', async ({ page, renderScenario, tab }) => {
+    await renderScenario(
+      `<button id="before">Before</button><c2-action-bar open><c2-button-group toolbar aria-label="Formatting"><c2-button id="bold">Bold</c2-button><c2-button id="italic">Italic</c2-button></c2-button-group></c2-action-bar><button id="after">After</button>`,
+    )
+    await page.locator('#before').focus()
+    await tab()
+    await expect(page.locator('#bold')).toBeFocused()
+    await page.keyboard.press('ArrowRight')
+    await expect(page.locator('#italic')).toBeFocused()
+    await tab()
+    await expect(page.locator('#after')).toBeFocused()
+  })
+
+  test('on a phone it keeps one row and scrolls its actions sideways', async ({ page, renderScenario }) => {
+    await page.setViewportSize({ width: 360, height: 640 })
+    const buttons = ['Bold', 'Italic', 'Underline', 'Strike', 'Link', 'Quote', 'Code'].map((name) => `<c2-button>${name}</c2-button>`).join('')
+    await renderScenario(
+      `<div style="position: relative; height: 200px"><c2-action-bar open style="--c2-action-bar--position: absolute">${buttons}</c2-action-bar></div>`,
+    )
+    const tops = await page.locator('c2-button').evaluateAll((elements) => elements.map((element) => Math.round(element.getBoundingClientRect().top)))
+    expect(new Set(tops).size).toBe(1)
+    await expect(bar(page).locator('.actions')).toHaveClass(/fade-end/)
+  })
+
+  test('the toolbar name follows the nearest lang', async ({ page, renderScenario }) => {
+    await renderScenario(`<div lang="fr"><c2-action-bar open>${actions}</c2-action-bar></div>`)
+    await expect(bar(page)).toHaveHostAria('aria-label', 'Actions')
+    await props(bar(page), { count: 1 })
+    await expect(bar(page)).toHaveHostAria('aria-label', 'Actions sur la sélection')
+  })
+})
+
+test.describe('hide-on-scroll', () => {
+  const scroller = (attributes: string) =>
+    `<div class="scroller"><div class="rows"></div><c2-action-bar ${attributes}>${actions}</c2-action-bar></div><button id="after">After</button>`
+  const scrollBy = (page: Page, top: number) => page.locator('.scroller').evaluate((element, top) => element.scrollBy({ top }), top)
+  /**
+   * Keeps every scroll "under way" by stopping `scrollend` before it reaches the bar's listener on the document, so a
+   * test can look at the hidden bar without racing the end of the scroll. Skips in an engine without `scrollend`, where
+   * a timer ends the scroll (covered by its own test).
+   */
+  const holdScroll = async (page: Page) => {
+    const native = await page.evaluate(() => {
+      const held = window as Window & { held?: boolean }
+      held.held = true
+      window.addEventListener('scrollend', (event) => held.held && event.stopImmediatePropagation(), { capture: true })
+      return 'onscrollend' in window
+    })
+    test.skip(!native, 'no scrollend in this engine')
+  }
+  /** Lets the held scroll end, as the browser would. */
+  const endScroll = (page: Page) =>
+    page.locator('.scroller').evaluate((element) => {
+      ;(window as Window & { held?: boolean }).held = false
+      element.dispatchEvent(new Event('scrollend'))
+    })
+
+  test('hides while its scroll container scrolls and comes back when the scroll ends', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open hide-on-scroll'))
+    await expect(surface(page)).toBeVisible()
+    await countSlides(page)
+    await page.locator('.scroller').hover()
+    await page.mouse.wheel(0, 200)
+    await page.waitForFunction(() => document.querySelector('.scroller')!.scrollTop > 0)
+    // It slid away, and as the wheel scroll ended on its own, back: two slides.
+    await expect.poll(() => slides(page)).toBe(2)
+    await expect(surface(page)).toBeVisible()
+    await expect(bar(page)).toHaveState('open')
+  })
+
+  test('a scroll hides it, slid and faded away, until the scroll ends', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open hide-on-scroll'))
+    await holdScroll(page)
+    await countSlides(page)
+    await scrollBy(page, 200)
+    await expect(bar(page)).not.toHaveState('open')
+    await expect(surface(page)).toBeHidden()
+    expect(await slides(page)).toBe(1)
+    await endScroll(page)
+    await expect(bar(page)).toHaveState('open')
+    expect(await slides(page)).toBe(2)
+  })
+
+  test('a selection bar hides as well, keeping its count', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('count="3" hide-on-scroll'))
+    await holdScroll(page)
+    await scrollBy(page, 200)
+    await expect(bar(page)).not.toHaveState('open')
+    await expect(bar(page).locator('.bar > span.label')).toHaveText('3 selected')
+    await expect(page.getByRole('status')).toHaveText('3 selected')
+  })
+
+  test('stays while focus is in the bar', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open hide-on-scroll'))
+    await holdScroll(page)
+    await page.locator('#archive').focus()
+    await scrollBy(page, 200)
+    await page.waitForFunction(() => document.querySelector('.scroller')!.scrollTop > 0)
+    await expect(bar(page)).toHaveState('open')
+  })
+
+  test('focus coming into a hiding bar brings it back', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open hide-on-scroll'))
+    await holdScroll(page)
+    await countSlides(page)
+    // Focus lands on an action as the bar starts to hide, while it is still fading out and so still focusable.
+    await page.locator('.scroller').evaluate(
+      (element) =>
+        new Promise<void>((resolve) => {
+          element.addEventListener('scroll', () => queueMicrotask(() => (document.querySelector('#archive') as HTMLElement).focus()), { once: true })
+          element.addEventListener('scroll', () => setTimeout(resolve), { once: true })
+          element.scrollBy({ top: 200 })
+        }),
+    )
+    await expect(page.locator('#archive')).toBeFocused()
+    await expect(bar(page)).toHaveState('open')
+    expect(await slides(page)).toBe(2)
+  })
+
+  test('hears a scroll container in the shadow root of a component it is slotted into', async ({ page, renderScenario }) => {
+    // Defined before the bar connects, as a real component's module would be.
+    await page.addInitScript(() => {
+      customElements.define(
+        'test-pane',
+        class extends HTMLElement {
+          constructor() {
+            super()
+            const root = this.attachShadow({ mode: 'open' })
+            const body = document.createElement('div')
+            body.className = 'body'
+            body.style.cssText = 'height: 200px; overflow: auto'
+            body.append(document.createElement('slot'))
+            root.append(body)
+          }
+        },
+      )
+    })
+    await renderScenario(`<test-pane><div style="height: 900px"></div><c2-action-bar open hide-on-scroll>${actions}</c2-action-bar></test-pane>`)
+    await countSlides(page)
+    await page.locator('test-pane').evaluate((element) => element.shadowRoot!.querySelector('.body')!.scrollBy({ top: 200 }))
+    // The scroll, and its end, are heard in the pane's shadow root, where the window cannot hold the end back: it hid
+    // and came back.
+    await expect.poll(() => slides(page)).toBe(2)
+  })
+
+  test('ignores scrolls of an element the bar is not in', async ({ page, renderScenario }) => {
+    await renderScenario(`<div class="other scroller"><div class="rows"></div></div><c2-action-bar open hide-on-scroll>${actions}</c2-action-bar>`)
+    await holdScroll(page)
+    await page.locator('.other').evaluate((element) => element.scrollBy({ top: 200 }))
+    await page.waitForFunction(() => document.querySelector('.other')!.scrollTop > 0)
+    await expect(bar(page)).toHaveState('open')
+  })
+
+  test('without the attribute, scrolling leaves the bar alone', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open'))
+    await holdScroll(page)
+    await scrollBy(page, 200)
+    await page.waitForFunction(() => document.querySelector('.scroller')!.scrollTop > 0)
+    await expect(bar(page)).toHaveState('open')
+  })
+
+  test('removing the attribute shows a bar a scroll had hidden, and stops listening', async ({ page, renderScenario }) => {
+    await renderScenario(scroller('open hide-on-scroll'))
+    await holdScroll(page)
+    await scrollBy(page, 200)
+    await expect(bar(page)).not.toHaveState('open')
+    await props(bar(page), { hideOnScroll: false })
+    await expect(bar(page)).toHaveState('open')
+    await scrollBy(page, 200)
+    await page.waitForFunction(() => document.querySelector('.scroller')!.scrollTop > 200)
+    await expect(bar(page)).toHaveState('open')
+  })
+
+  test('with reduced motion it fades without sliding', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await renderScenario(scroller('open hide-on-scroll'))
+    await holdScroll(page)
+    await countSlides(page)
+    await scrollBy(page, 200)
+    await expect(surface(page)).toBeHidden()
+    expect(await slides(page)).toBe(0)
+  })
+
+  test('without scrollend, it comes back once the scroll has been still for a moment', async ({ page, renderScenario }) => {
+    // An engine without `scrollend`: the bar falls back to a timer.
+    await page.addInitScript(() => {
+      delete (Window.prototype as { onscrollend?: unknown }).onscrollend
+      delete (window as { onscrollend?: unknown }).onscrollend
+    })
+    await renderScenario(scroller('open hide-on-scroll'))
+    expect(await page.evaluate(() => 'onscrollend' in window)).toBe(false)
+    await countSlides(page)
+    await scrollBy(page, 200)
+    // It slid away and back: counting the slides does not race the 150ms the bar stays hidden.
+    await expect.poll(() => slides(page)).toBe(2)
+    await expect(bar(page)).toHaveState('open')
+  })
 })

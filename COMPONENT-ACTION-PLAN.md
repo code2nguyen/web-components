@@ -128,7 +128,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **tabs-1** · `c2-tab` · tab nav #468, code tabs #510 · +0.7 kB on 1.9 kB · risk low
 - **details-1** · `c2-details` · collapse #469 · +0.3 kB on 3.9 kB · risk low
 - **table-of-contents-1** · `c2-table-of-contents` · index bar #470 · +1.2 kB on 5.1 kB · risk low
-- **action-bar-1** · `c2-action-bar` · floating toolbar #473 · +0.5 kB on 2.3 kB · risk low
 - **sticky-1** · `c2-sticky` · sticky cta #475 · +0.3 kB on 1.5 kB · risk low
 - **progress-1** · `c2-progress` · navigation progress #496 (companion), milestone progress #506 · +0.6 kB on 2.7 kB, 1.2 kB new entry · risk low
 - **tour-1** · `c2-tour` · beacon #497 · +0.8 kB on 16.1 kB · risk low

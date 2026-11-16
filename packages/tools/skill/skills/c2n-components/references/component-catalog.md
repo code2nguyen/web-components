@@ -229,7 +229,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Layout
 
 - **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
-- **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it.
+- **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it; or, open, a floating toolbar.
 - **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.
 - **Backdrop** — `c2-backdrop` · `@c2n/components/backdrop` — A container that draws a decorative pattern behind its content: dots, a grid, stripes, flicker, aurora or meteors.
 - **Beam** — `c2-beam` · `@c2n/components/beam` — An animated line between two elements, for data-flow and integration diagrams.

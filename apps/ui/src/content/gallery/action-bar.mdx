@@ -1,4 +1,5 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { ActionBar } from '@c2n/components/action-bar'
@@ -7,6 +8,13 @@ import { IconButton } from '@c2n/components/icon-button'
 import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
 import { FeatherTagIcon as FeatherTag } from '@c2n/feather-icons/icons/tag.js'
 import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+import { ButtonGroup } from '@c2n/components/button-group'
+import { Checkbox } from '@c2n/components/checkbox'
+import { FeatherBoldIcon as FeatherBold } from '@c2n/feather-icons/icons/bold.js'
+import { FeatherItalicIcon as FeatherItalic } from '@c2n/feather-icons/icons/italic.js'
+import { FeatherUnderlineIcon as FeatherUnderline } from '@c2n/feather-icons/icons/underline.js'
+import { FeatherLinkIcon as FeatherLink } from '@c2n/feather-icons/icons/link.js'
+import ActionBarExamplesRuntime from '../../components/ActionBarExamplesRuntime.astro'
 
 ## Presets
 
@@ -207,3 +215,186 @@ floats over.
 ```
 
 </GalleryGrid>
+
+## Floating toolbar
+
+With `open`, the bar shows with nothing selected: a toolbar of the actions alone, with no count and no clear button,
+evenly padded by `--c2-action-bar__container__toolbar--padding`. It switches to the selection layout while `count` is
+above zero. `hide-on-scroll` tucks it away while its scroll container scrolls; it comes back when the scroll ends.
+
+<GalleryGrid min="480">
+
+```html tag=MdxCodeBlock,label=Toolbar
+<style>
+  .ab-frame-toolbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+</style>
+<div class="ab-frame-toolbar">
+  <c2-action-bar open aria-label="Page">
+    <c2-button>Add block</c2-button>
+    <c2-button>Comment</c2-button>
+    <c2-button>Share</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pill formatting toolbar
+<style>
+  .ab-frame-format {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-format {
+    --c2-action-bar__container--border-radius: 999px;
+    --c2-action-bar__container__toolbar--padding: 4px;
+    --c2-button-group--gap: 2px;
+    --c2-icon-button--border-radius: 999px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="ab-frame-format">
+  <c2-action-bar class="ab-format" open aria-label="Formatting">
+    <c2-button-group toolbar aria-label="Text style">
+      <c2-icon-button aria-label="Bold"><c2-feather-bold></c2-feather-bold></c2-icon-button>
+      <c2-icon-button aria-label="Italic"><c2-feather-italic></c2-feather-italic></c2-icon-button>
+      <c2-icon-button aria-label="Underline"><c2-feather-underline></c2-feather-underline></c2-icon-button>
+      <c2-icon-button aria-label="Link"><c2-feather-link></c2-feather-link></c2-icon-button>
+    </c2-button-group>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Hides while scrolling
+<style>
+  .ab-scroll {
+    box-sizing: border-box;
+    width: 100%;
+    height: 160px;
+    overflow: auto;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-scroll-text {
+    margin: 0;
+    padding: 16px 16px 72px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 14px;
+    line-height: 1.7;
+  }
+</style>
+<div class="ab-scroll">
+  <p class="ab-scroll-text">
+    Scroll this box: the toolbar slides away while the text moves and comes back as soon as the scroll stops, so it never sits over what you are
+    reading. A keyboard user who has moved focus into the toolbar keeps it in place. The bar stays at the default sticky position, at the bottom of the
+    box, and floats over the text, so the text keeps some room below its last line. Scroll on to the end and back up again: the toolbar follows the
+    bottom edge the whole way.
+  </p>
+  <c2-action-bar open hide-on-scroll aria-label="Reader">
+    <c2-button>Highlight</c2-button>
+    <c2-button>Note</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar that turns into a selection bar
+<style>
+  .ab-turns {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 200px;
+    padding: 12px 16px 72px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+  .ab-turns-bar {
+    --c2-action-bar--position: absolute;
+  }
+  .ab-turns-wrap {
+    position: relative;
+    width: 100%;
+  }
+</style>
+<div class="ab-turns-wrap" data-action-bar-example="turns">
+  <div class="ab-turns">
+    <c2-checkbox>Draft the release notes</c2-checkbox>
+    <c2-checkbox>Review the pricing page</c2-checkbox>
+    <c2-checkbox>Book the launch call</c2-checkbox>
+  </div>
+  <c2-action-bar class="ab-turns-bar" open aria-label="Tasks">
+    <c2-button>New task</c2-button>
+    <c2-button>Sort</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .ab-frame-fr {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-sizing: border-box;
+    width: 100%;
+    height: 112px;
+    padding-bottom: 16px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+  }
+</style>
+<div class="ab-frame-fr" lang="fr">
+  <c2-action-bar open count="3">
+    <c2-button>Archiver</c2-button>
+    <c2-button>Supprimer</c2-button>
+  </c2-action-bar>
+</div>
+```
+
+</GalleryGrid>
+
+<ActionBarExamplesRuntime />
+
+The French card's text comes from the app, which adds the language once; the selection card sets `count` from its
+checkboxes and empties them on `clear`:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'action-bar': {
+      selected: { one: '{0} sélectionné', other: '{0} sélectionnés' },
+      clear: 'Effacer la sélection',
+      actions: 'Actions sur la sélection',
+      toolbar: 'Actions',
+    },
+  },
+})
+
+const bar = document.querySelector('c2-action-bar')
+const boxes = [...document.querySelectorAll('c2-checkbox')]
+const sync = () => (bar.count = boxes.filter((box) => box.checked).length)
+boxes.forEach((box) => box.addEventListener('change', sync))
+bar.addEventListener('clear', () => {
+  boxes.forEach((box) => (box.checked = false))
+  sync()
+})
+```

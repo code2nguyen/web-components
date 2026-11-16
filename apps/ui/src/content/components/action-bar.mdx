@@ -1,6 +1,6 @@
 ---
 title: 'Action Bar'
-description: 'A floating bar for the current selection: the count, the bulk actions and a button that clears it.'
+description: 'A floating bar for the current selection: the count, the bulk actions and a button that clears it; or, open, a floating toolbar.'
 category: 'Layout'
 ---
 
@@ -81,6 +81,14 @@ bar.addEventListener('clear', () => table.clearSelection())
     </c2-action-bar>
   </div>
 </div>
+<div data-label="Floating toolbar, nothing selected">
+  <div class="action-bar-frame">
+    <c2-action-bar class="action-bar-inline" open aria-label="Page">
+      <c2-button class="action-bar-secondary">Comment</c2-button>
+      <c2-button>Share</c2-button>
+    </c2-action-bar>
+  </div>
+</div>
 ```
 
 The examples set `--c2-action-bar--position: relative` so the bar sits inside its frame; leave it at the default
@@ -90,6 +98,25 @@ never covers its last row.
 The actions always stay on one line. On a phone (the bar 480px wide or less) the count and the clear button share the
 top row and the actions get a full-width row below; actions that still do not fit scroll sideways, with a fade on the
 edge that has more past it. Set `--c2-action-bar__actions--flex-wrap: wrap` to wrap them onto further lines instead.
+
+## Floating toolbar
+
+Set `open` to show the bar when nothing is selected: a floating toolbar of the actions alone, with no count and no
+clear button, for the commands of a page or a canvas (Figma's bottom bar, a reader's highlight and note). While `count`
+is above zero it shows the selection layout as usual, and goes back to the toolbar when the selection empties. Name it
+with `aria-label` (it falls back to "Actions"). For one Tab stop and arrow keys, put a `c2-button-group toolbar` inside.
+
+Add `hide-on-scroll` and the bar tucks itself away while its scroll container, or the page, scrolls, and comes back as
+the scroll ends (with `scrollend`, or after the scroll has been still for 150ms where the browser has no `scrollend`).
+A bar that holds focus stays put.
+
+```html tag=CodeBlock
+<c2-action-bar open hide-on-scroll aria-label="Page">
+  <c2-button>Add block</c2-button>
+  <c2-button>Comment</c2-button>
+  <c2-button>Share</c2-button>
+</c2-action-bar>
+```
 
 ## In an application
 

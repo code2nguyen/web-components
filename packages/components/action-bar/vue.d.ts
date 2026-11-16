@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-action-bar': DefineComponent<
       C2Props<ActionBar> & {
+        'hide-on-scroll'?: unknown
         onClear?: (event: EventOf<ActionBar, 'clear'>) => void
       }
     >
