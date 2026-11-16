@@ -1,0 +1,100 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tier-editor,
+  $theme: (
+    from-width: minmax(0, 1fr),
+    bound-width: minmax(0, 1fr),
+    rate-width: minmax(0, 1fr),
+    from--background: #fafafa,
+    from--color: #71717a,
+    from__used--background: #edf1fe,
+    from__used--color: #18181b,
+    from__match--background: #edf1fe,
+    from__match--color: #18181b,
+    from__match--border: 1px solid rgb(2, 101, 220),
+    from__match--font-weight: 600,
+
+    preview--padding: 8px 12px,
+    preview--border: 1px solid #e4e4e7,
+    preview--border-radius: 6px,
+    preview--background: #fafafa,
+    preview--color: #18181b,
+    preview--font-size: 13px,
+    breakdown--color: #71717a,
+    total--font-weight: 600,
+  )
+);
+
+$button-size: var(--c2-key-value-editor__button--size, 32px);
+
+/* Four tracks: the first value of each tier, its bound, its rate and the remove button. */
+.header,
+.row {
+  grid-template-columns: css.cssVar(from-width) css.cssVar(bound-width) css.cssVar(rate-width) $button-size;
+}
+
+.lock-keys .header,
+.lock-keys .row,
+.viewing .header,
+.item {
+  grid-template-columns: css.cssVar(from-width) css.cssVar(bound-width) css.cssVar(rate-width);
+}
+
+/* Read-only text in the box of a field, so the columns line up. */
+.from {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: var(--c2-key-value-editor__field--height, 32px);
+  padding-inline: var(--c2-key-value-editor__field--padding-inline, 8px);
+  border: 1px solid transparent;
+  border-radius: var(--c2-key-value-editor__field--border-radius, 6px);
+  background: css.cssVar(from--background);
+  color: css.cssVar(from--color);
+  font-family: var(--c2-key-value-editor__field--font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: var(--c2-key-value-editor__field--font-size, 13px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row.used .from {
+  background: css.cssVar(from__used--background);
+  color: css.cssVar(from__used--color);
+}
+
+.row.match .from {
+  border: css.cssVar(from__match--border);
+  background: css.cssVar(from__match--background);
+  color: css.cssVar(from__match--color);
+  font-weight: css.cssVar(from__match--font-weight);
+}
+
+.preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: css.cssVar(preview--padding);
+  border: css.cssVar(preview--border);
+  border-radius: css.cssVar(preview--border-radius);
+  background: css.cssVar(preview--background);
+  color: css.cssVar(preview--color);
+  font-size: css.cssVar(preview--font-size);
+}
+
+.breakdown {
+  color: css.cssVar(breakdown--color);
+  font-family: var(--c2-key-value-editor__field--font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+
+.total {
+  font-weight: css.cssVar(total--font-weight);
+}
+
+/* View mode: the range spans the first two tracks. */
+.item .range {
+  display: grid;
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+  min-width: 0;
+}

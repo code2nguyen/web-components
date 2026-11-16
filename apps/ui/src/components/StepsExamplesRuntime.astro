@@ -1,0 +1,54 @@
+---
+/** Wires the steps gallery cards whose features are property-only (`renderTrailing`) or the app's own code (actions). */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Steps, StepStatus } from '@c2n/components/steps'
+  import '@c2n/components/steps'
+  import '@c2n/components/badge'
+  import '@c2n/components/button'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French an app would add for the gallery's French card: the library ships English only.
+  addTranslations({ fr: { steps: { summary: '{0} sur {1} terminées' } } })
+
+  const TAGS: Partial<Record<StepStatus, [string, string]>> = {
+    success: ['success', 'Completed'],
+    current: ['primary', 'In progress'],
+    pending: ['neutral', 'Not started'],
+  }
+
+  const GUIDANCE: Record<string, string> = {
+    lead: 'Lead: find the decision maker and log the first call.',
+    qualify: 'Qualify: confirm budget, authority, need and timing.',
+    propose: 'Propose: send the quote and agree a decision date.',
+    closed: 'Closed: record whether the deal was won or lost, and why.',
+  }
+
+  for (const tasks of document.querySelectorAll<Steps>('c2-steps[data-steps-example="task-list"]')) {
+    tasks.renderTrailing = ({ node, status }) => {
+      const [tone, text] = node.disabled ? ['neutral', 'Cannot start yet'] : (TAGS[status] ?? TAGS.pending!)
+      return html`<c2-badge tone=${tone}>${text}</c2-badge>`
+    }
+  }
+
+  for (const example of document.querySelectorAll<HTMLElement>('[data-steps-example="stage-path"]')) {
+    const path = example.querySelector<Steps>('c2-steps')
+    const guidance = example.querySelector<HTMLElement>('[data-steps-guidance]')
+    if (!path) continue
+    path.addEventListener('selection-change', ({ detail }) => {
+      if (guidance) guidance.textContent = GUIDANCE[detail.value] ?? ''
+    })
+    example.querySelector('[data-steps-action="mark-current"]')?.addEventListener('click', () => {
+      const step = path.querySelector<HTMLElement & { path: string }>(`c2-step[value="${path.selected}"]`)
+      const index = step ? Number(step.path) - 1 : -1
+      if (index >= 0) path.current = index
+    })
+  }
+
+  for (const trace of document.querySelectorAll<Steps>('c2-steps[data-steps-example="header-actions"]')) {
+    trace.querySelector('[data-steps-action="expand"]')?.addEventListener('click', () => trace.expandAll())
+    trace.querySelector('[data-steps-action="collapse"]')?.addEventListener('click', () => trace.collapseAll())
+  }
+</script>

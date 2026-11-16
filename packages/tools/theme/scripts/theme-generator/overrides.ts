@@ -625,6 +625,13 @@ export const overrides: Record<string, Override> = {
   // amber is an accent the theme has no token for.
   '--c2-meter__track--background-color': { token: 'color-outline-variant' },
   '--c2-meter__indicator__critical--background-color': { token: 'color-error' },
+  // The overage past a meter's limit is the error colour, and its limit mark is drawn in the text colour.
+  '--c2-meter__overage--background-color': { token: 'color-error' },
+  // Range indicator: the bare scale is the meter's track, a band without a tone the strong outline grey, and a
+  // critical band the error colour. The optimum green and sub-optimum amber are accents the theme has no token for.
+  '--c2-range-indicator__track--background-color': { token: 'color-outline-variant' },
+  '--c2-range-indicator__band--background-color': { token: 'color-outline-strong' },
+  '--c2-range-indicator__band__critical--background-color': { token: 'color-error' },
   ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-meter__segment-${i + 1}--background-color`, { token: `chart-series-${i + 1}` }])),
   ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-distribution-bar__segment-${i + 1}--color`, { token: `chart-series-${i + 1}` }])),
   // The empty bar is a track, like the meter's; the hover bubble is an inverse surface, like the chart tooltip.
@@ -799,6 +806,11 @@ export const overrides: Record<string, Override> = {
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
+  // The tier a previewed quantity falls in is outlined in the accent, as a selected item is.
+  '--c2-tier-editor__from__match--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },

@@ -84,6 +84,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
 - **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
+- **Range Indicator** — `c2-range-indicator` · `@c2n/components/meter/range-indicator` — One value placed on a banded scale — a lab result against its reference ranges, a salary inside its pay band — with labelled bands, a pointer and off-scale ends.
 - **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.
@@ -215,6 +216,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/components/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/components/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
+- **Tier editor** — `c2-tier-editor` · `@c2n/components/key-value-editor/tier-editor` — Contiguous numeric tiers edited as rows (from, up to, rate) for tiered pricing, commission accelerators and grading schemes, with an open last tier, gap and order checks, and a live preview of what a quantity comes to.
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
 - **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.

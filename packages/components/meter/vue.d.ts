@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { Meter } from '@c2n/meter'
+import type { RangeIndicator } from '@c2n/meter/range-indicator.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -17,6 +18,11 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-meter': DefineComponent<
       C2Props<Meter> & {
+        'value-text'?: unknown
+      }
+    >
+    'c2-range-indicator': DefineComponent<
+      C2Props<RangeIndicator> & {
         'value-text'?: unknown
       }
     >

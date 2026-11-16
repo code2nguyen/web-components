@@ -17,6 +17,7 @@
     row__selected--background: null,
     row__selected--box-shadow: null,
     row__disabled--opacity: 0.38,
+    row--clip-path: null,
     row__horizontal--border-bottom: none,
     row__horizontal--min-width: 96px,
     row__horizontal--row-gap: 8px,
@@ -57,6 +58,9 @@
     ),
     label__selected--color: rgb(2, 101, 220),
     label__selected--font-weight: null,
+    label__link--color: null,
+    label__link--text-decoration: none,
+    label__link__hover--text-decoration: underline,
     detail--color: #71717a,
     detail--font-size: null,
     detail--font-weight: 400,
@@ -150,6 +154,7 @@ $_duration: css.cssVar(transition-duration);
   background: css.cssVar(row--background);
   border-radius: css.cssVar(row--border-radius);
   border-bottom: css.cssVar(row--border-bottom);
+  clip-path: css.cssVar(row--clip-path);
   transition: background-color $_duration animation.$standard-easing;
 
   &:hover {
@@ -238,6 +243,30 @@ button.c2-step__row {
     &:hover {
       background: css.cssVar(row--background);
     }
+  }
+}
+
+/**
+ * A step with `href` is an `<a>`: the same row, its label in the link colour. The underline comes with the pointer or
+ * the focus, so a list of tasks does not read as a wall of underlines.
+ */
+a.c2-step__row {
+  color: inherit;
+  text-decoration: none;
+
+  .c2-step__label {
+    color: css.cssVar(label__link--color, label--color);
+    text-decoration: css.cssVar(label__link--text-decoration);
+  }
+
+  &:hover .c2-step__label,
+  &:focus-visible .c2-step__label {
+    text-decoration: css.cssVar(label__link__hover--text-decoration);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(row--outline);
+    outline-offset: -2px;
   }
 }
 

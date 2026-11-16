@@ -2,6 +2,7 @@
 title: 'Key Value Editor'
 description: 'Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.'
 category: 'Inputs'
+apiTags: ['c2-key-value-editor']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -22,6 +23,10 @@ import { KeyValueEditor } from '@c2n/components/key-value-editor'
 ```typescript tag=CodeBlock
 import '@c2n/components/key-value-editor'
 ```
+
+For bands of a numeric scale, tiered prices, commission accelerators or a grading scheme, the same package has
+[`c2-tier-editor`](/web-components/components/tier-editor): rows of from, up to and rate that cannot leave a gap, with
+a live preview of what a quantity comes to, in an entry of its own (`@c2n/components/key-value-editor/tier-editor`).
 
 ## Usage
 

@@ -89,7 +89,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
 - **highlight-3** · `c2-highlight` · text annotator #279 · +0.3 kB on 2.9 kB · risk low
-- **key-value-editor-1** · `c2-key-value-editor` · tier editor #264 · +1.2 kB on 7.2 kB · risk low
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-1** · `c2-rich-text-editor` · merge field input #266 · +1 kB on 54.6 kB · risk low
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
@@ -108,7 +107,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **scheduler-5** · `c2-scheduler` · example: on call schedule #302
 - **week-planner-1** · `c2-week-planner` · schedule paint grid #301 · +1.5 kB on 36.7 kB · risk low
 - **slider-1** · `c2-slider` · time scrubber #311 · +0.6 kB on 5.5 kB · risk low
-- **steps-1** · `c2-steps` · task list #319, stage path #321 · +1.2 kB on 11.3 kB · risk low
 - **steps-2** · `c2-steps` · lesson list #626 · +0.6 kB on 11.3 kB · risk low
 - **button-1** · `c2-button` · hold button #325 (companion), progress button #448 · +0.3 kB on 2.4 kB, 1.2 kB new entry · risk low · needs the success and error states listed for `c2-button` in the roadmap
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
@@ -119,7 +117,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **chart-4** · `@c2n/chart` · small multiples #526 (companion) · 3 kB new entry · risk medium
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low
 - **checkbox-1** · `c2-checkbox-group` · modifier group #365 · +0.5 kB on 6.1 kB · risk low
-- **meter-1** · `c2-meter` · seat meter #400, range indicator #421 (companion) · +0.3 kB on 3.5 kB, 2.5 kB new entry · risk low
 - **secret-field-1** · `c2-secret-field` · totp code #397 · +1 kB on 25.3 kB · risk low
 - **password-field-1** · `c2-password-field` · password generator #398 (lazy) · +0.3 kB on 6.0 kB, 3 kB lazy · risk low
 - **reorder-list-1** · `c2-reorder-list` · ranking #444 · +0.6 kB on 12.2 kB · risk low

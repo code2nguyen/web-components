@@ -1,16 +1,21 @@
-import { LitElement, html, nothing, unsafeCSS, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { repeat } from 'lit/directives/repeat.js'
+import { state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
+import type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation, StepsProgress } from './step-types.js'
 import { rollupStatus } from './step-icons.js'
+import { stepsMessages } from './messages.js'
 import styles from './steps.scss?inline'
 
 import { STEP_SELECT_EVENT, STEP_STATUS_EVENT, type StepSelectRequestDetail } from './step.js'
 
-export type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
+export type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation, StepsProgress } from './step-types.js'
+export { stepsMessages } from './messages.js'
 export type { StepToggleEventDetail, StepEventMap } from './step.js'
 
 /** Detail of the `selection-change` event of {@link Steps}. */
@@ -50,6 +55,9 @@ type ManagedStep = HTMLElement & {
   collapsed: boolean
   status: StepStatus
 }
+
+/** The statuses that count as done in `progress` and the summary line. */
+const COMPLETED = new Set<StepStatus>(['success', 'warning', 'skipped'])
 
 /**
  * A list of steps: the trace of a task as it runs, or a wizard's progress — vertical by default, or across the top
@@ -101,9 +109,18 @@ type ManagedStep = HTMLElement & {
  * reader can still press the first step to go back to the log. Selection is independent of `status`: the list
  * never moves it on its own.
  *
+ * **Links.** `href` on a step (or on a data node) makes its row a link, which is what a task list is: sections of
+ * tasks, each a link to its page, with a status tag in the `trailing` slot. A group's row stays its disclosure.
+ *
+ * **Header.** `summary` adds a line above the steps that counts them — "3 of 7 completed", from `progress` — and the
+ * `actions` slot is the zone beside it for the app's own commands: "Mark as current stage" on a stage path, "Expand
+ * all" on a trace. Neither is there unless asked for, so a run trace looks as it always did.
+ *
  * @tag c2-steps
  *
  * @slot - The `c2-step` children. Ignored when `steps` is set.
+ * @slot summary - Replaces the summary line's text. Filling it shows the header even without `summary`.
+ * @slot actions - The app's own commands for the list — a `c2-button` that marks the selected stage as current, one that expands every group. Shown at the end of the header.
  *
  * @slotcomponent c2-step
  *
@@ -119,6 +136,18 @@ type ManagedStep = HTMLElement & {
  * @cssproperty {overflow} [--c2-steps--overflow-y=visible] - `auto` with a `max-height` keeps a long run in its own scroller.
  * @cssproperty {max-height} [--c2-steps--max-height=none]
  * @cssproperty {overflow} [--c2-steps__horizontal--overflow-x=auto] - How a horizontal list that is wider than its box behaves.
+ * @cssproperty {pixel} [--c2-steps__header--gap=12px] - Space between the summary and the actions.
+ * @cssproperty {padding} [--c2-steps__header--padding-block=4px] - Above and below the header, inside its hairline.
+ * @cssproperty {padding} [--c2-steps__header--padding-inline=12px] - Either side of the header. The default lines the summary up with the rows' text edge.
+ * @cssproperty {border} [--c2-steps__header--border-bottom=none] - A rule between the header and the steps.
+ * @cssproperty {pixel} [--c2-steps__actions--gap=8px] - Space between the app's commands in the `actions` slot.
+ * @cssproperty {color} [--c2-steps__summary--color=#71717a]
+ * @cssproperty {font-size} [--c2-steps__summary--font-size=14px]
+ * @cssproperty {font-weight} [--c2-steps__summary--font-weight=500]
+ *
+ * @csspart header - The line above the steps holding the summary and the actions. Hidden until `summary` is set or one of its slots is filled.
+ * @csspart summary - The summary text region containing the `summary` slot or the built-in count.
+ * @csspart actions - The region containing the `actions` slot.
  */
 @customElement('c2-steps')
 export class Steps extends LitElement {
@@ -152,6 +181,11 @@ export class Steps extends LitElement {
 
   /** The steps as data, instead of `c2-step` children. Takes precedence over the slot. */
   @property({ converter: jsonPropertyConverter }) steps: StepNode[] | undefined = undefined
+
+  /**
+   * Shows a summary line above the steps — "3 of 7 completed" — counted as `progress` counts. Off by default. The `summary` slot replaces the text, and the message is translatable.
+   */
+  @property({ type: Boolean, reflect: true }) summary = false
 
   /** Accessible name for the list. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
@@ -207,6 +241,25 @@ export class Steps extends LitElement {
   /** A declarative shadow root is attached before the element upgrades: the list was rendered on the server. */
   private readonly serverRendered = this.shadowRoot !== null
 
+  private readonly msg = new LocalizeController(this, stepsMessages)
+  private readonly slotPresence = new SlotPresenceController(this, ['summary', 'actions'])
+  /**
+   * The count the summary line shows, taken during the sync walk while `summary` is on and never computed otherwise.
+   * Unknown until the first walk, when the line shows nothing rather than a count of nothing.
+   */
+  @state() private shownProgress?: StepsProgress
+
+  /**
+   * How far the list has got, and how many of its steps are finished (`success`, `warning` or `skipped`). A vertical
+   * list counts every step that is not a group; a horizontal one counts its top-level steps, which are all it draws,
+   * a group by the status it rolls up. Read it for a progress bar or a summary of your own; it is computed on demand.
+   */
+  get progress(): StepsProgress {
+    const counted = this.orientation === 'horizontal' ? this.rootSteps : this.allSteps().filter((step) => !step.querySelector('c2-step'))
+    const completed = counted.filter((step) => COMPLETED.has((step as ManagedStep).status)).length
+    return { completed, total: counted.length }
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     this.internals.role = 'list'
@@ -223,7 +276,9 @@ export class Steps extends LitElement {
     super.disconnectedCallback()
   }
 
-  protected override updated() {
+  protected override updated(changed: PropertyValues) {
+    // A new count is the walk's own output: walking again for it would only find the same count.
+    if (changed.size === 1 && changed.has('shownProgress')) return
     // Server-rendered steps nested in this shadow root hydrate after this first update: writing to them before that
     // would make their first render differ from what the server drew. Sync once they have.
     if (this.serverRendered && !this.hasSynced) {
@@ -353,6 +408,11 @@ export class Steps extends LitElement {
     const root: ParentNode = this.steps?.length ? (this.renderRoot as ShadowRoot) : this
     const grouped = !!root.querySelector('c2-step c2-step')
 
+    // The summary's count, taken on the way: what `progress` returns, without a second pass over the tree.
+    const counting = this.summary
+    const horizontal = this.orientation === 'horizontal'
+    let completed = 0
+    let total = 0
     const walk = (steps: HTMLElement[], level: number, parentPath: string): StepStatus[] => {
       return steps.map((step, index) => {
         const element = step as ManagedStep
@@ -380,11 +440,16 @@ export class Steps extends LitElement {
           element.status = next
           this.written.set(element, next)
         }
+        if (counting && (horizontal ? level === 0 : !children.length)) {
+          total++
+          if (COMPLETED.has(element.status)) completed++
+        }
         return element.status
       })
     }
     walk(this.rootSteps, 0, '')
     this.hasSynced = true
+    if (counting && (completed !== this.shownProgress?.completed || total !== this.shownProgress?.total)) this.shownProgress = { completed, total }
   }
 
   /**
@@ -425,6 +490,7 @@ export class Steps extends LitElement {
       value=${ifDefined(node.id)}
       ?disabled=${node.disabled ?? false}
       ?collapsed=${node.collapsed ?? false}
+      href=${ifDefined(node.href)}
       label=${ifDefined(this.renderItem || this.renderLabel ? undefined : node.label)}
       detail=${ifDefined(this.renderItem || this.renderDetail ? undefined : node.detail)}
       trailing=${ifDefined(this.renderItem || this.renderTrailing ? undefined : node.trailing)}
@@ -443,14 +509,70 @@ export class Steps extends LitElement {
     </c2-step>`
   }
 
+  /**
+   * The summary and the actions. Hidden until asked for: a slot whose content is not known yet (a server render)
+   * counts as empty, so a list that never uses the header never draws an empty one.
+   */
+  private get hasSummary() {
+    return this.summary || this.slotPresence.state('summary') === 'present'
+  }
+
+  private get hasActions() {
+    return this.slotPresence.state('actions') === 'present'
+  }
+
+  protected override willUpdate() {
+    // Read by the horizontal layout, which gives the header a line of its own.
+    if (this.hasSummary || this.hasActions) this.internals.states.add('has-header')
+    else this.internals.states.delete('has-header')
+  }
+
+  /**
+   * The count of a list rendered from `steps`, before its first walk — on the server, where there is none — so the
+   * summary is right in the server's HTML. A list of `c2-step` children has to wait for the walk.
+   */
+  private dataProgress(): StepsProgress | undefined {
+    if (!this.summary || !this.steps?.length) return undefined
+    let completed = 0
+    let total = 0
+    const count = (nodes: StepNode[], level: number) =>
+      nodes.forEach((node, index) => {
+        const children = node.children ?? []
+        if (this.orientation === 'horizontal' ? level === 0 : !children.length) {
+          total++
+          if (COMPLETED.has(this.statusOf(node, level, index))) completed++
+        }
+        if (this.orientation !== 'horizontal') count(children, level + 1)
+      })
+    count(this.steps, 0)
+    return { completed, total }
+  }
+
+  private renderHeader() {
+    const { hasSummary, hasActions } = this
+    const progress = this.shownProgress ?? this.dataProgress()
+    return html`<div class="header" part="header" ?hidden=${!hasSummary && !hasActions}>
+      <span class="summary" part="summary" ?hidden=${!hasSummary}>
+        <slot name="summary" @slotchange=${this.slotPresence.handleSlotChange}
+          >${this.summary && progress ? this.msg.t('summary', progress.completed, progress.total) : nothing}</slot
+        >
+      </span>
+      <span class="actions" part="actions" ?hidden=${!hasActions}>
+        <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+      </span>
+    </div>`
+  }
+
   override render() {
-    return this.steps?.length
+    const steps = this.steps?.length
       ? html`${repeat(
           this.steps,
           (node, index) => node.id ?? String(index + 1),
           (node, index) => this.renderNode(node, 0, index, ''),
         )}`
       : html`<slot @slotchange=${() => this.syncSteps()}></slot>`
+    return html`${this.renderHeader()}
+      <div class="body">${steps}</div>`
   }
 }
 

@@ -1,0 +1,194 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import RangeIndicatorExamplesRuntime from '../../components/RangeIndicatorExamplesRuntime.astro'
+
+import { RangeIndicator } from '@c2n/components/meter/range-indicator'
+
+<RangeIndicatorExamplesRuntime />
+
+## Presets
+
+Banded scales for lab results, pay bands and screening scores. The band `tone`s carry the meaning, the track
+height and radius set the shape, and the three rows (value, band labels, numbers) can each be hidden through their
+`display` variable.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-range-indicator value="64" bands='[{"label":"Low","to":40},{"label":"Normal","to":80,"tone":"optimum"},{"label":"High"}]'>Score</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Lab panel
+<style>
+  .lab-panel {
+    display: grid;
+    gap: 14px;
+    width: 280px;
+  }
+  .lab {
+    --c2-range-indicator__track--height: 6px;
+    --c2-range-indicator__band-labels--display: none;
+    --c2-range-indicator__label--font-size: 12px;
+    --c2-range-indicator__value--font-size: 12px;
+    --c2-range-indicator__tick--font-size: 11px;
+  }
+  .lab:state(critical) {
+    --c2-range-indicator__status--color: var(--c2-theme--color-error, #dc2626);
+  }
+</style>
+<div class="lab-panel">
+  <c2-range-indicator
+    class="lab"
+    min="2.5"
+    max="6"
+    value="4.2"
+    value-text="4.2 mmol/L"
+    bands='[{"label":"Low","to":3.5,"tone":"critical"},{"label":"Normal","to":5.2,"tone":"optimum"},{"label":"High","tone":"critical"}]'>Potassium</c2-range-indicator>
+  <c2-range-indicator
+    class="lab"
+    min="120"
+    max="160"
+    value="132"
+    value-text="132 mmol/L"
+    bands='[{"label":"Low","to":135,"tone":"critical"},{"label":"Normal","to":146,"tone":"optimum"},{"label":"High","tone":"critical"}]'>Sodium</c2-range-indicator>
+  <c2-range-indicator
+    class="lab"
+    min="0"
+    max="3"
+    value="0.9"
+    value-text="0.9 mg/dL"
+    bands='[{"label":"Low","to":0.6,"tone":"suboptimum"},{"label":"Normal","to":1.3,"tone":"optimum"},{"label":"High","tone":"critical"}]'>Creatinine</c2-range-indicator>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Off the scale
+<style>
+  .off-scale {
+    width: 280px;
+  }
+  .off-scale:state(below-scale),
+  .off-scale:state(above-scale) {
+    --c2-range-indicator__value--color: var(--c2-theme--color-error, #dc2626);
+    --c2-range-indicator__value--font-weight: 600;
+  }
+</style>
+<c2-range-indicator
+  class="off-scale"
+  min="40"
+  max="160"
+  value="212"
+  value-text="212 mg/dL"
+  bands='[{"label":"Low","to":70,"tone":"suboptimum"},{"label":"Normal","to":100,"tone":"optimum"},{"label":"Prediabetes","to":126,"tone":"suboptimum"},{"label":"Diabetes","tone":"critical"}]'>Fasting glucose</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Reference range
+<style>
+  .reference {
+    width: 280px;
+    --c2-range-indicator__band--background-color: #0f766e;
+  }
+</style>
+<c2-range-indicator class="reference" min="0" max="10" value="7.4" value-text="7.4 mg/L" bands='[{"label":"Reference","from":0,"to":5}]'>C-reactive protein</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Pay band
+<style>
+  .pay-band {
+    width: 300px;
+    --c2-range-indicator__track--height: 14px;
+    --c2-range-indicator__track--border-radius: 4px;
+    --c2-range-indicator__band--gap: 0px;
+    --c2-range-indicator__pointer--size: 14px;
+    --c2-range-indicator__pointer--color: #7c3aed;
+    --c2-range-indicator__band--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
+    --c2-range-indicator__band-label--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-range-indicator
+  class="pay-band"
+  min="90000"
+  max="140000"
+  value="118000"
+  value-text="$118,000 · 56th percentile"
+  bands='[{"label":"Low","to":105000},{"label":"Mid","to":125000,"color":"#a78bfa"},{"label":"High"}]'>Senior engineer, L5</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Value slot
+<style>
+  .slotted-value {
+    width: 280px;
+  }
+  .slotted-value strong {
+    font-variant-numeric: tabular-nums;
+  }
+  .slotted-value small {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-range-indicator
+  class="slotted-value"
+  min="0"
+  max="200"
+  value="164"
+  value-text="164 mg/dL"
+  bands='[{"label":"Optimal","to":100,"tone":"optimum"},{"label":"Near optimal","to":130},{"label":"High","tone":"critical"}]'>LDL cholesterol<span slot="value"><strong>164</strong> <small>mg/dL</small></span></c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Screening score
+<style>
+  .screening {
+    width: 300px;
+    --c2-range-indicator__band-labels--display: none;
+    --c2-range-indicator__band--gap: 3px;
+    --c2-range-indicator__value--font-size: 20px;
+    --c2-range-indicator__value--font-weight: 600;
+    --c2-range-indicator__value--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-range-indicator
+  class="screening"
+  min="0"
+  max="27"
+  value="12"
+  bands='[{"label":"Minimal","to":5,"tone":"optimum"},{"label":"Mild","to":10,"color":"#ca8a04"},{"label":"Moderate","to":15,"tone":"suboptimum"},{"label":"Mod. severe","to":20,"color":"#ea580c"},{"label":"Severe","tone":"critical"}]'>PHQ-9</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=Compact row
+<style>
+  .compact {
+    width: 220px;
+    --c2-range-indicator--gap: 4px;
+    --c2-range-indicator__track--height: 4px;
+    --c2-range-indicator__pointer--size: 8px;
+    --c2-range-indicator__band-labels--display: none;
+    --c2-range-indicator__ticks--display: none;
+    --c2-range-indicator__label--font-size: 12px;
+    --c2-range-indicator__value--font-size: 12px;
+    --c2-range-indicator__status--display: none;
+  }
+</style>
+<c2-range-indicator class="compact" min="18" max="40" value="23.4" bands='[{"label":"Under","to":18.5,"tone":"suboptimum"},{"label":"Healthy","to":25,"tone":"optimum"},{"label":"Over","to":30,"tone":"suboptimum"},{"label":"Obese","tone":"critical"}]'>BMI</c2-range-indicator>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .french {
+    width: 280px;
+  }
+</style>
+<div lang="fr" class="french">
+  <c2-range-indicator min="2.5" max="6" value="5.6" value-text="5,6 mmol/L" bands='[{"label":"Bas","to":3.5,"tone":"critical"},{"label":"Normal","to":5.2,"tone":"optimum"},{"label":"Élevé","tone":"critical"}]'>Potassium</c2-range-indicator>
+</div>
+```
+
+</GalleryGrid>
+
+The French card's numbers follow its `lang` ("3,5", "5,2"), and so does the text the indicator announces, once the
+application supplies it:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'range-indicator': { label: 'Plage', valueInBand: '{0}, {1}' } } })
+```

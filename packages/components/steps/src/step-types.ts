@@ -56,6 +56,19 @@ export interface StepNode {
   collapsed?: boolean
   /** In an `interactive` list, keeps the step from being selected — a result that does not exist yet. */
   disabled?: boolean
+  /**
+   * Makes the step's row a link to this URL — a task of a task list. A group's row stays its disclosure, and a
+   * `disabled` step is drawn without its link: a task that cannot start yet.
+   */
+  href?: string
+}
+
+/** How far a list has got, as its `progress` and its summary line count it. */
+export interface StepsProgress {
+  /** Steps that are finished: `success`, `warning` or `skipped`. */
+  completed: number
+  /** Every step that is not a group: a group's own row is the sum of its sub-steps, not one more task. */
+  total: number
 }
 
 /** What a renderer is handed for one step. */

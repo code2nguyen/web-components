@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { KeyValueEditor } from '@c2n/key-value-editor'
+import type { TierEditor } from '@c2n/key-value-editor/tier-editor.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -34,6 +35,20 @@ declare module 'react' {
         'key-pattern'?: Attribute
         'lock-keys'?: Attribute
         entries?: KeyValueEditor['entries'] | string
+      }
+      'c2-tier-editor': Omit<C2Props<TierEditor>, 'tiers' | 'entries'> & {
+        'total-format'?: Attribute
+        'key-label'?: Attribute
+        'value-label'?: Attribute
+        'key-placeholder'?: Attribute
+        'value-placeholder'?: Attribute
+        'add-label'?: Attribute
+        'duplicate-message'?: Attribute
+        'pattern-message'?: Attribute
+        'key-pattern'?: Attribute
+        'lock-keys'?: Attribute
+        tiers?: TierEditor['tiers'] | string
+        entries?: TierEditor['entries'] | string
       }
     }
   }

@@ -661,6 +661,10 @@
       "types": "./dist/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
     },
+    "./key-value-editor/tier-editor": {
+      "types": "./dist/key-value-editor/tier-editor.d.ts",
+      "default": "./dist/key-value-editor/tier-editor.js"
+    },
     "./keypad": {
       "types": "./dist/keypad.d.ts",
       "default": "./dist/keypad.js"
@@ -756,6 +760,10 @@
     "./meter": {
       "types": "./dist/meter.d.ts",
       "default": "./dist/meter.js"
+    },
+    "./meter/range-indicator": {
+      "types": "./dist/meter/range-indicator.d.ts",
+      "default": "./dist/meter/range-indicator.js"
     },
     "./mind-map": {
       "types": "./dist/mind-map.d.ts",
