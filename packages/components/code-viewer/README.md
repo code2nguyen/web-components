@@ -19,7 +19,7 @@ npm install @c2n/components
 
 - **Source**: the default slot, with text in a `<pre>` (formatters collapse whitespace inside custom elements but leave `<pre>` alone) or markup in a `<template>` (so the browser does not parse it); indentation is stripped. Or the `code` property / attribute, where `\n` stands for a newline.
 - **Languages and themes**: `language` takes any shiki id or alias; `theme` any built-in theme name or `css-variables`. Grammars and themes load on demand into one shared highlighter using shiki's JavaScript engine, no WASM.
-- **Dark mode**: add `dark-theme` and both palettes are rendered; `color-scheme="auto|light|dark"` picks one (auto follows `prefers-color-scheme`).
+- **Dark mode**: add `dark-theme` and both palettes are rendered; `color-scheme="auto|light|dark"` picks one (`auto` follows the `color-scheme` the element inherits, so a page theme switch drives it, and `prefers-color-scheme` where nothing on the page sets one; a page that sets only `color-scheme: dark` for its dark theme should set `light` for its light theme too).
 - **Extras**: `line-numbers` (+ `start-line`), `highlight-lines="2-4,7"`, `copyable` (fires `code-copy`), `wrap`, `inline`, a `title` slot for a file name header, and `--c2-code-viewer--max-height` for scrolling.
 - **Progressive**: the plain code renders immediately (server-side too) and is upgraded in place once highlighted.
 
