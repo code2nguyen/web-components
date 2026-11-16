@@ -1,7 +1,12 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import SliderExamplesRuntime from '../../components/SliderExamplesRuntime.astro'
 
 import { Slider } from '@c2n/components/slider'
+import { Button } from '@c2n/components/button'
+
+<SliderExamplesRuntime />
 
 ## Presets
 
@@ -133,3 +138,185 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
 ```
 
 </GalleryGrid>
+
+## Markers
+
+`markers` draws points of interest on the track: the events of a replay, the chapters of a recording, the readings of a log. They are decoration: the slider still selects any value on its step grid, and a thumb resting on a marker adds its `label` to what assistive technology reads. Each marker's `kind` becomes a `marker-<kind>` part, so a page colours each kind with `::part()`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Event markers
+<style>
+  .events {
+    width: 260px;
+    --c2-slider__marker--size: 10px;
+    --c2-slider__marker--border: 2px solid var(--c2-theme--color-surface, #ffffff);
+  }
+  .events::part(marker-stop) {
+    background: #0d9488;
+  }
+  .events::part(marker-alert) {
+    background: #dc2626;
+  }
+  .events::part(marker-note) {
+    background: #d97706;
+  }
+</style>
+<c2-slider
+  class="events"
+  min="0"
+  max="600"
+  value="300"
+  aria-label="Route replay"
+  markers='[{"value":45,"label":"Stop, depot","kind":"stop"},{"value":190,"label":"Harsh braking","kind":"alert"},{"value":320,"label":"Door opened","kind":"note"},{"value":410,"label":"Stop, customer","kind":"stop"},{"value":530,"label":"Speeding","kind":"alert"}]'
+></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Time scrubber
+<style>
+  .scrubber {
+    display: grid;
+    gap: 6px;
+    width: 220px;
+    max-width: 100%;
+  }
+  .scrubber .transport {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--font-size: 12px;
+  }
+  .scrubber output {
+    margin-inline-start: auto;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .scrubber c2-slider {
+    --c2-slider__marker--size: 10px;
+    --c2-slider__marker--border: 2px solid var(--c2-theme--color-surface, #ffffff);
+  }
+  .scrubber c2-slider::part(marker-alert) {
+    background: #dc2626;
+  }
+</style>
+<div class="scrubber" data-slider-example="scrubber">
+  <c2-slider
+    min="0"
+    max="600"
+    value="0"
+    aria-label="Replay time"
+    markers='[{"value":45,"label":"Stop, depot"},{"value":190,"label":"Harsh braking","kind":"alert"},{"value":410,"label":"Stop, customer"},{"value":530,"label":"Speeding","kind":"alert"}]'
+  ></c2-slider>
+  <div class="transport">
+    <c2-button data-action="previous" aria-label="Previous event">Prev</c2-button>
+    <c2-button data-action="play" toggle>Play</c2-button>
+    <c2-button data-action="next" aria-label="Next event">Next</c2-button>
+  </div>
+  <div class="transport">
+    <c2-button data-action="speed" aria-label="Speed 1×">1×</c2-button>
+    <output>0:00 / 10:00</output>
+  </div>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Marker content
+<style>
+  .chapters {
+    width: 260px;
+    --c2-slider__track--height: 6px;
+    --c2-slider__marker--size: 16px;
+    --c2-slider__marker--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-slider__marker__filled--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-slider__marker--border: 2px solid var(--c2-theme--color-primary, #0265dc);
+  }
+  .chapters::part(marker) {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .chapters::part(marker-filled) {
+    color: var(--c2-theme--color-on-primary, #ffffff);
+  }
+</style>
+<c2-slider
+  class="chapters"
+  data-slider-example="chapters"
+  min="0"
+  max="100"
+  value="48"
+  aria-label="Lesson progress"
+  markers='[{"value":12,"label":"Chapter 1, Setup"},{"value":40,"label":"Chapter 2, Layout"},{"value":68,"label":"Chapter 3, Data"},{"value":90,"label":"Chapter 4, Ship it"}]'
+></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Markers in a range
+<style>
+  .window {
+    width: 260px;
+    --c2-slider__marker--size: 8px;
+    --c2-slider__marker--border-radius: 2px;
+    --c2-slider__marker__filled--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-slider
+  class="window"
+  mode="range"
+  min="0"
+  max="24"
+  value-start="8"
+  value-end="17"
+  show-value
+  aria-label="Export window"
+  markers='[{"value":3,"label":"Backup"},{"value":9,"label":"Deploy"},{"value":12,"label":"Incident"},{"value":15,"label":"Deploy"},{"value":21,"label":"Backup"}]'
+></c2-slider>
+```
+
+</GalleryGrid>
+
+The two property-only parts, the time format and the marker content, and the transport around the scrubber are the application's code. Play, pause and speed are a timer that moves `value`; Previous and Next call `seekMarker()`:
+
+```ts tag=CodeBlock
+import type { Slider } from '@c2n/components/slider'
+import type { Button } from '@c2n/components/button'
+
+const scrubber = document.querySelector('.scrubber')!
+const slider = scrubber.querySelector<Slider>('c2-slider')!
+const button = (action: string) => scrubber.querySelector<Button>(`[data-action="${action}"]`)!
+
+const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+slider.formatValue = clock
+
+// Play is a toggle button driving a timer that moves `value`; the speed button changes the step.
+let speed = 1
+let timer: ReturnType<typeof setInterval> | undefined
+const stop = () => {
+  clearInterval(timer)
+  timer = undefined
+  button('play').selected = false
+}
+button('play').addEventListener('click', () => {
+  if (timer) return stop()
+  if (slider.value >= slider.max) slider.value = slider.min
+  timer = setInterval(() => {
+    slider.value = Math.min(slider.max, slider.value + speed)
+    if (slider.value >= slider.max) stop()
+  }, 250)
+  button('play').selected = true
+})
+button('speed').addEventListener('click', () => {
+  speed = speed === 4 ? 1 : speed * 2
+  button('speed').textContent = `${speed}×`
+  button('speed').setAttribute('aria-label', `Speed ${speed}×`)
+})
+
+// Previous and Next jump between the markers.
+button('previous').addEventListener('click', () => slider.seekMarker(-1))
+button('next').addEventListener('click', () => slider.seekMarker(1))
+
+// Marker content: the chapter number inside each dot.
+document.querySelector<Slider>('.chapters')!.renderMarker = ({ index }) => String(index + 1)
+```

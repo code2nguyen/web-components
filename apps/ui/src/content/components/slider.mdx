@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Slider } from '@c2n/components/slider'
 
-`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Add `name` to submit the current value through `FormData(form)`; form reset, fieldset disabling and the standard constraint-validation methods are supported. Set the `formatValue` property to format the bubble and `aria-valuetext` together. Set `mode="range"` to select an interval with two thumbs instead: `value-start` and `value-end` (`valueStart`/`valueEnd`) replace `value`, the thumbs cannot cross, a press on the track moves the nearer thumb, and the form receives two entries under `name`, start first.
+`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Add `name` to submit the current value through `FormData(form)`; form reset, fieldset disabling and the standard constraint-validation methods are supported. Set the `formatValue` property to format the bubble and `aria-valuetext` together. Set `mode="range"` to select an interval with two thumbs instead: `value-start` and `value-end` (`valueStart`/`valueEnd`) replace `value`, the thumbs cannot cross, a press on the track moves the nearer thumb, and the form receives two entries under `name`, start first. `markers` draws points of interest on the track, such as the events of a replay, and `seekMarker()` jumps between them.
 
 ## Import
 
@@ -84,6 +84,16 @@ import '@c2n/components/slider'
   <c2-slider orientation="vertical" value="40" show-value aria-label="Level"></c2-slider>
   <c2-slider orientation="vertical" value="70" ticks step="10" style="--c2-slider__container--length: 120px" aria-label="Level with ticks"></c2-slider>
 </div>
+<div data-label="Markers">
+  <c2-slider
+    class="wide"
+    min="0"
+    max="600"
+    value="240"
+    aria-label="Route replay"
+    markers='[{"value":45,"label":"Stop, depot"},{"value":190,"label":"Harsh braking"},{"value":410,"label":"Stop, customer"},{"value":530,"label":"Speeding"}]'
+  ></c2-slider>
+</div>
 <div data-label="Themed">
   <c2-slider class="wide success" value="80" show-value aria-label="Progress"></c2-slider>
 </div>
@@ -92,3 +102,5 @@ import '@c2n/components/slider'
 Label the slider with `aria-label` or point `aria-labelledby` at a visible label, as in the Default row; the value itself is announced through `aria-valuetext`, which uses the same `formatValue` as the bubble. In range mode each thumb is its own `slider`, named from `aria-label` and `start-label`/`end-label` ("Price, Minimum" and "Price, Maximum" by default). A horizontal slider fills the width of its container, so size it from the outside; a vertical one is an inline box whose height is `--c2-slider__container--length`.
 
 Because the native input owns the interaction, the thumb you see is a drawing: the invisible native thumb has the same size, so a press lands where the visual thumb sits. Theme the drawing with `--c2-slider__track--*`, `--c2-slider__fill--color` and `--c2-slider__thumb--*`; the thumb has hover and active halos (`__hover--box-shadow`, `__active--box-shadow`) and a focus ring. Tick marks pick a different colour on the filled part (`--c2-slider__tick__filled--color`), and the bubble is themed with `--c2-slider__value--*`, including a resting `--c2-slider__value--opacity` for an always-visible readout.
+
+Markers come from the `markers` property or its JSON attribute: each has a `value`, an optional `label` and an optional `kind`. They are drawn as dots over the track (`--c2-slider__marker--*`, with `__filled--color` for those on the filled part) and do not restrict the value. While a thumb rests on a marker, its label follows the value in `aria-valuetext` ("3:10, Harsh braking"). A marker's `kind` is added to its parts as `marker-<kind>`, so `c2-slider::part(marker-alert)` colours one kind, and the `renderMarker` property draws content inside each dot. `seekMarker(1)` and `seekMarker(-1)` move the value to the next or previous marker and return it, for an application's step buttons; like setting `value`, they fire no event. A time scrubber is a slider with markers plus the application's own transport: play, pause and speed are a timer that moves `value` (see the Time scrubber card in the gallery).
