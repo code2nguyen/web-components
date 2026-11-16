@@ -1,0 +1,146 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-index-bar,
+  $theme: (
+    font-family: inherit,
+    font-size: 12px,
+    font-weight: 600,
+    transition-duration: 150ms,
+    keys--gap: 0,
+    keys--padding: 4px 0,
+    keys--background-color: transparent,
+    keys--border-radius: 999px,
+    key--width: 20px,
+    key--padding-block: 1px,
+    key--line-height: 1.4,
+    key--color: rgb(2, 101, 220),
+    key--background-color: transparent,
+    key--border-radius: 999px,
+    key__hover--background-color: #f4f4f5,
+    key__active--color: #ffffff,
+    key__active--background-color: rgb(2, 101, 220),
+    key__empty--color: rgb(2, 101, 220),
+    key__empty--opacity: 0.38,
+    key__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    key__focus--outline-offset: 0,
+    bubble--display: flex,
+    bubble--width: 48px,
+    bubble--height: 48px,
+    bubble--inset-inline-end: calc(100% + 12px),
+    bubble--color: #ffffff,
+    bubble--background-color: rgb(2, 101, 220),
+    bubble--border-radius: 999px,
+    bubble--font-size: 24px,
+    bubble--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+  )
+);
+
+:host {
+  display: block;
+  inline-size: fit-content;
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+nav {
+  position: relative;
+}
+
+.keys {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: css.cssVar(keys--gap);
+  margin: 0;
+  padding: css.cssVar(keys--padding);
+  border-radius: css.cssVar(keys--border-radius);
+  background-color: css.cssVar(keys--background-color);
+  list-style: none;
+  // The rail takes the drag: no page scroll, text selection or callout under the finger.
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: pointer;
+}
+
+.key {
+  display: block;
+  box-sizing: border-box;
+  min-inline-size: css.cssVar(key--width);
+  padding-block: css.cssVar(key--padding-block);
+  padding-inline: 2px;
+  border-radius: css.cssVar(key--border-radius);
+  background-color: css.cssVar(key--background-color);
+  color: css.cssVar(key--color);
+  line-height: css.cssVar(key--line-height);
+  text-align: center;
+  text-decoration: none;
+  transition-property: color, background-color;
+  transition-duration: css.cssVar(transition-duration);
+
+  &.empty {
+    color: css.cssVar(key__empty--color);
+    opacity: css.cssVar(key__empty--opacity);
+  }
+
+  &.active {
+    background-color: css.cssVar(key__active--background-color);
+    color: css.cssVar(key__active--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(key__focus--outline);
+    outline-offset: css.cssVar(key__focus--outline-offset);
+  }
+}
+
+@media (hover: hover) {
+  .key:not(.empty, .active):hover {
+    background-color: css.cssVar(key__hover--background-color);
+  }
+}
+
+.bubble {
+  position: absolute;
+  inset-block-start: var(--y, 0);
+  inset-inline-end: css.cssVar(bubble--inset-inline-end);
+  display: css.cssVar(bubble--display);
+  align-items: center;
+  justify-content: center;
+  inline-size: css.cssVar(bubble--width);
+  block-size: css.cssVar(bubble--height);
+  border-radius: css.cssVar(bubble--border-radius);
+  background-color: css.cssVar(bubble--background-color);
+  box-shadow: css.cssVar(bubble--box-shadow);
+  color: css.cssVar(bubble--color);
+  font-size: css.cssVar(bubble--font-size);
+  transform: translateY(-50%);
+  pointer-events: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .key.active {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+
+  .bubble {
+    border: 1px solid CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .key {
+    transition-duration: 0s;
+  }
+}

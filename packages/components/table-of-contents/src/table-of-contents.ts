@@ -238,24 +238,32 @@ export class TableOfContents extends LitElement {
     </ul>`
   }
 
-  /** Moves to the section `id`, as activating its link does. */
-  scrollToSection(id: string, options: { focus?: boolean } = {}) {
+  /**
+   * Moves to the section `id`, as activating its link does. `behavior` replaces the smooth scroll (`'instant'` jumps),
+   * and `focus: false` leaves focus where it is.
+   */
+  scrollToSection(id: string, options: { focus?: boolean; behavior?: ScrollBehavior } = {}) {
     const target = this.resolveTarget(id)
     if (!target) return false
     this.setCurrent(id)
     this.lock(id, scrollParent(target))
-    scrollTarget(target, this.offset)
+    scrollTarget(target, this.offset, options.behavior)
     if (options.focus !== false) focusTarget(target)
     return true
   }
 
-  private handleClick(event: MouseEvent, item: TableOfContentsItem) {
+  /** Handles a click on the link of `item`: a plain click moves to its section, a modified one is left to the browser. */
+  protected handleClick(event: MouseEvent, item: TableOfContentsItem) {
     // A modified click (new tab, new window, copy link) is the browser's to handle.
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-    if (!this.resolveTarget(item.id)) return
-    event.preventDefault()
-    this.scrollToSection(item.id)
-    if (!this.keepUrl && decodeHash(location.hash) !== item.id) history.pushState(history.state, '', `#${encodeURIComponent(item.id)}`)
+    if (this.navigateTo(item.id)) event.preventDefault()
+  }
+
+  /** Scrolls to the section `id`, focuses it and records it in the URL unless `keep-url`; `false` when it is not on the page. */
+  protected navigateTo(id: string, behavior?: ScrollBehavior) {
+    if (!this.scrollToSection(id, { behavior })) return false
+    if (!this.keepUrl && decodeHash(location.hash) !== id) history.pushState(history.state, '', `#${encodeURIComponent(id)}`)
+    return true
   }
 
   private readonly handleScroll = () => {
@@ -499,12 +507,35 @@ function isAtEnd(scroller: HTMLElement | null) {
   return element.scrollTop + height >= element.scrollHeight - 2
 }
 
-function scrollTarget(target: HTMLElement, offset: number) {
+function scrollTarget(target: HTMLElement, offset: number, requested?: ScrollBehavior) {
   const scroller = scrollParent(target)
   const areaTop = scroller ? scroller.getBoundingClientRect().top : 0
-  const top = target.getBoundingClientRect().top - areaTop - offset
-  const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+  const top = layoutTop(target) - areaTop - offset
+  const behavior: ScrollBehavior = requested ?? (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
   ;(scroller ?? window).scrollBy({ top, behavior })
+}
+
+/**
+ * The top of `target` where the layout puts it. A `position: sticky` heading that is stuck reads as the top of its
+ * scroller, which would scroll a list of sticky letter headers by nothing; it is measured unstuck for that one read.
+ */
+function layoutTop(target: HTMLElement) {
+  if (getComputedStyle(target).position !== 'sticky') return target.getBoundingClientRect().top
+  const { style } = target
+  const hadStyle = target.hasAttribute('style')
+  const value = style.getPropertyValue('position')
+  const priority = style.getPropertyPriority('position')
+  style.setProperty('position', 'static', 'important')
+  const top = target.getBoundingClientRect().top
+  if (value) style.setProperty('position', value, priority)
+  else style.removeProperty('position')
+  if (!hadStyle) {
+    // Reading the attribute first makes the engine write the inline style back now (Chrome does it lazily), so the
+    // removal is the last word and no empty `style=""` comes back later.
+    target.getAttribute('style')
+    target.removeAttribute('style')
+  }
+  return top
 }
 
 function focusTarget(target: HTMLElement) {
