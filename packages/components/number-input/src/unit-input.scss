@@ -29,9 +29,18 @@
   white-space: nowrap;
 }
 
+// In a narrow field the number keeps room for a few digits and the equivalent gives way, cut with an ellipsis
+// (the whole text is still read with the number).
+input {
+  min-width: 3ch;
+}
+
 .equivalent {
   display: css.cssVar(equivalent--display);
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: css.cssVar(equivalent--color);
   font-size: css.cssVar(equivalent--font-size);
   font-variant-numeric: tabular-nums;

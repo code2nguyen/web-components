@@ -15,7 +15,7 @@ import { FormField } from '@c2n/components/form-field'
 The field, the number and the step controls take the `--c2-number-input--*` variables; the unit picker, the unit label
 and the equivalent take `--c2-unit-input--*`.
 
-<GalleryGrid>
+<GalleryGrid min="300">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -89,7 +89,7 @@ and the equivalent take `--c2-unit-input--*`.
 
 ## Units
 
-<GalleryGrid>
+<GalleryGrid min="300">
 
 ```html tag=MdxCodeBlock,label=Packs
 <style>
@@ -171,7 +171,7 @@ its factor after `=`.
 
 ## States
 
-<GalleryGrid>
+<GalleryGrid min="300">
 
 ```html tag=MdxCodeBlock,label=Error
 <style>
@@ -204,12 +204,15 @@ its factor after `=`.
 
 ## Forms and script
 
-<GalleryGrid>
+<GalleryGrid min="300">
 
 ```html tag=MdxCodeBlock,label=In a form field
 <style>
   .in-field {
     width: 260px;
+  }
+  .in-field c2-unit-input {
+    width: 100%;
   }
 </style>
 <c2-form-field label="Reorder quantity" hint="Received in cases of 24." class="in-field">

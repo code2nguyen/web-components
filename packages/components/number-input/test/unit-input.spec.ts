@@ -148,3 +148,50 @@ test('the unit label and picker keep the number-input field: clicking the picker
   await picker.click()
   await expect(picker).toBeFocused()
 })
+
+test('moving focus between the number and the picker stays inside the field: no focusout or focusin on the host', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-unit-input aria-label="Eggs" value="2" ${packs}></c2-unit-input><c2-number-input aria-label="Next"></c2-number-input>`)
+  const host = page.locator('c2-unit-input')
+  await host.evaluate((element) => {
+    const seen: string[] = []
+    element.addEventListener('focusin', () => seen.push('focusin'))
+    element.addEventListener('focusout', () => seen.push('focusout'))
+    ;(element as HTMLElement & { seen: string[] }).seen = seen
+  })
+  await page.getByRole('spinbutton', { name: 'Eggs' }).focus()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('combobox', { name: 'Unit' })).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  await expect(host).toHaveJSProperty('seen', ['focusin'])
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('spinbutton', { name: 'Next' })).toBeFocused()
+  await expect(host).toHaveJSProperty('seen', ['focusin', 'focusout'])
+})
+
+test('new units drop the remembered conversion; exponent steps and a null step are read', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-unit-input aria-label="Eggs" value="5" ${packs}></c2-unit-input>`)
+  const host = page.locator('c2-unit-input')
+  const base = await host.evaluate((element: UnitInput) => {
+    element.convertTo('dozen')
+    element.units = [
+      { value: 'ea', factor: 1 },
+      { value: 'dozen', factor: 10 },
+    ]
+    return element.baseValue
+  })
+  expect(base).toBeCloseTo(4.16667, 5)
+
+  const converted = await host.evaluate(async (element: UnitInput) => {
+    element.units = [
+      { value: 'kg', factor: 1, step: null as unknown as string },
+      { value: 'g', factor: 0.001, step: '1e-3' },
+    ]
+    element.unit = 'kg'
+    element.value = '0.0004536'
+    element.convertTo('g')
+    await element.updateComplete
+    return { value: element.value, step: element.shadowRoot!.querySelector('input')!.step, kgStep: element.units[0].step ?? 'none' }
+  })
+  expect(converted).toEqual({ value: '0.454', step: '1e-3', kgStep: 'none' })
+})

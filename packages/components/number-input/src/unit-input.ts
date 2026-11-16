@@ -1,4 +1,4 @@
-import { html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { html, nothing, unsafeCSS } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -44,10 +44,13 @@ export interface UnitInput {
 function parseUnits(value: unknown): UnitInputUnit[] {
   let list = value
   if (typeof value === 'string') {
-    try {
-      list = JSON.parse(value)
-    } catch {
-      list = value.split(';')
+    list = value.split(';')
+    if (value.trim().startsWith('[')) {
+      try {
+        list = JSON.parse(value)
+      } catch {
+        // Not JSON: a `;`-separated list that happens to start with a bracket.
+      }
     }
   }
   if (!Array.isArray(list)) return []
@@ -61,7 +64,7 @@ function parseUnits(value: unknown): UnitInputUnit[] {
         value: code,
         label: typeof unit.label === 'string' ? unit.label : undefined,
         factor: unit.factor !== undefined && unit.factor !== '' && factor > 0 && Number.isFinite(factor) ? factor : undefined,
-        step: unit.step === undefined ? undefined : String(unit.step),
+        step: unit.step === undefined || unit.step === null || unit.step === '' ? undefined : String(unit.step),
       },
     ]
   })
@@ -73,14 +76,17 @@ const unitsConverter = {
   fromProperty: parseUnits,
 }
 
-// Decimals a converted number keeps: those of the unit's step, or 6 when it has none.
+// Decimals a converted number keeps: those of the unit's step (`0.25`, `1e-3`), or 6 when it has none.
 function decimalsOf(step: string | undefined) {
-  return step && Number.isFinite(Number(step)) ? (step.split('.')[1] ?? '').length : 6
+  const amount = Number(step)
+  if (!step || !Number.isFinite(amount) || amount <= 0) return 6
+  const [digits, exponent] = amount.toExponential().split('e')
+  return Math.max(0, (digits.split('.')[1] ?? '').length - Number(exponent))
 }
 
-// Drops the float noise of a product (`0.30000000000000004`).
-function clean(amount: number) {
-  return Number(amount.toPrecision(12))
+// The quantity `amount` of a unit holds in base units, without the float noise of the product (`0.30000000000000004`).
+function toBase(amount: number, factor: number) {
+  return factor === 1 ? amount : Number((amount * factor).toPrecision(15))
 }
 
 /**
@@ -115,7 +121,7 @@ function clean(amount: number) {
  *
  * @cssproperty {color} [--c2-unit-input__unit--color=#71717a]
  * @cssproperty {font-size} [--c2-unit-input__unit--font-size=14px]
- * @cssproperty {display} [--c2-unit-input__equivalent--display=inline] - `none` hides the equivalent in the base unit.
+ * @cssproperty {display} [--c2-unit-input__equivalent--display=inline] - `none` hides the equivalent in the base unit from view; a screen reader still reads it with the number.
  * @cssproperty {color} [--c2-unit-input__equivalent--color=#71717a]
  * @cssproperty {font-size} [--c2-unit-input__equivalent--font-size=12px]
  * @cssproperty {padding} [--c2-unit-input__picker--padding=0 30px 0 10px] - Space around the unit in the picker; the right side holds the chevron.
@@ -139,12 +145,24 @@ export class UnitInput extends NumberInput {
   // The exact base quantity of the last conversion, so converting back and forth does not drift (5 ea → dozen → ea).
   private carried?: { value: string; unit: string; base: number }
   private equivalent = ''
+  private _units: UnitInputUnit[] = []
 
   /**
    * The units the user may pick from. As an attribute, a JSON array of `{ value, label?, factor?, step? }` or the
    * short form `ea=1;dozen=12;case=144`.
    */
-  @property({ converter: unitsConverter }) units: UnitInputUnit[] = []
+  @property({ converter: unitsConverter })
+  get units(): UnitInputUnit[] {
+    return this._units
+  }
+  set units(next: UnitInputUnit[]) {
+    const old = this._units
+    // A string assigned to the property (the attribute's JSON or short form) is read like the attribute.
+    this._units = parseUnits(next)
+    // A conversion remembered under the old units would give `baseValue` the old factor.
+    this.carried = undefined
+    this.requestUpdate('units', old)
+  }
   /** The `value` of the selected unit. Empty, or a code `units` does not hold, selects the first unit. Setting it does not convert the number. */
   @property({ type: String }) unit = ''
   /** Form field name of the unit. Empty submits the number only. */
@@ -166,7 +184,7 @@ export class UnitInput extends NumberInput {
     const amount = Number(this.value)
     if (this.value === '' || !unit?.factor || !Number.isFinite(amount)) return Number.NaN
     const carried = this.carried
-    return carried && carried.value === this.value && carried.unit === unit.value ? carried.base : clean(amount * unit.factor)
+    return carried && carried.value === this.value && carried.unit === unit.value ? carried.base : toBase(amount, unit.factor)
   }
   set baseValue(base: number) {
     const unit = this.selectedUnit
@@ -225,10 +243,8 @@ export class UnitInput extends NumberInput {
     return state
   }
 
-  protected override willUpdate(changed: PropertyValues<this>) {
-    // A conversion remembered under the old units would give `baseValue` the old factor.
-    if (changed.has('units')) this.carried = undefined
-    super.willUpdate(changed)
+  protected override ownsClick(target: HTMLElement) {
+    return !!target.closest('.picker')
   }
 
   protected override descriptionIds() {
@@ -257,9 +273,12 @@ export class UnitInput extends NumberInput {
     const previousUnit = this.selectedUnit?.value ?? ''
     const before = this.value
     this.convertTo((event.target as HTMLSelectElement).value)
+    // Read now: another pick or a write from code may land while the update is pending.
+    const unit = this.unit
+    const moved = this.value !== before
     await this.updateComplete
-    this.dispatchEvent(new CustomEvent<UnitInputUnitChangeDetail>('unit-change', { detail: { unit: this.unit, previousUnit } }))
-    if (this.value !== before) {
+    this.dispatchEvent(new CustomEvent<UnitInputUnitChangeDetail>('unit-change', { detail: { unit, previousUnit } }))
+    if (moved) {
       this.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType: 'insertReplacementText' }))
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
     }
@@ -277,7 +296,11 @@ export class UnitInput extends NumberInput {
     const label = unit.label || unit.value
     return html`${
       this.units.length === 1 ? html`<span id="unit-name" class="unit" part="unit">${label}</span>` : html`<span id="unit-name" hidden>${label}</span>`
-    }${this.equivalent ? html`<span id="equivalent" class="equivalent" part="equivalent">${this.equivalent}</span>` : nothing}`
+    }${
+      // A property binding, not text: hydration writes properties but keeps the server's text, and a server cannot see
+      // a `lang` outside the element, so its number format (`1.13`) may not be the page's (`1,13`).
+      this.equivalent ? html`<span id="equivalent" class="equivalent" part="equivalent" .textContent=${this.equivalent}></span>` : nothing
+    }`
   }
 
   protected override renderFieldEnd() {
@@ -290,6 +313,8 @@ export class UnitInput extends NumberInput {
         aria-label=${this.unitLabel || this.unitMsg.t('unit')}
         ?disabled=${this.effectiveDisabled || this.readOnly}
         @change=${this.handleUnitChange}
+        @focusin=${this.handleFocusIn}
+        @focusout=${this.handleFocusOut}
         @input=${(event: Event) => event.stopPropagation()}
       >
         ${this.units.map((unit) => html`<option value=${unit.value} ?selected=${unit === current} .selected=${unit === current}>${unit.label || unit.value}</option>`)}

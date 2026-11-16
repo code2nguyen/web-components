@@ -234,19 +234,31 @@ export class NumberInput extends LitElement {
     this.value = (event.target as HTMLInputElement).value
     redispatchEvent(this, event)
   }
-  private handleFocusIn(event: FocusEvent) {
-    this.focused = true
-    redispatchEvent(this, event)
+  // Focus moving between controls of the shadow root (the number and a companion's own control) stays inside the field:
+  // the host neither loses nor regains focus, so nothing is re-dispatched.
+  private movesWithin(event: FocusEvent) {
+    return event.relatedTarget instanceof Node && !!this.shadowRoot?.contains(event.relatedTarget)
   }
-  private handleFocusOut(event: FocusEvent) {
+  // A companion element binds these to its own focusable control too.
+  protected handleFocusIn(event: FocusEvent) {
+    this.focused = true
+    if (!this.movesWithin(event)) redispatchEvent(this, event)
+  }
+  protected handleFocusOut(event: FocusEvent) {
+    if (this.movesWithin(event)) return
     this.focused = false
     redispatchEvent(this, event)
+  }
+  // Whether a click on this element of the field belongs to a companion's own control, rather than focusing the number.
+  protected ownsClick(_target: HTMLElement): boolean {
+    return false
   }
   private keepInputFocus(event: Event) {
     event.preventDefault()
   }
   private forwardFocus(event: Event) {
-    if (!(event.target as HTMLElement).closest('.stepper, select')) this.input?.focus()
+    const target = event.target as HTMLElement
+    if (!target.closest('.stepper') && !this.ownsClick(target)) this.input?.focus()
   }
   private stepBy(amount: number) {
     if (!this.input || this.steppersDisabled) return
