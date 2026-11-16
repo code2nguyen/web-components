@@ -131,7 +131,7 @@ export class Switch extends LitElement {
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
-  private readonly slotPresence = new SlotPresenceController(this, ['description'])
+  private readonly slotPresence = new SlotPresenceController(this, ['', 'description'])
   /** Description handed down by an enclosing `c2-form-field`; the switch keeps its own text as its name. */
   private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
   /** True while the thumb follows the pointer; disables the slide transition. */
@@ -306,7 +306,7 @@ export class Switch extends LitElement {
             role="switch"
             name=${ifDefined(this.name || undefined)}
             .value=${this.value}
-            aria-label=${ifDefined(this.ariaLabel)}
+            aria-label=${ifDefined(this.ariaLabel || (!this.label && !this.slotPresence.has('') && this.field.label) || undefined)}
             aria-labelledby=${ifDefined(this.ariaLabelledBy)}
             aria-describedby=${this.field.describedBy(this.ariaDescribedBy)}
             aria-invalid=${this.field.invalid ? 'true' : nothing}
@@ -328,7 +328,7 @@ export class Switch extends LitElement {
           </span>
         </span>
         <span class="c2-switch-text">
-          <span class="c2-switch-label" part="label"><slot>${this.label}</slot></span>
+          <span class="c2-switch-label" part="label"><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot></span>
           <span class="c2-switch-description" part="description" ?hidden=${!hasDescription}>
             <slot name="description" @slotchange=${this.handleDescriptionChange}></slot>
           </span>

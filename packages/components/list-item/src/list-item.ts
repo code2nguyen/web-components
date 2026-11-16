@@ -8,6 +8,7 @@ import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { FIELD_CONNECT_EVENT, fieldConsumerOf, type FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 /** Events fired by {@link ListItem}, keyed for `addEventListener`. */
 export interface ListItemEventMap {
@@ -51,13 +52,21 @@ export interface ListItem {
  * Interactive content placed in a row (a delete button in `suffix-icon`, a checkbox in `prefix-icon`) keeps its own
  * events: clicking it neither selects the row nor fires the row's `click`, the original event bubbles on with the
  * control as its `target`, and Enter / Space activate the control instead of the row.
+ * A focusable control in the `control` slot (a `c2-switch`, `c2-checkbox` or `c2-select`) turns the row into a
+ * settings row: the row is no longer a button or an option, it takes no focus and does not toggle `selected`. The
+ * control keeps its own role, focus and keyboard; a click anywhere else on the row focuses it, and flips a switch or
+ * checkbox, as the label of a `c2-form-field` does. A `c2-*` switch, checkbox or select is named by the row's text and
+ * described by its `description`; a text field keeps its own hint and error line, so give it an `aria-label`. For a
+ * row that opens another page with its current value, use an `href` row with the value in `suffix-icon` instead. Do
+ * not combine a control with `href` or put such a row in a `c2-list`, whose rows are options.
  * With `href` the row is a link; `current` marks the link of the page the reader is on (`aria-current="page"`), as a
  * navigation list does for the current route, and draws it with the `current` variables. In a multiple-selection list, adjacent selected rows lose the corner radius between
  * them (the list sets `joinedBefore` / `joinedAfter`, exposed as `:state(joined-before)` / `:state(joined-after)`) so a run of
  * selected rows reads as one block.
  *
  * Accessibility: standalone rows are `role="button"` with `aria-pressed`; rows in a list are `role="option"` with
- * `aria-selected` and a roving `tabindex` managed by the list. Set your own `role` to override.
+ * `aria-selected` and a roving `tabindex` managed by the list; a row with a `control` has no role of its own. Set your
+ * own `role` to override.
  *
  * @tag c2-list-item
  *
@@ -65,6 +74,9 @@ export interface ListItem {
  * @slot description - Secondary line under the content (muted, smaller).
  * @slot prefix-icon - Icon (or avatar, badge, …) shown before the content.
  * @slot suffix-icon - Icon shown after the content, e.g. a check mark or shortcut hint.
+ * @slot control - A trailing control the whole row labels and activates, such as a `c2-switch` or a `c2-select`.
+ *
+ * @csspart control - The `control` slot itself, which projects the trailing control at the end of the row. Like any slot it has no box (`display: contents`) until you give it one; the assigned control keeps its own styles.
  *
  * @event {CustomEvent<{ selected: boolean; value: string }>} selected-change - Fired after `selected` changes, whether from a click or from the parent list.
  * @event {MouseEvent} click - Fired when an enabled row is activated; a row with `href` also navigates.
@@ -200,6 +212,18 @@ export class ListItem extends LitElement {
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
 
+  /** The element in the `control` slot, or `null`. */
+  get controlElement(): HTMLElement | null {
+    let control = this.querySelector<Element>(':scope > [slot="control"]')
+    // A wrapper around a single element (Astro's `<astro-island>`, a `<label>`) stands for the element it holds.
+    while (control && !control.shadowRoot && control.childElementCount === 1) control = control.firstElementChild
+    return control as HTMLElement | null
+  }
+
+  // The control the row names through the field protocol, and the observer that keeps its name current.
+  private fieldConsumer: FieldContextConsumer | undefined
+  private textObserver?: MutationObserver
+
   /** The text a `c2-select` shows for this row: `label` when set, otherwise the text content of the default slot. */
   get displayText(): string {
     if (this.label !== undefined) return this.label
@@ -219,12 +243,70 @@ export class ListItem extends LitElement {
     super.connectedCallback()
     this.addEventListener('keydown', this.handleKeydown)
     this.addEventListener('click', this.blockDisabledClick, true)
+    this.addEventListener(FIELD_CONNECT_EVENT, this.handleFieldConnect)
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.removeEventListener('keydown', this.handleKeydown)
     this.removeEventListener('click', this.blockDisabledClick, true)
+    this.removeEventListener(FIELD_CONNECT_EVENT, this.handleFieldConnect)
+    this.releaseControl()
+  }
+
+  // A control that upgrades after the row: name it, and keep an outer field from claiming it.
+  private handleFieldConnect = (event: Event) => {
+    if (event.target !== this.controlElement) return
+    event.stopPropagation()
+    this.requestUpdate()
+  }
+
+  // As a c2-form-field's label does: focus the control and, for a self-labelled one (a switch, a checkbox) or a native
+  // control, click the element that took the focus. A select or a text field only takes the focus.
+  private activateControl(control: HTMLElement) {
+    control.focus()
+    const consumer = fieldConsumerOf(control)
+    if (consumer && !consumer.selfLabelled) return
+    let target: Element = control
+    while (target.shadowRoot?.activeElement) target = target.shadowRoot.activeElement
+    ;(target as HTMLElement).click()
+  }
+
+  private slotText(slot: HTMLSlotElement | null) {
+    return (slot?.assignedNodes({ flatten: true }) ?? [])
+      .map((node) => node.textContent)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  // Names and describes a switch, checkbox or select in the control slot, or lets go of one that left it. A text field
+  // is left alone: claiming it would hide its own hint and error line, which the row cannot show for it.
+  private syncControl() {
+    let consumer = fieldConsumerOf(this.controlElement)
+    if (consumer?.kind === 'text') consumer = undefined
+    if (consumer !== this.fieldConsumer) this.releaseControl()
+    if (!consumer) return
+    this.fieldConsumer = consumer
+    // Text edited in place (a framework switching language) fires no slotchange.
+    this.textObserver ??= new MutationObserver(() => this.requestUpdate())
+    this.textObserver.observe(this, { subtree: true, childList: true, characterData: true })
+    consumer.attach(this, {
+      label: this.slotText(this.contentSlot),
+      description: this.slotText(this.renderRoot.querySelector<HTMLSlotElement>('[name=description]')),
+      invalid: false,
+    })
+  }
+
+  private releaseControl() {
+    this.fieldConsumer?.detach(this)
+    this.fieldConsumer = undefined
+    this.textObserver?.disconnect()
+  }
+
+  private handleSlotChange = (event: Event) => {
+    this.slotPresence.handleSlotChange(event)
+    this.requestUpdate()
   }
 
   private blockDisabledClick = (event: Event) => {
@@ -237,6 +319,8 @@ export class ListItem extends LitElement {
   /** Behaves like a click: dispatches `click` on the row and, for a standalone row, toggles `selected`. */
   activate() {
     if (this.disabled) return
+    const control = this.controlElement
+    if (control) return this.activateControl(control)
     const dispatched = this.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, cancelable: true }))
     if (dispatched && !this.applyContext) this.selected = !this.selected
   }
@@ -249,6 +333,12 @@ export class ListItem extends LitElement {
       event.stopPropagation()
       return
     }
+    // A settings row hands the click to its control, which reports the change itself.
+    const control = this.controlElement
+    if (control) {
+      if (!event.composedPath().includes(control)) this.activateControl(control)
+      return
+    }
     const dispatched = redispatchEvent(this, event)
 
     if (dispatched && this.applyContext == false) {
@@ -257,7 +347,7 @@ export class ListItem extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
-    // Inside a list the list owns the keyboard.
+    // Inside a list the list owns the keyboard; in a settings row the keys come from the control, caught just below.
     if (this.applyContext || this.disabled || isFromInteractiveContent(event, this)) return
     // modern-web-ignore: ime-enter the row renders no text field (the match is a selector string); keys from slotted interactive content return early above
     if (event.key === 'Enter' || event.key === ' ') {
@@ -293,6 +383,7 @@ export class ListItem extends LitElement {
       )
     }
     this.syncAria()
+    this.syncControl()
   }
 
   private toggleState(name: string, on: boolean) {
@@ -302,28 +393,33 @@ export class ListItem extends LitElement {
 
   private syncAria() {
     const inList = this.applyContext
+    const hasControl = !!this.controlElement
     // A `role` the author writes on the host wins in the accessibility tree; follow it for the state it implies.
-    const role = this.getAttribute('role') ?? (this.href ? 'link' : inList ? 'option' : 'button')
+    const role = this.getAttribute('role') ?? (hasControl ? null : this.href ? 'link' : inList ? 'option' : 'button')
     this.internals.role = role
     this.internals.ariaSelected = role === 'option' ? String(this.selected) : null
     this.internals.ariaPressed = role === 'button' ? String(this.selected) : null
     this.internals.ariaDisabled = this.disabled ? 'true' : null
     this.internals.ariaCurrent = this.current ? 'page' : null
-    // Standalone rows are tab stops themselves; in a list the list assigns the roving tabindex.
-    if (!inList) this.tabIndex = this.disabled ? -1 : 0
-    else if (this.disabled) this.tabIndex = -1
+    // Standalone rows are tab stops themselves; in a list the list assigns the roving tabindex. A standalone settings
+    // row leaves the focus to its control (a tabindex on a row with no role of its own would be a stray tab stop).
+    if (!inList) {
+      if (hasControl) this.removeAttribute('tabindex')
+      else this.tabIndex = this.disabled ? -1 : 0
+    } else if (this.disabled) this.tabIndex = -1
   }
 
   private renderInner() {
     return html`
       <slot name="prefix-icon"></slot>
       <div class="c2-list-item__content">
-        <div class="c2-list-item__text"><slot>${this.label ?? this.value}</slot></div>
+        <div class="c2-list-item__text"><slot @slotchange=${this.handleSlotChange}>${this.label ?? this.value}</slot></div>
         <div class="c2-list-item__description" ?hidden=${!this.slotPresence.has('description')}>
-          <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+          <slot name="description" @slotchange=${this.handleSlotChange}></slot>
         </div>
       </div>
       <slot name="suffix-icon"></slot>
+      <slot name="control" part="control" @slotchange=${this.handleSlotChange}></slot>
     `
   }
 

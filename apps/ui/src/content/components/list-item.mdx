@@ -1,6 +1,6 @@
 ---
 title: 'List Item'
-description: 'Selectable row with icon slots, used on its own, as the option of list and select, or as a navigation link with collapsible groups.'
+description: 'Selectable row with icon slots, used on its own, as the option of list and select, as a navigation link with collapsible groups, or as a settings row around a control.'
 category: 'Data display'
 ---
 
@@ -15,8 +15,10 @@ import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/a
 import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
 import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
 import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
+import { Switch } from '@c2n/components/switch'
+import { Select } from '@c2n/components/select'
 
-`c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. `current` marks the link of the page the reader is on, and `c2-list-group`, from the same package, folds navigation rows under a collapsible heading. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
+`c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. `current` marks the link of the page the reader is on, and `c2-list-group`, from the same package, folds navigation rows under a collapsible heading. A control in the `control` slot, such as a `c2-switch` or a `c2-select`, makes the row a settings row that names and activates it. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
 
 ## Import
 
@@ -47,6 +49,14 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
     --c2-list--border-top-right-radius: 8px;
     --c2-list--border-bottom-left-radius: 8px;
     --c2-list--border-bottom-right-radius: 8px;
+  }
+  .settings {
+    display: flex;
+    flex-direction: column;
+    width: 260px;
+  }
+  .settings .theme {
+    width: 110px;
   }
   .hint {
     font-size: 12px;
@@ -96,6 +106,19 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
     </c2-list-group>
   </nav>
 </div>
+<div data-label="Settings rows">
+  <div class="settings">
+    <c2-list-item>Wi-Fi<span slot="description">Join known networks</span><c2-switch slot="control" checked></c2-switch></c2-list-item>
+    <c2-list-item>
+      Theme
+      <c2-select slot="control" class="theme" value="system" client:only="lit">
+        <c2-list-item value="light">Light</c2-list-item>
+        <c2-list-item value="system">System</c2-list-item>
+        <c2-list-item value="dark">Dark</c2-list-item>
+      </c2-select>
+    </c2-list-item>
+  </div>
+</div>
 <div data-label="Inside a list">
   <c2-list client:only="lit" value="sent" class="menu">
     <c2-list-item value="inbox">Inbox</c2-list-item>
@@ -116,6 +139,7 @@ Rows stretch to their container, so give the wrapper a width. Hover, selected an
 - **`href`**: the row renders as a link (`role="link"`); inside a list it still takes part in the selection.
 - **`current`**: marks a link row as the current page (`aria-current="page"`). It looks selected by default; the `--c2-list-item__current--*` variables give it its own look, such as an accent bar. It does not change `selected`.
 - **`c2-list-group`**: a collapsible heading over navigation rows, imported with the row (`@c2n/components/list-item`). The header is a disclosure button (`aria-expanded`) taking a `label`, a `prefix-icon` and a `suffix` such as a count; `open` shows the rows, `toggle()` flips it and a `toggle` event (`ToggleEvent`, not bubbling) reports each change. Groups nest. Keep the rows in a `<nav>` rather than a `c2-list`, which is a listbox of options.
+- **`control` slot**: a focusable control placed here (a `c2-switch`, `c2-checkbox` or `c2-select`) makes the row a settings row. The row drops its own role and tab stop and never toggles `selected`; the control keeps its role, focus and keys, and stays the only tab stop. A click anywhere else on the row does what the label of a `c2-form-field` does: it focuses the control, and flips a switch or checkbox. A `c2-*` switch, checkbox or select is named by the row's text and described by its `description`; a control's own text or `aria-label` still wins. A text field keeps its own hint and error line, so give it an `aria-label`. For a row that opens another page with its current value, use an `href` row with the value and a chevron in `suffix-icon`. Do not combine a control with `href`, and keep such rows out of a `c2-list`, whose rows are options.
 - **`label`**: what a `c2-select` shows for the row. Without it the trigger shows the row's text content, which for a two-line row would be both lines.
 - **`data`**: any object you attach to the row; a list or select returns it in `selection-change` next to the value.
 
