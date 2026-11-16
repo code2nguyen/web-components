@@ -115,7 +115,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @csspart detail - Secondary-text region containing the `detail` slot or property fallback.
  * @csspart trailing - End-aligned text region containing the `trailing` slot or property fallback.
  * @csspart children - The box holding the sub-steps.
- * @csspart reason - The line under the label holding the `reason` slot or property fallback. Hidden while both are empty.
+ * @csspart reason - Text region under the label containing the `reason` slot or property fallback. Hidden while both are empty.
  * @csspart progress - A group's count of finished steps under its label — "2 of 5" — drawn while the list has `group-progress`.
  * @csspart progress-bar - The bar at the start of the `progress` line. Zero wide, and so not drawn, until `--c2-step__progress__bar--width` gives it a width.
  *
