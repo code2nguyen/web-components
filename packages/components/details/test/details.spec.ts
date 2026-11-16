@@ -312,6 +312,93 @@ test('without invoker commands, the panel runs its triggers on click', async ({ 
   await expect(host).toHaveJSProperty('expanded', true)
 })
 
+const BUTTON_MODULE = '/packages/components/button/src/button.ts'
+const C2_TRIGGERS = `
+  <c2-button commandfor="filters" command="--toggle" aria-controls="filters" aria-expanded="false">Filters</c2-button>
+  <c2-button commandfor="filters" command="--close">Hide</c2-button>`
+
+for (const mode of ['invoker commands', 'the click fallback']) {
+  test(`a c2-button trigger drives a headless panel through ${mode}, and its inner button reports aria-expanded`, async ({ page, renderScenario }) => {
+    if (mode === 'the click fallback')
+      await page.addInitScript(() => {
+        delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
+        window.addEventListener('command', (event) => event.stopImmediatePropagation(), { capture: true })
+      })
+    await renderScenario('<c2-details id="filters" headless><p>Status: open</p></c2-details>')
+    if (mode === 'invoker commands') test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
+    // The scenario page loads c2-details only: load c2-button, then put the triggers before the panel.
+    await page.locator('main').evaluate(
+      async (main, { url, markup }) => {
+        await import(url)
+        main.insertAdjacentHTML('afterbegin', markup)
+        await Promise.all([...main.querySelectorAll('c2-button')].map((button) => (button as Element & { updateComplete: Promise<boolean> }).updateComplete))
+      },
+      { url: BUTTON_MODULE, markup: C2_TRIGGERS },
+    )
+    const host = page.locator('c2-details')
+    const trigger = page.getByRole('button', { name: 'Filters' })
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    await trigger.focus()
+    await page.keyboard.press('Enter')
+    await expect(host).toHaveJSProperty('expanded', true)
+    await expect(page.getByText('Status: open')).toBeVisible()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    await page.keyboard.press('Space')
+    await expect(host).toHaveJSProperty('expanded', false)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    await trigger.click()
+    await expect(host).toHaveJSProperty('expanded', true)
+    await page.getByRole('button', { name: 'Hide' }).click()
+    await expect(host).toHaveJSProperty('expanded', false)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    // A disabled c2-button sends nothing.
+    await page
+      .locator('c2-button')
+      .first()
+      .evaluate((element) => element.setAttribute('disabled', ''))
+    await page
+      .locator('c2-button')
+      .first()
+      .evaluate((element) => element.shadowRoot!.querySelector('button')!.click())
+    await page
+      .locator('c2-button')
+      .first()
+      .evaluate((element) => (element as HTMLElement).click())
+    await expect(host).toHaveJSProperty('expanded', false)
+    await accessible(page)
+  })
+}
+
+test('without invoker commands, a running c2-button, a submit c2-button of a form and a non-button send nothing', async ({ page, renderScenario }) => {
+  await page.addInitScript(() => {
+    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
+    window.addEventListener('command', (event) => event.stopImmediatePropagation(), { capture: true })
+  })
+  await renderScenario('<c2-details id="filters" headless><p>Status: open</p></c2-details>')
+  await page.locator('main').evaluate(
+    async (main, { url, markup }) => {
+      await import(url)
+      main.insertAdjacentHTML('afterbegin', markup)
+      await Promise.all([...main.querySelectorAll('c2-button')].map((button) => (button as Element & { updateComplete: Promise<boolean> }).updateComplete))
+      main.querySelector('form')!.addEventListener('submit', (event) => event.preventDefault())
+    },
+    {
+      url: BUTTON_MODULE,
+      markup: `<c2-button running commandfor="filters" command="--toggle">Busy</c2-button>
+        <form><c2-button type="submit" commandfor="filters" command="--toggle">Send</c2-button></form>
+        <span commandfor="filters" command="--toggle">Text</span>`,
+    },
+  )
+  for (const selector of ['c2-button[running]', 'c2-button[type="submit"]', 'span[commandfor]'])
+    await page.locator(selector).evaluate((element) => ((element.shadowRoot?.querySelector('button') ?? element) as HTMLElement).click())
+  await page.locator('c2-button[running]').evaluate((element) => (element as HTMLElement).click())
+  await expect(page.locator('c2-details')).toHaveJSProperty('expanded', false)
+})
+
 test('headless content may draw past the panel edge, as a focus ring does', async ({ page, renderScenario }) => {
   await renderScenario('<c2-details headless expanded><a href="#x">Link</a></c2-details>')
   await expect(page.locator('c2-details').locator('.c2-details')).toHaveCSS('overflow', 'visible')
@@ -331,4 +418,241 @@ test('reduced motion opens and closes a headless panel without animating', async
   })
   expect(running).toBe(0)
   await shown(page.getByText('Status: open')).toBe(false)
+})
+
+const FAQ = `
+  <c2-details name="faq" label="Cancel"><p>Cancel answer</p></c2-details>
+  <c2-details name="faq" label="Refunds"><p>Refunds answer</p></c2-details>
+  <c2-details name="faq" label="Discount"><p>Discount answer</p></c2-details>`
+
+const expandedStates = (page: Page) => page.locator('c2-details').evaluateAll((panels) => panels.map((panel) => (panel as Details).expanded))
+
+test('opening a named panel closes the other panels of its name, each firing toggle', async ({ page, renderScenario }) => {
+  await renderScenario(FAQ)
+  // Instant, so every close has finished (and fired its toggle) before the next step.
+  await page.addStyleTag({ content: 'c2-details { --c2-details--transition-duration: 0ms }' })
+  await page.locator('c2-details').evaluateAll((panels) => {
+    const log: Record<string, string[]> = {}
+    ;(window as unknown as { toggles: Record<string, string[]> }).toggles = log
+    for (const panel of panels) {
+      const label = panel.getAttribute('label')!
+      log[label] = []
+      panel.addEventListener('toggle', (event) => log[label].push((event as ToggleEvent).newState))
+    }
+  })
+  const summaries = page.locator('summary')
+  await summaries.nth(0).click()
+  await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  await summaries.nth(1).click()
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, false])
+  await shown(page.getByText('Cancel answer')).toBe(false)
+  await expect(page.getByText('Refunds answer')).toBeVisible()
+  // From the keyboard, and from code: `expanded` and `toggle()`.
+  await summaries.nth(2).press('Enter')
+  await expect.poll(() => expandedStates(page)).toEqual([false, false, true])
+  await page
+    .locator('c2-details')
+    .nth(0)
+    .evaluate((panel: Details) => (panel.expanded = true))
+  await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  await page
+    .locator('c2-details')
+    .nth(1)
+    .evaluate((panel: Details) => panel.toggle(true))
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, false])
+  // Each closed panel re-emits its own toggle.
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { toggles: Record<string, string[]> }).toggles))
+    .toEqual({ Cancel: ['open', 'closed', 'open', 'closed'], Refunds: ['open', 'closed', 'open'], Discount: ['open', 'closed'] })
+  // Closing the open one leaves every panel closed, as native `<details name>` allows.
+  await summaries.nth(1).click()
+  await expect.poll(() => expandedStates(page)).toEqual([false, false, false])
+  await accessible(page)
+})
+
+test('panels with another name or no name are independent', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-details name="faq" label="A"><p>A</p></c2-details>
+    <c2-details name="plans" label="B"><p>B</p></c2-details>
+    <c2-details label="C"><p>C</p></c2-details>
+    <c2-details label="D"><p>D</p></c2-details>`)
+  for (const index of [0, 1, 2, 3]) await page.locator('summary').nth(index).click()
+  await expect.poll(() => expandedStates(page)).toEqual([true, true, true, true])
+  // Renamed while open into a group that has an open panel: it joins as the open one.
+  await page
+    .locator('c2-details')
+    .nth(1)
+    .evaluate((panel: Details) => (panel.name = 'faq'))
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, true, true])
+})
+
+test('a panel that joins its group open is the open one, and of two opened in one task the last stays open', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-details name="faq" label="A" expanded><p>First answer</p></c2-details>
+    <c2-details name="faq" label="B" expanded><p>Second answer</p></c2-details>
+    <c2-details name="other" label="C" expanded><p>Third answer</p></c2-details>`)
+  // Rendered open in tree order: each one opens after the one before it.
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, true])
+  await shown(page.getByText('First answer')).toBe(false)
+  // Inserted open, or opened in the task that inserts it: it stays open and closes the others.
+  await page.locator('main').evaluate(async (main) => {
+    const panel = document.createElement('c2-details')
+    panel.name = 'faq'
+    panel.label = 'D'
+    main.append(panel)
+    panel.expanded = true
+    await panel.updateComplete
+  })
+  await expect.poll(() => expandedStates(page)).toEqual([false, false, true, true])
+  // Moved open into the group: it is the open one.
+  await page.locator('main').evaluate((main) => {
+    const [, second] = main.querySelectorAll('c2-details')
+    second.remove()
+    second.expanded = true
+    main.append(second)
+  })
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, false, true])
+  // Two panels opened in one task: the last one, as native `open` assignments do, and the other draws no close.
+  const animations = await page.locator('main').evaluate(async (main) => {
+    const [first, , third] = main.querySelectorAll('c2-details')
+    first.expanded = true
+    third.expanded = true
+    await Promise.all([first.updateComplete, third.updateComplete])
+    return first.shadowRoot!.querySelector('.c2-details-content')!.getAnimations().length
+  })
+  expect(animations).toBe(0)
+  await expect.poll(() => expandedStates(page)).toEqual([false, true, true, false])
+})
+
+test('of two panels opened with toggle() in one task, the last stays open once the browser reports both', async ({ page, renderScenario }) => {
+  await renderScenario(FAQ)
+  const toggles = await page.locator('main').evaluate(async (main) => {
+    const [first, second] = main.querySelectorAll('c2-details')
+    const seen: string[] = []
+    for (const panel of [first, second]) panel.addEventListener('toggle', (event) => seen.push(`${panel.label}:${event.newState}`))
+    second.toggle(true)
+    first.toggle(true)
+    // Past the browser's queued toggle tasks.
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    await Promise.all([first.updateComplete, second.updateComplete])
+    return seen
+  })
+  await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  expect(toggles).toEqual(['Cancel:open'])
+  await shown(page.getByText('Refunds answer')).toBe(false)
+})
+
+test('a name groups panels within one document or shadow root, not across them', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details name="faq" label="Outside"><p>Outside</p></c2-details><div id="shadow-host"></div>')
+  const states = await page.evaluate(async () => {
+    const root = document.querySelector('#shadow-host')!.attachShadow({ mode: 'open' })
+    const make = (label: string) => {
+      const panel = document.createElement('c2-details')
+      panel.name = 'faq'
+      panel.label = label
+      root.append(panel)
+      return panel
+    }
+    const outside = document.querySelector('c2-details')!
+    const inside = [make('Inside 1'), make('Inside 2')]
+    const read = async () => {
+      await Promise.all([outside, ...inside].map((panel) => panel.updateComplete))
+      return [outside, ...inside].map((panel) => panel.expanded)
+    }
+    await read()
+    outside.expanded = true
+    await read()
+    inside[0].expanded = true
+    const first = await read()
+    inside[1].toggle()
+    const second = await read()
+    outside.expanded = false
+    await read()
+    outside.expanded = true
+    const third = await read()
+    return [first, second, third]
+  })
+  expect(states).toEqual([
+    [true, true, false],
+    [true, false, true],
+    [true, false, true],
+  ])
+})
+
+test('a find-in-page reveal of a closed named panel closes the open one', async ({ page, renderScenario }) => {
+  await renderScenario(FAQ)
+  await page.locator('summary').nth(0).click()
+  await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  // Find-in-page opens the native details itself, as here.
+  await page
+    .locator('c2-details')
+    .nth(2)
+    .evaluate((element) => {
+      element.shadowRoot!.querySelector('details')!.open = true
+    })
+  await expect.poll(() => expandedStates(page)).toEqual([false, false, true])
+  await shown(page.getByText('Cancel answer')).toBe(false)
+  await expect(page.getByText('Discount answer')).toBeVisible()
+})
+
+test('headless named panels opened by invoker commands close each other and keep their triggers in step', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <button commandfor="shipping" command="--toggle" aria-controls="shipping" aria-expanded="false">Shipping</button>
+    <button commandfor="returns" command="--toggle" aria-controls="returns" aria-expanded="false">Returns</button>
+    <c2-details id="shipping" name="policy" headless><p>Ships in two days</p></c2-details>
+    <c2-details id="returns" name="policy" headless><p>Returns within 30 days</p></c2-details>`)
+  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
+  const shipping = page.getByRole('button', { name: 'Shipping' })
+  const returns = page.getByRole('button', { name: 'Returns' })
+  await shipping.click()
+  await expect.poll(() => expandedStates(page)).toEqual([true, false])
+  await expect(shipping).toHaveAttribute('aria-expanded', 'true')
+  await returns.press('Enter')
+  await expect.poll(() => expandedStates(page)).toEqual([false, true])
+  await expect(shipping).toHaveAttribute('aria-expanded', 'false')
+  await expect(returns).toHaveAttribute('aria-expanded', 'true')
+  await shown(page.getByText('Ships in two days')).toBe(false)
+  await accessible(page)
+})
+
+test('panels of a c2-accordion follow the accordion, not their name', async ({ page }) => {
+  // The accordion's own scenario page, so the panels and the accordion share one copy of the details context.
+  await page.goto('/packages/components/accordion/test/scenarios.html')
+  await expect.poll(() => page.evaluate(() => document.documentElement.dataset.modulesReady === 'true')).toBe(true)
+  const states = await page.locator('main').evaluate(async (main) => {
+    main.innerHTML = `
+      <c2-accordion multiple>
+        <c2-details name="faq" label="A"><p>A</p></c2-details>
+        <c2-details name="faq" label="B"><p>B</p></c2-details>
+      </c2-accordion>
+      <c2-accordion>
+        <c2-details name="faq" label="C"><p>C</p></c2-details>
+        <c2-details name="faq" label="D"><p>D</p></c2-details>
+      </c2-accordion>
+      <c2-details name="faq" label="E"><p>E</p></c2-details>`
+    await Promise.all(['c2-accordion', 'c2-details'].map((tag) => customElements.whenDefined(tag)))
+    const panels = [...main.querySelectorAll('c2-details')]
+    const read = async () => {
+      await new Promise(requestAnimationFrame)
+      await Promise.all(panels.map((panel) => panel.updateComplete))
+      return panels.map((panel) => panel.expanded)
+    }
+    await read()
+    const seen: boolean[][] = []
+    for (const index of [0, 1, 2, 3, 4]) {
+      panels[index].expanded = true
+      seen.push(await read())
+    }
+    return seen
+  })
+  expect(states).toEqual([
+    // `multiple` keeps both of its panels open whatever their name.
+    [true, false, false, false, false],
+    [true, true, false, false, false],
+    // The exclusive accordion still closes its own sibling, and nothing outside it.
+    [true, true, true, false, false],
+    [true, true, false, true, false],
+    // A standalone panel of the same name leaves the accordions' panels alone.
+    [true, true, false, true, true],
+  ])
 })
