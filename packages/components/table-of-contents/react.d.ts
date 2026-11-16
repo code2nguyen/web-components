@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { IndexBar } from '@c2n/table-of-contents/index-bar.js'
 import type { TableOfContents } from '@c2n/table-of-contents'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-index-bar': Omit<C2Props<IndexBar>, 'keys' | 'items'> & {
+        'keep-url'?: Attribute
+        keys?: IndexBar['keys'] | string
+        items?: IndexBar['items'] | string
+      }
       'c2-table-of-contents': Omit<C2Props<TableOfContents>, 'items'> & {
         'keep-url'?: Attribute
         items?: TableOfContents['items'] | string

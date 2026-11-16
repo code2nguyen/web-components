@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-page-header': DefineComponent<
       C2Props<PageHeader> & {
+        'large-title'?: unknown
         'parent-href'?: unknown
         'parent-label'?: unknown
         'more-actions-label'?: unknown

@@ -1101,6 +1101,10 @@
       "types": "./dist/table-of-contents.d.ts",
       "default": "./dist/table-of-contents.js"
     },
+    "./table-of-contents/index-bar": {
+      "types": "./dist/table-of-contents/index-bar.d.ts",
+      "default": "./dist/table-of-contents/index-bar.js"
+    },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
       "default": "./dist/tabs.js"

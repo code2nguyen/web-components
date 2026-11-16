@@ -117,8 +117,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
 - **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low
-- **page-header-1** · `c2-page-header` · nav bar #467 · +0.6 kB on 29.8 kB · risk low
-- **table-of-contents-1** · `c2-table-of-contents` · index bar #470 · +1.2 kB on 5.1 kB · risk low
 - **tour-1** · `c2-tour` · beacon #497 · +0.8 kB on 16.1 kB · risk low
 - **comment-thread-1** · `c2-comment-thread` · comment tree #508 · +1.5 kB on 47.8 kB · risk medium
 - **json-viewer-1** · `c2-json-viewer` · schema tree #553 (lazy) · +0.3 kB on 7.0 kB, 4 kB lazy · risk low
