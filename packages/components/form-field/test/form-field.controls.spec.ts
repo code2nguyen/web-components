@@ -72,6 +72,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
     tag: 'c2-scorecard',
     markup: `<c2-scorecard rows='[{"value":"a","label":"A"}]' columns='[{"value":"1","label":"1"}]'></c2-scorecard>`,
   },
+  { tag: 'c2-reorder-list', markup: '<c2-reorder-list name="ranking" editable><div data-reorder-key="a">A</div></c2-reorder-list>' },
   {
     tag: 'c2-record-merge',
     markup: `<c2-record-merge records='[{"id":"a","label":"A","values":{"name":"Ada"}}]'></c2-record-merge>`,
