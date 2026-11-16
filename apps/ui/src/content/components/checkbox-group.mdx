@@ -12,7 +12,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Checkbox, CheckboxGroup } from '@c2n/components/checkbox'
 
-`c2-checkbox-group` turns several `c2-checkbox` options into one form-associated control, the multi-select counterpart of `c2-radio-group`. Its `value` is the array of checked option values in document order; its `name` submits each of them to `FormData`; `disabled` disables every option while keeping the ones disabled on their own; and `required` means at least one option is checked. Each option keeps its native behaviour and stays its own tab stop, so Tab moves between options and Space toggles them. Options can sit anywhere inside the group, including in wrapper elements.
+`c2-checkbox-group` turns several `c2-checkbox` options into one form-associated control, the multi-select counterpart of `c2-radio-group`. Its `value` is the array of checked option values in document order; its `name` submits each of them to `FormData`; `disabled` disables every option while keeping the ones disabled on their own; `required` means at least one option is checked; and `min` and `max` bound how many may be checked, as a menu's modifier group ("choose up to 2") or a ballot's "vote for up to 3" needs. Each option keeps its native behaviour and stays its own tab stop, so Tab moves between options and Space toggles them. Options can sit anywhere inside the group, including in wrapper elements.
 
 ## Import
 
@@ -25,6 +25,12 @@ Importing `@c2n/components/checkbox` registers both `c2-checkbox-group` and `c2-
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/checkbox
+<style>
+  .modifiers {
+    width: 300px;
+    --c2-checkbox-group--align-items: stretch;
+  }
+</style>
 <div data-label="Group">
   <c2-checkbox-group client:only="lit" name="channels" value="email;push">
     <span slot="label">Notify me by</span>
@@ -51,6 +57,15 @@ Importing `@c2n/components/checkbox` registers both `c2-checkbox-group` and `c2-
     <c2-checkbox value="product">Product updates<span slot="description">New features, at most once a month</span></c2-checkbox>
   </c2-checkbox-group>
 </div>
+<div data-label="Up to two">
+  <c2-checkbox-group client:only="lit" name="sides" max="2" min="1" value="fries;salad" class="modifiers">
+    <span slot="label">Sides</span>
+    <span slot="description">Choose up to 2</span>
+    <c2-checkbox value="fries">Fries<span slot="trailing">+$2.50</span></c2-checkbox>
+    <c2-checkbox value="salad">Side salad<span slot="trailing">+$3.00</span></c2-checkbox>
+    <c2-checkbox value="soup">Soup of the day<span slot="trailing">+$4.00</span></c2-checkbox>
+  </c2-checkbox-group>
+</div>
 <div data-label="Disabled">
   <c2-checkbox-group client:only="lit" value="read" orientation="horizontal" aria-label="Permissions">
     <c2-checkbox value="read" disabled>Read (always on)</c2-checkbox>
@@ -66,6 +81,8 @@ Importing `@c2n/components/checkbox` registers both `c2-checkbox-group` and `c2-
 ```
 
 Set the group's `value` to check options from code: an array from script (`group.value = ['email', 'sms']`) or `;`-separated values in markup (`value="email;sms"`). Without a `value`, options written with `checked` are adopted as the starting value. Listen for `change` on the group (`detail.value` is the new array) or `input`; the options' own events stop at the group, so a listener above it hears exactly one of each per toggle. Neither fires for programmatic changes.
+
+`max` caps the selection: once that many options are checked, the unchecked ones are disabled until one is unchecked again, so the user cannot pass it. `min` is the fewest checked options the form accepts, counting an empty group (`min="1"` also asks for at least one, reported as `rangeUnderflow` where `required` reports `valueMissing`; a `min` above `max` is read as `max`). A `value` set from code that breaks either rule is kept and reported through the form contract (`validity.rangeUnderflow` or `rangeOverflow`, with the `groupRangeUnderflow` or `groupRangeOverflow` message, translatable like every message of the package). Say the rule in the `description` slot ("Choose up to 2") so it is read with the group. Each option's `trailing` slot puts a price or a count at the end of its row; with `--c2-checkbox-group--align-items: stretch` the prices line up at the right edge.
 
 Give the group a `name` and every checked value is appended to `FormData(form)` under it; leave the options themselves unnamed. `required`, fieldset disabling, `form.reset()`, `checkValidity()`, `reportValidity()` and `setCustomValidity()` follow the native form contract. The `label` slot names the group for assistive technology (`aria-label` works too), and the text inside each `c2-checkbox` labels that option: clicking it toggles the box.
 

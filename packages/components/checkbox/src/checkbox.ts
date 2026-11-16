@@ -32,6 +32,7 @@ export interface Checkbox {
  *
  * @slot - Label text beside the box. Clicking it toggles the checkbox, and it names the checkbox for assistive technology.
  * @slot description - Supporting text shown under the label.
+ * @slot trailing - Content at the end of the row, such as an option's price (`+$1.50`) or a count. Part of the clickable label, so it is read with the checkbox's name. Give the checkbox the full width (`--c2-checkbox-group--align-items: stretch` in a group) to push it to the far edge.
  * @slot checkmark - Icon shown when checked: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`. Defaults to a check.
  * @slot mixedmark - Icon shown when indeterminate. Defaults to a dash.
  * @slot uncheckmark - Icon shown when unchecked. Empty by default.
@@ -43,6 +44,7 @@ export interface Checkbox {
  * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
  * @csspart label - Region containing the default slot (the label text).
  * @csspart description - Region containing the `description` slot below the label.
+ * @csspart trailing - Region at the end of the row containing the `trailing` slot, hidden while that slot is empty.
  *
  * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
  * @cssproperty {pixel} [--c2-checkbox__container--width=18px]
@@ -97,6 +99,10 @@ export interface Checkbox {
  * @cssproperty {color} [--c2-checkbox__description--color=#71717a]
  * @cssproperty {font-size} [--c2-checkbox__description--font-size=12px]
  * @cssproperty {line-height} [--c2-checkbox__description--line-height=1.4]
+ * @cssproperty {color} [--c2-checkbox__trailing--color=#71717a] - Text colour of the `trailing` region (a price, a count).
+ * @cssproperty {font-size} [--c2-checkbox__trailing--font-size=inherit]
+ * @cssproperty {font-weight} [--c2-checkbox__trailing--font-weight=inherit]
+ * @cssproperty {pixel} [--c2-checkbox__trailing--padding-inline-start=12px] - Space inside the `trailing` region before its content, added to `field--gap`.
  */
 @customElement('c2-checkbox')
 export class Checkbox extends LitElement {
@@ -140,12 +146,21 @@ export class Checkbox extends LitElement {
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
-  /** Set by a containing `c2-checkbox-group` while the whole group is disabled; the checkbox's own `disabled` is kept. */
+  /**
+   * Set by a containing `c2-checkbox-group` while it disables this option: the whole group is disabled, or its `max` is
+   * reached and this option is unchecked. The checkbox's own `disabled` is kept.
+   */
   @property({ type: Boolean, attribute: false }) groupDisabled = false
 
-  private readonly slotPresence = new SlotPresenceController(this, ['', 'description'])
+  private readonly slotPresence = new SlotPresenceController(this, ['', 'description', 'trailing'])
   /** Description handed down by an enclosing `c2-form-field`; the checkbox keeps its own text as its name. */
   private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
+
+  override connectedCallback() {
+    super.connectedCallback()
+    // A group's lock does not follow an option moved out of it.
+    if (this.groupDisabled && !this.closest('c2-checkbox-group')) this.groupDisabled = false
+  }
 
   /** The containing form, when this control is associated with one. */
   get form() {
@@ -199,10 +214,18 @@ export class Checkbox extends LitElement {
     const ariaChecked = this.indeterminate ? 'mixed' : undefined
     const hasLabel = this.slotPresence.has('')
     const hasDescription = this.slotPresence.has('description')
+    const hasTrailing = this.slotPresence.has('trailing')
     // The whole row is a <label>, so clicking the text toggles the inner input and names it. Both text regions are
     // hidden while their slots are empty, which leaves a bare checkbox exactly the size of its touch target.
     return html`
-      <label class=${classMap({ 'c2-checkbox-field': true, 'has-text': hasLabel || hasDescription, 'has-description': hasDescription })}>
+      <label
+        class=${classMap({
+          'c2-checkbox-field': true,
+          'has-text': hasLabel || hasDescription || hasTrailing,
+          'has-description': hasDescription,
+          'has-trailing': hasTrailing,
+        })}
+      >
         <div class="c2-checkbox">
           <input
             class="c2-checkbox-input"
@@ -248,6 +271,9 @@ export class Checkbox extends LitElement {
           <span class="c2-checkbox-description" part="description" ?hidden=${!hasDescription}>
             <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </span>
+        </span>
+        <span class="c2-checkbox-trailing" part="trailing" ?hidden=${!hasTrailing}>
+          <slot name="trailing" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </span>
       </label>
       ${this.field.renderDescription()}
