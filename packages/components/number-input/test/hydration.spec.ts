@@ -21,7 +21,7 @@ test.beforeAll(async () => {
     cacheDir: `${root}node_modules/.vite-hydration-test`,
   })
   try {
-    const server = (await vite.ssrLoadModule(fileURLToPath(new URL('./hydration-server.ts', import.meta.url)))) as typeof import('./hydration-server')
+    const server = (await vite.ssrLoadModule(fileURLToPath(new URL('./hydration-server.ts', import.meta.url)))) as { renderUnitInput(): Promise<string> }
     markup = await server.renderUnitInput()
   } finally {
     await vite.close()
