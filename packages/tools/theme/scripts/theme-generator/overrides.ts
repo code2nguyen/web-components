@@ -627,6 +627,13 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // A milestone's dot is ringed in the page surface so it stands off the track; a dot not reached yet is the strong
+  // outline grey. The claimable green and its halo are accents the theme has no token for.
+  '--c2-progress__mark--border-color': { token: 'color-surface' },
+  '--c2-progress__mark--background-color': { token: 'color-outline-strong' },
+  '--c2-progress__mark__claimable--background-color': { exclude: 'reward accent, like the meter optimum green' },
+  '--c2-progress__mark__claimable--box-shadow': { exclude: 'halo in the claimable accent' },
+  '--c2-navigation-progress__indicator--border-radius': { exclude: 'a square bar by default; rounding is a look, not a theme scale' },
   // Secret field: the show button's pressed fill is the same hairline grey, a step above the hover surface.
   '--c2-secret-field__action__selected--background-color': { token: 'color-outline-variant' },
   // Meter: the unused range is the progress track's hairline grey, a critical value is the error colour, and the

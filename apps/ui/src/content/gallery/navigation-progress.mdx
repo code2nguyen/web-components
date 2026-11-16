@@ -1,0 +1,131 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import NavigationProgressExamplesRuntime from '../../components/NavigationProgressExamplesRuntime.astro'
+
+import { NavigationProgress } from '@c2n/components/progress/navigation-progress'
+import { Button } from '@c2n/components/button'
+
+<NavigationProgressExamplesRuntime />
+
+## Presets
+
+Page-top loading bars. The cards draw theirs `contained`, over the top of the card; the "Page top" card drives the real thing, across the top of this page. `--c2-navigation-progress--height` and the indicator colour give the bar its look, the box shadow its glow, and the two durations its pace.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-navigation-progress contained active></c2-navigation-progress>
+```
+
+```html tag=MdxCodeBlock,label=Page top
+<style>
+  .page-top {
+    display: flex;
+    gap: 8px;
+  }
+</style>
+<div class="page-top" data-navigation-progress-example="page">
+  <c2-navigation-progress></c2-navigation-progress>
+  <c2-button data-navigation-progress-action="start">Start</c2-button>
+  <c2-button data-navigation-progress-action="done">Done</c2-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=App window
+<style>
+  .app-window {
+    position: relative;
+    overflow: hidden;
+    width: 280px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    font-size: 13px;
+  }
+  .app-window header {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+  .app-window p {
+    margin: 0;
+    padding: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .app-window footer {
+    padding: 0 12px 12px;
+  }
+</style>
+<div class="app-window" data-navigation-progress-example="window">
+  <c2-navigation-progress contained></c2-navigation-progress>
+  <header>Customers</header>
+  <p>Open the next page to see the bar run for a second and a half.</p>
+  <footer><c2-button data-navigation-progress-action="navigate">Next page</c2-button></footer>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Glow
+<style>
+  .glow {
+    --c2-navigation-progress--height: 2px;
+    --c2-navigation-progress__indicator--background-color: #7c3aed;
+    --c2-navigation-progress__indicator--box-shadow: 0 0 10px #7c3aed, 0 0 4px #7c3aed;
+  }
+</style>
+<c2-navigation-progress class="glow" contained active></c2-navigation-progress>
+```
+
+```html tag=MdxCodeBlock,label=Thick
+<style>
+  .thick {
+    --c2-navigation-progress--height: 6px;
+    --c2-navigation-progress__indicator--border-radius: 0 999px 999px 0;
+    --c2-navigation-progress__indicator--background-color: #16a34a;
+  }
+</style>
+<c2-navigation-progress class="thick" contained active></c2-navigation-progress>
+```
+
+```html tag=MdxCodeBlock,label=Video red
+<style>
+  .video-red {
+    --c2-navigation-progress--height: 3px;
+    --c2-navigation-progress__indicator--background-color: #dc2626;
+    --c2-navigation-progress--animation-duration: 120ms;
+    --c2-navigation-progress--fade-duration: 250ms;
+  }
+</style>
+<c2-navigation-progress class="video-red" contained active></c2-navigation-progress>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .french {
+    position: relative;
+    width: 240px;
+    padding: 14px 12px 10px;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div lang="fr" class="french">
+  <c2-navigation-progress contained active></c2-navigation-progress>
+  Factures
+</div>
+```
+
+</GalleryGrid>
+
+The cards that start and finish the bar call its methods; the French card is named "Chargement de la page" once the application supplies the text:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'navigation-progress': { loading: 'Chargement de la page' } } })
+
+const bar = document.querySelector('c2-navigation-progress')!
+bar.start() // shows the bar and trickles it forward
+bar.done() // fills it and fades it out
+```

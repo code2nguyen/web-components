@@ -1,3 +1,4 @@
+@use '@c2n/sass/visually-hidden';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-progress,
   $theme: (
@@ -17,6 +18,18 @@
     value--font-weight: 500,
     ring-value--font-size: 16px,
     indicator--stroke-linecap: round,
+    mark--size: 14px,
+    mark--border-width: 2px,
+    mark--border-color: #ffffff,
+    mark--background-color: #a1a1aa,
+    mark__reached--background-color: #0265dc,
+    mark__claimable--background-color: #16a34a,
+    mark__claimable--box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.24),
+    mark-label--color: #71717a,
+    mark-label__reached--color: #18181b,
+    mark-label--font-size: 12px,
+    mark-label--font-weight: null,
+    mark-label--padding-top: 6px,
   )
 );
 
@@ -101,6 +114,88 @@
   to {
     transform: translateX(250%);
   }
+}
+
+// Milestones: the track and the marks list share one grid cell column. The first row is exactly the track's height,
+// so the dots centre on it; the list spans both rows and the second row grows to fit the labels.
+.c2-progress-rail {
+  display: grid;
+  grid-template: css.cssVar(height) auto / 100%;
+
+  > .c2-progress-track {
+    grid-area: 1 / 1;
+  }
+}
+
+.c2-progress-marks {
+  grid-area: 1 / 1 / 3 / 2;
+  display: grid;
+  // Positioned like the track, and after it, so the dots paint over the track and its fill.
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Each milestone is a zero-width column at its value: centred content overflows it equally on both sides, in either
+// writing direction, so the dot centres on the value without a transform.
+.c2-progress-mark {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 0;
+  margin-inline-start: calc(var(--_at) * 100%);
+}
+
+.c2-progress-mark-dot {
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(mark--size);
+  height: css.cssVar(mark--size);
+  margin-top: calc((#{css.cssVar(height)} - #{css.cssVar(mark--size)}) / 2);
+  border: css.cssVar(mark--border-width) solid css.cssVar(mark--border-color);
+  border-radius: 50%;
+  background-color: css.cssVar(mark--background-color);
+}
+
+.c2-progress-mark-label {
+  width: max-content;
+  padding-top: css.cssVar(mark-label--padding-top);
+  color: css.cssVar(mark-label--color);
+  font-size: css.cssVar(mark-label--font-size);
+  font-weight: css.cssVar(mark-label--font-weight);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+// Near either end the label starts or ends at the milestone instead of centring on it, so it stays over the track.
+.is-start .c2-progress-mark-label {
+  align-self: flex-start;
+}
+
+.is-end .c2-progress-mark-label {
+  align-self: flex-end;
+}
+
+.is-reached,
+.is-claimable {
+  .c2-progress-mark-label {
+    color: css.cssVar(mark-label__reached--color);
+  }
+}
+
+.is-reached .c2-progress-mark-dot {
+  background-color: css.cssVar(mark__reached--background-color);
+}
+
+.is-claimable .c2-progress-mark-dot {
+  background-color: css.cssVar(mark__claimable--background-color);
+  box-shadow: css.cssVar(mark__claimable--box-shadow);
+}
+
+.c2-progress-sr {
+  @include visually-hidden.visually-hidden;
 }
 
 // Circular: the same track and indicator drawn as two concentric circle strokes. The radius is set in CSS so the ring

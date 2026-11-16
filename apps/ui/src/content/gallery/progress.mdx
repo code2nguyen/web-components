@@ -1,7 +1,11 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ProgressExamplesRuntime from '../../components/ProgressExamplesRuntime.astro'
 
 import { Progress } from '@c2n/components/progress'
+
+<ProgressExamplesRuntime />
 
 ## Presets
 
@@ -185,4 +189,141 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
 </c2-progress>
 ```
 
+```html tag=MdxCodeBlock,label=Free shipping
+<style>
+  .shipping {
+    width: 260px;
+    --c2-progress__indicator--background-color: #16a34a;
+    --c2-progress__mark__reached--background-color: #16a34a;
+    --c2-progress__label--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-progress__label--font-size: 13px;
+  }
+</style>
+<c2-progress class="shipping" value="38" max="50" marks='[{"value":50,"label":"Free shipping"}]'>
+  Spend <strong>$12</strong> more for free shipping
+</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Loyalty tiers
+<style>
+  .tiers {
+    width: 280px;
+    --c2-progress--height: 6px;
+    --c2-progress__indicator--background-color: #b45309;
+    --c2-progress__mark--size: 16px;
+    --c2-progress__mark__reached--background-color: #b45309;
+    --c2-progress__mark__claimable--background-color: #f59e0b;
+    --c2-progress__mark__claimable--box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+    --c2-progress__mark-label--font-weight: 500;
+  }
+</style>
+<c2-progress
+  class="tiers"
+  value="1800"
+  max="3000"
+  show-value
+  marks='[{"value":500,"label":"Silver"},{"value":1500,"label":"Gold","state":"claimable"},{"value":3000,"label":"Platinum"}]'
+>
+  Loyalty points
+  <span slot="value">1,800 pts</span>
+</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Commission accelerators
+<style>
+  .quota {
+    width: 280px;
+    --c2-progress--height: 10px;
+    --c2-progress--border-radius: 4px;
+    --c2-progress__indicator--background-color: #0d9488;
+    --c2-progress__mark--size: 18px;
+    --c2-progress__mark--border-width: 0px;
+    --c2-progress__mark--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-progress__mark__reached--background-color: #0f766e;
+    --c2-progress__mark-label--padding-top: 4px;
+    --c2-progress__mark-label--font-size: 11px;
+  }
+  .quota::part(mark-dot) {
+    width: 2px;
+    border-radius: 1px;
+  }
+</style>
+<c2-progress
+  class="quota"
+  value="124"
+  max="200"
+  show-value
+  marks='[{"value":100,"label":"Quota · 1.5×"},{"value":150,"label":"2×"},{"value":200,"label":"3×"}]'
+>
+  Q3 attainment
+  <span slot="value">124%</span>
+</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Season pass
+<style>
+  .season {
+    width: 300px;
+    --c2-progress--height: 12px;
+    --c2-progress--border-radius: 6px;
+    --c2-progress__indicator--background-color: #7c3aed;
+    --c2-progress__mark--size: 20px;
+    --c2-progress__mark--border-width: 3px;
+    --c2-progress__mark__reached--background-color: #7c3aed;
+    --c2-progress__mark__claimable--background-color: #f59e0b;
+    --c2-progress__mark__claimable--box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+  }
+  .season::part(mark-label) {
+    display: grid;
+    justify-items: center;
+  }
+  .season::part(reward-level) {
+    font-size: 11px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .season::part(reward-name) {
+    font-weight: 600;
+  }
+</style>
+<c2-progress
+  class="season"
+  data-progress-example="rewards"
+  value="22"
+  max="30"
+  marks='[{"value":10,"label":"Banner"},{"value":20,"label":"Emote","state":"claimable"},{"value":30,"label":"Skin"}]'
+>
+  Season 4
+</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Milestones en français
+<style>
+  .milestones-fr {
+    width: 280px;
+  }
+</style>
+<div lang="fr" class="milestones-fr">
+  <c2-progress
+    value="1800"
+    max="3000"
+    marks='[{"value":500,"label":"Argent"},{"value":1500,"label":"Or","state":"claimable"},{"value":3000,"label":"Platine"}]'
+  >
+    Points de fidélité
+  </c2-progress>
+</div>
+```
+
 </GalleryGrid>
+
+The season pass card draws each reward through `renderMark`, whose output carries its own parts for the page to style. The French card announces each milestone's state ("1 500, à réclamer", "3 000, encore 1 200") once the application supplies the text:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import { addTranslations } from '@c2n/core/localize.js'
+
+const season = document.querySelector('c2-progress')!
+season.renderMark = ({ mark, state }) =>
+  html`<span part="reward-level">${state === 'claimable' ? 'Claim' : `Lv ${mark.value}`}</span><span part="reward-name">${mark.label}</span>`
+
+addTranslations({ fr: { progress: { markReached: '{0}, atteint', markClaimable: '{0}, à réclamer', markLocked: '{0}, encore {1}', markAhead: '{0}, pas atteint' } } })
+```

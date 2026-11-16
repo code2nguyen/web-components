@@ -391,6 +391,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
   <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
 </c2-navigation-menu>`,
+  'navigation-progress': `<div style="position:relative;display:grid;gap:4px;width:240px;padding:16px 12px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:13px"><c2-navigation-progress contained active label="Loading invoices"></c2-navigation-progress><strong>Invoices</strong><span>Loading the next page…</span></div>`,
   notepad: `<c2-notepad label="Groceries" style="width:240px;--c2-notepad__sheet--min-height:150px;--c2-notepad__writing--font-size:16px;--c2-notepad__rule--spacing:24px;--c2-notepad__margin--inset:36px" value="- [x] Oat milk&#10;- [ ] **Sourdough**&#10;remember the ==blue== bag"></c2-notepad>`,
   'notification-center': `<c2-notification-center group-by="none" style="--c2-notification-center--width:250px;--c2-notification-center__item--padding:6px 10px;--c2-notification-center__header--padding:8px 10px 6px" notifications='[{"id":"1","title":"Ana mentioned you","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}}]'></c2-notification-center>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
