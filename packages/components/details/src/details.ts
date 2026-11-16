@@ -118,8 +118,12 @@ export class Details extends LitElement {
   @property() label = ''
 
   /**
-   * Accordion group: opening a panel closes every other `c2-details` with the same name in the same document or shadow
-   * root. (The native `name` attribute cannot be used: each panel's `<details>` sits in its own shadow tree.)
+   * Accordion group: a panel that opens (by click, keyboard, `expanded`, `toggle()`, a command or find-in-page), or that
+   * joins the group open (first client render, insertion, a new `name`), closes every other `c2-details` with the same
+   * name in the same document or shadow root, each firing its own `toggle`. Of two panels opened in one task, the last
+   * one stays open, as with native `<details name>`. A server-rendered panel takes part once it has hydrated.
+   * The children of a `c2-accordion` follow the accordion (and its `multiple`), not `name`. (The native `name`
+   * attribute cannot be used: each panel's `<details>` sits in its own shadow tree.)
    */
   @property() name: string | undefined = undefined
 
@@ -159,6 +163,8 @@ export class Details extends LitElement {
       this.commandRoot = this.getRootNode()
       this.commandRoot.addEventListener('click', this.handleTriggerClick)
     }
+    // Moved open into its group: it is the open one now.
+    if (this.hasUpdated && this.expanded) this.closeNamePeers()
   }
 
   override disconnectedCallback() {
@@ -177,12 +183,45 @@ export class Details extends LitElement {
     }
   }
 
+  /**
+   * Closes the rest of the `name` group the moment this panel opens or joins it open, synchronously as native `open`
+   * does, so of two panels opened in one task the last one stays open.
+   */
+  override requestUpdate(...args: Parameters<LitElement['requestUpdate']>) {
+    super.requestUpdate(...args)
+    const [name, oldValue] = args
+    if (this.hasUpdated && this.expanded && ((name === 'expanded' && !oldValue) || (name === 'name' && oldValue !== this.name))) this.closeNamePeers()
+  }
+
+  override firstUpdated() {
+    // Rendered open: it is the open one of its group. After the first render, so a hydrating panel still matches the server.
+    if (this.expanded) this.closeNamePeers()
+  }
+
   override updated(changed: PropertyValues<this>) {
-    if (this.isConnected && changed.has('expanded') && changed.get('expanded') !== undefined) {
+    // `toggle()` opens the native disclosure ahead of the render; when a later panel of the group closed this one in the
+    // same task, the template value did not change and the render left the native `open` in place.
+    const open = this.expanded || this.closing
+    if (changed.has('expanded') && this.detailsElement && this.detailsElement.open !== open) this.detailsElement.open = open
+    // A panel opened and closed again before it rendered (by a later panel of its group) has nothing to animate.
+    if (this.isConnected && changed.has('expanded') && changed.get('expanded') !== undefined && changed.get('expanded') !== this.expanded) {
       this.animateContent(this.expanded)
       this.accordion?.expandedChanged(this)
       this.syncTriggers()
     }
+  }
+
+  /**
+   * Closes the other open panels of this panel's `name` group in the same root node; nothing without a `name`. The
+   * children of a `c2-accordion` belong to the accordion's rule instead, on either side. A peer that has not rendered
+   * yet is left alone (it may be waiting to hydrate): if it is open, its own first update closes this one.
+   */
+  private closeNamePeers() {
+    const name = this.name
+    if (!name || !this.isConnected || isAccordionPanel(this)) return
+    const root = this.getRootNode() as Document | ShadowRoot
+    for (const peer of root.querySelectorAll('c2-details'))
+      if (peer !== this && peer.name === name && peer.expanded && peer.hasUpdated && !isAccordionPanel(peer)) peer.expanded = false
   }
 
   private readonly handleCommand = (event: Event) => this.runCommand(event, (event as CommandEvent).command)
@@ -326,6 +365,8 @@ export class Details extends LitElement {
   }
 
   private handleDetailsToggle(event: Event) {
+    // Opened and closed again in one task (see `updated`): the browser still reports it, with no change of state.
+    if ((event as ToggleEvent).oldState === (event as ToggleEvent).newState) return
     // The native element stays open during the closing animation.
     if (!this.closing) this.expanded = this.detailsElement.open
     redispatchEvent(this, event)
@@ -385,6 +426,11 @@ export class Details extends LitElement {
       </details>
     `
   }
+}
+
+/** A direct child of `c2-accordion`, which coordinates its panels itself. */
+function isAccordionPanel(panel: Element): boolean {
+  return panel.parentElement?.localName === 'c2-accordion'
 }
 
 /** First top-level entry of a comma-separated CSS list; commas inside `cubic-bezier(...)` are kept. */
