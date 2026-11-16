@@ -20,6 +20,17 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
 </c2-code-viewer>
 ```
 
+```html tag=MdxCodeBlock,label=Follows the page theme
+<style>
+  .paired-viewer {
+    width: 240px;
+  }
+</style>
+<c2-code-viewer class="paired-viewer" language="ts" theme="github-light" dark-theme="github-dark-default" code="const hello = (name) =>\n  `Hi, ${name}!`">
+  <span slot="title">color-scheme="auto"</span>
+</c2-code-viewer>
+```
+
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {
