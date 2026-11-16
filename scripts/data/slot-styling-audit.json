@@ -2247,6 +2247,30 @@
       "reason": "The default slot holds the app's own content that scrolls; the app styles it, and the area themes only the scroller."
     },
     {
+      "tag": "c2-scroll-area",
+      "slot": "bottom-icon",
+      "decision": "assigned-content",
+      "reason": "The bottom-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-scroll-area",
+      "slot": "end-icon",
+      "decision": "assigned-content",
+      "reason": "The end-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-scroll-area",
+      "slot": "start-icon",
+      "decision": "assigned-content",
+      "reason": "The start-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-scroll-area",
+      "slot": "top-icon",
+      "decision": "assigned-content",
+      "reason": "The top-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-scroll-progress",
       "slot": "",
       "decision": "assigned-content",
