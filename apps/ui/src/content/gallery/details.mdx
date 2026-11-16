@@ -6,6 +6,7 @@ import DetailsExamplesRuntime from '../../components/DetailsExamplesRuntime.astr
 
 import { Details } from '@c2n/components/details'
 import { Switch } from '@c2n/components/switch'
+import { Button } from '@c2n/components/button'
 
 <DetailsExamplesRuntime />
 
@@ -263,19 +264,16 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     width: 240px;
   }
   .collapse-filters .trigger {
-    padding: 4px 0;
-    border: none;
-    background: none;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--c2-theme--color-primary, #0265dc);
-    cursor: pointer;
-  }
-  .collapse-filters .trigger:focus-visible {
-    outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
-    outline-offset: 2px;
-    border-radius: 4px;
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 8px;
+    --c2-button__container--padding-right: 8px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__hover--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__active--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    margin-left: -8px;
   }
   .collapse-filters .panel {
     display: grid;
@@ -293,7 +291,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
   }
 </style>
 <div class="collapse-filters">
-  <button class="trigger" commandfor="gallery-filters" command="--toggle" aria-controls="gallery-filters" aria-expanded="true">Filters</button>
+  <c2-button class="trigger" commandfor="gallery-filters" command="--toggle" aria-controls="gallery-filters" aria-expanded="true">Filters</c2-button>
   <c2-details id="gallery-filters" headless expanded>
     <div class="panel">
       <span><strong>Status</strong> Open, In review</span>
@@ -356,19 +354,16 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details__content--padding-top: 6px;
   }
   .collapse-more .trigger {
-    padding: 4px 0;
-    border: none;
-    background: none;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--c2-theme--color-primary, #0265dc);
-    cursor: pointer;
-  }
-  .collapse-more .trigger:focus-visible {
-    outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
-    outline-offset: 2px;
-    border-radius: 4px;
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 8px;
+    --c2-button__container--padding-right: 8px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__hover--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__active--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    margin-left: -8px;
   }
 </style>
 <div class="collapse-more">
@@ -376,7 +371,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
   <c2-details id="gallery-more" class="more" headless>
     <p>Weekend orders ship on Monday. Find-in-page still finds this text and opens the panel.</p>
   </c2-details>
-  <button class="trigger" commandfor="gallery-more" command="--toggle" aria-controls="gallery-more" aria-expanded="false">Read more</button>
+  <c2-button class="trigger" commandfor="gallery-more" command="--toggle" aria-controls="gallery-more" aria-expanded="false">Read more</c2-button>
 </div>
 ```
 
@@ -386,19 +381,16 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     width: 240px;
   }
   .collapse-fr .trigger {
-    padding: 4px 0;
-    border: none;
-    background: none;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--c2-theme--color-primary, #0265dc);
-    cursor: pointer;
-  }
-  .collapse-fr .trigger:focus-visible {
-    outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
-    outline-offset: 2px;
-    border-radius: 4px;
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 8px;
+    --c2-button__container--padding-right: 8px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__hover--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__active--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    margin-left: -8px;
   }
   .collapse-fr .panel {
     display: grid;
@@ -416,7 +408,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
   }
 </style>
 <div class="collapse-fr" lang="fr">
-  <button class="trigger" commandfor="gallery-fr" command="--toggle" aria-controls="gallery-fr" aria-expanded="true">Filtres</button>
+  <c2-button class="trigger" commandfor="gallery-fr" command="--toggle" aria-controls="gallery-fr" aria-expanded="true">Filtres</c2-button>
   <c2-details id="gallery-fr" headless expanded>
     <div class="panel">
       <span><strong>Statut</strong> Ouvert, En revue</span>
@@ -432,7 +424,7 @@ Classes style assigned content directly; `summary`, `title`, `icon`, `header-con
 
 ## Collapse
 
-`headless` draws the content alone, with no summary row and no frame, so the panel becomes a collapse that a control elsewhere on the page opens. A native button needs no script: `commandfor` names the panel and `command` is `--toggle`, `--open` or `--close`; the panel keeps that button's `aria-expanded` in step. Invoker commands are Baseline since December 2025 (Chrome 135, Firefox 144, Safari 26.2); in an older browser the panel runs the button's command on click itself. Any other control drives `expanded` or `toggle()` and listens for `toggle`, as the switch card does:
+`headless` draws the content alone, with no summary row and no frame, so the panel becomes a collapse that a control elsewhere on the page opens. A `c2-button` (or a native button) needs no script: `commandfor` names the panel and `command` is `--toggle`, `--open` or `--close`; the panel keeps that button's `aria-expanded` in step, and `c2-button` hands it to its inner button. Invoker commands are Baseline since December 2025 (Chrome 135, Firefox 144, Safari 26.2); in an older browser the panel runs the button's command on click itself. Any other control drives `expanded` or `toggle()` and listens for `toggle`, as the switch card does:
 
 ```ts tag=CodeBlock
 import type { Details } from '@c2n/components/details'

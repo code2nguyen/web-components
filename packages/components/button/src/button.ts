@@ -1,10 +1,20 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
 
+/** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them the target's own fallback runs. */
+const nativeCommands = !isServer && 'commandForElement' in HTMLButtonElement.prototype
+/** ARIA element reflection (`ariaControlsElements`): the only way an id outside the shadow root reaches the inner button. */
+const elementReflection = !isServer && 'ariaControlsElements' in Element.prototype
+
 /**
  * Action button with optional leading/trailing icons, busy state and toggle-button semantics.
+ *
+ * Like a native `<button>`, it can be an invoker: `commandfor="<id>"` + `command` send the command to that element
+ * (`show-modal`, `toggle-popover`, or a custom `--name` that arrives as a `command` event). `aria-expanded` and
+ * `aria-controls` written on the host are handed to the inner button, so a disclosure trigger reports its state.
  *
  * @tag c2-button
  *
@@ -95,12 +105,37 @@ export class Button extends LitElement {
   /** Accessible name forwarded to the inner `<button>`. Set it on an icon-only button or one whose visible text is not its name. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
+  /**
+   * Id of the element this button sends its `command` to, as on a native `<button>` (invoker commands). Looked up in
+   * the button's own document or shadow root when the button is pressed. A `submit` or `reset` button of a form does not invoke.
+   */
+  @property({ attribute: 'commandfor', reflect: true }) commandFor = ''
+
+  /**
+   * Command sent to the `commandfor` element: a built-in one (`show-modal`, `close`, `toggle-popover`, …) or a custom
+   * `--name`, which reaches the target as a `command` event whose `source` is this button.
+   */
+  @property({ reflect: true }) command = ''
+
+  /** Expanded state of the content this button shows or hides (`"true"`/`"false"`), forwarded to the inner `<button>`. */
+  @property({ attribute: 'aria-expanded' }) override ariaExpanded: string | null = null
+
+  /**
+   * Ids (space-separated) of the elements this button controls, looked up in the button's own document or shadow root
+   * and handed to the inner `<button>` as element references, since an id does not cross the shadow boundary. They are
+   * looked up again when the attribute changes and when the button gets focus or is pressed.
+   */
+  @property({ attribute: 'aria-controls' }) ariaControls: string | null = null
+
+  @query('button', true) private readonly innerButton!: HTMLButtonElement | null
+
   /** The associated form, matching the native button API. */
   get form(): HTMLFormElement | null {
     return this.internals?.form ?? null
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    if (changed.has('commandFor') || changed.has('type') || changed.has('ariaControls')) this.resolveReferences()
     if (changed.has('disabled') || changed.has('running')) {
       if (this.unavailable) this.internals?.states.add('disabled')
       else this.internals?.states.delete('disabled')
@@ -116,7 +151,29 @@ export class Button extends LitElement {
     queueMicrotask(() => this.requestUpdate())
   }
 
+  private byId(id: string): Element | null {
+    const root = this.getRootNode() as Document | ShadowRoot
+    return id && root.getElementById ? root.getElementById(id) : null
+  }
+
+  /** Points the inner button at the `commandfor` and `aria-controls` elements, which may have been added since. */
+  private resolveReferences() {
+    const button = this.innerButton
+    if (!button) return
+    if (nativeCommands) {
+      // As natively, a submit or reset button of a form submits or resets it instead.
+      const target = this.type === 'button' || !this.form ? this.byId(this.commandFor) : null
+      if (button.commandForElement !== target) button.commandForElement = target
+    }
+    if (elementReflection) {
+      const controls = (this.ariaControls ?? '').split(/\s+/).flatMap((id) => this.byId(id) ?? [])
+      if (controls.length || button.ariaControlsElements) button.ariaControlsElements = controls.length ? controls : null
+    }
+  }
+
   private handleClick = () => {
+    // Runs before the button's activation behaviour, which reads `commandForElement`.
+    this.resolveReferences()
     if (this.unavailable) return
     if (this.type === 'reset') {
       if (this.form) HTMLFormElement.prototype.reset.call(this.form)
@@ -137,8 +194,11 @@ export class Button extends LitElement {
         aria-label=${this.ariaLabel || nothing}
         aria-busy=${this.running ? 'true' : nothing}
         aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
+        aria-expanded=${this.ariaExpanded || nothing}
+        command=${this.command || nothing}
         type="button"
         @click=${this.handleClick}
+        @focus=${this.resolveReferences}
       >
         ${
           this.running
