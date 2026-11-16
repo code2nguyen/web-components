@@ -280,6 +280,7 @@ price: .price
 Ada Lovelace,ada@analytical.io
 Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'in-view': `<c2-in-view style="--c2-in-view__hidden--opacity: 0; --c2-in-view__hidden--transform: translateY(12px)"><div style="padding: 16px 24px; border-radius: 8px; background: var(--c2-theme--color-surface-container, #f4f4f5)">Revealed on scroll</div></c2-in-view>`,
+  'index-bar': `<c2-index-bar keys="ABCDEF" keep-url items='[{"id":"preview-ib-a","label":"A"},{"id":"preview-ib-c","label":"C"},{"id":"preview-ib-d","label":"D"},{"id":"preview-ib-f","label":"F"}]'></c2-index-bar>`,
   indicator: `<div class="preview-row">
   <c2-indicator count="3" accessible-label="{count} unread"><c2-button>Inbox</c2-button></c2-indicator>
   <c2-indicator tone="success" position="bottom-end" accessible-label="Online" style="--c2-indicator--offset-x: 14.6%; --c2-indicator--offset-y: 14.6%"><c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar></c2-indicator>

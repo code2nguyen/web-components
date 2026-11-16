@@ -9,6 +9,10 @@
       "types": "./types/src/table-of-contents.d.ts",
       "default": "./dist/table-of-contents.js"
     },
+    "./index-bar.js": {
+      "types": "./types/src/index-bar.d.ts",
+      "default": "./dist/index-bar.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +70,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./index-bar.js"
+    ]
+  }
 }
