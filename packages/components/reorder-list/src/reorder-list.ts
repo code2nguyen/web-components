@@ -273,7 +273,7 @@ export class ReorderList extends LitElement {
    * one entry per row under it; rows without a key are not submitted. A named list also keeps its displayed order when
    * rows are added or removed, instead of returning to the light-DOM order.
    */
-  @property() name = ''
+  @property({ reflect: true }) name = ''
 
   /** The `data-reorder-key` of each keyed row, in the displayed order, which is what a form submits under `name`. */
   get value(): string[] {
