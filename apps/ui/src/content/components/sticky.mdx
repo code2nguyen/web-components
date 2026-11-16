@@ -1,6 +1,6 @@
 ---
 title: 'Sticky'
-description: 'Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down.'
+description: 'Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down or while a watched element is on screen.'
 category: 'Layout'
 ---
 
@@ -10,7 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Sticky } from '@c2n/components/sticky'
 import { Button } from '@c2n/components/button'
 
-`c2-sticky` keeps a toolbar, a row of tabs, a section heading or an action bar in view while the content around it scrolls. Stickiness itself is CSS `position: sticky`, so it costs nothing at rest; what the element adds is the **stuck state**: once content runs beneath it the host matches `:state(stuck)`, fires `stuck-change`, and its surface switches to the `__stuck--*` background and shadow, so a bar can sit flat on the page until it actually overlaps something. `edge="bottom"` pins it to the bottom edge instead. With `hide-on-scroll` it slides out of view while the reader scrolls down and comes back on the way up, or as soon as focus moves into it.
+`c2-sticky` keeps a toolbar, a row of tabs, a section heading or an action bar in view while the content around it scrolls. Stickiness itself is CSS `position: sticky`, so it costs nothing at rest; what the element adds is the **stuck state**: once content runs beneath it the host matches `:state(stuck)`, fires `stuck-change`, and its surface switches to the `__stuck--*` background and shadow, so a bar can sit flat on the page until it actually overlaps something. `edge="bottom"` pins it to the bottom edge instead. With `hide-on-scroll` it slides out of view while the reader scrolls down and comes back on the way up, or as soon as focus moves into it. With `show-when-hidden` it becomes a sticky call to action: it stays out of view while a watched element (the page's main Buy or Apply button) is on screen, and slides in once that element is scrolled away.
 
 The element sticks within its parent, and the nearest ancestor with `overflow` set is the box it sticks to, exactly as for any sticky box. Keep a distance from the edge with `--c2-sticky--offset` (the height of a sticky header above it, for instance), and switch pinning off under a breakpoint with `--c2-sticky--position: static`, which also switches the stuck state off. `c2-header` uses the same behaviour for its `sticky` mode.
 
@@ -87,6 +87,21 @@ Scroll inside each box.
     <p>Weekly metrics digest: all dashboards green.</p>
   </div>
 </div>
+<div data-label="Call to action while the main button is off screen">
+  <div class="sticky-scroller">
+    <p><strong>Trail runner 2</strong> · €129. Light, grippy and made for long days on rough ground.</p>
+    <p><c2-button id="sticky-usage-buy">Add to cart</c2-button></p>
+    <p>Scroll down: once the Add to cart button leaves the box, a bar with the same action slides in.</p>
+    <p>Upper: recycled mesh with a reinforced toe cap.</p>
+    <p>Midsole: responsive foam, 6 mm drop.</p>
+    <p>Outsole: 4 mm lugs in a sticky rubber compound.</p>
+    <p>Weight: 280 g for a size 42.</p>
+    <p>Free returns within 30 days.</p>
+    <c2-sticky class="sticky-toolbar" edge="bottom" show-when-hidden="sticky-usage-buy">
+      <div class="bar"><strong>Trail runner 2 · €129</strong><c2-button>Add to cart</c2-button></div>
+    </c2-sticky>
+  </div>
+</div>
 <div data-label="Pinned to the bottom edge">
   <div class="sticky-scroller">
     <p>Terms of service, section 1. The actions stay in reach until the end of the text.</p>
@@ -104,9 +119,23 @@ Scroll inside each box.
 </div>
 ```
 
+## Sticky call to action
+
+`show-when-hidden` names, by id, the element the sticky content stands in for, usually the page's main action. While that element is on screen the content is slid out of view and hidden (`:state(concealed)`), so it is neither focusable nor read twice; once the element is scrolled out of view, in either direction, the content slides back in. One `IntersectionObserver` watches the element, and nothing runs while the attribute is absent. The bar is an action zone: put your own button in it and give it the same handler as the button it mirrors.
+
+The id is looked up in the element's own document or shadow root. For an element in another shadow root, or one rendered after the sticky element, assign it to `showWhenHiddenElement` instead, which wins over the attribute. An id that matches nothing leaves the content in view, so the action stays reachable. While focus is inside the content it stays in view even if the watched element scrolls back in, and it slides away once focus leaves. The concealed content keeps its place in the flow; to keep a top bar from leaving a gap, let it overlap what follows with a negative `margin-block-end` (the gallery's "Buy bar at the top" card).
+
+```html tag=CodeBlock
+<c2-button id="buy">Add to cart</c2-button>
+…
+<c2-sticky edge="bottom" show-when-hidden="buy">
+  <div class="buy-bar"><strong>Trail runner 2 · €129</strong><c2-button>Add to cart</c2-button></div>
+</c2-sticky>
+```
+
 ## Reacting to the stuck state
 
-Style a stuck element from outside with `:state(stuck)` and `:state(retracted)`, or listen for `stuck-change` and `retract-change`, which do not bubble. The element's `stuck` and `retracted` properties read the current state, and `reveal()` brings a retracted element back.
+Style a stuck element from outside with `:state(stuck)`, `:state(retracted)` and `:state(concealed)`, or listen for `stuck-change`, `retract-change` and `conceal-change`, which do not bubble. The element's `stuck`, `retracted` and `concealed` properties read the current state, and `reveal()` brings a retracted element back.
 
 ```typescript tag=CodeBlock
 const toolbar = document.querySelector('c2-sticky')!

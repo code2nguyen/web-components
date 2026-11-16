@@ -21,8 +21,10 @@ declare module 'vue' {
     'c2-sticky': DefineComponent<
       C2Props<Sticky> & {
         'hide-on-scroll'?: unknown
+        'show-when-hidden'?: unknown
         onStuckChange?: (event: EventOf<Sticky, 'stuck-change'>) => void
         onRetractChange?: (event: EventOf<Sticky, 'retract-change'>) => void
+        onConcealChange?: (event: EventOf<Sticky, 'conceal-change'>) => void
       }
     >
   }
