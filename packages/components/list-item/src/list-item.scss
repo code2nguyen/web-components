@@ -163,6 +163,12 @@
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
+// The trailing control of a settings row keeps its own size. Its slot is the `control` part and, like any slot, has
+// no box, so an ordinary row lays out exactly as before.
+::slotted([slot='control']) {
+  flex: none;
+}
+
 // A bare `<svg>` is the one thing in these slots with no size of its own to work from, so it is the one thing the row
 // sizes. A `c2-feather-*` or `c2-mat-icon` reads the variables set above, and anything else — a shortcut hint, a
 // badge, an avatar — keeps its natural size instead of being squared off to an icon's.

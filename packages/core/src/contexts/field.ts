@@ -41,6 +41,8 @@ export interface FieldConsumerOptions {
   /**
    * The control is named by its own slotted text (a checkbox, a switch), so the field's label must not replace that
    * name. The field then draws no label row unless it has a label of its own, and passes that label as description.
+   * A label it is handed anyway (a `c2-list-item` naming the control in its `control` slot) names it only while it has
+   * no text of its own.
    */
   selfLabelled?: boolean
 }

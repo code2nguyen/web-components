@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-list-item: row shapes, densities, selected treatments, icons and two-line rows, on their own and inside a list. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-list-item: row shapes, densities, selected treatments, icons and two-line rows, on their own and inside a list, navigation and settings rows. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -17,6 +17,19 @@ import { FeatherUsersIcon as FeatherUsers } from '@c2n/feather-icons/icons/users
 import { FeatherFolderIcon as FeatherFolder } from '@c2n/feather-icons/icons/folder.js'
 import { FeatherBarChartIcon as FeatherBarChart } from '@c2n/feather-icons/icons/bar-chart.js'
 import { FeatherBriefcaseIcon as FeatherBriefcase } from '@c2n/feather-icons/icons/briefcase.js'
+import { FeatherWifiIcon as FeatherWifi } from '@c2n/feather-icons/icons/wifi.js'
+import { FeatherBluetoothIcon as FeatherBluetooth } from '@c2n/feather-icons/icons/bluetooth.js'
+import { FeatherGlobeIcon as FeatherGlobe } from '@c2n/feather-icons/icons/globe.js'
+import { FeatherChevronRightIcon as FeatherChevronRight } from '@c2n/feather-icons/icons/chevron-right.js'
+import { FeatherMoonIcon as FeatherMoon } from '@c2n/feather-icons/icons/moon.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+import { FeatherSmartphoneIcon as FeatherSmartphone } from '@c2n/feather-icons/icons/smartphone.js'
+import { FeatherMessageSquareIcon as FeatherMessageSquare } from '@c2n/feather-icons/icons/message-square.js'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherLockIcon as FeatherLock } from '@c2n/feather-icons/icons/lock.js'
+import { Switch } from '@c2n/components/switch'
+import { Checkbox } from '@c2n/components/checkbox'
+import { Select } from '@c2n/components/select'
 
 ## Rows
 
@@ -497,6 +510,155 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
   </c2-list-group>
   <c2-list-item href="#security"><c2-feather-settings slot="prefix-icon"></c2-feather-settings>Security</c2-list-item>
 </nav>
+```
+
+</GalleryGrid>
+
+## Settings rows
+
+A control in the `control` slot turns the row into a settings row: the row's text names the control, its `description` describes it, and a click anywhere on the row flips a switch or checkbox or focuses a select. The control keeps its own role, focus and keys. For a row that opens another page with its current value, use an `href` row with the value and a chevron in `suffix-icon`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Settings group
+<style>
+  .settings {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .settings .heading {
+    margin: 8px 12px 0;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .settings .group {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 12px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    --c2-list-item--min-height: 44px;
+    --c2-list-item--padding-left: 10px;
+    --c2-list-item--padding-right: 10px;
+    --c2-list-item--gap: 10px;
+    --c2-list-item--border-top-left-radius: 0px;
+    --c2-list-item--border-top-right-radius: 0px;
+    --c2-list-item--border-bottom-left-radius: 0px;
+    --c2-list-item--border-bottom-right-radius: 0px;
+    --c2-list-item--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .settings .last {
+    --c2-list-item--border-bottom: none;
+  }
+  .settings .value {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .settings .theme {
+    width: 88px;
+  }
+</style>
+<div class="settings">
+  <div class="heading">Connections</div>
+  <div class="group">
+    <c2-list-item><c2-feather-wifi slot="prefix-icon"></c2-feather-wifi>Wi-Fi<c2-switch slot="control" checked></c2-switch></c2-list-item>
+    <c2-list-item><c2-feather-bluetooth slot="prefix-icon"></c2-feather-bluetooth>Bluetooth<c2-switch slot="control"></c2-switch></c2-list-item>
+    <c2-list-item href="#units" class="last"><c2-feather-globe slot="prefix-icon"></c2-feather-globe>Units<span slot="suffix-icon" class="value">Metric</span><c2-feather-chevron-right slot="suffix-icon"></c2-feather-chevron-right></c2-list-item>
+  </div>
+  <div class="heading">Display</div>
+  <div class="group">
+    <c2-list-item class="last">
+      <c2-feather-moon slot="prefix-icon"></c2-feather-moon>
+      Theme
+      <c2-select slot="control" class="theme" value="auto" client:only="lit">
+        <c2-list-item value="auto">Auto</c2-list-item>
+        <c2-list-item value="light">Light</c2-list-item>
+        <c2-list-item value="dark">Dark</c2-list-item>
+      </c2-select>
+    </c2-list-item>
+  </div>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Two-line toggles
+<style>
+  .toggles {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    --c2-list-item--padding-top: 10px;
+    --c2-list-item--padding-bottom: 10px;
+    --c2-list-item--gap: 12px;
+    --c2-list-item__description--line-height: 18px;
+    --c2-list-item__description--margin-top: 2px;
+  }
+</style>
+<div class="toggles">
+  <c2-list-item>Auto-update apps<span slot="description">Over Wi-Fi, while charging</span><c2-switch slot="control" checked></c2-switch></c2-list-item>
+  <c2-list-item>Usage reports<span slot="description">Anonymous crash data</span><c2-switch slot="control"></c2-switch></c2-list-item>
+  <c2-list-item>Battery saver<span slot="description">Below 20% charge</span><c2-switch slot="control"></c2-switch></c2-list-item>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Notification channels
+<style>
+  .channels {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 280px;
+    padding: 4px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    --c2-list-item--gap: 12px;
+  }
+</style>
+<div class="channels">
+  <c2-list-item><c2-feather-mail slot="prefix-icon"></c2-feather-mail>Email<span slot="description">Weekly digest and mentions</span><c2-checkbox slot="control" checked></c2-checkbox></c2-list-item>
+  <c2-list-item><c2-feather-smartphone slot="prefix-icon"></c2-feather-smartphone>Push<span slot="description">Direct messages only</span><c2-checkbox slot="control" checked></c2-checkbox></c2-list-item>
+  <c2-list-item><c2-feather-message-square slot="prefix-icon"></c2-feather-message-square>SMS<span slot="description">Security alerts</span><c2-checkbox slot="control"></c2-checkbox></c2-list-item>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Réglages (français)
+<style>
+  .reglages {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 280px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 12px;
+    --c2-list-item--min-height: 44px;
+    --c2-list-item--gap: 12px;
+    --c2-list-item--border-top-left-radius: 0px;
+    --c2-list-item--border-top-right-radius: 0px;
+    --c2-list-item--border-bottom-left-radius: 0px;
+    --c2-list-item--border-bottom-right-radius: 0px;
+    --c2-list-item--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .reglages .last {
+    --c2-list-item--border-bottom: none;
+  }
+  .reglages .value {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="reglages" lang="fr">
+  <c2-list-item><c2-feather-bell slot="prefix-icon"></c2-feather-bell>Notifications<c2-switch slot="control" checked></c2-switch></c2-list-item>
+  <c2-list-item><c2-feather-lock slot="prefix-icon"></c2-feather-lock>Verrouillage<span slot="description">Après 5 minutes</span><c2-switch slot="control"></c2-switch></c2-list-item>
+  <c2-list-item href="#langue" class="last"><c2-feather-globe slot="prefix-icon"></c2-feather-globe>Langue<span slot="suffix-icon" class="value">Français</span><c2-feather-chevron-right slot="suffix-icon"></c2-feather-chevron-right></c2-list-item>
+</div>
 ```
 
 </GalleryGrid>

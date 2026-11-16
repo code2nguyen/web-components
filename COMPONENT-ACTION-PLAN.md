@@ -123,7 +123,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
 - **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low
-- **list-item-2** · `c2-list-item` · settings row #476 · +0.3 kB on 3.3 kB · risk low
 - **page-header-1** · `c2-page-header` · nav bar #467 · +0.6 kB on 29.8 kB · risk low
 - **table-of-contents-1** · `c2-table-of-contents` · index bar #470 · +1.2 kB on 5.1 kB · risk low
 - **progress-1** · `c2-progress` · navigation progress #496 (companion), milestone progress #506 · +0.6 kB on 2.7 kB, 1.2 kB new entry · risk low

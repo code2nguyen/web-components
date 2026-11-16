@@ -2591,6 +2591,13 @@
     },
     {
       "tag": "c2-list-item",
+      "slot": "control",
+      "decision": "part",
+      "parts": ["control"],
+      "reason": "The control slot is itself the control part: it has no box until a consumer gives it one, so an ordinary row lays out as before, and the assigned control keeps its own contract."
+    },
+    {
+      "tag": "c2-list-item",
       "slot": "default",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."

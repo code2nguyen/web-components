@@ -209,7 +209,7 @@ export class Checkbox extends LitElement {
             type="checkbox"
             name="${ifDefined(this.name)}"
             aria-checked="${ifDefined(ariaChecked)}"
-            aria-label="${ifDefined(this.ariaLabel)}"
+            aria-label="${ifDefined(this.ariaLabel || (!hasLabel && this.field.label) || undefined)}"
             aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
             aria-describedby="${this.field.describedBy(this.ariaDescribedBy)}"
             aria-invalid="${this.field.invalid ? 'true' : nothing}"
