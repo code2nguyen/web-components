@@ -71,6 +71,18 @@
     trailing--color: #71717a,
     trailing--font-size: null,
     trailing--font-weight: 400,
+    reason--color: #71717a,
+    reason--font-size: 12px,
+    reason--font-weight: 400,
+    progress--color: #71717a,
+    progress--font-size: 12px,
+    progress--font-weight: 400,
+    progress--gap: 6px,
+    progress__bar--width: 0px,
+    progress__bar--height: 4px,
+    progress__bar--border-radius: 999px,
+    progress__bar--color: null,
+    progress__track--color: #e4e4e7,
 
     success--color: #16a34a,
     error--color: #dc2626,
@@ -78,6 +90,7 @@
     running--color: rgb(2, 101, 220),
     current--color: rgb(2, 101, 220),
     skipped--color: #71717a,
+    locked--color: #71717a,
 
     transition-duration: 150ms,
     enter-duration: 260ms,
@@ -394,6 +407,15 @@ a.c2-step__row {
   display: none;
 }
 
+// The label line, then the lines under it that only some steps have: a group's count and a reason.
+.c2-step__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: css.cssVar(detail--row-gap);
+}
+
 .c2-step__text {
   display: flex;
   flex-direction: css.cssVar(text--flex-direction);
@@ -453,6 +475,47 @@ a.c2-step__row {
   &[hidden] {
     display: none;
   }
+}
+
+.c2-step__reason {
+  color: css.cssVar(reason--color);
+  font-size: css.cssVar(reason--font-size);
+  font-weight: css.cssVar(reason--font-weight);
+  line-height: 1.5;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-step__progress {
+  display: flex;
+  align-items: center;
+  color: css.cssVar(progress--color);
+  font-size: css.cssVar(progress--font-size);
+  font-weight: css.cssVar(progress--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+// Zero wide by default, and then no gap either: `min()` keeps a bar nobody asked for from pushing the count over.
+.c2-step__progress-bar {
+  flex: none;
+  inline-size: css.cssVar(progress__bar--width);
+  block-size: css.cssVar(progress__bar--height);
+  margin-inline-end: min(#{css.cssVar(progress--gap)}, #{css.cssVar(progress__bar--width)});
+  border-radius: css.cssVar(progress__bar--border-radius);
+  background: linear-gradient(
+    var(--_to, to right),
+    #{css.cssVar(progress__bar--color, success--color)} calc(var(--_done, 0) * 100%),
+    #{css.cssVar(progress__track--color)} 0
+  );
+}
+
+// Gradients ignore `direction`, so the bar fills from the other end on its own.
+.c2-step__progress-bar:dir(rtl) {
+  --_to: to left;
 }
 
 // Read by assistive technology, never shown: the marker alone would leave the state unspoken.
@@ -518,6 +581,16 @@ a.c2-step__row {
 :host(:state(marker-number)) .c2-step__row.is-running .c2-step__marker {
   // With a number inside, the filled core would swallow it.
   box-shadow: none;
+}
+
+// A locked step is muted like a skipped one; its padlock says why it does not respond.
+.c2-step__row.is-locked {
+  .c2-step__marker {
+    color: css.cssVar(locked--color);
+  }
+  .c2-step__label {
+    color: css.cssVar(locked--color);
+  }
 }
 
 // Muted rather than dimmed: an opacity on top of an already-muted grey can never meet the contrast minimum, and a
@@ -660,9 +733,13 @@ a.c2-step__row {
   margin-inline-end: 0;
 }
 
+// The text cell holds the label line and the lines under it.
+.is-horizontal .c2-step__body {
+  grid-area: text;
+}
+
 // A column is narrow, so the detail goes under the label whatever `text--flex-direction` says.
 .is-horizontal .c2-step__text {
-  grid-area: text;
   // Beside the marker, the label's first line is the one centred on it.
   margin-top: calc((var(--_line) - #{css.cssVar(label--font-size)} * 1.5) / 2);
   flex-direction: column;

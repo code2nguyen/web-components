@@ -26,6 +26,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-step': C2Props<Step>
       'c2-steps': Omit<C2Props<Steps>, 'steps'> & {
+        'group-progress'?: Attribute
         'aria-label'?: Attribute
         steps?: Steps['steps'] | string
       }
