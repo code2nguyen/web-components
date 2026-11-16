@@ -20,6 +20,8 @@
     title--color: #18181b,
     title--min-width: 240px,
     title__narrow--font-size: 20px,
+    title__large--font-size: 32px,
+    title__collapsed--scale: 0.9,
 
     leading--size: 40px,
 
@@ -250,6 +252,11 @@ $_duration: css.cssVar(transition-duration);
   flex: none;
 }
 
+// With nothing folded the menu takes no room, or the row's gap would push a lone primary action off the title's edge.
+.more-menu:has(> .more[hidden]) {
+  display: none;
+}
+
 .more {
   display: inline-grid;
   place-items: center;
@@ -365,6 +372,10 @@ $_duration: css.cssVar(transition-duration);
   text-overflow: ellipsis;
 }
 
+.condensed-center {
+  display: contents;
+}
+
 .condensed-suffix {
   display: inline-flex;
   flex: none;
@@ -397,5 +408,82 @@ $_duration: css.cssVar(transition-duration);
   .primary,
   .condensed-bar {
     transition-duration: 0s;
+  }
+}
+
+// ------------------------------------
+// Large title: drawn large at every width; on a sticky header it collapses under the condensed bar, whose title is
+// centred over the whole bar, clear of the back link and the primary action.
+:host([large-title]) .heading {
+  font-size: css.cssVar(title__large--font-size);
+}
+
+:host([large-title]) .condensed-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  // Equal side columns centre the title on the bar; when the bar is too narrow for that, they shrink to what the back
+  // link and the primary action need and the title takes the rest.
+  grid-template-columns:
+    minmax(calc(#{css.cssVar(padding-left)} + 32px), 1fr) minmax(0, max-content) minmax(0, max-content)
+    minmax(calc(#{css.cssVar(padding-right)} + var(--_primary-width, 0px) + 12px), 1fr);
+  align-items: center;
+
+  .condensed-title {
+    grid-column: 2;
+  }
+
+  .condensed-suffix {
+    margin-inline-start: 8px;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+// The fade follows the scroll of the nearest scroll container, over the range the component measures (a view timeline
+// cannot be used: inside a sticky box it ends where the box stops sticking). The bar shows from the start of that range,
+// inert until the header has condensed.
+@supports ((animation-timeline: scroll()) and (animation-range: 0% 100%)) {
+  @media (prefers-reduced-motion: no-preference) {
+    :host([large-title][sticky]) {
+      .title-line > *,
+      .condensed-bar {
+        animation: var(--_fade-title, none) auto linear both;
+        animation-timeline: scroll(nearest block);
+        animation-range: var(--_fade-range, normal);
+      }
+
+      .title-line > * {
+        transform-origin: 0 50%;
+
+        &:dir(rtl) {
+          transform-origin: 100% 50%;
+        }
+      }
+
+      .condensed-bar {
+        visibility: visible;
+        animation-name: var(--_fade-bar, none);
+      }
+    }
+  }
+}
+
+@keyframes c2-page-header-title-out {
+  to {
+    opacity: 0;
+    scale: css.cssVar(title__collapsed--scale);
+  }
+}
+
+@keyframes c2-page-header-bar-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

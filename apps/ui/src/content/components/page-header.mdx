@@ -21,6 +21,8 @@ It lays out from its **own width**. Below 600px the breadcrumb gives way to a pa
 
 With `sticky`, once the title has scrolled away a condensed bar keeps the parent link, the title, its badges and the primary action in view. Inside a `c2-app-shell` it sits right under the shell's header with no extra CSS. A page header rendered on the server cannot fold its actions, so they wrap instead.
 
+For a **mobile navigation bar**, add `large-title`: the title is drawn large at every width (`--c2-page-header__title__large--font-size`) and, on a sticky page header, collapses into the condensed bar as it scrolls under it. The bar's title is centred between the back link and the primary action. Where CSS scroll-driven animations are supported the large title fades out and the bar fades in with the scroll position; elsewhere the bar fades in once the title has gone, and with reduced motion there is no scroll-linked fade. The page header follows the nearest scrolling ancestor, so it works in a scrolling pane as well as on the page.
+
 ## Import
 
 ```typescript tag=CodeBlock
@@ -80,6 +82,22 @@ The narrow frames show the parent link and folded actions; open **More actions**
     font-size: 14px;
     font-weight: 500;
   }
+  .nav-pane {
+    height: 280px;
+    overflow: auto;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .nav-pane .demo-page-header {
+    --c2-page-header--padding-top: 12px;
+    --c2-page-header--background-color: var(--c2-theme--color-surface, #ffffff);
+  }
+  .nav-rows {
+    margin: 0;
+    padding: 4px 24px 16px 40px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 14px;
+    line-height: 2;
+  }
   .tabs a[aria-current='page'] {
     color: var(--c2-theme--color-on-surface, #18181b);
     border-bottom-color: var(--c2-theme--color-primary, #0265dc);
@@ -135,6 +153,29 @@ The narrow frames show the parent link and folded actions; open **More actions**
       <c2-button slot="actions" class="secondary" overflow-priority="2">Reject</c2-button>
       <c2-button slot="actions" primary>Approve batch</c2-button>
     </c2-page-header>
+  </div>
+</div>
+<div data-label="Navigation bar · large title (scroll it)">
+  <div class="header-frame narrow nav-pane">
+    <c2-page-header client:only="lit" class="demo-page-header" sticky large-title>
+      <c2-breadcrumb slot="breadcrumb">
+        <c2-link-button href="#usage">Payouts</c2-link-button>
+        <c2-link-button>Batches</c2-link-button>
+      </c2-breadcrumb>
+      <h1>Batches</h1>
+      <c2-button slot="actions" primary>New batch</c2-button>
+    </c2-page-header>
+    <ul class="nav-rows">
+      <li>B-0412 · October supplier run</li>
+      <li>B-0411 · Contractors</li>
+      <li>B-0410 · Refunds</li>
+      <li>B-0409 · Payroll top-up</li>
+      <li>B-0408 · September supplier run</li>
+      <li>B-0407 · Contractors</li>
+      <li>B-0406 · Refunds</li>
+      <li>B-0405 · Payroll top-up</li>
+      <li>B-0404 · August supplier run</li>
+    </ul>
   </div>
 </div>
 ```
