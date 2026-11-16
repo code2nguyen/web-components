@@ -8,6 +8,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { animate, type Options as MotionOptions } from '@lit-labs/motion'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { reorderListMessages } from './messages'
 import styles from './reorder-list.scss?inline'
 
@@ -59,6 +60,21 @@ export const defaultSwipeActions: readonly ReorderSwipeAction[] = Object.freeze(
   Object.freeze({ id: 'delete', label: 'Delete', side: 'end', tone: 'danger', icon: 'delete', key: 'Delete' } as ReorderSwipeAction),
 ])
 
+/** What `renderRank` is called with, once per row of a `ranked` list. */
+export interface ReorderListRankContext {
+  /** The row. */
+  item: ReorderItemReference
+  /** The row's position, from 1, as currently displayed (it follows a row that is being moved). */
+  rank: number
+  /** The number of rows. */
+  count: number
+  /** Whether the row is the one being moved by keyboard. */
+  active: boolean
+}
+
+/** Draws the content of a row's `rank` badge: anything Lit can render. */
+export type ReorderListRankRenderer = (context: ReorderListRankContext) => unknown
+
 export interface ReorderErrorEventDetail {
   reason: 'duplicate-key'
   key: string
@@ -70,6 +86,7 @@ export interface ReorderListEventMap {
   reorder: CustomEvent<ReorderEventDetail>
   'reorder-error': CustomEvent<ReorderErrorEventDetail>
   'swipe-action': CustomEvent<ReorderSwipeActionEventDetail>
+  input: Event
   /** @deprecated Listen for `reorder`. */
   change: CustomEvent<number[]>
 }
@@ -144,8 +161,11 @@ function parseMotionDuration(value: string): number {
  *
  * Use `data-fixed` to pin an item at its absolute position, `data-reorder-key` for optional stable application
  * identity, and `data-reorder-label` for announcements. Non-empty keys must be unique. Editable lists need an
- * accessible name through `aria-label` or `aria-labelledby`. Whole-row touch reordering owns the vertical gesture;
+ * accessible name through `aria-label`, `aria-labelledby` or a `<label for>`. Whole-row touch reordering owns the vertical gesture;
  * interactive descendants retain their native behavior and never arm a reorder.
+ *
+ * With `ranked`, each row shows its position in a `rank` badge. With a `name`, the list is a form control: it submits
+ * the `data-reorder-key` of each keyed row in the displayed order, and `value` reads or sets that order.
  *
  * @tag c2-reorder-list
  *
@@ -154,6 +174,7 @@ function parseMotionDuration(value: string): number {
  * @slot dragging-item - Optional pointer preview shown only during pointer reordering.
  *
  * @csspart container - Ordered-list layout and component-owned spacing boundary.
+ * @csspart rank - With `ranked`, the badge region before each row's content, containing the row's position or what `renderRank` returns; hidden from assistive technology, which already announces the position.
  * @csspart item - Repeated component-owned placement wrapper around the default slot's assigned ordinary item; styles placement, not assigned content.
  * @csspart placeholder - Component-owned destination marker wrapping the `placeholder` slot or its visible fallback; styles placement, not assigned content.
  * @csspart dragging-item - Fixed-position component-owned preview region wrapping the `dragging-item` slot or its recognizable fallback; styles placement, not assigned content.
@@ -162,6 +183,7 @@ function parseMotionDuration(value: string): number {
  * @csspart swipe-action - One revealed swipe action button.
  *
  * @event {CustomEvent<ReorderEventDetail>} reorder - Fired once after a real committed user reorder. Bubbles and crosses shadow boundaries; not cancelable.
+ * @event {Event} input - Fired after `reorder` when a user reorder changes `value`. Bubbles and crosses shadow boundaries.
  * @event {CustomEvent<ReorderErrorEventDetail>} reorder-error - Fired when duplicate non-empty item keys prevent pickup.
  * @event {CustomEvent<number[]>} change - Deprecated numeric permutation emitted with `reorder` during the compatibility window.
  * @event {CustomEvent<ReorderSwipeActionEventDetail>} swipe-action - Fired when a swipe action runs, from its button, a full swipe or its key. Bubbles, crosses shadow boundaries and is cancelable: the `delete` action removes the item unless the event is canceled.
@@ -201,10 +223,22 @@ function parseMotionDuration(value: string): number {
  * @cssproperty {color} [--c2-reorder-list__swipe-action__accent--background-color=#0265dc] - Background of an `accent` action.
  * @cssproperty {color} [--c2-reorder-list__swipe-action__neutral--background-color=#52525b] - Background of a `neutral` action.
  * @cssproperty {color} [--c2-reorder-list__swipe-content--background-color=#ffffff] - Background of the sliding layer, which hides the actions until an item is swiped.
+ * @cssproperty {length} [--c2-reorder-list__rank--min-width=24px] - Minimum width of the rank badge.
+ * @cssproperty {length} [--c2-reorder-list__rank--height=24px] - Height of the rank badge.
+ * @cssproperty {length} [--c2-reorder-list__rank--padding=0 6px] - Padding of the rank badge.
+ * @cssproperty {length} [--c2-reorder-list__rank--margin-inline-end=12px] - Space between the rank badge and the row's content.
+ * @cssproperty {length} [--c2-reorder-list__rank--border-radius=999px] - Corner radius of the rank badge.
+ * @cssproperty {color} [--c2-reorder-list__rank--background-color=#f4f4f5] - Background of the rank badge.
+ * @cssproperty {color} [--c2-reorder-list__rank--color=#52525b] - Text colour of the rank badge.
+ * @cssproperty {length} [--c2-reorder-list__rank--font-size=12px] - Text size of the rank badge.
+ * @cssproperty {number} [--c2-reorder-list__rank--font-weight=600] - Text weight of the rank badge.
+ * @cssproperty {color} [--c2-reorder-list__rank__active--background-color=#0265dc] - Background of the rank badge of the row being moved by keyboard.
+ * @cssproperty {color} [--c2-reorder-list__rank__active--color=#ffffff] - Text colour of the rank badge of the row being moved by keyboard.
  */
 @customElement('c2-reorder-list')
 export class ReorderList extends LitElement {
   static override styles = unsafeCSS(styles)
+  static formAssociated = true
 
   // Each item's slot picks its item by hand instead of writing `slot` on it: an attribute written on a child while the
   // page upgrades is one the server never rendered, which React reports as a hydration mismatch.
@@ -228,6 +262,47 @@ export class ReorderList extends LitElement {
    */
   @property({ attribute: 'swipe-actions', converter: jsonPropertyConverter }) swipeActions: ReorderSwipeAction[] = [...defaultSwipeActions]
 
+  /** Shows each row's position, from 1, in a `rank` badge before it. */
+  @property({ type: Boolean }) ranked = false
+
+  /** Draws the content of each `rank` badge of a `ranked` list instead of the position number. */
+  @property({ attribute: false }) renderRank?: ReorderListRankRenderer
+
+  /**
+   * Form field name. With a name, the list submits the `data-reorder-key` of each keyed row, in the displayed order, as
+   * one entry per row under it; rows without a key are not submitted. A named list also keeps its displayed order when
+   * rows are added or removed, instead of returning to the light-DOM order.
+   */
+  @property() name = ''
+
+  /** The `data-reorder-key` of each keyed row, in the displayed order, which is what a form submits under `name`. */
+  get value(): string[] {
+    return this.visualOrder.length === 0 && this.pendingValue ? [...this.pendingValue] : this.keysOf(this.visualOrder)
+  }
+
+  /**
+   * Puts the movable rows with these keys first, in this order, and the other movable rows after them in their current
+   * order; fixed rows keep their positions and unknown keys are ignored. The light DOM is not moved. A value set before
+   * the rows exist applies once they arrive.
+   */
+  set value(keys: readonly string[]) {
+    if (!Array.isArray(keys)) return
+    if (this.visualOrder.length === 0) {
+      this.pendingValue = [...keys]
+      return
+    }
+    this.pendingValue = undefined
+    const next = this.orderByKeys(this.visualOrder, keys)
+    if (this.sameOrder(next, this.visualOrder)) return
+    if (this.session) this.cancelSession(this.msg.t('canceledItemsChanged'))
+    this.visualOrder = next
+  }
+
+  /** The form this list is associated with, if any. */
+  get form(): HTMLFormElement | null {
+    return this.internals.form
+  }
+
   @query('.c2-reorder-list-container') private containerElement?: HTMLElement
   @query('.dragging-item') private draggingElement?: HTMLElement
 
@@ -236,6 +311,13 @@ export class ReorderList extends LitElement {
   @state() private announcement = ''
   @state() private placeholderSize = { width: '0px', height: '0px' }
 
+  @state() private formDisabled = false
+  private readonly internals = this.attachInternals()
+  /** Names and describes the list inside a `c2-form-field`. */
+  private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
+  private pendingValue?: string[]
+  private authoredOrder: readonly HTMLElement[] = []
+  private inputAfterReconcile = false
   private readonly assignmentIds = new WeakMap<HTMLElement, string>()
   private assignmentCounter = 0
   private readonly msg = new LocalizeController(this, reorderListMessages)
@@ -277,10 +359,15 @@ export class ReorderList extends LitElement {
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     if (changedProperties.has('editable') && !this.editable && this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
+    if ((changedProperties as PropertyValues).has('formDisabled') && this.formDisabled) {
+      if (this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
+      this.closeSwipe()
+    }
   }
 
   protected override updated(changedProperties: PropertyValues<this>): void {
     super.updated(changedProperties)
+    if ((changedProperties as PropertyValues).has('visualOrder') || changedProperties.has('name')) this.syncFormValue()
     this.observeRenderedSize()
     if (this.session) this.observeSessionVisibility()
     this.restorePendingFocus()
@@ -300,7 +387,8 @@ export class ReorderList extends LitElement {
         part="container"
         class="c2-reorder-list-container"
         role="list"
-        aria-label=${this.getAccessibleName() || nothing}
+        aria-label=${this.getAccessibleName() || this.field.label || nothing}
+        aria-describedby=${this.field.describedBy()}
         @pointerdown=${this.handlePointerDown}
         @pointermove=${this.handlePointerMove}
         @pointerup=${this.handlePointerUp}
@@ -317,6 +405,7 @@ export class ReorderList extends LitElement {
         <slot name="dragging-item" ${assignSlot(this.getSpecialChildren('dragging-item'))}><span class="dragging-item__fallback">${activeLabel}</span></slot>
       </div>
       <p class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">${this.announcement || nothing}</p>
+      ${this.field.renderDescription()}
     `
   }
 
@@ -324,11 +413,12 @@ export class ReorderList extends LitElement {
     const index = order.indexOf(item)
     const fixed = this.isFixedItem(item)
     const active = this.session?.item === item
-    const draggable = this.editable && !fixed
+    const draggable = this.reorderable && !fixed
     const swipe = this.canSwipe(item)
     const tabbable = this.isKeyboardItem(item) && (this.focusedItem === item || (!this.focusedItem && this.firstKeyboardItem(order) === item))
     const describedBy = [draggable ? this.instructionsId : '', swipe && this.swipeShortcutText ? this.swipeInstructionsId : ''].filter(Boolean).join(' ')
-    const slot = html`<slot name=${this.getAssignmentId(item)} ${assignSlot([item])}></slot>`
+    const assigned = html`<slot name=${this.getAssignmentId(item)} ${assignSlot([item])}></slot>`
+    const slot = this.ranked ? this.renderRanked(item, index, order.length, active, assigned) : assigned
     return html`
       <div
         ${animate(() => this.itemMotionOptions())}
@@ -346,6 +436,15 @@ export class ReorderList extends LitElement {
         ${swipe ? this.renderSwipe(item, slot) : slot}
       </div>
     `
+  }
+
+  private renderRanked(item: HTMLElement, index: number, count: number, active: boolean, slot: TemplateResult): TemplateResult {
+    const rank = index + 1
+    const content = this.renderRank ? this.renderRank({ item: this.itemReference(item), rank, count, active }) : this.msg.t('rank', rank)
+    return html`<div class="ranked">
+      <span part="rank" class=${classMap({ rank: true, 'rank--active': active })} aria-hidden="true">${content}</span>
+      <div class="ranked__content">${slot}</div>
+    </div>`
   }
 
   private renderSwipe(item: HTMLElement, slot: TemplateResult): TemplateResult {
@@ -430,9 +529,18 @@ export class ReorderList extends LitElement {
         if (record.type === 'childList') return record.target === this
         const previous = record.oldValue ?? ''
         const current = (record.target as Element).slot
-        return record.target.parentNode === this && previous !== current && (SPECIAL_SLOTS.has(previous) || SPECIAL_SLOTS.has(current))
+        return (
+          record.attributeName === 'slot' &&
+          record.target.parentNode === this &&
+          previous !== current &&
+          (SPECIAL_SLOTS.has(previous) || SPECIAL_SLOTS.has(current))
+        )
       }
-      if (!records.some(changesItems)) return
+      if (!records.some(changesItems)) {
+        // A row's key changed: what the form submits changes with it, the order does not.
+        if (records.some((record) => record.attributeName === 'data-reorder-key' && record.target.parentNode === this)) this.syncFormValue()
+        return
+      }
       this.requestUpdate()
       const activeItem = this.session?.item ?? null
       const previousIndex = activeItem ? (this.session?.candidateIndex ?? 0) : 0
@@ -443,6 +551,10 @@ export class ReorderList extends LitElement {
       const focusedWrapper = (this.renderRoot as ShadowRoot | undefined)?.activeElement as HTMLElement | null | undefined
       const focusedItem = this.getItemByAssignmentId(focusedWrapper?.dataset?.assignmentId)
       this.reconcileAuthoredOrder()
+      if (this.inputAfterReconcile) {
+        this.inputAfterReconcile = false
+        this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+      }
       if (activeItem && !activeItem.isConnected) {
         const movable = this.visualOrder.filter((item) => !this.isFixedItem(item))
         this.pendingFocus = movable[Math.min(previousIndex, Math.max(0, movable.length - 1))] ?? 'host'
@@ -454,13 +566,24 @@ export class ReorderList extends LitElement {
       }
     })
     // Attribute records on children need `subtree`; the filter above keeps only the list's own children.
-    this.childListObserver.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'], attributeOldValue: true })
+    this.childListObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['slot', 'data-reorder-key'],
+      attributeOldValue: true,
+    })
   }
 
   private reconcileAuthoredOrder(): void {
     const authored = this.getAuthoredItems()
     if (!this.manualSlots) for (const item of authored) item.setAttribute('slot', this.getAssignmentId(item))
-    this.visualOrder = authored
+    let next: readonly HTMLElement[] = authored
+    if (this.pendingValue && authored.length) next = this.orderByKeys(authored, this.pendingValue)
+    else if (this.name) next = this.keepDisplayedOrder(authored)
+    if (authored.length) this.pendingValue = undefined
+    this.authoredOrder = authored
+    this.visualOrder = next
     if (this.focusedItem && !authored.includes(this.focusedItem)) this.focusedItem = this.firstMovable(authored)
   }
 
@@ -497,11 +620,11 @@ export class ReorderList extends LitElement {
 
   private handlePointerDown(event: PointerEvent): void {
     this.lastInputMethod = this.pointerInputMethod(event.pointerType)
-    if ((!this.editable && !this.swipeable) || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0) || this.session) return
+    if ((!this.reorderable && !this.swipeable) || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0) || this.session) return
     const wrapper = this.getWrapperFromEvent(event)
     const item = wrapper ? this.getItemByAssignmentId(wrapper.dataset.assignmentId) : null
     if (!item || this.hasInteractiveOrigin(event, wrapper)) return
-    const canDrag = this.editable && !this.isFixedItem(item)
+    const canDrag = this.reorderable && !this.isFixedItem(item)
     const canSwipe = this.canSwipe(item)
     if (!canDrag && !canSwipe) return
 
@@ -669,7 +792,7 @@ export class ReorderList extends LitElement {
         return
       }
     }
-    if (!this.editable || this.isFixedItem(item) || this.hasInteractiveOrigin(event, event.currentTarget as HTMLElement)) return
+    if (!this.reorderable || this.isFixedItem(item) || this.hasInteractiveOrigin(event, event.currentTarget as HTMLElement)) return
     const session = this.session
     if (!session) {
       if (event.code !== 'Space') return
@@ -756,11 +879,11 @@ export class ReorderList extends LitElement {
 
   private canSwipe(item: HTMLElement): boolean {
     const value = item.getAttribute('data-swipe')
-    return this.swipeable && value !== 'false' && value !== '0' && this.swipeActionList.length > 0
+    return this.swipeable && !this.formDisabled && value !== 'false' && value !== '0' && this.swipeActionList.length > 0
   }
 
   private isKeyboardItem(item: HTMLElement): boolean {
-    return (this.editable && !this.isFixedItem(item)) || this.canSwipe(item)
+    return (this.reorderable && !this.isFixedItem(item)) || this.canSwipe(item)
   }
 
   private firstKeyboardItem(order: readonly HTMLElement[]): HTMLElement | null {
@@ -884,6 +1007,7 @@ export class ReorderList extends LitElement {
       const index = this.visualOrder.indexOf(item)
       const remaining = this.visualOrder.filter((candidate) => candidate !== item && this.isKeyboardItem(candidate))
       if (trigger === 'key') this.pendingFocus = remaining[Math.min(index, remaining.length - 1)] ?? 'host'
+      this.inputAfterReconcile = true
       item.remove()
       this.announcement = this.msg.t('deleted', label)
       return
@@ -922,6 +1046,7 @@ export class ReorderList extends LitElement {
     this.announcement = this.msg.t('dropped', label, detail.fromIndex + 1, detail.toIndex + 1)
     this.pendingFocus = detail.inputMethod === 'keyboard' ? detail.item.element : null
     this.dispatchEvent(new CustomEvent<ReorderEventDetail>('reorder', { bubbles: true, composed: true, detail }))
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new CustomEvent<number[]>('change', { bubbles: true, cancelable: true, detail: legacyOrder }))
   }
 
@@ -983,10 +1108,80 @@ export class ReorderList extends LitElement {
     const direct = this.getAttribute('aria-label')?.trim()
     if (direct) return direct
     const ids = this.getAttribute('aria-labelledby')?.split(/\s+/).filter(Boolean) ?? []
-    return ids
-      .map((id) => this.ownerDocument.getElementById(id)?.textContent?.trim() ?? '')
+    // A `<label for>` names the list when no ARIA attribute does; a label wrapping the list would read the rows too.
+    const labels = ids.length
+      ? ids.map((id) => this.ownerDocument.getElementById(id))
+      : [...(this.internals.labels ?? [])].filter((label) => !label.contains(this))
+    return labels
+      .map((label) => label?.textContent?.trim() ?? '')
       .filter(Boolean)
       .join(' ')
+  }
+
+  // Form control -----------------------------------------------------------------------------------------------------
+
+  formResetCallback(): void {
+    this.pendingValue = undefined
+    if (this.session) this.cancelSession(this.msg.t('canceled'))
+    this.closeSwipe()
+    this.visualOrder = this.getAuthoredItems()
+  }
+
+  formDisabledCallback(disabled: boolean): void {
+    this.formDisabled = disabled
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null): void {
+    if (typeof state !== 'string') return
+    try {
+      const keys: unknown = JSON.parse(state)
+      if (Array.isArray(keys)) this.value = keys.map(String)
+    } catch {
+      // Not a state this element wrote; keep the current order.
+    }
+  }
+
+  private syncFormValue(): void {
+    const keys = this.value
+    const entries = this.name && keys.length ? new FormData() : null
+    for (const key of entries ? keys : []) entries!.append(this.name, key)
+    this.internals.setFormValue(entries, JSON.stringify(keys))
+  }
+
+  private get reorderable(): boolean {
+    return this.editable && !this.formDisabled
+  }
+
+  private keysOf(order: readonly HTMLElement[]): string[] {
+    return order.map((item) => item.dataset.reorderKey?.trim() ?? '').filter(Boolean)
+  }
+
+  private orderByKeys(order: readonly HTMLElement[], keys: readonly string[]): readonly HTMLElement[] {
+    const movable = order.filter((item) => !this.isFixedItem(item))
+    const byKey = new Map(movable.map((item) => [item.dataset.reorderKey?.trim(), item]))
+    const first = new Set(keys.map((key) => byKey.get(String(key).trim())).filter((item): item is HTMLElement => !!item))
+    const sorted = [...first, ...movable.filter((item) => !first.has(item))]
+    return this.fillMovable(order, sorted)
+  }
+
+  /**
+   * The new authored rows with the rows that stayed in the order they were displayed in, when the light DOM only gained
+   * or lost rows. When the remaining rows were themselves moved in the light DOM, that order wins as before.
+   */
+  private keepDisplayedOrder(authored: readonly HTMLElement[]): readonly HTMLElement[] {
+    const kept = new Set(authored.filter((item) => !this.isFixedItem(item) && this.visualOrder.includes(item)))
+    const before = this.authoredOrder.filter((item) => kept.has(item))
+    const after = authored.filter((item) => kept.has(item))
+    if (!this.sameOrder(before, after)) return authored
+    const displayed = this.visualOrder.filter((item) => kept.has(item))
+    let index = 0
+    return authored.map((item) => (kept.has(item) ? displayed[index++] : item))
+  }
+
+  /** `order` with its movable rows replaced, in turn, by `movable`; fixed rows keep their positions. */
+  private fillMovable(order: readonly HTMLElement[], movable: readonly HTMLElement[]): readonly HTMLElement[] {
+    let index = 0
+    return order.map((item) => (this.isFixedItem(item) ? item : movable[index++]))
   }
 
   private isFixedItem(item: HTMLElement): boolean {
