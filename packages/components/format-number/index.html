@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-format-number</title>
     <script type="module" src="/src/format-number.ts"></script>
+    <script type="module" src="/src/delta.ts"></script>
     <style>
       body {
         display: grid;
@@ -36,6 +37,11 @@
     <p class="pnl">
       P&amp;L: <c2-format-number type="currency" sign-display="exceptZero" value="420.5"></c2-format-number> /
       <c2-format-number type="currency" sign-display="exceptZero" value="-87.25"></c2-format-number>
+    </p>
+    <p>
+      Delta:
+      <c2-delta type="percent" maximum-fraction-digits="1" value="0.124"><span slot="comparison">vs last month</span></c2-delta>
+      / <c2-delta type="unit" unit="millisecond" better="lower" value="-42"></c2-delta>
     </p>
     <p class="price"><c2-format-number type="currency" value="49"></c2-format-number></p>
     <p>Missing: <c2-format-number>—</c2-format-number></p>
