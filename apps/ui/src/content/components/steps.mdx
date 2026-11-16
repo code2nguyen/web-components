@@ -46,7 +46,7 @@ it. Two lines on purpose, and each of them is still one line.
 it is running, or that something under it failed, without you setting it.
 
 Author it either way, and mix them freely: slot `c2-step` children, or hand `c2-steps` a `steps` array of
-`{ id, label, detail, trailing, status, children }` and it renders the tree itself. The array wins when both are
+`{ id, label, detail, trailing, status, reason, children }` and it renders the tree itself. The array wins when both are
 present.
 
 The connector rail is off by default, because a trace does not want one. Give `--c2-step__rail--width` a width and a
@@ -176,6 +176,18 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
   }
   .tasks c2-step c2-step {
     --c2-step__label--font-weight: 500;
+  }
+  /* A lesson list: sections counting their lessons with a bar, durations at the end of each row. */
+  .lessons {
+    --c2-step__row--padding-block: 8px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__progress__bar--width: 64px;
+    --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .lessons c2-step c2-step {
+    --c2-step__label--font-weight: 400;
   }
   /* A stage path: no rail, no marker, every row cut to a chevron and filled by its status. */
   .stages {
@@ -376,6 +388,20 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
   </c2-steps>
 </div>
 
+<div data-label="A lesson list — each section counts its lessons, and a locked one says why">
+  <c2-steps class="lessons" group-progress aria-label="Course content">
+    <c2-step label="Getting started">
+      <c2-step status="success" label="Welcome" href="#lesson-lists" trailing="2 min"></c2-step>
+      <c2-step status="success" label="Install the components" href="#lesson-lists" trailing="6 min"></c2-step>
+      <c2-step status="current" label="Your first form" href="#lesson-lists" trailing="12 min"></c2-step>
+    </c2-step>
+    <c2-step label="Theming">
+      <c2-step status="locked" label="Design tokens" reason="Finish Getting started to unlock" trailing="9 min"></c2-step>
+      <c2-step status="locked" label="Dark mode" trailing="7 min"></c2-step>
+    </c2-step>
+  </c2-steps>
+</div>
+
 <div data-label="A stage path — chevrons filled by status; press a stage to select it">
   <c2-steps class="stages" orientation="horizontal" interactive marker="none" current="2" selected="propose" aria-label="Opportunity stage">
     <c2-step class="stage-first" value="lead" label="Lead"></c2-step>
@@ -394,6 +420,7 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     <c2-step status="current" label="Current"></c2-step>
     <c2-step status="pending" label="Pending"></c2-step>
     <c2-step status="skipped" label="Skipped"></c2-step>
+    <c2-step status="locked" label="Locked" reason="A reason says why, on a line of its own"></c2-step>
   </c2-steps>
 </div>
 ```
@@ -472,6 +499,38 @@ path.querySelector('[slot="actions"]').addEventListener('click', () => {
   const index = Number(path.querySelector(`c2-step[value="${path.selected}"]`).path) - 1
   if (index >= 0) path.current = index
 })
+```
+
+## Lesson lists
+
+A **lesson list** is a course's curriculum: sections of lessons, how far the reader has got through each section, and
+lessons that cannot be opened yet. It is a task list with two more pieces:
+
+- `group-progress` on `c2-steps` counts every group's finished steps and shows the count under the group's label —
+  "2 of 5". It counts as `progress` does: the group's steps that are not groups themselves, with `success`, `warning`
+  and `skipped` as done. `--c2-step__progress__bar--width: 64px` adds a bar in front of the count (filled in
+  `--c2-step__progress__bar--color`, the success colour by default), and the text is the `groupProgress` message,
+  translatable like the summary. Each group's `{ completed, total }` is its `progress` property, and a renderer reads it
+  from `context.progress`.
+- `status="locked"` is a step the reader cannot open yet. Its marker is a padlock, its label is muted
+  (`--c2-step__locked--color`), and its row is neither a link nor, in an `interactive` list, selectable — `select()`
+  refuses it too. Assistive technology hears "Locked" after the label (the `locked` message).
+- `reason` (or the `reason` slot) puts a line under the label that says why: "Finish Getting started to unlock",
+  "Available on 3 May". It works with any status — why a step was skipped, what a failure means. A group whose only
+  unfinished steps are locked rolls up as `locked`.
+
+The lesson's type is an icon in the `marker` slot (or from `renderMarker`), its duration the `trailing` text.
+
+```html tag=CodeBlock
+<c2-steps group-progress aria-label="Course content">
+  <c2-step label="Getting started">
+    <c2-step status="success" label="Welcome" href="/lessons/welcome" trailing="2 min"></c2-step>
+    <c2-step status="current" label="Your first form" href="/lessons/form" trailing="12 min"></c2-step>
+  </c2-step>
+  <c2-step label="Theming">
+    <c2-step status="locked" label="Design tokens" reason="Finish Getting started to unlock"></c2-step>
+  </c2-step>
+</c2-steps>
 ```
 
 ## Driving a run

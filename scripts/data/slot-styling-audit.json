@@ -4077,6 +4077,13 @@
     },
     {
       "tag": "c2-step",
+      "slot": "reason",
+      "decision": "part",
+      "parts": ["reason"],
+      "reason": "The semantic reason region owns the reason slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
       "slot": "toggle",
       "decision": "part",
       "parts": ["toggle"],
