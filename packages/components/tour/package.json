@@ -9,6 +9,10 @@
       "types": "./types/src/tour.d.ts",
       "default": "./dist/tour.js"
     },
+    "./beacon.js": {
+      "types": "./types/src/beacon.d.ts",
+      "default": "./dist/beacon.js"
+    },
     "./tour-step.js": {
       "types": "./types/src/tour-step.d.ts",
       "default": "./dist/tour-step.js"
@@ -36,6 +40,8 @@
     "tour",
     "onboarding",
     "walkthrough",
+    "hotspots",
+    "beacon",
     "coach marks",
     "web component",
     "lit"
@@ -74,5 +80,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./beacon.js"
+    ]
+  }
 }

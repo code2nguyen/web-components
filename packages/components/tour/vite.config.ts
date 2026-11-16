@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/tour.ts', 'src/tour-step.ts'],
+      entry: ['src/tour.ts', 'src/tour-step.ts', 'src/beacon.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/tour.ts', 'src/tour-step.ts'],
+      files: ['src/tour.ts', 'src/tour-step.ts', 'src/beacon.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

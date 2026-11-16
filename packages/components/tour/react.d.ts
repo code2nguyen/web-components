@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { Beacon } from '@c2n/tour/beacon.js'
 import type { Tour } from '@c2n/tour'
 import type { TourStep } from '@c2n/tour/tour-step.js'
 
@@ -24,6 +25,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-beacon': C2Props<Beacon> & {
+        'storage-key'?: Attribute
+        'skip-limit'?: Attribute
+        'skip-delay'?: Attribute
+      }
       'c2-tour': C2Props<Tour> & {
         'storage-key'?: Attribute
         'skip-limit'?: Attribute
