@@ -1,5 +1,6 @@
 import { test, expect } from './fixture'
 import { accessible } from '../../../../tests/component-fixture'
+import type { Questionnaire } from '../src/questionnaire'
 
 test('questionnaire action parts and assigned replacements use independent styling routes', async ({ page, scenario }) => {
   await scenario()
@@ -113,4 +114,90 @@ test('shows the default or slotted summary after submit', async ({ page, scenari
   await expect(host).toHaveAttribute('completed')
   await expect(page.getByRole('heading', { name: 'Your plan' })).toBeVisible()
   await expect(page.getByText('Custom answer summary')).toBeVisible()
+})
+
+test('inline asks one question and collapses to the chosen answer', async ({ page, scenario }) => {
+  await scenario('inline')
+  const host = page.locator('c2-questionnaire')
+  await expect(host).toHaveAttribute('inline')
+  await expect(page.getByText('Question 1 of 3')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Next' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(page.getByRole('alert')).toHaveText('Choose an answer to continue.')
+  await page.getByRole('radio', { name: /Approval checkpoints/ }).check()
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(host).toHaveAttribute('completed')
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'What should the agent build next?' })).toBeVisible()
+  await expect(host.locator('[part="answer"]')).toContainText('Approval checkpoints')
+  await expect(page.getByRole('heading', { name: 'Summary' })).toHaveCount(0)
+  await expect(host).toHaveAttribute('data-events', /"type":"complete","detail":\{"answers":\{"direction":"approvals"\}\}/)
+  await accessible(page)
+})
+
+test('inline submits from the keyboard, keeps focus on the answer and ignores shortcuts once collapsed', async ({ page, scenario }) => {
+  await scenario('inline')
+  const host = page.locator('c2-questionnaire')
+  await page.getByRole('radio', { name: /Tool call timeline/ }).focus()
+  await page.keyboard.press('c')
+  await expect(page.getByRole('radio', { name: /Sub-agent handoffs/ })).toBeChecked()
+  await page.getByRole('button', { name: 'Submit' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(host.locator('[part="answer"]')).toBeFocused()
+  await expect(host.locator('[part="answer"]')).toContainText('Sub-agent handoffs')
+  await page.keyboard.press('a')
+  await expect(host).toHaveJSProperty('answers', { direction: 'handoffs' })
+})
+
+test('inline collapses to the free-text answer, a multiple answer or a skip', async ({ page, scenario }) => {
+  await scenario('inline')
+  const host = page.locator('c2-questionnaire')
+  await page.getByRole('textbox', { name: 'Describe another feature…' }).fill('A cost meter')
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(host.locator('[part="answer"]')).toContainText('A cost meter')
+
+  await scenario('inline-multiple')
+  await expect(page.getByRole('button', { name: 'Previous' })).toHaveCount(0)
+  await page.getByRole('checkbox', { name: 'Decisions' }).check()
+  await page.getByRole('checkbox', { name: 'Risks' }).check()
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await expect(host.locator('[part="answer"]')).toContainText('Decisions, Risks')
+
+  await scenario('inline-multiple')
+  await page.getByRole('button', { name: 'Skip' }).click()
+  await expect(host).toHaveAttribute('completed')
+  await expect(host.locator('[part="answer"]')).toHaveText(/Skipped/)
+  await host.evaluate((element) => element.setAttribute('skipped-label', 'Not answered'))
+  await expect(host.locator('[part="answer"]')).toContainText('Not answered')
+  await expect(host).toHaveAttribute('data-events', /"type":"skip".*"type":"complete"/)
+})
+
+test('inline keeps focus in the answer region when the summary slot replaces it, and stays on its question', async ({ page, scenario }) => {
+  await scenario('inline-summary')
+  const host = page.locator('c2-questionnaire')
+  await host.evaluate((element: Questionnaire) => (element.current = 2))
+  await page.getByRole('radio', { name: 'Start now' }).check()
+  await page.getByRole('button', { name: 'Submit' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByText('Custom answer summary')).toBeVisible()
+  await expect(host.locator('[part="answer"]')).toBeFocused()
+  await host.evaluate((element: Questionnaire) => element.previous())
+  await expect(host).toHaveAttribute('completed')
+  await expect(host).toHaveJSProperty('current', 2)
+  await host.evaluate((element: Questionnaire) => element.reset())
+  await expect(host).toHaveJSProperty('current', 2)
+  await expect(page.getByRole('radio', { name: 'Start now' })).not.toBeChecked()
+})
+
+test('letter shortcuts no longer change answers once the summary shows', async ({ page, scenario }) => {
+  await scenario()
+  const host = page.locator('c2-questionnaire')
+  await host.evaluate((element: Questionnaire) => (element.current = 2))
+  await page.getByRole('radio', { name: 'Start now' }).check()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(host).toHaveAttribute('completed')
+  // An author-focusable host (a summary with its own controls behaves the same): the keydown reaches the host's listener.
+  await host.evaluate((element) => (element.tabIndex = 0))
+  await host.press('b')
+  await expect(host).toHaveJSProperty('answers', { timing: 'now' })
 })

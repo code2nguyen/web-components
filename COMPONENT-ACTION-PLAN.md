@@ -124,7 +124,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **json-viewer-2** · `c2-json-viewer` · json editor #554 (lazy) · +0.3 kB on 7.0 kB, 6 kB lazy · risk medium
 - **log-viewer-1** · `c2-log-viewer` · build log #555 (lazy) · +0.4 kB on 16.5 kB, 4 kB lazy · risk medium
 - **citation-1** · `c2-citation` · sources #570 (companion) · 2.5 kB new entry · risk low
-- **questionnaire-1** · `c2-questionnaire` · agent question #571 · +0.8 kB on 4.7 kB · risk low
 - **selection-toolbar-1** · `c2-selection-toolbar` · inline prompt #574 · +1 kB on 13.2 kB · risk low
 
 ### New packages

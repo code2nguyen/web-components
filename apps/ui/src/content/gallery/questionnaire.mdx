@@ -1,5 +1,5 @@
 ---
-description: 'Playful, production-shaped questionnaire flows with single choice, multiple choice, custom item renderers and a completed answer summary.'
+description: 'Playful, production-shaped questionnaire flows with single choice, multiple choice, custom item renderers, a completed answer summary and inline agent questions.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -109,6 +109,84 @@ Each example gets a full row so the question, options and navigation can breathe
 </GalleryGrid>
 
 <QuestionnaireExamplesRuntime />
+
+## Inline questions
+
+With `inline`, the questionnaire asks a single question in place, as an agent does inside a chat thread: no progress line and no Previous, Submit (`complete-label`) or Skip completes it, and it collapses to the question and the chosen answer. Every word it shows comes from the question data and the label attributes.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Agent question
+<style>
+  .agent-question {
+    --c2-questionnaire__option--padding: 8px 12px;
+    --c2-questionnaire__title--font-size: 15px;
+  }
+</style>
+<c2-questionnaire
+  class="agent-question"
+  inline
+  complete-label="Submit"
+  questions='[{"id":"storage","title":"Where should the session store its cache?","description":"The agent will configure the build to match.","otherPlaceholder":"Somewhere else…","options":[{"value":"disk","label":"On disk","description":"Survives restarts; uses about 2 GB."},{"value":"memory","label":"In memory","description":"Fastest, cleared when the session ends."},{"value":"none","label":"No cache"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Answered
+<style>
+  .agent-answered {
+    --c2-questionnaire__answer--border: 1px solid #0f766e;
+    --c2-questionnaire__answer--border-radius: 14px;
+    --c2-questionnaire__answer--padding: 12px 16px;
+    --c2-questionnaire__answer--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-questionnaire__answer-value--font-weight: 600;
+  }
+</style>
+<c2-questionnaire
+  client:only="lit"
+  class="agent-answered"
+  inline
+  completed
+  data-questionnaire-answers='{"storage":"memory"}'
+  questions='[{"id":"storage","title":"Where should the session store its cache?","options":[{"value":"disk","label":"On disk"},{"value":"memory","label":"In memory"},{"value":"none","label":"No cache"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Pick several
+<style>
+  .agent-checks {
+    --c2-questionnaire__options--gap: 4px;
+    --c2-questionnaire__option--padding: 6px 10px;
+    --c2-questionnaire__option--border-radius: 6px;
+    --c2-questionnaire__action--border-radius: 999px;
+  }
+</style>
+<c2-questionnaire
+  class="agent-checks"
+  inline
+  complete-label="Run checks"
+  skip-label="Not now"
+  questions='[{"id":"checks","title":"Which checks should run before the commit?","type":"choice","skippable":true,"options":[{"value":"lint","label":"Lint"},{"value":"types","label":"Type-check"},{"value":"tests","label":"Unit tests"},{"value":"e2e","label":"Browser tests"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Question en français
+<style>
+  .agent-question-fr {
+    width: min(100%, 448px);
+  }
+</style>
+<div class="agent-question-fr" lang="fr">
+  <c2-questionnaire
+    inline
+    complete-label="Envoyer"
+    skip-label="Passer"
+    skipped-label="Question passée"
+    questions='[{"id":"ton","title":"Quel ton pour la réponse ?","skippable":true,"errorMessage":"Choisissez une réponse ou passez la question.","otherPlaceholder":"Un autre ton…","options":[{"value":"bref","label":"Bref et direct"},{"value":"detaille","label":"Détaillé, avec des exemples"},{"value":"formel","label":"Formel"}]}]'
+  ></c2-questionnaire>
+</div>
+```
+
+</GalleryGrid>
 
 ## Custom option renderer
 
