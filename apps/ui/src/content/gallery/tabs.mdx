@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Tabs } from '@c2n/components/tabs'
+import { CodeViewer } from '@c2n/components/code-viewer'
 import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
 import { FeatherBookOpenIcon as FeatherBookOpen } from '@c2n/feather-icons/icons/book-open.js'
 import { FeatherEditIcon as FeatherEdit } from '@c2n/feather-icons/icons/edit.js'
@@ -292,4 +293,79 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 </c2-tabs>
 ```
 
+```html tag=MdxCodeBlock,label=Synced code tabs
+<style>
+  .code-group {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+  }
+  .code-tabs {
+    --c2-tabs__tab--font-size: 13px;
+    --c2-tabs__tab--padding-top: 6px;
+    --c2-tabs__tab--padding-bottom: 6px;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
+    --c2-tabs__indicator--color: var(--c2-theme--color-primary, #2563eb);
+    --c2-code-viewer--border-top: none;
+    --c2-code-viewer--border-top-left-radius: 0px;
+    --c2-code-viewer--border-top-right-radius: 0px;
+  }
+</style>
+<div class="code-group">
+  <c2-tabs class="code-tabs" sync-key="gallery-pm" aria-label="Install" client:load>
+    <c2-tab for="gi-npm">npm</c2-tab>
+    <c2-tab for="gi-pnpm">pnpm</c2-tab>
+    <c2-tab for="gi-yarn">yarn</c2-tab>
+    <div id="gi-npm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="npm install @c2n/components"></c2-code-viewer></div>
+    <div id="gi-pnpm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="pnpm add @c2n/components"></c2-code-viewer></div>
+    <div id="gi-yarn"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="yarn add @c2n/components"></c2-code-viewer></div>
+  </c2-tabs>
+  <c2-tabs class="code-tabs" sync-key="gallery-pm" aria-label="Run" client:load>
+    <c2-tab for="gr-npm">npm</c2-tab>
+    <c2-tab for="gr-pnpm">pnpm</c2-tab>
+    <c2-tab for="gr-yarn">yarn</c2-tab>
+    <div id="gr-npm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="npm run dev"></c2-code-viewer></div>
+    <div id="gr-pnpm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="pnpm dev"></c2-code-viewer></div>
+    <div id="gr-yarn"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" code="yarn dev"></c2-code-viewer></div>
+  </c2-tabs>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=One-line command
+<style>
+  .command-tabs {
+    width: 100%;
+    --c2-tabs--box-shadow: none;
+    --c2-tabs--gap: 2px;
+    --c2-tabs__indicator--height: 0px;
+    --c2-tabs__tab--font-size: 12px;
+    --c2-tabs__tab--padding-top: 2px;
+    --c2-tabs__tab--padding-bottom: 2px;
+    --c2-tabs__tab--padding-left: 8px;
+    --c2-tabs__tab--padding-right: 8px;
+    --c2-tabs__tab--border-top-left-radius: 6px;
+    --c2-tabs__tab--border-top-right-radius: 6px;
+    --c2-tabs__tab--border-bottom-left-radius: 6px;
+    --c2-tabs__tab--border-bottom-right-radius: 6px;
+    --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tabs__tab__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-code-viewer--padding-top: 8px;
+    --c2-code-viewer--padding-bottom: 8px;
+  }
+</style>
+<c2-tabs class="command-tabs" sync-key="gallery-pm" aria-label="Create a project" client:load>
+  <c2-tab for="gc-npm">npm</c2-tab>
+  <c2-tab for="gc-pnpm">pnpm</c2-tab>
+  <c2-tab for="gc-yarn">yarn</c2-tab>
+  <div id="gc-npm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" copyable code="npm create vite@latest"></c2-code-viewer></div>
+  <div id="gc-pnpm"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" copyable code="pnpm create vite"></c2-code-viewer></div>
+  <div id="gc-yarn"><c2-code-viewer language="bash" theme="github-light" dark-theme="github-dark-default" copyable code="yarn create vite"></c2-code-viewer></div>
+</c2-tabs>
+```
+
 </GalleryGrid>
+
+The three code cards share `sync-key="gallery-pm"`: pick a package manager in one and the others follow; reload the page and they open on it.

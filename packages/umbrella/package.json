@@ -1101,6 +1101,10 @@
       "types": "./dist/tabs/tab.d.ts",
       "default": "./dist/tabs/tab.js"
     },
+    "./tabs/tab-nav": {
+      "types": "./dist/tabs/tab-nav.d.ts",
+      "default": "./dist/tabs/tab-nav.js"
+    },
     "./tag-input": {
       "types": "./dist/tag-input.d.ts",
       "default": "./dist/tag-input.js"

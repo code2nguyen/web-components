@@ -13,6 +13,24 @@ import type { Tab } from './tab'
 
 const TAB_TAG = 'c2-tab'
 
+/** Window event a strip with a `sync-key` fires when the user picks a tab, so the other strips of its group follow. */
+const SYNC_EVENT = 'c2-tabs-sync'
+
+/** `localStorage` key prefix under which a `sync-key` group remembers the label of its last pick. */
+const SYNC_STORE = 'c2n-tabs:'
+
+interface TabsSyncDetail {
+  key: string
+  label: string
+  source: Tabs
+}
+
+/**
+ * What a `sync-key` group matches tabs by: the label, which the same choice shares across groups (`npm`, `pnpm`). An
+ * explicit `label` or `aria-label` wins over the text, which may hold a badge; the text's whitespace is collapsed.
+ */
+const syncLabel = (tab: Tab) => tab.label || tab.getAttribute('aria-label') || tab.textContent?.replace(/\s+/g, ' ').trim() || ''
+
 /** Element reflection lets a panel wrapper in the shadow root be labelled by its tab in the light DOM. */
 const canReferenceElements = typeof Element !== 'undefined' && 'ariaLabelledByElements' in Element.prototype
 
@@ -50,6 +68,10 @@ export interface Tabs {
  * (`ariaLabelledByElements`), the selected panel gets `role="tabpanel"` and `aria-labelledby` itself (and the
  * tab an `id` for it), unless the author wrote them.
  *
+ * Strips that share a `sync-key` move together: picking a tab in one selects the tab with the same label in every
+ * other strip of the page with that key (a package manager, a language), and the choice is remembered in
+ * `localStorage` and restored when the page loads again. That is how a set of code blocks keeps one switcher.
+ *
  * When the shadow root was server-rendered (declarative shadow DOM, which has no manual mode) the strip falls
  * back to writing `slot` on the tabs and the selected panel, and only that panel is rendered. The selected tab
  * matches `c2-tab:state(selected)`.
@@ -61,7 +83,7 @@ export interface Tabs {
  * @slot tab - The `<c2-tab>` children (assigned by the strip; no `slot` attribute needed).
  * @slot tab-content - The panel of the selected tab, in a server-rendered shadow root only (assigned from the child whose `id` matches `selected-tab`). Otherwise each panel is assigned to a wrapper of its own; no `slot` attribute is needed either way.
  *
- * @event {CustomEvent<TabsSelectionChangeEventDetail>} selection-change - Fired after the user selects another tab. `detail.value` is the new `selected-tab`. Not fired for programmatic changes. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
+ * @event {CustomEvent<TabsSelectionChangeEventDetail>} selection-change - Fired after the user selects another tab, including when this strip follows a pick made in another strip of its `sync-key` group. `detail.value` is the new `selected-tab`. Not fired for programmatic changes, nor when a remembered choice is restored. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
  * The name matches `c2-list`, `c2-select` and `c2-table`; it is deliberately not `change`, which every native form
  * control bubbles — a `c2-text-field` inside a panel would otherwise reach a listener meant for the tab strip.
@@ -131,6 +153,18 @@ export class Tabs extends LitElement {
   @property({ type: String, attribute: 'selected-tab' })
   selectedTab = ''
 
+  /**
+   * Name of a group of strips that switch together. Picking a tab selects the tab with the same label (its `label`,
+   * else its `aria-label`, else its text) in every strip of the page with this key, and the label is remembered in
+   * `localStorage` under `c2n-tabs:<sync-key>`, so the strip opens on it on the next visit. A strip that has no tab with
+   * that label keeps its own. A remembered choice is applied once the tabs are slotted, in place of `selected-tab`.
+   */
+  @property({ type: String, attribute: 'sync-key' })
+  syncKey = ''
+
+  /** Whether the remembered `sync-key` choice has been looked up. */
+  private restored = false
+
   @query('.c2-tabs-header')
   private header!: HTMLElement
 
@@ -169,11 +203,13 @@ export class Tabs extends LitElement {
       this.childObserver.observe(this, { childList: true })
       // A reconnected strip may have missed child changes while it was detached.
       if (this.hasUpdated) this.assignSlots()
+      window.addEventListener(SYNC_EVENT, this.handleSync)
     }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
+    if (!isServer) window.removeEventListener(SYNC_EVENT, this.handleSync)
     this.resizeObserver?.disconnect()
     this.childObserver?.disconnect()
   }
@@ -210,11 +246,47 @@ export class Tabs extends LitElement {
 
   /** Selects a tab and notifies listeners. Ignores unknown or disabled tabs. */
   select(value: string) {
+    const tab = this.pick(value)
+    const label = tab && this.syncKey ? syncLabel(tab) : ''
+    if (!label) return
+    try {
+      localStorage.setItem(SYNC_STORE + this.syncKey, label)
+    } catch {
+      // Storage blocked (private mode, a sandboxed frame): the group still switches together on this page.
+    }
+    window.dispatchEvent(new CustomEvent<TabsSyncDetail>(SYNC_EVENT, { detail: { key: this.syncKey, label, source: this } }))
+  }
+
+  /** Selects a tab and fires `selection-change`; returns the tab when the selection changed. */
+  private pick(value: string): Tab | undefined {
     if (value === this.selectedTab) return
     const tab = this.tabs.find((t) => t.for === value)
     if (!tab || tab.disabled) return
     this.selectedTab = value
     this.dispatchEvent(new CustomEvent<TabsSelectionChangeEventDetail>('selection-change', { detail: { value }, bubbles: false, composed: true }))
+    return tab
+  }
+
+  /** Another strip of the page picked a tab: follow it when it is in this strip's group and this strip has that label. */
+  private handleSync = (event: Event) => {
+    const { key, label, source } = (event as CustomEvent<TabsSyncDetail>).detail
+    if (source === this || !this.syncKey || key !== this.syncKey) return
+    const tab = this.tabs.find((t) => !t.disabled && syncLabel(t) === label)
+    if (tab) this.pick(tab.for)
+  }
+
+  /** Selects the tab of the choice its `sync-key` group remembers, once, silently. */
+  private restoreSync(tabs: Tab[]) {
+    if (!this.syncKey || this.restored || tabs.length === 0) return
+    this.restored = true
+    let label: string | null = null
+    try {
+      label = localStorage.getItem(SYNC_STORE + this.syncKey)
+    } catch {
+      return
+    }
+    const tab = label ? tabs.find((t) => !t.disabled && syncLabel(t) === label) : undefined
+    if (tab) this.selectedTab = tab.for
   }
 
   private handleTabChange(event: CustomEvent<string>) {
@@ -267,6 +339,7 @@ export class Tabs extends LitElement {
       for (const tab of tabs) this.resizeObserver.observe(tab)
     }
 
+    this.restoreSync(tabs)
     // No (valid) selection given: adopt the first enabled tab silently.
     if (!this.selectedTab) {
       const first = tabs.find((t) => !t.disabled)

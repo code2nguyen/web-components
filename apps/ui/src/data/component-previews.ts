@@ -566,6 +566,11 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-symbol-no-results></c2-symbol-no-results>
   <c2-symbol-payment-success></c2-symbol-payment-success>
 </div>`,
+  'tab-nav': `<c2-tab-nav aria-label="Repository" style="width:240px">
+  <c2-tab href="#code" current>Code</c2-tab>
+  <c2-tab href="#issues">Issues</c2-tab>
+  <c2-tab href="#settings">Settings</c2-tab>
+</c2-tab-nav>`,
   table: `<c2-table sortable stripe row-key="id" style="height:180px;width:100%" rows='[
   {"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},
   {"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},
