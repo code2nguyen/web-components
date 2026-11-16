@@ -230,6 +230,29 @@ summary {
   }
 }
 
+// A collapse driven from outside: the content alone, with no summary and no frame. The content padding variables still
+// apply, defaulting to 0 rather than the header's padding.
+:host([headless]) {
+  summary {
+    display: none;
+  }
+
+  // The frame belongs to the summary panel. With no frame there is nothing to clip to, so focus rings and shadows of
+  // the content may draw past it (the slide still clips the content wrapper while it plays).
+  .c2-details {
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .c2-details-body {
+    padding: var(--c2-details__content--padding-top, 0) var(--c2-details__content--padding-right, 0) var(--c2-details__content--padding-bottom, 0)
+      var(--c2-details__content--padding-left, 0);
+  }
+}
+
 :host([disabled]) summary {
   cursor: default;
   opacity: css.cssVar(header__disabled--opacity);
