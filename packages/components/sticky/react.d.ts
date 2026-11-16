@@ -25,6 +25,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-sticky': C2Props<Sticky> & {
         'hide-on-scroll'?: Attribute
+        'show-when-hidden'?: Attribute
       }
     }
   }

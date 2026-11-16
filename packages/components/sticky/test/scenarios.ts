@@ -6,9 +6,16 @@ const main = document.querySelector('main')!
 const paragraphs = (count: number, label: string) =>
   Array.from({ length: count }, (_, i) => `<p>${label} paragraph ${i + 1}. Content scrolls beneath the pinned toolbar.</p>`).join('')
 
-const edge = scenario === 'bottom' || scenario === 'grow' ? ' edge="bottom"' : ''
+const cta = scenario.startsWith('cta')
+const edge = scenario === 'bottom' || scenario === 'grow' || cta ? ' edge="bottom"' : ''
 const hide = scenario === 'hide' ? ' hide-on-scroll' : ''
-const sticky = `<c2-sticky id="subject"${edge}${hide}>
+// `cta`: stands in for #buy (`cta-short`: on a box too short to scroll); `cta-missing`: names an id that matches nothing; `cta-element`: watches through the property.
+const watch = scenario === 'cta' || scenario === 'cta-short' ? ' show-when-hidden="buy"' : scenario === 'cta-missing' ? ' show-when-hidden="nowhere"' : ''
+const sticky = cta
+  ? `<c2-sticky id="subject"${edge}${watch}>
+  <div class="toolbar" role="toolbar" aria-label="Purchase"><button>Buy from the bar</button></div>
+</c2-sticky>`
+  : `<c2-sticky id="subject"${edge}${hide}>
   <div class="toolbar" role="toolbar" aria-label="Formatting"><button>Bold</button><button>Italic</button></div>
 </c2-sticky>`
 
@@ -27,7 +34,8 @@ customElements.define(
 )
 
 let content: string
-if (scenario === 'bottom') content = `${paragraphs(30, 'Body')}${sticky}${paragraphs(2, 'Footer')}`
+if (cta) content = `${paragraphs(1, 'Product')}<button id="buy">Buy now</button>${paragraphs(scenario === 'cta-short' ? 2 : 30, 'Details')}${sticky}`
+else if (scenario === 'bottom') content = `${paragraphs(30, 'Body')}${sticky}${paragraphs(2, 'Footer')}`
 else if (scenario === 'grow') content = `${paragraphs(1, 'Body')}<div id="more"></div>${sticky}`
 else content = `${paragraphs(2, 'Intro')}${sticky}${paragraphs(30, 'Body')}`
 
@@ -51,8 +59,12 @@ const subject = document.querySelector('c2-sticky')!
 const log = document.querySelector<HTMLOutputElement>('#log')!
 subject.addEventListener('stuck-change', (event) => (log.dataset.stuck = String(event.detail.stuck)))
 subject.addEventListener('retract-change', (event) => (log.dataset.retracted = String(event.detail.retracted)))
+subject.addEventListener('conceal-change', (event) => (log.dataset.concealed = String(event.detail.concealed)))
+if (scenario === 'cta-element') subject.showWhenHiddenElement = document.querySelector('#buy')
 
 // Branch on `scenario` to set up each state the spec drives, rather than mutating the element from the test.
+// A box exactly as tall as its content, so anything the concealed bar adds below it makes the box scroll.
+if (scenario === 'cta-short') document.querySelector<HTMLElement>('.scroller')!.style.height = 'auto'
 if (scenario === 'static') subject.style.setProperty('--c2-sticky--position', 'static')
 if (scenario === 'offset') subject.style.setProperty('--c2-sticky--offset', '24px')
 
