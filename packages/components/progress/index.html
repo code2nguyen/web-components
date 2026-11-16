@@ -97,9 +97,30 @@
         <h2>Live</h2>
         <c2-progress id="live" value="0" show-value>Rendering</c2-progress>
       </section>
+
+      <section>
+        <h2>Milestones</h2>
+        <c2-progress
+          value="1800"
+          max="3000"
+          marks='[{"value":500,"label":"Silver"},{"value":1500,"label":"Gold","state":"claimable"},{"value":3000,"label":"Platinum"}]'
+          >Loyalty points</c2-progress
+        >
+      </section>
+
+      <section>
+        <h2>Navigation progress</h2>
+        <c2-navigation-progress id="nav"></c2-navigation-progress>
+        <button id="nav-start">Start</button>
+        <button id="nav-done">Done</button>
+      </section>
     </main>
 
     <script type="module">
+      import './src/navigation-progress.ts'
+      const nav = document.querySelector('#nav')
+      document.querySelector('#nav-start').addEventListener('click', () => nav.start())
+      document.querySelector('#nav-done').addEventListener('click', () => nav.done())
       const live = document.querySelector('#live')
       setInterval(() => {
         live.value = live.value >= 100 ? 0 : live.value + 7

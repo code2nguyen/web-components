@@ -26,3 +26,25 @@ npm install @c2n/components
 Theme it with `--c2-progress--height`, `--c2-progress--width`, `--c2-progress--border-radius`, `--c2-progress__track--background-color`, `--c2-progress__indicator--background-color`, `--c2-progress--gap` and the `--c2-progress__label--*` / `--c2-progress__value--*` text variables. The full list is in `custom-elements.json` and on the docs site.
 
 Reach for [`@c2n/components/spinner`](../spinner) when the wait has no natural width to fill.
+
+## Milestones
+
+`marks` puts milestones on a linear track: tiers, thresholds, rewards. Each is `{ value, label?, state? }` in the units of `value`; it is `locked` until the value reaches it and `reached` from then on, and `state: "claimable"` marks a reward waiting to be claimed. Each milestone is announced with its state (a locked one with the distance left), `nextMark` returns the first one ahead of the value and the distance to it, and `renderMark` draws a label of your own. The `--c2-progress__mark--*` and `--c2-progress__mark-label--*` variables style the dots and the labels.
+
+```html
+<c2-progress value="38" max="50" marks='[{"value":50,"label":"Free shipping"}]'>Spend $12 more for free shipping</c2-progress>
+```
+
+## Navigation progress
+
+`c2-navigation-progress` is the thin bar across the top of the page while a route changes. It has its own entry, so it does not load `c2-progress`:
+
+```js
+import '@c2n/components/progress/navigation-progress'
+
+const bar = document.querySelector('c2-navigation-progress')
+router.on('start', () => bar.start()) // shows the bar and trickles it forward
+router.on('end', () => bar.done()) // fills it and fades it out
+```
+
+It draws in the top layer, above dialogs; `contained` draws it at the top of the nearest positioned ancestor instead. The `active` property is the same run for a framework binding.

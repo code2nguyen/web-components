@@ -881,6 +881,10 @@
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
     },
+    "./progress/navigation-progress": {
+      "types": "./dist/progress/navigation-progress.d.ts",
+      "default": "./dist/progress/navigation-progress.js"
+    },
     "./promo-code-field": {
       "types": "./dist/promo-code-field.d.ts",
       "default": "./dist/promo-code-field.js"

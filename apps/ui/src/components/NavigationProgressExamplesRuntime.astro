@@ -1,0 +1,33 @@
+---
+/**
+ * Plays the application's part in the navigation progress examples: the Start and Done buttons call the methods of
+ * the bar in their card (`data-navigation-progress-example`), and the French of the card under `lang="fr"`, which
+ * names the bar "Chargement de la page".
+ */
+---
+
+<script>
+  import type { NavigationProgress } from '@c2n/components/progress/navigation-progress'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { 'navigation-progress': { loading: 'Chargement de la page' } } })
+
+  const navigations = new WeakMap<NavigationProgress, ReturnType<typeof setTimeout>>()
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLElement>('[data-navigation-progress-action]')
+    const bar = button?.closest('[data-navigation-progress-example]')?.querySelector<NavigationProgress>('c2-navigation-progress')
+    if (!button || !bar) return
+    clearTimeout(navigations.get(bar))
+    if (button.dataset.navigationProgressAction === 'start') bar.start()
+    else if (button.dataset.navigationProgressAction === 'done') bar.done()
+    else {
+      // A navigation that takes a second and a half.
+      bar.start()
+      navigations.set(
+        bar,
+        setTimeout(() => bar.done(), 1500),
+      )
+    }
+  })
+</script>

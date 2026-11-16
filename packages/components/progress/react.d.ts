@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { NavigationProgress } from '@c2n/progress/navigation-progress.js'
 import type { Progress } from '@c2n/progress'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,8 +24,10 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-progress': C2Props<Progress> & {
+      'c2-navigation-progress': C2Props<NavigationProgress>
+      'c2-progress': Omit<C2Props<Progress>, 'marks'> & {
         'show-value'?: Attribute
+        marks?: Progress['marks'] | string
       }
     }
   }
