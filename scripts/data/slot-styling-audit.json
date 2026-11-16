@@ -4541,6 +4541,43 @@
       "reason": "The content region owns the clamp, colour and typography of the projected text through its part and --c2-truncate__content--* variables."
     },
     {
+      "tag": "c2-unit-input",
+      "slot": "chevron-icon",
+      "decision": "variables",
+      "variables": ["--c2-unit-input__icon--size", "--c2-unit-input__icon--color"],
+      "reason": "The unit picker's chevron box sizes and colours the slotted icon and its SVG fallback through the icon variables."
+    },
+    {
+      "tag": "c2-unit-input",
+      "slot": "decrement-icon",
+      "decision": "assigned-content",
+      "reason": "The decrement-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-unit-input",
+      "slot": "increment-icon",
+      "decision": "assigned-content",
+      "reason": "The increment-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-unit-input",
+      "slot": "prefix",
+      "decision": "assigned-content",
+      "reason": "The prefix slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-unit-input",
+      "slot": "suffix",
+      "decision": "assigned-content",
+      "reason": "The suffix slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-unit-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-upload",
       "slot": "action",
       "decision": "part",

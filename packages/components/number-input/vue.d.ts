@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { NumberInput } from '@c2n/number-input'
+import type { UnitInput } from '@c2n/number-input/unit-input.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -26,6 +27,19 @@ declare module 'vue' {
         'aria-label'?: unknown
         onInput?: (event: EventOf<NumberInput, 'input'>) => void
         onChange?: (event: EventOf<NumberInput, 'change'>) => void
+      }
+    >
+    'c2-unit-input': DefineComponent<
+      C2Props<UnitInput> & {
+        'unit-name'?: unknown
+        'unit-label'?: unknown
+        readonly?: unknown
+        'hide-steppers'?: unknown
+        'error-text'?: unknown
+        'aria-label'?: unknown
+        onUnitChange?: (event: EventOf<UnitInput, 'unit-change'>) => void
+        onInput?: (event: EventOf<UnitInput, 'input'>) => void
+        onChange?: (event: EventOf<UnitInput, 'change'>) => void
       }
     >
   }

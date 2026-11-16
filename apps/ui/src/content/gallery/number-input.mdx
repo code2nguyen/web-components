@@ -1,9 +1,11 @@
 ---
-description: 'Ready-made numeric fields with default, compact and accounting treatments.'
+description: 'Ready-made numeric fields with default, compact and accounting treatments, and step controls in French.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import NumberInputExamplesRuntime from '../../components/NumberInputExamplesRuntime.astro'
 
 import { NumberInput } from '@c2n/components/number-input'
 
@@ -51,3 +53,31 @@ Use the public field, value, adornment and stepper variables to fit different da
 ```
 
 </GalleryGrid>
+
+## Language
+
+The step controls are named "Increase value" and "Decrease value". An app translates them under `number-input`, and
+they follow the nearest `lang`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=French
+<style>
+  .french {
+    width: 190px;
+  }
+</style>
+<div lang="fr">
+  <c2-number-input class="french" aria-label="Quantité" value="3" min="0"></c2-number-input>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'number-input': { decrease: 'Diminuer la valeur', increase: 'Augmenter la valeur' } } })
+```
+
+<NumberInputExamplesRuntime />

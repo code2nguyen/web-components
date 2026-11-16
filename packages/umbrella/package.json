@@ -809,6 +809,10 @@
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
     },
+    "./number-input/unit-input": {
+      "types": "./dist/number-input/unit-input.d.ts",
+      "default": "./dist/number-input/unit-input.js"
+    },
     "./order-book": {
       "types": "./dist/order-book.d.ts",
       "default": "./dist/order-book.js"

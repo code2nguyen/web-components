@@ -1,0 +1,100 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-unit-input,
+  $theme: (
+    unit--color: #71717a,
+    unit--font-size: 14px,
+    equivalent--display: inline,
+    equivalent--color: #71717a,
+    equivalent--font-size: 12px,
+    picker--padding: 0 30px 0 10px,
+    picker--color: #18181b,
+    picker--background: transparent,
+    picker__hover--background: #f4f4f5,
+    picker--font-size: 14px,
+    picker--font-weight: 500,
+    picker--border-left: 1px solid #e4e4e7,
+    picker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    icon--size: 16px,
+    icon--color: #71717a,
+  )
+);
+
+// The field, the number and the step controls are c2-number-input's and keep its --c2-number-input--* variables.
+
+.unit {
+  flex: none;
+  color: css.cssVar(unit--color);
+  font-size: css.cssVar(unit--font-size);
+  white-space: nowrap;
+}
+
+// In a narrow field the number keeps room for a few digits and the equivalent gives way, cut with an ellipsis
+// (the whole text is still read with the number).
+input {
+  min-width: 3ch;
+}
+
+.equivalent {
+  display: css.cssVar(equivalent--display);
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: css.cssVar(equivalent--color);
+  font-size: css.cssVar(equivalent--font-size);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.picker {
+  position: relative;
+  display: flex;
+  flex: none;
+  border-left: css.cssVar(picker--border-left);
+}
+
+select {
+  margin: 0;
+  padding: css.cssVar(picker--padding);
+  border: 0;
+  border-radius: 0;
+  color: css.cssVar(picker--color);
+  background: css.cssVar(picker--background);
+  font: inherit;
+  font-size: css.cssVar(picker--font-size);
+  font-weight: css.cssVar(picker--font-weight);
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  transition: animation.standard(background);
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(picker__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(picker__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-flex;
+  color: css.cssVar(icon--color);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.chevron svg,
+::slotted([slot='chevron-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
