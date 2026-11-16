@@ -155,14 +155,15 @@ test('mouse-drag scrolls with the mouse, and the click that ends a drag does not
 
 test('mouse-drag leaves a field alone and moves only the axes that scroll', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-scroll-area mouse-drag style="--c2-scroll-area--max-height: 200px; width: 300px"><input aria-label="Note" style="width: 280px" />${rows(20)}</c2-scroll-area>`,
+    `<c2-scroll-area mouse-drag style="--c2-scroll-area--max-height: 200px; width: 300px">${rows(3)}<input aria-label="Note" style="width: 280px" />${rows(17)}</c2-scroll-area>`,
   )
   // The drag module loads the first time mouse-drag is on.
   await expect(viewport(page)).toHaveClass(/draggable/)
   const input = (await page.getByRole('textbox', { name: 'Note' }).boundingBox())!
   await page.mouse.move(input.x + 10, input.y + input.height / 2)
   await page.mouse.down()
-  await page.mouse.move(input.x + 10, input.y - 150, { steps: 5 })
+  // Stays inside the area: a release outside the page leaves Firefox's field holding the mouse.
+  await page.mouse.move(input.x + 10, input.y - 100, { steps: 5 })
   await page.mouse.up()
   expect(await area(page).evaluate((element: Area) => element.viewport.scrollTop)).toBe(0)
   const box = (await area(page).boundingBox())!
