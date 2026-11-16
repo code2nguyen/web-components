@@ -16,29 +16,98 @@ export interface InstalledInfo {
   version: string
   /** Set when the project reaches the package through `@c2n/components`: import it from the umbrella's entry. */
   via?: { package: typeof UMBRELLA; version: string }
-  /** Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. */
-  elements?: Map<string, InstalledElement>
+  /**
+   * Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. Shared by every
+   * package read from the same manifest (all of them, through the umbrella), so read-only.
+   */
+  elements?: ReadonlyMap<string, InstalledElement>
   /**
    * The tags of `elements` the package itself declares: all of them in its own manifest, and in the umbrella's merged
    * one only those whose module path starts with the package's directory (`table/…`).
    */
-  owned?: Set<string>
+  owned?: ReadonlySet<string>
   /** Per tag of `elements`, the manifest module declaring it (`meter/src/meter.js` in the umbrella's merged manifest) and its description. */
-  declared?: Map<string, { path: string; description: string }>
+  declared?: ReadonlyMap<string, { path: string; description: string }>
   /** The package's export entries (`./meter`), as its `package.json` lists them. */
   entries?: Set<string>
 }
 
 const TTL = 10_000
-let cache: { at: number; root: string; packages: Map<string, InstalledInfo | null> } | undefined
+/**
+ * What was read from the project, for `TTL` ms. Every package reached through `@c2n/components` reads the same
+ * `package.json` files and the same merged manifest (several MB), so those are read and parsed once, not per package.
+ */
+let cache:
+  | {
+      at: number
+      root: string
+      packages: Map<string, InstalledInfo | null>
+      /** Indexed manifests, keyed by real path. */
+      manifests: Map<string, ManifestIndex | null>
+      /** Parsed JSON files (`package.json`), or the error reading one threw. */
+      json: Map<string, { value: unknown } | { error: unknown }>
+    }
+  | undefined
+
+/** A parsed `custom-elements.json`, indexed once and shared by every package read from it. */
+interface ManifestIndex {
+  elements: ReadonlyMap<string, InstalledElement>
+  declared: ReadonlyMap<string, { path: string; description: string }>
+  /** Every tag the manifest declares. */
+  tags: ReadonlySet<string>
+  /** The tags declared by the modules under each top-level directory (`table` for `table/src/table.js`). */
+  ownedByDirectory: ReadonlyMap<string, ReadonlySet<string>>
+}
+
+const NONE: ReadonlySet<string> = new Set()
+
+interface ManifestJson {
+  modules?: {
+    path?: string
+    declarations?: {
+      tagName?: string
+      name?: string
+      description?: string
+      members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
+      attributes?: unknown[]
+      slots?: unknown[]
+      events?: unknown[]
+      cssParts?: unknown[]
+      cssProperties?: { name?: string }[]
+    }[]
+  }[]
+}
 
 export function projectRoot(): string {
   return process.env.C2N_PROJECT_ROOT ?? process.cwd()
 }
 
-export function installedPackage(name: string): InstalledInfo | null {
+/** The cache for the current project root, emptied when the root changed or it is older than `TTL`. */
+function freshCache(): NonNullable<typeof cache> {
   const root = projectRoot()
-  if (!cache || cache.root !== root || Date.now() - cache.at > TTL) cache = { at: Date.now(), root, packages: new Map() }
+  if (!cache || cache.root !== root || Date.now() - cache.at > TTL) cache = { at: Date.now(), root, packages: new Map(), manifests: new Map(), json: new Map() }
+  return cache
+}
+
+/** `path` parsed as JSON, read once per cache lifetime; throws what reading or parsing it threw. */
+function readJson<T>(path: string): T {
+  const json = freshCache().json
+  let entry = json.get(path)
+  if (!entry) {
+    try {
+      entry = { value: JSON.parse(readFileSync(path, 'utf8')) }
+    } catch (error) {
+      entry = { error }
+    }
+    json.set(path, entry)
+  }
+  if ('error' in entry) throw entry.error
+  return entry.value as T
+}
+
+export function installedPackage(name: string): InstalledInfo | null {
+  const cache = freshCache()
+  const root = cache.root
   if (cache.packages.has(name)) return cache.packages.get(name) ?? null
   let info: InstalledInfo | null
   try {
@@ -49,52 +118,16 @@ export function installedPackage(name: string): InstalledInfo | null {
     // The umbrella bundles the package, so its own package.json and merged manifest stand in for the package's.
     const pkgJsonPath = umbrella ? umbrella.path : findPackageJson(root, name)
     if (!pkgJsonPath) throw new Error(`${name} is not installed`)
-    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string; exports?: Record<string, unknown> }
+    const pkg = readJson<{ version: string; customElements?: string; exports?: Record<string, unknown> }>(pkgJsonPath)
     info = { version: pkg.version, entries: new Set(Object.keys(pkg.exports ?? {})) }
     if (umbrella) info.via = { package: UMBRELLA, version: umbrella.version }
     if (pkg.customElements) {
-      try {
-        const manifest = JSON.parse(readFileSync(join(pkgJsonPath, '..', pkg.customElements), 'utf8')) as {
-          modules?: {
-            path?: string
-            declarations?: {
-              tagName?: string
-              name?: string
-              description?: string
-              members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
-              attributes?: unknown[]
-              slots?: unknown[]
-              events?: unknown[]
-              cssParts?: unknown[]
-              cssProperties?: { name?: string }[]
-            }[]
-          }[]
-        }
-        const elements = new Map<string, InstalledElement>()
-        const owned = new Set<string>()
-        const declared = new Map<string, { path: string; description: string }>()
-        const directory = umbrella ? `${name.slice('@c2n/'.length)}/` : ''
-        for (const mod of manifest.modules ?? []) {
-          for (const decl of mod.declarations ?? []) {
-            if (!decl.tagName) continue
-            if ((mod.path ?? '').startsWith(directory)) owned.add(decl.tagName)
-            declared.set(decl.tagName, { path: mod.path ?? '', description: decl.description ?? '' })
-            elements.set(decl.tagName, {
-              className: decl.name ?? '',
-              properties: publicProperties(decl.members),
-              attributes: (decl.attributes ?? []) as ElementEntry['attributes'],
-              slots: (decl.slots ?? []) as ElementEntry['slots'],
-              events: (decl.events ?? []) as ElementEntry['events'],
-              cssParts: (decl.cssParts ?? []) as ElementEntry['cssParts'],
-              cssProperties: (decl.cssProperties ?? []).filter((p) => p.name) as ElementEntry['cssProperties'],
-            })
-          }
-        }
-        info.elements = elements
-        info.owned = owned
-        info.declared = declared
-      } catch {
-        /* manifest unreadable: keep the bundled API */
+      // Unreadable manifest: keep the bundled API. Through the umbrella, a package owns only its directory's tags.
+      const manifest = manifestIndex(join(pkgJsonPath, '..', pkg.customElements))
+      if (manifest) {
+        info.elements = manifest.elements
+        info.owned = umbrella ? (manifest.ownedByDirectory.get(name.slice('@c2n/'.length)) ?? NONE) : manifest.tags
+        info.declared = manifest.declared
       }
     }
   } catch {
@@ -102,6 +135,61 @@ export function installedPackage(name: string): InstalledInfo | null {
   }
   cache.packages.set(name, info)
   return info
+}
+
+/**
+ * The manifest at `path`, read and indexed once per cache lifetime. Through `@c2n/components` every package resolves
+ * to the umbrella's merged manifest (several MB), and parsing it once per package made a cold `installedOnly` listing
+ * take tens of seconds. `null` when it cannot be read or parsed.
+ */
+function manifestIndex(path: string): ManifestIndex | null {
+  const manifests = freshCache().manifests
+  // The umbrella's package.json is reached through its real path, the umbrella itself through node_modules: one key.
+  let key = path
+  try {
+    key = realpathSync(path)
+  } catch {
+    /* missing: the read below fails the same way */
+  }
+  if (manifests.has(key)) return manifests.get(key) ?? null
+  let index: ManifestIndex | null
+  try {
+    const manifest = JSON.parse(readFileSync(key, 'utf8')) as ManifestJson
+    const elements = new Map<string, InstalledElement>()
+    const declared = new Map<string, { path: string; description: string }>()
+    const tags = new Set<string>()
+    const ownedByDirectory = new Map<string, Set<string>>()
+    for (const mod of manifest.modules ?? []) {
+      const modulePath = mod.path ?? ''
+      // A package owns the tags of the modules under its directory (`table/…`); a path with no `/` is under none.
+      const slash = modulePath.indexOf('/')
+      const directory = slash === -1 ? undefined : modulePath.slice(0, slash)
+      for (const decl of mod.declarations ?? []) {
+        if (!decl.tagName) continue
+        tags.add(decl.tagName)
+        if (directory !== undefined) {
+          let owned = ownedByDirectory.get(directory)
+          if (!owned) ownedByDirectory.set(directory, (owned = new Set()))
+          owned.add(decl.tagName)
+        }
+        declared.set(decl.tagName, { path: modulePath, description: decl.description ?? '' })
+        elements.set(decl.tagName, {
+          className: decl.name ?? '',
+          properties: publicProperties(decl.members),
+          attributes: (decl.attributes ?? []) as ElementEntry['attributes'],
+          slots: (decl.slots ?? []) as ElementEntry['slots'],
+          events: (decl.events ?? []) as ElementEntry['events'],
+          cssParts: (decl.cssParts ?? []) as ElementEntry['cssParts'],
+          cssProperties: (decl.cssProperties ?? []).filter((p) => p.name) as ElementEntry['cssProperties'],
+        })
+      }
+    }
+    index = { elements, declared, tags, ownedByDirectory }
+  } catch {
+    index = null
+  }
+  manifests.set(key, index)
+  return index
 }
 
 /** Public instance fields of a manifest declaration: what a property binding may set. */
@@ -115,7 +203,7 @@ export function publicProperties(members: { kind?: string; name?: string; static
 /** Every dependency the project's own `package.json` names. */
 function declaredDependencies(root: string): Set<string> {
   try {
-    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as Record<string, Record<string, string> | undefined>
+    const pkg = readJson<Record<string, Record<string, string> | undefined>>(join(root, 'package.json'))
     return new Set(['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].flatMap((key) => Object.keys(pkg[key] ?? {})))
   } catch {
     return new Set()
@@ -139,7 +227,7 @@ function umbrellaOf(root: string, name: string): { path: string; version: string
   const path = findPackageJson(root, UMBRELLA)
   if (!path) return undefined
   try {
-    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; exports?: Record<string, unknown> }
+    const pkg = readJson<{ version: string; exports?: Record<string, unknown> }>(path)
     return pkg.exports?.[`./${name.slice('@c2n/'.length)}`] !== undefined ? { path: realpathSync(path), version: pkg.version } : undefined
   } catch {
     return undefined
