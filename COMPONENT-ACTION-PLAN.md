@@ -96,7 +96,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **image-annotator-1** · `c2-image-annotator` · extraction review #275, pinned comments #276, example: image pins #368 · +1.4 kB on 26.1 kB · risk low
 - **core-1** · `@c2n/core` · drop zone #284 (core), sync status #384 (core)
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
-- **scroll-area-1** · `c2-scroll-area` · scroller #472 · +1 kB on 3.4 kB · risk low
 - **date-selector-2** · `c2-date-selector` · date compare picker #295 · +1.2 kB on 4.7 kB · risk low
 - **date-input-2** · `c2-date-input` · memorable date #293 (companion) · 2.5 kB new entry · risk low
 - **month-planner-1** · `c2-month-planner` · agenda view #298, change calendar #303 · +2.3 kB on 10.9 kB · risk low

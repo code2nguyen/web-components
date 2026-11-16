@@ -1,0 +1,32 @@
+---
+/**
+ * Plays the application's part in the scroll area gallery: the French of the card under `lang="fr"`, and the header
+ * buttons of the "Buttons in a header" card (`data-scroll-page="start|end"`), which call `scrollPage()` on the area
+ * marked `data-scroll-area-example="header"` in the same `.area-header` block.
+ */
+---
+
+<script>
+  import type { ScrollArea, ScrollEdge } from '@c2n/components/scroll-area'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the "In French" card: the library ships its text in English only.
+  addTranslations({
+    fr: {
+      'scroll-area': {
+        label: 'Contenu défilant',
+        top: 'Défiler vers le haut',
+        bottom: 'Défiler vers le bas',
+        start: 'Défiler vers l’arrière',
+        end: 'Défiler vers l’avant',
+      },
+    },
+  })
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLElement>('[data-scroll-page]')
+    const area = button?.closest('.area-header')?.querySelector<ScrollArea>('c2-scroll-area[data-scroll-area-example="header"]')
+    if (!button || !area) return
+    area.scrollPage(button.dataset.scrollPage as ScrollEdge)
+  })
+</script>

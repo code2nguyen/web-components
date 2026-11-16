@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-scroll-area': DefineComponent<
       C2Props<ScrollArea> & {
+        'mouse-drag'?: unknown
         onScrollEdge?: (event: EventOf<ScrollArea, 'scroll-edge'>) => void
       }
     >

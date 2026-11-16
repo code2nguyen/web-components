@@ -14,6 +14,17 @@
     shadow--size: 12px,
     fade--size: 0px,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control--size: 32px,
+    control--inset: 8px,
+    control__icon--size: 16px,
+    control--color: #18181b,
+    control--background-color: #ffffff,
+    control__hover--background-color: #f4f4f5,
+    control--border: 1px solid #e4e4e7,
+    control--border-radius: 999px,
+    control--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    control--opacity: 1,
+    control__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
 
@@ -203,8 +214,130 @@
   opacity: 1;
 }
 
+// Mouse drag (classes set by mouse-drag.ts): while it drags, no text selection and no snapping fighting the pointer.
+.viewport.draggable {
+  cursor: grab;
+}
+
+.viewport.dragging {
+  cursor: grabbing;
+  user-select: none;
+  // Beats a snap type set through ::part(viewport); the snap applies again on release.
+  scroll-snap-type: none !important;
+}
+
+// The controls: one button over each edge, shown only while that edge has more beyond it. Hidden ones are
+// `visibility: hidden`, so they leave the accessibility tree and cannot keep focus.
+.control {
+  --_rest: #{css.cssVar(control--opacity)};
+
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  margin: 0;
+  padding: 0;
+  color: css.cssVar(control--color);
+  background-color: css.cssVar(control--background-color);
+  border: css.cssVar(control--border);
+  border-radius: css.cssVar(control--border-radius);
+  box-shadow: css.cssVar(control--box-shadow);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  touch-action: manipulation;
+  transition:
+    background-color 150ms ease,
+    opacity 150ms ease,
+    visibility 150ms;
+
+  &:hover {
+    background-color: css.cssVar(control__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(control__focus--outline);
+    outline-offset: 2px;
+  }
+
+  ::slotted(*),
+  .chevron {
+    width: css.cssVar(control__icon--size);
+    height: css.cssVar(control__icon--size);
+  }
+}
+
+.frame:is(:hover, :focus-within) .control {
+  --_rest: 1;
+}
+
+@media (hover: none) {
+  .control {
+    --_rest: 1;
+  }
+}
+
+.more-top .control--top,
+.more-bottom .control--bottom,
+.more-start .control--start,
+.more-end .control--end {
+  opacity: var(--_rest);
+  visibility: visible;
+}
+
+.control--top,
+.control--bottom {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.control--top {
+  top: css.cssVar(control--inset);
+}
+
+.control--bottom {
+  bottom: css.cssVar(control--inset);
+}
+
+.control--start,
+.control--end {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.control--start {
+  inset-inline-start: css.cssVar(control--inset);
+}
+
+.control--end {
+  inset-inline-end: css.cssVar(control--inset);
+}
+
+// The chevron points to the inline end; the others turn it. Only the default icon turns, never a slotted one.
+.control--top .chevron {
+  rotate: -90deg;
+}
+
+.control--bottom .chevron {
+  rotate: 90deg;
+}
+
+.control--start .chevron,
+:host(:dir(rtl)) .control--end .chevron {
+  rotate: 180deg;
+}
+
+:host(:dir(rtl)) .control--start .chevron {
+  rotate: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .shadow {
+  .shadow,
+  .control {
     transition: none;
   }
 }

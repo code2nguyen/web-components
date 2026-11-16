@@ -1,11 +1,16 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ScrollAreaExamplesRuntime from '../../components/ScrollAreaExamplesRuntime.astro'
 
 import { ScrollArea } from '@c2n/components/scroll-area'
+import { Button } from '@c2n/components/button'
+
+<ScrollAreaExamplesRuntime />
 
 ## Presets
 
-Looks for `c2-scroll-area`. The scrollbar, the shadows and the fade set the style.
+Looks for `c2-scroll-area`. The scrollbar, the shadows and the fade set the style; `controls` and `mouse-drag` make it a row scroller.
 
 <GalleryGrid>
 
@@ -60,4 +65,224 @@ Looks for `c2-scroll-area`. The scrollbar, the shadows and the fade set the styl
 <c2-scroll-area class="area-fade" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
 ```
 
+```html tag=MdxCodeBlock,label=Row scroller
+<style>
+  .area-row {
+    --c2-scroll-area__scrollbar--width: none;
+    --c2-scroll-area__shadow--color: transparent;
+    --c2-scroll-area__fade--size: 32px;
+    width: min(280px, 100%);
+  }
+  .area-row .shelf {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+  }
+  .area-row .tile {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 120px;
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-scroll-area class="area-row" orientation="horizontal" controls mouse-drag label="Trending"><div class="shelf"><span class="tile">Title 1</span><span class="tile">Title 2</span><span class="tile">Title 3</span><span class="tile">Title 4</span><span class="tile">Title 5</span><span class="tile">Title 6</span><span class="tile">Title 7</span><span class="tile">Title 8</span></div></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Controls on hover
+<style>
+  .area-hover-controls {
+    --c2-scroll-area__scrollbar--width: none;
+    --c2-scroll-area__control--opacity: 0;
+    --c2-scroll-area__control--size: 100%;
+    --c2-scroll-area__control--inset: 0px;
+    --c2-scroll-area__control--border: none;
+    --c2-scroll-area__control--border-radius: 0;
+    --c2-scroll-area__control--box-shadow: none;
+    --c2-scroll-area__control--background-color: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 80%, transparent);
+    --c2-scroll-area__control__hover--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-scroll-area__control__icon--size: 20px;
+    width: min(280px, 100%);
+  }
+  .area-hover-controls::part(control) {
+    width: 36px;
+  }
+  .area-hover-controls .shelf {
+    display: flex;
+    gap: 6px;
+    width: max-content;
+  }
+  .area-hover-controls .chip {
+    padding: 6px 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 999px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    white-space: nowrap;
+  }
+</style>
+<c2-scroll-area class="area-hover-controls" orientation="horizontal" controls label="Topics"><div class="shelf"><span class="chip">Design</span><span class="chip">Engineering</span><span class="chip">Marketing</span><span class="chip">Sales</span><span class="chip">Support</span><span class="chip">Finance</span><span class="chip">Legal</span><span class="chip">People</span></div></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Snap and drag
+<style>
+  .area-snap {
+    --c2-scroll-area__scrollbar--width: none;
+    --c2-scroll-area__control--size: 28px;
+    width: min(280px, 100%);
+  }
+  .area-snap::part(viewport) {
+    scroll-snap-type: x mandatory;
+  }
+  .area-snap .shelf {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+  }
+  .area-snap .slide {
+    display: grid;
+    place-items: center;
+    width: 150px;
+    height: 110px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    scroll-snap-align: start;
+  }
+</style>
+<c2-scroll-area class="area-snap" orientation="horizontal" controls mouse-drag label="Plans"><div class="shelf"><span class="slide">Starter</span><span class="slide">Team</span><span class="slide">Business</span><span class="slide">Enterprise</span></div></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .area-icons {
+    --c2-scroll-area__scrollbar--width: none;
+    --c2-scroll-area__control--size: 28px;
+    --c2-scroll-area__control--border-radius: 6px;
+    --c2-scroll-area__control--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-scroll-area__control--background-color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-scroll-area__control__hover--background-color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+    --c2-scroll-area__control--border: none;
+    --c2-scroll-area__control__icon--size: 14px;
+    width: min(280px, 100%);
+  }
+  .area-icons .shelf {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+  }
+  .area-icons .tile {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-scroll-area class="area-icons" orientation="horizontal" controls label="Friends">
+  <svg slot="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+  <svg slot="end-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+  <div class="shelf"><span class="tile">Ana</span><span class="tile">Ben</span><span class="tile">Chloé</span><span class="tile">Dev</span><span class="tile">Eli</span><span class="tile">Femi</span><span class="tile">Gus</span></div>
+</c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Vertical controls
+<style>
+  .area-vertical {
+    --c2-scroll-area--max-height: 180px;
+    --c2-scroll-area__control--size: 28px;
+    width: 220px;
+  }
+  .area-vertical .row {
+    margin: 0;
+    padding: 8px 4px;
+  }
+</style>
+<c2-scroll-area class="area-vertical" controls label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p></c2-scroll-area>
+```
+
+```html tag=MdxCodeBlock,label=Buttons in a header
+<style>
+  .area-header {
+    display: grid;
+    gap: 8px;
+    width: min(280px, 100%);
+  }
+  .area-header .bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+  .area-header .bar span {
+    flex: 1;
+  }
+  .area-header c2-scroll-area {
+    --c2-scroll-area__scrollbar--width: none;
+  }
+  .area-header .shelf {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+  }
+  .area-header .tile {
+    display: grid;
+    place-items: center;
+    width: 120px;
+    height: 72px;
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="area-header">
+  <div class="bar"><span>Up next</span><c2-button data-scroll-page="start" aria-label="Scroll back">‹</c2-button><c2-button data-scroll-page="end" aria-label="Scroll forward">›</c2-button></div>
+  <c2-scroll-area data-scroll-area-example="header" orientation="horizontal" mouse-drag label="Up next"><div class="shelf"><span class="tile">Episode 1</span><span class="tile">Episode 2</span><span class="tile">Episode 3</span><span class="tile">Episode 4</span><span class="tile">Episode 5</span><span class="tile">Episode 6</span></div></c2-scroll-area>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .area-french {
+    --c2-scroll-area__scrollbar--width: none;
+    width: 190px;
+  }
+  .area-french .shelf {
+    display: flex;
+    gap: 6px;
+    width: max-content;
+  }
+  .area-french .chip {
+    padding: 6px 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 999px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    white-space: nowrap;
+  }
+</style>
+<div lang="fr">
+  <c2-scroll-area class="area-french" orientation="horizontal" controls label="Rubriques"><div class="shelf"><span class="chip">Actualités</span><span class="chip">Économie</span><span class="chip">Culture</span><span class="chip">Sport</span><span class="chip">Sciences</span><span class="chip">Voyages</span><span class="chip">Cuisine</span></div></c2-scroll-area>
+</div>
+```
+
 </GalleryGrid>
+
+"Buttons in a header" puts the app's own buttons in its header and calls `scrollPage()`, which is what the built-in controls do:
+
+```ts tag=CodeBlock
+header.querySelectorAll('[data-scroll-page]').forEach((button) => button.addEventListener('click', () => area.scrollPage(button.dataset.scrollPage)))
+```
+
+"In French" sits under `lang="fr"`: the buttons' names come from the translation the page registered.
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: { 'scroll-area': { label: 'Contenu défilant', top: 'Défiler vers le haut', bottom: 'Défiler vers le bas', start: 'Défiler vers l’arrière', end: 'Défiler vers l’avant' } },
+})
+```
