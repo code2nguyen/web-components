@@ -49,6 +49,11 @@ main.innerHTML =
 const subject = document.querySelector<Questionnaire>('c2-questionnaire')!
 subject.questions = questions
 if (scenario === 'disabled') subject.disabled = true
+if (scenario.startsWith('inline')) {
+  subject.inline = true
+  subject.completeLabel = 'Submit'
+  if (scenario === 'inline-multiple') subject.current = 1
+}
 if (scenario === 'custom-render') {
   subject.questionItemRender = ({ option, selected }) =>
     html`<span data-custom-item><strong>${option.label}</strong><small>${selected ? 'Selected' : 'Available'}</small></span>`
@@ -60,7 +65,7 @@ if (scenario === 'custom-actions') {
     '<button slot="previous-button" type="button">Go back</button><button slot="skip-button" type="button">Not now</button><button slot="next-button" type="button">Continue</button><button slot="submit-button" type="button">Finish plan</button>',
   )
 }
-if (scenario === 'custom-summary') {
+if (scenario === 'custom-summary' || scenario === 'inline-summary') {
   subject.insertAdjacentHTML('beforeend', '<section slot="summary"><h2>Your plan</h2><output>Custom answer summary</output></section>')
 }
 for (const eventName of ['answer-change', 'step-change', 'skip', 'complete']) {

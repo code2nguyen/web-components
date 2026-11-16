@@ -38,6 +38,14 @@
     primary-action--color: #ffffff,
     secondary-action--border: 1px solid #e4e4e7,
     secondary-action--background-color: #ffffff,
+    answer--padding: 10px 12px,
+    answer--border: 1px solid #e4e4e7,
+    answer--border-radius: 8px,
+    answer--background-color: #fafafa,
+    answer-question--color: #71717a,
+    answer-question--font-size: 12px,
+    answer-value--font-size: 14px,
+    answer-value--font-weight: 500,
   )
 );
 
@@ -255,6 +263,33 @@ kbd {
   margin: 4px 0 0;
   color: css.cssVar(option-description--color);
   font-size: 14px;
+}
+
+.answer {
+  display: grid;
+  gap: 2px;
+  padding: css.cssVar(answer--padding);
+  border: css.cssVar(answer--border);
+  border-radius: css.cssVar(answer--border-radius);
+  background-color: css.cssVar(answer--background-color);
+
+  &:focus-visible {
+    outline: css.cssVar(option__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.answer-question {
+  color: css.cssVar(answer-question--color);
+  font-size: css.cssVar(answer-question--font-size);
+  font-weight: inherit;
+}
+
+.answer-value {
+  margin: 0;
+  font-size: css.cssVar(answer-value--font-size);
+  font-weight: css.cssVar(answer-value--font-weight);
+  overflow-wrap: anywhere;
 }
 
 .actions {
