@@ -8,6 +8,7 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
+import type { Delta } from '@c2n/format-number/delta.js'
 import type { FormatNumber } from '@c2n/format-number'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -15,6 +16,21 @@ type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-delta': DefineComponent<
+      C2Props<Delta> & {
+        'sign-display'?: unknown
+        'compact-display'?: unknown
+        'currency-display'?: unknown
+        'currency-sign'?: unknown
+        'unit-display'?: unknown
+        'no-grouping'?: unknown
+        'minimum-integer-digits'?: unknown
+        'minimum-fraction-digits'?: unknown
+        'maximum-fraction-digits'?: unknown
+        'minimum-significant-digits'?: unknown
+        'maximum-significant-digits'?: unknown
+      }
+    >
     'c2-format-number': DefineComponent<
       C2Props<FormatNumber> & {
         'compact-display'?: unknown

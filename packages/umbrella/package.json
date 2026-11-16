@@ -545,6 +545,10 @@
       "types": "./dist/format-number.d.ts",
       "default": "./dist/format-number.js"
     },
+    "./format-number/delta": {
+      "types": "./dist/format-number/delta.d.ts",
+      "default": "./dist/format-number/delta.js"
+    },
     "./fx-converter": {
       "types": "./dist/fx-converter.d.ts",
       "default": "./dist/fx-converter.js"

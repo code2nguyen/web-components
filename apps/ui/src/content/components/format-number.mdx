@@ -2,6 +2,7 @@
 title: 'Format Number'
 description: 'A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.'
 category: 'Data display'
+apiTags: ['c2-format-number']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,7 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { FormatNumber } from '@c2n/components/format-number'
 
-`c2-format-number` writes a number the way its reader expects it, with `Intl.NumberFormat`: grouping and decimals of the locale ("1,234.5" in English, "1 234,5" in French), and `type` for what it counts: `currency` (with `currency`, `currency-display` and `currency-sign="accounting"` for parentheses on losses), `percent` (0.25 reads "25%"), `unit` (any unit `Intl` knows, such as `kilometer-per-hour` or `celsius`) and `bytes`, scaled to the largest unit that fits ("1.5 MB"; `binary` steps by 1024). `notation="compact"` shortens large counts to "1.2K" or "1.2 thousand", the digit attributes (`minimum-fraction-digits`, `maximum-significant-digits`…) and `sign-display` work as in `Intl`, and `no-grouping` drops the separators for years and IDs. `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The digits sit in a `<data>` element whose `value` is the raw number, and a shortened display carries the full figure as its hover title. The currency symbol, unit and compact suffix are the `unit` part, so `--c2-format-number__unit--*` can set them smaller or lighter than the digits, and `--c2-format-number__negative--color` / `__positive--color` colour losses and gains. Until `value` holds a number, the default slot shows instead, for a fallback such as "—".
+`c2-format-number` writes a number the way its reader expects it, with `Intl.NumberFormat`: grouping and decimals of the locale ("1,234.5" in English, "1 234,5" in French), and `type` for what it counts: `currency` (with `currency`, `currency-display` and `currency-sign="accounting"` for parentheses on losses), `percent` (0.25 reads "25%"), `unit` (any unit `Intl` knows, such as `kilometer-per-hour` or `celsius`) and `bytes`, scaled to the largest unit that fits ("1.5 MB"; `binary` steps by 1024). `notation="compact"` shortens large counts to "1.2K" or "1.2 thousand", the digit attributes (`minimum-fraction-digits`, `maximum-significant-digits`…) and `sign-display` work as in `Intl`, and `no-grouping` drops the separators for years and IDs. `locale` picks the language, falling back to the nearest `lang` attribute and then the browser's. The digits sit in a `<data>` element whose `value` is the raw number, and a shortened display carries the full figure as its hover title. The currency symbol, unit and compact suffix are the `unit` part, so `--c2-format-number__unit--*` can set them smaller or lighter than the digits, and `--c2-format-number__negative--color` / `__positive--color` colour losses and gains. To show a change, with an arrow and the good or bad colour, use its companion [`c2-delta`](/web-components/components/delta). Until `value` holds a number, the default slot shows instead, for a fallback such as "—".
 
 ## Import
 
