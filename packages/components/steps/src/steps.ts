@@ -54,6 +54,7 @@ type ManagedStep = HTMLElement & {
   entering: boolean
   collapsed: boolean
   status: StepStatus
+  progress?: StepsProgress
 }
 
 /** The statuses that count as done in `progress` and the summary line. */
@@ -111,6 +112,8 @@ const COMPLETED = new Set<StepStatus>(['success', 'warning', 'skipped'])
  *
  * **Links.** `href` on a step (or on a data node) makes its row a link, which is what a task list is: sections of
  * tasks, each a link to its page, with a status tag in the `trailing` slot. A group's row stays its disclosure.
+ *
+ * **Lessons.** `group-progress` counts each group's finished steps under its label, and a `locked` step cannot be opened.
  *
  * **Header.** `summary` adds a line above the steps that counts them — "3 of 7 completed", from `progress` — and the
  * `actions` slot is the zone beside it for the app's own commands: "Mark as current stage" on a stage path, "Expand
@@ -186,6 +189,9 @@ export class Steps extends LitElement {
    * Shows a summary line above the steps — "3 of 7 completed" — counted as `progress` counts. Off by default. The `summary` slot replaces the text, and the message is translatable.
    */
   @property({ type: Boolean, reflect: true }) summary = false
+
+  /** Shows each group's count of finished steps under its label — "2 of 5" — counted as `progress` counts. Off by default. */
+  @property({ type: Boolean, reflect: true, attribute: 'group-progress' }) groupProgress = false
 
   /** Accessible name for the list. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
@@ -314,12 +320,12 @@ export class Steps extends LitElement {
 
   /**
    * Selects a step by its `value` (a data node's `id`) or dotted path, as a press on it would — including the
-   * `selection-change` event. Returns `false`, and changes nothing, for an unknown or `disabled` step. Setting
-   * `selected` does the same without the event.
+   * `selection-change` event. Returns `false`, and changes nothing, for an unknown, `disabled` or `locked` step.
+   * Setting `selected` does the same without the event.
    */
   select(value: string): boolean {
     const step = this.allSteps().find((element) => Steps.keyOf(element as ManagedStep) === value) as ManagedStep | undefined
-    if (!step || step.disabled) return false
+    if (!step || step.disabled || step.status === 'locked') return false
     if (value === this.selected) return true
     this.selected = value
     this.dispatchEvent(
@@ -413,7 +419,7 @@ export class Steps extends LitElement {
     const horizontal = this.orientation === 'horizontal'
     let completed = 0
     let total = 0
-    const walk = (steps: HTMLElement[], level: number, parentPath: string): StepStatus[] => {
+    const walk = (steps: HTMLElement[], level: number, parentPath: string, tally?: StepsProgress): StepStatus[] => {
       return steps.map((step, index) => {
         const element = step as ManagedStep
         element.level = level
@@ -424,7 +430,8 @@ export class Steps extends LitElement {
         element.marker = this.marker
         element.orientation = this.orientation
         element.interactive = this.interactive
-        element.selected = !!this.selected && Steps.keyOf(element) === this.selected
+        // A locked step is never the selected one, whatever `selected` names: it cannot be opened.
+        element.selected = !!this.selected && Steps.keyOf(element) === this.selected && element.status !== 'locked'
         element.grouped = grouped
         if (!this.known.has(element)) {
           this.known.add(element)
@@ -434,11 +441,17 @@ export class Steps extends LitElement {
 
         const children = Steps.collectSteps(element)
         element.hasChildren = children.length > 0
-        const childStatuses = children.length ? walk(children, level + 1, element.path) : []
+        const own = children.length ? { completed: 0, total: 0 } : undefined
+        const childStatuses = children.length ? walk(children, level + 1, element.path, own) : []
         if (this.mayWrite(element)) {
           const next = this.deriveStatus(childStatuses, level, index)
           element.status = next
           this.written.set(element, next)
+        }
+        element.progress = this.groupProgress ? own : undefined
+        if (tally) {
+          tally.completed += own ? own.completed : +COMPLETED.has(element.status)
+          tally.total += own ? own.total : 1
         }
         if (counting && (horizontal ? level === 0 : !children.length)) {
           total++
@@ -481,9 +494,22 @@ export class Steps extends LitElement {
   private renderNode(node: StepNode, level: number, index: number, parentPath: string): TemplateResult {
     const position = index + 1
     const path = parentPath ? `${parentPath}.${position}` : String(position)
-    const context: StepContext = { node, level, position, path, status: this.statusOf(node, level, index) }
-    const slot = (name: string, renderer: StepRenderer | undefined) => (renderer ? html`<span slot=${name}>${renderer(context)}</span>` : nothing)
+    const status = this.statusOf(node, level, index)
     const children = node.children ?? []
+    let progress: StepsProgress | undefined
+    // Counted only when a renderer reads it. The rows' own counts are the walk's, from the statuses actually drawn.
+    const count = () => (children.length ? (progress ??= this.countNodes(children, level + 1, true)) : undefined)
+    const context: StepContext = {
+      node,
+      level,
+      position,
+      path,
+      status,
+      get progress() {
+        return count()
+      },
+    }
+    const slot = (name: string, renderer: StepRenderer | undefined) => (renderer ? html`<span slot=${name}>${renderer(context)}</span>` : nothing)
     // A renderer replaces the attribute, rather than competing with it for the same slot.
     return html`<c2-step
       status=${ifDefined(node.status)}
@@ -491,6 +517,7 @@ export class Steps extends LitElement {
       ?disabled=${node.disabled ?? false}
       ?collapsed=${node.collapsed ?? false}
       href=${ifDefined(node.href)}
+      reason=${ifDefined(node.reason)}
       label=${ifDefined(this.renderItem || this.renderLabel ? undefined : node.label)}
       detail=${ifDefined(this.renderItem || this.renderDetail ? undefined : node.detail)}
       trailing=${ifDefined(this.renderItem || this.renderTrailing ? undefined : node.trailing)}
@@ -532,20 +559,19 @@ export class Steps extends LitElement {
    * summary is right in the server's HTML. A list of `c2-step` children has to wait for the walk.
    */
   private dataProgress(): StepsProgress | undefined {
-    if (!this.summary || !this.steps?.length) return undefined
-    let completed = 0
-    let total = 0
-    const count = (nodes: StepNode[], level: number) =>
-      nodes.forEach((node, index) => {
-        const children = node.children ?? []
-        if (this.orientation === 'horizontal' ? level === 0 : !children.length) {
-          total++
-          if (COMPLETED.has(this.statusOf(node, level, index))) completed++
-        }
-        if (this.orientation !== 'horizontal') count(children, level + 1)
-      })
-    count(this.steps, 0)
-    return { completed, total }
+    return this.summary && this.steps?.length ? this.countNodes(this.steps, 0, this.orientation !== 'horizontal') : undefined
+  }
+
+  /** Counts `nodes` themselves, or with `leaves` the steps under them that are not groups. */
+  private countNodes(nodes: StepNode[], level: number, leaves: boolean, progress: StepsProgress = { completed: 0, total: 0 }): StepsProgress {
+    nodes.forEach((node, index) => {
+      if (leaves && node.children?.length) this.countNodes(node.children, level + 1, leaves, progress)
+      else {
+        progress.total++
+        if (COMPLETED.has(this.statusOf(node, level, index))) progress.completed++
+      }
+    })
+    return progress
   }
 
   private renderHeader() {

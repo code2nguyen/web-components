@@ -203,6 +203,32 @@ const markup: Record<string, string> = {
     <c2-step status="success" label="Un"></c2-step>
     <c2-step label="Deux"></c2-step>
   </c2-steps></div>`,
+  // A course: sections counting their lessons, a lesson locked behind another with its reason, and one with no group.
+  lessons: `<c2-steps id="subject" group-progress aria-label="Course content">
+    <c2-step id="basics" label="Basics">
+      <c2-step id="intro" status="success" label="Introduction" href="#intro" trailing="4 min"></c2-step>
+      <c2-step id="forms" status="current" label="Your first form" href="#forms" trailing="12 min"></c2-step>
+      <c2-step id="valid" label="Validation" href="#valid" trailing="9 min"></c2-step>
+    </c2-step>
+    <c2-step id="advanced" label="Advanced">
+      <c2-step id="themes" status="locked" label="Theming" href="#themes" reason="Finish Basics to unlock"></c2-step>
+      <c2-step id="slots" status="locked" href="#slots" label="Slots"><span slot="reason" id="slot-reason">Available on 3 May</span></c2-step>
+    </c2-step>
+    <c2-step id="loose" status="success" label="Wrap-up"></c2-step>
+  </c2-steps>`,
+  // Locked in an interactive list: neither a button nor selectable.
+  'lessons-interactive': `<c2-steps id="subject" interactive aria-label="Lessons">
+    <c2-step value="one" status="success" label="One"></c2-step>
+    <c2-step value="two" status="locked" label="Two" reason="Finish One first"></c2-step>
+    <c2-step value="three" label="Three"></c2-step>
+  </c2-steps>`,
+  'lessons-data': `<c2-steps id="subject" group-progress aria-label="Course from data"></c2-steps>`,
+  'lessons-fr': `<div lang="fr"><c2-steps id="subject" group-progress aria-label="Cours">
+    <c2-step label="Bases">
+      <c2-step status="success" label="Un"></c2-step>
+      <c2-step status="locked" label="Deux"></c2-step>
+    </c2-step>
+  </c2-steps></div>`,
   'data-interactive': `<c2-steps id="subject" orientation="horizontal" interactive selected="process" aria-label="Task from data"></c2-steps>`,
   data: `<c2-steps id="subject" aria-label="Run trace from data"></c2-steps>`,
   'data-wizard': `<c2-steps id="subject" marker="number" current="1" aria-label="Checkout from data"></c2-steps>`,
@@ -253,6 +279,30 @@ if (scenario === 'data-links') {
     { id: 'b', label: 'Payment', href: '#payment' },
     { id: 'c', label: 'Review', href: '#review', disabled: true },
   ]
+}
+
+if (scenario === 'lessons-data') {
+  subject.steps = [
+    {
+      id: 'basics',
+      label: 'Basics',
+      children: [
+        { id: 'intro', label: 'Introduction', status: 'success' },
+        { id: 'forms', label: 'Forms', status: 'success' },
+        { id: 'valid', label: 'Validation' },
+      ],
+    },
+    {
+      id: 'advanced',
+      label: 'Advanced',
+      children: [{ id: 'themes', label: 'Theming', status: 'locked', reason: 'Finish Basics to unlock', href: '#themes' }],
+    },
+  ]
+  subject.renderTrailing = (context) => (context.progress ? `${context.progress.completed}/${context.progress.total}` : '')
+}
+
+if (scenario === 'lessons-fr') {
+  addTranslations({ fr: { steps: { groupProgress: '{0} sur {1}', locked: 'Verrouillée' } } })
 }
 
 if (scenario === 'summary-fr') {
