@@ -652,6 +652,9 @@ export const overrides: Record<string, Override> = {
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.
   '--c2-tabs__indicator--color': { token: 'color-primary' },
   '--c2-tabs--box-shadow': { token: 'color-outline-variant', value: 'inset 0px -2px 0px 0px var(--c2-theme--color-outline-variant, rgb(230, 230, 230))' },
+  // Tab nav: the same strip, so the same accent indicator and hairline baseline.
+  '--c2-tab-nav__indicator--color': { token: 'color-primary' },
+  '--c2-tab-nav--box-shadow': { token: 'color-outline-variant', value: 'inset 0px -2px 0px 0px var(--c2-theme--color-outline-variant, rgb(230, 230, 230))' },
   // Selected + hovered list item: a slightly stronger tint of the selected surface.
   '--c2-list-item__selected__hover--background': {
     token: 'color-primary-container',

@@ -13,6 +13,10 @@
       "types": "./types/src/tab.d.ts",
       "default": "./dist/tab.js"
     },
+    "./tab-nav.js": {
+      "types": "./types/src/tab-nav.d.ts",
+      "default": "./dist/tab-nav.js"
+    },
     "./tab-context.js": {
       "types": "./types/src/tab-context.d.ts",
       "default": "./dist/tab-context.js"
@@ -73,5 +77,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./tab-nav.js"
+    ]
+  }
 }

@@ -6,6 +6,7 @@
     <title>c2-tabs</title>
     <script type="module" src="/src/tabs.ts"></script>
     <script type="module" src="/src/tab.ts"></script>
+    <script type="module" src="/src/tab-nav.ts"></script>
     <style>
       body {
         padding: 24px;
@@ -100,6 +101,32 @@
           document.getElementById('log').textContent = `change → ${e.detail.value}`
         })
       </script>
+    </section>
+
+    <section>
+      <h2>Code tabs (sync-key: pick in one, the other follows; remembered on reload)</h2>
+      <c2-tabs sync-key="harness-pm" style="width: 320px">
+        <c2-tab for="i-npm">npm</c2-tab>
+        <c2-tab for="i-pnpm">pnpm</c2-tab>
+        <div id="i-npm">npm install @c2n/components</div>
+        <div id="i-pnpm">pnpm add @c2n/components</div>
+      </c2-tabs>
+      <c2-tabs sync-key="harness-pm" style="width: 320px">
+        <c2-tab for="r-npm">npm</c2-tab>
+        <c2-tab for="r-pnpm">pnpm</c2-tab>
+        <div id="r-npm">npm run dev</div>
+        <div id="r-pnpm">pnpm dev</div>
+      </c2-tabs>
+    </section>
+
+    <section>
+      <h2>Tab nav (links, current page)</h2>
+      <c2-tab-nav aria-label="Repository" style="width: 320px">
+        <c2-tab href="#code" current>Code</c2-tab>
+        <c2-tab href="#issues">Issues</c2-tab>
+        <c2-tab href="#pulls">Pull requests</c2-tab>
+        <c2-tab href="#settings">Settings</c2-tab>
+      </c2-tab-nav>
     </section>
   </body>
 </html>

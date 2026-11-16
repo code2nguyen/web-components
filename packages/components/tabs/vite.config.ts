@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/tabs.ts', 'src/tab.ts', 'src/tab-context.ts'],
+      entry: ['src/tabs.ts', 'src/tab.ts', 'src/tab-nav.ts', 'src/tab-context.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/tabs.ts', 'src/tab.ts'],
+      files: ['src/tabs.ts', 'src/tab.ts', 'src/tab-nav.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

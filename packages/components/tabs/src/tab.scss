@@ -1,4 +1,8 @@
+@use '@c2n/sass/focus';
+
 :host {
+  // The containing block of a link tab's `::after`, which covers the tab and nothing beyond it.
+  position: relative;
   display: inline-flex;
   align-items: center;
   box-sizing: border-box;
@@ -15,4 +19,30 @@
 :host(:focus) {
   // The parent `<c2-tabs>` draws a themeable ring with `:focus-visible`; drop the UA default.
   outline: none;
+}
+
+// A link tab (`href`, inside `<c2-tab-nav>`): the `<a>` keeps the tab's look and covers the whole tab through its
+// `::after`, so the padding the strip gives the tab is clickable too. `<c2-tab-nav>` positions the tab and hands the
+// focus ring down through two private custom properties, since it cannot reach this shadow root.
+a {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  color: inherit;
+  text-decoration: none;
+  border-radius: inherit;
+  outline: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  &:focus-visible::after {
+    outline: var(--_c2-tab-focus-outline, 2px solid rgba(2, 101, 220, 0.4));
+    outline-offset: var(--_c2-tab-focus-outline-offset, -2px);
+    @include focus.forced-colors-ring(2px, -2px);
+  }
 }

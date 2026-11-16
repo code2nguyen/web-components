@@ -275,3 +275,52 @@ test('a find in the panel of a tab disabled since the last render hides it again
   await expect(page.locator('c2-tab[for="two"]')).toHaveHostAria('aria-selected', 'false')
   await expect(host).toHaveJSProperty('selectedTab', 'one')
 })
+
+// Code tabs: strips with one `sync-key` switch together, matched by label, and remember the choice.
+const group = (prefix: string, selected = '') =>
+  `<c2-tabs sync-key="pm" aria-label="Package manager ${prefix}"${selected ? ` selected-tab="${prefix}-${selected}"` : ''}><c2-tab for="${prefix}-npm">npm</c2-tab><c2-tab for="${prefix}-pnpm">pnpm</c2-tab><c2-tab for="${prefix}-yarn" label="yarn"></c2-tab><div id="${prefix}-npm">${prefix} npm</div><div id="${prefix}-pnpm">${prefix} pnpm</div><div id="${prefix}-yarn">${prefix} yarn</div></c2-tabs>`
+
+test('strips with the same sync-key follow a pick made in one of them, and others do not', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tabs/test/scenarios.html')
+  await page.evaluate(() => localStorage.clear())
+  await renderScenario(
+    group('a') +
+      group('b') +
+      '<c2-tabs sync-key="other"><c2-tab for="c-npm">npm</c2-tab><c2-tab for="c-pnpm">pnpm</c2-tab><div id="c-npm">c npm</div><div id="c-pnpm">c pnpm</div></c2-tabs>' +
+      '<c2-tabs><c2-tab for="d-npm">npm</c2-tab><c2-tab for="d-pnpm">pnpm</c2-tab><div id="d-npm">d npm</div><div id="d-pnpm">d pnpm</div></c2-tabs>',
+  )
+  const b = page.locator('c2-tabs').nth(1)
+  await watch(b, 'selection-change')
+
+  await page.locator('c2-tab[for="a-pnpm"]').click()
+  await expect(page.locator('c2-tab[for="b-pnpm"]')).toHaveHostAria('aria-selected', 'true')
+  await expect(b).toHaveAttribute('data-events', '[{"value":"b-pnpm"}]')
+  await expect(page.locator('c2-tab[for="c-npm"]')).toHaveHostAria('aria-selected', 'true')
+  await expect(page.locator('c2-tab[for="d-npm"]')).toHaveHostAria('aria-selected', 'true')
+
+  // Keyboard picks sync too; a `label` attribute matches like text.
+  await page.locator('c2-tab[for="b-pnpm"]').press('ArrowRight')
+  await expect(page.locator('c2-tab[for="a-yarn"]')).toHaveHostAria('aria-selected', 'true')
+  expect(await page.evaluate(() => localStorage.getItem('c2n-tabs:pm'))).toBe('yarn')
+  await accessible(page)
+})
+
+test('a sync-key group opens on the remembered choice', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tabs/test/scenarios.html')
+  await page.evaluate(() => localStorage.setItem('c2n-tabs:pm', 'pnpm'))
+  await renderScenario(group('a', 'npm') + group('b'))
+  await expect(page.locator('c2-tab[for="a-pnpm"]')).toHaveHostAria('aria-selected', 'true')
+  await expect(page.locator('c2-tab[for="b-pnpm"]')).toHaveHostAria('aria-selected', 'true')
+  await expect(page.locator('c2-tabs').first()).toHaveJSProperty('selectedTab', 'a-pnpm')
+  await page.evaluate(() => localStorage.clear())
+})
+
+test('without a sync-key nothing is shared or stored', async ({ page, renderScenario }) => {
+  await page.goto('/packages/components/tabs/test/scenarios.html')
+  await page.evaluate(() => localStorage.clear())
+  await renderScenario(markup + markup.replaceAll('"one"', '"one-b"').replaceAll('"two"', '"two-b"').replaceAll('"three"', '"three-b"'))
+  await page.locator('c2-tab[for="three"]').click()
+  await expect(page.locator('c2-tab[for="three"]')).toHaveHostAria('aria-selected', 'true')
+  await expect(page.locator('c2-tab[for="one-b"]')).toHaveHostAria('aria-selected', 'true')
+  expect(await page.evaluate(() => localStorage.length)).toBe(0)
+})

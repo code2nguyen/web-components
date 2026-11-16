@@ -4109,6 +4109,13 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tab-nav",
+      "slot": "",
+      "decision": "part",
+      "parts": ["list"],
+      "reason": "The list region scrolls the slotted link tabs and draws the strip's line; it is exported as the list part."
+    },
+    {
       "tag": "c2-table",
       "slot": "cell:{line}:{field}",
       "decision": "assigned-content",

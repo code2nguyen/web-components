@@ -27,8 +27,14 @@ assert(tools.length === 10, `expected 10 tools, got ${tools.length}: ${tools.map
 const list = textOf(await client.callTool({ name: 'list_components', arguments: {} }))
 assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_components lacks c2-button')
 
+// @c2n/tabs is documented on two pages (c2-tabs, c2-tab-nav), so each element resolves through its own entry, as
+// c2-table-column does beside the table variants.
+const tabs = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tabs' } }))
+assert(tabs.includes("import '@c2n/components/tabs'"), 'get_component c2-tabs must resolve @c2n/components/tabs')
 const tab = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab' } }))
-assert(tab.includes("import '@c2n/components/tabs'"), 'get_component c2-tab must resolve @c2n/components/tabs')
+assert(tab.includes("import '@c2n/components/tabs/tab'"), 'get_component c2-tab must resolve @c2n/components/tabs/tab')
+const tabNav = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab-nav' } }))
+assert(tabNav.includes("import '@c2n/components/tabs/tab-nav'"), 'get_component c2-tab-nav must resolve its own entry')
 
 const chart = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-line-chart' } }))
 assert(chart.includes("import '@c2n/components/chart/line-chart'"), 'get_component c2-line-chart must resolve its own entry')
@@ -129,7 +135,7 @@ try {
   assert(installedOnly.includes('c2-button') && !installedOnly.includes('c2-feather-'), 'list_components installedOnly misreads @c2n/components')
   const umbrellaTheme = textOf(await umbrellaClient.callTool({ name: 'get_theme', arguments: {} }))
   assert(umbrellaTheme.includes('@c2n/components/theme.css'), 'get_theme ignores @c2n/components')
-  const umbrellaValidation = textOf(await umbrellaClient.callTool({ name: 'validate_markup', arguments: { code: '<c2-tab></c2-tab>' } }))
+  const umbrellaValidation = textOf(await umbrellaClient.callTool({ name: 'validate_markup', arguments: { code: '<c2-tabs></c2-tabs>' } }))
   assert(umbrellaValidation.includes("import '@c2n/components/tabs'"), 'validate_markup ignores @c2n/components')
   await umbrellaClient.close()
 } finally {
