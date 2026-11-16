@@ -5,6 +5,9 @@ import { Steps } from '@c2n/components/steps'
 import { Step } from '@c2n/components/steps/step'
 import { Badge } from '@c2n/components/badge'
 import { Button } from '@c2n/components/button'
+import { FeatherPlayCircleIcon as FeatherPlayCircle } from '@c2n/feather-icons/icons/play-circle.js'
+import { FeatherFileTextIcon as FeatherFileText } from '@c2n/feather-icons/icons/file-text.js'
+import { FeatherHelpCircleIcon as FeatherHelpCircle } from '@c2n/feather-icons/icons/help-circle.js'
 import CodeBlock from '../../components/CodeBlock.astro'
 import StepsExamplesRuntime from '../../components/StepsExamplesRuntime.astro'
 
@@ -457,21 +460,169 @@ that, and the `toggle` slot adds a chevron — both off by default.
 </c2-steps>
 ```
 
+```html tag=MdxCodeBlock,label=Course curriculum
+<style>
+  .curriculum {
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-steps--border-radius: 8px;
+    --c2-step__row--padding-block: 10px;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__row--indent: 0px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__label__link--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__marker--size: 18px;
+    --c2-step__marker--border: 1px solid transparent;
+    --c2-step__progress__bar--width: 72px;
+    --c2-step__progress__bar--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-feather-icon--size: 16px;
+  }
+  .curriculum c2-step c2-step {
+    --c2-step__row--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__label--font-weight: 400;
+  }
+</style>
+<c2-steps class="curriculum" group-progress aria-label="Course content">
+  <c2-step label="Section 1: Getting started" trailing="20 min">
+    <c2-step status="success" label="Welcome" href="#welcome" trailing="2 min">
+      <c2-feather-play-circle slot="marker"></c2-feather-play-circle>
+    </c2-step>
+    <c2-step status="success" label="Install the components" href="#install" trailing="6 min">
+      <c2-feather-file-text slot="marker"></c2-feather-file-text>
+    </c2-step>
+    <c2-step status="current" label="Your first form" href="#first-form" trailing="12 min">
+      <c2-feather-play-circle slot="marker"></c2-feather-play-circle>
+    </c2-step>
+  </c2-step>
+  <c2-step label="Section 2: Theming" trailing="21 min">
+    <c2-step status="locked" label="Design tokens" reason="Finish section 1 to unlock" trailing="9 min"></c2-step>
+    <c2-step status="locked" label="Dark mode" trailing="7 min"></c2-step>
+    <c2-step status="locked" label="Quiz" trailing="5 min"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Section counts and reasons
+<style>
+  .checklist-sections {
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__progress--font-size: 12px;
+  }
+</style>
+<c2-steps class="checklist-sections" group-progress aria-label="Launch checklist">
+  <c2-step label="Before launch">
+    <c2-step status="success" label="Domain verified"></c2-step>
+    <c2-step status="success" label="Payment provider connected"></c2-step>
+    <c2-step status="warning" label="Shipping zones" reason="Two countries have no rate yet"></c2-step>
+    <c2-step label="Legal pages"></c2-step>
+  </c2-step>
+  <c2-step label="Launch day">
+    <c2-step label="Remove the password page"></c2-step>
+    <c2-step status="locked" label="Announce">
+      <span slot="reason">Opens on <time datetime="2026-12-01">1 December</time> — <a href="#launch-plan">see the launch plan</a></span>
+    </c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Learning path
+<style>
+  .learning-path {
+    --c2-steps--gap: 6px;
+    --c2-step__row--border-bottom: none;
+    --c2-step__row--border-radius: 12px;
+    --c2-step__row--padding-block: 10px;
+    --c2-step__row--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__marker--size: 28px;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-step__success--color: #16a34a;
+    --c2-step__reason--font-size: 12px;
+  }
+  .learning-path c2-step:state(current) {
+    --c2-step__row--background: light-dark(#eff6ff, #0f2547);
+    --c2-step__label--color: light-dark(#1d4ed8, #93b4f5);
+  }
+  /* The path winds: every other unit is drawn further in. */
+  .learning-path .unit-2 {
+    margin-inline-start: 40px;
+  }
+  .learning-path .unit-3 {
+    margin-inline-start: 80px;
+  }
+</style>
+<c2-steps class="learning-path" aria-label="Spanish, unit 1">
+  <c2-step status="success" label="Greetings" trailing="10 XP"></c2-step>
+  <c2-step class="unit-2" status="success" label="Ordering food" trailing="10 XP"></c2-step>
+  <c2-step class="unit-3" status="current" label="At the market" trailing="15 XP"></c2-step>
+  <c2-step class="unit-2" status="locked" label="Directions" reason="Complete At the market"></c2-step>
+  <c2-step status="locked" label="Unit review" reason="Unlocks after every lesson above"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Curriculum from data
+<style>
+  .course-data {
+    --c2-step__row--padding-block: 9px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label__link--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-step__trailing--font-size: 14px;
+  }
+</style>
+<c2-steps
+  class="course-data"
+  data-steps-example="lessons"
+  aria-label="Course from data"
+  steps='[{"id":"s1","label":"Foundations","children":[{"id":"l1","label":"What is a component","status":"success","href":"#l1","minutes":4},{"id":"l2","label":"Slots","status":"success","href":"#l2","minutes":8},{"id":"l3","label":"Events","status":"current","href":"#l3","minutes":11}]},{"id":"s2","label":"Data","children":[{"id":"l4","label":"Data sources","status":"locked","reason":"Finish Foundations to unlock","minutes":14},{"id":"l5","label":"Paging","status":"locked","minutes":9}]}]'
+></c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Lessons in French
+<style>
+  .lecons {
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__progress__bar--width: 56px;
+  }
+</style>
+<c2-steps class="lecons" lang="fr" group-progress aria-label="Contenu du cours">
+  <c2-step label="Les bases">
+    <c2-step status="success" label="Bienvenue" href="#bienvenue"></c2-step>
+    <c2-step status="current" label="Votre premier formulaire" href="#formulaire"></c2-step>
+  </c2-step>
+  <c2-step label="Thèmes">
+    <c2-step status="locked" label="Jetons de design" reason="Terminez les bases pour débloquer"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
 </GalleryGrid>
 
 <StepsExamplesRuntime />
 
-The task list from data hands each row its status tag through `renderTrailing`. The stage path's action and its
+The task list from data hands each row its status tag through `renderTrailing`, and the curriculum from data writes
+each section's count and minutes there from `context.progress`. The stage path's action and its
 guidance, and the trace's header buttons, are a few lines of the app's own code:
 
 ```ts tag=CodeBlock
 import { html } from 'lit'
+import type { StepNode } from '@c2n/components/steps'
 
 const TAGS = { success: ['success', 'Completed'], current: ['primary', 'In progress'], pending: ['neutral', 'Not started'] }
 tasks.renderTrailing = ({ node, status }) => {
   const [tone, text] = node.disabled ? ['neutral', 'Cannot start yet'] : (TAGS[status] ?? TAGS.pending)
   return html`<c2-badge tone=${tone}>${text}</c2-badge>`
 }
+
+// Each lesson node of `steps` carries its length in `minutes`; a section's is the sum of its lessons'.
+const minutesOf = (node: StepNode & { minutes?: number }): number =>
+  (node.children?.length ? node.children.reduce((sum, child) => sum + minutesOf(child), 0) : (node.minutes ?? 0))
+course.renderTrailing = ({ node, progress }) =>
+  progress ? `${progress.completed}/${progress.total} · ${minutesOf(node)} min` : `${minutesOf(node)} min`
 
 path.addEventListener('selection-change', ({ detail }) => (guidance.textContent = GUIDANCE[detail.value]))
 markCurrent.addEventListener('click', () => {

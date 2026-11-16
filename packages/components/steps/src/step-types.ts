@@ -14,6 +14,11 @@ export type StepStatus =
   | 'warning'
   /** Deliberately not run. */
   | 'skipped'
+  /**
+   * Cannot be opened yet — a lesson behind the one before it, a task waiting on another. Drawn with a padlock, and
+   * neither a link nor selectable. Say why with `reason`.
+   */
+  | 'locked'
 
 /** How the marker is drawn. */
 export type StepsMarker =
@@ -61,9 +66,14 @@ export interface StepNode {
    * `disabled` step is drawn without its link: a task that cannot start yet.
    */
   href?: string
+  /**
+   * Why the step is in its status, on a line of its own under the label — what keeps a `locked` lesson closed ("Finish
+   * Basics to unlock"), why a step was skipped.
+   */
+  reason?: string
 }
 
-/** How far a list has got, as its `progress` and its summary line count it. */
+/** How far a list (or one of its groups) has got, as its `progress` and its summary line count it. */
 export interface StepsProgress {
   /** Steps that are finished: `success`, `warning` or `skipped`. */
   completed: number
@@ -83,6 +93,8 @@ export interface StepContext {
   path: string
   /** The status in effect, rolled up and `current`-derived. */
   status: StepStatus
+  /** A group's count of finished steps under it, as `group-progress` shows it. `undefined` for a step with no sub-steps. */
+  readonly progress?: StepsProgress
 }
 
 /** Replaces part of a row's content. Returns anything Lit can render. */

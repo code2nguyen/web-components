@@ -4,14 +4,29 @@
 
 <script>
   import { html } from 'lit'
-  import type { Steps, StepStatus } from '@c2n/components/steps'
+  import type { StepNode, Steps, StepStatus } from '@c2n/components/steps'
   import '@c2n/components/steps'
   import '@c2n/components/badge'
   import '@c2n/components/button'
   import { addTranslations } from '@c2n/core/localize.js'
 
   // The French an app would add for the gallery's French card: the library ships English only.
-  addTranslations({ fr: { steps: { summary: '{0} sur {1} terminées' } } })
+  addTranslations({
+    fr: {
+      steps: {
+        summary: '{0} sur {1} terminées',
+        groupProgress: '{0} sur {1}',
+        pending: 'À faire',
+        current: 'En cours',
+        running: 'En cours d’exécution',
+        success: 'Terminée',
+        error: 'Échec',
+        warning: 'Terminée avec des avertissements',
+        skipped: 'Ignorée',
+        locked: 'Verrouillée',
+      },
+    },
+  })
 
   const TAGS: Partial<Record<StepStatus, [string, string]>> = {
     success: ['success', 'Completed'],
@@ -31,6 +46,13 @@
       const [tone, text] = node.disabled ? ['neutral', 'Cannot start yet'] : (TAGS[status] ?? TAGS.pending!)
       return html`<c2-badge tone=${tone}>${text}</c2-badge>`
     }
+  }
+
+  // A lesson node carries its length in minutes; a section's is the sum of its lessons'.
+  type Lesson = StepNode & { minutes?: number }
+  const minutesOf = (node: Lesson): number => (node.children?.length ? node.children.reduce((sum, child) => sum + minutesOf(child), 0) : (node.minutes ?? 0))
+  for (const course of document.querySelectorAll<Steps>('c2-steps[data-steps-example="lessons"]')) {
+    course.renderTrailing = ({ node, progress }) => (progress ? `${progress.completed}/${progress.total} · ${minutesOf(node)} min` : `${minutesOf(node)} min`)
   }
 
   for (const example of document.querySelectorAll<HTMLElement>('[data-steps-example="stage-path"]')) {
