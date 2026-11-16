@@ -55,7 +55,6 @@
     "@lit-labs/ssr-client": "1.1.8",
     "@lit-labs/ssr-dom-shim": "1.6.0",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.4.1",
     "ajv": "^8.20.0",
     "husky": "9.1.7",
     "lerna": "10.0.1",
@@ -78,10 +77,7 @@
     "scripts/generator"
   ],
   "overrides": {
-    "@lit-labs/ssr": {
-      ".": "3.2.2",
-      "@types/node": "$@types/node"
-    }
+    "@lit-labs/ssr": "3.2.2"
   },
   "wireit": {
     "lint": {
