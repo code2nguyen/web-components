@@ -9,6 +9,8 @@ import { classMap } from 'lit/directives/class-map.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
 
+const nativeCommands = typeof HTMLButtonElement === 'undefined' || 'commandForElement' in HTMLButtonElement.prototype
+
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
 export interface DetailsEventMap {
   toggle: ToggleEvent
@@ -25,6 +27,9 @@ export interface Details {
  * close animate the content height (plus a fade) with the Web Animations API, so the motion is identical in every
  * browser; the native `open` attribute is only removed once the close animation has finished.
  *
+ * `headless` makes it a collapse opened from outside, e.g. by `<button commandfor="id" command="--toggle">`
+ * (`--open`, `--close`).
+ *
  * @tag c2-details
  *
  * @slot title - Header label. Falls back to the `label` attribute.
@@ -40,6 +45,7 @@ export interface Details {
  * @csspart body - Collapsible body region wrapping the default slot.
  *
  * @event {ToggleEvent} toggle - Re-dispatched from the native details after it opens or closes (`newState` is `open` or `closed`).
+ *   An external trigger updates its own `aria-expanded` from it.
  *
  * @cssproperty {border} [--c2-details--border=1px solid rgb(213, 213, 213)] - Frame on all four sides; each per-side variable falls back to it.
  * @cssproperty {border} [--c2-details--border-top=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
@@ -120,6 +126,12 @@ export class Details extends LitElement {
   /** Dims the header and blocks toggling (pointer and keyboard). */
   @property({ type: Boolean, reflect: true }) disabled = false
 
+  /**
+   * Draws the content alone (no summary, no frame, content padding 0): a collapse opened from outside through
+   * `expanded`, `toggle()` or a `commandfor` button. A `command="--toggle"` button gets its `aria-expanded` kept in step.
+   */
+  @property({ type: Boolean, reflect: true }) headless = false
+
   private readonly slotPresence = new SlotPresenceController(this, ['header-content', 'expanded-icon'])
   /** Keeps the native `open` attribute while the close animation plays; the content is hidden by the browser otherwise. */
   @state() private closing = false
@@ -131,9 +143,26 @@ export class Details extends LitElement {
   @consume({ context: accordionContext, subscribe: true })
   private accordion: AccordionContext | undefined
 
+  private commandRoot: Node | undefined
+
+  constructor() {
+    super()
+    this.addEventListener('command', this.handleCommand)
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!nativeCommands) {
+      this.commandRoot = this.getRootNode()
+      this.commandRoot.addEventListener('click', this.handleTriggerClick)
+    }
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.accordion = undefined
+    this.commandRoot?.removeEventListener('click', this.handleTriggerClick)
+    this.commandRoot = undefined
     this.cancelContentAnimations()
     this.closing = false
   }
@@ -149,7 +178,30 @@ export class Details extends LitElement {
     if (this.isConnected && changed.has('expanded') && changed.get('expanded') !== undefined) {
       this.animateContent(this.expanded)
       this.accordion?.expandedChanged(this)
+      this.syncTriggers()
     }
+  }
+
+  private readonly handleCommand = (event: Event) => this.runCommand(event, (event as CommandEvent).command)
+
+  /** Without invoker commands, a click on a button naming this panel runs its command. */
+  private readonly handleTriggerClick = (event: Event) => {
+    const button = event.composedPath().find((node): node is HTMLButtonElement => node instanceof HTMLButtonElement && node.hasAttribute('commandfor'))
+    if (button && !button.disabled && this.id && button.getAttribute('commandfor') === this.id) this.runCommand(event, button.getAttribute('command'))
+  }
+
+  private runCommand(event: Event, command: string | null) {
+    if (!event.defaultPrevented && (command === '--toggle' || command === '--open' || command === '--close'))
+      this.toggle(command === '--toggle' ? undefined : command === '--open')
+  }
+
+  /** `aria-expanded` of the `--toggle` buttons naming this panel, as popover invokers get natively. Only on change. */
+  private syncTriggers() {
+    const root = this.getRootNode() as ParentNode
+    const expanded = String(this.expanded)
+    if (this.id && root.querySelectorAll)
+      for (const button of root.querySelectorAll<HTMLElement>(`button[commandfor="${CSS.escape(this.id)}"][command="--toggle"]`))
+        if (button.ariaExpanded !== expanded) button.ariaExpanded = expanded
   }
 
   private cancelContentAnimations() {

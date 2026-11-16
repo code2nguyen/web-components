@@ -1,0 +1,17 @@
+---
+/** Plays the application's part in the details gallery: a switch that drives a headless panel through `expanded`. */
+---
+
+<script>
+  import type { Details } from '@c2n/components/details'
+  import type { Switch } from '@c2n/components/switch'
+
+  for (const example of document.querySelectorAll<HTMLElement>('[data-details-example="switch"]')) {
+    const toggle = example.querySelector<Switch>('c2-switch')
+    const panel = example.querySelector<Details>('c2-details')
+    if (!toggle || !panel) continue
+    toggle.addEventListener('change', () => (panel.expanded = toggle.checked))
+    // Find-in-page can open the panel: keep the switch in step.
+    panel.addEventListener('toggle', (event) => (toggle.checked = event.newState === 'open'))
+  }
+</script>

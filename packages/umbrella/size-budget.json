@@ -1,7 +1,7 @@
 {
   "lazy": 404045,
   "entries": {
-    "accordion": 5182,
+    "accordion": 6073,
     "action-bar": 4528,
     "address-field": 57259,
     "angle-slider": 4553,
@@ -101,7 +101,7 @@
     "description-list/description-group": 2556,
     "description-list/description-item": 6671,
     "description-list/description-value": 1748,
-    "details": 3967,
+    "details": 4857,
     "device-frame": 2141,
     "diff-viewer": 8512,
     "distribution-bar": 5251,

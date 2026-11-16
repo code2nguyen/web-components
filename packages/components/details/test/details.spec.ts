@@ -11,7 +11,7 @@ test('header-content presence follows assignment, insertion, removal and reassig
 })
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import type { Locator } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import type { Details } from '../src/details'
 
 // Closed content is skipped with `content-visibility: hidden`. Playwright's WebKit visibility check does not ask the
@@ -161,4 +161,174 @@ test('closed content stays rendered for find-in-page, and a browser-opened detai
   expect(newState).toBe('open')
   await expect(host).toHaveJSProperty('expanded', true)
   await expect(page.getByText('Arrives tomorrow')).toBeVisible()
+})
+
+const COLLAPSE = `
+  <button commandfor="filters" command="--toggle" aria-controls="filters" aria-expanded="false">Filters</button>
+  <button commandfor="filters" command="--open">Show</button>
+  <button commandfor="filters" command="--close">Hide</button>
+  <c2-details id="filters" headless><p>Status: open</p></c2-details>`
+
+const supportsCommands = (page: Page) => page.evaluate(() => 'commandForElement' in HTMLButtonElement.prototype)
+
+test('headless draws the content alone: no summary, no frame, no padding', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details headless expanded label="Ignored"><p>Status: open</p></c2-details>')
+  const host = page.locator('c2-details')
+  await expect(host.locator('summary')).toBeHidden()
+  await expect(page.getByText('Status: open')).toBeVisible()
+  const frame = host.locator('.c2-details')
+  await expect(frame).toHaveCSS('border-top-width', '0px')
+  await expect(frame).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  const body = host.locator('.c2-details-body')
+  await expect(body).toHaveCSS('padding-top', '0px')
+  await expect(body).toHaveCSS('padding-left', '0px')
+  // The content padding variables still apply.
+  await host.evaluate((element) => element.style.setProperty('--c2-details__content--padding-left', '9px'))
+  await expect(body).toHaveCSS('padding-left', '9px')
+  await accessible(page)
+})
+
+test('headless is opt-in: a default panel keeps its summary and carries no headless attribute', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Shipping"><p>Arrives tomorrow</p></c2-details>')
+  await expect(page.locator('summary')).toBeVisible()
+  await expect(page.locator('c2-details')).not.toHaveAttribute('headless')
+})
+
+test('a headless panel opens and closes from expanded and toggle(), and re-emits toggle', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details headless><p>Status: open</p></c2-details>')
+  await shown(page.getByText('Status: open')).toBe(false)
+  const states = await page.locator('c2-details').evaluate(async (element: Details) => {
+    const seen: string[] = []
+    const toggled = () => new Promise((resolve) => element.addEventListener('toggle', resolve, { once: true }))
+    element.addEventListener('toggle', (event) => seen.push(event.newState))
+    let next = toggled()
+    element.expanded = true
+    await next
+    next = toggled()
+    element.toggle()
+    await next
+    return seen
+  })
+  expect(states).toEqual(['open', 'closed'])
+  await shown(page.getByText('Status: open')).toBe(false)
+})
+
+test('invoker buttons toggle, open and close a headless panel from the keyboard and keep aria-expanded in step', async ({ page, renderScenario }) => {
+  await renderScenario(COLLAPSE)
+  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
+  const host = page.locator('c2-details')
+  const trigger = page.getByRole('button', { name: 'Filters' })
+
+  await trigger.focus()
+  await page.keyboard.press('Enter')
+  await expect(host).toHaveJSProperty('expanded', true)
+  await expect(page.getByText('Status: open')).toBeVisible()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+  await page.keyboard.press('Space')
+  await expect(host).toHaveJSProperty('expanded', false)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await shown(page.getByText('Status: open')).toBe(false)
+
+  const show = page.getByRole('button', { name: 'Show' })
+  await show.press('Enter')
+  await expect(host).toHaveJSProperty('expanded', true)
+  // A trigger that sent a command before follows a change made by another one.
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await show.press('Enter')
+  await expect(host).toHaveJSProperty('expanded', true)
+
+  await page.getByRole('button', { name: 'Hide' }).press('Enter')
+  await expect(host).toHaveJSProperty('expanded', false)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await accessible(page)
+})
+
+test('unknown commands, a disabled panel and a retargeted trigger are left alone', async ({ page, renderScenario }) => {
+  await renderScenario(`${COLLAPSE}<button commandfor="filters" command="--other">Other</button>`)
+  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
+  const host = page.locator('c2-details')
+  const trigger = page.getByRole('button', { name: 'Filters' })
+
+  await page.getByRole('button', { name: 'Other' }).click()
+  await expect(host).toHaveJSProperty('expanded', false)
+
+  await host.evaluate((element: Details) => (element.disabled = true))
+  await trigger.click()
+  await expect(host).toHaveJSProperty('expanded', false)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+  await host.evaluate((element: Details) => (element.disabled = false))
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  // Pointed elsewhere, the button no longer reports this panel.
+  await trigger.evaluate((button: HTMLButtonElement) => (button.commandForElement = null))
+  await page.getByRole('button', { name: 'Hide' }).click()
+  await expect(host).toHaveJSProperty('expanded', false)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+})
+
+test('closed headless content stays findable, and a find-in-page reveal opens the panel and its unused trigger', async ({ page, renderScenario }) => {
+  await renderScenario(COLLAPSE)
+  const host = page.locator('c2-details')
+  await expect(host.locator('.c2-details-content')).not.toHaveCSS('display', 'none')
+  await shown(page.getByText('Status: open')).toBe(false)
+  // Find-in-page opens the native details itself, as here; the panel follows, and so does a trigger never pressed.
+  await host.evaluate((element) => {
+    element.shadowRoot!.querySelector('details')!.open = true
+  })
+  await expect(host).toHaveJSProperty('expanded', true)
+  await expect(page.getByText('Status: open')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Filters' })).toHaveAttribute('aria-expanded', 'true')
+  // Open and close buttons carry no expanded state.
+  await expect(page.getByRole('button', { name: 'Show' })).not.toHaveAttribute('aria-expanded')
+})
+
+test('an app cancels a command from a capturing listener', async ({ page, renderScenario }) => {
+  await renderScenario(COLLAPSE)
+  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
+  await page.evaluate(() => document.addEventListener('command', (event) => event.preventDefault(), { capture: true }))
+  await page.getByRole('button', { name: 'Filters' }).click()
+  await expect(page.locator('c2-details')).toHaveJSProperty('expanded', false)
+  await expect(page.getByRole('button', { name: 'Filters' })).toHaveAttribute('aria-expanded', 'false')
+})
+
+test('without invoker commands, the panel runs its triggers on click', async ({ page, renderScenario }) => {
+  // Before the component loads: hide the feature, and swallow the events the browser still sends.
+  await page.addInitScript(() => {
+    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
+    window.addEventListener('command', (event) => event.stopImmediatePropagation(), { capture: true })
+  })
+  await renderScenario(`${COLLAPSE}<button commandfor="filters" command="--toggle" disabled>Off</button>`)
+  const host = page.locator('c2-details')
+  const trigger = page.getByRole('button', { name: 'Filters' })
+  await trigger.press('Enter')
+  await expect(host).toHaveJSProperty('expanded', true)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await page.getByRole('button', { name: 'Hide' }).click()
+  await expect(host).toHaveJSProperty('expanded', false)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await page.getByRole('button', { name: 'Show' }).click()
+  await expect(host).toHaveJSProperty('expanded', true)
+})
+
+test('headless content may draw past the panel edge, as a focus ring does', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details headless expanded><a href="#x">Link</a></c2-details>')
+  await expect(page.locator('c2-details').locator('.c2-details')).toHaveCSS('overflow', 'visible')
+})
+
+test('reduced motion opens and closes a headless panel without animating', async ({ page, renderScenario }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await renderScenario('<c2-details headless><p>Status: open</p></c2-details>')
+  const running = await page.locator('c2-details').evaluate(async (element: Details) => {
+    const content = element.shadowRoot!.querySelector('.c2-details-content')!
+    element.expanded = true
+    await element.updateComplete
+    const opening = content.getAnimations().length
+    element.expanded = false
+    await element.updateComplete
+    return opening + content.getAnimations().length
+  })
+  expect(running).toBe(0)
+  await shown(page.getByText('Status: open')).toBe(false)
 })
