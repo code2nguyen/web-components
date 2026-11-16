@@ -210,3 +210,132 @@ test('an own disabled removed inside a disabled fieldset stays disabled until th
   await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
   await expect(page.getByRole('checkbox')).toBeEnabled()
 })
+
+const modifiers =
+  '<c2-checkbox-group name="toppings" max="2" min="1" aria-label="Toppings">' +
+  '<c2-checkbox value="cheese">Cheese<span slot="trailing">+$1.00</span></c2-checkbox>' +
+  '<c2-checkbox value="bacon">Bacon<span slot="trailing">+$2.00</span></c2-checkbox>' +
+  '<c2-checkbox value="olives">Olives<span slot="trailing">+$0.50</span></c2-checkbox>' +
+  '<c2-checkbox value="onion" disabled>Onion</c2-checkbox>' +
+  '</c2-checkbox-group>'
+
+test('max disables the unchecked options once reached and frees them when one is unchecked', async ({ page, renderScenario, tab }) => {
+  await renderScenario(modifiers)
+  const group = page.locator('c2-checkbox-group')
+  await tab()
+  await page.keyboard.press('Space')
+  await tab()
+  await page.keyboard.press('Space')
+  await expect(group).toHaveJSProperty('value', ['cheese', 'bacon'])
+  await expect(page.getByRole('checkbox', { name: 'Olives' })).toBeDisabled()
+  // Space on the focused option still unchecks it, which frees the others.
+  await page.keyboard.press('Space')
+  await expect(group).toHaveJSProperty('value', ['cheese'])
+  await expect(page.getByRole('checkbox', { name: 'Olives' })).toBeEnabled()
+  await page.getByRole('checkbox', { name: 'Bacon' }).check()
+  // A click on an option the full group disabled changes nothing.
+  await pointerClick(page.getByText('Olives'))
+  await expect(group).toHaveJSProperty('value', ['cheese', 'bacon'])
+  await page.getByRole('checkbox', { name: 'Bacon' }).uncheck()
+  await expect(group).toHaveJSProperty('value', ['cheese'])
+  await expect(page.getByRole('checkbox', { name: 'Olives' })).toBeEnabled()
+  // An option disabled on its own stays disabled.
+  await expect(page.getByRole('checkbox', { name: 'Onion' })).toBeDisabled()
+  await page.getByRole('checkbox', { name: 'Olives' }).check()
+  await expect(group).toHaveJSProperty('value', ['cheese', 'olives'])
+  await accessible(page)
+})
+
+test('min and max validate the count with their messages', async ({ page, renderScenario }) => {
+  await renderScenario(`<form>${modifiers}</form>`)
+  const group = page.locator('c2-checkbox-group')
+  const validity = () =>
+    group.evaluate((element) => {
+      const control = element as HTMLElement & { validity: ValidityState; validationMessage: string }
+      const { rangeUnderflow, rangeOverflow, valueMissing, valid } = control.validity
+      return { rangeUnderflow, rangeOverflow, valueMissing, valid, message: control.validationMessage }
+    })
+  await expect
+    .poll(validity)
+    .toEqual({ rangeUnderflow: true, rangeOverflow: false, valueMissing: false, valid: false, message: 'Please select at least one option.' })
+  await props(group, { min: 2 })
+  await expect.poll(validity).toMatchObject({ rangeUnderflow: true, message: 'Please select at least 2 options.' })
+  await page.getByRole('checkbox', { name: 'Cheese' }).check()
+  await page.getByRole('checkbox', { name: 'Bacon' }).check()
+  await expect.poll(validity).toMatchObject({ valid: true, message: '' })
+  // A value from script may pass max: it is kept and reported, and the user can uncheck options to fix it.
+  await props(group, { value: ['cheese', 'bacon', 'olives'] })
+  await expect.poll(validity).toMatchObject({ rangeOverflow: true, message: 'Please select no more than 2 options.' })
+  const submitted = () => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).getAll('toppings'))
+  await expect.poll(submitted).toEqual(['cheese', 'bacon', 'olives'])
+  await page.getByRole('checkbox', { name: 'Olives' }).uncheck()
+  await expect.poll(validity).toMatchObject({ valid: true })
+  await props(group, { max: 0, min: 0 })
+  await page.getByRole('checkbox', { name: 'Olives' }).check()
+  await expect.poll(submitted).toEqual(['cheese', 'bacon', 'olives'])
+  await expect.poll(validity).toMatchObject({ valid: true })
+})
+
+test('the range messages follow the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${modifiers.replace('min="1"', 'min="2"')}</div>`)
+  const group = page.locator('c2-checkbox-group')
+  await expect(group).toHaveJSProperty('validationMessage', 'Veuillez sélectionner au moins 2 options.')
+  await props(group, { value: ['cheese', 'bacon', 'olives'] })
+  await expect(group).toHaveJSProperty('validationMessage', 'Veuillez sélectionner 2 options au maximum.')
+})
+
+test('the trailing slot sits at the end of the row and joins the clickable label', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div style="width: 320px">${modifiers.replace('<c2-checkbox-group', '<c2-checkbox-group style="--c2-checkbox-group--align-items: stretch"')}</div>`,
+  )
+  const cheese = page.locator('c2-checkbox').first()
+  const trailing = cheese.locator('[part="trailing"]')
+  await expect(trailing).toBeVisible()
+  await expect(page.locator('c2-checkbox').last().locator('[part="trailing"]')).toBeHidden()
+  const row = await cheese.boundingBox()
+  const price = await trailing.boundingBox()
+  expect(Math.round((price?.x ?? 0) + (price?.width ?? 0))).toBe(Math.round((row?.x ?? 0) + (row?.width ?? 0)))
+  await expect(page.getByRole('checkbox', { name: 'Cheese +$1.00', exact: true })).toBeVisible()
+  await page.getByText('+$1.00').click()
+  await expect(page.locator('c2-checkbox-group')).toHaveJSProperty('value', ['cheese'])
+})
+
+test('trailing presence follows slotted content', async ({ page, renderScenario }) => {
+  const trailing = page.locator('c2-checkbox').locator('[part="trailing"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-checkbox>Cheese<span slot="trailing" data-slot-presence-probe>+$1.00</span></c2-checkbox>',
+    host: 'c2-checkbox',
+    slot: 'trailing',
+    assertPresent: async (present) => (present ? expect(trailing).toBeVisible() : expect(trailing).toBeHidden()),
+  })
+})
+
+test('max counts only values that match an option, and a min above max reads as max', async ({ page, renderScenario }) => {
+  await renderScenario(modifiers.replace('min="1"', 'min="5" value="cheese;retired"'))
+  const group = page.locator('c2-checkbox-group')
+  await expect(page.getByRole('checkbox', { name: 'Bacon' })).toBeEnabled()
+  await page.getByRole('checkbox', { name: 'Bacon' }).check()
+  await expect(page.getByRole('checkbox', { name: 'Olives' })).toBeDisabled()
+  await props(group, { value: ['cheese', 'bacon'] })
+  await expect.poll(() => group.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(true)
+})
+
+test('an option added inside a wrapper after the group is full cannot pass max, and one moved out is freed', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-checkbox-group max="1" value="a" aria-label="One"><div id="wrap"><c2-checkbox value="a">A</c2-checkbox></div></c2-checkbox-group><div id="outside"></div>',
+  )
+  const group = page.locator('c2-checkbox-group')
+  await page.locator('#wrap').evaluate((wrap) => {
+    const late = document.createElement('c2-checkbox')
+    late.setAttribute('value', 'b')
+    late.textContent = 'B'
+    wrap.append(late)
+  })
+  // The lock reaches it only on the next sync; a click before that is undone instead of passing max.
+  await pointerClick(page.getByRole('checkbox', { name: 'B' }))
+  await expect(group).toHaveJSProperty('value', ['a'])
+  await expect(page.getByRole('checkbox', { name: 'B' })).not.toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'B' })).toBeDisabled()
+  await page.evaluate(() => document.querySelector('#outside')!.append(document.querySelector('c2-checkbox[value="b"]')!))
+  await expect(page.getByRole('checkbox', { name: 'B' })).toBeEnabled()
+})
