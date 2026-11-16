@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -24,6 +24,14 @@ export interface ScrollArea {
 
 /** How close to an edge, in pixels, counts as at it: sub-pixel scroll positions never reach it exactly. */
 const EDGE = 1
+/** The share of the viewport a `controls` button scrolls, so a little of what was in view stays in view as context. */
+const PAGE = 0.8
+const EDGES: ScrollEdge[] = ['top', 'bottom', 'start', 'end']
+
+/** Points to the inline end; each control turns it towards its own edge. */
+const chevron = html`<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polyline points="9 18 15 12 9 6"></polyline>
+</svg>`
 
 /**
  * A scroll container with themed scrollbars and edge shadows, like the ScrollArea of Mantine, Chakra and PrimeVue and
@@ -39,13 +47,28 @@ const EDGE = 1
  * `scroll-edge` fires when a scroll reaches an edge: the hook for loading more in a feed or a chat. `viewport` is the
  * element that scrolls, for code that needs the real scroller; `scrollToEdge()` jumps to an edge.
  *
+ * `controls` turns the area into a row scroller: a button over each edge with more beyond it scrolls most of a page
+ * towards that edge, and hides once the edge is reached. The buttons are for the pointer: they are named but kept out
+ * of the tab order, because the area itself is the tab stop and its arrow and page keys already scroll it.
+ * `scrollPage()` is what they call, for an app's own buttons. `mouse-drag` lets a mouse drag the content to scroll it,
+ * as touch does natively; the click that ends a drag does not reach a link or a button in the content.
+ *
  * @tag c2-scroll-area
  *
  * @slot - The content that scrolls.
+ * @slot top-icon - Icon of the `controls` button on the top edge. Defaults to a chevron.
+ * @slot bottom-icon - Icon of the `controls` button on the bottom edge. Defaults to a chevron.
+ * @slot start-icon - Icon of the `controls` button on the inline start edge. Defaults to a chevron.
+ * @slot end-icon - Icon of the `controls` button on the inline end edge. Defaults to a chevron.
  *
  * @event {CustomEvent<{ edge: 'top' | 'bottom' | 'start' | 'end' }>} scroll-edge - Fired when a scroll reaches an edge. Does not bubble, so a scroll area nested in another does not trigger the outer one's listener.
  *
  * @csspart viewport - The element that scrolls.
+ * @csspart control - Every `controls` button.
+ * @csspart top-control - The `controls` button on the top edge, around the `top-icon` slot.
+ * @csspart bottom-control - The `controls` button on the bottom edge, around the `bottom-icon` slot.
+ * @csspart start-control - The `controls` button on the inline start edge, around the `start-icon` slot.
+ * @csspart end-control - The `controls` button on the inline end edge, around the `end-icon` slot.
  *
  * @cssproperty {pixel} [--c2-scroll-area--max-height=none] - The tallest the area grows before it scrolls.
  * @cssproperty {pixel} [--c2-scroll-area--max-width=none]
@@ -60,6 +83,17 @@ const EDGE = 1
  * @cssproperty {pixel} [--c2-scroll-area__shadow--size=12px]
  * @cssproperty {pixel} [--c2-scroll-area__fade--size=0px] - Above 0, the content fades into each edge with more beyond it.
  * @cssproperty {outline} [--c2-scroll-area__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {pixel} [--c2-scroll-area__control--size=32px] - Width and height of a `controls` button.
+ * @cssproperty {pixel} [--c2-scroll-area__control--inset=8px] - Distance from a `controls` button to its edge.
+ * @cssproperty {pixel} [--c2-scroll-area__control__icon--size=16px]
+ * @cssproperty {color} [--c2-scroll-area__control--color=#18181b]
+ * @cssproperty {color} [--c2-scroll-area__control--background-color=#ffffff]
+ * @cssproperty {color} [--c2-scroll-area__control__hover--background-color=#f4f4f5]
+ * @cssproperty {border} [--c2-scroll-area__control--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-scroll-area__control--border-radius=999px]
+ * @cssproperty {shadow} [--c2-scroll-area__control--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {opacity} [--c2-scroll-area__control--opacity=1] - Opacity of a shown `controls` button while the pointer is off the area and focus is outside it; `0` shows the buttons only on hover. Ignored on devices that cannot hover.
+ * @cssproperty {outline} [--c2-scroll-area__control__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  */
 @customElement('c2-scroll-area')
 export class ScrollArea extends LitElement {
@@ -70,6 +104,12 @@ export class ScrollArea extends LitElement {
 
   /** The accessible name of the scroll region. */
   @property() label = ''
+
+  /** Show a button over each edge with more beyond it, which scrolls most of a page towards that edge. */
+  @property({ type: Boolean, reflect: true }) controls = false
+
+  /** Let a mouse drag the content to scroll it. Touch scrolls by dragging natively either way. */
+  @property({ type: Boolean, reflect: true, attribute: 'mouse-drag' }) mouseDrag = false
 
   /** Edges with content hidden behind them. */
   @state() private beyond = { top: false, bottom: false, start: false, end: false }
@@ -83,6 +123,8 @@ export class ScrollArea extends LitElement {
   private frame = 0
   /** The first measure records where the area starts without announcing it. */
   private measuredOnce = false
+  /** Detaches `mouse-drag` (`./mouse-drag.js`, loaded the first time it is on). */
+  private stopDrag?: () => void
 
   /** The element that scrolls. */
   get viewport(): HTMLElement | null {
@@ -114,16 +156,38 @@ export class ScrollArea extends LitElement {
     viewport.scrollTo({ ...positions[edge], behavior })
   }
 
+  /**
+   * Scrolls most of a page towards an edge, as the `controls` buttons do; `start` / `end` follow the writing direction.
+   * Smooth unless the user prefers reduced motion. Scroll snapping set on the `viewport` part still applies.
+   */
+  scrollPage(edge: ScrollEdge): void {
+    const viewport = this.viewport
+    if (!viewport) return
+    const block = edge === 'top' || edge === 'bottom'
+    // An axis the area does not scroll is clipped: moving it from script would hide content the user cannot bring back.
+    if (this.orientation !== 'both' && block !== (this.orientation === 'vertical')) return
+    const toward = edge === 'top' || edge === 'start' ? -1 : 1
+    const distance = toward * PAGE * (block ? viewport.clientHeight : viewport.clientWidth)
+    const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const rtl = getComputedStyle(viewport).direction === 'rtl'
+    viewport.scrollBy(block ? { top: distance, behavior } : { left: rtl ? -distance : distance, behavior })
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     this.resizeObserver?.disconnect()
     cancelAnimationFrame(this.frame)
+    this.stopDrag?.()
+    this.stopDrag = undefined
   }
 
   override connectedCallback(): void {
     super.connectedCallback()
     // Moved in the page: watch the same viewport again.
-    if (this.hasUpdated) this.watch()
+    if (this.hasUpdated) {
+      this.watch()
+      this.syncDrag()
+    }
   }
 
   protected override firstUpdated(): void {
@@ -136,6 +200,10 @@ export class ScrollArea extends LitElement {
       this.measuredOnce = false
       this.measure()
     }
+    if (changed.has('mouseDrag')) this.syncDrag()
+    // A clicked control keeps focus; once its edge is reached it hides, so focus moves to the area rather than the page.
+    const edge = (this.shadowRoot?.activeElement as HTMLElement | null)?.dataset.edge as ScrollEdge | undefined
+    if (edge && !this.beyond[edge]) this.viewport?.focus({ preventScroll: true })
   }
 
   private watch(): void {
@@ -147,6 +215,21 @@ export class ScrollArea extends LitElement {
       if (content) this.resizeObserver.observe(content)
     }
     this.measure()
+  }
+
+  private syncDrag(): void {
+    const viewport = this.viewport
+    if (!this.mouseDrag || !viewport) {
+      this.stopDrag?.()
+      this.stopDrag = undefined
+    } else if (!this.stopDrag) {
+      let stop: (() => void) | undefined
+      let cancelled = false
+      this.stopDrag = () => (stop ? stop() : (cancelled = true))
+      void import('./mouse-drag.js').then(({ dragToScroll }) => {
+        if (!cancelled) stop = dragToScroll(viewport, () => this.orientation)
+      })
+    }
   }
 
   private handleScroll(): void {
@@ -170,7 +253,7 @@ export class ScrollArea extends LitElement {
       end: horizontal && left + clientWidth < scrollWidth - EDGE,
     }
     const scrollable = { vertical: scrollHeight > clientHeight + EDGE, horizontal: scrollWidth > clientWidth + EDGE }
-    for (const edge of ['top', 'bottom', 'start', 'end'] as ScrollEdge[]) {
+    for (const edge of EDGES) {
       const axisScrolls = edge === 'top' || edge === 'bottom' ? vertical && scrollable.vertical : horizontal && scrollable.horizontal
       const atEdge = axisScrolls && !next[edge]
       if (atEdge && !this.reached.has(edge)) {
@@ -187,7 +270,7 @@ export class ScrollArea extends LitElement {
   }
 
   override render() {
-    const edges = (['top', 'bottom', 'start', 'end'] as ScrollEdge[]).filter((edge) => this.beyond[edge])
+    const edges = EDGES.filter((edge) => this.beyond[edge])
     // Named, it is a landmark; unnamed, a group, so several scroll areas do not make landmarks with the same name.
     return html`<div class="frame ${edges.map((edge) => `more-${edge}`).join(' ')} ${this.fading ? 'fade' : ''}">
       <div
@@ -204,6 +287,24 @@ export class ScrollArea extends LitElement {
       <span class="shadow shadow--bottom" aria-hidden="true"></span>
       <span class="shadow shadow--start" aria-hidden="true"></span>
       <span class="shadow shadow--end" aria-hidden="true"></span>
+      ${
+        this.controls
+          ? EDGES.map(
+              (edge) =>
+                html`<button
+                  class="control control--${edge}"
+                  part="control ${edge}-control"
+                  type="button"
+                  tabindex="-1"
+                  data-edge=${edge}
+                  aria-label=${this.msg.t(edge)}
+                  @click=${() => this.scrollPage(edge)}
+                >
+                  <slot name="${edge}-icon">${chevron}</slot>
+                </button>`,
+            )
+          : nothing
+      }
     </div>`
   }
 }

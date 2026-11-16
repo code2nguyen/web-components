@@ -37,12 +37,32 @@ import '@c2n/components/scroll-area'
     --c2-scroll-area__shadow--color: transparent;
     --c2-scroll-area__fade--size: 40px;
   }
+  .scroll-row {
+    --c2-scroll-area__scrollbar--width: none;
+    width: 300px;
+  }
+  .scroll-row .shelf {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+  }
+  .scroll-row .tile {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 72px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
 </style>
 <div data-label="Shadows">
   <c2-scroll-area class="scroll-demo" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
 </div>
 <div data-label="Fade">
   <c2-scroll-area class="scroll-demo scroll-fade" label="Members"><p class="row">Member 1</p><p class="row">Member 2</p><p class="row">Member 3</p><p class="row">Member 4</p><p class="row">Member 5</p><p class="row">Member 6</p><p class="row">Member 7</p><p class="row">Member 8</p><p class="row">Member 9</p><p class="row">Member 10</p><p class="row">Member 11</p><p class="row">Member 12</p><p class="row">Member 13</p><p class="row">Member 14</p><p class="row">Member 15</p><p class="row">Member 16</p><p class="row">Member 17</p><p class="row">Member 18</p><p class="row">Member 19</p><p class="row">Member 20</p></c2-scroll-area>
+</div>
+<div data-label="Row scroller">
+  <c2-scroll-area class="scroll-row" orientation="horizontal" controls mouse-drag label="Recently viewed"><div class="shelf"><span class="tile">Item 1</span><span class="tile">Item 2</span><span class="tile">Item 3</span><span class="tile">Item 4</span><span class="tile">Item 5</span><span class="tile">Item 6</span><span class="tile">Item 7</span><span class="tile">Item 8</span></div></c2-scroll-area>
 </div>
 ```
 
@@ -57,6 +77,14 @@ The scrollbar stays native, so it keeps the platform's feel and accessibility, a
 ### Shadows and fade
 
 A shadow shows on each edge that has content beyond it and disappears once that edge is reached. Set `--c2-scroll-area__shadow--color: transparent` to turn shadows off, and `--c2-scroll-area__fade--size` above 0 to fade the content into those edges instead.
+
+### Row scroller
+
+`controls` puts a button over each edge that has content beyond it: it scrolls most of a page towards that edge (smoothly, unless the user prefers reduced motion) and hides once the edge is reached, so a row at its start shows only the forward button. Their look comes from the `--c2-scroll-area__control--*` variables; `--c2-scroll-area__control--opacity: 0` shows them only while the pointer is over the area. The `start-icon`, `end-icon`, `top-icon` and `bottom-icon` slots replace their chevrons, and the `control` part (or `start-control`, `end-control`…) styles the buttons themselves.
+
+The buttons are for the pointer: they have a name but no tab stop, because the area already has one and its arrow and page keys scroll it. `scrollPage(edge)` does what a button does, for an app that puts its own buttons in a header.
+
+`mouse-drag` lets a mouse drag the content to scroll it, as a finger does on a touch screen. A press that moves a few pixels becomes a drag, and the click that ends it does not reach a link or a button in the content; a field keeps its own text selection. Scroll snapping set through `::part(viewport)` pauses while the drag lasts and snaps on release. The drag code loads the first time `mouse-drag` is turned on, so an area without it does not pay for it.
 
 ### Scrolling from code
 

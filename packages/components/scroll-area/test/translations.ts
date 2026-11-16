@@ -5,6 +5,10 @@ import { scrollAreaMessages } from '../src/messages.js'
 
 const fr: typeof scrollAreaMessages.en = {
   label: 'Contenu défilant',
+  top: 'Défiler vers le haut',
+  bottom: 'Défiler vers le bas',
+  start: 'Défiler vers l’arrière',
+  end: 'Défiler vers l’avant',
 }
 
 addTranslations({ fr: { 'scroll-area': fr } })
