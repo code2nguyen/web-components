@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { IndexBar } from '@c2n/table-of-contents/index-bar.js'
 import type { TableOfContents } from '@c2n/table-of-contents'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,12 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-index-bar': DefineComponent<
+      C2Props<IndexBar> & {
+        'keep-url'?: unknown
+        onActiveChange?: (event: EventOf<IndexBar, 'active-change'>) => void
+      }
+    >
     'c2-table-of-contents': DefineComponent<
       C2Props<TableOfContents> & {
         'keep-url'?: unknown

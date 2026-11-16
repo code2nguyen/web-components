@@ -1,0 +1,344 @@
+---
+title: 'Index Bar'
+description: 'Looks and data forms for c2-index-bar: the default rail, a whole alphabet with dimmed keys, a pill rail, a text-only rail, sections given as items and a translated rail.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { IndexBar } from '@c2n/components/table-of-contents/index-bar'
+
+## Presets
+
+Looks for `c2-index-bar`. The keys (`--c2-index-bar__key--*`), the current key (`__key__active--*`), the rail behind them (`__keys--*`) and the bubble that follows a drag (`__bubble--*`) do most of the work. Each card lists a short contact list beside its rail: tap a key, or press on the rail and drag.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .ibg-default {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-default .list {
+    flex: 1;
+    height: 220px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-default h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-default p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-default .list > :last-child {
+    margin-bottom: 180px;
+  }
+</style>
+<div class="ibg-default">
+  <div class="list" id="ibg-default-list" tabindex="0" role="region" aria-label="Contacts">
+    <h5 id="ibg-default-a">A</h5>
+    <p>Ada Lovelace</p>
+    <p>Alan Turing</p>
+    <h5 id="ibg-default-b">B</h5>
+    <p>Barbara Liskov</p>
+    <h5 id="ibg-default-g">G</h5>
+    <p>Grace Hopper</p>
+    <h5 id="ibg-default-k">K</h5>
+    <p>Ken Thompson</p>
+    <h5 id="ibg-default-m">M</h5>
+    <p>Margaret Hamilton</p>
+    <h5 id="ibg-default-t">T</h5>
+    <p>Tim Berners-Lee</p>
+  </div>
+  <c2-index-bar for="ibg-default-list" selector="h5" keep-url></c2-index-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Whole alphabet
+<style>
+  .ibg-alphabet {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-alphabet .list {
+    flex: 1;
+    height: 260px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-alphabet h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-alphabet p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-alphabet .list > :last-child {
+    margin-bottom: 220px;
+  }
+  .ibg-alphabet c2-index-bar {
+    --c2-index-bar__key--padding-block: 0px;
+    --c2-index-bar--font-size: 11px;
+  }
+</style>
+<div class="ibg-alphabet">
+  <div class="list" id="ibg-alphabet-list" tabindex="0" role="region" aria-label="Contacts">
+    <h5 id="ibg-alphabet-a">A</h5>
+    <p>Ada Lovelace</p>
+    <h5 id="ibg-alphabet-e">É</h5>
+    <p>Émilie du Châtelet</p>
+    <h5 id="ibg-alphabet-h">H</h5>
+    <p>Hedy Lamarr</p>
+    <h5 id="ibg-alphabet-r">R</h5>
+    <p>Radia Perlman</p>
+    <h5 id="ibg-alphabet-num">0–9</h5>
+    <p>3M Support</p>
+  </div>
+  <c2-index-bar for="ibg-alphabet-list" selector="h5" keys="ABCDEFGHIJKLMNOPQRSTUVWXYZ#" keep-url></c2-index-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pill rail
+<style>
+  .ibg-pill {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-pill .list {
+    flex: 1;
+    height: 220px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-pill h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-pill p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-pill .list > :last-child {
+    margin-bottom: 180px;
+  }
+  .ibg-pill c2-index-bar {
+    --c2-index-bar__keys--padding: 6px 3px;
+    --c2-index-bar__keys--gap: 2px;
+    --c2-index-bar__keys--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-index-bar__key--width: 22px;
+    --c2-index-bar__key--padding-block: 2px;
+    --c2-index-bar__key--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-index-bar__key__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    --c2-index-bar__key__active--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-index-bar__key__active--background-color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-index-bar__bubble--width: 56px;
+    --c2-index-bar__bubble--height: 56px;
+    --c2-index-bar__bubble--border-radius: 14px;
+    --c2-index-bar__bubble--color: var(--c2-theme--color-surface, #ffffff);
+    --c2-index-bar__bubble--background-color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div class="ibg-pill">
+  <div class="list" id="ibg-pill-list" tabindex="0" role="region" aria-label="Contacts">
+    <h5 id="ibg-pill-c">C</h5>
+    <p>Claude Shannon</p>
+    <h5 id="ibg-pill-f">F</h5>
+    <p>Frances Allen</p>
+    <h5 id="ibg-pill-j">J</h5>
+    <p>John McCarthy</p>
+    <h5 id="ibg-pill-n">N</h5>
+    <p>Niklaus Wirth</p>
+    <h5 id="ibg-pill-s">S</h5>
+    <p>Sophie Wilson</p>
+    <h5 id="ibg-pill-y">Y</h5>
+    <p>Yukihiro Matsumoto</p>
+  </div>
+  <c2-index-bar for="ibg-pill-list" selector="h5" keep-url></c2-index-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Text only
+<style>
+  .ibg-text {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-text .list {
+    flex: 1;
+    height: 220px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-text h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-text p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-text .list > :last-child {
+    margin-bottom: 180px;
+  }
+  .ibg-text c2-index-bar {
+    --c2-index-bar--font-weight: 500;
+    --c2-index-bar__key--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-index-bar__key__hover--background-color: transparent;
+    --c2-index-bar__key__active--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-index-bar__key__active--background-color: transparent;
+    --c2-index-bar__bubble--display: none;
+  }
+</style>
+<div class="ibg-text">
+  <div class="list" id="ibg-text-list" tabindex="0" role="region" aria-label="Glossary">
+    <h5 id="ibg-text-a">A</h5>
+    <p>Accessor</p>
+    <h5 id="ibg-text-c">C</h5>
+    <p>Closure</p>
+    <h5 id="ibg-text-h">H</h5>
+    <p>Hoisting</p>
+    <h5 id="ibg-text-p">P</h5>
+    <p>Promise</p>
+    <h5 id="ibg-text-s">S</h5>
+    <p>Shadow root</p>
+    <h5 id="ibg-text-w">W</h5>
+    <p>Web component</p>
+  </div>
+  <c2-index-bar for="ibg-text-list" selector="h5" keep-url></c2-index-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Sections as items
+<style>
+  .ibg-items {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-items .list {
+    flex: 1;
+    height: 200px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-items h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-items p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-items .list > :last-child {
+    margin-bottom: 160px;
+  }
+</style>
+<div class="ibg-items">
+  <div class="list" tabindex="0" role="region" aria-label="Teams">
+    <h5 id="ibg-items-design">Design</h5>
+    <p>Brand, product and motion</p>
+    <h5 id="ibg-items-eng">Engineering</h5>
+    <p>Platform, web and mobile</p>
+    <h5 id="ibg-items-ops">Operations</h5>
+    <p>Finance, legal and people</p>
+    <h5 id="ibg-items-sales">Sales</h5>
+    <p>Accounts and partnerships</p>
+  </div>
+  <c2-index-bar
+    keys="DEMOS"
+    keep-url
+    items='[{"id":"ibg-items-design","label":"Design"},{"id":"ibg-items-eng","label":"Engineering"},{"id":"ibg-items-ops","label":"Operations"},{"id":"ibg-items-sales","label":"Sales"}]'
+  ></c2-index-bar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Vietnamese alphabet
+<style>
+  .ibg-vi {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+  }
+  .ibg-vi .list {
+    flex: 1;
+    height: 260px;
+    overflow: auto;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ibg-vi h5 {
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ibg-vi p {
+    margin: 0 0 6px;
+    padding: 0 8px;
+  }
+  .ibg-vi .list > :last-child {
+    margin-bottom: 220px;
+  }
+  .ibg-vi c2-index-bar {
+    --c2-index-bar__key--padding-block: 0px;
+    --c2-index-bar--font-size: 11px;
+  }
+</style>
+<div class="ibg-vi" lang="vi">
+  <div class="list" id="ibg-vi-list" tabindex="0" role="region" aria-label="Danh bạ">
+    <h5 id="ibg-vi-a">A</h5>
+    <p>An Nguyễn</p>
+    <h5 id="ibg-vi-b">B</h5>
+    <p>Bảo Trần</p>
+    <h5 id="ibg-vi-dd">Đ</h5>
+    <p>Đức Phạm</p>
+    <h5 id="ibg-vi-h">H</h5>
+    <p>Hà Lê</p>
+    <h5 id="ibg-vi-l">L</h5>
+    <p>Linh Võ</p>
+    <h5 id="ibg-vi-t">T</h5>
+    <p>Thảo Đặng</p>
+  </div>
+  <c2-index-bar for="ibg-vi-list" selector="h5" keys="A;Ă;Â;B;C;D;Đ;E;Ê;G;H;I;K;L;M;N;O;Ô;Ơ;P;Q;R;S;T;U;Ư;V;X;Y" keep-url></c2-index-bar>
+</div>
+```
+
+</GalleryGrid>
+
+The rail of the last card is named "Chỉ mục" once the app adds its Vietnamese text: `addTranslations({ vi: { 'index-bar': { label: 'Chỉ mục' } } })`.

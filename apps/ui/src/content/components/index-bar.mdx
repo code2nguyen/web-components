@@ -1,0 +1,104 @@
+---
+title: 'Index Bar'
+description: 'The A to Z rail beside a long list: tap or drag along it to jump between sections, a bubble shows the key, empty keys are dimmed.'
+category: 'Navigation'
+package: '@c2n/table-of-contents'
+tag: 'c2-index-bar'
+apiTags: ['c2-index-bar']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { IndexBar } from '@c2n/components/table-of-contents/index-bar'
+
+`c2-index-bar` is the rail of letters beside a contact list, a glossary or any long list cut into sections. It is a [`c2-table-of-contents`](/web-components/components/table-of-contents) in another shape: it reads the headings of the element named by `for` (with any `selector`), files each section under the first character of its label, marks the key of the section being read and jumps when a key is tapped. Dragging along the rail scrubs through the list, section by section, while a bubble beside the rail shows the key under the pointer.
+
+`keys` sets the alphabet the rail always shows (`ABCDEFGHIJKLMNOPQRSTUVWXYZ#`): a key no section is filed under is dimmed, dragging over it moves on to the next key that has one, and a section whose key is not listed is filed under the key that differs only by accents (`É` under `E`), else under `#`. Without `keys` the rail lists the keys of the sections. The rail is a single Tab stop: the arrow keys, Home and End walk its keys and Enter jumps, moving focus to the section's heading as a click does.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/table-of-contents/index-bar'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/table-of-contents
+<style>
+  .ib-demo {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 340px;
+  }
+  .ib-demo .ib-list {
+    flex: 1;
+    height: 260px;
+    overflow: auto;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .ib-demo h5 {
+    position: sticky;
+    top: 0;
+    margin: 0;
+    padding: 4px 12px;
+    font-size: 12px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .ib-demo p {
+    margin: 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .ib-demo .ib-list > :last-child {
+    margin-bottom: 220px;
+  }
+</style>
+<div data-label="Tap a key, or drag along the rail">
+  <div class="ib-demo">
+    <div class="ib-list" id="ib-usage-list" tabindex="0" role="region" aria-label="Contacts">
+      <h5 id="ib-usage-a">A</h5>
+      <p>Ada Lovelace</p>
+      <p>Alan Turing</p>
+      <h5 id="ib-usage-b">B</h5>
+      <p>Barbara Liskov</p>
+      <h5 id="ib-usage-d">D</h5>
+      <p>Donald Knuth</p>
+      <p>Dennis Ritchie</p>
+      <h5 id="ib-usage-e">E</h5>
+      <p>Edsger Dijkstra</p>
+      <h5 id="ib-usage-g">G</h5>
+      <p>Grace Hopper</p>
+      <h5 id="ib-usage-k">K</h5>
+      <p>Ken Thompson</p>
+      <h5 id="ib-usage-l">L</h5>
+      <p>Linus Torvalds</p>
+      <h5 id="ib-usage-m">M</h5>
+      <p>Margaret Hamilton</p>
+      <h5 id="ib-usage-t">T</h5>
+      <p>Tim Berners-Lee</p>
+    </div>
+    <c2-index-bar for="ib-usage-list" selector="h5" keys="ABCDEFGHIJKLMNOPQRSTUVWXYZ" keep-url></c2-index-bar>
+  </div>
+</div>
+```
+
+The rail reads the `h5` headings of the list next to it (`for="ib-usage-list" selector="h5"`). Each heading needs an `id`; its text, or its `data-toc-label`, gives the key. `keep-url` leaves the address alone, which suits a list inside an app; without it a jump records the section in the URL fragment, as a link would.
+
+## Sections given as items
+
+When the sections are known in advance, hand them over as `items`, each with the `id` of its heading and, when its label does not start with it, the `key` it is filed under:
+
+```html tag=CodeBlock
+<c2-index-bar keys="ABC" items='[{"id":"a","label":"Ada","key":"A"},{"id":"c","label":"Carl"}]'></c2-index-bar>
+```
+
+## Placing the rail
+
+The rail is as tall as its keys. Place it beside the list in a flex row (or in a sticky column of the page) and centre it vertically; the bubble sits towards the list, `--c2-index-bar__bubble--inset-inline-end` from the rail's end edge, so leave it room or set `--c2-index-bar__bubble--display: none`. `offset` works as on the table of contents: set it to the height of a sticky header above the list.
