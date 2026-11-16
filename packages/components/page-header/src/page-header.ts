@@ -97,6 +97,12 @@ function foldOrder(actions: Action[]): Action[] {
  * parent link, the title, a copy of the title badges and the primary action itself. Inside a `c2-app-shell` the offset
  * comes from the shell, so the bar sits under its header with no CSS.
  *
+ * With `large-title` the title is drawn large (`--c2-page-header__title__large--font-size`, kept below 600px) and, on a
+ * sticky page header, collapses into the condensed bar as it scrolls under it: the bar's title is centred, and where
+ * CSS scroll-driven animations are supported the large title fades out while the bar fades in with the scroll position
+ * (elsewhere the bar fades in once the title has gone). This is the mobile navigation bar: the parent link is the back
+ * control and the primary action stays at the end of the bar. The scroll container is the nearest scrolling ancestor.
+ *
  * @tag c2-page-header
  *
  * @slot breadcrumb - Where the page sits: usually a `c2-breadcrumb`. Hidden below 600px.
@@ -142,6 +148,8 @@ function foldOrder(actions: Action[]): Action[] {
  * @cssproperty {color} [--c2-page-header__title--color=#18181b]
  * @cssproperty {pixel} [--c2-page-header__title--min-width=240px] - Room kept for the title before actions fold.
  * @cssproperty {font-size} [--c2-page-header__title__narrow--font-size=20px]
+ * @cssproperty {font-size} [--c2-page-header__title__large--font-size=32px] - The title of a `large-title` page header, at every width.
+ * @cssproperty {number} [--c2-page-header__title__collapsed--scale=0.9] - How far a `large-title` title shrinks as it scrolls under the condensed bar.
  * @cssproperty {pixel} [--c2-page-header__leading--size=40px]
  * @cssproperty {color} [--c2-page-header__description--color=#52525b]
  * @cssproperty {font-size} [--c2-page-header__description--font-size=14px]
@@ -177,6 +185,12 @@ export class PageHeader extends LitElement {
 
   /** Keep a condensed bar with the title and the primary action once the title has scrolled out of view. */
   @property({ type: Boolean, reflect: true }) sticky = false
+
+  /**
+   * Draw the title large. With `sticky`, it collapses into the condensed bar as it scrolls under it, the bar's title is
+   * centred, and the fade follows the scroll position where scroll-driven animations are supported.
+   */
+  @property({ type: Boolean, reflect: true, attribute: 'large-title' }) largeTitle = false
 
   /** Overrides the target of the parent link derived from the breadcrumb. */
   @property({ attribute: 'parent-href' }) parentHref = ''
@@ -216,9 +230,14 @@ export class PageHeader extends LitElement {
   private foldScheduled = false
   private sheet?: CSSStyleSheet
   private observedTop = 0
+  private scrollRootCache?: Element | null
+  // How far below the sticky offset a large title's lower edge is when the header sticks (0 to the bar height).
+  private condenseInset = 48
   private actionObserver?: ResizeObserver
   private actionWidths = new WeakMap<Element, number>()
   private collapseOffset = -1
+  private fadeRange = ''
+  private hostStart = -1
   /** `aria-hidden` copies of the title badges for the condensed bar, rebuilt only when the badges change. */
   @state() private suffixCopies: Node[] = []
 
@@ -248,6 +267,7 @@ export class PageHeader extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback()
     if (isServer) return
+    this.scrollRootCache = undefined
     this.collectChildren()
     this.mutationObserver ??= new MutationObserver((records) => {
       const own = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
@@ -370,6 +390,29 @@ export class PageHeader extends LitElement {
     return Math.round(Number.parseFloat(value) || 0)
   }
 
+  // The line the title must pass to condense, below the sticky offset. A large title condenses when the header sticks
+  // (or when the title has left, if that comes first; see `syncCondensedGeometry`), one pixel past where its lower
+  // edge comes to rest.
+  private get condenseLine(): number {
+    return this.stickyTop + (this.largeTitle ? this.condenseInset + 1 : 0)
+  }
+
+  // The scroll container the header sticks in, across shadow roots (null for the document's own scroller). Found once
+  // per connection: walking the ancestors resolves their styles.
+  private get scrollRoot(): Element | null {
+    if (this.scrollRootCache !== undefined) return this.scrollRootCache
+    const up = (node: Element): Element | null => node.assignedSlot ?? node.parentElement ?? ((node.parentNode as ShadowRoot | null)?.host || null)
+    let root: Element | null = null
+    for (let node = up(this); node && node !== document.documentElement && node !== document.body; node = up(node)) {
+      const style = getComputedStyle(node)
+      if (/auto|scroll|overlay|hidden/.test(`${style.overflowX} ${style.overflowY}`)) {
+        root = node
+        break
+      }
+    }
+    return (this.scrollRootCache = root)
+  }
+
   /**
    * Watches the title line against the area below `--c2-page-header--sticky-top`. The offset can change after the
    * observer was made (a `c2-app-shell` measures its header after both have rendered), so it is re-read on every
@@ -377,19 +420,22 @@ export class PageHeader extends LitElement {
    */
   private observeTitle() {
     if (isServer || !this.sticky || !this.titleLine) return
-    const top = this.stickyTop
+    const top = this.condenseLine
+    const root = this.largeTitle ? this.scrollRoot : null
+    // The root only changes on reconnection, which starts a new observer.
     if (this.intersectionObserver && top === this.observedTop) return
     this.intersectionObserver?.disconnect()
     this.observedTop = top
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
-        if (this.stickyTop !== this.observedTop) return this.observeTitle()
+        if (this.largeTitle) this.syncCondensedGeometry()
+        if (this.condenseLine !== this.observedTop) return this.observeTitle()
         const entry = entries[entries.length - 1]
         // Condensed when the title has left through the top, not when it is still below the fold.
         const condensed = !entry.isIntersecting && entry.boundingClientRect.bottom <= (entry.rootBounds?.top ?? 0) + 1
         this.setCondensed(condensed)
       },
-      { rootMargin: `${-top}px 0px 0px 0px` },
+      { root, rootMargin: `${-top}px 0px 0px 0px` },
     )
     this.intersectionObserver.observe(this.titleLine)
   }
@@ -478,7 +524,7 @@ export class PageHeader extends LitElement {
   }
 
   protected override updated(changed: PropertyValues): void {
-    if (changed.has('sticky')) {
+    if (changed.has('sticky') || changed.has('largeTitle')) {
       this.intersectionObserver?.disconnect()
       this.intersectionObserver = undefined
       if (this.sticky) {
@@ -508,13 +554,29 @@ export class PageHeader extends LitElement {
   private syncCondensedGeometry() {
     const condensedHeight = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-page-header__condensed--height')) || 48
     const offset = Math.max(0, Math.round(this.offsetHeight - condensedHeight))
-    if (offset !== this.collapseOffset) {
+    // A large title condenses as the header sticks, when its lower edge is `inset` below the sticky offset (or as it
+    // leaves, if that comes first). It fades over the scroll before that point: its own height, or less when the
+    // header is too short to have scrolled that far.
+    const line = this.largeTitle && this.titleLine ? this.relativeBox(this.titleLine) : undefined
+    const inset = line ? Math.min(condensedHeight, Math.max(0, line.top + line.height - offset)) : condensedHeight
+    const start = line ? this.measureStart(offset) : -1
+    const end = line && start >= 0 ? Math.round(start - this.stickyTop + line.top + line.height - inset - 1) : -1
+    const fade = end > 0 ? `${end - Math.max(1, Math.min(line!.height, end))}px ${end}px` : ''
+    if (offset !== this.collapseOffset || inset !== this.condenseInset || fade !== this.fadeRange) {
       this.collapseOffset = offset
-      this.sheet?.replaceSync(`:host { --_collapse-offset: ${offset}px; }`)
+      this.fadeRange = fade
+      const moved = inset !== this.condenseInset
+      this.condenseInset = inset
+      // The fade is named only once its range is known, so it never holds the bar hidden.
+      const names = fade ? ` --_fade-range: ${fade}; --_fade-title: c2-page-header-title-out; --_fade-bar: c2-page-header-bar-in;` : ''
+      this.sheet?.replaceSync(`:host { --_collapse-offset: ${offset}px;${names} }`)
+      if (moved) this.observeTitle()
     }
     const primary = this.primaryElement
     if (!primary || !this.isCondensed) {
-      if (this.primaryShift.x || this.primaryShift.y) this.primaryShift = { x: 0, y: 0, width: primary?.offsetWidth ?? 0 }
+      // The width is kept up to date: a centred large title leaves room for it while it fades in.
+      const width = primary?.offsetWidth ?? 0
+      if (this.primaryShift.x || this.primaryShift.y || width !== this.primaryShift.width) this.primaryShift = { x: 0, y: 0, width }
       return
     }
     const right = Number.parseFloat(getComputedStyle(this).getPropertyValue('--c2-page-header--padding-right')) || 24
@@ -522,6 +584,16 @@ export class PageHeader extends LitElement {
     const x = Math.round(this.clientWidth - right - box.width - box.left)
     const y = Math.round(this.offsetHeight - condensedHeight + (condensedHeight - box.height) / 2 - box.top)
     if (x !== this.primaryShift.x || y !== this.primaryShift.y || box.width !== this.primaryShift.width) this.primaryShift = { x, y, width: box.width }
+  }
+
+  // Where the header starts in its scroll container's content, the origin of the fade's scroll range. While it is
+  // stuck its box is not in its own place, so the last measure is kept.
+  private measureStart(offset: number): number {
+    const root = this.scrollRoot
+    const scrolled = root ? root.scrollTop : window.scrollY
+    const top = this.getBoundingClientRect().top - (root ? root.getBoundingClientRect().top + root.clientTop : 0)
+    if (scrolled <= 0 || Math.abs(top - (this.stickyTop - offset)) >= 1) this.hostStart = Math.round(top + scrolled)
+    return this.hostStart
   }
 
   /** The element's layout box relative to the host, ignoring any transform on it. */
@@ -590,10 +662,16 @@ export class PageHeader extends LitElement {
       .replace(/\s+/g, ' ')
       .trim()
     const suffix = this.suffixCopies
-    return html`<div class="condensed-bar" part="condensed" style=${styleMap({ '--_primary-width': `${this.primaryShift.width}px` })}>
+    return html`<div
+      class="condensed-bar"
+      part="condensed"
+      ?inert=${!this.isCondensed}
+      style=${styleMap({ '--_primary-width': `${this.primaryShift.width}px` })}
+    >
       ${this.renderParentLink(true)}
-      <span class="condensed-title" aria-hidden="true">${title}</span>
-      <span class="condensed-suffix" aria-hidden="true">${suffix}</span>
+      <span class="condensed-center"
+        ><span class="condensed-title" aria-hidden="true">${title}</span> <span class="condensed-suffix" aria-hidden="true">${suffix}</span></span
+      >
     </div>`
   }
 

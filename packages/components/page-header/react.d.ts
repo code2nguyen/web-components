@@ -24,6 +24,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-page-header': C2Props<PageHeader> & {
+        'large-title'?: Attribute
         'parent-href'?: Attribute
         'parent-label'?: Attribute
         'more-actions-label'?: Attribute

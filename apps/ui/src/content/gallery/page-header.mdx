@@ -12,6 +12,8 @@ import { Avatar } from '@c2n/components/avatar'
 
 Each card resets the site's global heading styles on its `h1` (`font: inherit`) so the title takes the page header's typography. The title scale, the surface and the divider set the tone: `--c2-page-header__title--font-size`, `--c2-page-header--background-color` and `--c2-page-header--border-bottom`.
 
+**Navigation bar** is the mobile top bar: `sticky large-title` in a scrolling pane. Scroll it: the large title fades as it passes under the bar, whose title is centred between the back link (derived from the breadcrumb) and the primary action. Where CSS scroll-driven animations are supported the fade follows the scroll position; elsewhere the bar fades in once the title has gone.
+
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
@@ -99,6 +101,80 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
   <h1>Payout rules</h1>
   <p slot="description">Limits and approvals that apply to every batch.</p>
   <c2-button slot="actions" primary>Add rule</c2-button>
+</c2-page-header>
+```
+
+```html tag=MdxCodeBlock,label=Navigation bar
+<style>
+  .nav-pane {
+    height: 320px;
+    overflow: auto;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+    background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .nav-bar {
+    --c2-page-header--padding-top: 12px;
+    --c2-page-header--padding-right: 16px;
+    --c2-page-header--padding-left: 16px;
+    --c2-page-header--background-color: var(--c2-theme--color-surface, #ffffff);
+  }
+  .nav-bar h1 {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+  .nav-rows {
+    margin: 0;
+    padding: 0 16px 16px;
+    list-style: none;
+  }
+  .nav-rows li {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+</style>
+<div class="nav-pane">
+  <c2-page-header client:only="lit" class="nav-bar" sticky large-title>
+    <c2-breadcrumb slot="breadcrumb">
+      <c2-link-button href="#">Settings</c2-link-button>
+      <c2-link-button>Alerts</c2-link-button>
+    </c2-breadcrumb>
+    <h1>Alerts</h1>
+    <c2-button slot="actions" primary>Done</c2-button>
+  </c2-page-header>
+  <ul class="nav-rows">
+    <li>Payout approved</li>
+    <li>Payout rejected</li>
+    <li>Batch awaiting approval</li>
+    <li>New beneficiary added</li>
+    <li>Card spend over limit</li>
+    <li>Statement ready</li>
+    <li>Weekly cash summary</li>
+    <li>Sign-in from a new device</li>
+  </ul>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Large title
+<style>
+  .large-header {
+    --c2-page-header__title__large--font-size: 40px;
+    --c2-page-header__title--font-weight: 700;
+  }
+  .large-header h1 {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: -0.02em;
+  }
+</style>
+<c2-page-header class="large-header" large-title>
+  <h1>Today</h1>
+  <p slot="description">Three batches need your approval.</p>
 </c2-page-header>
 ```
 
