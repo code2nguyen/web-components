@@ -1,5 +1,5 @@
 {
-  "lazy": 404045,
+  "lazy": 405023,
   "entries": {
     "accordion": 6073,
     "action-bar": 4528,
@@ -248,7 +248,7 @@
     "status-panel": 2740,
     "steps": 13302,
     "steps/step": 8244,
-    "sticky": 1540,
+    "sticky": 1705,
     "streaming-text": 2776,
     "swipe-action": 4151,
     "switch": 3794,
