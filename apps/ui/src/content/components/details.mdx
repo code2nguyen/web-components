@@ -10,7 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Details } from '@c2n/components/details'
 import { Button } from '@c2n/components/button'
 
-`c2-details` wraps a native `<details>` / `<summary>` pair, so keyboard access, screen-reader semantics and find-in-page auto-expand come from the browser. Give panels the same `name` and they form an exclusive accordion: opening one closes the others in the same document or shadow root (the panels of a `c2-accordion` follow the accordion instead). The header is the `title` slot (or the `label` attribute) plus an optional `header-content` row that stays visible when collapsed; buttons and links placed there work without toggling the panel. `title-not-clickable` limits toggling to the chevron, `disabled` blocks it. Open and close slide the content smoothly in every browser (`--c2-details--transition-duration` controls the length, reduced motion disables it), and `expanded` mirrors the native `open` state; listen for `toggle` on the element. Content rendered only once the panel opens (in a `toggle` listener, by a framework) still slides open: the panel follows content that grows while it opens. `headless` turns the panel into a collapse: the content alone, with no summary and no frame, opened by a control elsewhere on the page. A native button with `commandfor` and `command="--toggle"` (or `--open`, `--close`) needs no script, and the panel keeps its `aria-expanded` in step; any other control sets `expanded` or calls `toggle()`. Closed content stays findable by find-in-page, which opens the panel.
+`c2-details` wraps a native `<details>` / `<summary>` pair, so keyboard access, screen-reader semantics and find-in-page auto-expand come from the browser. Give panels the same `name` and they form an exclusive accordion: opening one closes the others in the same document or shadow root (the panels of a `c2-accordion` follow the accordion instead). The header is the `title` slot (or the `label` attribute) plus an optional `header-content` row that stays visible when collapsed; buttons and links placed there work without toggling the panel. `title-not-clickable` limits toggling to the chevron, `disabled` blocks it. Open and close slide the content smoothly in every browser (`--c2-details--transition-duration` controls the length, reduced motion disables it), and `expanded` mirrors the native `open` state; listen for `toggle` on the element. Content rendered only once the panel opens (in a `toggle` listener, by a framework) still slides open: the panel follows content that grows while it opens. `headless` turns the panel into a collapse: the content alone, with no summary and no frame, opened by a control elsewhere on the page. A `c2-button` (or a native button) with `commandfor` and `command="--toggle"` (or `--open`, `--close`) needs no script, and the panel keeps its `aria-expanded` in step; any other control sets `expanded` or calls `toggle()`. Closed content stays findable by find-in-page, which opens the panel.
 
 ## Import
 
@@ -32,19 +32,16 @@ import '@c2n/components/details'
     color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .collapse-trigger {
-    padding: 4px 0;
-    border: none;
-    background: none;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--c2-theme--color-primary, #0265dc);
-    cursor: pointer;
-  }
-  .collapse-trigger:focus-visible {
-    outline: var(--c2-theme--focus-ring, 2px solid rgba(2, 101, 220, 0.4));
-    outline-offset: 2px;
-    border-radius: 4px;
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 8px;
+    --c2-button__container--padding-right: 8px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-button__container__hover--color: var(--c2-theme--color-primary, #0265dc);
+    --c2-button__container__active--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    margin-left: -8px;
   }
   .stack {
     display: grid;
@@ -74,7 +71,7 @@ import '@c2n/components/details'
 </div>
 <div data-label="Headless collapse">
   <div class="demo">
-    <button class="collapse-trigger" commandfor="usage-collapse" command="--toggle" aria-controls="usage-collapse" aria-expanded="false">Show delivery details</button>
+    <c2-button class="collapse-trigger" commandfor="usage-collapse" command="--toggle" aria-controls="usage-collapse" aria-expanded="false">Show delivery details</c2-button>
     <c2-details id="usage-collapse" headless><p>Orders placed before 2 pm ship the same day. Weekend orders ship on Monday.</p></c2-details>
   </div>
 </div>

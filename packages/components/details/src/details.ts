@@ -11,6 +11,9 @@ import styles from './details.scss?inline'
 
 const nativeCommands = typeof HTMLButtonElement === 'undefined' || 'commandForElement' in HTMLButtonElement.prototype
 
+/** A native button, or an element that draws its button in its shadow root and forwards commands to it (`c2-button`). */
+const isInvoker = (element: Element) => element instanceof HTMLButtonElement || !!element.shadowRoot?.querySelector('button')
+
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
 export interface DetailsEventMap {
   toggle: ToggleEvent
@@ -27,8 +30,8 @@ export interface Details {
  * close animate the content height (plus a fade) with the Web Animations API, so the motion is identical in every
  * browser; the native `open` attribute is only removed once the close animation has finished.
  *
- * `headless` makes it a collapse opened from outside, e.g. by `<button commandfor="id" command="--toggle">`
- * (`--open`, `--close`).
+ * `headless` makes it a collapse opened from outside, e.g. by `<button commandfor="id" command="--toggle">` or
+ * `<c2-button commandfor="id" command="--toggle">` (`--open`, `--close`).
  *
  * @tag c2-details
  *
@@ -223,10 +226,22 @@ export class Details extends LitElement {
 
   private readonly handleCommand = (event: Event) => this.runCommand(event, (event as CommandEvent).command)
 
-  /** Without invoker commands, a click on a button naming this panel runs its command. */
+  /**
+   * Without invoker commands, a click on a trigger naming this panel runs its command: a native button, or an element
+   * such as `c2-button` that carries `commandfor` on its host and draws its button in a shadow root. As natively, a
+   * disabled button and a submit or reset button of a form send nothing.
+   */
   private readonly handleTriggerClick = (event: Event) => {
-    const button = event.composedPath().find((node): node is HTMLButtonElement => node instanceof HTMLButtonElement && node.hasAttribute('commandfor'))
-    if (button && !button.disabled && this.id && button.getAttribute('commandfor') === this.id) this.runCommand(event, button.getAttribute('command'))
+    const path = event.composedPath()
+    const trigger = path.find((node): node is Element => node instanceof Element && node.hasAttribute('commandfor'))
+    if (!trigger || !this.id || trigger.getAttribute('commandfor') !== this.id || !isInvoker(trigger)) return
+    // The button the click went through: the trigger itself, or the one in its shadow root.
+    const button = path.find(
+      (node): node is HTMLButtonElement => node instanceof HTMLButtonElement && (node === trigger || node.getRootNode() === trigger.shadowRoot),
+    )
+    const { type, form } = trigger as Element & { type?: string; form?: HTMLFormElement | null }
+    if (!button || button.disabled || trigger.matches(':disabled') || (type !== 'button' && form)) return
+    this.runCommand(event, trigger.getAttribute('command'))
   }
 
   private runCommand(event: Event, command: string | null) {
@@ -234,13 +249,20 @@ export class Details extends LitElement {
       this.toggle(command === '--toggle' ? undefined : command === '--open')
   }
 
-  /** `aria-expanded` of the `--toggle` buttons naming this panel, as popover invokers get natively. Only on change. */
+  /**
+   * `aria-expanded` of the `--toggle` triggers naming this panel, as popover invokers get natively. Only on change.
+   * A `c2-button` takes it as a property and hands it to its inner button; an attribute the author wrote is kept in step.
+   */
   private syncTriggers() {
     const root = this.getRootNode() as ParentNode
     const expanded = String(this.expanded)
     if (this.id && root.querySelectorAll)
-      for (const button of root.querySelectorAll<HTMLElement>(`button[commandfor="${CSS.escape(this.id)}"][command="--toggle"]`))
-        if (button.ariaExpanded !== expanded) button.ariaExpanded = expanded
+      for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="--toggle"]`)) {
+        if (!isInvoker(trigger) || (trigger.ariaExpanded === expanded && (trigger.getAttribute('aria-expanded') ?? expanded) === expanded)) continue
+        trigger.ariaExpanded = expanded
+        // modern-web-ignore: aria-attribute-on-other-element updates only the aria-expanded the author wrote on a c2-button trigger, so it does not go stale
+        if (!(trigger instanceof HTMLButtonElement) && trigger.hasAttribute('aria-expanded')) trigger.setAttribute('aria-expanded', expanded)
+      }
   }
 
   private cancelContentAnimations() {

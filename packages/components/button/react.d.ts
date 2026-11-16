@@ -25,6 +25,9 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-button': C2Props<Button> & {
         'aria-label'?: Attribute
+        commandfor?: Attribute
+        'aria-expanded'?: Attribute
+        'aria-controls'?: Attribute
       }
     }
   }
