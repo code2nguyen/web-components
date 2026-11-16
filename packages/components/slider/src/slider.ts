@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -19,6 +19,42 @@ export type SliderMode = 'single' | 'range'
 type RangeThumb = 'start' | 'end'
 
 const MAX_TICKS = 200
+
+/** A point of interest drawn on the track: an event on a time axis, a recorded reading, a chapter. */
+export interface SliderMarker {
+  /** Position on the track, in the slider's `min`–`max` units. Markers outside that range are not drawn. */
+  value: number
+  /** Read with the value (`aria-valuetext`) while a thumb rests on the marker. */
+  label?: string
+  /** Category of the marker, added to its CSS parts as `marker-<kind>` so a page can colour each kind. Letters, digits, `-` and `_`. */
+  kind?: string
+}
+
+/** What a {@link SliderMarkerRenderer} receives for each drawn marker. */
+export interface SliderMarkerContext {
+  marker: SliderMarker
+  /** Index of the marker in `markers`. */
+  index: number
+  /** Position along the track, `0` at `min` and `1` at `max`. */
+  fraction: number
+  /** True while the marker lies on the filled part of the track. */
+  filled: boolean
+}
+
+/** Content drawn inside a marker (an icon, a short label); anything Lit can render. */
+export type SliderMarkerRenderer = (context: SliderMarkerContext) => unknown
+
+// `filled` is the state part every filled marker carries, so it is no kind.
+const KIND = /^(?!filled$)[\w-]+$/
+
+interface DrawnMarker {
+  marker: SliderMarker
+  index: number
+  /** `marker.value` on the step grid: what a thumb resting on the marker holds. */
+  value: number
+  /** Drawn position along the track. */
+  fraction: number
+}
 
 /** Events fired by {@link Slider}, keyed for `addEventListener`. */
 export interface SliderEventMap {
@@ -41,6 +77,11 @@ export interface Slider {
  * the track moves the nearer thumb there, and the fill spans the selected interval. In a form the range submits two
  * entries under `name`, start first.
  *
+ * `markers` draws points of interest on the track (the events of a replay, the chapters of a recording) without
+ * changing what the slider selects: each is a dot at its `value`, coloured by `kind` through the `marker-<kind>` part,
+ * and a thumb resting on one adds its `label` to `aria-valuetext`. `seekMarker()` moves the value to the next or the
+ * previous marker, for an application's step buttons.
+ *
  * @tag c2-slider
  *
  * @event {Event} input - Re-dispatched from the inner input while the value changes (every step of a drag). In range mode, read `valueStart`/`valueEnd`.
@@ -52,6 +93,8 @@ export interface Slider {
  * @csspart thumb-start - The lower handle in range mode.
  * @csspart thumb-end - The upper handle in range mode.
  * @csspart value - The value bubble shown above the thumb when `show-value` is set.
+ * @csspart markers - The layer holding the `markers`, laid over the track.
+ * @csspart marker - Each marker. It also carries `marker-<kind>` from its `kind`, and `marker-filled` while it lies on the filled part.
  *
  * @cssproperty {pixel} [--c2-slider__container--height=32px] - Height of the horizontal slider (width when vertical); the touch target.
  * @cssproperty {pixel} [--c2-slider__container--length=160px] - Length of a vertical slider. A horizontal one fills its width.
@@ -77,6 +120,12 @@ export interface Slider {
  * @cssproperty {color} [--c2-slider__tick--color=#a1a1aa] - Ticks on the unfilled part of the track.
  * @cssproperty {color} [--c2-slider__tick__filled--color=#ffffff] - Ticks on the filled part.
  *
+ * @cssproperty {pixel} [--c2-slider__marker--size=8px] - Diameter of a marker dot.
+ * @cssproperty {border-radius} [--c2-slider__marker--border-radius=999px]
+ * @cssproperty {color} [--c2-slider__marker--color=#18181b] - Markers on the unfilled part of the track.
+ * @cssproperty {color} [--c2-slider__marker__filled--color=#ffffff] - Markers on the filled part.
+ * @cssproperty {border} [--c2-slider__marker--border=0 solid transparent] - Outline of a marker dot, e.g. a ring that separates it from the track.
+ *
  * @cssproperty {background} [--c2-slider__value--background=#18181b] - Value bubble above the thumb.
  * @cssproperty {color} [--c2-slider__value--color=#fafafa]
  * @cssproperty {font-size} [--c2-slider__value--font-size=12px]
@@ -101,6 +150,8 @@ export class Slider extends LitElement {
   private defaultValueStart = 0
   private defaultValueEnd = 100
   private defaultValueCaptured = false
+  /** The markers inside `min`/`max`, with their snapped value; rebuilt when `markers` or the bounds change. */
+  private drawnMarkers: DrawnMarker[] = []
   /** Thumb a press on the track grabbed, followed until the pointer is released. */
   private trackDrag: { thumb: RangeThumb; pointerId: number; moved: boolean } | undefined
 
@@ -143,6 +194,15 @@ export class Slider extends LitElement {
 
   /** Draws a mark on the track for every `step` between `min` and `max` (up to 200 marks). */
   @property({ type: Boolean, reflect: true }) ticks = false
+
+  /**
+   * Points of interest drawn on the track, as an array or a JSON attribute (`markers='[{"value":42,"label":"Stop"}]'`).
+   * They are decoration: the slider still selects any value on its `step` grid.
+   */
+  @property({ converter: jsonPropertyConverter }) markers?: SliderMarker[]
+
+  /** Content drawn inside each marker. Without it a marker is a plain dot. Property only. */
+  @property({ attribute: false }) renderMarker?: SliderMarkerRenderer
 
   /** Formats the value for the bubble and `aria-valuetext`, e.g. `(v) => \`${v}%\``. Property only. */
   @property({ attribute: false }) formatValue: (value: number) => string = (value) => String(value)
@@ -233,6 +293,54 @@ export class Slider extends LitElement {
   /** Position of the value along the track, `0` at `min` and `1` at `max`. */
   get fraction(): number {
     return this.toFraction(this.value)
+  }
+
+  /**
+   * Moves `value` to the nearest marker after it (`direction` 1) or before it (-1) and returns that marker, or
+   * `undefined` when there is none or the slider is in range mode. Like setting `value`, it fires no event.
+   */
+  seekMarker(direction: 1 | -1 = 1): SliderMarker | undefined {
+    if (this.isRange) return undefined
+    let next: DrawnMarker | undefined
+    for (const drawn of this.drawnMarkers) {
+      if ((drawn.value - this.value) * direction <= 0) continue
+      if (!next || (drawn.value - next.value) * direction < 0) next = drawn
+    }
+    if (next) this.value = next.value
+    return next?.marker
+  }
+
+  /** Snaps a value to the `step` grid inside `min`/`max`, as the native input does: the top is the last step. */
+  private snap(raw: number): number {
+    if (!(this.step > 0)) return Math.min(this.max, Math.max(this.min, raw))
+    const top = this.min + Math.floor((this.max - this.min) / this.step + 1e-9) * this.step
+    const snapped = this.min + Math.round((raw - this.min) / this.step) * this.step
+    return Math.min(top, Math.max(this.min, Number(snapped.toFixed(10))))
+  }
+
+  /** `aria-valuetext`: the formatted value, followed by the labels of the markers a thumb rests on. */
+  private valueText(value: number, formatted: string): string {
+    const labels = this.drawnMarkers.filter((drawn) => drawn.marker.label && drawn.value === value).map((drawn) => drawn.marker.label)
+    return [formatted, ...labels].join(', ')
+  }
+
+  /** Fractions of the track between which ticks and markers are drawn as filled. */
+  private get filledInterval(): [number, number] {
+    return this.isRange ? [this.toFraction(this.valueStart), this.toFraction(this.valueEnd)] : [0, this.fraction]
+  }
+
+  protected override willUpdate(changed: PropertyValues<this>) {
+    if (changed.has('markers') || changed.has('min') || changed.has('max') || changed.has('step')) {
+      // Kept between updates so a drag, which re-renders on every step, does not filter and snap the markers again.
+      this.drawnMarkers = []
+      if (Array.isArray(this.markers)) {
+        this.markers.forEach((marker, index) => {
+          if (Number.isFinite(marker?.value) && marker.value >= this.min && marker.value <= this.max) {
+            this.drawnMarkers.push({ marker, index, value: this.snap(marker.value), fraction: this.toFraction(marker.value) })
+          }
+        })
+      }
+    }
   }
 
   private get isRange() {
@@ -345,9 +453,7 @@ export class Slider extends LitElement {
     let fraction = length > 0 ? (vertical ? box.bottom - event.clientY : event.clientX - box.left) - size / 2 : 0
     fraction = length > 0 ? Math.min(1, Math.max(0, fraction / length)) : 0
     if (!vertical && getComputedStyle(this).direction === 'rtl') fraction = 1 - fraction
-    const raw = this.min + fraction * (this.max - this.min)
-    const snapped = this.step > 0 ? this.min + Math.round((raw - this.min) / this.step) * this.step : raw
-    return Math.min(this.max, Math.max(this.min, Number(snapped.toFixed(10))))
+    return this.snap(this.min + fraction * (this.max - this.min))
   }
 
   /**
@@ -393,7 +499,7 @@ export class Slider extends LitElement {
     if (!this.ticks || this.step <= 0) return nothing
     const count = Math.round((this.max - this.min) / this.step)
     if (count < 1 || count > MAX_TICKS) return nothing
-    const [low, high] = this.isRange ? [this.toFraction(this.valueStart), this.toFraction(this.valueEnd)] : [0, this.fraction]
+    const [low, high] = this.filledInterval
     const marks = []
     for (let i = 0; i <= count; i++) {
       const fraction = i / count
@@ -405,6 +511,29 @@ export class Slider extends LitElement {
       )
     }
     return html`<div class="c2-slider-ticks" aria-hidden="true">${marks}</div>`
+  }
+
+  private renderMarkers() {
+    if (!this.drawnMarkers.length) return nothing
+    // Filled by the snapped value, as the label is announced: a marker a thumb rests on counts as reached.
+    const [low, high] = this.filledInterval
+    return html`<div class="c2-slider-markers" part="markers" aria-hidden="true">
+      ${this.drawnMarkers.map(({ marker, index, value, fraction }) => {
+        const position = this.toFraction(value)
+        const filled = position >= low && position <= high
+        const kind = typeof marker.kind === 'string' && KIND.test(marker.kind) ? ` marker-${marker.kind}` : ''
+        return html`<span
+          class=${classMap({ 'c2-slider-marker': true, 'is-filled': filled })}
+          part=${`marker${kind}${filled ? ' marker-filled' : ''}`}
+          style=${styleMap({ '--_p': String(fraction) })}
+          >${
+            // `nothing`, not `undefined`, without a renderer: Lit assumes a hydrated `undefined` left a text node, and a
+            // renderer set after hydration would then write its text into the closing marker comment.
+            this.renderMarker ? this.renderMarker({ marker, index, fraction, filled }) : nothing
+          }</span
+        >`
+      })}
+    </div>`
   }
 
   private rangeLabel(thumbLabel: string) {
@@ -430,7 +559,7 @@ export class Slider extends LitElement {
       aria-label=${this.rangeLabel(thumb === 'start' ? this.startLabel : this.endLabel)}
       aria-describedby=${this.field.describedBy()}
       aria-invalid=${this.field.invalid ? 'true' : nothing}
-      aria-valuetext=${this.formatValue(value)}
+      aria-valuetext=${this.valueText(value, this.formatValue(value))}
       aria-orientation=${this.orientation}
       @input=${(event: Event) => this.handleRangeInput(thumb, event)}
       @change=${(event: Event) => this.handleRangeChange(thumb, event)}
@@ -452,7 +581,7 @@ export class Slider extends LitElement {
       >
         <div class="c2-slider-track" part="track">
           <div class="c2-slider-fill" part="fill"></div>
-          ${this.renderTicks()} ${this.renderRangeThumb('start', this.valueStart)} ${this.renderRangeThumb('end', this.valueEnd)}
+          ${this.renderTicks()} ${this.renderMarkers()} ${this.renderRangeThumb('start', this.valueStart)} ${this.renderRangeThumb('end', this.valueEnd)}
         </div>
         ${this.renderRangeInput('start', this.valueStart)} ${this.renderRangeInput('end', this.valueEnd)}
       </div>
@@ -467,7 +596,7 @@ export class Slider extends LitElement {
       <div class="c2-slider" style=${styleMap({ '--_p': String(this.fraction) })}>
         <div class="c2-slider-track" part="track">
           <div class="c2-slider-fill" part="fill"></div>
-          ${this.renderTicks()}
+          ${this.renderTicks()} ${this.renderMarkers()}
           <div class="c2-slider-thumb" part="thumb">
             ${this.showValue ? html`<div class="c2-slider-value" part="value" aria-hidden="true">${formatted}</div>` : nothing}
           </div>
@@ -485,7 +614,7 @@ export class Slider extends LitElement {
           aria-labelledby=${ifDefined(this.ariaLabelledBy)}
           aria-describedby=${this.field.describedBy()}
           aria-invalid=${this.field.invalid ? 'true' : nothing}
-          aria-valuetext=${formatted}
+          aria-valuetext=${this.valueText(this.value, formatted)}
           aria-orientation=${this.orientation}
           @input=${this.handleInput}
           @change=${this.handleChange}

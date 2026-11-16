@@ -1,0 +1,92 @@
+---
+/**
+ * Plays the application's part in the slider gallery: the time scrubber's transport (a Play toggle and a speed
+ * button driving a timer, and Previous/Next buttons calling `seekMarker()`) with its `formatValue`, and the chapter
+ * numbers drawn inside the markers through `renderMarker`. Both are property-only.
+ */
+---
+
+<script>
+  import type { Slider } from '@c2n/components/slider'
+  import type { Button } from '@c2n/components/button'
+  import '@c2n/components/slider'
+  import '@c2n/components/button'
+
+  const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds) % 60).padStart(2, '0')}`
+  const speeds = [1, 2, 4]
+
+  /** Resolves once the server-rendered slider has hydrated: a property set before that would not reach its DOM. */
+  async function hydrated(slider: Slider) {
+    await customElements.whenDefined('c2-slider')
+    await slider.updateComplete
+  }
+
+  async function setupScrubber(root: HTMLElement) {
+    const slider = root.querySelector<Slider>('c2-slider')
+    if (!slider) return
+    await hydrated(slider)
+    const output = root.querySelector('output')
+    const button = (action: string) => root.querySelector<Button>(`[data-action="${action}"]`)
+    const play = button('play')
+    const speedButton = button('speed')
+    let speed = 1
+    let timer: ReturnType<typeof setInterval> | undefined
+
+    slider.formatValue = clock
+    const show = () => {
+      if (output) output.textContent = `${clock(slider.value)} / ${clock(slider.max)}`
+    }
+    const stop = () => {
+      clearInterval(timer)
+      timer = undefined
+      if (play) play.selected = false
+    }
+    const start = () => {
+      if (slider.value >= slider.max) slider.value = slider.min
+      timer = setInterval(() => {
+        slider.value = Math.min(slider.max, slider.value + speed)
+        show()
+        if (slider.value >= slider.max) stop()
+      }, 250)
+      if (play) play.selected = true
+    }
+
+    slider.addEventListener('input', show)
+    play?.addEventListener('click', () => (timer ? stop() : start()))
+    button('previous')?.addEventListener('click', () => {
+      slider.seekMarker(-1)
+      show()
+    })
+    button('next')?.addEventListener('click', () => {
+      slider.seekMarker(1)
+      show()
+    })
+    speedButton?.addEventListener('click', () => {
+      speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length]
+      speedButton.textContent = `${speed}×`
+      speedButton.setAttribute('aria-label', `Speed ${speed}×`)
+    })
+    show()
+  }
+
+  async function setupChapters(slider: Slider) {
+    await hydrated(slider)
+    slider.renderMarker = ({ index }) => String(index + 1)
+  }
+
+  const initialized = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-slider-example]').forEach((element) => {
+      if (initialized.has(element)) return
+      initialized.add(element)
+      if (element.dataset.sliderExample === 'scrubber') void setupScrubber(element)
+      else if (element.dataset.sliderExample === 'chapters') void setupChapters(element as Slider)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

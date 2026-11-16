@@ -122,5 +122,22 @@
       <c2-slider class="flat" value="35" aria-label="Flat"></c2-slider>
       <c2-slider class="success" value="80" show-value aria-label="Success"></c2-slider>
     </section>
+
+    <section>
+      <h2>Markers (horizontal, vertical, RTL, range)</h2>
+      <c2-slider
+        min="0"
+        max="600"
+        value="240"
+        show-value
+        aria-label="Replay"
+        markers='[{"value":45,"label":"Stop"},{"value":190,"label":"Braking"},{"value":410,"label":"Stop"}]'
+      ></c2-slider>
+      <div class="row">
+        <c2-slider orientation="vertical" value="60" aria-label="Vertical markers" markers='[{"value":20},{"value":50},{"value":80}]'></c2-slider>
+        <div dir="rtl" style="flex: 1"><c2-slider value="40" aria-label="RTL markers" markers='[{"value":20},{"value":50},{"value":80}]'></c2-slider></div>
+      </div>
+      <c2-slider mode="range" value-start="30" value-end="70" aria-label="Range markers" markers='[{"value":10},{"value":50},{"value":90}]'></c2-slider>
+    </section>
   </body>
 </html>

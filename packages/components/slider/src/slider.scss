@@ -27,6 +27,12 @@
     tick--color: #a1a1aa,
     tick__filled--color: #ffffff,
 
+    marker--size: 8px,
+    marker--border-radius: 999px,
+    marker--color: #18181b,
+    marker__filled--color: #ffffff,
+    marker--border: 0 solid transparent,
+
     value--background: #18181b,
     value--color: #fafafa,
     value--font-size: 12px,
@@ -156,6 +162,44 @@ $_range-length: calc((var(--_end) - var(--_start)) * (100% - #{$_thumb}));
 
 // Vertical: centre across the track with physical `left`/`right` (the logical start offset above would otherwise win).
 :host([orientation='vertical']) .c2-slider-tick {
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: $_offset;
+  transform: translate(-50%, 50%);
+}
+
+// Markers: points of interest over the track, below the thumb. Placed like the ticks.
+.c2-slider-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.c2-slider-marker {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: $_offset;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: css.cssVar(marker--size);
+  min-height: css.cssVar(marker--size);
+  border-radius: css.cssVar(marker--border-radius);
+  border: css.cssVar(marker--border);
+  background: css.cssVar(marker--color);
+  transform: translate(-50%, -50%);
+
+  &.is-filled {
+    background: css.cssVar(marker__filled--color);
+  }
+}
+
+:host(:dir(rtl)) .c2-slider-marker {
+  transform: translate(50%, -50%);
+}
+
+:host([orientation='vertical']) .c2-slider-marker {
   top: auto;
   left: 50%;
   right: auto;
