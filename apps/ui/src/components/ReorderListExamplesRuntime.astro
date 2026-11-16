@@ -1,0 +1,69 @@
+---
+/** Enhances reorder list examples whose property-only API (`renderRank`) or form behaviour cannot be expressed as HTML. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { ReorderList } from '@c2n/components/reorder-list'
+  import '@c2n/components/reorder-list'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French an app would add for the gallery's French card: the library ships English only.
+  addTranslations({
+    fr: {
+      'reorder-list': {
+        instructions: 'Appuyez sur Espace pour saisir un élément. Déplacez-le avec les flèches, Début ou Fin ; Espace le dépose et Échap annule.',
+        item: 'Élément',
+        pickedUp: '{0} saisi, position {1} sur {2}. Déplacez-le avec les flèches, Début ou Fin ; Espace le dépose et Échap annule.',
+        returned: '{0} revenu à la position {1}.',
+        atFirst: '{0} est déjà à la première position permise.',
+        atLast: '{0} est déjà à la dernière position permise.',
+        moved: '{0} déplacé à la position {1} sur {2}.',
+        dropped: '{0} déplacé de la position {1} à {2}.',
+        canceled: "Réorganisation annulée. L'élément est revenu à sa position d'origine.",
+        canceledNotEditable: "Réorganisation annulée : la modification n'est plus disponible.",
+        canceledItemsChanged: 'Les éléments ont changé. Réorganisation annulée.',
+        rank: { '1': '1er', other: '{0}e' },
+      },
+    },
+  })
+
+  const ordinals = new Intl.PluralRules('en', { type: 'ordinal' })
+  const suffixes: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' }
+
+  function setupPodium(list: ReorderList) {
+    list.renderRank = ({ rank }) => html`${rank}<sup>${suffixes[ordinals.select(rank)]}</sup>`
+  }
+
+  function setupForm(list: ReorderList) {
+    const form = list.closest('form')
+    const output = form?.querySelector('output')
+    if (!form || !output) return
+    const show = () => {
+      output.value = new FormData(form).getAll(list.name).join(' › ')
+    }
+    void list.updateComplete.then(show)
+    list.addEventListener('input', show)
+    form.addEventListener('submit', (event) => {
+      event.preventDefault()
+      show()
+    })
+    form.addEventListener('reset', () => requestAnimationFrame(show))
+  }
+
+  const initialized = new WeakSet<ReorderList>()
+
+  function setup() {
+    document.querySelectorAll<ReorderList>('c2-reorder-list[data-reorder-list-example]').forEach((list) => {
+      if (initialized.has(list)) return
+      initialized.add(list)
+      if (list.dataset.reorderListExample === 'podium') setupPodium(list)
+      if (list.dataset.reorderListExample === 'form') setupForm(list)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

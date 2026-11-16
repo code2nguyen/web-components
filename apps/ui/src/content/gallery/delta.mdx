@@ -1,0 +1,159 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import DeltaExamplesRuntime from '../../components/DeltaExamplesRuntime.astro'
+
+import { FormatNumber } from '@c2n/components/format-number'
+import { Delta } from '@c2n/components/format-number/delta'
+
+<DeltaExamplesRuntime />
+
+## Presets
+
+Curated looks for `c2-delta`. Open any card in the studio to start from it. The change inherits the surrounding text, so size and weight come from the page; the good, bad and flat colours read the direction, and the comparison label stays quieter than the number.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-delta type="percent" value="0.124"></c2-delta>
+```
+
+```html tag=MdxCodeBlock,label=KPI tile
+<style>
+  .delta-kpi {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .delta-kpi-value {
+    --c2-format-number--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-format-number--font-size: 28px;
+    --c2-format-number--font-weight: 600;
+  }
+  .delta-kpi-change {
+    --c2-format-number--font-size: 14px;
+    --c2-format-number--font-weight: 500;
+    --c2-delta__comparison--font-size: 12px;
+  }
+</style>
+<div class="delta-kpi">
+  <span>Revenue</span>
+  <c2-format-number class="delta-kpi-value" type="currency" notation="compact" value="1284310"></c2-format-number>
+  <c2-delta class="delta-kpi-change" type="percent" maximum-fraction-digits="1" value="0.124"><span slot="comparison">vs last month</span></c2-delta>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Lower is better
+<style>
+  .delta-costs {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 6px 24px;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .delta-costs c2-delta {
+    justify-self: end;
+    --c2-format-number--font-weight: 600;
+  }
+</style>
+<div class="delta-costs">
+  <span>Cloud spend</span>
+  <c2-delta type="percent" better="lower" maximum-fraction-digits="1" value="-0.082"></c2-delta>
+  <span>p95 latency</span>
+  <c2-delta type="unit" unit="millisecond" better="lower" value="35"></c2-delta>
+  <span>Churn</span>
+  <c2-delta type="percent" better="lower" maximum-fraction-digits="1" value="0.0004"></c2-delta>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Delta chips
+<style>
+  .delta-chips {
+    display: flex;
+    gap: 8px;
+  }
+  .delta-chip {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-format-number--font-weight: 600;
+    --c2-delta__arrow--size: 0.85em;
+  }
+</style>
+<div class="delta-chips">
+  <c2-delta class="delta-chip" type="percent" value="0.18"></c2-delta>
+  <c2-delta class="delta-chip" type="percent" value="-0.06"></c2-delta>
+  <c2-delta class="delta-chip" type="percent" value="0"></c2-delta>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Custom arrows
+<style>
+  .delta-chevrons {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    --c2-delta__arrow--margin-inline-end: 4px;
+  }
+  .delta-chevrons [slot$='-icon'] {
+    font-size: 0.75em;
+  }
+</style>
+<div class="delta-chevrons">
+  <c2-delta type="currency" value="420.5"><span slot="increase-icon">▲</span></c2-delta>
+  <c2-delta type="currency" value="-87.25"><span slot="decrease-icon">▼</span></c2-delta>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Brand colours
+<style>
+  .delta-brand {
+    display: grid;
+    gap: 6px;
+    font-size: 14px;
+    --c2-delta__good--color: light-dark(#1d4ed8, #93b4f5);
+    --c2-delta__bad--color: light-dark(#c2410c, #fb923c);
+  }
+</style>
+<div class="delta-brand">
+  <c2-delta type="percent" value="0.052"><span slot="comparison">vs last week</span></c2-delta>
+  <c2-delta type="percent" value="-0.017"><span slot="comparison">vs last week</span></c2-delta>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .delta-fr {
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<p class="delta-fr" lang="fr">
+  Chiffre d'affaires
+  <c2-delta locale="fr" type="percent" maximum-fraction-digits="1" value="0.124"><span slot="comparison">sur un mois</span></c2-delta>
+</p>
+```
+
+</GalleryGrid>
+
+The arrow's accessible name is a message of the component; an app names it in its own languages:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'format-number': {
+      increaseBetter: 'Hausse, mieux',
+      increaseWorse: 'Hausse, pire',
+      decreaseBetter: 'Baisse, mieux',
+      decreaseWorse: 'Baisse, pire',
+    },
+  },
+})
+```

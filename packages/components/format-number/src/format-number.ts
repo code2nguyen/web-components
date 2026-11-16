@@ -1,5 +1,5 @@
-import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
+import { LitElement, html, isServer, nothing, unsafeCSS, type CSSResultGroup } from 'lit'
+import { classMap, type ClassInfo } from 'lit/directives/class-map.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { resolveLocale } from '@c2n/core/locale-helper.js'
@@ -175,7 +175,7 @@ const UNIT_PARTS = new Set<string>(['currency', 'unit', 'percentSign', 'compact'
  */
 @customElement('c2-format-number')
 export class FormatNumber extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The number to format: a number from script, or a numeric string such as `1234.5` in markup. */
   @property() value: number | string | undefined = undefined
@@ -265,11 +265,15 @@ export class FormatNumber extends LitElement {
     const value = toNumber(this.value)
     if (value === undefined) return html`<slot></slot>`
     const options = this.formatOptions
-    const parts = formatNumberToParts(value, options)
+    return this.renderNumber(value, options, formatNumberToParts(value, options))
+  }
+
+  /** The `<data>` of `value` formatted as `parts`; `c2-delta` adds its tone `classes` and its arrow as `lead`. */
+  protected renderNumber(value: number, options: FormatNumberOptions, parts: Intl.NumberFormatPart[], classes?: ClassInfo, lead?: unknown) {
     // A shortened display carries the whole figure on hover: "1.2M" → "1,234,567", "1.5 MB" → "1,536,000 bytes".
     const title = options.notation === 'compact' || options.type === 'bytes' ? fullFigure(value, options) : undefined
-    return html`<data part="number" class=${classMap({ negative: value < 0, positive: value > 0 })} value=${String(value)} title=${title ?? nothing}
-      >${parts.map((part) => (UNIT_PARTS.has(part.type) ? html`<span part="unit">${part.value}</span>` : part.value))}</data
+    return html`<data part="number" class=${classMap({ negative: value < 0, positive: value > 0, ...classes })} value=${String(value)} title=${title ?? nothing}
+      >${lead}${parts.map((part) => (UNIT_PARTS.has(part.type) ? html`<span part="unit">${part.value}</span>` : part.value))}</data
     >`
   }
 }
