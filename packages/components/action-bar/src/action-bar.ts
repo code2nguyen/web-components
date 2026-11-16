@@ -215,11 +215,11 @@ export class ActionBar extends LitElement {
     if (!this.ancestors.has(target) || (!this.scrolling && this.matches(':focus-within'))) return
     this.scrollers.add(target)
     this.scrolling = true
-    // Without `scrollend`, the scroll counts as ended once it has been still for 150ms.
-    if (!('onscrollend' in window)) {
-      clearTimeout(this.scrollTimer)
-      this.scrollTimer = setTimeout(this.handleScrollEnd, 150)
-    }
+    // Without `scrollend`, the scroll counts as ended once it has been still for 150ms. With it, a longer stillness
+    // still ends it: an engine may not deliver `scrollend` for every scroll (Firefox for a wheel scroll here), and a
+    // bar left hidden would take its actions away for good.
+    clearTimeout(this.scrollTimer)
+    this.scrollTimer = setTimeout(this.handleScrollEnd, 'onscrollend' in window ? 3000 : 150)
   }
 
   /** A scroll ended (`scrollend`), or, with no event, every scroll did: focus came in, or the timer ran out. */

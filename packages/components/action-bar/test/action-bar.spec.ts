@@ -360,8 +360,9 @@ test.describe('hide-on-scroll', () => {
     await page.locator('.scroller').hover()
     await page.mouse.wheel(0, 200)
     await page.waitForFunction(() => document.querySelector('.scroller')!.scrollTop > 0)
-    // It slid away, and as the wheel scroll ended on its own, back: two slides.
-    await expect.poll(() => slides(page)).toBe(2)
+    // It slid away, and as the wheel scroll ended on its own, back: two slides. An engine that delivers no
+    // `scrollend` for the wheel scroll (Firefox) brings it back after the bar's 3s fallback.
+    await expect.poll(() => slides(page), { timeout: 10_000 }).toBe(2)
     await expect(surface(page)).toBeVisible()
     await expect(bar(page)).toHaveState('open')
   })
