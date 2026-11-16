@@ -51,6 +51,9 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@lit-labs/ssr": "3.2.2",
+    "@lit-labs/ssr-client": "1.1.8",
+    "@lit-labs/ssr-dom-shim": "1.6.0",
     "@playwright/test": "1.63.0",
     "ajv": "^8.20.0",
     "husky": "9.1.7",

@@ -179,6 +179,48 @@ export function localeOf(element: Element | null | undefined): string {
   return (typeof navigator !== 'undefined' && navigator.language) || 'en'
 }
 
+/**
+ * The language a server renders in when the component sets none: a server renderer (Lit SSR) runs no controller hooks,
+ * and could not see a `lang` outside the element nor the app's `addTranslations` anyway. Components that format on the
+ * server through `resolveLocale` get the server's own language, which is English there too.
+ */
+const SERVER_LOCALE = 'en'
+
+/** Whether two language tags format alike: `en` and `en-US` do, `en-GB` and `fr` do not. */
+function sameLocale(a: string, b: string): boolean {
+  if (a.toLowerCase() === b.toLowerCase()) return true
+  try {
+    return new Intl.Locale(a).maximize().toString() === new Intl.Locale(b).maximize().toString()
+  } catch {
+    return false
+  }
+}
+
+/** The controllers drawing their host in the server's language, see `redrawAfterHydration`. */
+const inServerPass = new WeakSet<LocaleController>()
+/** The controllers of each server-rendered host that redraw in the server's language first. */
+const serverPasses = new WeakMap<ReactiveControllerHost & Element, Set<LocaleController>>()
+
+/**
+ * Rewrites what a host hydrated in another language than the server's. Hydration adopts the server's DOM and records
+ * the client's values as written, so a text or attribute that differs (`Decrease value`, `1.13` for `1,13`) would stay
+ * the server's until its value changed again. One render in the server's language makes every such binding differ from
+ * what lit-html recorded, and the render after it writes the client's values: only the bindings that depend on the
+ * language are touched, through lit-html's own diffing. Both run after hydration, never during it.
+ */
+async function redrawAfterHydration(host: ReactiveControllerHost & Element, passes: Set<LocaleController>): Promise<void> {
+  try {
+    await host.updateComplete
+    host.requestUpdate()
+    await host.updateComplete
+  } catch {
+    // The host's own update failed: Lit reports it; the language is set back below all the same.
+  }
+  serverPasses.delete(host)
+  for (const controller of passes) inServerPass.delete(controller)
+  host.requestUpdate()
+}
+
 const controllers = new Set<LocaleController>()
 let observer: MutationObserver | undefined
 
@@ -195,6 +237,9 @@ function observeLang(): void {
  * Keeps a component in step with its language: `locale` is the host's language (its own `locale` when the component
  * passes one, else `localeOf`), read before each render, and the host redraws when a `lang` attribute changes
  * anywhere in the document. For components whose text comes from `Intl`; `LocalizeController` adds messages.
+ *
+ * A server-rendered host whose language (or messages) differ from the server's is drawn twice more once hydrated, in
+ * the server's language then in its own, so that the text and attributes the server wrote are replaced.
  */
 export class LocaleController implements ReactiveController {
   /** The host's language as of its last render. */
@@ -205,10 +250,25 @@ export class LocaleController implements ReactiveController {
   /** The component's own locale setting, which wins over `lang` when it is set. */
   private readonly explicit: () => string | null | undefined
 
+  /** Until the first update ends, for a host with a declarative shadow root: that update hydrates the server's DOM. */
+  private serverRendered: boolean
+
   constructor(host: ReactiveControllerHost & Element, explicit: () => string | null | undefined = () => undefined) {
     this.host = host
     this.explicit = explicit
+    // A shadow root before the first update is the server's; a controller made later finds the host's own render.
+    this.serverRendered = !!host.shadowRoot && !(host as { hasUpdated?: boolean }).hasUpdated
     host.addController(this)
+  }
+
+  /** The language the server drew the host in: the component's own setting, else English. */
+  protected serverLocale(): string {
+    return this.explicit() || SERVER_LOCALE
+  }
+
+  /** Whether the host, as hydrated, may show other text than the server drew. */
+  protected differsFromServer(): boolean {
+    return !sameLocale(this.locale, this.serverLocale())
   }
 
   /** The language the host would use now. */
@@ -227,7 +287,22 @@ export class LocaleController implements ReactiveController {
   }
 
   hostUpdate(): void {
-    this.locale = this.resolve()
+    this.locale = inServerPass.has(this) ? this.serverLocale() : this.resolve()
+  }
+
+  hostUpdated(): void {
+    if (!this.serverRendered) return
+    this.serverRendered = false
+    if (!this.differsFromServer()) return
+    inServerPass.add(this)
+    const passes = serverPasses.get(this.host)
+    if (passes) {
+      passes.add(this)
+      return
+    }
+    const added = new Set<LocaleController>([this])
+    serverPasses.set(this.host, added)
+    void redrawAfterHydration(this.host, added)
   }
 
   /** Redraws the host when its language changed, or always when its messages did. */
@@ -252,6 +327,15 @@ export class LocalizeController<M extends Messages> extends LocaleController {
   }
 
   t<K extends keyof M & string>(key: K, ...args: MessageArgs<M[K]>): string {
+    // The server knew none of the app's translations: in English, it drew the component's own text.
+    if (inServerPass.has(this) && this.locale === SERVER_LOCALE) return render(this.catalog.en[key] as TranslatedMessage, this.locale, args as unknown[])
     return formatMessage(this.catalog, this.locale, key, ...args)
+  }
+
+  /** Also when the app added messages in the host's language, which the server may not have had (`en` included). */
+  protected override differsFromServer(): boolean {
+    const byLocale = translations.get(this.catalogName)
+    const tag = this.locale.toLowerCase()
+    return super.differsFromServer() || !!byLocale?.has(tag) || !!byLocale?.has(tag.split('-')[0])
   }
 }
