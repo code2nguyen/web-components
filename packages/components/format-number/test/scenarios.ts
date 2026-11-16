@@ -1,4 +1,5 @@
 import '../src/format-number'
+import '../src/delta'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -50,8 +51,42 @@ const markup: Record<string, string> = {
       <c2-format-number id="loss" locale="en-US" type="currency" value="-87.25"></c2-format-number>
       <c2-format-number id="flat" locale="en-US" value="0"></c2-format-number>
     </div>`,
+  delta: `
+    <c2-delta id="rise" locale="en-US" type="percent" maximum-fraction-digits="1" value="0.124"
+      ><span slot="comparison">vs last month</span></c2-delta
+    >
+    <c2-delta id="fall" locale="en-US" type="percent" maximum-fraction-digits="1" value="-0.031"></c2-delta>
+    <c2-delta id="rounds-flat" locale="en-US" type="percent" maximum-fraction-digits="1" value="0.0001"></c2-delta>
+    <c2-delta id="cost-up" locale="en-US" type="currency" better="lower" value="120"></c2-delta>
+    <c2-delta id="cost-down" locale="en-US" type="currency" better="lower" value="-120"></c2-delta>
+    <c2-format-number id="plain" locale="en-US" value="-5"></c2-format-number>
+    <c2-delta id="sign-auto" locale="en-US" sign-display="auto" value="5"></c2-delta>
+    <c2-delta id="custom-icon" locale="en-US" value="3"><b slot="increase-icon">↗</b></c2-delta>
+    <c2-delta id="pending">—<span slot="comparison">vs last month</span></c2-delta>`,
+  'delta-colour': `
+    <style>
+      .delta {
+        --c2-delta__good--color: rgb(0, 128, 0);
+        --c2-delta__bad--color: rgb(200, 0, 0);
+        --c2-delta__flat--color: rgb(100, 100, 100);
+        --c2-delta__comparison--color: rgb(10, 20, 30);
+        --c2-format-number__negative--color: rgb(1, 2, 3);
+      }
+    </style>
+    <div class="delta">
+      <c2-delta id="good" locale="en-US" value="4"><span slot="comparison">vs Q1</span></c2-delta>
+      <c2-delta id="bad" locale="en-US" value="-4"></c2-delta>
+      <c2-delta id="flat" locale="en-US" value="0"></c2-delta>
+    </div>`,
+  'delta-fr': `<p lang="fr"><c2-delta id="subject" type="percent" value="0.05"></c2-delta></p>`,
+}
+if (scenario === 'delta-fr') {
+  const { addTranslations } = await import('@c2n/core/localize.js')
+  addTranslations({
+    fr: { 'format-number': { increaseBetter: 'Hausse, mieux', increaseWorse: 'Hausse, pire', decreaseBetter: 'Baisse, mieux', decreaseWorse: 'Baisse, pire' } },
+  })
 }
 main.innerHTML = markup[scenario] ?? markup.default
 
-await Promise.all([...main.querySelectorAll('c2-format-number')].map((element) => element.updateComplete))
+await Promise.all([...main.querySelectorAll<HTMLElementTagNameMap['c2-format-number']>('c2-format-number, c2-delta')].map((element) => element.updateComplete))
 main.dataset.ready = 'true'

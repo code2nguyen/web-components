@@ -491,6 +491,15 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  // A change in `c2-delta`: the same success and error hues as the table's delta, readable on a dark page.
+  '--c2-delta__good--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-delta__bad--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // The current time's column of a flowsheet: tints of the primary, so they follow the theme with its text.
   '--c2-flowsheet__now--background': {
     token: 'color-primary',

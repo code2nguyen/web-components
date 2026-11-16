@@ -107,7 +107,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **week-planner-1** · `c2-week-planner` · schedule paint grid #301 · +1.5 kB on 36.7 kB · risk low
 - **button-1** · `c2-button` · hold button #325 (companion), progress button #448 · +0.3 kB on 2.4 kB, 1.2 kB new entry · risk low · needs the success and error states listed for `c2-button` in the roadmap
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
-- **format-number-2** · `c2-format-number` · delta #505 · +0.3 kB on 3.2 kB · risk low
 - **chart-1** · `@c2n/chart` · spc chart #366 · +0.2 kB on 34.0 kB, 2 kB lazy · risk low
 - **chart-2** · `@c2n/chart` · combo chart #524 · +1 kB on 37.2 kB · risk medium
 - **chart-3** · `@c2n/chart` · histogram chart #525 · +0.8 kB on 37.2 kB · risk low
