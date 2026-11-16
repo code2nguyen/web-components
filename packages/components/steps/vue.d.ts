@@ -26,6 +26,7 @@ declare module 'vue' {
     >
     'c2-steps': DefineComponent<
       C2Props<Steps> & {
+        'group-progress'?: unknown
         'aria-label'?: unknown
         onSelectionChange?: (event: EventOf<Steps, 'selection-change'>) => void
         onStepToggle?: (event: EventOf<Steps, 'step-toggle'>) => void

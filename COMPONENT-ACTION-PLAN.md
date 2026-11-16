@@ -106,7 +106,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **scheduler-5** · `c2-scheduler` · example: on call schedule #302
 - **week-planner-1** · `c2-week-planner` · schedule paint grid #301 · +1.5 kB on 36.7 kB · risk low
 - **slider-1** · `c2-slider` · time scrubber #311 · +0.6 kB on 5.5 kB · risk low
-- **steps-2** · `c2-steps` · lesson list #626 · +0.6 kB on 11.3 kB · risk low
 - **button-1** · `c2-button` · hold button #325 (companion), progress button #448 · +0.3 kB on 2.4 kB, 1.2 kB new entry · risk low · needs the success and error states listed for `c2-button` in the roadmap
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
 - **format-number-2** · `c2-format-number` · delta #505 · +0.3 kB on 3.2 kB · risk low
