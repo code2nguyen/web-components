@@ -33,3 +33,26 @@ import '@c2n/components/tour'
 - A step without a target, or whose target is missing, shows centred over the dimmed page.
 - Style the panel through `--c2-tour--*`, the dimming through `--c2-tour__backdrop--color` and the cut-out through
   `--c2-tour__spotlight--*`. The API page lists every variable.
+
+## Beacon
+
+`c2-beacon` is the tour's companion for tips that stand alone: a pulsing dot on each `c2-tour-step` target that opens
+the step in the tour's panel when clicked, with no order, no progress and no dimming.
+
+```js
+import '@c2n/components/tour/beacon'
+```
+
+```html
+<c2-beacon storage-key="reports-tips-v1">
+  <c2-tour-step id="tip-export" target="#export" heading="Export to CSV">Download any view as a spreadsheet.</c2-tour-step>
+  <c2-tour-step id="tip-share" target="#share" heading="Share a link">Anyone with the link sees a read-only copy.</c2-tour-step>
+</c2-beacon>
+```
+
+- Got it dismisses a tip (`dismiss` event, `{ index, key }`) and moves focus to its target; the close button, Escape and
+  a click outside close it and keep the dot.
+- `storage-key` remembers the dismissed tips in `localStorage` (`{ dismissed: [...] }`, read it from `dismissed`), keyed
+  by each step's `id` (give it one of its own, not its target's), else its index; `reset()` brings them back.
+- Style the dot through `--c2-beacon__dot--*` and its pulse through `--c2-beacon__pulse--*`; the panel takes the
+  tour's `--c2-tour--*` variables.

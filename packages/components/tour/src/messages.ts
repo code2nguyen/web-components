@@ -15,6 +15,12 @@ const en = {
   close: 'Close tour',
   /** The progress line, e.g. "2 of 5". */
   progress: (index: number, count: number) => `${index} of ${count}`,
+  /** `c2-beacon`: the button in a tip that dismisses it for good. */
+  dismiss: 'Got it',
+  /** `c2-beacon`: accessible name of the pulsing dot that opens a tip, with the tip's heading. */
+  beacon: (heading: string) => `Show tip: ${heading}`,
+  /** `c2-beacon`: accessible name of the pulsing dot of a tip without a heading. */
+  beaconUnnamed: 'Show tip',
 }
 
 /** The tour's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

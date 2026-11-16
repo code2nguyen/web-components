@@ -121,6 +121,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Feedback
 
 - **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
+- **Beacon** — `c2-beacon, c2-tour-step` · `@c2n/components/tour/beacon` — Pulsing hotspots that point at new or unfamiliar features and open a short tip when clicked, dismissed once and remembered. Children: `c2-tour-step`.
 - **Celebration** — `c2-celebration` · `@c2n/components/celebration` — Confetti, a burst of sparks or rising emoji for a moment worth marking, fired from code or a click.
 - **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.
 - **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
@@ -140,7 +141,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Toast** — `c2-toast, c2-toast-region` · `@c2n/components/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
 - **Toggletip** — `c2-toggletip` · `@c2n/components/toggletip` — A small ⓘ button that opens a help bubble on click or tap; the bubble can hold links and is announced to screen readers.
 - **Tooltip** — `c2-tooltip` · `@c2n/components/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
-- **Tour** — `c2-tour, c2-tour-step` · `@c2n/components/tour` — A guided product tour that spotlights one element at a time and explains it in a panel beside it. Children: `c2-tour-step`.
+- **Tour** — `c2-tour` · `@c2n/components/tour` — A guided product tour that spotlights one element at a time and explains it in a panel beside it. Children: `c2-tour-step`.
 - **Working Indicator** — `c2-working-indicator` · `@c2n/components/working-indicator` — A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.
 
 ## Icons

@@ -5,7 +5,7 @@ import type { Placement } from '@floating-ui/dom'
 import styles from './tour-step.scss?inline'
 
 /**
- * One step of a `c2-tour`: the element it points at, a heading and the text that explains it. The step draws nothing
+ * One step of a `c2-tour`, or one tip of a `c2-beacon`: the element it points at, a heading and the text that explains it. The step draws nothing
  * on its own; its tour shows the current step inside its panel, beside the highlighted target.
  *
  * `target` is a CSS selector, looked up from the tour's root (the document, or the shadow root the tour sits in) when
@@ -42,7 +42,8 @@ export class TourStep extends LitElement {
 
   override updated(changed: PropertyValues<this>) {
     // The tour reads these when it draws the step, so it redraws when they change.
-    if (changed.size && this.parentElement?.localName === 'c2-tour') (this.parentElement as LitElement).requestUpdate()
+    const parent = this.parentElement
+    if (changed.size && (parent?.localName === 'c2-tour' || parent?.localName === 'c2-beacon')) (parent as LitElement).requestUpdate()
   }
 
   override render() {
