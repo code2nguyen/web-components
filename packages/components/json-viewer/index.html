@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-json-viewer</title>
     <script type="module" src="/src/json-viewer.ts"></script>
+    <script type="module" src="/src/schema-tree.ts"></script>
     <style>
       body {
         display: grid;
@@ -43,6 +44,12 @@
 
     <h3>Empty</h3>
     <c2-json-viewer><span slot="empty">Nothing loaded yet</span></c2-json-viewer>
+
+    <h3>Schema tree</h3>
+    <c2-schema-tree
+      label="User"
+      schema='{"type":"object","required":["id"],"properties":{"id":{"type":"string","format":"uuid","readOnly":true},"plan":{"enum":["free","pro"],"default":"free"},"address":{"$ref":"#/$defs/Address"},"contact":{"oneOf":[{"title":"Email","type":"object","properties":{"email":{"type":"string","format":"email"}}},{"title":"Phone","type":"object","properties":{"tel":{"type":"string"}}}]}},"$defs":{"Address":{"type":"object","properties":{"city":{"type":"string","minLength":1}}}}}'
+    ></c2-schema-tree>
 
     <script type="module">
       const searchable = document.querySelector('#searchable')

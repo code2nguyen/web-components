@@ -1,0 +1,127 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import SchemaTreeExamplesRuntime from '../../components/SchemaTreeExamplesRuntime.astro'
+
+import { SchemaTree } from '@c2n/components/json-viewer/schema-tree'
+
+<SchemaTreeExamplesRuntime />
+
+## Presets
+
+Looks and cases for `c2-schema-tree`. The `--c2-schema-tree__*` variables colour the type badge, the marks, the
+constraints and the description; the `--c2-json-viewer-*` variables still set the box, the rows and the names. Open any
+card in the studio to start from it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-schema-tree
+  schema='{"type":"object","required":["name"],"properties":{"name":{"type":"string","maxLength":40},"age":{"type":"integer","minimum":0},"admin":{"type":"boolean","default":false},"roles":{"type":"array","items":{"type":"string","enum":["admin","editor","viewer"]}}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=References and recursion
+<c2-schema-tree
+  label="Category"
+  schema='{"$ref":"#/$defs/Category","$defs":{"Node":{"type":"object","required":["id"],"properties":{"id":{"type":"string","format":"uuid"},"createdAt":{"type":"string","format":"date-time","readOnly":true}}},"Category":{"allOf":[{"$ref":"#/$defs/Node"},{"properties":{"name":{"type":"string","minLength":1},"parent":{"$ref":"#/$defs/Category"},"children":{"type":"array","items":{"$ref":"#/$defs/Category"}}}}]}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=One of
+<c2-schema-tree
+  label="Payment"
+  expand-depth="3"
+  schema='{"type":"object","required":["amount","method"],"properties":{"amount":{"type":"number","exclusiveMinimum":0},"method":{"oneOf":[{"title":"Card","type":"object","required":["token"],"properties":{"token":{"type":"string"},"save":{"type":"boolean","default":false}}},{"title":"Bank transfer","type":"object","properties":{"iban":{"type":"string","pattern":"^[A-Z]{2}[0-9]{2}"}}},{"type":"object","properties":{"wallet":{"const":"paypal"}}}]}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=OpenAPI component
+<c2-schema-tree
+  label="Pet"
+  pointer="/components/schemas/Pet"
+  schema='{"openapi":"3.0.3","components":{"schemas":{"Pet":{"type":"object","required":["name"],"properties":{"id":{"type":"integer","format":"int64","readOnly":true},"name":{"type":"string","description":"What the pet answers to."},"tag":{"type":"string","nullable":true,"deprecated":true,"description":"Use tags instead."},"tags":{"type":"array","uniqueItems":true,"maxItems":5,"items":{"type":"string"}},"owner":{"$ref":"#/components/schemas/Owner"}}},"Owner":{"type":"object","properties":{"email":{"type":"string","format":"email","writeOnly":true}}}}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=Search and filter
+<c2-schema-tree
+  search="id"
+  filter
+  schema='{"type":"object","properties":{"orderId":{"type":"string"},"total":{"type":"number"},"customer":{"type":"object","properties":{"customerId":{"type":"string"},"name":{"type":"string"}}},"lines":{"type":"array","items":{"type":"object","properties":{"sku":{"type":"string"},"qty":{"type":"integer"}}}}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=API reference
+<style>
+  .schema-reference {
+    --c2-json-viewer--font-size: 13px;
+    --c2-json-viewer--border: none;
+    --c2-json-viewer__row--height: 30px;
+    --c2-json-viewer__row--indent: 20px;
+    --c2-json-viewer__key--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-schema-tree__type--color: light-dark(#7e22ce, #c9a2ef);
+    --c2-schema-tree__type--background-color: light-dark(#f3e8ff, #2c1945);
+    --c2-schema-tree__type--border-radius: 999px;
+    --c2-schema-tree__type--padding-inline: 8px;
+    --c2-schema-tree__format--color: light-dark(#7e22ce, #c9a2ef);
+    --c2-schema-tree__description--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-schema-tree
+  class="schema-reference"
+  schema='{"type":"object","required":["url","events"],"properties":{"url":{"type":"string","format":"uri","description":"Where events are posted."},"events":{"type":"array","minItems":1,"items":{"type":"string","enum":["order.paid","order.refunded"]}},"secret":{"type":"string","writeOnly":true,"description":"Signs each delivery."},"active":{"type":"boolean","default":true}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=Names and types only
+<style>
+  .schema-compact {
+    --c2-json-viewer--font-size: 11px;
+    --c2-json-viewer__row--height: 20px;
+    --c2-json-viewer__row--indent: 12px;
+    --c2-schema-tree__type--background-color: transparent;
+    --c2-schema-tree__type--padding-inline: 0px;
+  }
+  .schema-compact::part(constraints),
+  .schema-compact::part(enum),
+  .schema-compact::part(description) {
+    display: none;
+  }
+</style>
+<c2-schema-tree
+  class="schema-compact"
+  schema='{"type":"object","required":["host"],"properties":{"host":{"type":"string","format":"hostname","description":"Server name."},"port":{"type":"integer","minimum":1,"maximum":65535,"default":8080},"tls":{"type":"object","properties":{"cert":{"type":"string"},"key":{"type":"string","writeOnly":true}}},"mode":{"enum":["dev","prod"]}}}'
+></c2-schema-tree>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<div lang="fr">
+  <c2-schema-tree
+    schema='{"type":"object","required":["nom"],"properties":{"nom":{"type":"string","maxLength":40,"description":"Nom affiché."},"age":{"type":"integer","minimum":0},"pays":{"type":"string","default":"FR"},"fax":{"type":"string","deprecated":true},"contact":{"oneOf":[{"type":"object","properties":{"email":{"type":"string","format":"email"}}},{"type":"object","properties":{"tel":{"type":"string"}}}]}}}'
+  ></c2-schema-tree>
+</div>
+```
+
+</GalleryGrid>
+
+The marks and constraints are messages of the component; an app writes them in its own languages:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'json-viewer': {
+      schema: 'Schéma',
+      required: 'obligatoire',
+      deprecated: 'obsolète',
+      oneOf: 'un parmi',
+      option: 'Option {0}',
+      maxLength: '≤ {0} caractères',
+      default: 'par défaut {0}',
+    },
+  },
+})
+```

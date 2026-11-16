@@ -2,6 +2,7 @@
 title: 'JSON Viewer'
 description: 'Browse a JSON value as a collapsible tree, search it, and copy any path or value.'
 category: 'Editors & viewers'
+apiTags: ['c2-json-viewer']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -22,6 +23,10 @@ Large documents are fine: only the lines in view are rendered, so a million-item
 with a million nodes scrolls like a short one. Each line is one row high (`--c2-json-viewer__row--height`) and a long
 value ends with an ellipsis; its full text is in the tooltip and in "copy value". Assign a new value to `data`
 rather than mutating the current one.
+
+To document a JSON Schema or an OpenAPI schema rather than show a value, use its companion
+[`c2-schema-tree`](/web-components/components/schema-tree): the same tree, with each property's type, marks and
+constraints.
 
 ## Import
 

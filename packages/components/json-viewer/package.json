@@ -9,6 +9,10 @@
       "types": "./types/src/json-viewer.d.ts",
       "default": "./dist/json-viewer.js"
     },
+    "./schema-tree.js": {
+      "types": "./types/src/schema-tree.d.ts",
+      "default": "./dist/schema-tree.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +70,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./schema-tree.js"
+    ]
+  }
 }
