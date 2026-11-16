@@ -1,0 +1,111 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-beacon,
+  $theme: (
+    dot--size: 12px,
+    dot--hit-size: 24px,
+    dot--color: 'rgb(2, 101, 220)',
+    dot--border-color: #ffffff,
+    dot--border-width: 2px,
+    dot--box-shadow: '0 1px 3px rgba(24, 24, 27, 0.3)',
+    dot--translate: '0px 0px',
+    dot__focus--outline: '2px solid rgba(2, 101, 220, 0.4)',
+    pulse--scale: 2.5,
+    pulse--duration: 1.6s,
+    backdrop--color: transparent,
+  )
+);
+
+// A beacon explains one element without taking the page over: the tour's dimming is off unless asked for.
+:host {
+  --c2-tour__backdrop--color: #{css.cssVar(backdrop--color)};
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+// A manual popover in the top layer, so it shows above anything the target sits under; reset the UA popover box.
+// The button is the hit area; the dot and its pulse are drawn by the pseudo-elements, the pulse first so it stays behind.
+.beacon {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  width: css.cssVar(dot--hit-size);
+  height: css.cssVar(dot--hit-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  overflow: visible;
+  translate: css.cssVar(dot--translate);
+  cursor: pointer;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: css.cssVar(dot--size);
+    height: css.cssVar(dot--size);
+    margin: calc(#{css.cssVar(dot--size)} / -2) 0 0 calc(#{css.cssVar(dot--size)} / -2);
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: css.cssVar(dot--color);
+    pointer-events: none;
+  }
+
+  &::before {
+    opacity: 0;
+    animation: c2-beacon-pulse css.cssVar(pulse--duration) ease-out infinite;
+  }
+
+  &::after {
+    border: css.cssVar(dot--border-width) solid css.cssVar(dot--border-color);
+    box-shadow: css.cssVar(dot--box-shadow);
+  }
+
+  &[aria-expanded='true']::before {
+    animation: none;
+  }
+
+  // Its target is not rendered, or scrolled out of view: no dot, and no pulse running unseen.
+  &[data-hidden] {
+    visibility: hidden;
+
+    &::before {
+      animation: none;
+    }
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(dot__focus--outline);
+    outline-offset: 0;
+  }
+}
+
+@keyframes c2-beacon-pulse {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(#{css.cssVar(pulse--scale)});
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beacon::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .beacon::after {
+    background: Highlight;
+    border-color: Canvas;
+  }
+}

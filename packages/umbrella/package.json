@@ -1185,6 +1185,10 @@
       "types": "./dist/tour/tour-step.d.ts",
       "default": "./dist/tour/tour-step.js"
     },
+    "./tour/beacon": {
+      "types": "./dist/tour/beacon.d.ts",
+      "default": "./dist/tour/beacon.js"
+    },
     "./trace-waterfall": {
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"

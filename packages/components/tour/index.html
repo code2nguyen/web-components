@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-tour</title>
     <script type="module" src="/src/tour.ts"></script>
+    <script type="module" src="/src/beacon.ts"></script>
     <style>
       body {
         padding: 24px;
@@ -62,6 +63,13 @@
       <button slot="trigger">What's new?</button>
       <c2-tour-step target="#settings" heading="Settings moved">Everything that was under your avatar now lives here.</c2-tour-step>
     </c2-tour>
+
+    <h2>Beacon</h2>
+    <c2-beacon storage-key="harness-beacon">
+      <c2-tour-step id="tip-new" target="#new" heading="Templates">Start a report from one of twelve templates.</c2-tour-step>
+      <c2-tour-step id="tip-settings" target="#settings" heading="Settings moved">Everything that was under your avatar now lives here.</c2-tour-step>
+    </c2-beacon>
+    <button onclick="document.querySelector('c2-beacon').reset()">Show the tips again</button>
 
     <pre id="log"></pre>
 
