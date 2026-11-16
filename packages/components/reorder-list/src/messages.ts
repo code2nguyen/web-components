@@ -22,6 +22,8 @@ const en = {
   canceledItemHidden: 'Reordering canceled because the item is not visible.',
   canceledListHidden: 'Reordering canceled because the item or list is not visible.',
   canceledPointerLost: 'Reordering canceled because pointer control was lost.',
+  /** The position shown in a row's rank badge. */
+  rank: (rank: number) => `${rank}`,
 }
 
 /** The reorder list's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

@@ -24,6 +24,7 @@ const fr: typeof reorderListMessages.en = {
   canceledItemHidden: "Réorganisation annulée : l'élément n'est pas visible.",
   canceledListHidden: "Réorganisation annulée : l'élément ou la liste n'est pas visible.",
   canceledPointerLost: 'Réorganisation annulée : le pointeur a été perdu.',
+  rank: (rank: number) => (rank === 1 ? '1er' : `${rank}e`),
 }
 
 addTranslations({ fr: { 'reorder-list': fr } })

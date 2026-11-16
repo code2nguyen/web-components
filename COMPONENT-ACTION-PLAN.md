@@ -114,7 +114,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low
 - **secret-field-1** · `c2-secret-field` · totp code #397 · +1 kB on 25.3 kB · risk low
 - **password-field-1** · `c2-password-field` · password generator #398 (lazy) · +0.3 kB on 6.0 kB, 3 kB lazy · risk low
-- **reorder-list-1** · `c2-reorder-list` · ranking #444 · +0.6 kB on 12.2 kB · risk low
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
 - **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low

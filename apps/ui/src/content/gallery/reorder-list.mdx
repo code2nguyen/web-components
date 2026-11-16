@@ -1,10 +1,13 @@
 ---
-description: 'Production-shaped queues with fixed rows and public feedback styling.'
+description: 'Production-shaped queues with fixed rows, public feedback styling, rank badges and ranking form controls.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ReorderListExamplesRuntime from '../../components/ReorderListExamplesRuntime.astro'
 
+import { Button } from '@c2n/components/button'
 import { ReorderList } from '@c2n/components/reorder-list'
 
 ## Presets
@@ -82,4 +85,138 @@ import { ReorderList } from '@c2n/components/reorder-list'
 </c2-reorder-list>
 ```
 
+```html tag=MdxCodeBlock,label=Ranking
+<style>
+  .feature-ranking {
+    --c2-reorder-list--container-gap: 6px;
+    --c2-reorder-list__rank--min-width: 28px;
+    --c2-reorder-list__rank--height: 28px;
+    --c2-reorder-list__rank--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-reorder-list__rank--color: light-dark(#0154b8, #9cc9ff);
+    --c2-reorder-list__rank--font-size: 13px;
+  }
+  .feature-choice {
+    padding: 10px 12px;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-reorder-list client:only="lit" class="feature-ranking" editable ranked aria-label="Rank what matters most">
+  <div class="feature-choice" data-reorder-key="speed">Speed</div>
+  <div class="feature-choice" data-reorder-key="price">Price</div>
+  <div class="feature-choice" data-reorder-key="support">Support</div>
+  <div class="feature-choice" data-reorder-key="design">Design</div>
+</c2-reorder-list>
+```
+
+```html tag=MdxCodeBlock,label=Ranking form
+<style>
+  .survey {
+    display: grid;
+    gap: 10px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .survey-question {
+    font-weight: 600;
+  }
+  .survey-list {
+    --c2-reorder-list--container-gap: 4px;
+    --c2-reorder-list--divider-height: 0px;
+  }
+  .survey-option {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .survey-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .survey-actions output {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<form class="survey">
+  <label class="survey-question" for="commute-ranking">Rank how you get to work</label>
+  <c2-reorder-list client:only="lit" id="commute-ranking" class="survey-list" name="commute" editable ranked data-reorder-list-example="form">
+    <div class="survey-option" data-reorder-key="bike">Bike</div>
+    <div class="survey-option" data-reorder-key="train">Train</div>
+    <div class="survey-option" data-reorder-key="car">Car</div>
+    <div class="survey-option" data-reorder-key="walk">Walk</div>
+  </c2-reorder-list>
+  <div class="survey-actions">
+    <c2-button client:only="lit" type="reset">Reset</c2-button>
+    <output aria-live="polite"></output>
+  </div>
+</form>
+```
+
+```html tag=MdxCodeBlock,label=Podium ranks
+<style>
+  .podium {
+    --c2-reorder-list--container-gap: 6px;
+    --c2-reorder-list__rank--min-width: 40px;
+    --c2-reorder-list__rank--height: 28px;
+    --c2-reorder-list__rank--background-color: transparent;
+    --c2-reorder-list__rank--color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .podium-entry {
+    padding: 10px 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-reorder-list client:only="lit" class="podium" editable ranked aria-label="Finalists" data-reorder-list-example="podium">
+  <div class="podium-entry" data-reorder-key="aria">Aria Chen</div>
+  <div class="podium-entry" data-reorder-key="malik">Malik Osei</div>
+  <div class="podium-entry" data-reorder-key="sofia">Sofia Reyes</div>
+  <div class="podium-entry" data-reorder-key="jonas">Jonas Berg</div>
+</c2-reorder-list>
+```
+
+```html tag=MdxCodeBlock,label=Classement (français)
+<style>
+  .classement {
+    --c2-reorder-list--container-gap: 4px;
+    --c2-reorder-list__rank--min-width: 36px;
+  }
+  .classement-ligne {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div lang="fr">
+  <c2-reorder-list client:only="lit" class="classement" editable ranked aria-label="Vos destinations préférées">
+    <div class="classement-ligne" data-reorder-key="lisbonne">Lisbonne</div>
+    <div class="classement-ligne" data-reorder-key="kyoto">Kyoto</div>
+    <div class="classement-ligne" data-reorder-key="montreal">Montréal</div>
+  </c2-reorder-list>
+</div>
+```
+
 </GalleryGrid>
+
+<ReorderListExamplesRuntime />
+
+`ranked` draws each row's position; `renderRank` replaces the number with your own content, and `name` makes the list a form control that submits the item keys in their displayed order:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { ReorderList } from '@c2n/components/reorder-list'
+
+const list = document.querySelector<ReorderList>('c2-reorder-list')!
+const ordinals = new Intl.PluralRules('en', { type: 'ordinal' })
+const suffixes: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' }
+list.renderRank = ({ rank }) => html`${rank}<sup>${suffixes[ordinals.select(rank)]}</sup>`
+
+// <form><c2-reorder-list name="commute" editable ranked>…</c2-reorder-list></form>
+list.addEventListener('input', () => {
+  const ranking = new FormData(list.closest('form')!).getAll('commute') // ['train', 'bike', …]
+})
+```
