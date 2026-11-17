@@ -3572,6 +3572,13 @@
       "reason": "The empty slot projects consumer-owned light DOM (an empty-folder panel of the app's own); style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-file-preview",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The actions wrapper owns the slot's place in the header toolbar, before the download link; the assigned commands stay consumer-owned."
+    },
+    {
       "tag": "c2-filter-builder",
       "slot": "end",
       "decision": "assigned-content",
