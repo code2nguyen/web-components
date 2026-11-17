@@ -3936,6 +3936,27 @@
       "reason": "The title slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-shortcut-sheet",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's padding, colour and alignment through variables; the replacement text inherits them."
+    },
+    {
+      "tag": "c2-shortcut-sheet",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region wraps the action zone and is hidden when it is empty; its spacing is a variable and the app's links or buttons are consumer-owned."
+    },
+    {
+      "tag": "c2-shortcut-sheet",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The title region sits in the dialog's heading, whose typography is the c2-modal header variables; the replacement heading inherits it."
+    },
+    {
       "tag": "c2-side-nav",
       "slot": "default",
       "decision": "assigned-content",

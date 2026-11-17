@@ -2,6 +2,7 @@
 title: 'Shortcut'
 description: 'Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.'
 category: 'Inputs'
+apiTags: ['c2-shortcut']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -94,7 +95,8 @@ how an app swaps its shortcuts per route.
 ```
 
 From script, a binding can carry a `handler` instead of an action, and `entries` returns each binding with its
-platform-aware `label` (`⌘K, ⌘/` on macOS, `Ctrl+K, Ctrl+/` elsewhere) for a cheatsheet:
+platform-aware `label` (`⌘K, ⌘/` on macOS, `Ctrl+K, Ctrl+/` elsewhere) for a cheatsheet. For the usual "?" dialog,
+use [`c2-shortcut-sheet`](/web-components/components/shortcut-sheet), which builds it from the bindings:
 
 ```ts tag=CodeBlock
 shortcuts.bindings = [...shortcuts.bindings, { keys: 'mod+shift+?', handler: () => cheatsheet.show(), description: 'Show shortcuts' }]
@@ -138,5 +140,7 @@ Option on macOS and on non-Latin layouts.
 - **Held keys.** Auto-repeat is ignored unless the binding sets `repeat`.
 - **Accessibility.** Each `for` target receives `aria-keyshortcuts` (unless it already has one) so assistive
   technology announces the shortcut. Show the shortcut visually with [`c2-kbd`](../kbd).
+- **Shortcut sheet.** Give bindings a `description` and a `group`, and the companion
+  [`c2-shortcut-sheet`](/web-components/components/shortcut-sheet) lists them in the "?" dialog, searchable.
 - **Pausing.** `disabled` on the element pauses all of its bindings; `disabled` on a binding turns that one off.
   Removing the element unregisters everything.

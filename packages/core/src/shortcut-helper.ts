@@ -117,6 +117,16 @@ export function isComposedStroke(stroke: ShortcutStroke): boolean {
 
 const cache = new Map<string, ShortcutSequence[]>()
 
+/** Splits `keys` into its alternatives and their strokes, dropping an alternative with a stroke that names no key. */
+function tokenize(keys: string): ShortcutSequence[] {
+  return keys
+    .split(',')
+    .map((alternative) => alternative.trim())
+    .filter(Boolean)
+    .map((source) => ({ source, strokes: source.split(/\s+/).map(parseStroke) }))
+    .filter((sequence) => sequence.strokes.every((stroke) => stroke.key))
+}
+
 /**
  * Parses a `keys` string into its alternatives. Malformed alternatives (no key) and alternatives with a stroke that is
  * not composed (see {@link isComposedStroke}) are dropped, the latter with a warning. The comma key has to be written
@@ -125,17 +135,11 @@ const cache = new Map<string, ShortcutSequence[]>()
 export function parseShortcut(keys: string): ShortcutSequence[] {
   const cached = cache.get(keys)
   if (cached) return cached
-  const sequences = keys
-    .split(',')
-    .map((alternative) => alternative.trim())
-    .filter(Boolean)
-    .map((source) => ({ source, strokes: source.split(/\s+/).map(parseStroke) }))
-    .filter((sequence) => sequence.strokes.every((stroke) => stroke.key))
-    .filter((sequence) => {
-      if (sequence.strokes.every(isComposedStroke)) return true
-      console.warn(`[c2-shortcut] "${sequence.source}" ignored: every key needs Ctrl, ⌘ or Alt (only Escape and F1–F24 may stand alone).`)
-      return false
-    })
+  const sequences = tokenize(keys).filter((sequence) => {
+    if (sequence.strokes.every(isComposedStroke)) return true
+    console.warn(`[c2-shortcut] "${sequence.source}" ignored: every key needs Ctrl, ⌘ or Alt (only Escape and F1–F24 may stand alone).`)
+    return false
+  })
   cache.set(keys, sequences)
   return sequences
 }
@@ -211,6 +215,14 @@ function strokeLabel(stroke: ShortcutStroke, apple: boolean): string {
  */
 export function formatShortcut(keys: string, apple = isApplePlatform()): string[] {
   return parseShortcut(keys).map((sequence) => sequence.strokes.map((stroke) => strokeLabel(stroke, apple)).join(' '))
+}
+
+/**
+ * Like {@link formatShortcut}, but for keys a page documents rather than binds: a bare key (`?`, `j`, `g d`,
+ * `arrowdown`), which a component handles itself, is formatted too, with no warning.
+ */
+export function formatKeys(keys: string, apple = isApplePlatform()): string[] {
+  return tokenize(keys).map((sequence) => sequence.strokes.map((stroke) => strokeLabel(stroke, apple)).join(' '))
 }
 
 const ARIA_KEY_NAMES: Record<string, string> = {

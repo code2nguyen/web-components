@@ -1,0 +1,147 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import ShortcutSheetExamplesRuntime from '../../components/ShortcutSheetExamplesRuntime.astro'
+
+import { Shortcut } from '@c2n/components/shortcut'
+import { ShortcutSheet } from '@c2n/components/shortcut/shortcut-sheet'
+import { Button } from '@c2n/components/button'
+
+<ShortcutSheetExamplesRuntime />
+
+## Presets
+
+Shortcut sheets for help pages and "?" dialogs. The inline cards show the list as it appears in the dialog; open the dialog card with its button or <c2-kbd>alt + .</c2-kbd>.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-shortcut-sheet
+  inline
+  no-bindings
+  shortcuts='[{"keys":"mod+k","description":"Open search"},{"keys":"j","description":"Next item","group":"Navigation"},{"keys":"k","description":"Previous item","group":"Navigation"},{"keys":"mod+b","description":"Bold","group":"Editing"}]'
+></c2-shortcut-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Dialog from bindings
+<c2-shortcut
+  id="sheet-gallery-bindings"
+  bindings='[{"keys":"mod+k","action":"search","description":"Open search"},{"keys":"alt+n","action":"new","description":"New issue","group":"Issues"},{"keys":"alt+l","action":"label","description":"Add a label","group":"Issues"},{"keys":"alt+g alt+i","action":"issues","description":"Go to issues","group":"Navigation"},{"keys":"alt+g alt+p","action":"pulls","description":"Go to pull requests","group":"Navigation"}]'
+></c2-shortcut>
+<c2-shortcut-sheet id="sheet-gallery-dialog" for="sheet-gallery-bindings" keys="alt+.">
+  <a slot="footer" href="#customize-shortcuts">Customize shortcuts</a>
+</c2-shortcut-sheet>
+<c2-button commandfor="sheet-gallery-dialog" command="--show">Keyboard shortcuts</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Sequences and alternatives
+<c2-shortcut-sheet
+  inline
+  no-bindings
+  no-search
+  shortcuts='[{"keys":"mod+k, mod+/","description":"Command palette"},{"keys":"g i","description":"Go to inbox"},{"keys":"g s","description":"Go to starred"},{"keys":"arrowup, arrowdown","description":"Move between messages"}]'
+></c2-shortcut-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Compact help panel
+<style>
+  .shortcut-sheet-compact {
+    width: 300px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-shortcut-sheet__item--border-bottom: none;
+    --c2-shortcut-sheet__item--padding-top: 3px;
+    --c2-shortcut-sheet__item--padding-bottom: 3px;
+    --c2-shortcut-sheet__description--font-size: 13px;
+    --c2-shortcut-sheet__group--margin-bottom: 12px;
+    --c2-shortcut-sheet__group-heading--text-transform: none;
+    --c2-shortcut-sheet__group-heading--letter-spacing: 0;
+    --c2-shortcut-sheet__group-heading--font-size: 13px;
+    --c2-shortcut-sheet__group-heading--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-kbd--box-shadow: 0 1px 0 #a1a1aa;
+  }
+</style>
+<c2-shortcut-sheet
+  class="shortcut-sheet-compact"
+  inline
+  no-bindings
+  no-search
+  shortcuts='[{"keys":"space","description":"Play or pause","group":"Playback"},{"keys":"arrowleft, arrowright","description":"Seek 5 seconds","group":"Playback"},{"keys":"m","description":"Mute","group":"Sound"},{"keys":"arrowup, arrowdown","description":"Volume","group":"Sound"}]'
+></c2-shortcut-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Custom rows
+<style>
+  .shortcut-sheet-rows::part(item) {
+    justify-content: flex-start;
+  }
+  .shortcut-sheet-rows::part(command) {
+    flex: 1;
+    font-size: 14px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .shortcut-sheet-rows::part(code) {
+    font-size: 12px;
+    color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+  }
+</style>
+<c2-shortcut-sheet
+  class="shortcut-sheet-rows"
+  data-shortcut-sheet-example="render-item"
+  inline
+  no-bindings
+  no-search
+  shortcuts='[{"keys":"mod+s","description":"Save"},{"keys":"mod+shift+s","description":"Save as"},{"keys":"mod+z, mod+shift+z","description":"Undo, redo"}]'
+></c2-shortcut-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Empty state
+<c2-shortcut-sheet inline no-search no-bindings>
+  <span slot="empty">This page has no shortcuts yet.</span>
+</c2-shortcut-sheet>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<div lang="fr">
+  <c2-shortcut-sheet
+    inline
+  no-bindings
+    shortcuts='[{"keys":"mod+k","description":"Ouvrir la recherche"},{"keys":"g i","description":"Aller à la boîte de réception","group":"Navigation"},{"keys":"j","description":"Message suivant","group":"Navigation"}]'
+  ></c2-shortcut-sheet>
+</div>
+```
+
+</GalleryGrid>
+
+`renderItem` draws the content of each row; the sheet keeps the row, its list and its search. Give the elements it returns a `part` to style them from the page:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+sheet.renderItem = ({ entry }) => html`<span part="command">${entry.description}</span><code part="code">${entry.labels.join(' · ')}</code>`
+```
+
+The sheet's text is a message of the component; an app adds its languages:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    shortcut: {
+      title: 'Raccourcis clavier',
+      search: 'Rechercher un raccourci',
+      general: 'Général',
+      show: 'Afficher les raccourcis clavier',
+      or: 'ou',
+      then: 'puis',
+      results: { one: '{0} raccourci', other: '{0} raccourcis' },
+      noResults: 'Aucun raccourci ne correspond à « {0} »',
+      empty: 'Aucun raccourci clavier',
+    },
+  },
+})
+```
