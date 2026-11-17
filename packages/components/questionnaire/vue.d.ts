@@ -24,6 +24,7 @@ declare module 'vue' {
         'complete-label'?: unknown
         'previous-label'?: unknown
         'skip-label'?: unknown
+        'skipped-label'?: unknown
         onComplete?: (event: EventOf<Questionnaire, 'complete'>) => void
         onSkip?: (event: EventOf<Questionnaire, 'skip'>) => void
         onStepChange?: (event: EventOf<Questionnaire, 'step-change'>) => void

@@ -72,7 +72,8 @@ let instanceId = 0
  * A complete multi-step questionnaire with single- and multiple-choice questions, optional free-text answers,
  * validation, keyboard shortcuts and previous / skip / next navigation. Questions are supplied as an array through
  * the `questions` property or as JSON in the `questions` attribute. The component preserves answers between steps,
- * emits progress events and submits the complete answer object as JSON when given a form `name`.
+ * emits progress events and submits the complete answer object as JSON when given a form `name`. With `inline` it asks
+ * one question in place, as an agent does inside a chat thread, and collapses to the chosen answer once submitted.
  *
  * @tag c2-questionnaire
  *
@@ -89,11 +90,12 @@ let instanceId = 0
  * @csspart skip-button - Fallback button inside the `skip-button` slot when no assigned replacement is present.
  * @csspart next-button - Fallback button inside the `next-button` slot when no assigned replacement is present.
  * @csspart submit-button - Fallback button inside the `submit-button` slot when no assigned replacement is present.
+ * @csspart answer - The collapsed answer region of an `inline` questionnaire after Submit: it wraps the `summary` slot, whose fallback is the question and the chosen answer.
  *
  * @event {CustomEvent<{ questionId: string, value: QuestionnaireAnswer, answers: QuestionnaireAnswers }>} answer-change - Fired whenever an answer changes.
  * @event {CustomEvent<{ index: number, question: QuestionnaireQuestion }>} step-change - Fired after navigation changes the visible question.
  * @event {CustomEvent<{ index: number, questionId: string }>} skip - Fired when a skippable question is skipped.
- * @event {CustomEvent<{ answers: QuestionnaireAnswers }>} complete - Fired from Next / Save on the last valid question.
+ * @event {CustomEvent<{ answers: QuestionnaireAnswers }>} complete - Fired from Next / Save on the last valid question, or from Submit or Skip in `inline` mode.
  *
  * @cssproperty {width} [--c2-questionnaire--width=100%] - Width of the questionnaire host.
  * @cssproperty {width} [--c2-questionnaire--max-width=448px] - Maximum readable width of the flow.
@@ -131,6 +133,14 @@ let instanceId = 0
  * @cssproperty {color} [--c2-questionnaire__primary-action--color=#ffffff] - Next and complete button text colour.
  * @cssproperty {border} [--c2-questionnaire__secondary-action--border=1px solid #e4e4e7] - Previous and skip button border.
  * @cssproperty {color} [--c2-questionnaire__secondary-action--background-color=#ffffff] - Previous and skip button background.
+ * @cssproperty {padding} [--c2-questionnaire__answer--padding=10px 12px] - Padding of the collapsed answer of an `inline` questionnaire.
+ * @cssproperty {border} [--c2-questionnaire__answer--border=1px solid #e4e4e7] - Border of the collapsed answer.
+ * @cssproperty {border-radius} [--c2-questionnaire__answer--border-radius=8px] - Corner radius of the collapsed answer.
+ * @cssproperty {color} [--c2-questionnaire__answer--background-color=#fafafa] - Background of the collapsed answer.
+ * @cssproperty {color} [--c2-questionnaire__answer-question--color=#71717a] - Colour of the question line in the collapsed answer.
+ * @cssproperty {font-size} [--c2-questionnaire__answer-question--font-size=12px] - Size of the question line in the collapsed answer.
+ * @cssproperty {font-size} [--c2-questionnaire__answer-value--font-size=14px] - Size of the chosen answer in the collapsed answer.
+ * @cssproperty {font-weight} [--c2-questionnaire__answer-value--font-weight=500] - Weight of the chosen answer in the collapsed answer.
  */
 @customElement('c2-questionnaire')
 export class Questionnaire extends LitElement {
@@ -151,6 +161,13 @@ export class Questionnaire extends LitElement {
 
   /** Zero-based visible question index. */
   @property({ type: Number, reflect: true }) current = 0
+
+  /**
+   * Single-question mode for a question asked inside a thread: the visible question (at `current`) is the only one asked,
+   * without the progress line or Previous; Submit (`complete-label`) or Skip completes the questionnaire, which then
+   * collapses to the question and the chosen answer. The `summary` slot replaces that collapsed answer.
+   */
+  @property({ type: Boolean, reflect: true }) inline = false
 
   /** Shows the answer summary after successful completion. */
   @property({ type: Boolean, reflect: true }) completed = false
@@ -175,8 +192,12 @@ export class Questionnaire extends LitElement {
   /** Label of the skip action. */
   @property({ attribute: 'skip-label' }) skipLabel = 'Skip'
 
+  /** Text shown for a skipped question in the answer summary and the collapsed answer of an `inline` questionnaire. */
+  @property({ attribute: 'skipped-label' }) skippedLabel = 'Skipped'
+
   @state() private showError = false
   @query('.option input') private firstOption?: HTMLInputElement
+  @query('.answer') private collapsedAnswer?: HTMLElement
 
   /** Currently visible question. */
   get question(): QuestionnaireQuestion | undefined {
@@ -221,6 +242,19 @@ export class Questionnaire extends LitElement {
     return this.disabled || this.disabledByForm
   }
 
+  /** Whether the visible question is the one Submit completes: the final question, or any question in `inline` mode. */
+  private get isLastStep(): boolean {
+    return this.inline || this.current === this.questions.length - 1
+  }
+
+  private complete(answers: QuestionnaireAnswers) {
+    // An inline question collapses under the focus: move it to the answer so the keyboard user stays in place.
+    const keepFocus = this.inline && this.matches(':focus-within')
+    this.completed = true
+    this.dispatchEvent(new CustomEvent('complete', { detail: { answers: { ...answers } }, bubbles: true, composed: true }))
+    if (keepFocus) void this.updateComplete.then(() => this.collapsedAnswer?.focus())
+  }
+
   /** Move to the next question, or complete the questionnaire on the final question. Returns whether validation passed. */
   next(): boolean {
     const question = this.question
@@ -231,18 +265,17 @@ export class Questionnaire extends LitElement {
       return false
     }
     this.showError = false
-    if (this.current === this.questions.length - 1) {
-      this.completed = true
-      this.dispatchEvent(new CustomEvent('complete', { detail: { answers: { ...this.answers } }, bubbles: true, composed: true }))
+    if (this.isLastStep) {
+      this.complete(this.answers)
       return true
     }
     this.goTo(this.current + 1)
     return true
   }
 
-  /** Return to the previous question. */
+  /** Return to the previous question. Does nothing in `inline` mode, which asks one question. */
   previous() {
-    if (this.effectiveDisabled || this.current === 0) return
+    if (this.effectiveDisabled || this.inline || this.current === 0) return
     this.goTo(this.current - 1)
   }
 
@@ -255,18 +288,17 @@ export class Questionnaire extends LitElement {
     this.answers = answers
     this.showError = false
     this.dispatchEvent(new CustomEvent('skip', { detail: { index: this.current, questionId: question.id }, bubbles: true, composed: true }))
-    if (this.current === this.questions.length - 1) {
-      this.completed = true
-      this.dispatchEvent(new CustomEvent('complete', { detail: { answers: { ...answers } }, bubbles: true, composed: true }))
+    if (this.isLastStep) {
+      this.complete(answers)
     } else {
       this.goTo(this.current + 1)
     }
   }
 
-  /** Clear all answers and return to the first question. */
+  /** Clear all answers and return to the first question; in `inline` mode, to the question that was asked. */
   reset() {
     this.answers = {}
-    this.current = 0
+    if (!this.inline) this.current = 0
     this.completed = false
     this.showError = false
   }
@@ -318,7 +350,14 @@ export class Questionnaire extends LitElement {
 
   private handleShortcut = (event: KeyboardEvent) => {
     const origin = event.composedPath()[0]
-    if (this.effectiveDisabled || event.metaKey || event.ctrlKey || event.altKey || (origin instanceof HTMLInputElement && origin.classList.contains('other')))
+    if (
+      this.effectiveDisabled ||
+      this.completed ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      (origin instanceof HTMLInputElement && origin.classList.contains('other'))
+    )
       return
     const question = this.question
     if (!question || event.key.length !== 1) return
@@ -343,15 +382,30 @@ export class Questionnaire extends LitElement {
     return Array.isArray(answer) ? answer.includes(option.value) : answer === option.value
   }
 
-  private answerLabels(question: QuestionnaireQuestion): string[] {
+  private answerText(question: QuestionnaireQuestion): string {
     const answer = this.answers[question.id]
     const values = Array.isArray(answer) ? answer : answer ? [answer] : []
-    return values.map((value) => question.options.find((option) => option.value === value)?.label ?? value)
+    const labels = values.map((value) => question.options.find((option) => option.value === value)?.label ?? value)
+    return labels.length ? labels.join(', ') : this.skippedLabel
   }
 
   override render() {
     const question = this.question
     if (!question) return html`<slot name="empty">No questions configured.</slot>`
+    if (this.completed && this.inline) {
+      return html`
+        <div class="questionnaire">
+          <slot name="header"></slot>
+          <section class="answer" part="answer" tabindex="-1" aria-labelledby="answer-question">
+            <slot name="summary">
+              <h2 id="answer-question" class="answer-question">${question.title}</h2>
+              <p class="answer-value">${this.answerText(question)}</p>
+            </slot>
+          </section>
+          <slot name="footer"></slot>
+        </div>
+      `
+    }
     if (this.completed) {
       return html`
         <div class="questionnaire">
@@ -360,13 +414,13 @@ export class Questionnaire extends LitElement {
             <slot name="summary">
               <h2>Summary</h2>
               <dl>
-                ${this.questions.map((item) => {
-                  const labels = this.answerLabels(item)
-                  return html`<div>
-                    <dt>${item.title}</dt>
-                    <dd>${labels.length ? labels.join(', ') : 'Skipped'}</dd>
-                  </div>`
-                })}
+                ${this.questions.map(
+                  (item) =>
+                    html`<div>
+                      <dt>${item.title}</dt>
+                      <dd>${this.answerText(item)}</dd>
+                    </div>`,
+                )}
               </dl>
             </slot>
           </section>
@@ -380,7 +434,7 @@ export class Questionnaire extends LitElement {
     return html`
       <div class="questionnaire">
         <slot name="header"></slot>
-        <div class="progress">Question ${this.current + 1} of ${this.questions.length}</div>
+        ${this.inline ? nothing : html`<div class="progress">Question ${this.current + 1} of ${this.questions.length}</div>`}
         <section aria-labelledby="question-title" aria-describedby=${describedBy}>
           <h2 id="question-title">${question.title}</h2>
           ${question.description ? html`<p id="question-description">${question.description}</p>` : html`<span id="question-description" hidden></span>`}
@@ -438,7 +492,7 @@ export class Questionnaire extends LitElement {
         <div class="actions">
           <div>
             ${
-              this.current > 0
+              this.current > 0 && !this.inline
                 ? html`<slot name="previous-button" @click=${this.previous}>
                     <button class="secondary" part="previous-button" type="button" ?disabled=${this.effectiveDisabled}>${this.previousLabel}</button>
                   </slot>`
@@ -454,7 +508,7 @@ export class Questionnaire extends LitElement {
                 : nothing
             }
             ${
-              this.current === this.questions.length - 1
+              this.isLastStep
                 ? html`<slot name="submit-button" @click=${this.next}>
                     <button class="primary" part="submit-button" type="button" ?disabled=${this.effectiveDisabled}>${this.completeLabel}</button>
                   </slot>`

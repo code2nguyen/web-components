@@ -1,0 +1,39 @@
+---
+/**
+ * Plays the application's part in the progress gallery: `renderMark` on the season pass card
+ * (`data-progress-example="rewards"`), which a fence cannot set, and the French of the card under `lang="fr"`, which
+ * announces each milestone's state ("1 500, à réclamer").
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Progress, ProgressMarkContext } from '@c2n/components/progress'
+  import '@c2n/components/progress'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      progress: {
+        loading: 'Chargement',
+        markReached: '{0}, atteint',
+        markClaimable: '{0}, à réclamer',
+        markLocked: '{0}, encore {1}',
+        markAhead: '{0}, pas atteint',
+      },
+    },
+  })
+
+  const reward = ({ mark, state }: ProgressMarkContext) =>
+    html`<span part="reward-level">${state === 'claimable' ? 'Claim' : `Lv ${mark.value}`}</span><span part="reward-name">${mark.label}</span>`
+
+  // The studio and the code toggle may draw the card again, so new copies are picked up as they appear.
+  function setup() {
+    document.querySelectorAll<Progress>('c2-progress[data-progress-example="rewards"]').forEach((progress) => {
+      if (progress.renderMark !== reward) progress.renderMark = reward
+    })
+  }
+
+  setup()
+  new MutationObserver(setup).observe(document.documentElement, { childList: true, subtree: true })
+</script>

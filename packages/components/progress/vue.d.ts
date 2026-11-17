@@ -8,6 +8,7 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
+import type { NavigationProgress } from '@c2n/progress/navigation-progress.js'
 import type { Progress } from '@c2n/progress'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -15,6 +16,7 @@ type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-navigation-progress': DefineComponent<C2Props<NavigationProgress>>
     'c2-progress': DefineComponent<
       C2Props<Progress> & {
         'show-value'?: unknown
