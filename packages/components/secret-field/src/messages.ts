@@ -21,5 +21,8 @@ const en = {
   empty: 'No secret',
 }
 
+/** The keys of the secret field's text, which a companion element's catalog repeats. */
+export type SecretFieldMessages = typeof en
+
 /** The secret field's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
 export const secretFieldMessages = defineMessages('secret-field', en)

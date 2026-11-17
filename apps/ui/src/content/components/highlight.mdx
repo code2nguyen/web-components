@@ -2,6 +2,7 @@
 title: 'Highlight'
 description: 'Marks the parts of a text that match a search query.'
 category: 'Data display'
+apiTags: ['c2-highlight', 'c2-find-bar']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -12,6 +13,8 @@ import { Highlight, FindBar } from '@c2n/components/highlight'
 `c2-highlight` draws its text with every match of `query` wrapped in a `<mark>`, the way a search result list, a command palette or a filtered table shows why a row matched. Matching ignores letter case unless `match-case` is set; `ignore-accents` lets `cafe` match `café`, `whole-word` skips matches inside longer words, and `words` splits the query on spaces and marks each word on its own. Assign an array to the `query` property to highlight several terms at once. `active-index` singles out one match for a find bar that steps through them, and the number of matches is the read-only `matchCount` property, the `match-change` event and the `:state(matched)` custom state. The same matcher is exported as `findMatches(text, query, options)` for code that filters the items it highlights.
 
 `c2-find-bar`, in the same package, is the find bar that drives them: point its `for` at one `c2-highlight` or at an element holding several, and it sets their query, counts the matches across all of them ("2 of 7"), steps through them with Enter and Shift+Enter and scrolls the current one into view. Its match case and whole word toggles set the same options on the highlights, Escape fires `close` and clears them, and the `replace` attribute adds a replace row that fires `replace` for the application to change its text. Its `actions` slot takes extra commands.
+
+To label spans of a text rather than search it, the same package has [`c2-text-annotator`](/web-components/components/text-annotator): a `c2-highlight` that draws labelled, overlapping spans and adds one for the selection when a label's key is pressed.
 
 ## Import
 

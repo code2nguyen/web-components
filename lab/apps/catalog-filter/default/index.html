@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Outdoor gear · catalog-filter lab build</title>
+    <script>
+      ;(function () {
+        try {
+          var theme = new URLSearchParams(location.search).get('theme')
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme
+        } catch (e) {
+          /* the prefers-color-scheme fallback still applies */
+        }
+      })()
+    </script>
+    <script type="module" src="./main.js"></script>
+  </head>
+
+  <body>
+    <div class="page">
+      <header class="page__head">
+        <div>
+          <h1>Outdoor gear</h1>
+          <!-- dogfood-exempt: no c2 component announces a changing count to screen readers (searched "live region", "announcer") -->
+          <p id="result-count" class="page__count" role="status">12 products</p>
+        </div>
+        <div class="page__tools">
+          <c2-button id="open-filters" class="page__filters-button">Filters</c2-button>
+          <c2-select id="sort" aria-label="Sort by" value="featured">
+            <c2-list-item value="featured">Featured</c2-list-item>
+            <c2-list-item value="price-asc">Price: low to high</c2-list-item>
+            <c2-list-item value="price-desc">Price: high to low</c2-list-item>
+            <c2-list-item value="name">Name</c2-list-item>
+          </c2-select>
+        </div>
+      </header>
+
+      <div class="page__body">
+        <aside id="sidebar" class="page__sidebar" aria-label="Filters">
+          <div id="filters" class="filters">
+            <c2-search-field id="search" placeholder="Search products" aria-label="Search products"></c2-search-field>
+            <c2-facet-list id="category" label="Category" sort="none"></c2-facet-list>
+            <c2-facet-list id="brand" label="Brand" sort="none"></c2-facet-list>
+
+            <section class="filters__price" aria-labelledby="price-label">
+              <h2 id="price-label" class="filters__heading">Price</h2>
+              <c2-slider id="price" mode="range" min="0" max="400" step="10" value-start="0" value-end="400" aria-label="Price" show-value></c2-slider>
+              <div class="filters__price-inputs">
+                <c2-number-input id="price-min" aria-label="Minimum price" min="0" max="400" step="10" value="0"></c2-number-input>
+                <c2-number-input id="price-max" aria-label="Maximum price" min="0" max="400" step="10" value="400"></c2-number-input>
+              </div>
+            </section>
+
+            <c2-switch id="in-stock">In stock only</c2-switch>
+            <c2-button id="clear" class="filters__clear">Clear filters</c2-button>
+          </div>
+        </aside>
+
+        <main class="page__results">
+          <c2-chip-group id="chips" class="chips" expanded aria-label="Active filters"></c2-chip-group>
+          <div id="grid" class="grid"></div>
+          <c2-status-panel id="empty" heading="No products match" description="Try fewer filters or a different search." hidden>
+            <c2-button slot="actions" id="empty-clear">Clear filters</c2-button>
+          </c2-status-panel>
+        </main>
+      </div>
+    </div>
+
+    <c2-sheet id="filters-sheet" side="left">
+      <span slot="title">Filters</span>
+      <c2-button slot="footer" id="close-filters">Show results</c2-button>
+    </c2-sheet>
+  </body>
+</html>

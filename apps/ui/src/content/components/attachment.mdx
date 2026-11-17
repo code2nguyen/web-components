@@ -2,6 +2,7 @@
 title: 'Attachment'
 description: 'File and image attachments with metadata, upload progress, failure states, and actions.'
 category: 'Data display'
+apiTags: ['c2-attachment', 'c2-attachment-group']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -34,6 +35,12 @@ import '@c2n/components/attachment'
 <div data-label="Upload failed">
   <c2-attachment class="attachments" name="invoice.csv" type="CSV" size="84 KB" status="error" removable></c2-attachment>
 </div>
+<div data-label="Preview">
+  <c2-attachment-group class="attachments">
+    <c2-attachment preview name="mountains.svg" type="SVG" size="3 KB" src="/web-components/images/image-mountains.svg" layout="row"></c2-attachment>
+    <c2-attachment preview name="quarterly-report.pdf" type="PDF" size="1 KB" href="/web-components/media/quarterly-report.pdf"></c2-attachment>
+  </c2-attachment-group>
+</div>
 <div data-label="Group">
   <c2-attachment-group class="attachments">
     <c2-attachment name="brand-assets.zip" type="ZIP" size="12 MB" status="complete" removable></c2-attachment>
@@ -61,3 +68,21 @@ attachment.addEventListener('attachment-retry', event => {
 ```
 
 Set `layout="grid"` on `c2-attachment-group` for responsive equal columns. Use `layout="mixed"` for the reference composition: image tiles fill the columns and ordinary file rows span the entire group. Both layouts use `--c2-attachment-group--min-column-width` as their minimum card width.
+
+## Preview
+
+Add `preview` and the file name becomes a button (the thumbnail opens it too) that shows the file in a [`c2-file-preview`](/web-components/components/file-preview) dialog: an image with zoom, a video, an audio track, a PDF in the browser's own viewer, a text file, or a download. `href` is the file's own URL, when `src` is only a thumbnail; `file` (a property) is its content, such as the `File` an upload started from, read in place of `href`. Inside a `c2-attachment-group`, previous and next move through the group's attachments that have `preview`.
+
+The viewer is not part of the attachment's code: it loads the first time a preview opens. `attachment-preview` fires first and can be cancelled to open your own viewer instead, and `openPreview()` opens it from your own action, such as a button in the `actions` slot.
+
+```js tag=CodeBlock
+const attachment = document.querySelector('c2-attachment')
+attachment.file = uploadedFile
+
+attachment.addEventListener('attachment-preview', (event) => {
+  if (isSpreadsheet(event.detail.name)) {
+    event.preventDefault()
+    openSpreadsheetViewer(event.detail.name)
+  }
+})
+```

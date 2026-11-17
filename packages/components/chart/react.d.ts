@@ -27,6 +27,7 @@ import type { ChordChart } from '@c2n/chart/chord-chart.js'
 import type { DepthChart } from '@c2n/chart/depth-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
+import type { HistogramChart } from '@c2n/chart/histogram-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { MapChart } from '@c2n/chart/map-chart.js'
 import type { MapLayer } from '@c2n/chart/map-layer.js'
@@ -249,6 +250,27 @@ declare module 'react' {
         scalePoles?: HeatmapChart['scalePoles'] | string
         series?: HeatmapChart['series'] | string
         annotations?: HeatmapChart['annotations'] | string
+      }
+      'c2-histogram-chart': Omit<C2Props<HistogramChart>, 'percentiles' | 'series' | 'annotations'> & {
+        'bin-count'?: Attribute
+        'bin-width'?: Attribute
+        'bin-start'?: Attribute
+        'bin-end'?: Attribute
+        'bar-width'?: Attribute
+        'bar-gap'?: Attribute
+        'value-labels'?: Attribute
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        percentiles?: HistogramChart['percentiles'] | string
+        series?: HistogramChart['series'] | string
+        annotations?: HistogramChart['annotations'] | string
       }
       'c2-line-chart': Omit<C2Props<LineChart>, 'series' | 'annotations'> & {
         'y-min'?: Attribute

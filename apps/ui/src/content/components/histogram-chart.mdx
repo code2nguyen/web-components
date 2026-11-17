@@ -1,0 +1,122 @@
+---
+title: 'Histogram chart'
+description: 'Raw numeric samples cut into bins in the browser and drawn as touching bars, with an optional density curve, cumulative share and percentile markers.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-histogram-chart'
+apiTags: ['c2-histogram-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { HistogramChart } from '@c2n/components/chart/histogram-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+A histogram shows the shape of a distribution: how many request latencies, order values or test scores fall into each
+range. Hand it the raw samples and it cuts them into bins itself, then draws one bar per bin, touching its neighbours
+so the bars read as one shape. A density curve or the cumulative share can be drawn over the bars, and dashed rules
+mark percentiles such as the median and the p90. It extends the [bar chart](../bar-chart) and draws with the same
+uPlot engine.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/chart/histogram-chart'
+```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .histogram-plot {
+    width: 100%;
+    --c2-chart--height: 300px;
+  }
+</style>
+
+<div data-label="Latency with p50 and p90">
+  <c2-histogram-chart
+    class="histogram-plot"
+    bin-width="50"
+    overlay="density"
+    percentiles="[50, 90]"
+    data="[212, 248, 264, 271, 280, 289, 293, 301, 305, 312, 318, 322, 329, 334, 338, 341, 347, 352, 358, 363, 371, 379, 388, 396, 404, 417, 431, 448, 472, 515, 286, 297, 309, 316, 327, 344, 361, 383, 254, 276, 299, 335, 366, 402, 455, 590, 640]"
+  >
+    <c2-chart-series field="value" label="Checkout latency (ms)"></c2-chart-series>
+  </c2-histogram-chart>
+</div>
+
+<div data-label="Two regions, cumulative share">
+  <c2-histogram-chart
+    class="histogram-plot"
+    bin-width="100"
+    overlay="cumulative"
+    legend="bottom"
+    data='[{"east":[182,210,236,251,268,274,289,301,312,320,338,346,362,381,405,422,468,515,603],"west":[248,276,301,324,335,352,368,377,391,404,418,433,452,477,502,541,588,655,742]}]'
+  >
+    <c2-chart-series field="east" label="us-east"></c2-chart-series>
+    <c2-chart-series field="west" label="eu-west"></c2-chart-series>
+  </c2-histogram-chart>
+</div>
+```
+
+### Data
+
+`data` holds the samples, in either of two shapes:
+
+- **A number array**, one series: `data="[182, 240, 310]"`. A `c2-chart-series` gives it a label and a colour (its
+  `field` is not read), or leave it out.
+- **Rows**, where each `c2-chart-series` field holds one sample per row (long-format data, one row per request,
+  works as it is) or an array of samples. Several series share one set of bins.
+
+A value that is not a number (`null`, `"n/a"`) is skipped. Without a `c2-chart-series`, the fields of the first
+row that hold a number or a sample array are the series. A `dataSource` works as on the other charts: its `getWindow` returns the samples, and each
+point its `subscribe` pushes adds one sample per series, so a live histogram fills as requests complete; `max-points`
+keeps only that many pushed samples per series. Replacing `data` drops them.
+
+The `bins` getter returns every bin with its edges and one count per series, for a table beside the chart or an
+export, and `binHistogram()` is the same computation as a plain function.
+
+### Bins
+
+By default the chart makes about as many bins as Sturges' rule suggests (log₂ of the sample count, plus one), on a
+nice width: 1, 2, 2.5 or 5 times a power of ten, so the edges land on round numbers. Four attributes override it:
+
+- `bin-width`: the width of every bin, in the samples' unit.
+- `bin-count`: roughly how many bins, still on a nice width. `bin-width` wins when both are set.
+- `bin-start` and `bin-end`: the range the bins cover. Samples outside it are left out of the counts; without them the
+  range runs from the smallest sample, rounded down, to the largest, rounded up. Every bin has the same width, so a
+  `bin-end` between two edges is rounded up to the next one. The last bin includes its upper edge.
+
+The axis ticks sit on the bin edges, only every n-th one when the labels would otherwise collide. Bars touch;
+`--c2-chart__bin--gap` is the thin line between them, drawn in the chart's surface colour (`0` joins them).
+
+### Overlays and percentiles
+
+`overlay="density"` draws a smoothed density curve (a Gaussian kernel density estimate, with Silverman's bandwidth)
+over each series, scaled to the count axis so it follows the tops of the bars. `overlay="cumulative"` draws the share
+of samples up to each bin edge against a 0–100% axis on the right, which answers "what share of requests finished
+under 400 ms". `percentiles="[50, 90, 99]"` marks those percentiles of each series with a dashed rule labelled `p50`,
+`p90`, `p99`; they are interpolated from the raw samples, not from the bins. The code that draws all three loads the
+first time a chart asks for one.
+
+With one series the line and the markers take `--c2-chart__overlay--color` and `--c2-chart__percentile--color`; with
+several, each takes its series colour. `--c2-chart__overlay--width` and `--c2-chart__percentile--width` set the
+strokes.
+
+### Several series and layout
+
+Every series is binned on the same edges, so their bars line up: side by side in each bin by default, or one on top
+of the other with `stack="normal"` (`stack="percent"` shows each bin's split between the series). The density curve
+is drawn on side-by-side bars only, since a series' curve would not follow its segment of a stack. The legend appears with a second series. `orientation="horizontal"` lays the bins up the left edge,
+the lowest at the bottom.
+
+### Reading it
+
+The tooltip and the `point-hover` and `point-click` events name a bin by its range ("300 to 350") and give its count;
+`tooltip-change` also carries the `bin`. A visually hidden table lists every bin with its counts, and the plot's name
+gives the bin count and the percentiles. The text is in English; an app translates it with `addTranslations` under the
+`histogram-chart` key.

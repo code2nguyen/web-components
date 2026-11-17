@@ -11,6 +11,7 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Attachment } from '@c2n/attachment'
 import type { AttachmentGroup } from '@c2n/attachment/attachment-group.js'
+import type { FilePreview } from '@c2n/attachment/file-preview.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -21,6 +22,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-attachment': DefineComponent<
       C2Props<Attachment> & {
+        onAttachmentPreview?: (event: EventOf<Attachment, 'attachment-preview'>) => void
         onAttachmentRemove?: (event: EventOf<Attachment, 'attachment-remove'>) => void
         onAttachmentRetry?: (event: EventOf<Attachment, 'attachment-retry'>) => void
         onMediaError?: (event: EventOf<Attachment, 'media-error'>) => void
@@ -29,6 +31,12 @@ declare module 'vue' {
     'c2-attachment-group': DefineComponent<
       C2Props<AttachmentGroup> & {
         'aria-label'?: unknown
+      }
+    >
+    'c2-file-preview': DefineComponent<
+      C2Props<FilePreview> & {
+        onPreviewChange?: (event: EventOf<FilePreview, 'preview-change'>) => void
+        onClose?: (event: EventOf<FilePreview, 'close'>) => void
       }
     >
   }

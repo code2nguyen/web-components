@@ -1,0 +1,48 @@
+---
+/** Wires the histogram examples that need script: the French text an app adds, and a live data source. */
+---
+
+<script>
+  import type { HistogramChart } from '@c2n/components/chart/histogram-chart'
+  import type { ChartDataSource } from '@c2n/components/chart'
+  import '@c2n/components/chart/histogram-chart'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'histogram-chart': {
+        bin: 'Classe',
+        range: 'de {0} à {1}',
+        percentile: 'p{0}',
+        percentileValue: '{0} : {1}',
+        summary: 'Histogramme de {0}, {1} classes',
+        summaryPercentiles: '{0}. {1} : {2}',
+        withDensity: '{0}, avec une courbe de densité',
+        withCumulative: '{0}, avec la part cumulée',
+      },
+    },
+  })
+
+  /** A request latency in ms: mostly around 300, with a slow tail. */
+  const latency = () => Math.round(300 + 60 * (Math.random() + Math.random() + Math.random() - 1.5) * 2 + (Math.random() < 0.08 ? 250 * Math.random() : 0))
+
+  document.querySelectorAll<HistogramChart>('c2-histogram-chart[data-histogram-example="source"]').forEach((chart) => {
+    let timer: ReturnType<typeof setInterval> | undefined
+    const source: ChartDataSource = {
+      // The first window: 120 requests, after a short delay, as a server would answer.
+      getWindow: () => new Promise((resolve) => setTimeout(() => resolve({ data: Array.from({ length: 120 }, latency) }), 600)),
+      // Then one request every half second, paused while the chart is off-screen.
+      subscribe: (push) => {
+        let visible = true
+        const observer = new IntersectionObserver(([entry]) => (visible = entry?.isIntersecting ?? true))
+        observer.observe(chart)
+        timer = setInterval(() => visible && push(Date.now(), [latency()]), 500)
+        return () => {
+          clearInterval(timer)
+          observer.disconnect()
+        }
+      },
+    }
+    chart.dataSource = source
+  })
+</script>

@@ -1,0 +1,117 @@
+body {
+  margin: 0;
+  background: var(--c2-theme--color-surface, #ffffff);
+  color: var(--c2-theme--color-on-surface, #18181b);
+  font-family: var(--c2-theme--font-family, system-ui, sans-serif);
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page__head h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.page__count {
+  margin: 4px 0 0;
+  color: var(--c2-theme--color-on-surface-variant, #71717a);
+}
+
+.page__tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page__filters-button {
+  display: none;
+}
+
+.page__body {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.filters {
+  display: grid;
+  gap: 20px;
+}
+
+.filters__heading {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.filters__price-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.product__name {
+  font-weight: 600;
+}
+
+.product__brand {
+  margin: 0 0 8px;
+  color: var(--c2-theme--color-on-surface-variant, #71717a);
+  font-size: 13px;
+}
+
+.product__price {
+  font-weight: 600;
+}
+
+/* The facet's Only and Exclude actions are log-search idioms a shop does not offer; the documented part is the only
+   way to drop them (see the build report). */
+c2-facet-list::part(action) {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .page__filters-button {
+    display: inline-block;
+  }
+
+  .page__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page__sidebar {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

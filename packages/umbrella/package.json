@@ -101,6 +101,10 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./attachment/file-preview": {
+      "types": "./dist/attachment/file-preview.d.ts",
+      "default": "./dist/attachment/file-preview.js"
+    },
     "./audio-player": {
       "types": "./dist/audio-player.d.ts",
       "default": "./dist/audio-player.js"
@@ -256,6 +260,10 @@
     "./chart/heatmap-chart": {
       "types": "./dist/chart/heatmap-chart.d.ts",
       "default": "./dist/chart/heatmap-chart.js"
+    },
+    "./chart/histogram-chart": {
+      "types": "./dist/chart/histogram-chart.d.ts",
+      "default": "./dist/chart/histogram-chart.js"
     },
     "./chart/line-chart": {
       "types": "./dist/chart/line-chart.d.ts",
@@ -445,6 +453,10 @@
       "types": "./dist/date-input.d.ts",
       "default": "./dist/date-input.js"
     },
+    "./date-input/date-fields": {
+      "types": "./dist/date-input/date-fields.d.ts",
+      "default": "./dist/date-input/date-fields.js"
+    },
     "./date-selector": {
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
@@ -592,6 +604,10 @@
     "./highlight/find-bar": {
       "types": "./dist/highlight/find-bar.d.ts",
       "default": "./dist/highlight/find-bar.js"
+    },
+    "./highlight/text-annotator": {
+      "types": "./dist/highlight/text-annotator.d.ts",
+      "default": "./dist/highlight/text-annotator.js"
     },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
@@ -976,6 +992,10 @@
     "./secret-field": {
       "types": "./dist/secret-field.d.ts",
       "default": "./dist/secret-field.js"
+    },
+    "./secret-field/totp-code": {
+      "types": "./dist/secret-field/totp-code.d.ts",
+      "default": "./dist/secret-field/totp-code.js"
     },
     "./select": {
       "types": "./dist/select.d.ts",

@@ -1,0 +1,57 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-text-annotator,
+  $theme: (
+    tone-1--color: rgba(59, 130, 246, 0.24),
+    tone-2--color: rgba(234, 179, 8, 0.3),
+    tone-3--color: rgba(34, 197, 94, 0.26),
+    tone-4--color: rgba(236, 72, 153, 0.24),
+    tone-5--color: rgba(168, 85, 247, 0.24),
+    tone-6--color: rgba(249, 115, 22, 0.26),
+    span--border-radius: 2px,
+    span--text-decoration: none,
+    tag--display: inline-block,
+    tag--font-size: 0.7em,
+    tag--font-weight: 600,
+    tag--color: inherit,
+    tag--padding: 0 4px,
+    tag--margin: 0 2px,
+    tag--border-radius: 4px,
+  )
+);
+
+@for $i from 0 to 6 {
+  [data-tone='#{$i}'] {
+    --_c: #{css.cssVar(tone-#{$i + 1}--color)};
+  }
+}
+
+.span {
+  background-color: var(--_c);
+  border-radius: css.cssVar(span--border-radius);
+  text-decoration: css.cssVar(span--text-decoration);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.tag {
+  display: css.cssVar(tag--display);
+  margin: css.cssVar(tag--margin);
+  padding: css.cssVar(tag--padding);
+  border-radius: css.cssVar(tag--border-radius);
+  background-color: var(--_c);
+  color: css.cssVar(tag--color);
+  font-size: css.cssVar(tag--font-size);
+  font-weight: css.cssVar(tag--font-weight);
+  line-height: 1.4;
+  user-select: none;
+}
+
+@media (forced-colors: active) {
+  .span {
+    border-bottom: 2px solid CanvasText;
+  }
+
+  .tag {
+    border: 1px solid CanvasText;
+  }
+}

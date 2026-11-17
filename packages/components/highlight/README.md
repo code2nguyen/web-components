@@ -44,3 +44,22 @@ import '@c2n/components/highlight' // c2-highlight and c2-find-bar
 
 The bar never edits text: `replace` fires with the query, the replacement and the highlight holding the current match,
 and the application changes its own text. `close` fires on Escape and the close button; hide the bar there.
+
+## Text annotator
+
+`c2-text-annotator` is a `c2-highlight` that draws labelled spans of its text: each span tinted in its label's tone and
+followed by a tag, overlapping spans nested. Select text and press a label's `key` (or call `annotate(label)`) to add a
+span; doing it inside a span with that label removes it. `readonly` only shows the spans. It has an entry of its own.
+
+```js
+import '@c2n/components/highlight/text-annotator'
+```
+
+```html
+<c2-text-annotator labels='[{"value":"person","label":"Person","key":"p"}]' ranges='[{"start":0,"end":12,"label":"person"}]'
+  >Ada Lovelace worked in London.</c2-text-annotator
+>
+```
+
+`ranges-change` fires with the new `ranges` when the user adds or removes a span. Colour the labels with
+`--c2-text-annotator__tone-1--color` to `-6`, and style the `span` and `tag` parts.

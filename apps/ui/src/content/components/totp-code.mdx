@@ -1,0 +1,80 @@
+---
+title: 'TOTP Code'
+description: 'The rotating one-time code of an authenticator app, computed in the browser from a TOTP secret, with a countdown ring, show and copy.'
+category: 'Inputs'
+package: '@c2n/secret-field'
+tag: 'c2-totp-code'
+apiTags: ['c2-totp-code']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TotpCode } from '@c2n/components/secret-field/totp-code'
+
+`c2-totp-code` is the companion of [`c2-secret-field`](/web-components/components/secret-field) for the six-digit codes
+of an authenticator app, the way 1Password, Bitwarden and Okta Verify show them. Give it the TOTP secret, as base32 or as
+the `otpauth://totp/…` URI a QR code holds, and it computes the current code (RFC 6238) in the browser with Web Crypto:
+the digits in two groups, a ring that drains until the next code and turns red in the last `warning-time` seconds, and
+a new code on each period boundary. The show and copy buttons are the secret field's; copy copies the code, shown or not.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/secret-field/totp-code'
+```
+
+The entry registers `c2-totp-code` and `c2-secret-field`. The HMAC code loads the first time a secret is set.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/secret-field
+<style>
+  .totp-row {
+    width: 100%;
+    max-width: 320px;
+  }
+</style>
+<div data-label="Authenticator">
+  <c2-totp-code class="totp-row" label="GitHub · ada@example.com" secret="JBSWY3DPEHPK3PXP" revealed hide-reveal></c2-totp-code>
+</div>
+<div data-label="Masked until shown">
+  <c2-totp-code class="totp-row" label="Admin console" secret="KRSXG5CTMVRXEZLUKN2XAZLSKNSWG4TFOQ"></c2-totp-code>
+</div>
+<div data-label="otpauth URI: 8 digits, 60 seconds">
+  <c2-totp-code class="totp-row" label="Acme VPN" secret="otpauth://totp/Acme:ada?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&digits=8&period=60" revealed></c2-totp-code>
+</div>
+```
+
+`digits` (6 to 10), `period` (seconds) and `algorithm` (`SHA-1`, the default, `SHA-256` or `SHA-512`) match what the
+service set up; the parameters of an `otpauth` URI win over them. `value` is the current code and `code-change` fires
+with each new one. Nothing runs without a secret, the timer sleeps until the warning moment or the next period, and a
+hidden tab or an element scrolled out of view catches up when it shows again. A secret that is not base32, or a page without Web Crypto (an `http:` page
+other than `localhost`), shows "Code unavailable".
+
+The secret is the key to the account. Set it as a property rather than an attribute, so it stays out of the DOM and of
+any server-rendered HTML; it never travels with an event and is never logged:
+
+```ts tag=CodeBlock
+const code = document.querySelector('c2-totp-code')!
+code.secret = await vault.totpSecret(accountId) // your own storage
+code.addEventListener('code-change', () => console.log('new code'))
+```
+
+The labels are `totp-code` message tokens, which repeat the secret field's keys worded for a code:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'totp-code': {
+      show: 'Afficher le code',
+      copy: 'Copier le code',
+      copied: 'Copié',
+      unavailable: 'Code indisponible',
+      period: 'Nouveau code toutes les {0} secondes',
+    },
+  },
+})
+```

@@ -432,6 +432,11 @@ export const overrides: Record<string, Override> = {
   // A tour dims the page with the dialog scrim and rings its spotlight with the focus ring.
   '--c2-tour__backdrop--color': { token: 'color-scrim' },
   '--c2-tour__spotlight--outline': { token: 'focus-ring' },
+  // A file preview dims the page with the dialog scrim, lifts its previous/next buttons off the file like other small
+  // floating controls, and shows a text file in a monospace face whatever the app font.
+  '--c2-file-preview__backdrop--background': { token: 'color-scrim' },
+  '--c2-file-preview__nav--box-shadow': { token: 'shadow-sm' },
+  '--c2-file-preview__text--font-family': { exclude: 'monospace face for text files, not the UI font' },
   // A trace waterfall colours each service with the same categorical palette, so its bars match a chart of the same services.
   '--c2-trace-waterfall__series-1--color': { token: 'chart-series-1' },
   '--c2-trace-waterfall__series-2--color': { token: 'chart-series-2' },

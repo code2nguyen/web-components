@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { SecretField } from '@c2n/secret-field'
+import type { TotpCode } from '@c2n/secret-field/totp-code.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -27,6 +28,19 @@ declare module 'vue' {
         onRegenerate?: (event: EventOf<SecretField, 'regenerate'>) => void
         onCopied?: (event: EventOf<SecretField, 'copied'>) => void
         onCopyError?: (event: EventOf<SecretField, 'copy-error'>) => void
+      }
+    >
+    'c2-totp-code': DefineComponent<
+      C2Props<TotpCode> & {
+        'reveal-end'?: unknown
+        'warning-time'?: unknown
+        'reveal-start'?: unknown
+        'hide-reveal'?: unknown
+        onCodeChange?: (event: EventOf<TotpCode, 'code-change'>) => void
+        onRevealChange?: (event: EventOf<TotpCode, 'reveal-change'>) => void
+        onCopied?: (event: EventOf<TotpCode, 'copied'>) => void
+        onCopyError?: (event: EventOf<TotpCode, 'copy-error'>) => void
+        onRegenerate?: (event: EventOf<TotpCode, 'regenerate'>) => void
       }
     >
   }

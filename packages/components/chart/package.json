@@ -117,6 +117,10 @@
       "types": "./types/src/waterfall-chart.d.ts",
       "default": "./dist/waterfall-chart.js"
     },
+    "./histogram-chart.js": {
+      "types": "./types/src/histogram-chart.d.ts",
+      "default": "./dist/histogram-chart.js"
+    },
     "./maps/*.js": {
       "types": "./types/src/maps/*.d.ts",
       "default": "./dist/maps/*.js"

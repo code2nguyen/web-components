@@ -1,0 +1,211 @@
+---
+description: 'Looks for c2-date-fields: default, compact, boxed and inline labels, field orders, part-naming errors, bounds, states, slotted help, a form field, the value read from script and a French card. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import DateFieldsExamplesRuntime from '../../components/DateFieldsExamplesRuntime.astro'
+
+import { DateFields } from '@c2n/components/date-input/date-fields'
+import { FormField } from '@c2n/components/form-field'
+
+<DateFieldsExamplesRuntime />
+
+## Look
+
+The fields take the `--c2-date-fields__input--*` variables, their labels `--c2-date-fields__label--*`, and the year its
+own width.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-date-fields aria-label="Date of birth" value="1984-03-07"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-date-fields--gap: 8px;
+    --c2-date-fields__label--font-size: 12px;
+    --c2-date-fields__input--min-height: 30px;
+    --c2-date-fields__input--padding: 3px 6px;
+    --c2-date-fields__input--font-size: 13px;
+    --c2-date-fields__input--width: 3em;
+    --c2-date-fields__year--width: 4.5em;
+  }
+</style>
+<c2-date-fields class="compact" aria-label="Date of birth" value="1990-11-23"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Boxed
+<style>
+  .boxed {
+    --c2-date-fields--gap: 16px;
+    --c2-date-fields__label--font-size: 12px;
+    --c2-date-fields__label--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    --c2-date-fields__input--min-height: 44px;
+    --c2-date-fields__input--border: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-date-fields__input--border-radius: 0px;
+    --c2-date-fields__input--font-size: 18px;
+    --c2-date-fields__input__hover--border: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-date-fields__input__focus--border: 2px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-date-fields__input__focus--outline: 3px solid #fd0;
+    --c2-date-fields__input__error--border: 2px solid #d4351c;
+  }
+</style>
+<c2-date-fields class="boxed" aria-label="Date of birth" lang="en-GB" value="2007-03-27"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Accent
+<style>
+  .accent {
+    --c2-date-fields__input--border-radius: 8px;
+    --c2-date-fields__input--background: light-dark(#f5f3ff, #1e1838);
+    --c2-date-fields__input--border: 1px solid light-dark(#ddd6fe, #3b2f6b);
+    --c2-date-fields__input__hover--border: 1px solid #8b5cf6;
+    --c2-date-fields__input__focus--border: 1px solid #7c3aed;
+    --c2-date-fields__input__focus--outline: 2px solid rgba(124, 58, 237, 0.35);
+    --c2-date-fields__label--color: light-dark(#6d28d9, #b79cf5);
+  }
+</style>
+<c2-date-fields class="accent" aria-label="Anniversary" value="2015-06-20"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Labels beside the fields
+<style>
+  .inline::part(part) {
+    flex-direction: row;
+    align-items: center;
+  }
+  .inline::part(label) {
+    font-size: 13px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-date-fields class="inline" aria-label="Start date" value="2024-09-02"></c2-date-fields>
+```
+
+</GalleryGrid>
+
+## Order and hints
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Day first (en-GB)
+<c2-date-fields aria-label="Date of birth" lang="en-GB" autocomplete="bday" help="For example, 27 3 2007"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Year first
+<c2-date-fields aria-label="Passport issued" order="ymd" help="As printed on page 2."></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Slotted help
+<style>
+  .slotted a {
+    color: inherit;
+  }
+</style>
+<c2-date-fields class="slotted" aria-label="Policy start">
+  <span slot="supporting-text">The date on your <a href="#certificate">certificate</a>.</span>
+</c2-date-fields>
+```
+
+</GalleryGrid>
+
+## Validation
+
+Type in a card and leave it: the message names the part that is wrong and marks that field.
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Not a real date
+<c2-date-fields aria-label="Start date" lang="en-GB" value="2026-02-30" error></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Bounds
+<c2-date-fields aria-label="Date of birth" min="1900-01-01" max="2008-12-31" value="2012-05-04" error></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Error text
+<c2-date-fields aria-label="Date of birth" value="1984-03-07" error error-text="Must match the date on your passport"></c2-date-fields>
+```
+
+```html tag=MdxCodeBlock,label=Read-only and disabled
+<style>
+  .states {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+</style>
+<div class="states">
+  <c2-date-fields aria-label="Renewal" value="2027-03-01" readonly></c2-date-fields>
+  <c2-date-fields aria-label="Closed" value="2020-01-15" disabled></c2-date-fields>
+</div>
+```
+
+</GalleryGrid>
+
+## Forms and script
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=In a form field
+<c2-form-field label="Date of birth" hint="For example, 27 3 2007" validate-on="blur">
+  <c2-date-fields name="dob" lang="en-GB" autocomplete="bday" required></c2-date-fields>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Value
+<style>
+  .value {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .value output {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+</style>
+<div class="value" data-date-fields-example="value">
+  <c2-date-fields aria-label="Date of birth" value="1984-03-07"></c2-date-fields>
+  <output>value: "1984-03-07"</output>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=French
+<div lang="fr">
+  <c2-date-fields aria-label="Date de naissance" min="1900-01-01" value="1899-07-14" error></c2-date-fields>
+</div>
+```
+
+</GalleryGrid>
+
+The value card reads `value` on every edit; it stays empty until the three parts make a real date:
+
+```ts tag=CodeBlock
+const birth = document.querySelector('c2-date-fields')!
+birth.addEventListener('input', () => (output.textContent = `value: "${birth.value}"`))
+```
+
+The French card's labels and messages come from the app's translations:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'date-fields': {
+      day: 'Jour',
+      month: 'Mois',
+      year: 'Année',
+      min: 'La date doit être le {0} ou après',
+      // …one entry per message
+    },
+  },
+})
+```

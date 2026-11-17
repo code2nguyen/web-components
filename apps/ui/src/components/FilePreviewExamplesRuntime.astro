@@ -1,0 +1,93 @@
+---
+/**
+ * Plays the application's part in the file preview gallery: the French of the card under `lang="fr"`, the `File`
+ * items of the Local files card and the `renderViewer` of the Custom viewer card (properties, so they cannot be
+ * written in the fence), and the button of the Dialog card, which calls `showModal()`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { FilePreview } from '@c2n/components/attachment/file-preview'
+
+  addTranslations({
+    fr: {
+      'file-preview': {
+        label: 'Aperçu de {0}',
+        counter: '{0} sur {1}',
+        previous: 'Fichier précédent',
+        next: 'Fichier suivant',
+        zoomIn: 'Zoom avant',
+        zoomOut: 'Zoom arrière',
+        fit: 'Ajuster à la vue',
+        download: 'Télécharger {0}',
+        close: "Fermer l'aperçu",
+        loading: "Chargement de l'aperçu…",
+        unsupported: "Aucun aperçu n'est disponible pour ce fichier.",
+        error: "Ce fichier n'a pas pu être affiché.",
+        empty: 'Aucun fichier à afficher.',
+        truncated: 'Seul le début du fichier est affiché.',
+        image: 'Image',
+        video: 'Vidéo',
+        audio: 'Audio',
+        pdf: 'PDF',
+        text: 'Texte',
+        file: 'Fichier',
+      },
+    },
+  })
+
+  const NOTES = '# Launch notes\n\n- Preview files before they upload\n- <b>Markup</b> stays text\n'
+  const SWATCH =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><rect width="320" height="200" fill="#dbeafe"/><circle cx="110" cy="100" r="60" fill="#2563eb"/><rect x="180" y="50" width="100" height="100" rx="16" fill="#f59e0b"/></svg>'
+  const CSV = 'date,category,amount\n2026-11-02,Travel,412.50\n2026-11-04,Meals,38.20\n2026-11-09,Software,99.00'
+
+  /** A CSV as a table, drawn inside the preview's shadow root, so it styles itself. */
+  function csvTable(text: string) {
+    const table = document.createElement('table')
+    Object.assign(table.style, { borderCollapse: 'collapse', width: '100%', fontSize: '13px', alignSelf: 'start' })
+    text.split('\n').forEach((line, row) => {
+      const tr = table.insertRow()
+      for (const value of line.split(',')) {
+        const cell = document.createElement(row === 0 ? 'th' : 'td')
+        cell.textContent = value
+        Object.assign(cell.style, { padding: '6px 10px', textAlign: 'start', borderBottom: '1px solid color-mix(in srgb, currentColor 20%, transparent)' })
+        tr.append(cell)
+      }
+    })
+    return table
+  }
+
+  const LOCAL_FILES = () => [
+    { name: 'launch-notes.md', file: new File([NOTES], 'launch-notes.md', { type: 'text/markdown' }), size: '1 KB' },
+    { name: 'swatch.svg', file: new File([SWATCH], 'swatch.svg', { type: 'image/svg+xml' }), size: '1 KB' },
+  ]
+
+  /** Gives each card its data once its island has hydrated, so the first client render matches the server's. */
+  function setUp() {
+    for (const preview of document.querySelectorAll<FilePreview>('c2-file-preview[data-file-preview-example="files"]')) {
+      void preview.updateComplete.then(() => {
+        if (!preview.items?.length) preview.items = LOCAL_FILES()
+      })
+    }
+    for (const preview of document.querySelectorAll<FilePreview>('c2-file-preview[data-file-preview-example="render"]')) {
+      void preview.updateComplete.then(() => {
+        if (preview.renderViewer) return
+        preview.renderViewer = ({ item }) => (item.name.endsWith('.csv') ? csvTable(item.text ?? '') : undefined)
+        preview.items = [
+          { name: 'expenses.csv', text: CSV, size: '1 KB' },
+          { name: 'mountains.svg', src: '/web-components/images/image-mountains.svg', size: '3 KB' },
+        ]
+      })
+    }
+  }
+
+  // The previews are islands: their properties are set once the element is defined and has hydrated, never before,
+  // or the hydrating render would differ from the server's.
+  customElements.whenDefined('c2-file-preview').then(setUp)
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-file-preview-example="open"]')
+    void button?.parentElement?.querySelector<FilePreview>('c2-file-preview')?.showModal()
+  })
+</script>

@@ -9,6 +9,10 @@
       "types": "./types/src/date-input.d.ts",
       "default": "./dist/date-input.js"
     },
+    "./date-fields.js": {
+      "types": "./types/src/date-fields.d.ts",
+      "default": "./dist/date-fields.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -70,5 +74,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./date-fields.js"
+    ]
+  }
 }
