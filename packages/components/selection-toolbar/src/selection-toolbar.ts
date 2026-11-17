@@ -109,6 +109,8 @@ export class SelectionToolbar extends LitElement {
 
   private readonly msg = new LocalizeController(this, selectionToolbarMessages)
   private range: Range | null = null
+  /** The last selection or caret seen in the content. WebKit drops it when focus moves to a control there. */
+  private lastRange: Range | null = null
   private text = ''
   private pointerDown = false
   private settleTimer: ReturnType<typeof setTimeout> | undefined
@@ -133,6 +135,7 @@ export class SelectionToolbar extends LitElement {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback()
+    this.lastRange = null
     document.removeEventListener('selectionchange', this.handleSelectionChange)
     document.removeEventListener('pointerup', this.handlePointerUp, true)
     document.removeEventListener('pointercancel', this.handlePointerUp, true)
@@ -154,8 +157,11 @@ export class SelectionToolbar extends LitElement {
     // Opened without a toolbar: anchor to the selection or the caret in the content, else to the content itself.
     const selection = document.getSelection()
     const owned = !!selection && this.ownsSelection(selection, false)
-    this.range = owned ? selection.getRangeAt(0).cloneRange() : null
-    this.text = owned ? selection.toString() : ''
+    // Focus on a control in the content (an "Ask AI" button) keeps the caret it left, even where the engine dropped it.
+    const active = document.activeElement
+    const last = !owned && active && this.contains(active) && !this.inToolbar(active) && this.lastRange?.startContainer.isConnected ? this.lastRange : null
+    this.range = owned ? selection.getRangeAt(0).cloneRange() : last
+    this.text = owned ? selection.toString() : (last?.toString() ?? '')
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -208,6 +214,7 @@ export class SelectionToolbar extends LitElement {
     if (this.pointerDown || this.prompting) return
     clearTimeout(this.settleTimer)
     const selection = document.getSelection()
+    if (selection && this.ownsSelection(selection, false)) this.lastRange = selection.getRangeAt(0).cloneRange()
     // A collapsed selection, or one that left the content, hides at once; a growing one waits to settle.
     if (!selection || selection.isCollapsed || !this.ownsSelection(selection)) {
       if (this.open && !this.inToolbar(document.activeElement)) this.hide()
