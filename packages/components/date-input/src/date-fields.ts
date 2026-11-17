@@ -25,12 +25,13 @@ export interface DateFields {
 }
 
 type Messages = typeof dateFieldsMessages.en
-/** A message key, the parts it is about, and the message's argument. */
-type Problem = [key: keyof Messages, parts: string, arg?: string]
+/** A message key, the parts it is about, and the date bound it names. */
+type Problem = [key: keyof Messages, parts: string, bound?: string]
 
 const NAMES = { d: 'day', m: 'month', y: 'year' } as const
 const MISSING = { d: 'missingDay', m: 'missingMonth', y: 'missingYear' } as const
 const number = (text: string, digits: RegExp) => (digits.test(text.trim()) ? +text : 0)
+const ISO = /^\d{4}-\d\d-\d\d$/
 
 /**
  * A date typed as three labelled number fields, day, month and year, for dates people know by heart (a birth date, an
@@ -49,6 +50,7 @@ const number = (text: string, digits: RegExp) => (digits.test(text.trim()) ? +te
  * @csspart part - Each field with its label.
  * @csspart label - The label above each field.
  * @csspart input - Each input.
+ * @csspart supporting-text - The line below the fields: the help, or the error in its place.
  *
  * @cssproperty {pixel} [--c2-date-fields--gap=12px] - Between the fields.
  * @cssproperty {pixel} [--c2-date-fields__label--gap=4px]
@@ -91,7 +93,6 @@ export class DateFields extends LitElement {
   @state() private touched = false
   @state() private disabledByForm = false
   private problem?: Problem
-  private message = ''
   /** The date the fields make, or empty. */
   private composed = ''
   private customValidityMessage = ''
@@ -174,12 +175,21 @@ export class DateFields extends LitElement {
     if (typeof state === 'string') this.value = state
   }
 
+  /** A date format in the host's language, or the browser's when that language is not a valid tag. */
+  private format(options?: Intl.DateTimeFormatOptions) {
+    try {
+      return new Intl.DateTimeFormat(this.msg.locale, options)
+    } catch {
+      return new Intl.DateTimeFormat(undefined, options)
+    }
+  }
+
   /** The fields in reading order: `order` when it names all three, else the language's own. */
-  private get partOrder(): DateFieldsPart[] {
+  private partOrder(): DateFieldsPart[] {
     const order =
       [...this.order].sort().join('') === 'dmy'
         ? this.order
-        : new Intl.DateTimeFormat(this.msg.locale)
+        : this.format()
             .formatToParts()
             .map((part) => part.type[0])
             .join('')
@@ -191,13 +201,12 @@ export class DateFields extends LitElement {
     this.parts = { d: d && String(+d), m: m && String(+m), y }
   }
 
-  /** The first problem with the fields, in reading order. Sets `composed` to the date they make, if any. */
+  /** The first problem with the fields. Sets `composed` to the date they make, if any. */
   private check(): Problem | undefined {
     const { d, m, y } = this.parts
-    const order = this.partOrder
-    const missing = order.filter((part) => !this.parts[part].trim())
+    const missing = (['d', 'm', 'y'] as const).filter((part) => !this.parts[part].trim())
     this.composed = ''
-    if (missing.length === 3) return this.required ? ['required', order.join('')] : undefined
+    if (missing.length === 3) return this.required ? ['required', 'dmy'] : undefined
     if (missing.length > 1) return ['incomplete', missing.join('')]
     if (missing.length) return [MISSING[missing[0]], missing[0]]
     const day = number(d, /^\d\d?$/)
@@ -205,13 +214,21 @@ export class DateFields extends LitElement {
     if (day < 1 || day > 31) return ['badDay', 'd']
     if (month < 1 || month > 12) return ['badMonth', 'm']
     if (!number(y, /^\d{4}$/)) return ['badYear', 'y']
-    const date = new Date(Date.UTC(+y, month - 1, day))
+    const date = new Date(0)
+    // Not `Date.UTC`, which reads the years 0 to 99 as 1900 to 1999.
+    date.setUTCFullYear(+y, month - 1, day)
     if (date.getUTCDate() !== day) return ['notReal', 'd']
     const iso = (this.composed = date.toISOString().slice(0, 10))
-    const format = (bound: string) => new Intl.DateTimeFormat(this.msg.locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(bound))
-    if (this.min && iso < this.min) return ['min', order.join(''), format(this.min)]
-    if (this.max && iso > this.max) return ['max', order.join(''), format(this.max)]
+    if (ISO.test(this.min) && iso < this.min) return ['min', 'dmy', this.min]
+    if (ISO.test(this.max) && iso > this.max) return ['max', 'dmy', this.max]
     return undefined
+  }
+
+  /** The validation message: the custom one, else the problem's, with its date bound written out. */
+  private validationText() {
+    const [key, , bound] = this.problem ?? []
+    if (this.customValidityMessage || !key) return this.customValidityMessage
+    return this.msg.t(key, ...((bound ? [this.format({ dateStyle: 'long', timeZone: 'UTC' }).format(new Date(bound))] : []) as [string]))
   }
 
   private handleInput(event: InputEvent) {
@@ -227,36 +244,36 @@ export class DateFields extends LitElement {
     if (!this.renderRoot.contains(event.relatedTarget as Node) && Object.values(this.parts).some(Boolean)) this.touched = true
   }
 
-  // In `update`, after the language controller has read the current `lang`.
-  protected override update(changed: PropertyValues<this>) {
+  protected override willUpdate(changed: PropertyValues<this>) {
     // A value set from outside fills the fields; one that is not a real date clears the value.
     if (changed.has('value') && this.value !== this.composed) this.parse()
-    const problem = (this.problem = this.check())
+    this.problem = this.check()
     if (this.value !== this.composed) this.value = this.composed
-    this.message = this.customValidityMessage || (problem ? this.msg.t(problem[0], ...((problem[2] ? [problem[2]] : []) as [string])) : '')
-    super.update(changed)
   }
 
   protected override updated() {
     const disabled = this.disabled || this.disabledByForm
-    const anchor = this.renderRoot.querySelector<HTMLInputElement>(`[data-part=${this.problem?.[1][0] ?? this.partOrder[0]}]`) ?? undefined
+    const message = this.validationText()
+    const parts = this.problem?.[1] ?? 'dmy'
+    const anchor = this.renderRoot.querySelector<HTMLInputElement>(`[data-part=${this.partOrder().find((part) => parts.includes(part))}]`) ?? undefined
     this.internals.setFormValue(disabled ? null : this.value, this.value)
     // A custom error rather than `badInput`, so that a `c2-form-field` shows this message, which names the part.
     this.internals.setValidity(
-      disabled || !this.message ? {} : this.problem?.[0] === 'required' && !this.customValidityMessage ? { valueMissing: true } : { customError: true },
-      this.message,
+      disabled || !message ? {} : this.problem?.[0] === 'required' && !this.customValidityMessage ? { valueMissing: true } : { customError: true },
+      message,
       anchor,
     )
   }
 
   override render() {
     const disabled = this.disabled || this.disabledByForm
-    const problem = (this.touched || this.error) && !disabled ? this.problem : undefined
-    const showError = !disabled && (this.error || !!problem)
+    const shown = (this.touched || this.error) && !disabled ? this.validationText() : ''
+    const message = (this.error && this.errorText) || shown
+    const showError = !disabled && (this.error || !!shown)
     const invalid = showError || (!disabled && this.field.invalid)
-    const message = showError ? (this.error && this.errorText) || this.message : this.help
-    const showSupporting = !this.field.managed && (!!message || this.slotPresence.has('supporting-text'))
-    const bad = problem?.[1] ?? 'dmy'
+    const showSupporting = !this.field.managed && (!!message || !!this.help || this.slotPresence.has('supporting-text'))
+    // A custom message or `error-text` is about the whole date.
+    const bad = (shown && !this.customValidityMessage && this.problem?.[1]) || 'dmy'
     return html`
       <fieldset
         part="fields"
@@ -265,7 +282,7 @@ export class DateFields extends LitElement {
         ?disabled=${disabled}
         @focusout=${this.handleFocusOut}
       >
-        ${this.partOrder.map(
+        ${this.partOrder().map(
           (part) => html`
             <label part="part" class=${part}>
               <span part="label">${this.msg.t(NAMES[part])}</span>
@@ -287,13 +304,10 @@ export class DateFields extends LitElement {
           `,
         )}
       </fieldset>
-      ${
-        showSupporting
-          ? html`<div id="supporting-text" class="supporting-text ${showError ? 'error' : ''}">
-              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
-            </div>`
-          : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
-      }
+      <div id="supporting-text" part="supporting-text" class="supporting-text ${showError ? 'error' : ''}" ?hidden=${!showSupporting}>
+        ${message || nothing}
+        <slot name="supporting-text" ?hidden=${!!message} @slotchange=${this.slotPresence.handleSlotChange}>${message ? nothing : this.help}</slot>
+      </div>
       ${this.field.renderDescription()}
     `
   }

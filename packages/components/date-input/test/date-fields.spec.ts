@@ -98,18 +98,37 @@ test('reports required, min and max through form validity', async ({ page, rende
   await host.evaluate((element) => (element as HTMLElement & { setCustomValidity(m: string): void }).setCustomValidity('Taken'))
   await expect.poll(() => valid(host)).toBe(false)
   await expect(host).toHaveJSProperty('validationMessage', 'Taken')
+  await expect(host.locator('.supporting-text')).toHaveText('Taken')
+  await expect(host.locator('input[aria-invalid="true"]')).toHaveCount(3)
 })
 
-test('shows error-text while error is set, and helper content through the slot', async ({ page, renderScenario }) => {
+test('shows error-text while error is set, in place of slotted help', async ({ page, renderScenario }) => {
   await renderScenario(
     '<c2-date-fields error error-text="Must match your passport" aria-label="Date"><span slot="supporting-text">Slotted help</span></c2-date-fields>',
   )
   const host = page.locator('c2-date-fields')
   await expect(host.locator('.supporting-text')).toHaveClass(/error/)
+  await expect(host.locator('.supporting-text')).toContainText('Must match your passport')
+  await expect(host.getByText('Slotted help')).toBeHidden()
   await expect(host.locator('input[aria-invalid="true"]')).toHaveCount(3)
-  await expect(host.getByText('Slotted help')).toBeVisible()
   await props(host, { error: false })
   await expect(host.locator('input[aria-invalid="true"]')).toHaveCount(0)
+  await expect(host.getByText('Slotted help')).toBeVisible()
+  // A part-naming message also replaces the slotted help.
+  await field(host, 'Month').fill('13')
+  await field(host, 'Month').blur()
+  await expect(host.locator('.supporting-text')).toContainText('Enter a full date')
+  await expect(host.getByText('Slotted help')).toBeHidden()
+})
+
+test('reads four-digit years as written and ignores a bound that is not a date', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-date-fields order="dmy" min="today" aria-label="Date"></c2-date-fields>')
+  const host = page.locator('c2-date-fields')
+  await field(host, 'Day').fill('1')
+  await field(host, 'Month').fill('1')
+  await field(host, 'Year').fill('0050')
+  await expect(host).toHaveJSProperty('value', '0050-01-01')
+  await expect.poll(() => valid(host)).toBe(true)
 })
 
 test('resets to its authored date, restores disabled fieldsets and keeps read-only values', async ({ page, renderScenario }) => {
@@ -164,6 +183,6 @@ test('takes its name and error from an enclosing form field', async ({ page, ren
   await field(host, 'Year').blur()
   await expect(page.locator('c2-form-field')).toContainText('Day must be a number from 1 to 31')
   // The field draws the message; the control does not repeat it.
-  await expect(host.locator('.supporting-text')).toHaveCount(0)
+  await expect(host.locator('.supporting-text')).toBeHidden()
   await expect(field(host, 'Day')).toHaveAttribute('aria-invalid', 'true')
 })
