@@ -5,7 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import type { Citation } from './citation'
+import type { MarkerCollector } from './marker-collector'
 import { citationListMessages } from './citation-list-messages'
 import { opensElsewhere, safeIconUrl, safeSourceUrl, sourceHost } from './source-url'
 import styles from './citation-list.scss?inline'
@@ -48,44 +48,6 @@ export interface CitationList {
   removeEventListener: TypedRemoveEventListener<CitationList, CitationListEventMap>
 }
 
-/** Attributes of a marker that change what the list shows. */
-const WATCHED = ['index', 'href', 'source-title', 'snippet', 'site', 'favicon']
-
-/** The details of a source a later marker can fill in when the first one left them out. */
-const FIELDS = ['title', 'snippet', 'site', 'favicon'] as const
-
-/**
- * Whether `parent` holds nothing but the one element the list is in: no other element (a `template`, as an island keeps
- * for its slots, aside) and no text. Such a wrapper is not the answer, so the list looks past it.
- */
-function isWrapper(parent: Element): boolean {
-  let elements = 0
-  for (const node of parent.childNodes) {
-    if (node instanceof HTMLTemplateElement) continue
-    if (node.nodeType === Node.ELEMENT_NODE) elements++
-    else if (node.nodeType === Node.TEXT_NODE && node.textContent!.trim()) return false
-  }
-  return elements === 1
-}
-
-/** What makes two markers the same source: the address, else the number. */
-const keyOf = (source: CitationSource) => source.href || (source.index === undefined ? '' : `#${source.index}`)
-
-/** A marker's source, read from its properties once upgraded and from its attributes before. */
-function readMarker(marker: Element): CitationSource {
-  const element = marker as Partial<Citation>
-  const attribute = (name: string) => marker.getAttribute(name) ?? ''
-  const index = element.index ?? (marker.hasAttribute('index') ? Number(attribute('index')) : undefined)
-  return {
-    index: typeof index === 'number' && Number.isFinite(index) ? index : undefined,
-    href: element.href ?? attribute('href'),
-    title: element.sourceTitle ?? attribute('source-title'),
-    snippet: element.snippet ?? attribute('snippet'),
-    site: element.site ?? attribute('site'),
-    favicon: element.favicon ?? attribute('favicon'),
-  }
-}
-
 /**
  * The "Used 12 sources" line under an AI answer, like the sources of Perplexity and ChatGPT search: a stack of the
  * sites' icons and a count, which expands into a card per source. It collects the `c2-citation` markers of the answer
@@ -107,7 +69,7 @@ function readMarker(marker: Element): CitationSource {
  * @csspart summary - The toggle region: the stack of icons, the count and the chevron.
  * @csspart icons - The stack of site icons inside the toggle.
  * @csspart icon - One site's icon in the stack: its favicon, or the site's first letter when it has none.
- * @csspart count - The toggle's text region, holding the `summary` slot.
+ * @csspart count - The toggle's text region. It wraps the `summary` slot, whose fallback is the "Used 3 sources" count; assigned content takes its place.
  * @csspart list - The region of source cards shown while the list is open.
  * @csspart source - One source card region: a link to the source when it has an address.
  * @csspart number - The source's number region on its card, matching its markers.
@@ -185,11 +147,8 @@ export class CitationList extends LitElement {
 
   private readonly msg = new LocalizeController(this, citationListMessages)
   private readonly slots = new SlotPresenceController(this, ['footer'])
-  private observer?: MutationObserver
-  /** Where the markers are read: what `scope()` found when the list last started watching. */
-  private scopeNode: ParentNode | null = null
-  private collectQueued = false
-  private highlightedMarkers: Citation[] = []
+  private collector?: MarkerCollector
+  private loading?: Promise<void>
 
   override connectedCallback() {
     super.connectedCallback()
@@ -199,10 +158,7 @@ export class CitationList extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.observer?.disconnect()
-    this.observer = undefined
-    this.scopeNode = null
-    this.highlight()
+    this.collector?.disconnect()
   }
 
   override firstUpdated() {
@@ -210,83 +166,21 @@ export class CitationList extends LitElement {
   }
 
   override updated(changed: PropertyValues<this>) {
-    if (changed.has('for') && changed.get('for') !== undefined) this.watch()
-    else if (changed.has('sources') && changed.get('sources') !== undefined) this.collect()
+    if (changed.has('for') && changed.get('for') !== undefined) this.collector?.watch()
+    else if (changed.has('sources') && changed.get('sources') !== undefined) this.collector?.collect()
   }
 
-  /**
-   * The node whose markers are listed: the element `for` names, else the parent (an element or a shadow root), past
-   * any wrapper that holds nothing but the list.
-   */
-  private scope(): ParentNode | null {
-    if (this.for) return (this.getRootNode() as Document | ShadowRoot).getElementById?.(this.for) ?? null
-    let scope = this.parentNode
-    while (scope instanceof Element && scope.parentNode && isWrapper(scope)) scope = scope.parentNode
-    return scope
-  }
-
-  /**
-   * Observes the scope for markers coming, going and changing. While the element `for` names does not exist, it
-   * observes the root for that element to appear (inserted, or given the `id`) and starts over then.
-   */
+  /** Starts following the markers, with the collector loaded the first time. */
   private watch() {
-    this.observer?.disconnect()
-    this.observer = undefined
-    this.scopeNode = this.isConnected ? this.scope() : null
-    if (!this.isConnected) return
-    const scope = this.scopeNode
-    if (scope) {
-      this.observer = new MutationObserver(() => this.queueCollect())
-      this.observer.observe(scope as Node, { childList: true, subtree: true, attributes: true, attributeFilter: WATCHED })
-    } else {
-      this.observer = new MutationObserver(() => {
-        if (this.scope()) this.watch()
-      })
-      this.observer.observe(this.getRootNode(), { childList: true, subtree: true, attributes: true, attributeFilter: ['id'] })
-    }
-    this.collect()
-  }
-
-  private markers(): Citation[] {
-    return [...(this.scopeNode?.querySelectorAll('c2-citation') ?? [])]
-  }
-
-  /** Collects once per task, however many changes a streaming answer makes in it. */
-  private queueCollect() {
-    if (this.collectQueued) return
-    this.collectQueued = true
-    queueMicrotask(() => {
-      this.collectQueued = false
-      this.collect()
+    if (this.collector) return this.collector.watch()
+    this.loading ??= import('./marker-collector').then(({ MarkerCollector }) => {
+      this.collector = new MarkerCollector(this, (sources) => (this.collected = sources))
+      if (this.isConnected) this.collector.watch()
     })
   }
 
-  /**
-   * One source per address (or number), in the order of their numbers. A detail the first marker of a source leaves
-   * out (a repeat marker often carries only the number and the address) is taken from the next one that has it.
-   */
-  private collect() {
-    // Given sources win: the markers are not shown, so not read.
-    if (this.sources?.length) return
-    const byKey = new Map<string, CitationSource>()
-    for (const marker of this.markers()) {
-      const source = readMarker(marker)
-      const key = keyOf(source)
-      if (!key) continue
-      const known = byKey.get(key)
-      if (!known) byKey.set(key, source)
-      else for (const field of FIELDS) known[field] ||= source[field]
-    }
-    const next = [...byKey.values()].sort((a, b) => (a.index ?? Infinity) - (b.index ?? Infinity))
-    if (JSON.stringify(next) !== JSON.stringify(this.collected)) this.collected = next
-  }
-
-  /** Highlights the markers that cite `source`, and clears the ones highlighted before. */
   private highlight(source?: CitationSource) {
-    for (const marker of this.highlightedMarkers) marker.highlighted = false
-    const key = source && keyOf(source)
-    this.highlightedMarkers = key ? this.markers().filter((marker) => keyOf(readMarker(marker)) === key) : []
-    for (const marker of this.highlightedMarkers) marker.highlighted = true
+    this.collector?.highlight(source)
   }
 
   private get shown(): CitationSource[] {

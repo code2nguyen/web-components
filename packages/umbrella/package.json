@@ -369,6 +369,10 @@
       "types": "./dist/citation.d.ts",
       "default": "./dist/citation.js"
     },
+    "./citation/citation-list": {
+      "types": "./dist/citation/citation-list.d.ts",
+      "default": "./dist/citation/citation-list.js"
+    },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
       "default": "./dist/code-editor.js"

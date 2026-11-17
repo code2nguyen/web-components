@@ -46,6 +46,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chat Message** — `c2-chat-message` · `@c2n/components/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
 - **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
 - **Citation** — `c2-citation` · `@c2n/components/citation` — A numbered inline marker that names its source, with a hover preview of the page it cites.
+- **Citation List** — `c2-citation-list` · `@c2n/components/citation/citation-list` — The "Used 12 sources" line under an AI answer: a stack of site icons and a count that expands into a card per source, linked to the answer''s citation markers.
 - **Comment Thread** — `c2-comment-thread` · `@c2n/components/comment-thread` — One conversation on a piece of content: the first comment and its replies, a reply box, edit and delete on your own comments, and Resolve.
 - **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.
 - **Reaction Bar** — `c2-reaction-bar` · `@c2n/components/reaction-bar` — Emoji reactions with counts under a message or comment, toggled by the current user, with a picker to add more.
