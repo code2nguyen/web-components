@@ -1,0 +1,71 @@
+---
+/**
+ * Plays the application's part in the status light gallery: the Sync status card feeds its light from `@c2n/core`'s
+ * `SyncStatus` model, with a simulated save (no network) that the card's buttons drive.
+ */
+---
+
+<script>
+  import { SyncStatus, formatSyncStatus, syncStatusTone } from '@c2n/core/controllers/sync-status.js'
+  import { localeOf } from '@c2n/core/localize.js'
+
+  const initialized = new WeakSet<Element>()
+
+  function setup(card: HTMLElement) {
+    if (initialized.has(card)) return
+    const light = card.querySelector('c2-status-light')
+    const retry = card.querySelector<HTMLElement>('[data-sync="retry"]')
+    const offline = card.querySelector<HTMLElement>('[data-sync="offline"]')
+    if (!light || !retry || !offline) return
+    initialized.add(card)
+
+    const status = new SyncStatus({ online: true })
+    let failNext = false
+    let debounce: number | undefined
+
+    const draw = () => {
+      light.textContent = formatSyncStatus(status.snapshot, localeOf(light))
+      light.setAttribute('tone', syncStatusTone(status.state))
+      light.toggleAttribute('pulse', status.state === 'saving')
+      retry.hidden = status.state !== 'error'
+      offline.textContent = status.online ? 'Go offline' : 'Go online'
+    }
+    status.addEventListener('change', draw)
+
+    // The app's save: here a short wait that fails when asked to, where an app would send the draft to its server.
+    const saveDraft = () =>
+      new Promise<void>((resolve, reject) =>
+        window.setTimeout(() => {
+          if (failNext) {
+            failNext = false
+            reject(new Error('Server error'))
+          } else resolve()
+        }, 900),
+      )
+
+    const edit = () => {
+      status.change()
+      window.clearTimeout(debounce)
+      debounce = window.setTimeout(() => void status.save(saveDraft).catch(() => undefined), 700)
+    }
+
+    card.addEventListener('click', (event) => {
+      const action = (event.target as Element | null)?.closest('[data-sync]')?.getAttribute('data-sync')
+      if (action === 'edit') edit()
+      if (action === 'fail') {
+        failNext = true
+        edit()
+      }
+      if (action === 'offline') status.setOnline(!status.online)
+      if (action === 'retry') void status.retry()
+    })
+    draw()
+  }
+
+  function setupAll() {
+    document.querySelectorAll<HTMLElement>('[data-status-light-example="sync"]').forEach(setup)
+  }
+
+  setupAll()
+  document.addEventListener('astro:page-load', setupAll)
+</script>
