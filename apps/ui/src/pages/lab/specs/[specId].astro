@@ -135,7 +135,7 @@ const focus = spec.focus
   .map((tag) => {
     const page = lab.docPages.get(tag)
     const chip = rawElement('c2-chip', { class: 'lab-chip' }, escapeHtml(tag))
-    return page ? `<a class="lab-chip-link" href="${base}/components/${page}/">${chip}</a>` : chip
+    return page ? `<a class="lab-chip-link" href="${base}/components/${escapeHtml(page)}/">${chip}</a>` : chip
   })
   .join('')
 
@@ -151,7 +151,7 @@ const buildSummary = builds
         })()
       : 'Waiting for a lab session to build it.'
     const run = build.latestRun ? ` · latest run ${passSummary(build.latestRun)} journeys, ${formatDate(build.latestRun.startedAt)}` : ''
-    const report = build.report ? ` · <a href="${repoFile(`lab/reports/${build.report.id}.md`)}">build report</a>` : ''
+    const report = build.report ? ` · <a href="${escapeHtml(repoFile(`lab/reports/${build.report.id}.md`))}">build report</a>` : ''
     return `<li><strong>${escapeHtml(build.direction)}</strong> ${status} <span>${escapeHtml(counts)}${escapeHtml(run)}</span>${report}</li>`
   })
   .join('')

@@ -41,7 +41,7 @@ const stats = [
 const runCards = latestRuns
   .map((run) => {
     const spec = specOf(run.spec)
-    const title = spec ? `<a href="${base}/lab/specs/${spec.id}/">${escapeHtml(spec.title)}</a>` : escapeHtml(run.target)
+    const title = spec ? `<a href="${base}/lab/specs/${escapeHtml(spec.id)}/">${escapeHtml(spec.title)}</a>` : escapeHtml(run.target)
     const kind = spec ? `${SIZE_LABELS[spec.size]} · ${escapeHtml(run.direction ?? '')} direction` : 'Example app'
     const passed = run.summary.passed === run.summary.journeys
     const badges = [
@@ -50,7 +50,9 @@ const runCards = latestRuns
       rawElement('c2-badge', { tone: 'neutral' }, `${run.summary.findings.known} known`),
       run.summary.findings.flaky ? rawElement('c2-badge', { tone: 'info' }, `${run.summary.findings.flaky} flaky`) : '',
     ].join('')
-    const commit = run.library.commit ? `<a href="${REPOSITORY}/commit/${run.library.commit}">${run.library.commit.slice(0, 8)}</a>` : 'unknown commit'
+    const commit = run.library.commit
+      ? `<a href="${REPOSITORY}/commit/${escapeHtml(run.library.commit)}">${escapeHtml(run.library.commit.slice(0, 8))}</a>`
+      : 'unknown commit'
     const change = run.change
       ? `<p class="lab-run__change">Since the previous run: ${run.change.gone.length} gone, ${run.change.appeared.length} appeared.</p>`
       : `<p class="lab-run__change">First recorded run.</p>`
@@ -99,7 +101,7 @@ for (const finding of lab.openFindings) {
 const findingList = [...findingsByComponent]
   .map(([component, findings]) => {
     const page = lab.docPages.get(component)
-    const name = page ? `<a href="${base}/components/${page}/"><code>${escapeHtml(component)}</code></a>` : `<code>${escapeHtml(component)}</code>`
+    const name = page ? `<a href="${base}/components/${escapeHtml(page)}/"><code>${escapeHtml(component)}</code></a>` : `<code>${escapeHtml(component)}</code>`
     const items = findings
       .map(
         (finding) =>
