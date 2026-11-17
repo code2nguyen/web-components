@@ -14,7 +14,7 @@ Looks and cases for `c2-schema-tree`. The `--c2-schema-tree__*` variables colour
 constraints and the description; the `--c2-json-viewer-*` variables still set the box, the rows and the names. Open any
 card in the studio to start from it.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-schema-tree
@@ -97,7 +97,14 @@ card in the studio to start from it.
 ```
 
 ```html tag=MdxCodeBlock,label=En français
-<div lang="fr">
+<style>
+  .schema-french {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+</style>
+<div class="schema-french" lang="fr">
   <c2-schema-tree
     schema='{"type":"object","required":["nom"],"properties":{"nom":{"type":"string","maxLength":40,"description":"Nom affiché."},"age":{"type":"integer","minimum":0},"pays":{"type":"string","default":"FR"},"fax":{"type":"string","deprecated":true},"contact":{"oneOf":[{"type":"object","properties":{"email":{"type":"string","format":"email"}}},{"type":"object","properties":{"tel":{"type":"string"}}}]}}}'
   ></c2-schema-tree>

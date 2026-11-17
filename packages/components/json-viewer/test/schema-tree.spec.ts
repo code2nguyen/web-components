@@ -35,6 +35,8 @@ test('each property shows its type, marks, constraints, values and description',
   await expect(line(page, 'id').locator('[part="required"]')).toHaveText('required')
   await expect(line(page, 'id').locator('[part="mark"]')).toHaveText('read-only')
   await expect(line(page, 'id').locator('[part="description"]')).toHaveText('Assigned by the server.')
+  // Two marks side by side are two words in the line's accessible name, not "requiredread-only".
+  await expect(line(page, 'id')).toHaveAccessibleName(/required read-only/)
   await expect(line(page, 'email').locator('[part="constraints"]')).toHaveText('≤ 120 chars')
   await expect(line(page, 'age').locator('[part="constraints"]')).toHaveText('≥ 0 · < 150')
   await expect(line(page, 'age').locator('[part="required"]')).toHaveCount(0)

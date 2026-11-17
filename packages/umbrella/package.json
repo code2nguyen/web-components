@@ -645,6 +645,10 @@
       "types": "./dist/json-viewer.d.ts",
       "default": "./dist/json-viewer.js"
     },
+    "./json-viewer/schema-tree": {
+      "types": "./dist/json-viewer/schema-tree.d.ts",
+      "default": "./dist/json-viewer/schema-tree.js"
+    },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"

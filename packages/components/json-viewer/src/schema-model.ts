@@ -416,7 +416,7 @@ export function renderSchemaValue(line: SchemaLine, context: SchemaRenderContext
     line.readOnly ? html`<span class="mark" part="mark">${t('readOnly')}</span>` : nothing,
     line.writeOnly ? html`<span class="mark" part="mark">${t('writeOnly')}</span>` : nothing,
     line.recursive ? html`<span class="mark" part="mark">↻ ${t('recursive')}</span>` : nothing,
-  ]
+  ].filter((mark) => mark !== nothing)
   const constraints = line.constraints.map(([key, value]) => (key === 'uniqueItems' ? t(key) : t(key, value)))
   const values = line.enum ? [...line.enum.slice(0, ENUM_LIMIT), ...(line.enum.length > ENUM_LIMIT ? ['…'] : [])] : []
   // A choice that also has a type says both: `object · one of`.
@@ -424,7 +424,8 @@ export function renderSchemaValue(line: SchemaLine, context: SchemaRenderContext
   const title = [line.description, values.length ? line.enum?.join(' | ') : ''].filter(Boolean).join('\n') || nothing
   return html`<span class="value schema" part="value" title=${title}
     >${type ? html`<span class="type" part="type">${context.highlight(type)}${line.format ? html`<span class="format">&lt;${line.format}&gt;</span>` : nothing}</span>` : nothing}
-    ${choice} ${marks} ${constraints.length ? html`<span class="constraints" part="constraints">${constraints.join(' · ')}</span>` : nothing}
+    ${choice} ${marks.map((mark, index) => html`${index ? ' ' : ''}${mark}`)}
+    ${constraints.length ? html`<span class="constraints" part="constraints">${constraints.join(' · ')}</span>` : nothing}
     ${values.length ? html`<span class="enum" part="enum">${values.map((value, index) => html`${index ? ' | ' : ''}<code>${value}</code>`)}</span>` : nothing}
     ${line.description ? html`<span class="description" part="description">${line.description}</span>` : nothing}</span
   >`
