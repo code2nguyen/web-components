@@ -119,6 +119,7 @@ test('the detail slot shows beside the active shape; Enter moves into it, Escape
 
   // The second pin is in the lower right: the card goes to its left, its bottom level with the pin's.
   await shape(element, 'p2').focus()
+  await expect(shape(element, 'p2')).toBeFocused()
   await expect.poll(() => active(element)).toBe('p2')
   const second = (await shape(element, 'p2').locator('circle').boundingBox())!
   box = (await card(element).boundingBox())!

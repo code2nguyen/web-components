@@ -3,7 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
-import { isComposingKey } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/icon-button'
 import { imageAnnotatorMessages } from './messages.js'
@@ -448,6 +448,8 @@ export class ImageAnnotator extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     this.internals.ariaLabel = this.msg.t('stage')
+    // A server-rendered slot already holds its children when the element hydrates, so `slotchange` never fires for them.
+    if (!this.hasUpdated) this.slotted = hasSlottedContent(this, 'detail')
     if (!Array.isArray(this.shapes)) this.shapes = []
     if (changed.has('colors') && (!this.color || !this.colors.includes(this.color))) this.color = this.colors[0] ?? '#e11d48'
     if (changed.has('src')) this.natural = { width: 0, height: 0 }
