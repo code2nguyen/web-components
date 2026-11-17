@@ -1,0 +1,81 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-schema-tree,
+  $theme: (
+    type--color: #0550ae,
+    type--background-color: #f4f4f5,
+    type--border-radius: 4px,
+    type--padding-inline: 4px,
+    format--color: #52525b,
+    required--color: #b91c1c,
+    mark--color: #b35900,
+    deprecated--color: #71717a,
+    option--color: #0550ae,
+    constraint--color: #71717a,
+    enum--color: #116329,
+    description--color: #71717a,
+  )
+);
+
+.loading {
+  min-height: 24px;
+}
+
+// The name is followed by the type, not a colon, so it keeps its colour and drops the colon's tight spacing.
+.key {
+  &.option,
+  &.position,
+  &.pattern,
+  &.other {
+    color: css.cssVar(option--color);
+    font-style: italic;
+  }
+
+  &.deprecated {
+    color: css.cssVar(deprecated--color);
+    text-decoration: line-through;
+  }
+}
+
+// Everything after the name sits on the one line, cut off with an ellipsis like a long JSON value.
+.schema > * {
+  margin-inline-end: 1ch;
+}
+
+.type {
+  padding-inline: css.cssVar(type--padding-inline);
+  border-radius: css.cssVar(type--border-radius);
+  background-color: css.cssVar(type--background-color);
+  color: css.cssVar(type--color);
+}
+
+.format {
+  margin-inline-start: 0.5ch;
+  color: css.cssVar(format--color);
+}
+
+.mark,
+.choice {
+  color: css.cssVar(mark--color);
+}
+
+.required {
+  color: css.cssVar(required--color);
+}
+
+.constraints {
+  color: css.cssVar(constraint--color);
+}
+
+.enum {
+  color: css.cssVar(constraint--color);
+
+  code {
+    font: inherit;
+    color: css.cssVar(enum--color);
+  }
+}
+
+.description {
+  color: css.cssVar(description--color);
+  font-family: system-ui, sans-serif;
+}

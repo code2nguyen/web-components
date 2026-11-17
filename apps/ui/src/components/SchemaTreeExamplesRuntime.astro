@@ -1,0 +1,26 @@
+---
+/**
+ * Plays the application's part in the schema tree gallery: the French of the card under `lang="fr"`, whose marks and
+ * constraints read "obligatoire", "obsolète" and "≤ 40 caractères".
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'json-viewer': {
+        schema: 'Schéma',
+        required: 'obligatoire',
+        deprecated: 'obsolète',
+        readOnly: 'lecture seule',
+        oneOf: 'un parmi',
+        option: 'Option {0}',
+        minimum: '≥ {0}',
+        maxLength: '≤ {0} caractères',
+        default: 'par défaut {0}',
+      },
+    },
+  })
+</script>
