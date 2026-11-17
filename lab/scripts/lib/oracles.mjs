@@ -44,7 +44,8 @@ export function watchConsole(page, report) {
     report({ kind: 'uncaught-exception', severity: 'error', component: componentIn(text), rule: normalise(error.message), message: text.slice(0, 1200) })
   }
   const onRequestFailed = (request) => {
-    if (!request.url().startsWith(origin())) return
+    const appOrigin = origin()
+    if (!appOrigin || appOrigin === 'null' || !request.url().startsWith(appOrigin)) return
     report({
       kind: 'request-failed',
       severity: 'error',
@@ -123,20 +124,34 @@ export async function checkOverflow(page, report) {
   const overflow = await page.evaluate(() => {
     const doc = document.documentElement
     if (doc.scrollWidth <= doc.clientWidth + 1) return null
-    const wide = [...document.querySelectorAll('*')]
-      .filter((el) => el.localName.startsWith('c2-'))
-      .map((el) => ({ tag: el.localName, right: Math.round(el.getBoundingClientRect().right) }))
-      .filter((el) => el.right > doc.clientWidth + 1)
-      .sort((a, b) => b.right - a.right)
-    return { scrollWidth: doc.scrollWidth, clientWidth: doc.clientWidth, wide: wide.slice(0, 5) }
+    // Every c2 element, through shadow roots, with its nesting depth among c2 elements.
+    const found = []
+    const walk = (root, depth) => {
+      for (const el of root.querySelectorAll('*')) {
+        const isC2 = el.localName.startsWith('c2-')
+        if (isC2) {
+          const right = el.getBoundingClientRect().right
+          if (right > doc.clientWidth + 1) {
+            let level = depth
+            for (let node = el.parentNode; node; node = node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode) {
+              if (node.localName?.startsWith('c2-')) level++
+            }
+            found.push({ tag: el.localName, right: Math.round(right), depth: level })
+          }
+        }
+        if (el.shadowRoot) walk(el.shadowRoot, depth)
+      }
+    }
+    walk(document, 0)
+    // The deepest overflowing component is the likeliest cause: its ancestors overflow because it does.
+    found.sort((a, b) => b.depth - a.depth || b.right - a.right)
+    return { scrollWidth: doc.scrollWidth, clientWidth: doc.clientWidth, wide: found.slice(0, 5) }
   })
   if (!overflow) return
-  // The innermost overflowing component is the likeliest cause; its ancestors overflow because it does.
-  const component = overflow.wide.at(-1)?.tag ?? null
   report({
     kind: 'overflow',
     severity: 'warn',
-    component,
+    component: overflow.wide[0]?.tag ?? null,
     rule: 'horizontal-scroll',
     message: `Page is ${overflow.scrollWidth}px wide in a ${overflow.clientWidth}px viewport.`,
     details: overflow,
@@ -190,7 +205,6 @@ export function createFocusChecker(page, report) {
     if (!focused || focused.rect.width === 0 || focused.rect.height === 0) return
     const key = `${focused.hosts.join('>')}|${focused.tag}|${focused.role}|${focused.name}`
     if (seen.has(key)) return
-    seen.add(key)
 
     const viewport = page.viewportSize()
     const pad = 6
@@ -200,7 +214,12 @@ export function createFocusChecker(page, report) {
       width: Math.min(focused.rect.width + pad * 2, viewport.width),
       height: Math.min(focused.rect.height + pad * 2, viewport.height),
     }
-    if (clip.y + clip.height > viewport.height || clip.x + clip.width > viewport.width) return
+    // Outside the viewport the clip cannot be compared; leave the control unchecked so a later tab stop can check it.
+    if (clip.y + clip.height > viewport.height || clip.x + clip.width > viewport.width) {
+      stats.skipped++
+      return
+    }
+    seen.add(key)
     const shoot = () => page.screenshot({ clip, animations: 'disabled', caret: 'hide' })
 
     const withFocus = await shoot()

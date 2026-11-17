@@ -11,16 +11,18 @@ let tagCounter = 0
  * row is an `option`, a c2-tabs host a `tablist`), which Playwright's `getByRole` cannot see. The name matches as a
  * case-insensitive substring unless `exact` is set. Returns null when no node matches.
  */
-async function locateAx(page, target) {
+async function axMatches(page, target) {
   const wanted = String(target.name ?? '').toLowerCase()
-  const matches = (await axTree(page)).filter(
+  return (await axTree(page)).filter(
     (node) => node.role === target.ax && (target.exact ? node.name.toLowerCase() === wanted : node.name.toLowerCase().includes(wanted)),
   )
-  const node = matches[target.nth ?? 0]
-  if (!node?.backendId) return null
+}
+
+/** Tag the DOM element behind an accessibility node so a Playwright locator can find it again. */
+async function tagNode(page, backendId) {
   const session = await page.context().newCDPSession(page)
   try {
-    const { object } = await session.send('DOM.resolveNode', { backendNodeId: node.backendId })
+    const { object } = await session.send('DOM.resolveNode', { backendNodeId: backendId })
     const id = `lab-${++tagCounter}`
     // A data attribute no component observes; Playwright's CSS engine pierces open shadow roots to find it again.
     await session.send('Runtime.callFunctionOn', {
@@ -29,9 +31,39 @@ async function locateAx(page, target) {
       arguments: [{ value: id }],
     })
     return page.locator(`[data-lab-target="${id}"]`)
+  } catch {
+    return null
   } finally {
     await session.detach().catch(() => {})
   }
+}
+
+async function locateAx(page, target) {
+  const matches = (await axMatches(page, target)).filter((node) => node.backendId)
+  const candidates = []
+  if (!target.within) {
+    const node = matches[target.nth ?? 0]
+    const locator = node && (await tagNode(page, node.backendId))
+    return locator ?? null
+  }
+  // Scoped: keep the matches inside the `within` element, across shadow roots, then take the nth of those.
+  const scope = await locate(page, target.within, 0)
+    .then((locator) => locator.elementHandle({ timeout: 500 }))
+    .catch(() => null)
+  if (!scope) return null
+  for (const node of matches) {
+    const locator = await tagNode(page, node.backendId)
+    if (!locator) continue
+    const inside = await locator
+      .evaluate((el, outer) => {
+        for (let node = el; node; node = node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode) if (node === outer) return true
+        return false
+      }, scope)
+      .catch(() => false)
+    if (inside) candidates.push(locator)
+    if (candidates.length > (target.nth ?? 0)) break
+  }
+  return candidates[target.nth ?? 0] ?? null
 }
 
 /** Like `resolve`, but also understands `{ ax }` targets, waiting up to `timeout` for the node to appear. */
@@ -120,11 +152,24 @@ async function expectState(page, assertion, timeout) {
   if (assertion.count) {
     const target = typeof assertion.count === 'string' ? { css: assertion.count } : { ...assertion.count }
     delete target.nth
-    const locator = target.role
-      ? page.getByRole(target.role, { name: target.name, exact: target.exact ?? false })
-      : target.css
-        ? page.locator(target.css)
-        : page.getByText(target.text, { exact: target.exact ?? false })
+    if (target.ax) {
+      if (target.within) throw new Error('`count` of an `ax` target does not take `within`.')
+      const deadline = Date.now() + timeout
+      let count
+      while ((count = (await axMatches(page, target)).length) !== assertion.equals) {
+        if (Date.now() > deadline) throw new Error(`Expected ${assertion.equals} accessibility node(s) ${target.ax} "${target.name ?? ''}", found ${count}.`)
+        await page.waitForTimeout(150)
+      }
+      return
+    }
+    const scope = target.within ? resolve(page, target.within) : page
+    let locator
+    if (target.role) locator = scope.getByRole(target.role, { name: target.name, exact: target.exact ?? false })
+    else if (target.label) locator = scope.getByLabel(target.label, { exact: target.exact ?? false })
+    else if (target.placeholder) locator = scope.getByPlaceholder(target.placeholder)
+    else if (target.text) locator = scope.getByText(target.text, { exact: target.exact ?? false })
+    else if (target.css) locator = scope.locator(target.css)
+    else throw new Error(`Cannot count target ${JSON.stringify(target)}`)
     return expect(locator).toHaveCount(assertion.equals, { timeout })
   }
   if (assertion.text) return expect(await locate(page, assertion.text, timeout)).toContainText(assertion.contains, { timeout })

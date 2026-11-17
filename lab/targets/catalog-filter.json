@@ -51,6 +51,60 @@
       "personas": ["mouse", "keyboard", "dark", "fr"]
     },
     {
+      "id": "t1b-search-again",
+      "title": "T1 · Search, clear it from its chip, search the same again",
+      "personas": ["mouse", "keyboard", "dark", "fr"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "fill": {
+            "ax": "searchbox",
+            "name": "Search products"
+          },
+          "text": "tent"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "3 products"
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Remove “tent”"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "12 products"
+          }
+        },
+        {
+          "fill": {
+            "ax": "searchbox",
+            "name": "Search products"
+          },
+          "text": "tent"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "3 products"
+          }
+        }
+      ]
+    },
+    {
       "id": "t2-two-categories",
       "title": "T2 · Pick two categories",
       "steps": [

@@ -164,9 +164,16 @@ function render() {
 }
 
 // Inputs write the state, then everything re-renders from it.
-el.search.addEventListener('search', () => {
-  state.query = el.search.value
-  render()
+// Search on `input` with the app's own debounce, not on the field's `search` event: once the app sets `value` (a chip
+// or "Clear filters" empties it), the field still remembers the last query and fires no `search` when the same query
+// is typed again (see the build report, R1).
+let searchTimer
+el.search.addEventListener('input', () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    state.query = el.search.value
+    render()
+  }, 150)
 })
 for (const facet of ['category', 'brand']) {
   el[facet].addEventListener('filter-change', (event) => {
@@ -179,13 +186,17 @@ el.price.addEventListener('input', () => {
   state.max = el.price.valueEnd
   render()
 })
-const clampPrice = (value, fallback) => (Number.isFinite(value) ? Math.min(PRICE.max, Math.max(PRICE.min, value)) : fallback)
+/** An emptied or unreadable box means "no limit" on that end, not 0. */
+const clampPrice = (text, fallback) => {
+  const value = String(text).trim() === '' ? NaN : Number(text)
+  return Number.isFinite(value) ? Math.min(PRICE.max, Math.max(PRICE.min, value)) : fallback
+}
 el.priceMin.addEventListener('change', () => {
-  state.min = Math.min(clampPrice(Number(el.priceMin.value), PRICE.min), state.max)
+  state.min = Math.min(clampPrice(el.priceMin.value, PRICE.min), state.max)
   render()
 })
 el.priceMax.addEventListener('change', () => {
-  state.max = Math.max(clampPrice(Number(el.priceMax.value), PRICE.max), state.min)
+  state.max = Math.max(clampPrice(el.priceMax.value, PRICE.max), state.min)
   render()
 })
 el.inStock.addEventListener('change', () => {

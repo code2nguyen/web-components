@@ -27,8 +27,10 @@ function parseArgs(argv) {
     const arg = rest[i]
     if (arg === '--personas') options.personas = rest[++i].split(',')
     else if (arg === '--journeys') options.journeys = rest[++i].split(',')
-    else if (arg === '--repeat') options.repeat = Number(rest[++i])
-    else if (arg === '--steps') options.steps = rest[++i]
+    else if (arg === '--repeat') {
+      options.repeat = Number(rest[++i])
+      if (!Number.isInteger(options.repeat) || options.repeat < 1) throw new Error(`--repeat takes a whole number from 1, not "${rest[i]}"`)
+    } else if (arg === '--steps') options.steps = rest[++i]
     else if (arg === '--aria') options.aria = true
     else if (arg === '--no-axe') options.axe = false
     else throw new Error(`Unknown option ${arg}`)
@@ -222,6 +224,8 @@ async function run(options) {
     const adhoc = JSON.parse(readFileSync(resolve(options.steps), 'utf8'))
     target.journeys = [Array.isArray(adhoc) ? { id: 'adhoc', steps: adhoc } : { id: 'adhoc', ...adhoc }]
   } else if (options.journeys) {
+    const unknown = options.journeys.filter((id) => !target.journeys.some((journey) => journey.id === id))
+    if (unknown.length) throw new Error(`Unknown journey ${unknown.join(', ')}. Known: ${target.journeys.map((journey) => journey.id).join(', ')}`)
     target.journeys = target.journeys.filter((journey) => options.journeys.includes(journey.id))
   }
   const personaNames = options.personas ?? target.personas ?? Object.keys(PERSONAS)
@@ -233,10 +237,11 @@ async function run(options) {
   mkdirSync(join(out, 'snapshots'), { recursive: true })
 
   const server = await ensureServer(target, ROOT)
-  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
   const results = []
   const raw = []
+  let browser
   try {
+    browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
     for (const personaName of personaNames) {
       for (const journey of target.journeys) {
         if (journey.personas && !journey.personas.includes(personaName)) continue
@@ -254,7 +259,7 @@ async function run(options) {
       }
     }
   } finally {
-    await browser.close()
+    await browser?.close()
     await server.stop()
   }
 

@@ -18,7 +18,7 @@ Outcomes: **met** (a component does it as documented), **workaround** (met with 
 | checkout | feature | default | 11 | | | | | not built |
 | project-board | feature | default | 11 | | | | | not built |
 | appointment-booking | scenario | default | 9 | | | | | not built |
-| catalog-filter | scenario | default | 13 | 9 | 3 | 1 | 0 | [reports/catalog-filter/default.md](reports/catalog-filter/default.md) |
+| catalog-filter | scenario | default | 13 | 8 | 4 | 1 | 0 | [reports/catalog-filter/default.md](reports/catalog-filter/default.md) |
 | document-upload | scenario | default | 8 | | | | | not built |
 | orders-table | scenario | default | 9 | | | | | not built |
 | pricing-page | scenario | default | 7 | | | | | not built |
@@ -37,6 +37,8 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 | `filter.range` | 1 | 0 | 1 | 0 | 0 | c2-slider, c2-number-input | catalog-filter/R4 |
 | `layout.responsive` | 1 | 0 | 1 | 0 | 0 | c2-sheet, c2-button | catalog-filter/R11 |
 | `overlay.drawer` | 1 | 0 | 1 | 0 | 0 | c2-sheet, c2-button | catalog-filter/R11 |
+| `search.highlight` | 1 | 0 | 1 | 0 | 0 | c2-search-field, c2-highlight | catalog-filter/R1 |
+| `search.text` | 1 | 0 | 1 | 0 | 0 | c2-search-field, c2-highlight | catalog-filter/R1 |
 | `a11y.keyboard` | 1 | 1 | 0 | 0 | 0 | c2-facet-list, c2-slider, c2-switch, c2-chip |  |
 | `a11y.screen-reader` | 1 | 1 | 0 | 0 | 0 | c2-facet-list, c2-slider, c2-switch, c2-chip |  |
 | `filter.chips` | 1 | 1 | 0 | 0 | 0 | c2-chip, c2-chip-group |  |
@@ -44,8 +46,6 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 | `filter.toggle` | 1 | 1 | 0 | 0 | 0 | c2-switch |  |
 | `i18n.format` | 1 | 1 | 0 | 0 | 0 | c2-format-number |  |
 | `list.empty-state` | 1 | 1 | 0 | 0 | 0 | c2-status-panel, c2-button |  |
-| `search.highlight` | 1 | 1 | 0 | 0 | 0 | c2-search-field, c2-highlight |  |
-| `search.text` | 1 | 1 | 0 | 0 | 0 | c2-search-field, c2-highlight |  |
 | `sort.choice` | 1 | 1 | 0 | 0 | 0 | c2-select, c2-list-item |  |
 
 ## By component
@@ -53,6 +53,7 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 | Component | Requirements served | Short of the need |
 | --- | --- | --- |
 | `c2-facet-list` | 3 | **catalog-filter/R2** workaround: Every value carries Only and Exclude buttons (a Datadog log-search idiom) and there is no attribute to turn them off; a shop offers neither. Hidden with the documented `::part(action) { display: none }`. The app also has to handle `exclude` in case a value arrives excluded. |
+| `c2-search-field` | 1 | **catalog-filter/R1** workaround: Searches on `input` with the app's own 150ms debounce instead of the field's `search` event: once the app sets `value` (a chip or "Clear filters" empties the field), the field still remembers the last query, so typing the same query again fires no `search` (journey `t1b-search-again`). `findMatches` (exported next to `c2-highlight`) filters with the same matcher the highlight marks with, accents ignored on both. |
 | `c2-sheet` | 1 | **catalog-filter/R11** workaround: No component is a sidebar on a wide screen and a drawer on a phone. The app moves the one filter panel between the `<aside>` and a `c2-sheet` on a `matchMedia` change, so there is still a single set of controls and one state. |
 | `c2-slider` | 2 | **catalog-filter/R4** workaround: `c2-slider mode="range"` drags and steps but cannot be typed into, so two `c2-number-input`s sit under it and the app keeps the three in step (about 20 lines). The number inputs' stepper buttons are all named "Increase value" / "Decrease value", without the field's name. |
 | `c2-button` | 3 |  |
@@ -62,7 +63,6 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 | `c2-highlight` | 1 |  |
 | `c2-list-item` | 1 |  |
 | `c2-number-input` | 1 |  |
-| `c2-search-field` | 1 |  |
 | `c2-select` | 1 |  |
 | `c2-status-panel` | 1 |  |
 | `c2-switch` | 2 |  |

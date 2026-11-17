@@ -46,9 +46,11 @@ const keyboard = {
   async activate(page, locator, ctx) {
     const reached = await tabTo(page, locator, ctx, this.maxTabs)
     if (!reached) return pointer.activate(page, locator)
-    const role = await locator.evaluate((el) => el.getAttribute('role') ?? el.localName)
-    const key = /^(checkbox|switch|radio|input)$/.test(role) ? 'Space' : 'Enter'
-    await page.keyboard.press(key)
+    // The key follows the focused control's role as Chrome computes it (ElementInternals included): Space toggles a
+    // checkbox, switch or radio, Enter activates everything else, and a text field needs no key at all.
+    const { role } = await focusedAx(page)
+    if (/^(textbox|searchbox|spinbutton|slider)$/.test(role)) return
+    await page.keyboard.press(/^(checkbox|switch|radio|menuitemcheckbox|menuitemradio)$/.test(role) ? 'Space' : 'Enter')
   },
   async fill(page, locator, text, ctx) {
     const reached = await tabTo(page, locator, ctx, this.maxTabs)
@@ -94,7 +96,36 @@ export async function focusIsOn(locator) {
 }
 
 /** From inside a composite widget, walk with the arrow keys the way its keyboard pattern says: down/right, then up/left. */
+/** Chrome's role for the deepest focused element, and whether it opens a popup. */
+export async function focusedAx(page) {
+  const session = await page.context().newCDPSession(page)
+  try {
+    const { result } = await session.send('Runtime.evaluate', {
+      expression: `(() => { let a = document.activeElement; while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement; return a })()`,
+    })
+    if (!result.objectId) return { role: null, hasPopup: false }
+    const { node } = await session.send('DOM.describeNode', { objectId: result.objectId })
+    const { nodes } = await session.send('Accessibility.getPartialAXTree', { backendNodeId: node.backendNodeId, fetchRelatives: false })
+    const ax = nodes.find((candidate) => candidate.backendDOMNodeId === node.backendNodeId) ?? nodes[0]
+    const property = (name) => ax?.properties?.find((entry) => entry.name === name)?.value?.value
+    return { role: ax?.role?.value ?? null, hasPopup: Boolean(property('hasPopup') && property('hasPopup') !== 'false') }
+  } catch {
+    return { role: null, hasPopup: false }
+  } finally {
+    await session.detach().catch(() => {})
+  }
+}
+
+/**
+ * Roles whose arrow keys move between items rather than change a value. On anything else (a slider, a number field,
+ * a text field) the arrows would edit what they are on, so the persona does not press them there.
+ */
+const COMPOSITE =
+  /^(option|listbox|combobox|menu|menubar|menuitem|menuitemcheckbox|menuitemradio|tab|tablist|tree|treeitem|grid|gridcell|row|treegrid|radio|radiogroup)$/
+
 async function arrowTo(page, locator) {
+  const focused = await focusedAx(page)
+  if (!COMPOSITE.test(focused.role ?? '') && !(focused.role === 'button' && focused.hasPopup)) return false
   for (const key of ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft']) {
     let previous = null
     for (let i = 0; i < 30; i++) {
