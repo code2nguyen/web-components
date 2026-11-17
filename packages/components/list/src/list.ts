@@ -1,9 +1,9 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { query } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
+import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './list.scss?inline'
-import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
+import { LIST_ITEM_FOCUS_REQUEST_EVENT, selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem, isFromInteractiveContent } from '@c2n/list-item'
 import { provide } from '@lit/context'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -50,6 +50,9 @@ function rowItem(element: Element, depth = 0): ListItem | undefined {
  *
  * Keyboard: the list is a `listbox` with a roving `tabindex`. Arrow Up/Down move between enabled rows, Home/End jump to
  * the first/last, Enter and Space select the focused row, and typing letters jumps to the next row starting with them.
+ * The roving `tabindex` is written on the rows only once the list is first used (focused, pressed, or a row's `focus()`
+ * called): until then a focus entry in the list's own shadow root is its tab stop. A framework that server-renders the
+ * rows (Next.js, React Router) therefore hydrates them with exactly the attributes it rendered.
  *
  * Besides rows, the default slot accepts `<hr>` dividers and `<h1>`–`<h6>` group headings; both are styled by the
  * `__divider` and `__heading` tokens and skipped by selection and keyboard.
@@ -144,6 +147,12 @@ export class List extends LitElement {
   /** The row that currently holds the roving tabindex. */
   private focusedItem: ListItem | undefined = undefined
 
+  /**
+   * Whether the roving tabindex has been written on the rows. It waits for the first interaction: a `tabindex` written
+   * while the page upgrades is an attribute the server never rendered, and React reports it as a hydration mismatch.
+   */
+  @state() private rovingActive = false
+
   private typeahead = ''
   private typeaheadTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -158,7 +167,11 @@ export class List extends LitElement {
     return this.items.filter((item) => !item.disabled)
   }
 
+  /** Whether any row can take focus: the focus entry is a tab stop only then, as a row would be. */
+  @state() private hasEnabledRows = false
+
   private handleSlotChange() {
+    this.hasEnabledRows = this.enabledItems.length > 0
     for (const listItem of this.items) {
       if (!listItem.applyContext) {
         listItem.applyContext = true
@@ -172,11 +185,18 @@ export class List extends LitElement {
     super.connectedCallback()
     this.addEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
     this.addEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+    // Capture, so the rows are focusable before the press's default action decides where focus goes.
+    this.addEventListener('pointerdown', this.activateRoving, { capture: true })
+    this.addEventListener('focusin', this.activateRoving)
+    this.addEventListener(LIST_ITEM_FOCUS_REQUEST_EVENT, this.activateRoving)
   }
 
   override disconnectedCallback(): void {
     this.removeEventListener(SWIPE_REQUEST_EVENT, this.handleSwipeRequest)
     this.removeEventListener(SWIPE_CONTAINER_EVENT, this.stopOwnSwipeEvent)
+    this.removeEventListener('pointerdown', this.activateRoving, { capture: true })
+    this.removeEventListener('focusin', this.activateRoving)
+    this.removeEventListener(LIST_ITEM_FOCUS_REQUEST_EVENT, this.activateRoving)
     super.disconnectedCallback()
   }
 
@@ -224,11 +244,32 @@ export class List extends LitElement {
     if (!this.focusedItem || !enabled.includes(this.focusedItem)) {
       this.focusedItem = enabled.find((item) => this.value.includes(item.value)) ?? enabled[0]
     }
+    if (this.rovingActive) this.writeRovingTabindex(items)
+  }
+
+  private writeRovingTabindex(items = this.items) {
     for (const item of items) item.tabIndex = item === this.focusedItem && !this.disabled ? 0 : -1
+  }
+
+  /** Writes the roving tabindex on the rows, once: the list is being used, so the page has hydrated. */
+  private activateRoving = (): void => {
+    if (this.rovingActive) return
+    this.rovingActive = true
+    this.writeRovingTabindex()
+  }
+
+  /** Tab reached the focus entry: the list hands focus to its current row and the entry goes away. */
+  private handleEntryFocus() {
+    // The rows may have changed (one disabled) since the list last chose its current row.
+    this.syncRows()
+    if (!this.focusedItem || this.focusedItem.disabled) return
+    this.activateRoving()
+    this.focusedItem.focus()
   }
 
   private setFocusedItem(item: ListItem, focus = true) {
     this.focusedItem = item
+    this.rovingActive = true
     for (const other of this.items) other.tabIndex = other === item ? 0 : -1
     if (focus) item.focus()
   }
@@ -362,7 +403,10 @@ export class List extends LitElement {
   }
 
   override render() {
-    return html`<slot @slotchange=${this.handleSlotChange} @click=${this.handleListItemClick} @keydown=${this.handleKeydown}></slot>`
+    // The focus entry stands in for the roving tab stop until the list is first used (see `rovingActive`).
+    const entry =
+      this.rovingActive || this.disabled || !this.hasEnabledRows ? nothing : html`<div class="focus-entry" tabindex="0" @focus=${this.handleEntryFocus}></div>`
+    return html`${entry}<slot @slotchange=${this.handleSlotChange} @click=${this.handleListItemClick} @keydown=${this.handleKeydown}></slot>`
   }
 }
 

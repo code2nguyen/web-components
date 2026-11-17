@@ -1,0 +1,52 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-delta,
+  $theme: (
+    good--color: #15803d,
+    bad--color: #b91c1c,
+    flat--color: #71717a,
+    arrow--size: 0.75em,
+    arrow--margin-inline-end: 0.2em,
+    comparison--color: #71717a,
+    comparison--font-size: inherit,
+    comparison--margin-inline-start: 0.35em,
+    comparison--white-space: normal,
+  )
+);
+
+// After the sign colours of `c2-format-number`, which they override.
+.good {
+  color: css.cssVar(good--color);
+}
+
+.bad {
+  color: css.cssVar(bad--color);
+}
+
+.flat {
+  color: css.cssVar(flat--color);
+}
+
+[part='arrow'] {
+  margin-inline-end: css.cssVar(arrow--margin-inline-end);
+}
+
+svg {
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  vertical-align: -0.05em;
+  fill: currentColor;
+}
+
+[name='decrease-icon'] svg {
+  rotate: 180deg;
+}
+
+[part='comparison'] {
+  color: css.cssVar(comparison--color);
+  font-size: css.cssVar(comparison--font-size);
+  white-space: css.cssVar(comparison--white-space);
+}
+
+::slotted([slot='comparison']) {
+  margin-inline-start: css.cssVar(comparison--margin-inline-start);
+}

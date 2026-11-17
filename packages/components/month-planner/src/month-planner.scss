@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-month-planner,
@@ -182,7 +183,7 @@
     stroke-linejoin: round;
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(navigation__hover--background);
   }
 
@@ -298,7 +299,7 @@
     border-bottom-right-radius: css.cssVar(event--border-radius);
   }
 
-  &:hover {
+  @include pointer.hover {
     opacity: css.cssVar(event__hover--opacity);
   }
 
@@ -423,7 +424,7 @@
     outline-offset: -1px;
   }
 
-  &:hover:not(.selected) {
+  @include pointer.hover(':not(.selected)') {
     background: css.cssVar(month__hover--background);
   }
 
@@ -473,7 +474,7 @@
   .day {
     position: relative;
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(day__hover--background);
       background-clip: padding-box;
     }
@@ -538,7 +539,7 @@
       transition: animation.standard(opacity);
     }
 
-    &:hover::after {
+    @include pointer.hover('::after') {
       opacity: css.cssVar(event__hover--opacity);
     }
   }
@@ -671,7 +672,7 @@
   text-align: left;
   transition: animation.standard(background);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(agenda-event__hover--background);
   }
 

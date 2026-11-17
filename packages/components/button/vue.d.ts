@@ -18,6 +18,9 @@ declare module 'vue' {
     'c2-button': DefineComponent<
       C2Props<Button> & {
         'aria-label'?: unknown
+        commandfor?: unknown
+        'aria-expanded'?: unknown
+        'aria-controls'?: unknown
       }
     >
   }

@@ -27,3 +27,12 @@ sequence. Every key must hold Ctrl, ⌘ or Alt; only Escape and F1–F24 may be 
 while the user types in a field. `for` clicks (or, for a text field, focuses) the
 element with that id. The parser, matcher and formatter live in `@c2n/core/shortcut-helper.js` for components that
 need shortcuts without the element.
+
+## Shortcut sheet
+
+`@c2n/components/shortcut/shortcut-sheet` provides `c2-shortcut-sheet`, the "?" dialog that lists every binding with a
+`description`, grouped by its `group`, with a search field. It loads its dialog the first time it opens.
+
+```html
+<c2-shortcut-sheet id="shortcut-sheet" keys="mod+/"></c2-shortcut-sheet> <c2-button commandfor="shortcut-sheet" command="--show">Keyboard shortcuts</c2-button>
+```

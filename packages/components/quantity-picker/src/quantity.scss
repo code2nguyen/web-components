@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-quantity,
   $theme: (
@@ -72,7 +73,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border: css.cssVar(button__hover--border);
   }
 

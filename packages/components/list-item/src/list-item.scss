@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -115,7 +116,7 @@
   will-change: background, color, border;
   transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
-  &:hover {
+  @include pointer.hover {
     border-top: css.cssVar(hover--border-top, border-top);
     border-bottom: css.cssVar(hover--border-bottom, border-bottom);
     border-right: css.cssVar(hover--border-right, border-right);
@@ -163,6 +164,12 @@
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
 }
 
+// The trailing control of a settings row keeps its own size. Its slot is the `control` part and, like any slot, has
+// no box, so an ordinary row lays out exactly as before.
+::slotted([slot='control']) {
+  flex: none;
+}
+
 // A bare `<svg>` is the one thing in these slots with no size of its own to work from, so it is the one thing the row
 // sizes. A `c2-feather-*` or `c2-mat-icon` reads the variables set above, and anything else — a shortcut hint, a
 // badge, an avatar — keeps its natural size instead of being squared off to an icon's.
@@ -182,7 +189,7 @@
     background: css.cssVar(selected--background, background);
     color: css.cssVar(selected--color, color);
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(selected__hover--background, selected--background);
     }
   }
@@ -202,7 +209,7 @@
   color: css.cssVar(current--color, selected--color, color);
   font-weight: css.cssVar(current--font-weight, font-weight);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(current__hover--background, current--background, selected__hover--background, selected--background);
   }
 }

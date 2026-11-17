@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-citation,
   $theme: (
@@ -13,6 +14,8 @@
     marker__hover--background-color: #e4e4e7,
     marker__hover--color: #18181b,
     marker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    marker__highlighted--background-color: #edf1fe,
+    marker__highlighted--color: rgb(2, 101, 220),
     card--width: 300px,
     card--padding: 12px,
     card--gap: 6px,
@@ -76,9 +79,14 @@
     background-color 150ms ease,
     color 150ms ease;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(marker__hover--background-color);
     color: css.cssVar(marker__hover--color);
+  }
+
+  &.highlighted {
+    background-color: css.cssVar(marker__highlighted--background-color);
+    color: css.cssVar(marker__highlighted--color);
   }
 
   &:focus-visible {

@@ -1,0 +1,35 @@
+---
+title: 'Delta'
+description: 'A change formatted for its locale, the delta chip of a dashboard: an up or down arrow, the good or bad colour, and what it is compared with.'
+category: 'Data display'
+package: '@c2n/format-number'
+tag: 'c2-delta'
+apiTags: ['c2-delta']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Delta } from '@c2n/components/format-number/delta'
+
+`c2-delta` is [`c2-format-number`](/web-components/components/format-number) read as a change: "+12.4% vs last month". It draws an arrow up or down and colours the number with `--c2-delta__good--color` or `__bad--color` by its sign. `better="lower"` inverts the colours for a cost, a latency or a churn rate, where a fall is good. The arrow's accessible name says both ("Increase, better", "Decrease, worse"), so the colour is never the only sign of it. A change that shows as zero once rounded ("0.0%") is flat: no arrow, `--c2-delta__flat--color`. The sign shows by default (`sign-display="exceptZero"`), and every other attribute of `c2-format-number` works here: `type`, `currency`, `unit`, `notation`, the digit attributes and `locale`. The `comparison` slot says what the change is measured against, after the number in a quieter colour, and the `increase-icon` and `decrease-icon` slots replace the arrows.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/format-number/delta'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/format-number
+<div data-label="Change">
+  <c2-delta type="percent" maximum-fraction-digits="1" value="0.124"><span slot="comparison">vs last month</span></c2-delta>
+  <c2-delta type="percent" maximum-fraction-digits="1" value="-0.031"></c2-delta>
+  <c2-delta type="percent" maximum-fraction-digits="1" value="0.0001"></c2-delta>
+</div>
+<div data-label="Lower is better">
+  <c2-delta type="unit" unit="millisecond" better="lower" value="-42"><span slot="comparison">p95 latency</span></c2-delta>
+  <c2-delta type="currency" better="lower" value="1250"><span slot="comparison">cloud spend</span></c2-delta>
+</div>
+```

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-split-button,
@@ -122,7 +123,7 @@ $_duration: css.cssVar(transition--duration);
   background-color: css.cssVar(main--background-color);
   color: css.cssVar(main--color);
 
-  &:hover:not(:disabled):not([aria-disabled]) {
+  @include pointer.hover(':not(:disabled):not([aria-disabled])') {
     background-color: css.cssVar(main__hover--background-color, main--background-color);
     color: css.cssVar(main__hover--color, main--color);
   }
@@ -201,7 +202,7 @@ $_duration: css.cssVar(transition--duration);
     pointer-events: none;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background-color: css.cssVar(caret__hover--background-color, caret--background-color);
   }
 

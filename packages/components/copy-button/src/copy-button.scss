@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -102,7 +103,7 @@
   user-select: none;
   transition: animation.standard(background-color), animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(container__hover--background-color);
     color: css.cssVar(container__hover--color, container--color);
     border: css.cssVar(container__hover--border, container--border);

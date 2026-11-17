@@ -2,6 +2,7 @@
 title: 'Table Of Contents'
 description: 'An "On this page" navigation that lists the headings of a document, nests them by level and highlights the section being read.'
 category: 'Navigation'
+apiTags: ['c2-table-of-contents']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -12,6 +13,8 @@ import { TableOfContents } from '@c2n/components/table-of-contents'
 `c2-table-of-contents` turns the headings of a long page into a navigation landmark. It reads the `h2` and `h3` elements of the page's `<main>` (or of the element named by `for`, with any `selector`), nests them by level, and keeps up with the reader: the section at the top of the scroll area becomes current, its link gets `aria-current="true"`, and an indicator slides to it along the rail. Activating a link scrolls to the section, moves focus to its heading so the next Tab continues there, and updates the URL fragment (`keep-url` leaves the URL alone, for an app that routes on it).
 
 A heading needs an `id` to be listed. `data-toc-label` gives it a shorter entry and `data-toc-ignore` leaves it out, and the list follows the page as headings are added, renamed or removed. When the sections are known in advance, hand them over as `items` (`[{ id, label, level }]`) instead: the list then renders on the server as well. This documentation site does that for the **On this page** column on the right, with plain links inside the tag as a fallback: the element's shadow root has no slot, so they show only until it upgrades (or when JavaScript is off).
+
+For the A to Z rail beside a contact list or a glossary, the same package has [`c2-index-bar`](/web-components/components/index-bar): the same sections, followed the same way, as a compact column of keys you can drag along.
 
 ## Import
 

@@ -1,0 +1,95 @@
+---
+/**
+ * Plays the app's part for the saved-views cards of the view-options gallery (`data-view-options-example="saved"`):
+ * keeps the views in memory, answers `view-save`, `view-rename` and `view-delete` by updating `views` and `view-id`,
+ * and adds the French an app would supply for the card under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { ViewOptions, ViewSavedView } from '@c2n/components/view-options'
+  import '@c2n/components/view-options'
+
+  addTranslations({
+    fr: {
+      'view-options': {
+        display: 'Affichage',
+        panel: "Options d'affichage",
+        layout: 'Disposition',
+        list: 'Liste',
+        board: 'Tableau',
+        table: 'Table',
+        gallery: 'Galerie',
+        calendar: 'Calendrier',
+        timeline: 'Chronologie',
+        grouping: 'Regroupement',
+        subGrouping: 'Sous-regroupement',
+        columns: 'Colonnes',
+        rows: 'Lignes',
+        noGrouping: 'Aucun regroupement',
+        noSubGrouping: 'Aucun sous-regroupement',
+        noRows: 'Aucune ligne',
+        ordering: 'Tri',
+        sortField: 'Niveau de tri {0}',
+        ascending: 'Croissant',
+        descending: 'Décroissant',
+        removeSort: 'Retirer le niveau de tri {0}',
+        addSort: 'Ajouter un tri',
+        show: 'Afficher',
+        properties: 'Propriétés affichées',
+        reset: 'Réinitialiser',
+        setDefault: 'Définir par défaut',
+        views: 'Vues',
+        view: 'Vue',
+        chooseView: 'Vue non enregistrée',
+        shared: 'Partagée',
+        modified: 'Modifiée',
+        revert: 'Rétablir',
+        save: 'Enregistrer',
+        saveAs: 'Enregistrer sous…',
+        rename: 'Renommer',
+        remove: 'Supprimer',
+        viewName: 'Nom de la vue',
+        cancel: 'Annuler',
+      },
+    },
+  })
+
+  let next = 1
+
+  function saved(options: ViewOptions) {
+    const views = (): ViewSavedView[] => [...(options.views ?? [])]
+    options.addEventListener('view-save', (event) => {
+      const { id, name, value } = event.detail
+      if (id === null) {
+        const created = { id: `view-${next++}`, name, value }
+        options.views = [...views(), created]
+        options.viewId = created.id
+      } else {
+        options.views = views().map((view) => (view.id === id ? { ...view, value } : view))
+      }
+    })
+    options.addEventListener('view-rename', (event) => {
+      const { id, name } = event.detail
+      options.views = views().map((view) => (view.id === id ? { ...view, name } : view))
+    })
+    options.addEventListener('view-delete', (event) => {
+      options.views = views().filter((view) => view.id !== event.detail.id)
+      options.viewId = undefined
+    })
+  }
+
+  const initialized = new WeakSet<Element>()
+  function setup() {
+    document.querySelectorAll<ViewOptions>('c2-view-options[data-view-options-example="saved"]').forEach((options) => {
+      if (initialized.has(options)) return
+      initialized.add(options)
+      saved(options)
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+  customElements.whenDefined('c2-view-options').then(setup)
+</script>

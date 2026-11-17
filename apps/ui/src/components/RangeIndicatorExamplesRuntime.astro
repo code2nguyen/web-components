@@ -1,0 +1,12 @@
+---
+/**
+ * Plays the application's part in the range indicator gallery: the French of the card under `lang="fr"`, which the
+ * indicator announces ("5,6 mmol/L, Élevé") and uses as its name when it has no label.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { 'range-indicator': { label: 'Plage', valueInBand: '{0}, {1}' } } })
+</script>

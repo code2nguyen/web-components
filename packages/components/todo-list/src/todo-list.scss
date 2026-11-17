@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-todo-list,
   $theme: (
@@ -381,7 +382,7 @@ svg {
     color $duration ease,
     box-shadow $duration ease;
 
-  &:hover {
+  @include pointer.hover {
     color: $ink;
   }
 
@@ -1037,7 +1038,7 @@ svg {
     color: css.cssVar(pen-red--color);
   }
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(chip--background-color);
   }
 }
@@ -1140,7 +1141,7 @@ svg {
     stroke-width: 2;
   }
 
-  &:hover {
+  @include pointer.hover {
     color: $ink;
     background-color: css.cssVar(chip--background-color);
   }
@@ -1385,7 +1386,7 @@ svg {
     stroke-dasharray: 3 2.4;
   }
 
-  &:hover {
+  @include pointer.hover {
     color: $ink;
   }
 
@@ -1623,7 +1624,7 @@ svg {
     height: 18px;
   }
 
-  &:hover {
+  @include pointer.hover {
     color: var(--_ink, #{$accent});
     background-color: color-mix(in srgb, var(--_ink, #{$accent}) 10%, transparent);
   }

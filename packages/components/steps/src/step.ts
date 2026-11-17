@@ -4,9 +4,11 @@ import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import type { StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
-import { STATUS_ICONS, STATUS_LABELS } from './step-icons.js'
+import type { StepStatus, StepsMarker, StepsOrientation, StepsProgress } from './step-types.js'
+import { STATUS_ICONS } from './step-icons.js'
+import { stepsMessages } from './messages.js'
 import styles from './step.scss?inline'
 
 export type { StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
@@ -71,6 +73,11 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * lands under its parent's label. `--c2-step__text--flex-direction: column` still stacks the detail under the
  * label, which a wizard's descriptions want — that is two lines on purpose, and each of them is still one line.
  *
+ * **With `href` a row is a link** — a task in a task list, which opens its own page. A group's row stays its
+ * disclosure, and a `disabled` or `locked` step drops its link.
+ *
+ * **A `locked` step cannot be opened yet**: a padlock, no link, not selectable. `reason` says why under the label.
+ *
  * **In an `interactive` list a row is a button.** Pressing it selects the step — the list keeps one selected step and
  * says so with `selection-change` — so a view can show what belongs to it: the log of the step that ran, the result
  * of the step that produced one. A group's row stays its disclosure; `disabled` keeps a step from being selected.
@@ -81,7 +88,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * **States.** The step never writes an attribute on its own host — not even the `status` the list rolls up or the
  * `collapsed` a reader toggles, neither of which reflects — so server-rendered markup matches the hydrated element.
  * Page CSS reads the step through custom states instead: its status (`c2-step:state(running)`, `:state(success)`,
- * `:state(error)`, `:state(warning)`, `:state(current)`, `:state(skipped)`, `:state(pending)`), `:state(collapsed)`,
+ * `:state(error)`, `:state(warning)`, `:state(current)`, `:state(skipped)`, `:state(pending)`, `:state(locked)`), `:state(collapsed)`,
  * `:state(has-children)` for a group, `:state(last)` for the last step of its group, `:state(grouped)` when the list
  * holds any group, the marker mode as `:state(marker-icon)`, `:state(marker-number)` or `:state(marker-none)`, and
  * the two animations: `:state(entering)` while a step that arrived in a running trace grows into place, and
@@ -94,12 +101,13 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @slot detail - Secondary text beside the label. Falls back to the `detail` attribute.
  * @slot trailing - Content at the end of the row. Falls back to the `trailing` attribute.
  * @slot marker - Replaces the whole marker: a custom icon, an avatar, a number of your own.
+ * @slot reason - Why the step is in its status, on a line under the label. Falls back to the `reason` attribute.
  * @slot toggle - A disclosure affordance of your own — a chevron, a caret. Empty by default: a trace is a list of rows, and the row is already clickable. It is filled per step, so give a leaf an empty `<span slot="toggle"></span>` to keep its rows lined up with the groups above them.
  *
  * @event {CustomEvent<StepToggleEventDetail>} step-toggle - A group was folded away or brought back. Bubbles.
  *
  * @csspart frame - The box around the whole step, which is what grows when a new step arrives.
- * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`, and a selectable row in an `interactive` list is a `<button>`.
+ * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`, a step with `href` is an `<a>`, and a selectable row in an `interactive` list is a `<button>`.
  * @csspart toggle - Disclosure region containing the assigned `toggle` slot for a group.
  * @csspart marker - Round marker region containing the `marker` slot or status fallback at the start of the row.
  * @csspart rail - The connector between this marker and the next.
@@ -107,6 +115,9 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @csspart detail - Secondary-text region containing the `detail` slot or property fallback.
  * @csspart trailing - End-aligned text region containing the `trailing` slot or property fallback.
  * @csspart children - The box holding the sub-steps.
+ * @csspart reason - Text region under the label containing the `reason` slot or property fallback. Hidden while both are empty.
+ * @csspart progress - A group's count of finished steps under its label — "2 of 5" — drawn while the list has `group-progress`.
+ * @csspart progress-bar - The bar at the start of the `progress` line. Zero wide, and so not drawn, until `--c2-step__progress__bar--width` gives it a width.
  *
  * @cssproperty {pixel} [--c2-step__row--gap=10px] - Space between the marker, the text and the trailing content.
  * @cssproperty {padding} [--c2-step__row--padding-block=7px]
@@ -120,6 +131,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {color} --c2-step__row__selected--background - Background of the selected row in an `interactive` list. None by default: the label colour alone marks the selection.
  * @cssproperty {box-shadow} --c2-step__row__selected--box-shadow - An indicator for the selected row — `inset 0 -2px 0 currentColor` underlines it.
  * @cssproperty {opacity} [--c2-step__row__disabled--opacity=0.38] - A `disabled` step in an `interactive` list.
+ * @cssproperty {clip-path} --c2-step__row--clip-path - Cuts the row to a shape: a chevron, for a stage path — `polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%)` with the rail off and a background per status.
  * @cssproperty {border} [--c2-step__row__horizontal--border-bottom=none] - The hairline under each step of a horizontal list, which has none by default.
  * @cssproperty {pixel} [--c2-step__row__horizontal--min-width=96px] - The narrowest a step of a horizontal list gets before the list scrolls.
  * @cssproperty {grid-template-areas} [--c2-step__row__horizontal--grid-template-areas="marker rail rail" "text text text" "trailing trailing trailing"] - Where the text sits around the marker in a horizontal list. The cells are `marker`, `rail`, `text` and `trailing`, over three columns sized `auto auto 1fr`; the rail always takes the last one and runs on to the next step. Text over the marker: `"text text text" "trailing trailing trailing" "marker rail rail"`, with `--c2-step__row__horizontal--align-content: end`. Beside it: `"marker text rail" ". trailing ."`. Before it: `"text marker rail" "trailing . ."`.
@@ -153,6 +165,9 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {font-family} [--c2-step__label--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
  * @cssproperty {color} [--c2-step__label__selected--color=rgb(2, 101, 220)] - Label colour of the selected row: what marks the selection by default.
  * @cssproperty {font-weight} --c2-step__label__selected--font-weight - Label weight of the selected row. Falls back to the label weight.
+ * @cssproperty {color} --c2-step__label__link--color - Label colour of a step with `href`. Falls back to the label colour.
+ * @cssproperty {text-decoration} [--c2-step__label__link--text-decoration=none] - Underline of a linked label at rest.
+ * @cssproperty {text-decoration} [--c2-step__label__link__hover--text-decoration=underline] - Underline of a linked label while the pointer is on its row or the row has focus.
  * @cssproperty {color} [--c2-step__detail--color=#71717a]
  * @cssproperty {font-size} --c2-step__detail--font-size - Falls back to the label size.
  * @cssproperty {font-weight} [--c2-step__detail--font-weight=400]
@@ -164,12 +179,26 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {font-size} --c2-step__trailing--font-size - Falls back to the label size.
  * @cssproperty {font-weight} [--c2-step__trailing--font-weight=400]
  *
+ * @cssproperty {color} [--c2-step__reason--color=#71717a]
+ * @cssproperty {font-size} [--c2-step__reason--font-size=12px]
+ * @cssproperty {font-weight} [--c2-step__reason--font-weight=400]
+ * @cssproperty {color} [--c2-step__progress--color=#71717a] - Colour of a group's "2 of 5".
+ * @cssproperty {font-size} [--c2-step__progress--font-size=12px]
+ * @cssproperty {font-weight} [--c2-step__progress--font-weight=400]
+ * @cssproperty {pixel} [--c2-step__progress--gap=6px] - Space between the bar and the count, when there is a bar.
+ * @cssproperty {pixel} [--c2-step__progress__bar--width=0px] - Width of the bar before a group's count. `0px` draws none; `64px` draws one.
+ * @cssproperty {pixel} [--c2-step__progress__bar--height=4px]
+ * @cssproperty {border-radius} [--c2-step__progress__bar--border-radius=999px]
+ * @cssproperty {color} --c2-step__progress__bar--color - The finished part of the bar. Falls back to the success colour.
+ * @cssproperty {color} [--c2-step__progress__track--color=#e4e4e7] - The rest of the bar.
+ *
  * @cssproperty {color} [--c2-step__success--color=#16a34a] - Marker colour when the step succeeded.
  * @cssproperty {color} [--c2-step__error--color=#dc2626]
  * @cssproperty {color} [--c2-step__warning--color=#d97706]
  * @cssproperty {color} [--c2-step__running--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-step__current--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-step__skipped--color=#71717a] - Marker and label colour when the step was skipped.
+ * @cssproperty {color} [--c2-step__locked--color=#71717a] - Marker and label colour of a `locked` step.
  * @cssproperty {time} [--c2-step--transition-duration=150ms] - Colour transitions, and the beat a marker gives when its status settles.
  * @cssproperty {time} [--c2-step--enter-duration=260ms] - How long a step arriving in a running trace takes to grow into place. `0s` turns the animation off.
  * @cssproperty {translate} [--c2-step--enter-translate=-4px] - How far it slides while it does.
@@ -198,6 +227,9 @@ export class Step extends LitElement {
   /** Text at the end of the row, when the `trailing` slot is empty. */
   @property() trailing = ''
 
+  /** Why the step is in its status — "Finish Basics to unlock" — on a line under the label, when the `reason` slot is empty. */
+  @property() reason = ''
+
   /**
    * What the parent `c2-steps` calls this step in `selected` and `selection-change`. Without one, the step is
    * called by its dotted path — `2` for the second top-level step.
@@ -208,11 +240,25 @@ export class Step extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /**
+   * Makes the row a link to this URL — a task in a task list. A group's row stays its disclosure, and a `disabled` or
+   * `locked` step is drawn without its link: a task that cannot start yet. In an `interactive` list, following the link also
+   * selects the step.
+   */
+  @property() href = ''
+
+  /**
    * Whether this group is folded away. A group is expanded by default — every step in the list is a row you can
    * see — and only the reader, the markup or a reopening status ever changes that. Not reflected; read it as
    * `:state(collapsed)`.
    */
   @property({ type: Boolean }) collapsed = false
+
+  /** How many of a group's steps are finished, drawn under the label. Written by a parent with `group-progress`. */
+  @property({
+    attribute: false,
+    hasChanged: (next?: StepsProgress, previous?: StepsProgress) => next?.completed !== previous?.completed || next?.total !== previous?.total,
+  })
+  progress?: StepsProgress
 
   /** Depth of nesting. Written by the parent `c2-steps`; setting it by hand only changes the indent. */
   @property({ attribute: false }) level = 0
@@ -256,7 +302,8 @@ export class Step extends LitElement {
    */
   @property({ attribute: false }) entering = false
 
-  private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle'])
+  private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle', 'reason'])
+  private readonly msg = new LocalizeController(this, stepsMessages)
 
   override connectedCallback() {
     // A server-rendered step arrives with its shadow root already attached. The server cannot see the light DOM, so
@@ -342,8 +389,8 @@ export class Step extends LitElement {
     if (changed.has('entering')) this.setState('entering', this.entering)
   }
 
-  /** These three collapse when empty, so their rows have to know whether the slot was filled. */
-  private handleSlotChange(name: 'detail' | 'trailing' | 'toggle', event: Event) {
+  /** These collapse when empty, so their rows have to know whether the slot was filled. */
+  private handleSlotChange(name: 'detail' | 'trailing' | 'toggle' | 'reason', event: Event) {
     void name
     this.slotPresence.handleSlotChange(event)
   }
@@ -357,9 +404,15 @@ export class Step extends LitElement {
     this.collapsed = !(event.target as HTMLDetailsElement).open
   }
 
+  private get closed() {
+    return this.disabled || this.status === 'locked'
+  }
+
   /** The list owns the selection; the row only asks for it. */
-  private handleSelect() {
-    if (this.disabled) return
+  private handleSelect(event?: MouseEvent) {
+    if (this.closed) return
+    // A link opened in another tab or window leaves this view where it is, so it selects nothing either.
+    if (event?.currentTarget instanceof HTMLAnchorElement && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0)) return
     this.dispatchEvent(
       new CustomEvent<StepSelectRequestDetail>(STEP_SELECT_EVENT, { detail: { value: this.value || this.path }, bubbles: true, composed: true }),
     )
@@ -380,6 +433,8 @@ export class Step extends LitElement {
   private renderRowContent(): TemplateResult {
     const detail = this.detail || this.slotPresence.has('detail')
     const trailing = this.trailing || this.slotPresence.has('trailing')
+    const reason = this.reason || this.slotPresence.has('reason')
+    const progress = this.progress
     return html`
       <span class="c2-step__toggle" part="toggle" aria-hidden="true" ?hidden=${!this.slotPresence.has('toggle')}>
         <slot name="toggle" @slotchange=${(event: Event) => this.handleSlotChange('toggle', event)}></slot>
@@ -388,19 +443,43 @@ export class Step extends LitElement {
         ${this.renderMarker()}
         <span class="c2-step__rail" part="rail" aria-hidden="true"></span>
       </span>
-      <span class="c2-step__text">
-        <span class="c2-step__label" part="label">
-          <slot name="label">${this.label}</slot>
+      <span class="c2-step__body">
+        <span class="c2-step__text">
+          <span class="c2-step__label" part="label">
+            <slot name="label">${this.label}</slot>
+          </span>
+          <span class="c2-step__detail" part="detail" ?hidden=${!detail}>
+            <slot name="detail" @slotchange=${(event: Event) => this.handleSlotChange('detail', event)}>${this.detail}</slot>
+          </span>
         </span>
-        <span class="c2-step__detail" part="detail" ?hidden=${!detail}>
-          <slot name="detail" @slotchange=${(event: Event) => this.handleSlotChange('detail', event)}>${this.detail}</slot>
+        ${
+          progress
+            ? html`<span
+                class="c2-step__progress"
+                part="progress"
+                style=${styleMap({ '--_done': String(progress.total ? progress.completed / progress.total : 0) })}
+                ><span class="c2-step__progress-bar" part="progress-bar" aria-hidden="true"></span>${this.msg.t(
+                  'groupProgress',
+                  progress.completed,
+                  progress.total,
+                )}</span
+              >`
+            : nothing
+        }
+        <span class="c2-step__reason" part="reason" ?hidden=${!reason}>
+          <slot name="reason" @slotchange=${(event: Event) => this.handleSlotChange('reason', event)}>${this.reason}</slot>
         </span>
       </span>
       <span class="c2-step__trailing" part="trailing" ?hidden=${!trailing}>
         <slot name="trailing" @slotchange=${(event: Event) => this.handleSlotChange('trailing', event)}>${this.trailing}</slot>
       </span>
       <!-- The marker is a glyph, so the state is spelled out for assistive technology. -->
-      <span class="c2-step__status-text">${STATUS_LABELS[this.status]}</span>
+      <span class="c2-step__status-text"
+        >${
+          // A mistyped status has no message, and reads as nothing.
+          typeof stepsMessages.en[this.status] === 'string' ? this.msg.t(this.status) : nothing
+        }</span
+      >
     `
   }
 
@@ -412,9 +491,20 @@ export class Step extends LitElement {
     `
   }
 
-  /** A leaf's row: a button in an `interactive` list, which is what makes it focusable and pressable. */
+  /** A leaf's row: a link with `href`, a button in an `interactive` list, which is what makes it focusable and pressable. */
   private renderLeafRow(rowClass: ReturnType<typeof classMap>): TemplateResult {
-    if (!this.interactive) return html`<div class=${rowClass} part="row">${this.renderRowContent()}</div>`
+    if (this.href && !this.closed) {
+      return html`<a
+        class=${rowClass}
+        part="row"
+        href=${this.href}
+        aria-current=${this.interactive && this.selected ? 'true' : nothing}
+        @click=${this.interactive ? this.handleSelect : nothing}
+        >${this.renderRowContent()}</a
+      >`
+    }
+    // Not a disabled button: dimmed, its reason would fail contrast.
+    if (!this.interactive || this.status === 'locked') return html`<div class=${rowClass} part="row">${this.renderRowContent()}</div>`
     return html`<button
       type="button"
       class=${rowClass}

@@ -120,6 +120,126 @@ test('notices content that arrives without a scroll', async ({ page, scenario })
   await expect(page.locator('#log')).toHaveAttribute('data-stuck', 'true')
 })
 
+test.describe('show-when-hidden', () => {
+  const barButton = (page: Page) => page.getByRole('button', { name: 'Buy from the bar' })
+
+  test('stays out of view while the watched element is on screen, and slides in once it scrolls away', async ({ page, scenario }) => {
+    await scenario('cta')
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+    await expect(page.locator('[part="surface"]')).toHaveCSS('visibility', 'hidden')
+    await expect(barButton(page)).toBeHidden()
+
+    await scrollTo(page, 400)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(false)
+    await expect(page.locator('#log')).toHaveAttribute('data-concealed', 'false')
+    await expect(barButton(page)).toBeInViewport()
+    expect(await page.locator('c2-sticky').evaluate((el: HTMLElementTagNameMap['c2-sticky']) => el.concealed)).toBe(false)
+
+    await scrollTo(page, 0)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+    await expect(page.locator('#log')).toHaveAttribute('data-concealed', 'true')
+    await expect(page.locator('[part="surface"]')).toHaveCSS('visibility', 'hidden')
+  })
+
+  test('is skipped by Tab while concealed', async ({ page, scenario, tab }) => {
+    await scenario('cta')
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+    await expect(page.locator('[part="surface"]')).toHaveCSS('visibility', 'hidden')
+    await page.getByRole('button', { name: 'Buy now' }).focus()
+    await tab()
+    await expect(page.locator('c2-sticky button')).not.toBeFocused()
+    expect(await page.evaluate(() => document.activeElement?.textContent)).not.toBe('Buy from the bar')
+  })
+
+  test('keeps the focused stand-in in view until focus leaves it', async ({ page, scenario }) => {
+    await scenario('cta')
+    await scrollTo(page, 400)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(false)
+    // Shift+Tab from the document reaches the bar, the last control, without scrolling the main button into view.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.keyboard.press('Shift+Tab')
+    await expect(barButton(page)).toBeFocused()
+
+    await scrollTo(page, 0)
+    await expect(page.getByRole('button', { name: 'Buy now' })).toBeInViewport()
+    // Give the observer a frame to report the watched element: the focused bar must not hide.
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await hasState(page, 'concealed')).toBe(false)
+
+    await page.getByRole('button', { name: 'Buy now' }).focus()
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+  })
+
+  test('a click does not hold the stand-in in view once the watched element returns', async ({ page, scenario }) => {
+    await scenario('cta')
+    await scrollTo(page, 400)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(false)
+    await barButton(page).click()
+    await scrollTo(page, 0)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+  })
+
+  test('adds no scrollable overflow while concealed', async ({ page, scenario }) => {
+    await scenario('cta-short')
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+    // Let the slide finish: a translated surface would make the box scrollable.
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('c2-sticky')!.shadowRoot!.querySelector('.surface')!).visibility === 'hidden')
+    expect(await page.locator('.scroller').evaluate((scroller) => scroller.scrollHeight - scroller.clientHeight)).toBe(0)
+  })
+
+  test('watches an element given as a reference', async ({ page, scenario }) => {
+    await scenario('cta-element')
+    await expect.poll(() => hasState(page, 'concealed')).toBe(true)
+    await scrollTo(page, 400)
+    await expect.poll(() => hasState(page, 'concealed')).toBe(false)
+  })
+
+  test('an id that matches nothing leaves the content in view', async ({ page, scenario }) => {
+    await scenario('cta-missing')
+    await expect(barButton(page)).toBeInViewport()
+    expect(await hasState(page, 'concealed')).toBe(false)
+  })
+
+  test('slides without motion when the reader prefers reduced motion', async ({ page, scenario }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await scenario('cta')
+    await expect(page.locator('[part="surface"]')).toHaveCSS('transition-duration', /^0s/)
+  })
+
+  test('creates no observer and loads no watcher when nothing is watched', async ({ page, scenario }) => {
+    const watcherRequests: string[] = []
+    page.on('request', (request) => {
+      if (request.url().includes('sticky-watch')) watcherRequests.push(request.url())
+    })
+    await page.addInitScript(() => {
+      const Native = window.IntersectionObserver
+      ;(window as unknown as { observers: number }).observers = 0
+      window.IntersectionObserver = class extends Native {
+        constructor(...args: ConstructorParameters<typeof IntersectionObserver>) {
+          super(...args)
+          ;(window as unknown as { observers: number }).observers++
+        }
+      }
+    })
+    await scenario()
+    await wheel(page, 400)
+    await expect.poll(() => hasState(page, 'stuck')).toBe(true)
+    expect(await page.evaluate(() => (window as unknown as { observers: number }).observers)).toBe(0)
+    expect(watcherRequests).toEqual([])
+    expect(await hasState(page, 'concealed')).toBe(false)
+  })
+
+  for (const top of [0, 400]) {
+    test(`has no axe violations ${top ? 'while shown' : 'while concealed'}`, async ({ page, scenario }) => {
+      await scenario('cta')
+      await scrollTo(page, top)
+      await expect.poll(() => hasState(page, 'concealed')).toBe(top === 0)
+      const results = await new AxeBuilder({ page }).include('main').analyze()
+      expect(results.violations).toEqual([])
+    })
+  }
+})
+
 for (const state of ['default', 'hide']) {
   test(`${state} has no axe violations`, async ({ page, scenario }) => {
     await scenario(state)

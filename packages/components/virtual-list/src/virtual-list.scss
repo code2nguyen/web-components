@@ -1,4 +1,6 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-virtual-list,
   $theme: (
@@ -42,6 +44,11 @@
     skeleton--border-radius: 4px,
 
     state--color: #71717a,
+    more--padding: 12px,
+    more--color: #71717a,
+    more--font-size: 13px,
+    more__error--color: rgb(211, 21, 16),
+    more-retry--color: rgb(2, 101, 220),
     state--padding: 32px 12px,
     state--font-size: 14px,
     state__error--color: rgb(211, 21, 16),
@@ -174,4 +181,50 @@ mark {
 
 .footer[hidden] {
   display: none;
+}
+
+// The row under the last item while more can be loaded: empty until a page is on its way (it is what the end is
+// watched by), then the loading message, or the error and its Retry button.
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 1px;
+  padding: css.cssVar(more--padding);
+  color: css.cssVar(more--color);
+  font-size: css.cssVar(more--font-size);
+
+  c2-spinner {
+    --c2-spinner--size: 16px;
+  }
+}
+
+.more--error {
+  // A long message keeps its line and moves Retry under it rather than being squeezed beside it.
+  flex-wrap: wrap;
+  text-align: center;
+  color: css.cssVar(more__error--color);
+}
+
+.more-retry {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: css.cssVar(more-retry--color);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  @include pointer.hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+  }
+
+  @include focus.forced-colors-ring;
 }

@@ -16,12 +16,16 @@ import '@c2n/components/password-field'
 
 <!-- Sign up: strength meter and a requirements checklist -->
 <c2-password-field name="password" autocomplete="new-password" meter requirements="length;uppercase;number;symbol" minlength="10"></c2-password-field>
+
+<!-- With the password generator -->
+<c2-password-field name="password" autocomplete="new-password" generator meter></c2-password-field>
 ```
 
 A password input with a show/hide toggle (`revealed`, `reveal-change`, `hide-toggle`), an optional four-segment strength
 meter (`meter`, `strength-labels`, `scorer`, `strength-change`), a requirements checklist (`requirements`: built-in
 `length`, `lowercase`, `uppercase`, `number`, `symbol`, or `{ label, pattern | test }` objects from script) and a Caps
-Lock warning. It is form-associated and validates `required`, `minlength`, `maxlength` and the requirements.
+Lock warning. `generator` adds a generate button whose popover suggests a password or a passphrase (drawn with
+`crypto.getRandomValues`, loaded on first use; `generator-options`, `generate()`). It is form-associated and validates `required`, `minlength`, `maxlength` and the requirements.
 `scorePassword(value)` is exported for use outside the element.
 
 Styling goes through the `--c2-password-field*` custom properties listed in `custom-elements.json`.

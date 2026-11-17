@@ -11,7 +11,7 @@ import { ReorderList } from '@c2n/components/reorder-list'
 
 Use `c2-reorder-list` for one vertical queue whose ordinary direct children need pointer and keyboard reordering. The component keeps the committed visual order immediately; listen for `reorder` and persist `event.detail.order` in application state. It never physically moves application-owned light DOM.
 
-Add `swipeable` and each row also slides sideways to reveal actions behind it, a red **Delete** by default. Choose another pattern for grids, transfer between lists, nesting, copying, or undo history.
+Add `ranked` to number the rows, and a `name` to make the list a form control that submits its order. Add `swipeable` and each row also slides sideways to reveal actions behind it, a red **Delete** by default. Choose another pattern for grids, transfer between lists, nesting, copying, or undo history.
 
 ## Import
 
@@ -34,17 +34,6 @@ import '@c2n/components/reorder-list'
       background: var(--c2-theme--color-surface, #ffffff);
       color: var(--c2-theme--color-on-surface, #18181b);
     }
-  </style>
-  <c2-reorder-list client:only="lit" class="release-queue" editable aria-label="Deployment queue">
-    <div class="release-task" data-reorder-key="scope">Confirm scope</div>
-    <div class="release-task" data-reorder-key="changelog">Update changelog</div>
-    <div class="release-task" data-reorder-key="test">Run tests</div>
-    <div class="release-task" data-reorder-key="build">Build packages</div>
-    <div class="release-task" data-reorder-key="publish">Publish packages</div>
-    <div class="release-task" data-reorder-key="verify">Verify deployment</div>
-  </c2-reorder-list>
-</div><div data-label="Swipe actions">
-  <style>
     .inbox {
       --c2-reorder-list--container-gap: 6px;
       --c2-reorder-list--container-border-radius: 8px;
@@ -55,7 +44,25 @@ import '@c2n/components/reorder-list'
       border-radius: 8px;
       color: var(--c2-theme--color-on-surface, #18181b);
     }
+    .ranking-question {
+      --c2-reorder-list--container-gap: 4px;
+    }
+    .ranking-choice {
+      padding: 8px 12px;
+      border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+      border-radius: 8px;
+      color: var(--c2-theme--color-on-surface, #18181b);
+    }
   </style>
+  <c2-reorder-list client:only="lit" class="release-queue" editable aria-label="Deployment queue">
+    <div class="release-task" data-reorder-key="scope">Confirm scope</div>
+    <div class="release-task" data-reorder-key="changelog">Update changelog</div>
+    <div class="release-task" data-reorder-key="test">Run tests</div>
+    <div class="release-task" data-reorder-key="build">Build packages</div>
+    <div class="release-task" data-reorder-key="publish">Publish packages</div>
+    <div class="release-task" data-reorder-key="verify">Verify deployment</div>
+  </c2-reorder-list>
+</div><div data-label="Swipe actions">
   <c2-reorder-list
     client:only="lit"
     class="inbox"
@@ -67,6 +74,12 @@ import '@c2n/components/reorder-list'
     <div class="inbox-row" data-reorder-key="invoice" data-reorder-label="Invoice from ACME">Invoice from ACME</div>
     <div class="inbox-row" data-reorder-key="standup" data-reorder-label="Standup notes">Standup notes</div>
     <div class="inbox-row" data-reorder-key="offsite" data-reorder-label="Offsite plan">Offsite plan</div>
+  </c2-reorder-list>
+</div><div data-label="Ranking">
+  <c2-reorder-list client:only="lit" class="ranking-question" name="priorities" editable ranked aria-label="Rank what matters most">
+    <div class="ranking-choice" data-reorder-key="speed">Speed</div>
+    <div class="ranking-choice" data-reorder-key="price">Price</div>
+    <div class="ranking-choice" data-reorder-key="support">Support</div>
   </c2-reorder-list>
 </div>
 ```
@@ -91,6 +104,43 @@ queue.addEventListener('reorder', (event) => {
 `reorder` fires once only after a real change and includes the moved element/key, absolute `fromIndex`/`toIndex`, complete resulting order, and `mouse`, `touch`, `pen`, or `keyboard` input method. Duplicate keys fire `reorder-error` and block pickup. Initialization, external child reconciliation, cancellation, threshold-only gestures, and no-op drops fire no success event.
 
 The deprecated `change` event still accompanies a successful reorder with its legacy numeric permutation. Migrate persistence code to `reorder` before the next explicitly breaking release.
+
+## Ranking and forms
+
+`ranked` draws each row's position before it, starting at 1 and following the row while it moves. The badge is the
+`rank` part, styled through the `--c2-reorder-list__rank--*` variables (and `__rank__active--*` for the row being
+moved), and hidden from assistive technology, which already announces each row's position in the list. Set
+`renderRank` to draw your own content in it; it is called with `{ item, rank, count, active }`:
+
+```js tag=CodeBlock
+queue.renderRank = ({ rank }) => (rank === 1 ? '★' : String(rank))
+```
+
+With a `name`, the list is a form control, like a ranking question in a survey. It submits the `data-reorder-key` of
+each keyed row, in the displayed order, as one entry per row under that name (items without a key are not submitted),
+and fires `input` after each committed reorder:
+
+```html tag=CodeBlock
+<form>
+  <label for="commute">Rank how you get to work</label>
+  <c2-reorder-list id="commute" name="commute" editable ranked>
+    <div data-reorder-key="bike">Bike</div>
+    <div data-reorder-key="train">Train</div>
+    <div data-reorder-key="car">Car</div>
+  </c2-reorder-list>
+</form>
+```
+
+```js tag=CodeBlock
+new FormData(form).getAll('commute') // ['train', 'bike', 'car']
+```
+
+`value` reads the same keys as an array; setting it puts the movable rows with those keys first, in that order, and
+leaves fixed rows where they are (it never moves the light DOM). A form reset returns the list to its authored order,
+the browser's back/forward restore puts the submitted order back, and a disabled `<fieldset>` (or a `disabled`
+attribute on the list) stops reordering and swiping and leaves the list out of the submission. A named list keeps the
+user's order when rows are added or removed. A `<label for>`, or the label of an enclosing `c2-form-field`, names the
+list when it has no `aria-label`.
 
 ## Swipe actions
 
@@ -123,4 +173,4 @@ A revealed item closes again when it is tapped, swiped back, when anything else 
 happens unless an action is chosen. Keyboard users reach the same actions through their keys, which the list announces
 on each item; the revealed buttons are focusable too. `data-swipe="false"` keeps an item from swiping.
 
-Style consumer-owned rows directly. Use `container`, `item`, `placeholder`, `dragging-item`, `swipe-content`, `swipe-actions` and `swipe-action` parts for component-owned boundaries; documented CSS variables cover spacing, dividers, feedback, focus, active opacity, shadow, and motion. Reduced-motion mode removes decorative interpolation while preserving the interaction.
+Style consumer-owned rows directly. Use `container`, `item`, `rank`, `placeholder`, `dragging-item`, `swipe-content`, `swipe-actions` and `swipe-action` parts for component-owned boundaries; documented CSS variables cover spacing, dividers, feedback, focus, active opacity, shadow, and motion. Reduced-motion mode removes decorative interpolation while preserving the interaction.

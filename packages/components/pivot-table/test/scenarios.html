@@ -22,7 +22,8 @@
       import './translations.ts'
       import '../src/pivot-table.ts'
       import { pivot } from '../src/pivot.ts'
-      window.pivotApi = { pivot }
+      import { agingBucket } from '../src/aging-table.ts'
+      window.pivotApi = { pivot, agingBucket }
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

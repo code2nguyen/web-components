@@ -13,6 +13,10 @@
       "types": "./types/src/kanban-column.d.ts",
       "default": "./dist/kanban-column.js"
     },
+    "./matrix-board.js": {
+      "types": "./types/src/matrix-board.d.ts",
+      "default": "./dist/matrix-board.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -72,5 +76,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./matrix-board.js"
+    ]
+  }
 }

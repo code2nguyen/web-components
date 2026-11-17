@@ -54,11 +54,11 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
 
 `region-field` names each row's region and `value-field` holds the value it is shaded by. Rows join regions on the map's **region key**:
 
-| Map | Default `region-key` | Other keys |
-| --- | --- | --- |
-| `world-110m` (the default, about 105 KB) | `iso_a3`, ISO 3166-1 alpha-3 (`BRA`) | `iso_a2`, `id` (the numeric code, `076`), `name` |
-| `world-50m` (about 750 KB, for zoomed-in maps and small islands) | `iso_a3` | `iso_a2`, `id`, `name` |
-| `us-states` (the 50 states and DC, about 115 KB) | `postal`, the USPS code (`CA`) | `id` (the FIPS code, `06`), `name` |
+| Map                                                              | Default `region-key`                 | Other keys                                       |
+| ---------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------ |
+| `world-110m` (the default, about 105 KB)                         | `iso_a3`, ISO 3166-1 alpha-3 (`BRA`) | `iso_a2`, `id` (the numeric code, `076`), `name` |
+| `world-50m` (about 750 KB, for zoomed-in maps and small islands) | `iso_a3`                             | `iso_a2`, `id`, `name`                           |
+| `us-states` (the 50 states and DC, about 115 KB)                 | `postal`, the USPS code (`CA`)       | `id` (the FIPS code, `06`), `name`               |
 
 Each map is a separate module that loads the first time a chart names it. A key that differs only in case still matches (`fra` finds France). Rows that name no region are skipped and reported once by the `unmatched-rows` event, so a typo in the data shows up in the console of whoever listens rather than as a silently blank country. A region without a row keeps `--c2-chart__region--background-color` and appears as **No data** in the colour key. The world maps leave Antarctica out.
 

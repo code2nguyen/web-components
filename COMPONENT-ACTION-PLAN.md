@@ -49,7 +49,8 @@ These wave-1 steps depend on nothing and sit on different tracks, so they can al
 6. **Touch only your lines of `packages/umbrella/size-budget.json`.** Change your entry (and `lazy` when you add a lazy chunk) by hand or with `npm run size:add -w packages/umbrella` for a new entry. Do not commit the full rewrite `size:update` produces: it edits every entry and conflicts with every other open step.
 7. **Finish the package.** Tests in the package's `test/` directory (keyboard paths included), the docs usage row, one gallery card per example row, the rebuilt `custom-elements.json`, and what `npm run build:tools` regenerates. Then the checks CI runs: `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run mcp:smoke`.
 8. **Review before the pull request**, as `CLAUDE.md` requires: `/code-review`, `/security-review`, and the docs screenshot review when a component or its docs changed.
-9. **If the recommendation does not survive contact with the code**, do not force it. Say so in the pull request, propose the alternative (lazy, companion or new package), and leave the step line in place with a note.
+9. **A variant is a companion element, not more attributes on its host.** When a row fixes what a component's items mean and brings its own data shape, derived structure, domain computation or domain chrome, build it as a companion element in the host's package that extends the host, with its own entry and docs page, even if the candidates file says _Extend_. Code two variants share goes in a module both import, never in the host. [`TABLE-VARIANTS.md`](TABLE-VARIANTS.md) has the checklist and classifies the table rows.
+10. **If the recommendation does not survive contact with the code**, do not force it. Say so in the pull request, propose the alternative (lazy, companion or new package), and leave the step line in place with a note.
 
 ## Shared files and merge order
 
@@ -79,43 +80,22 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-3** · `c2-table` · data editor #241 (lazy), example: timesheet grid #307, example: journal entry grid #328 · +0.6 kB on 31.4 kB, 9 kB lazy · risk medium
-- **table-4** · `c2-table` · status matrix #247, ledger #331 · +1.3 kB on 31.4 kB · risk low
-- **table-5** · `c2-table` · example: line items editor #329, example: allocation editor #330
-
 ### New packages
 
 ## Wave 2: the P2 rows
 
 ### Existing packages
 
-- **table-6** · `c2-table` · value filter #242 (lazy), payroll review grid #355 · +1.2 kB on 31.4 kB, 17 kB lazy · risk low
-- **table-7** · `c2-table` · flowsheet #419 · +1 kB on 31.4 kB · risk low
-- **table-8** · `c2-table` · example: allocation grid #306, example: goal tree #358, example: gradebook #422
-- **virtual-list-1** · `c2-virtual-list` · infinite scroll #471 · +0.5 kB on 17.1 kB · risk low
-- **view-options-1** · `c2-view-options` · saved views #246 · +1.5 kB on 66.1 kB · risk low
-- **choice-matrix-1** · `c2-choice-matrix` · input matrix #248 (companion), record merge #251 · +0.8 kB on 4.8 kB, 3 kB new entry · risk low
-- **choice-matrix-2** · `c2-choice-matrix` · scorecard #316, example: rubric #317, example: inspection checklist #318 · +1.2 kB on 4.8 kB · risk low
-- **description-list-2** · `c2-description-list` · property list #253 (lazy), calculation breakdown #337, example: pay stub #354 · +1.2 kB on 5.6 kB, 6 kB lazy · risk low
-- **autocomplete-1** · `c2-autocomplete` · record picker #252 · +2.5 kB on 26.0 kB · risk low
-- **select-1** · `c2-select` · select panel #254, status select #255 · +2.2 kB on 24.7 kB · risk low
-- **select-2** · `c2-select` · native select #443 (companion) · 3 kB new entry · risk low
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
-- **pivot-table-3** · `c2-pivot-table` · aging table #333 · +0.8 kB on 32.3 kB · risk low
-- **kanban-1** · `c2-kanban` · matrix board #257 · +1.5 kB on 9.4 kB · risk medium
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
 - **highlight-3** · `c2-highlight` · text annotator #279 · +0.3 kB on 2.9 kB · risk low
-- **key-value-editor-1** · `c2-key-value-editor` · tier editor #264 · +1.2 kB on 7.2 kB · risk low
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-1** · `c2-rich-text-editor` · merge field input #266 · +1 kB on 54.6 kB · risk low
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
-- **upload-1** · `c2-upload` · document checklist #272, image uploader #282 · +2.5 kB on 13.0 kB · risk low
 - **attachment-1** · `c2-attachment` · file preview #273 (lazy) · +0.4 kB on 5.3 kB, 8 kB lazy · risk low · absorbs roadmap #46 `c2-pdf-viewer` and the `c2-image` gallery extension (#42)
 - **image-annotator-1** · `c2-image-annotator` · extraction review #275, pinned comments #276, example: image pins #368 · +1.4 kB on 26.1 kB · risk low
 - **core-1** · `@c2n/core` · drop zone #284 (core), sync status #384 (core)
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
-- **scroll-area-1** · `c2-scroll-area` · scroller #472 · +1 kB on 3.4 kB · risk low
-- **date-selector-2** · `c2-date-selector` · date compare picker #295 · +1.2 kB on 4.7 kB · risk low
 - **date-input-2** · `c2-date-input` · memorable date #293 (companion) · 2.5 kB new entry · risk low
 - **month-planner-1** · `c2-month-planner` · agenda view #298, change calendar #303 · +2.3 kB on 10.9 kB · risk low
 - **month-planner-2** · `c2-month-planner` · rate calendar #304 · +0.8 kB on 10.9 kB · risk medium
@@ -124,42 +104,19 @@ Steps on different tracks edit different packages, but a few generated files are
 - **scheduler-4** · `c2-scheduler` · shift board #352 · +0.8 kB on 38.1 kB · risk medium
 - **scheduler-5** · `c2-scheduler` · example: on call schedule #302
 - **week-planner-1** · `c2-week-planner` · schedule paint grid #301 · +1.5 kB on 36.7 kB · risk low
-- **slider-1** · `c2-slider` · time scrubber #311 · +0.6 kB on 5.5 kB · risk low
-- **steps-1** · `c2-steps` · task list #319, stage path #321 · +1.2 kB on 11.3 kB · risk low
-- **steps-2** · `c2-steps` · lesson list #626 · +0.6 kB on 11.3 kB · risk low
-- **confirm-dialog-1** · `c2-confirm-dialog` · typed confirm #323, prompt dialog #324 · +0.9 kB on 8.1 kB · risk low
 - **button-1** · `c2-button` · hold button #325 (companion), progress button #448 · +0.3 kB on 2.4 kB, 1.2 kB new entry · risk low · needs the success and error states listed for `c2-button` in the roadmap
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
-- **format-number-2** · `c2-format-number` · delta #505 · +0.3 kB on 3.2 kB · risk low
 - **chart-1** · `@c2n/chart` · spc chart #366 · +0.2 kB on 34.0 kB, 2 kB lazy · risk low
 - **chart-2** · `@c2n/chart` · combo chart #524 · +1 kB on 37.2 kB · risk medium
 - **chart-3** · `@c2n/chart` · histogram chart #525 · +0.8 kB on 37.2 kB · risk low
 - **chart-4** · `@c2n/chart` · small multiples #526 (companion) · 3 kB new entry · risk medium
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low
-- **number-input-1** · `c2-number-input` · unit input #364 · +1 kB on 3.6 kB · risk low
-- **checkbox-1** · `c2-checkbox-group` · modifier group #365 · +0.5 kB on 6.1 kB · risk low
-- **meter-1** · `c2-meter` · seat meter #400, range indicator #421 (companion) · +0.3 kB on 3.5 kB, 2.5 kB new entry · risk low
 - **secret-field-1** · `c2-secret-field` · totp code #397 · +1 kB on 25.3 kB · risk low
-- **password-field-1** · `c2-password-field` · password generator #398 (lazy) · +0.3 kB on 6.0 kB, 3 kB lazy · risk low
-- **reorder-list-1** · `c2-reorder-list` · ranking #444 · +0.6 kB on 12.2 kB · risk low
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
-- **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low
-- **list-item-2** · `c2-list-item` · settings row #476 · +0.3 kB on 3.3 kB · risk low
-- **page-header-1** · `c2-page-header` · nav bar #467 · +0.6 kB on 29.8 kB · risk low
-- **tabs-1** · `c2-tab` · tab nav #468, code tabs #510 · +0.7 kB on 1.9 kB · risk low
-- **details-1** · `c2-details` · collapse #469 · +0.3 kB on 3.9 kB · risk low
-- **table-of-contents-1** · `c2-table-of-contents` · index bar #470 · +1.2 kB on 5.1 kB · risk low
-- **action-bar-1** · `c2-action-bar` · floating toolbar #473 · +0.5 kB on 2.3 kB · risk low
-- **sticky-1** · `c2-sticky` · sticky cta #475 · +0.3 kB on 1.5 kB · risk low
-- **progress-1** · `c2-progress` · navigation progress #496 (companion), milestone progress #506 · +0.6 kB on 2.7 kB, 1.2 kB new entry · risk low
-- **tour-1** · `c2-tour` · beacon #497 · +0.8 kB on 16.1 kB · risk low
 - **comment-thread-1** · `c2-comment-thread` · comment tree #508 · +1.5 kB on 47.8 kB · risk medium
-- **json-viewer-1** · `c2-json-viewer` · schema tree #553 (lazy) · +0.3 kB on 7.0 kB, 4 kB lazy · risk low
 - **json-viewer-2** · `c2-json-viewer` · json editor #554 (lazy) · +0.3 kB on 7.0 kB, 6 kB lazy · risk medium
 - **log-viewer-1** · `c2-log-viewer` · build log #555 (lazy) · +0.4 kB on 16.5 kB, 4 kB lazy · risk medium
-- **citation-1** · `c2-citation` · sources #570 (companion) · 2.5 kB new entry · risk low
-- **questionnaire-1** · `c2-questionnaire` · agent question #571 · +0.8 kB on 4.7 kB · risk low
 - **selection-toolbar-1** · `c2-selection-toolbar` · inline prompt #574 · +1 kB on 13.2 kB · risk low
 
 ### New packages
@@ -178,8 +135,7 @@ Steps on different tracks edit different packages, but a few generated files are
 
 ### Existing packages
 
-- **table-9** · `c2-table` · bulk select #244 · +0.4 kB on 31.4 kB · risk low
-- **table-10** · `c2-table` · example: mitre matrix #411, example: dose grid #424, example: requirement tree #433
+- **kanban-2** · `c2-kanban` · example: mitre matrix #411 (moved from `table-10`: tactics are columns of techniques of different lengths, a board rather than a table) · after kanban-1
 - **virtual-list-2** · `c2-virtual-list` · data view #245 · +1.5 kB on 17.1 kB · risk medium
 - **choice-matrix-3** · `c2-choice-matrix` · example: rotation editor #353
 - **highlight-4** · `c2-highlight` · example: token heatmap #581, example: text suggestion #585

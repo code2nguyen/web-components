@@ -1,5 +1,6 @@
 import '../src/steps'
 import type { StepNode } from '../src/step-types'
+import { addTranslations } from '@c2n/core/localize.js'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -161,6 +162,73 @@ const markup: Record<string, string> = {
     </c2-step>
     <c2-step status="pending" label="ship" id="ship"></c2-step>
   </c2-steps>`,
+  // A task list: sections of linked tasks, a disabled one that cannot start yet, and the summary line counting them.
+  'task-list': `<c2-steps id="subject" summary marker="none" aria-label="Your application">
+    <c2-step label="Prepare">
+      <c2-step id="company" status="success" label="Company details" href="#company"></c2-step>
+      <c2-step id="directors" status="success" label="Directors" href="#directors"></c2-step>
+      <c2-step id="bank" status="current" label="Bank account" href="#bank" trailing="In progress"></c2-step>
+    </c2-step>
+    <c2-step label="Apply">
+      <c2-step id="declarations" status="pending" label="Declarations" href="#declarations"></c2-step>
+      <c2-step id="submit" status="pending" label="Submit" href="#submit" disabled trailing="Cannot start yet"></c2-step>
+    </c2-step>
+  </c2-steps>`,
+  // A stage path: horizontal, interactive, linked by nothing but a chevron per row, with an action in the header.
+  'stage-path': `<c2-steps id="subject" orientation="horizontal" interactive marker="none" current="2" style="width:640px;--c2-step__rail__horizontal--width:0px;--c2-step__row--clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%)" aria-label="Opportunity stage">
+    <button slot="actions" id="mark">Mark as current stage</button>
+    <c2-step value="prospecting" label="Prospecting"></c2-step>
+    <c2-step value="qualification" label="Qualification"></c2-step>
+    <c2-step value="proposal" label="Proposal"></c2-step>
+    <c2-step value="negotiation" label="Negotiation"></c2-step>
+    <c2-step value="closed" label="Closed"></c2-step>
+  </c2-steps>`,
+  // Links in an interactive list: following one also selects it; a group counts once in a horizontal summary.
+  'interactive-links': `<c2-steps id="subject" orientation="horizontal" interactive summary aria-label="Stages">
+    <c2-step value="one" status="success" label="One" href="#one"></c2-step>
+    <c2-step value="two" label="Two" href="#two">
+      <c2-step status="success" label="a"></c2-step>
+      <c2-step status="pending" label="b"></c2-step>
+    </c2-step>
+    <c2-step value="three" label="Three" href="#three"></c2-step>
+  </c2-steps>`,
+  // Links that are also selectable, and links from data.
+  'data-links': `<c2-steps id="subject" summary aria-label="Tasks from data"></c2-steps>`,
+  'summary-slot': `<c2-steps id="subject" aria-label="Custom summary">
+    <span slot="summary">You have completed 1 section</span>
+    <c2-step status="success" label="One"></c2-step>
+    <c2-step label="Two"></c2-step>
+  </c2-steps>`,
+  'summary-fr': `<div lang="fr"><c2-steps id="subject" summary aria-label="Tâches">
+    <c2-step status="success" label="Un"></c2-step>
+    <c2-step label="Deux"></c2-step>
+  </c2-steps></div>`,
+  // A course: sections counting their lessons, a lesson locked behind another with its reason, and one with no group.
+  lessons: `<c2-steps id="subject" group-progress aria-label="Course content">
+    <c2-step id="basics" label="Basics">
+      <c2-step id="intro" status="success" label="Introduction" href="#intro" trailing="4 min"></c2-step>
+      <c2-step id="forms" status="current" label="Your first form" href="#forms" trailing="12 min"></c2-step>
+      <c2-step id="valid" label="Validation" href="#valid" trailing="9 min"></c2-step>
+    </c2-step>
+    <c2-step id="advanced" label="Advanced">
+      <c2-step id="themes" status="locked" label="Theming" href="#themes" reason="Finish Basics to unlock"></c2-step>
+      <c2-step id="slots" status="locked" href="#slots" label="Slots"><span slot="reason" id="slot-reason">Available on 3 May</span></c2-step>
+    </c2-step>
+    <c2-step id="loose" status="success" label="Wrap-up"></c2-step>
+  </c2-steps>`,
+  // Locked in an interactive list: neither a button nor selectable.
+  'lessons-interactive': `<c2-steps id="subject" interactive aria-label="Lessons">
+    <c2-step value="one" status="success" label="One"></c2-step>
+    <c2-step value="two" status="locked" label="Two" reason="Finish One first"></c2-step>
+    <c2-step value="three" label="Three"></c2-step>
+  </c2-steps>`,
+  'lessons-data': `<c2-steps id="subject" group-progress aria-label="Course from data"></c2-steps>`,
+  'lessons-fr': `<div lang="fr"><c2-steps id="subject" group-progress aria-label="Cours">
+    <c2-step label="Bases">
+      <c2-step status="success" label="Un"></c2-step>
+      <c2-step status="locked" label="Deux"></c2-step>
+    </c2-step>
+  </c2-steps></div>`,
   'data-interactive': `<c2-steps id="subject" orientation="horizontal" interactive selected="process" aria-label="Task from data"></c2-steps>`,
   data: `<c2-steps id="subject" aria-label="Run trace from data"></c2-steps>`,
   'data-wizard': `<c2-steps id="subject" marker="number" current="1" aria-label="Checkout from data"></c2-steps>`,
@@ -203,6 +271,50 @@ if (scenario === 'data-interactive') {
     { id: 'process', label: 'Process', status: 'running' },
     { id: 'result', label: 'Result', disabled: true },
   ]
+}
+
+if (scenario === 'data-links') {
+  subject.steps = [
+    { id: 'a', label: 'Profile', status: 'success', href: '#profile' },
+    { id: 'b', label: 'Payment', href: '#payment' },
+    { id: 'c', label: 'Review', href: '#review', disabled: true },
+  ]
+}
+
+if (scenario === 'lessons-data') {
+  subject.steps = [
+    {
+      id: 'basics',
+      label: 'Basics',
+      children: [
+        { id: 'intro', label: 'Introduction', status: 'success' },
+        { id: 'forms', label: 'Forms', status: 'success' },
+        { id: 'valid', label: 'Validation' },
+      ],
+    },
+    {
+      id: 'advanced',
+      label: 'Advanced',
+      children: [{ id: 'themes', label: 'Theming', status: 'locked', reason: 'Finish Basics to unlock', href: '#themes' }],
+    },
+  ]
+  subject.renderTrailing = (context) => (context.progress ? `${context.progress.completed}/${context.progress.total}` : '')
+}
+
+if (scenario === 'lessons-fr') {
+  addTranslations({ fr: { steps: { groupProgress: '{0} sur {1}', locked: 'Verrouillée' } } })
+}
+
+if (scenario === 'summary-fr') {
+  addTranslations({ fr: { steps: { summary: '{0} sur {1} terminées' } } })
+}
+
+if (scenario === 'stage-path') {
+  // The app's action: the selected stage becomes the current one.
+  document.getElementById('mark')!.addEventListener('click', () => {
+    const index = Number(subject.querySelector<HTMLElement & { path: string }>(`c2-step[value="${subject.selected}"]`)?.path) - 1
+    if (index >= 0) subject.current = index
+  })
 }
 
 if (scenario === 'renderers') {

@@ -12,6 +12,8 @@ import { Button } from '@c2n/components/button'
 
 `c2-confirm-dialog` puts a question between the user and an action. `await dialog.show()` resolves `true` when they confirm and `false` when they cancel, press Escape or the dialog is closed by code, so the calling code reads top to bottom. Set the text with `heading`, `message`, `confirm-label` and `cancel-label`, or fill the `heading`, default and `icon` slots. `destructive` paints the confirm button in the error colour and puts the initial focus on Cancel, so a reflexive Enter never deletes anything. Hand it a `confirmAction` to run the work from the dialog: the confirm button spins until the promise settles, and a rejection keeps the dialog open (firing `confirm-error`) for a retry. It is a `c2-modal` announced as an `alertdialog`: a backdrop click does not dismiss it, and the frame takes the `--c2-modal…` variables.
 
+Two opt-in modes ask for more than a click. `confirm-text` is a typed confirmation: the confirm button stays disabled until the user types that phrase, such as the name of the repository being deleted, into the field the dialog adds under the message. `await dialog.prompt()` asks for a value: the dialog shows a text field (or the control you put in the `input` slot, such as a `c2-select`) and resolves with its value, or `null` when the user cancels. The field's constraints (`required`, `type`) and a `validate` function are checked on confirm, and an error keeps the dialog open with the message under the field. Enter in a text field confirms.
+
 ## Import
 
 ```typescript tag=CodeBlock
@@ -26,6 +28,15 @@ import { confirm } from '@c2n/components/confirm-dialog'
 if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.', confirmLabel: 'Delete', destructive: true })) {
   await deleteProject()
 }
+```
+
+`prompt()` does the same for a value: it resolves with what the user typed, or `null`.
+
+```typescript tag=CodeBlock
+import { prompt } from '@c2n/components/confirm-dialog'
+
+const name = await prompt({ heading: 'Rename file', label: 'File name', value: file.name, confirmLabel: 'Rename', required: true })
+if (name !== null) await renameFile(file, name)
 ```
 
 ## Usage
@@ -54,3 +65,12 @@ if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.
   <c2-button onclick="const d = document.getElementById('cd-3'); d.confirmAction = () => new Promise((r) => setTimeout(r, 1500)); d.show()">Revoke API key</c2-button>
   <c2-confirm-dialog id="cd-3" destructive heading="Revoke this key?" message="Requests signed with it fail immediately." confirm-label="Revoke"></c2-confirm-dialog>
 </div>
+<div data-label="Typed confirmation">
+  <c2-button class="cd-danger" onclick="document.getElementById('cd-4').show()">Delete repository</c2-button>
+  <c2-confirm-dialog id="cd-4" destructive heading="Delete repository?" message="Its issues, pull requests and releases are removed for everyone." confirm-label="Delete" confirm-text="acme/web-components"></c2-confirm-dialog>
+</div>
+<div data-label="Prompt">
+  <c2-button onclick="document.getElementById('cd-5').prompt({ label: 'File name', value: 'quarterly-report.pdf', required: true })">Rename file</c2-button>
+  <c2-confirm-dialog id="cd-5" heading="Rename file" message="The link to this file keeps working." confirm-label="Rename"></c2-confirm-dialog>
+</div>
+```

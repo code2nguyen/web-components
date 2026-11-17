@@ -29,6 +29,7 @@ const submitted: Record<string, string[]> = {
   'c2-date-strip': ['2026-10-17'],
   'c2-date-time-picker': ['2026-10-17T09:30'],
   'c2-duration-input': ['5400'],
+  'c2-image-uploader': ['photo.png'],
   'c2-inline-edit': ['Apollo'],
   'c2-json-form': ['{"city":"Paris"}'],
   'c2-keypad': ['42.5'],
@@ -37,6 +38,7 @@ const submitted: Record<string, string[]> = {
   'c2-mask-input': ['abc'],
   'c2-money-input': ['1250'],
   'c2-month-picker': ['2026-10'],
+  'c2-native-select': ['eu'],
   'c2-notepad': ['Notes'],
   'c2-number-input': ['42'],
   'c2-otp-input': ['1234'],
@@ -50,6 +52,8 @@ const submitted: Record<string, string[]> = {
   'c2-radio-group': ['a'],
   'c2-rate': ['3'],
   'c2-recurrence-editor': ['FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE'],
+  // Each keyed row's data-reorder-key, in the order the value set.
+  'c2-reorder-list': ['b', 'a'],
   'c2-rich-text-editor': ['Hello **world**'],
   'c2-search-field': ['query'],
   'c2-select': ['eu'],
@@ -63,9 +67,11 @@ const submitted: Record<string, string[]> = {
   'c2-text-field': ['Ada'],
   'c2-text-field-clear': ['Ada'],
   'c2-textarea': ['Long text'],
+  'c2-tier-editor': ['[{"upTo":1000,"value":0.05},{"upTo":null,"value":0.03}]'],
   'c2-time-input': ['09:30'],
   'c2-time-slot-picker': ['2026-10-17T09:00:00Z'],
   'c2-tree-select': ['eu'],
+  'c2-unit-input': ['42'],
   'c2-upload': ['notes.txt'],
   'c2-wheel-picker': ['5;10'],
 }
@@ -81,6 +87,10 @@ const ownCase: Record<string, string> = {
   'c2-address-field': 'submits name[line1], name[city]… and name[country], one entry per part of the country format',
   'c2-card-input': 'submits name[number], name[expiry] and name[cvc], typed in by the user only',
   'c2-choice-matrix': 'submits one name[row] entry per choice',
+  'c2-document-checklist': 'submits one name[requirement] entry per file, under the row it was uploaded to (covered in document-checklist.spec.ts)',
+  'c2-input-matrix': 'submits one name[row][column] entry per value',
+  'c2-record-merge': 'submits one name[field] entry per field, the record chosen for it',
+  'c2-scorecard': 'submits one name[criterion] entry per answer, the point chosen',
   'c2-quantity-picker': "submits one entry per counter, under each c2-quantity's own name (covered in quantity-picker.spec.ts)",
 }
 
@@ -113,6 +123,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-date-strip': (e) => (e.value = '2026-10-17'),
         'c2-date-time-picker': (e) => (e.value = '2026-10-17T09:30'),
         'c2-duration-input': (e) => (e.value = 5400),
+        'c2-image-uploader': (e) => (e.value = [new File(['x'], 'photo.png', { type: 'image/png' })]),
         'c2-inline-edit': (e) => (e.value = 'Apollo'),
         'c2-json-form': (e) => Object.assign(e, { schema: { type: 'object', properties: { city: { type: 'string' } } }, value: { city: 'Paris' } }),
         'c2-key-value-editor': (e) => (e.entries = [{ key: 'API_KEY', value: 'secret' }]),
@@ -120,6 +131,7 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-mask-input': (e) => (e.value = 'abc'),
         'c2-money-input': (e) => (e.value = '1250'),
         'c2-month-picker': (e) => (e.value = '2026-10'),
+        'c2-native-select': (e) => Object.assign(e, { options: ['us', 'eu'], value: 'eu' }),
         'c2-notepad': (e) => (e.value = 'Notes'),
         'c2-number-input': (e) => (e.value = '42'),
         'c2-otp-input': (e) => (e.value = '1234'),
@@ -135,6 +147,15 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-keypad': (e) => (e.value = '42.5'),
         'c2-rate': (e) => (e.value = 3),
         'c2-recurrence-editor': (e) => (e.value = 'FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE'),
+        'c2-reorder-list': (e) => {
+          for (const key of ['a', 'b']) {
+            const row = document.createElement('div')
+            row.dataset.reorderKey = key
+            row.textContent = key
+            e.append(row)
+          }
+          e.value = ['b', 'a']
+        },
         'c2-signature-pad': (e) =>
           (e.strokes = [
             [
@@ -151,9 +172,15 @@ test('a client-created control is submitted under the name set as a property', a
         'c2-text-field': (e) => (e.value = 'Ada'),
         'c2-text-field-clear': (e) => (e.value = 'Ada'),
         'c2-textarea': (e) => (e.value = 'Long text'),
+        'c2-tier-editor': (e) =>
+          (e.tiers = [
+            { upTo: 1000, value: 0.05 },
+            { upTo: null, value: 0.03 },
+          ]),
         'c2-time-input': (e) => (e.value = '09:30'),
         'c2-time-slot-picker': (e) => (e.value = '2026-10-17T09:00:00Z'),
         'c2-tree-select': (e) => (e.value = ['eu']),
+        'c2-unit-input': (e) => (e.value = '42'),
         'c2-upload': (e) => (e.value = [new File(['hello'], 'notes.txt', { type: 'text/plain' })]),
         'c2-wheel-picker': (e) => Object.assign(e, { columns: [{ options: ['4', '5', '6'] }, { options: ['0', '5', '10'] }], value: ['5', '10'] }),
         'c2-button': (e) => Object.assign(e, { type: 'submit', value: 'go' }),
@@ -199,6 +226,45 @@ test('c2-date-selector reflects end-name and submits the end of the range under 
   expect(outcome).toEqual({ attribute: 'end', data: { start: '2026-10-17', end: '2026-10-24' } })
 })
 
+test('c2-date-selector submits a comparison range under name-compare and name-compare-end', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const data = await page.evaluate(async () => {
+    const element = document.createElement('c2-date-selector') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, { name: 'period', from: '2026-10-17', to: '2026-10-23', compare: 'previous-period' })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return Object.fromEntries(new FormData(document.querySelector('form')!))
+  })
+  expect(data).toEqual({ period: '2026-10-17', 'period-end': '2026-10-23', 'period-compare': '2026-10-10', 'period-compare-end': '2026-10-16' })
+})
+
+test('a multiple c2-autocomplete submits one entry per pick under the name set as a property', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-autocomplete') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'accounts',
+      multiple: true,
+      itemKey: 'id',
+      value: 'typed query',
+      selectedItems: [
+        { id: 'acme', label: 'Acme' },
+        { id: 'hooli', label: 'Hooli' },
+      ],
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'accounts',
+    entries: [
+      ['accounts', 'acme'],
+      ['accounts', 'hooli'],
+    ],
+  })
+})
+
 test('c2-choice-matrix reflects a name set as a property and submits one name[row] entry per choice', async ({ page, renderScenario }) => {
   await renderScenario('<form></form>')
   const outcome = await page.evaluate(async () => {
@@ -227,6 +293,85 @@ test('c2-choice-matrix reflects a name set as a property and submits one name[ro
       ['perm[pulls]', 'read'],
     ],
   })
+})
+
+test('c2-input-matrix reflects a name set as a property and submits one name[row][column] entry per value', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-input-matrix') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'qty',
+      rows: [
+        { value: 's', label: 'S' },
+        { value: 'm', label: 'M' },
+      ],
+      columns: [
+        { value: 'red', label: 'Red' },
+        { value: 'blue', label: 'Blue' },
+      ],
+      value: { s: { red: 4, blue: 2 }, m: { blue: 1.5 } },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({
+    attribute: 'qty',
+    entries: [
+      ['qty[s][red]', '4'],
+      ['qty[s][blue]', '2'],
+      ['qty[m][blue]', '1.5'],
+    ],
+  })
+})
+
+test('c2-record-merge reflects a name set as a property and submits the record chosen for each field', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-record-merge') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'merge',
+      records: [
+        { id: 'a', label: 'A', values: { name: 'Ada', phone: '' } },
+        { id: 'b', label: 'B', values: { name: 'A.', phone: '+44' } },
+      ],
+      value: { phone: 'b' },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  // Every field without a choice is on the primary record, the first.
+  expect(outcome).toEqual({
+    attribute: 'merge',
+    entries: [
+      ['merge[name]', 'a'],
+      ['merge[phone]', 'b'],
+    ],
+  })
+})
+
+test('c2-scorecard reflects a name set as a property and submits one name[criterion] entry per answer', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-scorecard') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, {
+      name: 'sc',
+      rows: [
+        { value: 'design', label: 'Design' },
+        { value: 'code', label: 'Code' },
+      ],
+      columns: [
+        { value: '1', label: 'No' },
+        { value: '2', label: 'Yes' },
+      ],
+      value: { design: '2' },
+    })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return { attribute: element.getAttribute('name'), entries: [...new FormData(document.querySelector('form')!)] }
+  })
+  expect(outcome).toEqual({ attribute: 'sc', entries: [['sc[design]', '2']] })
 })
 
 test('c2-card-input reflects a name set as a property and submits name[number], name[expiry] and name[cvc]', async ({ page, renderScenario }) => {

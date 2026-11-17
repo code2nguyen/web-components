@@ -1,0 +1,75 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-navigation-progress,
+  $theme: (
+    height: 3px,
+    indicator--background-color: #0265dc,
+    indicator--box-shadow: none,
+    indicator--border-radius: 0,
+    animation-duration: 200ms,
+    fade-duration: 400ms,
+  )
+);
+
+// The host takes no room in the page: the bar is drawn in the top layer, or over the top of its container.
+:host {
+  display: contents;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.track {
+  // The popover's own place and look are reset: a strip across the top. Without popover support the fixed position
+  // and the z-index keep it at the top of the viewport over most of the page.
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 2147483647;
+  width: auto;
+  height: css.cssVar(height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  background: none;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity css.cssVar(animation-duration) ease-out;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.is-contained {
+  position: absolute;
+  z-index: 1;
+}
+
+// Fades in as it appears or enters the top layer.
+@starting-style {
+  .track {
+    opacity: 0;
+  }
+}
+
+// After `done()` the bar fills first, then fades.
+.is-done {
+  opacity: 0;
+  transition: opacity css.cssVar(fade-duration) ease-in css.cssVar(animation-duration);
+}
+
+.indicator {
+  height: 100%;
+  border-radius: css.cssVar(indicator--border-radius);
+  background-color: css.cssVar(indicator--background-color);
+  box-shadow: css.cssVar(indicator--box-shadow);
+  transition: width css.cssVar(animation-duration) ease-out;
+}
+
+// The steps jump instead of sliding; the fades stay, as they do not move anything.
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    transition: none;
+  }
+}

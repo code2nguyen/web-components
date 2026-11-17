@@ -39,6 +39,10 @@
       ></c2-password-field>
     </section>
     <section>
+      <h3>Password generator</h3>
+      <c2-password-field placeholder="New password" autocomplete="new-password" generator meter requirements="length;number" minlength="12"></c2-password-field>
+    </section>
+    <section>
       <h3>Error</h3>
       <c2-password-field value="secret" error error-text="Incorrect password."></c2-password-field>
     </section>

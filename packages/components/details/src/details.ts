@@ -9,6 +9,11 @@ import { classMap } from 'lit/directives/class-map.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
 
+const nativeCommands = typeof HTMLButtonElement === 'undefined' || 'commandForElement' in HTMLButtonElement.prototype
+
+/** A native button, or an element that draws its button in its shadow root and forwards commands to it (`c2-button`). */
+const isInvoker = (element: Element) => element instanceof HTMLButtonElement || !!element.shadowRoot?.querySelector('button')
+
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
 export interface DetailsEventMap {
   toggle: ToggleEvent
@@ -25,6 +30,9 @@ export interface Details {
  * close animate the content height (plus a fade) with the Web Animations API, so the motion is identical in every
  * browser; the native `open` attribute is only removed once the close animation has finished.
  *
+ * `headless` makes it a collapse opened from outside, e.g. by `<button commandfor="id" command="--toggle">` or
+ * `<c2-button commandfor="id" command="--toggle">` (`--open`, `--close`).
+ *
  * @tag c2-details
  *
  * @slot title - Header label. Falls back to the `label` attribute.
@@ -40,6 +48,7 @@ export interface Details {
  * @csspart body - Collapsible body region wrapping the default slot.
  *
  * @event {ToggleEvent} toggle - Re-dispatched from the native details after it opens or closes (`newState` is `open` or `closed`).
+ *   An external trigger updates its own `aria-expanded` from it.
  *
  * @cssproperty {border} [--c2-details--border=1px solid rgb(213, 213, 213)] - Frame on all four sides; each per-side variable falls back to it.
  * @cssproperty {border} [--c2-details--border-top=1px solid rgb(213, 213, 213)] - Falls back to `--c2-details--border`.
@@ -109,8 +118,12 @@ export class Details extends LitElement {
   @property() label = ''
 
   /**
-   * Accordion group: opening a panel closes every other `c2-details` with the same name in the same document or shadow
-   * root. (The native `name` attribute cannot be used: each panel's `<details>` sits in its own shadow tree.)
+   * Accordion group: a panel that opens (by click, keyboard, `expanded`, `toggle()`, a command or find-in-page), or that
+   * joins the group open (first client render, insertion, a new `name`), closes every other `c2-details` with the same
+   * name in the same document or shadow root, each firing its own `toggle`. Of two panels opened in one task, the last
+   * one stays open, as with native `<details name>`. A server-rendered panel takes part once it has hydrated.
+   * The children of a `c2-accordion` follow the accordion (and its `multiple`), not `name`. (The native `name`
+   * attribute cannot be used: each panel's `<details>` sits in its own shadow tree.)
    */
   @property() name: string | undefined = undefined
 
@@ -119,6 +132,12 @@ export class Details extends LitElement {
 
   /** Dims the header and blocks toggling (pointer and keyboard). */
   @property({ type: Boolean, reflect: true }) disabled = false
+
+  /**
+   * Draws the content alone (no summary, no frame, content padding 0): a collapse opened from outside through
+   * `expanded`, `toggle()` or a `commandfor` button. A `command="--toggle"` button gets its `aria-expanded` kept in step.
+   */
+  @property({ type: Boolean, reflect: true }) headless = false
 
   private readonly slotPresence = new SlotPresenceController(this, ['header-content', 'expanded-icon'])
   /** Keeps the native `open` attribute while the close animation plays; the content is hidden by the browser otherwise. */
@@ -131,9 +150,28 @@ export class Details extends LitElement {
   @consume({ context: accordionContext, subscribe: true })
   private accordion: AccordionContext | undefined
 
+  private commandRoot: Node | undefined
+
+  constructor() {
+    super()
+    this.addEventListener('command', this.handleCommand)
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!nativeCommands) {
+      this.commandRoot = this.getRootNode()
+      this.commandRoot.addEventListener('click', this.handleTriggerClick)
+    }
+    // Moved open into its group: it is the open one now.
+    if (this.hasUpdated && this.expanded) this.closeNamePeers()
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.accordion = undefined
+    this.commandRoot?.removeEventListener('click', this.handleTriggerClick)
+    this.commandRoot = undefined
     this.cancelContentAnimations()
     this.closing = false
   }
@@ -145,11 +183,86 @@ export class Details extends LitElement {
     }
   }
 
+  /**
+   * Closes the rest of the `name` group the moment this panel opens or joins it open, synchronously as native `open`
+   * does, so of two panels opened in one task the last one stays open.
+   */
+  override requestUpdate(...args: Parameters<LitElement['requestUpdate']>) {
+    super.requestUpdate(...args)
+    const [name, oldValue] = args
+    if (this.hasUpdated && this.expanded && ((name === 'expanded' && !oldValue) || (name === 'name' && oldValue !== this.name))) this.closeNamePeers()
+  }
+
+  override firstUpdated() {
+    // Rendered open: it is the open one of its group. After the first render, so a hydrating panel still matches the server.
+    if (this.expanded) this.closeNamePeers()
+  }
+
   override updated(changed: PropertyValues<this>) {
-    if (this.isConnected && changed.has('expanded') && changed.get('expanded') !== undefined) {
+    // `toggle()` opens the native disclosure ahead of the render; when a later panel of the group closed this one in the
+    // same task, the template value did not change and the render left the native `open` in place.
+    const open = this.expanded || this.closing
+    if (changed.has('expanded') && this.detailsElement && this.detailsElement.open !== open) this.detailsElement.open = open
+    // A panel opened and closed again before it rendered (by a later panel of its group) has nothing to animate.
+    if (this.isConnected && changed.has('expanded') && changed.get('expanded') !== undefined && changed.get('expanded') !== this.expanded) {
       this.animateContent(this.expanded)
       this.accordion?.expandedChanged(this)
+      this.syncTriggers()
     }
+  }
+
+  /**
+   * Closes the other open panels of this panel's `name` group in the same root node; nothing without a `name`. The
+   * children of a `c2-accordion` belong to the accordion's rule instead, on either side. A peer that has not rendered
+   * yet is left alone (it may be waiting to hydrate): if it is open, its own first update closes this one.
+   */
+  private closeNamePeers() {
+    const name = this.name
+    if (!name || !this.isConnected || isAccordionPanel(this)) return
+    const root = this.getRootNode() as Document | ShadowRoot
+    for (const peer of root.querySelectorAll('c2-details'))
+      if (peer !== this && peer.name === name && peer.expanded && peer.hasUpdated && !isAccordionPanel(peer)) peer.expanded = false
+  }
+
+  private readonly handleCommand = (event: Event) => this.runCommand(event, (event as CommandEvent).command)
+
+  /**
+   * Without invoker commands, a click on a trigger naming this panel runs its command: a native button, or an element
+   * such as `c2-button` that carries `commandfor` on its host and draws its button in a shadow root. As natively, a
+   * disabled button and a submit or reset button of a form send nothing.
+   */
+  private readonly handleTriggerClick = (event: Event) => {
+    const path = event.composedPath()
+    const trigger = path.find((node): node is Element => node instanceof Element && node.hasAttribute('commandfor'))
+    if (!trigger || !this.id || trigger.getAttribute('commandfor') !== this.id || !isInvoker(trigger)) return
+    // The button the click went through: the trigger itself, or the one in its shadow root.
+    const button = path.find(
+      (node): node is HTMLButtonElement => node instanceof HTMLButtonElement && (node === trigger || node.getRootNode() === trigger.shadowRoot),
+    )
+    const { type, form } = trigger as Element & { type?: string; form?: HTMLFormElement | null }
+    if (!button || button.disabled || trigger.matches(':disabled') || (type !== 'button' && form)) return
+    this.runCommand(event, trigger.getAttribute('command'))
+  }
+
+  private runCommand(event: Event, command: string | null) {
+    if (!event.defaultPrevented && (command === '--toggle' || command === '--open' || command === '--close'))
+      this.toggle(command === '--toggle' ? undefined : command === '--open')
+  }
+
+  /**
+   * `aria-expanded` of the `--toggle` triggers naming this panel, as popover invokers get natively. Only on change.
+   * A `c2-button` takes it as a property and hands it to its inner button; an attribute the author wrote is kept in step.
+   */
+  private syncTriggers() {
+    const root = this.getRootNode() as ParentNode
+    const expanded = String(this.expanded)
+    if (this.id && root.querySelectorAll)
+      for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="--toggle"]`)) {
+        if (!isInvoker(trigger) || (trigger.ariaExpanded === expanded && (trigger.getAttribute('aria-expanded') ?? expanded) === expanded)) continue
+        trigger.ariaExpanded = expanded
+        // modern-web-ignore: aria-attribute-on-other-element updates only the aria-expanded the author wrote on a c2-button trigger, so it does not go stale
+        if (!(trigger instanceof HTMLButtonElement) && trigger.hasAttribute('aria-expanded')) trigger.setAttribute('aria-expanded', expanded)
+      }
   }
 
   private cancelContentAnimations() {
@@ -252,6 +365,8 @@ export class Details extends LitElement {
   }
 
   private handleDetailsToggle(event: Event) {
+    // Opened and closed again in one task (see `updated`): the browser still reports it, with no change of state.
+    if ((event as ToggleEvent).oldState === (event as ToggleEvent).newState) return
     // The native element stays open during the closing animation.
     if (!this.closing) this.expanded = this.detailsElement.open
     redispatchEvent(this, event)
@@ -311,6 +426,11 @@ export class Details extends LitElement {
       </details>
     `
   }
+}
+
+/** A direct child of `c2-accordion`, which coordinates its panels itself. */
+function isAccordionPanel(panel: Element): boolean {
+  return panel.parentElement?.localName === 'c2-accordion'
 }
 
 /** First top-level entry of a comma-separated CSS list; commas inside `cubic-bezier(...)` are kept. */

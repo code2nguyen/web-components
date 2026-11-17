@@ -1,0 +1,40 @@
+---
+/**
+ * Plays the application's part in the unit input gallery: the French of the card under `lang="fr"` (the picker, the
+ * equivalent and the step controls of c2-number-input), and the base quantity of the card marked
+ * `data-unit-input-example="stock"`, read from `baseValue` whenever the number or the unit changes.
+ */
+---
+
+<script>
+  import type { UnitInput } from '@c2n/components/number-input/unit-input'
+  import '@c2n/components/number-input/unit-input'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'number-input': { decrease: 'Diminuer la valeur', increase: 'Augmenter la valeur' },
+      'unit-input': { unit: 'Unité', equivalent: '= {0} {1}', approximately: '≈ {0} {1}' },
+    },
+  })
+
+  const wired = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-unit-input-example="stock"]').forEach((card) => {
+      const stock = card.querySelector<UnitInput>('c2-unit-input')
+      const output = card.querySelector('output')
+      if (!stock || !output || wired.has(card)) return
+      wired.add(card)
+      const show = () => {
+        const base = stock.baseValue
+        output.textContent = Number.isFinite(base) ? `Stock: ${base} ${stock.baseUnit?.value ?? ''}` : 'Stock: none'
+      }
+      stock.addEventListener('input', show)
+      stock.addEventListener('unit-change', show)
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+</script>

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-chat-message-list,
   $theme: (
@@ -63,7 +64,7 @@
   scrollbar-width: css.cssVar(scrollbar--width);
   scrollbar-color: css.cssVar(scrollbar__thumb--color) css.cssVar(scrollbar__track--color);
 
-  &:hover {
+  @include pointer.hover {
     scrollbar-color: css.cssVar(scrollbar__thumb__hover--color) css.cssVar(scrollbar__track--color);
   }
 
@@ -90,7 +91,7 @@
       background: css.cssVar(scrollbar__thumb--color);
     }
 
-    &:hover::-webkit-scrollbar-thumb {
+    @include pointer.hover('::-webkit-scrollbar-thumb') {
       background: css.cssVar(scrollbar__thumb__hover--color);
     }
   }
@@ -139,7 +140,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(jump-button__hover--background);
   }
 

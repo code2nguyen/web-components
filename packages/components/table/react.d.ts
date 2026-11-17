@@ -13,8 +13,12 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { AllocationGrid } from '@c2n/table/allocation-grid.js'
+import type { Flowsheet } from '@c2n/table/flowsheet.js'
+import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
+import type { TreeTable } from '@c2n/table/tree-table.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -24,10 +28,19 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': Omit<
-        C2Props<Table>,
-        'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups' | 'expandedRows' | 'expandedDetails'
+      'c2-allocation-grid': Omit<
+        C2Props<AllocationGrid>,
+        'periods' | 'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
       > & {
+        'allocations-field'?: Attribute
+        'period-format'?: Attribute
+        'capacity-field'?: Attribute
+        'row-totals'?: Attribute
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
         'row-key'?: Attribute
@@ -45,38 +58,195 @@ declare module 'react' {
         'page-size'?: Attribute
         'summary-values'?: Attribute
         'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
+        periods?: AllocationGrid['periods'] | string
+        groupBy?: AllocationGrid['groupBy'] | string
+        expandedGroups?: AllocationGrid['expandedGroups'] | string
+        rows?: AllocationGrid['rows'] | string
+        columns?: AllocationGrid['columns'] | string
+        value?: AllocationGrid['value'] | string
+        sortModel?: AllocationGrid['sortModel'] | string
+        summaryValues?: AllocationGrid['summaryValues'] | string
+        expandedDetails?: AllocationGrid['expandedDetails'] | string
+        baseline?: AllocationGrid['baseline'] | string
+      }
+      'c2-flowsheet': Omit<
+        C2Props<Flowsheet>,
+        'observations' | 'times' | 'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+      > & {
+        'readings-field'?: Attribute
+        'time-order'?: Attribute
+        'time-format'?: Attribute
         'group-by'?: Attribute
         'group-display'?: Attribute
         'expanded-groups'?: Attribute
         'groups-collapsed'?: Attribute
         'empty-group-label'?: Attribute
-        'children-field'?: Attribute
-        'expanded-rows'?: Attribute
-        'tree-expanded'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
         'detail-height'?: Attribute
         'expanded-details'?: Attribute
         'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
+        observations?: Flowsheet['observations'] | string
+        times?: Flowsheet['times'] | string
+        groupBy?: Flowsheet['groupBy'] | string
+        expandedGroups?: Flowsheet['expandedGroups'] | string
+        rows?: Flowsheet['rows'] | string
+        columns?: Flowsheet['columns'] | string
+        value?: Flowsheet['value'] | string
+        sortModel?: Flowsheet['sortModel'] | string
+        summaryValues?: Flowsheet['summaryValues'] | string
+        expandedDetails?: Flowsheet['expandedDetails'] | string
+        baseline?: Flowsheet['baseline'] | string
+      }
+      'c2-group-table': Omit<
+        C2Props<GroupTable>,
+        'groupBy' | 'expandedGroups' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+      > & {
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
+        groupBy?: GroupTable['groupBy'] | string
+        expandedGroups?: GroupTable['expandedGroups'] | string
+        rows?: GroupTable['rows'] | string
+        columns?: GroupTable['columns'] | string
+        value?: GroupTable['value'] | string
+        sortModel?: GroupTable['sortModel'] | string
+        summaryValues?: GroupTable['summaryValues'] | string
+        expandedDetails?: GroupTable['expandedDetails'] | string
+        baseline?: GroupTable['baseline'] | string
+      }
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'> & {
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
         rows?: Table['rows'] | string
         columns?: Table['columns'] | string
         value?: Table['value'] | string
         sortModel?: Table['sortModel'] | string
         summaryValues?: Table['summaryValues'] | string
-        groupBy?: Table['groupBy'] | string
-        expandedGroups?: Table['expandedGroups'] | string
-        expandedRows?: Table['expandedRows'] | string
         expandedDetails?: Table['expandedDetails'] | string
+        baseline?: Table['baseline'] | string
       }
-      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
+      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions' | 'options'> & {
         'column-id'?: Attribute
         'min-width'?: Attribute
         'format-options'?: Attribute
         'cell-class'?: Attribute
         'cell-slot'?: Attribute
         'summary-label'?: Attribute
+        'summary-target'?: Attribute
         'summary-align'?: Attribute
         'summary-span'?: Attribute
         'group-column'?: Attribute
+        'variance-threshold'?: Attribute
+        'reference-range'?: Attribute
+        'critical-range'?: Attribute
+        'count-value'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
+        options?: TableColumn['options'] | string
+      }
+      'c2-tree-table': Omit<
+        C2Props<TreeTable>,
+        'expandedRows' | 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'expandedDetails' | 'baseline'
+      > & {
+        'children-field'?: Attribute
+        'expanded-rows'?: Attribute
+        'tree-expanded'?: Attribute
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
+        'row-key'?: Attribute
+        'checkbox-selection'?: Attribute
+        sort?: Attribute
+        'multi-sort'?: Attribute
+        'animate-updates'?: Attribute
+        'update-duration'?: Attribute
+        'highlight-updates'?: Attribute
+        'update-highlight-field'?: Attribute
+        'row-height'?: Attribute
+        'virtual-threshold'?: Attribute
+        'block-size'?: Attribute
+        'empty-message'?: Attribute
+        'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'detail-height'?: Attribute
+        'expanded-details'?: Attribute
+        'detail-label'?: Attribute
+        'bulk-select'?: Attribute
+        'selection-scope'?: Attribute
+        expandedRows?: TreeTable['expandedRows'] | string
+        rows?: TreeTable['rows'] | string
+        columns?: TreeTable['columns'] | string
+        value?: TreeTable['value'] | string
+        sortModel?: TreeTable['sortModel'] | string
+        summaryValues?: TreeTable['summaryValues'] | string
+        expandedDetails?: TreeTable['expandedDetails'] | string
+        baseline?: TreeTable['baseline'] | string
       }
     }
   }

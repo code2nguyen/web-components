@@ -1,4 +1,4 @@
-import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, isServer, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -31,6 +31,10 @@ export interface ActionBar {
  * it changes, in the built-in wording even when the `label` slot replaces the visible text. Hiding the bar takes its actions out
  * of the Tab order, so an action that empties the selection should move focus back to the collection.
  *
+ * Set `open` to show the bar with no selection at all: a floating toolbar of the actions alone, with no count and no clear
+ * button, that switches to the selection layout while `count` is above zero. Add `hide-on-scroll` to tuck the bar away
+ * while its scroll container (or the page) scrolls; it comes back as the scroll ends, and stays while focus is in it.
+ *
  * Put the actions in the default slot: `c2-button`s, a `c2-button-group toolbar` for one Tab stop with arrow keys,
  * or a menu of further actions. The actions stay on one line. Where the bar is 480px wide or less (a phone), the count
  * and the clear button share the top row and the actions take a full-width row below; actions that still do not fit
@@ -53,6 +57,7 @@ export interface ActionBar {
  * @cssproperty {border-radius} [--c2-action-bar__container--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-action-bar__container--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {padding} [--c2-action-bar__container--padding=6px 6px 6px 16px]
+ * @cssproperty {padding} [--c2-action-bar__container__toolbar--padding=6px] - The padding of an `open` bar with nothing selected, which shows the actions alone.
  * @cssproperty {pixel} [--c2-action-bar__container--gap=12px] - Space between the count, the divider, the actions and the clear button.
  * @cssproperty {pixel} [--c2-action-bar__container--max-width=calc(100% - 32px)] - Past this width the actions scroll sideways (or wrap, with `--c2-action-bar__actions--flex-wrap: wrap`).
  * @cssproperty {pixel} [--c2-action-bar__container--offset=8px] - How far the bar slides as it shows and hides.
@@ -89,6 +94,36 @@ export class ActionBar extends LitElement {
   @property({ type: Number }) count = 0
 
   /**
+   * Shows the bar even when nothing is selected: a floating toolbar of the actions alone, with no count line, divider
+   * or clear button. While `count` is above zero it shows the selection layout as usual.
+   */
+  @property({ type: Boolean }) open = false
+
+  /**
+   * Hides the bar while its scroll container or the page scrolls, and shows it again once the scroll ends. A bar that
+   * holds focus stays.
+   */
+  @property({ type: Boolean, attribute: 'hide-on-scroll' }) hideOnScroll = false
+
+  /** A scroll that the bar hides for is under way. */
+  @state() private scrolling = false
+
+  /**
+   * While `hide-on-scroll` is set: the bar's ancestors in the flat tree (so a scroll container in the shadow root of a
+   * component the bar is slotted into counts), among them the document and shadow roots listened to.
+   */
+  private ancestors = new Set<Node>()
+  /** The ancestors that are scrolling now: the bar comes back once the last of them ends. */
+  private scrollers = new Set<EventTarget>()
+  private scrollTimer?: ReturnType<typeof setTimeout>
+
+  /**
+   * Whether the bar shows the actions alone (`open` with nothing selected). Like `shownCount`, it keeps the last
+   * layout while the bar fades out, so a closing toolbar does not grow a count line on the way out.
+   */
+  private toolbar = false
+
+  /**
    * The count the label shows. It keeps the last non-zero count while the bar fades out, so the label does not read
    * "0 selected" on the way out, and so the live region has nothing new to announce.
    */
@@ -113,10 +148,14 @@ export class ActionBar extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.addEventListener('keydown', this.handleKeydown)
+    this.addEventListener('focusin', this.handleScrollEnd)
+    if (this.hasUpdated) this.listenToScroll()
   }
 
   override disconnectedCallback() {
     this.removeEventListener('keydown', this.handleKeydown)
+    this.removeEventListener('focusin', this.handleScrollEnd)
+    this.listenToScroll(false)
     this.resizeObserver?.disconnect()
     this.resizeObserver = undefined
     super.disconnectedCallback()
@@ -148,6 +187,51 @@ export class ActionBar extends LitElement {
     if (start !== this.overflow.start || end !== this.overflow.end) this.overflow = { start, end }
   }
 
+  /**
+   * Listens for scrolls while `hide-on-scroll` is set. Scroll events neither bubble nor cross a shadow boundary, but
+   * are seen on the way down, so one capturing listener on each document or shadow root among the bar's ancestors
+   * hears every container that scrolls it.
+   */
+  private listenToScroll(on = this.hideOnScroll): void {
+    for (const node of this.ancestors) {
+      node.removeEventListener('scroll', this.handleScroll, true)
+      node.removeEventListener('scrollend', this.handleScrollEnd, true)
+    }
+    this.ancestors.clear()
+    this.handleScrollEnd()
+    if (!on || !this.isConnected) return
+    for (let node = this.assignedSlot ?? this.parentNode; node; node = (node as Element).assignedSlot ?? node.parentNode ?? (node as ShadowRoot).host) {
+      this.ancestors.add(node)
+      if (node instanceof Element) continue
+      // modern-web-ignore: scroll-listener-visual hides while a scroll is under way, not at a scroll position; no CSS query says "scrolling", and hiding also takes the actions out of the Tab order
+      node.addEventListener('scroll', this.handleScroll, { capture: true, passive: true })
+      // `scrollend` is Baseline newly available; without it, `handleScroll` ends the scroll on a timer.
+      if ('onscrollend' in window) node.addEventListener('scrollend', this.handleScrollEnd, true)
+    }
+  }
+
+  private handleScroll = (event: Event): void => {
+    const target = event.target as Node
+    if (!this.ancestors.has(target) || (!this.scrolling && this.matches(':focus-within'))) return
+    this.scrollers.add(target)
+    this.scrolling = true
+    // Without `scrollend`, the scroll counts as ended once it has been still for 150ms. With it, a longer stillness
+    // still ends it: an engine may not deliver `scrollend` for every scroll (Firefox for a wheel scroll here), and a
+    // bar left hidden would take its actions away for good.
+    clearTimeout(this.scrollTimer)
+    this.scrollTimer = setTimeout(this.handleScrollEnd, 'onscrollend' in window ? 3000 : 150)
+  }
+
+  /** A scroll ended (`scrollend`), or, with no event, every scroll did: focus came in, or the timer ran out. */
+  private handleScrollEnd = (event?: Event): void => {
+    if (event?.type === 'scrollend') this.scrollers.delete(event.target as Node)
+    else {
+      this.scrollers.clear()
+      clearTimeout(this.scrollTimer)
+    }
+    this.scrolling = this.scrollers.size > 0
+  }
+
   private handleKeydown = (event: KeyboardEvent): void => {
     if (event.key !== 'Escape' || event.defaultPrevented || this.count <= 0) return
     // Escape in an open menu or select inside the bar closes that popup; it does not clear the selection.
@@ -157,11 +241,24 @@ export class ActionBar extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('count') && this.count > 0) this.shownCount = this.count
+    if (this.count > 0 || this.open) {
+      const toolbar = this.open && this.count <= 0
+      // The clear button leaves with the selection: focus on it moves to the first action rather than to the page.
+      if (toolbar && !this.toolbar && this.shadowRoot?.activeElement?.matches('.clear')) void this.updateComplete.then(() => this.focusFirstAction())
+      this.toolbar = toolbar
+    }
+    // Before the render, so a bar a scroll had hidden shows again in the same update.
+    if (changed.has('hideOnScroll') && !isServer) this.listenToScroll()
+  }
+
+  private focusFirstAction(): void {
+    const first = this.actionsElement?.querySelector('slot')?.assignedElements()[0]
+    if (first instanceof HTMLElement) first.focus()
   }
 
   protected override updated(): void {
-    this.internals.ariaLabel = this.msg.t('actions')
-    const open = this.count > 0
+    this.internals.ariaLabel = this.msg.t(this.toolbar ? 'toolbar' : 'actions')
+    const open = (this.count > 0 || this.open) && !this.scrolling
     if (open) this.internals.states.add('open')
     else this.internals.states.delete('open')
     if (this.wasOpen !== undefined && open !== this.wasOpen) this.slide(open)
@@ -185,22 +282,32 @@ export class ActionBar extends LitElement {
   }
 
   override render() {
+    // An open bar with nothing selected is a toolbar: the actions alone.
+    const toolbar = this.toolbar
     // The live region sits outside the bar: the bar is `visibility: hidden` while closed, and a region that enters
     // the accessibility tree together with its first text is often not announced. It says the count even when the
     // `label` slot replaces the visible text, and nothing at zero.
     return html`<span class="announcer" role="status">${this.count > 0 ? this.msg.t('selected', this.count) : nothing}</span>
-      <div class="bar">
-        <span class="label"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
-        <span class="divider" aria-hidden="true"></span>
+      <div class=${classMap({ bar: true, toolbar })}>
+        ${
+          toolbar
+            ? nothing
+            : html`<span class="label"><slot name="label">${this.msg.t('selected', this.shownCount)}</slot></span>
+                <span class="divider" aria-hidden="true"></span>`
+        }
         <div class=${classMap({ actions: true, 'fade-start': this.overflow.start, 'fade-end': this.overflow.end })} @scroll=${this.measureOverflow}>
           <slot @slotchange=${this.observeActions}></slot>
         </div>
-        <button type="button" class="clear" aria-label=${this.msg.t('clear')} @click=${this.clear}>
-          <slot name="clear-icon"
-            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-              <path d="m6 6 12 12M6 18 18 6"></path></svg
-          ></slot>
-        </button>
+        ${
+          toolbar
+            ? nothing
+            : html`<button type="button" class="clear" aria-label=${this.msg.t('clear')} @click=${this.clear}>
+                <slot name="clear-icon"
+                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="m6 6 12 12M6 18 18 6"></path></svg
+                ></slot>
+              </button>`
+        }
       </div>`
   }
 }

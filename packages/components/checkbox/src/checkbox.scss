@@ -59,6 +59,10 @@
     description--color: #71717a,
     description--font-size: 12px,
     description--line-height: 1.4,
+    trailing--color: #71717a,
+    trailing--font-size: inherit,
+    trailing--font-weight: inherit,
+    trailing--padding-inline-start: 12px,
   )
 );
 
@@ -98,6 +102,11 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
     align-items: flex-start;
   }
 
+  // A trailing region (a price) sits at the far edge, so the row takes the width the host is given.
+  &.has-trailing {
+    flex: 1 1 auto;
+  }
+
   &:has(.c2-checkbox-input:disabled) {
     cursor: default;
   }
@@ -114,7 +123,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   }
 }
 
-.c2-checkbox-field:has(.c2-checkbox-input:disabled) .c2-checkbox-text {
+.c2-checkbox-field:has(.c2-checkbox-input:disabled) :is(.c2-checkbox-text, .c2-checkbox-trailing) {
   opacity: css.cssVar(label__disabled--opacity);
 }
 
@@ -142,6 +151,24 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   line-height: css.cssVar(description--line-height);
   // The label row already fills the touch square; pull the description up under the text.
   margin-top: calc((1.5em - #{css.cssVar(state-layer--size)}) / 2 + 2px);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The trailing region keeps its own width and lines up with the label, even beside a description.
+.c2-checkbox-trailing {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-height: css.cssVar(state-layer--size);
+  margin-inline-start: auto;
+  padding-inline-start: css.cssVar(trailing--padding-inline-start);
+  color: css.cssVar(trailing--color);
+  font-size: css.cssVar(trailing--font-size);
+  font-weight: css.cssVar(trailing--font-weight);
+  font-variant-numeric: tabular-nums;
 
   &[hidden] {
     display: none;

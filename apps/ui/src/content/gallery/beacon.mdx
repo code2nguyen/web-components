@@ -1,0 +1,158 @@
+---
+description: 'Ready-made looks for c2-beacon: default, dot inside the corner, brand colour, calm, spotlight, remembered tips and French. Click a dot to open its tip.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import BeaconExamplesRuntime from '../../components/BeaconExamplesRuntime.astro'
+
+import { Button } from '@c2n/components/button'
+import { Beacon } from '@c2n/components/tour/beacon'
+
+## Presets
+
+Curated looks for `c2-beacon`. Click a dot to open its tip. The dot is styled through `--c2-beacon__dot--*` (`size`, `color`, `border-color`, `translate`) and its pulse through `--c2-beacon__pulse--*`; the tip is the tour's panel, so `--c2-tour--*` styles it. `--c2-beacon__backdrop--color` dims the page around an open tip.
+
+<BeaconExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-button id="gallery-beacon-default">Reports</c2-button>
+<c2-beacon client:only="lit">
+  <c2-tour-step target="#gallery-beacon-default" heading="Reports moved here">Every saved report now lives in one place.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Several tips
+<style>
+  .beacon-several {
+    display: flex;
+    gap: 24px;
+  }
+</style>
+<div class="beacon-several">
+  <c2-button id="gallery-beacon-filter">Filter</c2-button>
+  <c2-button id="gallery-beacon-group">Group</c2-button>
+</div>
+<c2-beacon client:only="lit">
+  <c2-tour-step target="#gallery-beacon-filter" heading="Saved filters">Save a filter once and reuse it on any board.</c2-tour-step>
+  <c2-tour-step target="#gallery-beacon-group" heading="Group by owner" placement="right">See who holds the most open items.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Inside the corner
+<style>
+  .beacon-inside {
+    --c2-beacon__dot--size: 8px;
+    --c2-beacon__dot--border-width: 0px;
+    --c2-beacon__dot--translate: -10px 10px;
+    --c2-beacon__dot--box-shadow: none;
+  }
+  .beacon-inside-card {
+    width: 180px;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div id="gallery-beacon-inside" class="beacon-inside-card">Usage this month</div>
+<c2-beacon class="beacon-inside" client:only="lit">
+  <c2-tour-step target="#gallery-beacon-inside" heading="New: usage by team">Open the card to split the total by team.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Brand colour
+<style>
+  .beacon-brand {
+    --c2-beacon__dot--color: #7c3aed;
+    --c2-beacon__dot--size: 14px;
+    --c2-beacon__pulse--scale: 3;
+    --c2-tour--background-color: #4c1d95;
+    --c2-tour--color: #ffffff;
+    --c2-tour--border: 1px solid #4c1d95;
+    --c2-tour--border-radius: 14px;
+    --c2-tour__body--color: #ede9fe;
+    --c2-tour__close--color: #ede9fe;
+    --c2-tour__close__hover--background-color: #5b21b6;
+    --c2-tour__next--background-color: #ffffff;
+    --c2-tour__next--color: #4c1d95;
+    --c2-tour__next__hover--background-color: #ede9fe;
+    --c2-tour__button--border-radius: 999px;
+    --c2-tour__spotlight--outline: 2px solid #a78bfa;
+  }
+</style>
+<c2-button id="gallery-beacon-brand">Automations</c2-button>
+<c2-beacon class="beacon-brand" client:only="lit">
+  <c2-tour-step target="#gallery-beacon-brand" heading="Automations are here">Move cards, assign people and post updates without lifting a finger.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Calm
+<style>
+  .beacon-calm {
+    --c2-beacon__dot--size: 10px;
+    --c2-beacon__dot--color: #d97706;
+    --c2-beacon__pulse--scale: 1;
+    --c2-tour--width: 240px;
+    --c2-tour__spotlight--outline: none;
+  }
+</style>
+<c2-button id="gallery-beacon-calm">Billing</c2-button>
+<c2-beacon class="beacon-calm" client:only="lit">
+  <c2-tour-step target="#gallery-beacon-calm" heading="Invoices by email" placement="right">A copy of each invoice now goes to your billing contact.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Spotlight
+<style>
+  .beacon-spotlight {
+    --c2-beacon__backdrop--color: rgba(9, 9, 11, 0.45);
+  }
+</style>
+<c2-button id="gallery-beacon-spotlight">Command palette</c2-button>
+<c2-beacon class="beacon-spotlight" client:only="lit">
+  <c2-tour-step target="#gallery-beacon-spotlight" heading="Press ⌘K anywhere">Jump to any page, person or setting from the keyboard.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=Remembered
+<style>
+  .beacon-remembered {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+</style>
+<div class="beacon-remembered">
+  <c2-button id="gallery-beacon-remembered">Templates</c2-button>
+  <c2-button data-beacon-example="reset">Show the tip again</c2-button>
+</div>
+<c2-beacon storage-key="c2n-gallery-beacon" client:only="lit">
+  <c2-tour-step id="templates" target="#gallery-beacon-remembered" heading="Start from a template">Got it hides this dot for good on this browser.</c2-tour-step>
+</c2-beacon>
+```
+
+```html tag=MdxCodeBlock,label=French
+<div lang="fr">
+  <c2-button id="gallery-beacon-fr">Exporter</c2-button>
+  <c2-beacon client:only="lit">
+    <c2-tour-step target="#gallery-beacon-fr" heading="Export CSV">Téléchargez n’importe quelle vue en tableur.</c2-tour-step>
+  </c2-beacon>
+</div>
+```
+
+</GalleryGrid>
+
+The Remembered card's button forgets the dismissed tips; the French card's text is the translation an app adds:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { tour: { dismiss: 'Compris', beacon: 'Voir l’astuce : {0}', beaconUnnamed: 'Voir l’astuce', close: 'Fermer' } } })
+
+resetButton.addEventListener('click', () => document.querySelector('c2-beacon')!.reset())
+```

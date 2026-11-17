@@ -1,4 +1,5 @@
 import { test, expect, props, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+import type { Locator } from '@playwright/test'
 
 test('value-slot presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
   const value = page.locator('c2-progress').locator('[part="value"]')
@@ -129,4 +130,120 @@ test('an indeterminate circular ring spins without a value', async ({ page, rend
   await expect(page.locator('[part="value"]')).toHaveText('')
   const animation = await page.locator('[part="indicator"]').evaluate((circle) => getComputedStyle(circle).animationName)
   expect(animation).toBe('c2-progress-spin')
+})
+
+const tiers = JSON.stringify([
+  { value: 500, label: 'Silver' },
+  { value: 1500, label: 'Gold', state: 'claimable' },
+  { value: 3000, label: 'Platinum' },
+])
+
+/** Centre of a part, as a fraction of the track's width from its left edge. */
+async function along(host: Locator, part: string, index = 0) {
+  const [track, box] = await Promise.all([host.locator('[part="track"]').boundingBox(), host.locator(`[part="${part}"]`).nth(index).boundingBox()])
+  return (box!.x + box!.width / 2 - track!.x) / track!.width
+}
+
+test('without marks the bar draws no milestone list', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-progress value="40">Points</c2-progress>')
+  await expect(page.locator('[part="marks"]')).toHaveCount(0)
+  // The track is still a direct child of the bar, as before milestones existed.
+  await expect(page.locator('.c2-progress > [part="track"]')).toHaveCount(1)
+})
+
+test('marks put a dot on the track at each milestone, with its label under the track', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress value="1800" max="3000" marks='${tiers}'>Loyalty points</c2-progress>`)
+  const host = page.locator('c2-progress')
+  await expect(host.locator('[part="mark-label"]')).toHaveText(['Silver', 'Gold', 'Platinum'])
+  expect(await along(host, 'mark-dot', 0)).toBeCloseTo(500 / 3000, 2)
+  expect(await along(host, 'mark-dot', 1)).toBeCloseTo(1500 / 3000, 2)
+  expect(await along(host, 'mark-dot', 2)).toBeCloseTo(1, 2)
+  // The dot is centred on the track, and the label sits below it.
+  const [track, dot, label] = await Promise.all([
+    host.locator('[part="track"]').boundingBox(),
+    host.locator('[part="mark-dot"]').first().boundingBox(),
+    host.locator('[part="mark-label"]').first().boundingBox(),
+  ])
+  expect(Math.abs(dot!.y + dot!.height / 2 - (track!.y + track!.height / 2))).toBeLessThan(1)
+  expect(label!.y).toBeGreaterThanOrEqual(dot!.y + dot!.height)
+  // The dot is drawn over the track and its fill, not under them.
+  const hit = await host.evaluate(
+    (el, [x, y]) => el.shadowRoot!.elementFromPoint(x, y)?.getAttribute('part'),
+    [dot!.x + dot!.width / 2, dot!.y + dot!.height / 2],
+  )
+  expect(hit).toBe('mark-dot')
+  // A label at the end of the track ends there instead of overflowing it.
+  const last = await host.locator('[part="mark-label"]').last().boundingBox()
+  expect(last!.x + last!.width).toBeLessThanOrEqual(track!.x + track!.width + 1)
+  await accessible(page)
+})
+
+test('each milestone is locked, reached or claimable, coloured and announced by its state', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress value="1800" max="3000" marks='${tiers}'>Loyalty points</c2-progress>`)
+  const host = page.locator('c2-progress')
+  const dots = host.locator('[part="mark-dot"]')
+  await expect(dots.nth(0)).toHaveCSS('background-color', 'rgb(2, 101, 220)')
+  await expect(dots.nth(1)).toHaveCSS('background-color', 'rgb(22, 163, 74)')
+  await expect(dots.nth(2)).toHaveCSS('background-color', 'rgb(161, 161, 170)')
+  await expect(host.locator('[part="mark"]')).toHaveText([/Silver\s*500, reached/, /Gold\s*1,500, ready to claim/, /Platinum\s*3,000, 1,200 to go/])
+  // The value moves the states; the explicit `claimable` stays.
+  await props(host, { value: 3000 })
+  await expect(host.locator('[part="mark"]').last()).toHaveText(/3,000, reached/)
+  await props(host, { value: 100 })
+  await expect(host.locator('[part="mark"]')).toHaveText([/500, 400 to go/, /ready to claim/, /3,000, 2,900 to go/])
+})
+
+test('nextMark gives the first milestone not reached and the distance to it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress value="38" max="50" marks='[{"value":25,"label":"Gift wrap"},{"value":50,"label":"Free shipping"}]'>Cart</c2-progress>`)
+  const host = page.locator('c2-progress')
+  const next = () => host.evaluate((el) => (el as HTMLElement & { nextMark?: { index: number; remaining: number } }).nextMark)
+  expect(await next()).toEqual({ mark: { value: 50, label: 'Free shipping' }, index: 1, remaining: 12 })
+  await props(host, { value: 50 })
+  expect(await next()).toBeUndefined()
+})
+
+test('an indeterminate bar announces no distance to its milestones and has no next one', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress marks='${tiers}'>Loyalty points</c2-progress>`)
+  const host = page.locator('c2-progress')
+  await expect(host.locator('[part="mark"]')).toHaveText([/500, not reached/, /1,500, ready to claim/, /3,000, not reached/])
+  expect(await host.evaluate((el) => (el as HTMLElement & { nextMark?: unknown }).nextMark)).toBeUndefined()
+})
+
+test('a milestone kept locked past the value is announced as not reached, and is not the next one', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress value="30" marks='[{"value":20,"label":"Verified","state":"locked"},{"value":50,"label":"Pro"}]'>Account</c2-progress>`)
+  const host = page.locator('c2-progress')
+  await expect(host.locator('[part="mark"]')).toHaveText([/20, not reached/, /50, 20 to go/])
+  expect(await host.evaluate((el) => (el as HTMLElement & { nextMark?: { index: number; remaining: number } }).nextMark)).toMatchObject({
+    index: 1,
+    remaining: 20,
+  })
+})
+
+test('marks also take an array in the property, and renderMark draws their labels', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-progress value="60">Season pass</c2-progress>')
+  const host = page.locator('c2-progress')
+  await host.evaluate(async (el) => {
+    const progress = el as HTMLElement & { marks: unknown; renderMark: unknown; updateComplete: Promise<boolean> }
+    progress.marks = [
+      { value: 50, label: 'Badge' },
+      { value: 75, label: 'Skin' },
+    ]
+    progress.renderMark = ({ mark, state, remaining }: { mark: { label: string }; state: string; remaining: number }) => {
+      const span = document.createElement('span')
+      span.textContent = `${mark.label} (${state}, ${remaining})`
+      return span
+    }
+    await progress.updateComplete
+  })
+  await expect(host.locator('[part="mark-label"]')).toHaveText(['Badge (reached, 0)', 'Skin (locked, 15)'])
+})
+
+test('the milestone states are announced in the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-progress value="1800" max="3000" marks='${tiers}'>Points</c2-progress></div>`)
+  await expect(page.locator('[part="mark"]')).toHaveText([/500, atteint/, /1\u202f500, à réclamer/, /3\u202f000, encore 1\u202f200/])
+})
+
+test('the circular variant ignores marks', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-progress variant="circular" value="40" marks='${tiers}'>Points</c2-progress>`)
+  await expect(page.locator('[part="marks"]')).toHaveCount(0)
 })

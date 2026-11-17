@@ -8,7 +8,17 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    // A sibling whose own tests load its source: reached through its built declarations as well (c2-table's filter
+    // imports @c2n/facet-list, c2-autocomplete loads @c2n/chip), its class would be declared twice and the second
+    // HTMLElementTagNameMap entry rejected.
+    "paths": {
+      "@c2n/chip": ["../packages/components/chip/src/chip.ts"],
+      "@c2n/facet-list": ["../packages/components/facet-list/src/facet-list.ts"]
+    }
   },
-  "include": ["../playwright.config.ts", "./**/*.ts", "../packages/components/*/test/**/*.ts", "../open-packages/*/test/**/*.ts"]
+  "include": ["../playwright.config.ts", "./**/*.ts", "../packages/components/*/test/**/*.ts", "../open-packages/*/test/**/*.ts"],
+  // Server-only test code, run in Node through Vite's SSR loader: @lit-labs/ssr's declarations add a global
+  // `Array.flat(depth: number): Array<T>` overload that would leak into every browser test of this program.
+  "exclude": ["../packages/components/number-input/test/hydration-server.ts"]
 }

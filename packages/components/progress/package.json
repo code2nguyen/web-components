@@ -9,6 +9,10 @@
       "types": "./types/src/progress.d.ts",
       "default": "./dist/progress.js"
     },
+    "./navigation-progress.js": {
+      "types": "./types/src/navigation-progress.d.ts",
+      "default": "./dist/navigation-progress.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +70,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./navigation-progress.js"
+    ]
+  }
 }

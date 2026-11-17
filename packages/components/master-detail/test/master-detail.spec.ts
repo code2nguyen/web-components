@@ -157,6 +157,14 @@ test('follows its own width across the breakpoint and keeps the open record', as
   await expect(item(page, 'Ana Ruiz')).toBeVisible()
 })
 
+// #500: a binding can follow the layout from the event alone, without also reading the property on first render.
+test('reports the initial layout once it is measured', async ({ page, scenario }) => {
+  await scenario('split')
+  await expect(page.locator('main')).toHaveAttribute('data-initial-events', 'layout:split')
+  await scenario('overlay')
+  await expect(page.locator('main')).toHaveAttribute('data-initial-events', 'layout:overlay')
+})
+
 test('lays out from the default breakpoint before it is measured', async ({ page, scenario }) => {
   await scenario('split')
   // A fresh element, rendered but not yet observed: no custom state is set, so the container query decides.

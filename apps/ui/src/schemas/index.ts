@@ -6,6 +6,7 @@ export const COMPONENT_CATEGORIES = [
   'Navigation',
   'Layout',
   'Data display',
+  'Table',
   'Editors & viewers',
   'Chart',
   'Planning',

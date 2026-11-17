@@ -4,8 +4,13 @@ description: 'Ready-made looks for c2-description-list: a detail-page grid, a bo
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import DescriptionListExamplesRuntime from '../../components/DescriptionListExamplesRuntime.astro'
 
 import { DescriptionList, DescriptionItem, DescriptionValue } from '@c2n/components/description-list'
+import { DescriptionGroup } from '@c2n/components/description-list/description-group'
+import { Button } from '@c2n/components/button'
+
+<DescriptionListExamplesRuntime />
 import { Badge } from '@c2n/components/badge'
 import { Timeline, TimelineItem } from '@c2n/components/timeline'
 
@@ -390,6 +395,132 @@ import { Timeline, TimelineItem } from '@c2n/components/timeline'
   <c2-description-item label="Errors">0.04%</c2-description-item>
   <c2-description-item label="p95 latency">182 ms</c2-description-item>
 </c2-description-list>
+```
+
+</GalleryGrid>
+
+## Sections, breakdowns and properties
+
+`c2-description-group` titles a section of items, and closes it on demand with `collapsible`. `kind="subtotal"` and
+`kind="total"` turn items into the lines of a calculation, and the value columns carry a current and a year-to-date
+amount. An `editor` on an item makes it a property edited in place; these cards write the committed value back as an
+app does.
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Record sections
+<style>
+  .dl-sections {
+    --c2-description-item__label--width: 120px;
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 10px;
+  }
+</style>
+<c2-description-list class="dl-sections" aria-label="Customer">
+  <c2-description-group label="Contact">
+    <c2-description-item label="Email">ada@example.com</c2-description-item>
+    <c2-description-item label="Phone">+44 20 7946 0000</c2-description-item>
+  </c2-description-group>
+  <c2-description-group label="Billing" collapsible>
+    <c2-description-item label="Plan">Business</c2-description-item>
+    <c2-description-item label="Card">Visa ending 4242</c2-description-item>
+  </c2-description-group>
+  <c2-description-group label="Notes" collapsible collapsed>
+    <c2-description-item label="Source">Referral from the Q3 webinar</c2-description-item>
+  </c2-description-group>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Fee breakdown
+<style>
+  .dl-breakdown {
+    --c2-description-item__label--width: 60%;
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 8px;
+  }
+  .dl-breakdown .amount {
+    display: block;
+    text-align: end;
+  }
+</style>
+<c2-description-list class="dl-breakdown" aria-label="Fee breakdown">
+  <c2-description-group label="Charge">
+    <c2-description-item label="Amount charged"><span class="amount">$250.00</span></c2-description-item>
+    <c2-description-item label="Processing 2.9% + 30¢"><span class="amount">−$7.55</span></c2-description-item>
+    <c2-description-item label="International card 1.5%"><span class="amount">−$3.75</span></c2-description-item>
+    <c2-description-item label="Fees" kind="subtotal"><span class="amount">−$11.30</span></c2-description-item>
+  </c2-description-group>
+  <c2-description-item label="Net to you" kind="total"><span class="amount">$238.70</span></c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Pay stub
+<style>
+  .dl-pay {
+    --c2-description-item__label--width: 44%;
+    --c2-description-list__grid--row-gap: 6px;
+    --c2-description-item__value-column--min-width: 84px;
+    --c2-description-item__value-column--gap: 12px;
+  }
+  .dl-pay c2-description-value {
+    text-align: end;
+  }
+</style>
+<c2-description-list class="dl-pay" aria-label="Pay stub, November 14" value-labels="Current;Year to date" label-heading="Line">
+  <c2-description-group label="Earnings">
+    <c2-description-item label="Salary, 80 h × $52.50"><c2-description-value>$4,200.00</c2-description-value><c2-description-value>$42,000.00</c2-description-value></c2-description-item>
+    <c2-description-item label="Overtime, 4 h × $78.75"><c2-description-value>$315.00</c2-description-value><c2-description-value>$1,890.00</c2-description-value></c2-description-item>
+    <c2-description-item label="Gross pay" kind="subtotal"><c2-description-value>$4,515.00</c2-description-value><c2-description-value>$43,890.00</c2-description-value></c2-description-item>
+  </c2-description-group>
+  <c2-description-group label="Taxes and deductions">
+    <c2-description-item label="Federal income tax"><c2-description-value>−$632.10</c2-description-value><c2-description-value>−$6,144.60</c2-description-value></c2-description-item>
+    <c2-description-item label="Social Security and Medicare"><c2-description-value>−$345.40</c2-description-value><c2-description-value>−$3,357.59</c2-description-value></c2-description-item>
+    <c2-description-item label="401(k) 5%"><c2-description-value>−$225.75</c2-description-value><c2-description-value>−$2,194.50</c2-description-value></c2-description-item>
+    <c2-description-item label="Deductions" kind="subtotal"><c2-description-value>−$1,203.25</c2-description-value><c2-description-value>−$11,696.69</c2-description-value></c2-description-item>
+  </c2-description-group>
+  <c2-description-item label="Net pay" kind="total"><c2-description-value>$3,311.75</c2-description-value><c2-description-value>$32,193.31</c2-description-value></c2-description-item>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Property list
+<style>
+  .dl-properties {
+    --c2-description-item__label--width: 110px;
+    --c2-description-list__grid--columns: 1;
+    --c2-description-list__grid--row-gap: 6px;
+  }
+</style>
+<c2-description-list class="dl-properties" data-description-list-example="properties" aria-label="Deal">
+  <span slot="heading">Acme renewal</span>
+  <c2-button slot="actions" variant="text">Add property</c2-button>
+  <c2-description-group label="Deal">
+    <c2-description-item label="Amount" name="amount" editor="number" edit-value="12000">$12,000</c2-description-item>
+    <c2-description-item label="Stage" name="stage" editor="select" options="Lead;Qualified;Proposal;Won;Lost">Proposal</c2-description-item>
+    <c2-description-item label="Close date" name="close" editor="date">2026-12-15</c2-description-item>
+  </c2-description-group>
+  <c2-description-group label="Contact" collapsible>
+    <c2-description-item label="Champion" name="champion" editor="text">Grace Hopper</c2-description-item>
+    <c2-description-item label="Website" name="website" editor="url">https://acme.example</c2-description-item>
+    <c2-description-item label="Notes" name="notes" editor="textarea">Wants SSO before signing.</c2-description-item>
+  </c2-description-group>
+</c2-description-list>
+```
+
+```html tag=MdxCodeBlock,label=Propriétés (French)
+<style>
+  .dl-properties-fr {
+    --c2-description-item__label--width: 110px;
+    --c2-description-list__grid--columns: 1;
+  }
+</style>
+<div lang="fr">
+  <c2-description-list client:only="lit" class="dl-properties-fr" data-description-list-example="properties" aria-label="Affaire">
+    <c2-description-group label="Affaire">
+      <c2-description-item label="Nom" editor="text">Renouvellement Acme</c2-description-item>
+      <c2-description-item label="Étape" editor="select" options="Prospect;Qualifié;Gagné">Qualifié</c2-description-item>
+    </c2-description-group>
+  </c2-description-list>
+</div>
 ```
 
 </GalleryGrid>

@@ -1,6 +1,6 @@
 ---
 title: 'Table gallery'
-description: 'Ready-made c2-table setups: columns and formats, sorting and selection, grouping, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
+description: 'Ready-made c2-table setups: columns and formats, sorting and selection, toolbars and footers, editing, states, and looks from a hairline report to a trading terminal. Groups are on the group table page, nested rows on the tree table page.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -8,10 +8,10 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
-import GroupByTableToolbar from '../../components/GroupByTableToolbar.astro'
 import TableExamplesRuntime from '../../components/TableExamplesRuntime.astro'
 
 import { Table } from '@c2n/components/table'
+import { GroupTable } from '@c2n/components/table/group-table'
 import { TableColumn } from '@c2n/components/table/table-column'
 import { Sparkline } from '@c2n/components/chart/sparkline'
 import { Button } from '@c2n/components/button'
@@ -20,7 +20,6 @@ import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <SparklineMarketTable />
-<GroupByTableToolbar />
 <TableExamplesRuntime />
 
 ## Columns and data
@@ -286,6 +285,114 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
   <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
   <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Bulk selection
+<style>
+  .bulk-invoices {
+    height: 330px;
+    width: 100%;
+  }
+  .bulk-invoices .bulk-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+</style>
+<c2-table client:only="lit" class="bulk-invoices" data-table-example="bulk-select" row-key="id" selection="multiple" checkbox-selection bulk-select paginated page-size="5" rows='[{"id":"INV-1040","customer":"Acme","amount":180,"status":"Paid"},{"id":"INV-1041","customer":"Brio","amount":247,"status":"Open"},{"id":"INV-1042","customer":"Corvid","amount":314,"status":"Overdue"},{"id":"INV-1043","customer":"Dune","amount":381,"status":"Paid"},{"id":"INV-1044","customer":"Ember","amount":448,"status":"Open"},{"id":"INV-1045","customer":"Fjord","amount":515,"status":"Overdue"},{"id":"INV-1046","customer":"Glint","amount":582,"status":"Paid"},{"id":"INV-1047","customer":"Harbor","amount":649,"status":"Open"},{"id":"INV-1048","customer":"Iris","amount":716,"status":"Overdue"},{"id":"INV-1049","customer":"Juniper","amount":783,"status":"Paid"},{"id":"INV-1050","customer":"Kestrel","amount":850,"status":"Open"},{"id":"INV-1051","customer":"Lumen","amount":917,"status":"Overdue"},{"id":"INV-1052","customer":"Maple","amount":984,"status":"Paid"},{"id":"INV-1053","customer":"Nimbus","amount":1051,"status":"Open"},{"id":"INV-1054","customer":"Onyx","amount":218,"status":"Overdue"},{"id":"INV-1055","customer":"Pike","amount":285,"status":"Paid"},{"id":"INV-1056","customer":"Quartz","amount":352,"status":"Open"},{"id":"INV-1057","customer":"Ridge","amount":419,"status":"Overdue"}]'>
+  <div slot="toolbar" class="bulk-bar"><span data-bulk-status>No invoices selected</span></div>
+  <c2-pagination slot="footer"></c2-pagination>
+  <c2-table-column field="id" header="Invoice" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(140px, 1fr)"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="100px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="110px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Filters and comparisons
+
+`filterable` on a column (or on the table, for every column) puts a funnel in its header. It opens a `c2-facet-list` of the column's values with their counts (the rows the other filters let through), searchable, each value included, excluded or picked alone, with the two sorts and a way to clear. Alt+↓ opens it from the header. The filters live in `filters`, a JSON attribute too, so a filtered view can be written in markup and applies before the filter's code loads; `filter-change` reports each change, and a `dataSource` receives them in its request. `baseline` takes last period's rows, matched by `row-key`: a column with `compare="delta"` or `compare="percent"` shows each cell's change from it, and `variance-threshold` marks the cells that moved further than that share.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Column filters
+<style>
+  .order-filters {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="order-filters" row-key="id" sortable filters='{"status":{"exclude":["Paid"]}}' rows='[{"id":"SO-1041","customer":"Acme Corp","region":"EMEA","status":"Paid","channel":"Web","total":1240},{"id":"SO-1042","customer":"Nordlys AS","region":"EMEA","status":"Open","channel":"Partner","total":860},{"id":"SO-1043","customer":"Brio Labs","region":"Americas","status":"Paid","channel":"Web","total":3100},{"id":"SO-1044","customer":"Kiwi Freight","region":"APAC","status":"Overdue","channel":"Sales","total":450},{"id":"SO-1045","customer":"Halcyon","region":"Americas","status":"Open","channel":"Web","total":620},{"id":"SO-1046","customer":"Tessera","region":"APAC","status":"Paid","channel":"Partner","total":1980},{"id":"SO-1047","customer":"Pine & Co","region":"EMEA","status":"Overdue","channel":"Sales","total":2310},{"id":"SO-1048","customer":"Lumen Health","region":"Americas","status":"Paid","channel":"Sales","total":4120}]'>
+  <c2-table-column field="id" header="Order" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(150px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="120px" filterable></c2-table-column>
+  <c2-table-column field="status" header="Status" width="120px" filterable></c2-table-column>
+  <c2-table-column field="channel" header="Channel" width="120px" filterable></c2-table-column>
+  <c2-table-column field="total" header="Total" width="110px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Payroll review
+<style>
+  .payroll-review {
+    height: 320px;
+    width: 100%;
+    --c2-table__delta__up--color: light-dark(#b45309, #f5b45c);
+    --c2-table__delta__down--color: light-dark(#15803d, #5fcf8b);
+  }
+</style>
+<c2-table client:only="lit" class="payroll-review" row-key="id" filterable rows='[{"id":"E-01","name":"Ada Lovelace","team":"Analytics","gross":9200,"tax":2480,"net":6720},{"id":"E-02","name":"Grace Hopper","team":"Compilers","gross":8600,"tax":2290,"net":6310},{"id":"E-03","name":"Alan Turing","team":"Research","gross":10450,"tax":2980,"net":7470},{"id":"E-04","name":"Radia Perlman","team":"Networks","gross":7900,"tax":2050,"net":5850},{"id":"E-05","name":"Barbara Liskov","team":"Research","gross":8800,"tax":2350,"net":6450},{"id":"E-06","name":"Katherine Johnson","team":"Flight","gross":6100,"tax":1490,"net":4610}]' baseline='[{"id":"E-01","gross":9200,"tax":2480,"net":6720},{"id":"E-02","gross":8400,"tax":2230,"net":6170},{"id":"E-03","gross":8650,"tax":2380,"net":6270},{"id":"E-04","gross":7900,"tax":2050,"net":5850},{"id":"E-05","gross":8800,"tax":2350,"net":6450},{"id":"E-06","gross":7400,"tax":1860,"net":5540}]'>
+  <c2-table-column field="name" header="Employee" width="minmax(130px, 1.5fr)" filterable="false"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="100px"></c2-table-column>
+  <c2-table-column field="gross" header="Gross" width="150px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1" filterable="false"></c2-table-column>
+  <c2-table-column field="tax" header="Tax" width="90px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' filterable="false"></c2-table-column>
+  <c2-table-column field="net" header="Net" width="130px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="percent" variance-threshold="0.1" filterable="false"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Filtres (French)
+<style>
+  .order-filters-fr {
+    height: 320px;
+    width: 100%;
+  }
+</style>
+<div lang="fr">
+  <c2-table client:only="lit" class="order-filters-fr" row-key="id" filterable rows='[{"id":"SO-1041","customer":"Acme Corp","region":"EMEA","status":"Paid","channel":"Web","total":1240},{"id":"SO-1042","customer":"Nordlys AS","region":"EMEA","status":"Open","channel":"Partner","total":860},{"id":"SO-1043","customer":"Brio Labs","region":"Americas","status":"Paid","channel":"Web","total":3100},{"id":"SO-1044","customer":"Kiwi Freight","region":"APAC","status":"Overdue","channel":"Sales","total":450},{"id":"SO-1045","customer":"Halcyon","region":"Americas","status":"Open","channel":"Web","total":620},{"id":"SO-1046","customer":"Tessera","region":"APAC","status":"Paid","channel":"Partner","total":1980},{"id":"SO-1047","customer":"Pine & Co","region":"EMEA","status":"Overdue","channel":"Sales","total":2310},{"id":"SO-1048","customer":"Lumen Health","region":"Americas","status":"Paid","channel":"Sales","total":4120}]'>
+    <c2-table-column field="customer" header="Client" width="minmax(150px, 2fr)" filterable="false"></c2-table-column>
+    <c2-table-column field="region" header="Région" width="130px"></c2-table-column>
+    <c2-table-column field="status" header="Statut" width="130px"></c2-table-column>
+    <c2-table-column field="total" header="Total" width="120px" align="end" format="currency" filterable="false"></c2-table-column>
+  </c2-table>
+</div>
+```
+
+</GalleryGrid>
+
+## Range flags
+
+`reference-range="low,high"` on a column flags a value outside its row's normal range with `H` or `L`, and `critical-range` with `HH` or `LL`, as a lab report does; each limit is a number or the field of the row that holds it, and the mark's tooltip gives the range. For a measure per row and a column per reading time, use [`c2-flowsheet`](/web-components/components/flowsheet).
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Lab report
+<style>
+  .lab-report {
+    height: 260px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="lab-report" row-key="id" rows='[{"id":"glu","test":"Glucose","unit":"mg/dL","result":131,"low":70,"high":99},{"id":"k","test":"Potassium","unit":"mmol/L","result":6.4,"low":3.5,"high":5.1,"critHigh":6.2},{"id":"na","test":"Sodium","unit":"mmol/L","result":139,"low":135,"high":145},{"id":"hb","test":"Hemoglobin","unit":"g/dL","result":11.1,"low":12,"high":16,"critLow":7},{"id":"tsh","test":"TSH","unit":"mIU/L","result":0.3,"low":0.4,"high":4}]'>
+  <c2-table-column field="test" header="Test" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="result" header="Result" width="120px" align="end" reference-range="low,high" critical-range="critLow,critHigh"></c2-table-column>
+  <c2-table-column field="unit" header="Unit" width="100px"></c2-table-column>
+  <c2-table-column field="low" header="Low" width="80px" align="end"></c2-table-column>
+  <c2-table-column field="high" header="High" width="80px" align="end"></c2-table-column>
 </c2-table>
 ```
 
@@ -614,176 +721,135 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
 
 </GalleryGrid>
 
-## Grouping
+## Statuses and running balances
 
-`group-by` gathers the rows into collapsible groups, outermost level first: `group-by="region,status"` nests the statuses of each region. By default each group is a row of the grid — its label and row count in the first column, and under every column with a `summary` that figure for the group's rows, so subtotals line up with the totals row. `group-display="band"` draws a full-width band per group instead. The groups of the rows at the top of the view stay under the header while they scroll, a group's checkbox selects its rows, and `groups-collapsed` starts them closed. The table does not ship a "group by" picker: the last card builds one from a `c2-button-group` in the `toolbar` slot that sets `groupBy`.
+`format="status"` draws each value of a column as a mark and a label from its `options`, the column's legend (`value`, `label`, `color`, `glyph`), so a grid of controls, skills or close tasks reads as a status matrix: windowed like any table, with its first column pinned. `summary="tally"` counts each status under its column, and a column with `count-value` counts the statuses of a row that hold one value. `running="credit,-debit"` makes a running total from `opening`, over the rows in their sorted order, and `summary="last"` closes it in the summary row: both are computed once when the rows change, never while scrolling.
 
 <GalleryGrid min="560">
 
-```html tag=MdxCodeBlock,label=Grouped rows
+```html tag=MdxCodeBlock,label=Status matrix
 <style>
-  .grouped-rows {
-    height: 360px;
+  .compliance {
+    height: 320px;
     width: 100%;
+    --c2-table__tally--gap: 8px;
+  }
+  .compliance::part(cell-failing) {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 </style>
-<c2-table client:only="lit" class="grouped-rows" row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
-  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
-  <c2-table-column field="region" header="Region" hidden></c2-table-column>
-  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
-  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
-  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+<c2-table client:only="lit" class="compliance" row-key="id" rows='[{"id":"d1","device":"MacBook-014","owner":"Ada Lovelace","disk":"pass","firewall":"pass","patches":"fail","mdm":"pass"},{"id":"d2","device":"MacBook-027","owner":"Grace Hopper","disk":"fail","firewall":"pass","patches":"fail","mdm":"warn"},{"id":"d3","device":"Surface-003","owner":"Alan Turing","disk":"pass","firewall":"na","patches":"pass","mdm":"pass"},{"id":"d4","device":"ThinkPad-112","owner":"Radia Perlman","disk":"pass","firewall":"pass","patches":"warn","mdm":"pass"},{"id":"d5","device":"MacBook-031","owner":"Barbara Liskov","disk":"pass","firewall":"fail","patches":"pass","mdm":"pass"},{"id":"d6","device":"iPad-008","owner":"Katherine Johnson","disk":"na","firewall":"na","patches":"pass","mdm":"warn"}]'>
+  <c2-table-column field="device" header="Device" width="124px" pinned="start" summary-label="Totals"></c2-table-column>
+  <c2-table-column field="disk" header="Encryption" width="130px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="firewall" header="Firewall" width="140px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="patches" header="Patches" width="134px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column field="mdm" header="MDM" width="110px" format="status" options='[{"value":"pass","label":"Passing","color":"#16a34a","glyph":"✓"},{"value":"warn","label":"At risk","color":"#d97706","glyph":"!"},{"value":"fail","label":"Failing","color":"#dc2626","glyph":"✕"},{"value":"na","label":"Not applicable"}]' summary="tally"></c2-table-column>
+  <c2-table-column column-id="failing" header="Failing" width="80px" align="end" count-value="fail" summary="sum"></c2-table-column>
 </c2-table>
 ```
 
-```html tag=MdxCodeBlock,label=Group bands
+```html tag=MdxCodeBlock,label=Skills matrix
 <style>
-  .grouped-bands {
-    height: 360px;
+  .skills {
+    height: 280px;
     width: 100%;
-    --c2-table__group-band--background: var(--c2-theme--color-surface-container, #f4f4f5);
-    --c2-table__group-count--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__status-label--max-width: 0;
+    --c2-table__status--gap: 0;
+    --c2-table__status-mark__glyph--size: 24px;
+    --c2-table__status-mark__glyph--border-radius: 6px;
+    --c2-table__status-mark__glyph--font-size: 12px;
+    --c2-table__cell--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
-<c2-table client:only="lit" class="grouped-bands" row-key="id" group-by="status" group-display="band" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
-  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)"></c2-table-column>
-  <c2-table-column field="region" header="Region" width="110px"></c2-table-column>
-  <c2-table-column field="status" header="Status" hidden></c2-table-column>
-  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency"></c2-table-column>
-  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number"></c2-table-column>
+<c2-table client:only="lit" class="skills" row-key="id" rows='[{"id":"ada","name":"Ada","lit":4,"css":3,"a11y":2,"perf":4,"sql":1,"ops":3},{"id":"grace","name":"Grace","lit":3,"css":4,"a11y":4,"perf":2,"sql":2,"ops":3},{"id":"alan","name":"Alan","lit":4,"css":2,"a11y":1,"perf":3,"sql":4,"ops":2},{"id":"radia","name":"Radia","lit":2,"css":3,"a11y":4,"perf":4,"sql":3,"ops":1},{"id":"barbara","name":"Barbara","lit":3,"css":4,"a11y":3,"perf":1,"sql":2,"ops":4}]'>
+  <c2-table-column field="name" header="Engineer" width="minmax(110px, 1fr)" pinned="start"></c2-table-column>
+  <c2-table-column field="lit" header="Lit" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="css" header="CSS" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="a11y" header="A11y" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="perf" header="Perf" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="sql" header="SQL" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
+  <c2-table-column field="ops" header="Ops" width="64px" align="center" format="status" options='[{"value":4,"label":"Expert","color":"#1e3a8a","glyph":"4"},{"value":3,"label":"Proficient","color":"#1d4ed8","glyph":"3"},{"value":2,"label":"Working","color":"#2563eb","glyph":"2"},{"value":1,"label":"Learning","color":"#64748b","glyph":"1"}]'></c2-table-column>
 </c2-table>
 ```
 
-```html tag=MdxCodeBlock,label=Collapsed groups
+```html tag=MdxCodeBlock,label=Account statement
 <style>
-  .grouped-collapsed {
-    height: 240px;
+  .statement {
+    height: 320px;
     width: 100%;
-    --c2-table__group-row--background: var(--c2-theme--color-surface, #ffffff);
-    --c2-table__group-toggle--color: rgb(2, 101, 220);
+    --c2-table__summary--font-weight: 700;
+  }
+  .statement::part(cell-balance),
+  .statement::part(summary-cell-balance) {
+    font-variant-numeric: tabular-nums;
+  }
+  .statement::part(cell-content-pending) {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    font-style: italic;
   }
 </style>
-<c2-table client:only="lit" class="grouped-collapsed" row-key="id" group-by="region" groups-collapsed rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
-  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
-  <c2-table-column field="region" header="Region" hidden></c2-table-column>
-  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
-  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
-  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+<c2-table client:only="lit" class="statement" row-key="id" sort="date:asc" rows='[{"id":"t1","date":"2026-11-01","memo":"Rent, Harbor Street office","debit":2400,"state":"posted"},{"id":"t2","date":"2026-11-03","memo":"Invoice INV-1042, Northwind","credit":5600,"state":"posted"},{"id":"t3","date":"2026-11-04","memo":"Cloud hosting","debit":318.4,"state":"posted"},{"id":"t4","date":"2026-11-06","memo":"Payroll","debit":3900,"state":"posted"},{"id":"t5","date":"2026-11-08","memo":"Invoice INV-1047, Lumen Works","credit":1250,"state":"posted"},{"id":"t6","date":"2026-11-10","memo":"Card authorisation, travel","pending":412,"state":"pending"}]'>
+  <c2-table-column field="date" header="Date" width="72px" format="date" format-options='{"month":"short","day":"numeric"}' summary-label="Closing balance" summary-span="2"></c2-table-column>
+  <c2-table-column field="memo" header="Description" width="minmax(130px, 2fr)"></c2-table-column>
+  <c2-table-column field="state" header="State" width="98px" format="status" options='[{"value":"posted","label":"Posted","color":"#16a34a"},{"value":"pending","label":"Pending","color":"#d97706"}]'></c2-table-column>
+  <c2-table-column field="pending" header="Pending" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column field="debit" header="Out" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column field="credit" header="In" width="78px" align="end" format="currency" format-options='{"maximumFractionDigits":0}'></c2-table-column>
+  <c2-table-column column-id="balance" header="Balance" width="92px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' running="credit,-debit" opening="8250" summary="last"></c2-table-column>
 </c2-table>
 ```
 
-```html tag=MdxCodeBlock,label=Toolbar: group by
+</GalleryGrid>
+
+## Gradebook
+
+A gradebook is a score per student and assignment, with each column's average in the summary row and the final grade as a column of its own. A late, missing or excused mark is data beside the score, and `cellPart` turns it into a part name (`cell-late`, `cell-missing`, `cell-excused`) the card styles from its legend; a failing score gets `cell-failing` the same way.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Gradebook
 <style>
-  .grouped-toolbar {
-    height: 400px;
+  .gradebook {
+    height: 320px;
     width: 100%;
-    --c2-table__toolbar--padding: 8px 12px;
   }
-  .grouped-toolbar .bar {
+  .gradebook::part(cell-late) {
+    box-shadow: inset 3px 0 0 0 #d97706;
+  }
+  .gradebook::part(cell-missing) {
+    background: light-dark(#fee2e2, #3f1a1a);
+  }
+  .gradebook::part(cell-excused) {
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .gradebook::part(cell-failing) {
+    color: light-dark(#b91c1c, #f39a9a);
+    font-weight: 600;
+  }
+  .gradebook .legend {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+    gap: 12px;
+    padding: 8px 12px;
     font-size: 12px;
-    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
-    --c2-button-group__segmented-item--color: var(--c2-theme--color-on-surface, #18181b);
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
-<c2-table client:only="lit" class="grouped-toolbar" data-group-by-table row-key="id" group-by="region" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
-  <div class="bar" slot="toolbar">
-    <span>Group by</span>
-    <c2-button-group appearance="segmented" selection="single" size="s" value="region" aria-label="Group by">
-      <c2-button value="none">None</c2-button>
-      <c2-button value="region">Region</c2-button>
-      <c2-button value="status">Status</c2-button>
-      <c2-button value="region,status">Region › Status</c2-button>
-    </c2-button-group>
-  </div>
-  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
-  <c2-table-column field="region" header="Region" hidden></c2-table-column>
-  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
-  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
-  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+<c2-table client:only="lit" class="gradebook" data-table-example="gradebook" row-key="id" rows='[{"id":"s1","name":"Amara Okafor","hw1":95,"quiz1":88,"essay":91,"midterm":87,"final":89.6,"marks":{}},{"id":"s2","name":"Bruno Silva","hw1":72,"quiz1":64,"essay":null,"midterm":70,"final":61.2,"marks":{"essay":"missing","quiz1":"late"}},{"id":"s3","name":"Chen Wei","hw1":100,"quiz1":92,"essay":84,"midterm":95,"final":92.4,"marks":{}},{"id":"s4","name":"Dana Kowalski","hw1":null,"quiz1":79,"essay":88,"midterm":81,"final":82.7,"marks":{"hw1":"excused"}},{"id":"s5","name":"Elif Yilmaz","hw1":58,"quiz1":45,"essay":67,"midterm":52,"final":55.1,"marks":{"hw1":"late"}}]'>
+  <div slot="toolbar" class="legend"><span>▎Late</span><span>■ Missing</span><span>□ Excused</span><span>Below 60 in red</span></div>
+  <c2-table-column field="name" header="Student" width="minmax(150px, 1fr)" pinned="start" summary-label="Class average"></c2-table-column>
+  <c2-table-column field="hw1" header="HW 1 · 10%" width="96px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="quiz1" header="Quiz 1 · 15%" width="104px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="essay" header="Essay · 25%" width="100px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="midterm" header="Midterm · 50%" width="116px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
+  <c2-table-column field="final" header="Final" width="80px" align="end" summary="avg" format="number" format-options='{"maximumFractionDigits":1}'></c2-table-column>
 </c2-table>
 ```
 
 </GalleryGrid>
-
-## Tree rows
-
-`children-field` reads each row's child rows from a field of its own, nested to any depth, and turns the grid into a `treegrid`: a parent is an ordinary row with a chevron, indented by level in the first column (or the one marked `group-column`). A column with `rollup` shows in a parent the aggregate of the leaves under it, so the totals of a chart of accounts or a bill of materials need no precomputing, and a sort orders each level by those figures. With `selection="multiple"` a parent selects the rows under it and follows its children.
-
-<GalleryGrid min="560">
-
-```html tag=MdxCodeBlock,label=Chart of accounts
-<style>
-  .tree-accounts {
-    height: 400px;
-    width: 100%;
-  }
-</style>
-<c2-table client:only="lit" class="tree-accounts" row-key="id" children-field="children" tree-expanded sortable rows='[{"id":"1000","name":"Assets","children":[{"id":"1100","name":"Current assets","children":[{"id":"1110","name":"Cash and equivalents","balance":184200},{"id":"1120","name":"Accounts receivable","balance":96450},{"id":"1130","name":"Inventory","balance":61300}]},{"id":"1200","name":"Fixed assets","children":[{"id":"1210","name":"Equipment","balance":142000},{"id":"1220","name":"Accumulated depreciation","balance":-38600}]}]},{"id":"2000","name":"Liabilities","children":[{"id":"2100","name":"Accounts payable","balance":72900},{"id":"2200","name":"Accrued expenses","balance":18450},{"id":"2300","name":"Long-term debt","balance":120000}]},{"id":"3000","name":"Equity","children":[{"id":"3100","name":"Share capital","balance":200000},{"id":"3200","name":"Retained earnings","balance":34000}]}]'>
-  <c2-table-column field="id" header="No." width="80px"></c2-table-column>
-  <c2-table-column field="name" header="Account" width="minmax(200px, 2fr)" group-column></c2-table-column>
-  <c2-table-column field="balance" header="Balance" width="140px" align="end" format="currency" rollup="sum"></c2-table-column>
-</c2-table>
-```
-
-```html tag=MdxCodeBlock,label=Cascading selection
-<style>
-  .tree-tasks {
-    height: 400px;
-    width: 100%;
-  }
-</style>
-<c2-table client:only="lit" class="tree-tasks" row-key="id" children-field="children" expanded-rows="p1;p1-2" selection="multiple" checkbox-selection value="p1-2;p1-2-1;p1-2-2" rows='[{"id":"p1","task":"Website relaunch","children":[{"id":"p1-1","task":"Content audit","owner":"Mia","hours":12},{"id":"p1-2","task":"Design system","children":[{"id":"p1-2-1","task":"Tokens","owner":"Leo","hours":8},{"id":"p1-2-2","task":"Components","owner":"Ana","hours":26}]},{"id":"p1-3","task":"Launch checklist","owner":"Mia","hours":5}]},{"id":"p2","task":"Billing migration","children":[{"id":"p2-1","task":"Data mapping","owner":"Sam","hours":16},{"id":"p2-2","task":"Dry run","owner":"Sam","hours":6}]},{"id":"p3","task":"Quarterly report","owner":"Ana","hours":4}]'>
-  <c2-table-column field="task" header="Task" width="minmax(200px, 2fr)" summary-label="Total"></c2-table-column>
-  <c2-table-column field="owner" header="Owner" width="90px"></c2-table-column>
-  <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>
-</c2-table>
-```
-
-```html tag=MdxCodeBlock,label=Children loaded on open
-<style>
-  .tree-lazy {
-    height: 400px;
-    width: 100%;
-  }
-</style>
-<c2-table client:only="lit" class="tree-lazy" data-table-example="lazy-children" row-key="id" children-field="children" rows='[{"id":"emea","region":"EMEA","children":true,"stores":42,"revenue":4820000},{"id":"americas","region":"Americas","children":true,"stores":57,"revenue":6310000},{"id":"apac","region":"APAC","children":true,"stores":23,"revenue":2140000}]'>
-  <c2-table-column field="region" header="Region" width="minmax(200px, 2fr)"></c2-table-column>
-  <c2-table-column field="stores" header="Stores" width="90px" align="end" format="number" rollup="sum"></c2-table-column>
-  <c2-table-column field="revenue" header="Revenue" width="140px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' rollup="sum"></c2-table-column>
-</c2-table>
-```
-
-```html tag=MdxCodeBlock,label=File tree
-<style>
-  .tree-files {
-    height: 400px;
-    width: 100%;
-    --c2-table__group--indent: 18px;
-    --c2-table__group-toggle--size: 14px;
-    --c2-table__group-toggle--color: rgb(2, 101, 220);
-    --c2-table__row--height: 30px;
-    --c2-table__cell--font-size: 13px;
-  }
-</style>
-<c2-table client:only="lit" class="tree-files" row-key="id" children-field="children" tree-expanded sortable sort="name:asc" rows='[{"id":"src","name":"src","children":[{"id":"src/components","name":"components","children":[{"id":"src/components/table.ts","name":"table.ts","size":112080},{"id":"src/components/tree.ts","name":"tree.ts","size":41210}]},{"id":"src/index.ts","name":"index.ts","size":820}]},{"id":"docs","name":"docs","children":[{"id":"docs/guide.md","name":"guide.md","size":18400}]},{"id":"package.json","name":"package.json","size":2310}]'>
-  <c2-table-column field="name" header="Name" width="minmax(200px, 2fr)"></c2-table-column>
-  <c2-table-column field="size" header="Size" width="110px" align="end" format="number" format-options='{"style":"unit","unit":"byte","notation":"compact","unitDisplay":"narrow"}' rollup="sum"></c2-table-column>
-</c2-table>
-```
-
-</GalleryGrid>
-
-The regions in "Children loaded on open" get their countries from `loadChildren` the first time they open, after a short delay that stands in for the network; their field holds `true` until then, and the chevron turns into a spinner while they load.
 
 ```ts tag=CodeBlock
-table.loadChildren = async ({ key }) => {
-  const response = await fetch(`/api/regions/${key}/countries`)
-  return response.json() // [{ id: 'de', region: 'Germany', stores: 12, revenue: 1480000 }, …]
-}
+table.cellPart = ({ row, column, value }) => [row.marks?.[column.field] && `cell-${row.marks[column.field]}`, typeof value === 'number' && value < 60 && 'cell-failing'].filter(Boolean)
 ```
 
 ## Row detail
@@ -844,6 +910,292 @@ table.loadChildren = async ({ key }) => {
 
 ```ts tag=CodeBlock
 table.renderDetail = ({ row }) => html`<p class="server-note">${row.note}</p>`
+```
+
+## Editing
+
+`editable` turns the columns that have an `editor` into a grid people type into, as in a spreadsheet: Enter, F2, a double click or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears, and a block copied from Excel or Sheets pastes from the focused cell. Changed cells get a corner mark, invalid ones (`required`, a value that is not a number or a date, a column's `validate`) a red ring. The rows are never mutated: each change fires `cell-change` and `rows-change` with a new `rows` array. The toolbar's buttons call `addRow()`, `revertChanges()` and `validate()`; the editing code loads on the first edit.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Editable grid
+<style>
+  .edit-grid {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .edit-grid .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .edit-grid .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .edit-grid .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .edit-grid .changes {
+    font-size: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-table client:only="lit" class="edit-grid" data-table-example="editable" editable row-key="id" rows='[{"id":"T-1","task":"Kick-off workshop","owner":"Ada","estimate":6,"status":"done","due":"2026-11-03","billable":true},{"id":"T-2","task":"Data model","owner":"Grace","estimate":14,"status":"doing","due":"2026-11-10","billable":true},{"id":"T-3","task":"Import mapping","owner":"Alan","estimate":9,"status":"todo","due":"2026-11-14","billable":false},{"id":"T-4","task":"Review","owner":"Radia","estimate":4,"status":"todo","due":"2026-11-18","billable":true}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Project plan</span>
+    <span class="changes" aria-live="polite">No changes</span>
+    <c2-button data-action="revert" class="ghost">Revert</c2-button>
+    <c2-button data-action="add">Add task</c2-button>
+  </div>
+  <c2-table-column field="task" header="Task" width="minmax(140px, 2fr)" editor="text" required summary-label="Total"></c2-table-column>
+  <c2-table-column field="owner" header="Owner" width="96px" editor="text"></c2-table-column>
+  <c2-table-column field="estimate" header="Hours" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="116px" editor="select" options='[{"value":"todo","label":"To do"},{"value":"doing","label":"In progress"},{"value":"done","label":"Done"}]'></c2-table-column>
+  <c2-table-column field="due" header="Due" width="118px" format="date" editor="date"></c2-table-column>
+  <c2-table-column field="billable" header="Billable" width="76px" align="center" editor="checkbox"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Timesheet grid
+<style>
+  .timesheet {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__cell__invalid--background: light-dark(#fef3c7, #3a2a06);
+    --c2-table__cell__invalid--box-shadow: inset 0 0 0 1px #d97706;
+  }
+  .timesheet .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .timesheet .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .timesheet::part(row-locked) {
+    --c2-table__cell--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .timesheet::part(cell-total) {
+    font-weight: 600;
+  }
+</style>
+<c2-table client:only="lit" class="timesheet" data-table-example="timesheet" editable row-key="id" rows='[{"id":"P-1","project":"Atlas migration","mon":7.5,"tue":8,"wed":6,"thu":8,"fri":4,"status":"draft"},{"id":"P-2","project":"Client support","mon":1,"tue":0.5,"wed":2,"thu":null,"fri":2,"status":"draft"},{"id":"P-3","project":"Hiring panel","mon":null,"tue":null,"wed":1.5,"thu":null,"fri":null,"status":"approved"},{"id":"P-4","project":"Planning","mon":0.5,"tue":0.5,"wed":0.5,"thu":0.5,"fri":3,"status":"draft"}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Week 46 · Ada Lovelace</span>
+    <c2-button data-action="submit">Submit week</c2-button>
+  </div>
+  <c2-table-column field="project" header="Project" width="minmax(130px, 2fr)" pinned="start" summary-label="Day total"></c2-table-column>
+  <c2-table-column field="mon" header="Mon" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="tue" header="Tue" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="wed" header="Wed" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="thu" header="Thu" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="fri" header="Fri" width="66px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="104px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="92px" options='[{"value":"draft","label":"Draft"},{"value":"submitted","label":"Submitted"},{"value":"approved","label":"Approved"}]'></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Journal entry
+<style>
+  .journal {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .journal .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .journal .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .journal .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .journal .balance {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: light-dark(#b91c1c, #f87171);
+  }
+  .journal .balance[data-balanced] {
+    color: light-dark(#15803d, #4ade80);
+  }
+  .journal::part(cell-debit),
+  .journal::part(cell-credit) {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+<c2-table client:only="lit" class="journal" data-table-example="journal" editable rows='[{"account":"6100","memo":"November office rent","debit":4200,"credit":null},{"account":"2100","memo":"VAT on rent","debit":840,"credit":null},{"account":"1000","memo":"Paid from operating account","debit":null,"credit":5000}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">JE-2026-0418</span>
+    <span class="balance" aria-live="polite"></span>
+    <c2-button data-action="add" class="ghost">Add line</c2-button>
+    <c2-button data-action="post" disabled>Post</c2-button>
+  </div>
+  <c2-table-column field="account" header="Account" width="minmax(170px, 2fr)" editor="select" required summary-label="Totals" options='[{"value":"1000","label":"1000 · Operating cash"},{"value":"1200","label":"1200 · Receivables"},{"value":"2000","label":"2000 · Payables"},{"value":"2100","label":"2100 · VAT receivable"},{"value":"6100","label":"6100 · Rent"},{"value":"6300","label":"6300 · Utilities"}]'></c2-table-column>
+  <c2-table-column field="memo" header="Memo" width="minmax(160px, 2fr)" editor="text"></c2-table-column>
+  <c2-table-column field="debit" header="Debit" width="110px" align="end" format="currency" editor="number" summary="sum"></c2-table-column>
+  <c2-table-column field="credit" header="Credit" width="110px" align="end" format="currency" editor="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Line items
+<style>
+  .line-items {
+    height: 340px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__footer--padding: 10px 12px;
+  }
+  .line-items .bar,
+  .line-items .totals {
+    display: flex;
+    align-items: center;
+    gap: 8px 16px;
+    width: 100%;
+  }
+  .line-items .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .line-items .totals {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .line-items .totals strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-group-table client:only="lit" class="line-items" data-table-example="line-items" editable row-key="id" group-by="section" rows='[{"id":"L1","section":"Hardware","product":"Standing desk frame","sku":"DSK-200","qty":2,"price":490,"discount":0,"tax":"std","total":980},{"id":"L2","section":"Hardware","product":"Monitor arm","sku":"ARM-31","qty":4,"price":89,"discount":10,"tax":"std","total":320.4},{"id":"L3","section":"Services","product":"Assembly and install","sku":"SVC-INS","qty":3,"price":120,"discount":0,"tax":"reduced","total":360}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Quote Q-2026-311</span>
+    <c2-button data-action="add">Add line</c2-button>
+  </div>
+  <c2-table-column field="product" header="Product" width="minmax(170px, 2fr)" editor="text" required></c2-table-column>
+  <c2-table-column field="section" header="Section" hidden></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="56px" align="end" format="number" editor="number" required></c2-table-column>
+  <c2-table-column field="price" header="Price" width="84px" align="end" format="currency" editor="number"></c2-table-column>
+  <c2-table-column field="discount" header="Disc. %" width="70px" align="end" format="number" editor="number"></c2-table-column>
+  <c2-table-column field="tax" header="Tax" width="92px" editor="select" options='[{"value":"std","label":"VAT 20%"},{"value":"reduced","label":"VAT 5.5%"},{"value":"zero","label":"Exempt"}]'></c2-table-column>
+  <c2-table-column field="total" header="Total" width="96px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column column-id="actions" header="" width="104px" align="end"></c2-table-column>
+  <div class="totals" slot="footer" aria-live="polite"></div>
+</c2-group-table>
+```
+
+```html tag=MdxCodeBlock,label=Allocation
+<style>
+  .allocation {
+    height: 300px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+    --c2-table__footer--padding: 10px 12px;
+  }
+  .allocation .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .allocation .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .allocation .ghost {
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+  .allocation .remainder {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: light-dark(#b91c1c, #f87171);
+  }
+  .allocation .remainder[data-done] {
+    color: light-dark(#15803d, #4ade80);
+  }
+</style>
+<c2-table client:only="lit" class="allocation" data-table-example="allocation" data-amount="12000" editable row-key="id" rows='[{"id":"A1","account":"6100","department":"Sales","share":50,"amount":6000},{"id":"A2","account":"6100","department":"Support","share":30,"amount":3600},{"id":"A3","account":"6300","department":"Engineering","share":15,"amount":1800}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Invoice INV-8820 · $12,000</span>
+    <c2-button class="ghost" data-action="template">Headcount template</c2-button>
+    <c2-button class="ghost" data-action="even">Split evenly</c2-button>
+    <c2-button data-action="add">Add split</c2-button>
+  </div>
+  <c2-table-column field="account" header="Account" width="minmax(150px, 2fr)" editor="select" required options='[{"value":"6100","label":"6100 \u00b7 Rent"},{"value":"6300","label":"6300 \u00b7 Utilities"},{"value":"6500","label":"6500 \u00b7 Software"}]' summary-label="Total"></c2-table-column>
+  <c2-table-column field="department" header="Department" width="minmax(120px, 1fr)" editor="text" required></c2-table-column>
+  <c2-table-column field="share" header="Share %" width="90px" align="end" format="number" format-options='{"maximumFractionDigits":2}' editor="number" summary="sum" summary-target="100"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="110px" align="end" format="currency" editor="number" summary="sum" summary-target="12000"></c2-table-column>
+  <span class="remainder" slot="footer" aria-live="polite"></span>
+</c2-table>
+```
+
+</GalleryGrid>
+
+"Timesheet grid" edits hours with a `c2-duration-input` (type `1h 30m`, `90m` or `1:30`), recomputes each row's total with `rowRule`, flags a missing day on a workday with `validate`, locks approved and submitted rows with `isCellEditable`, and splits the week total into regular and overtime hours. "Journal entry" keeps a line to a debit or a credit (typing one clears the other) and enables Post only once the entry balances:
+
+```ts tag=CodeBlock
+// A custom editor: any element, mounted over the cell being edited.
+day.renderEditor = ({ draft, setDraft }) => {
+  const input = document.createElement('c2-duration-input')
+  input.value = typeof draft === 'number' ? draft * 3600 : null
+  input.addEventListener('input', () => setDraft(input.value === null ? null : input.value / 3600))
+  return input
+}
+
+// A row rule: runs after each edit, before the row is stored.
+timesheet.rowRule = ({ row }) => ({ ...row, total: days.reduce((sum, day) => sum + (row[day] ?? 0), 0) })
+timesheet.isCellEditable = ({ row }) => row.status === 'draft'
+
+journal.rowRule = ({ row, field, value }) =>
+  value === null ? row : field === 'debit' ? { ...row, credit: null } : field === 'credit' ? { ...row, debit: null } : row
+journal.addEventListener('rows-change', ({ detail }) => {
+  const difference = sum(detail.rows, 'debit') - sum(detail.rows, 'credit')
+  post.disabled = difference !== 0
+})
+```
+
+"Line items" looks products up with a `c2-autocomplete` as the editor and fills the SKU, price and tax code from the pick in `rowRule`; the row's buttons are a `renderCell`, and the tax block in the footer is the app's own, recomputed on `rows-change`. "Allocation" keeps percent and amount in step both ways with a `rowRule`, and `summary-target` marks a total that misses 100% or the invoice amount:
+
+```html tag=CodeBlock
+<c2-table-column field="share" format="number" editor="number" summary="sum" summary-target="100"></c2-table-column>
+<c2-table-column field="amount" format="currency" editor="number" summary="sum" summary-target="12000"></c2-table-column>
+```
+
+```ts tag=CodeBlock
+const total = 12000
+const cents = (value: number) => Math.round(value * 100) / 100
+
+allocation.rowRule = ({ row, field }) =>
+  field === 'share'
+    ? { ...row, amount: cents((total * row.share) / 100) }
+    : field === 'amount'
+      ? { ...row, share: cents((row.amount / total) * 100) }
+      : row
 ```
 
 ## States

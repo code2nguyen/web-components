@@ -36,6 +36,17 @@
     swipe-action__accent--background-color: #0265dc,
     swipe-action__neutral--background-color: #52525b,
     swipe-content--background-color: #ffffff,
+    rank--min-width: 24px,
+    rank--height: 24px,
+    rank--padding: 0 6px,
+    rank--margin-inline-end: 12px,
+    rank--border-radius: 999px,
+    rank--background-color: #f4f4f5,
+    rank--color: #52525b,
+    rank--font-size: 12px,
+    rank--font-weight: 600,
+    rank__active--background-color: #0265dc,
+    rank__active--color: #ffffff,
   )
 );
 
@@ -108,6 +119,45 @@
   // Vertical scrolling stays with the page; the list owns horizontal movement.
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
+}
+
+// Rank -------------------------------------------------------------------------------------------------------------
+
+.ranked {
+  display: flex;
+  align-items: center;
+}
+
+.ranked__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: css.cssVar(rank--min-width);
+  height: css.cssVar(rank--height);
+  padding: css.cssVar(rank--padding);
+  margin-inline-end: css.cssVar(rank--margin-inline-end);
+  border-radius: css.cssVar(rank--border-radius);
+  background-color: css.cssVar(rank--background-color);
+  color: css.cssVar(rank--color);
+  font-size: css.cssVar(rank--font-size);
+  font-weight: css.cssVar(rank--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition:
+    background-color css.cssVar(motion--duration) css.cssVar(motion--timing-function),
+    color css.cssVar(motion--duration) css.cssVar(motion--timing-function);
+}
+
+.rank--active {
+  background-color: css.cssVar(rank__active--background-color);
+  color: css.cssVar(rank__active--color);
 }
 
 // Swipe ------------------------------------------------------------------------------------------------------------
@@ -298,7 +348,8 @@
   .list-item,
   .dragging-item,
   .swipe-content,
-  .swipe-action {
+  .swipe-action,
+  .rank {
     transition: none;
   }
 }

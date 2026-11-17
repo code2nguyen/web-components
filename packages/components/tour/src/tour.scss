@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-tour,
@@ -245,7 +246,7 @@
     height: 16px;
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(close__hover--background-color);
   }
 
@@ -306,7 +307,7 @@
   background: transparent;
   color: css.cssVar(skip--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(skip__hover--background-color);
   }
 }
@@ -316,7 +317,7 @@
   background: css.cssVar(previous--background-color);
   color: css.cssVar(previous--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(previous__hover--background-color);
   }
 }
@@ -326,7 +327,7 @@
   background: css.cssVar(next--background-color);
   color: css.cssVar(next--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(next__hover--background-color);
   }
 }

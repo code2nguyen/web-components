@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-bar-list,
   $theme: (
@@ -253,7 +254,7 @@ a.row:hover .label-text {
   font-weight: css.cssVar(header--font-weight);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 

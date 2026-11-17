@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
@@ -104,7 +105,7 @@
   outline-offset: css.cssVar(focus--outline-offset);
   transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 
@@ -174,7 +175,7 @@ input {
   background: transparent;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(calendar-icon__hover--color);
   }
 
@@ -253,7 +254,7 @@ input {
     stroke-linejoin: round;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(navigation__hover--background);
   }
 
@@ -299,7 +300,7 @@ input {
   cursor: pointer;
   transition: animation.standard(background), animation.standard(color);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(day__hover--background);
   }
 
@@ -399,14 +400,14 @@ input {
   cursor: pointer;
   transition: animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(picker-action__hover--color);
   }
 
   &.primary {
     color: css.cssVar(picker-action-primary--color);
 
-    &:hover {
+    @include pointer.hover {
       color: css.cssVar(picker-action-primary__hover--color);
     }
   }

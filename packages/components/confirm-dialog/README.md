@@ -29,5 +29,7 @@ if (await confirm({ heading: 'Delete project?', message: 'This cannot be undone.
 - `show()` resolves `true` on confirm, `false` on Cancel, Escape or `close()`; a backdrop click does not dismiss it.
 - `destructive` colours the confirm button with the error colour and focuses Cancel first.
 - `confirmAction` (or `action` in `confirm()`) runs the work from the dialog: the confirm button spins until it settles; a rejection keeps the dialog open and fires `confirm-error`.
-- Slots: `heading`, `icon`, and the default slot for the message. Events: `open`, `confirm` (cancelable), `cancel`, `close` (`detail.confirmed`), `confirm-error`.
+- `confirm-text` (or `confirmText` in `confirm()`) is a typed confirmation: the confirm button stays disabled until the user types that phrase.
+- `prompt(options)` (or the `prompt()` helper) asks for a value and resolves with it, or `null` on cancel: a built-in text field (`label`, `value`, `placeholder`, `type`, `required`), or the control in the `input` slot; `validate` returns an error message that keeps the dialog open.
+- Slots: `heading`, `icon`, `input`, and the default slot for the message. Events: `open`, `confirm` (cancelable), `cancel`, `close` (`detail.confirmed`), `confirm-error`.
 - Styled through `--c2-confirm-dialog…` variables (buttons, icon, message, width) plus the inner modal's `--c2-modal…` variables.

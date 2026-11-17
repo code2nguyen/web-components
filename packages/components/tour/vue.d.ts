@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Beacon } from '@c2n/tour/beacon.js'
 import type { Tour } from '@c2n/tour'
 import type { TourStep } from '@c2n/tour/tour-step.js'
 
@@ -19,6 +20,19 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-beacon': DefineComponent<
+      C2Props<Beacon> & {
+        'storage-key'?: unknown
+        'skip-limit'?: unknown
+        'skip-delay'?: unknown
+        onDismiss?: (event: EventOf<Beacon, 'dismiss'>) => void
+        onStepChange?: (event: EventOf<Beacon, 'step-change'>) => void
+        onFinish?: (event: EventOf<Beacon, 'finish'>) => void
+        onSkip?: (event: EventOf<Beacon, 'skip'>) => void
+        onShow?: (event: EventOf<Beacon, 'show'>) => void
+        onHide?: (event: EventOf<Beacon, 'hide'>) => void
+      }
+    >
     'c2-tour': DefineComponent<
       C2Props<Tour> & {
         'storage-key'?: unknown

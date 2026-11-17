@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -130,11 +130,11 @@ let nextRowId = 0
 export class KeyValueEditor extends LitElement {
   static formAssociated = true
 
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the hint line. */
-  private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
+  protected readonly formField = new FieldContextConsumer(this, { kind: 'text' })
   private readonly msg = new LocalizeController(this, keyValueEditorMessages)
 
   // Data
@@ -205,7 +205,7 @@ export class KeyValueEditor extends LitElement {
   private defaultEntries: KeyValueEntry[] | null = null
 
   /** Whether a field changed since it took focus, so blur fires `change` only after an edit. */
-  private fieldDirty = false
+  protected fieldDirty = false
 
   /** The entries as `.env` text, rows without a key left out. */
   toEnv(): string {
@@ -272,34 +272,34 @@ export class KeyValueEditor extends LitElement {
     this.defaultEntries ??= this.entries.map((entry) => ({ ...entry }))
   }
 
-  private get isDisabled() {
+  protected get isDisabled() {
     return this.disabled || this.disabledByForm
   }
 
-  private get viewing() {
+  protected get viewing() {
     return this.mode === 'view'
   }
 
-  private get editable() {
+  protected get editable() {
     return !this.isDisabled && !this.viewing
   }
 
-  private isKeyLocked(entry: KeyValueEntry | undefined) {
+  protected isKeyLocked(entry: KeyValueEntry | undefined) {
     return this.lockKeys || entry?.lockKey === true
   }
 
   /** `entries`, ignoring anything that is not an object with a key, so a malformed attribute renders nothing broken. */
-  private get realRows(): KeyValueEntry[] {
+  protected get realRows(): KeyValueEntry[] {
     return Array.isArray(this.entries) ? this.entries.filter((entry) => entry && typeof entry === 'object') : []
   }
 
   /** The rows on screen: the entries, or one blank row to type into when there are none and rows can be added. */
-  private get rows(): KeyValueEntry[] {
+  protected get rows(): KeyValueEntry[] {
     const rows = this.realRows
     return rows.length || this.lockKeys ? rows : [this.blankRow]
   }
 
-  private idOf(entry: KeyValueEntry): number {
+  protected idOf(entry: KeyValueEntry): number {
     let id = this.rowIds.get(entry)
     if (id === undefined) {
       id = nextRowId++
@@ -321,8 +321,8 @@ export class KeyValueEditor extends LitElement {
     }
   }
 
-  /** The refusal of every row whose key is refused, by index. */
-  private keyErrors(rows: readonly KeyValueEntry[]): Map<number, KeyValueKeyError> {
+  /** The refusal of every row whose key is refused, by index. A companion element returns its own refusals. */
+  protected keyErrors(rows: readonly KeyValueEntry[]): Map<number, string> {
     const errors = new Map<number, KeyValueKeyError>()
     const pattern = this.keyRegExp
     const seen = new Map<string, number[]>()
@@ -338,15 +338,45 @@ export class KeyValueEditor extends LitElement {
     return errors
   }
 
+  /** The message under a row whose key is refused, and the form's validation message while it is. */
+  protected keyErrorMessage(error: string): string {
+    return error === 'duplicate' ? this.duplicateMessage : this.patternMessage
+  }
+
+  /** Whether a row counts as filled in: for the `empty` state, `required` and view mode. Here, whether it has a key. */
+  protected isFilled(entry: KeyValueEntry): boolean {
+    return String(entry.key ?? '').trim() !== ''
+  }
+
+  /** The value the form submits for the rows: here, their `.env` text. */
+  protected formValue(rows: readonly KeyValueEntry[]): string {
+    return formatEnv(rows)
+  }
+
+  /** The form's validation message while `required` and no row is filled in. */
+  protected valueMissingMessage(): string {
+    return this.msg.t('valueMissing')
+  }
+
+  /** Text of the add button. */
+  protected addButtonLabel(): string {
+    return this.addLabel
+  }
+
+  /** Default content of the `empty` slot. */
+  protected emptyLabel(): string {
+    return 'No variables'
+  }
+
   /** Replaces the rows and fires `input` then `change`, for edits that are complete as they happen. */
-  private commitRows(rows: KeyValueEntry[]) {
+  protected commitRows(rows: KeyValueEntry[]) {
     this.entries = rows
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
   /** A copy of the row at `index` with `patch` applied, keeping its identity. */
-  private patchRow(index: number, patch: Partial<KeyValueEntry>): KeyValueEntry[] {
+  protected patchRow(index: number, patch: Partial<KeyValueEntry>): KeyValueEntry[] {
     return this.rows.map((entry, at) => {
       if (at !== index) return entry
       const next = { ...entry, ...patch }
@@ -356,14 +386,14 @@ export class KeyValueEditor extends LitElement {
   }
 
   /** Focuses a row's key field, or its value field when the key is locked. */
-  private focusField(index: number, field: Field) {
+  protected focusField(index: number, field: Field) {
     const row = this.renderRoot.querySelectorAll('.row')[index]
     const input = row?.querySelector<HTMLInputElement>(`input.${field}`) ?? row?.querySelector<HTMLInputElement>('input.value')
     input?.focus()
     if (input && field === 'key') input.setSelectionRange(input.value.length, input.value.length)
   }
 
-  private handleInput(event: Event, index: number, field: Field) {
+  protected handleInput(event: Event, index: number, field: Field) {
     // The native `input` is composed and would reach the host's listeners before `entries` updates; the host fires its own.
     event.stopPropagation()
     this.fieldDirty = true
@@ -371,7 +401,7 @@ export class KeyValueEditor extends LitElement {
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
   }
 
-  private handleChange = (event: Event) => {
+  protected handleChange = (event: Event) => {
     event.stopPropagation()
     if (!this.fieldDirty) return
     this.fieldDirty = false
@@ -382,7 +412,7 @@ export class KeyValueEditor extends LitElement {
     this.fieldDirty = false
   }
 
-  private async handleKeydown(event: KeyboardEvent, index: number, field: Field) {
+  protected async handleKeydown(event: KeyboardEvent, index: number, field: Field) {
     if (event.defaultPrevented || isComposingKey(event) || !this.editable) return
     const input = event.target as HTMLInputElement
     if (event.key === 'Enter') {
@@ -410,7 +440,7 @@ export class KeyValueEditor extends LitElement {
     }
   }
 
-  private async handlePaste(event: ClipboardEvent, index: number, field: Field) {
+  protected async handlePaste(event: ClipboardEvent, index: number, field: Field) {
     if (!this.editable) return
     const text = event.clipboardData?.getData('text/plain') ?? ''
     if (!text.includes('=')) return
@@ -450,7 +480,7 @@ export class KeyValueEditor extends LitElement {
     if (lastIndex !== -1) this.focusField(Math.min(lastIndex, this.rows.length - 1), 'value')
   }
 
-  private async handleRemove(index: number) {
+  protected async handleRemove(index: number) {
     const rows = this.realRows
     const next = rows.filter((_, at) => at !== index)
     this.commitRows(next)
@@ -473,9 +503,9 @@ export class KeyValueEditor extends LitElement {
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
     const rows = this.realRows
-    const keyed = rows.some((entry) => String(entry.key ?? '').trim() !== '')
+    const keyed = rows.some((entry) => this.isFilled(entry))
     const errors = this.keyErrors(rows)
-    this.internals.setFormValue(this.isDisabled ? null : formatEnv(rows))
+    this.internals.setFormValue(this.isDisabled ? null : this.formValue(rows))
 
     const firstError = errors.entries().next().value
     if (this.isDisabled || this.viewing) {
@@ -484,10 +514,10 @@ export class KeyValueEditor extends LitElement {
     } else if (firstError) {
       const [index, error] = firstError
       const anchor = this.renderRoot.querySelectorAll('.row')[index]?.querySelector<HTMLInputElement>('input') ?? undefined
-      this.internals.setValidity({ customError: true }, error === 'duplicate' ? this.duplicateMessage : this.patternMessage, anchor)
+      this.internals.setValidity({ customError: true }, this.keyErrorMessage(error), anchor)
     } else if (this.required && !keyed) {
       const anchor = this.renderRoot.querySelector<HTMLElement>('input, .add') ?? undefined
-      this.internals.setValidity({ valueMissing: true }, this.msg.t('valueMissing'), anchor)
+      this.internals.setValidity({ valueMissing: true }, this.valueMissingMessage(), anchor)
     } else {
       this.internals.setValidity({})
     }
@@ -555,7 +585,7 @@ export class KeyValueEditor extends LitElement {
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </slot>
-        <span>${this.addLabel}</span>
+        <span>${this.addButtonLabel()}</span>
       </button>
       ${actions}
     </div>`
@@ -566,11 +596,24 @@ export class KeyValueEditor extends LitElement {
     return html`<div class="hint" ?hidden=${!this.hasHint || this.formField.managed}><slot name="hint" @slotchange=${this.handleSlotchange}></slot></div>`
   }
 
-  private renderEmpty() {
-    return html`<div class="empty"><slot name="empty">No variables</slot></div>`
+  protected renderEmpty() {
+    return html`<div class="empty"><slot name="empty">${this.emptyLabel()}</slot></div>`
   }
 
-  private renderRow(entry: KeyValueEntry, index: number, error: KeyValueKeyError | undefined) {
+  /** The column headers above the rows. */
+  protected renderHeader() {
+    return html`<div class="header" aria-hidden="true">
+      <span>${this.keyLabel}</span>
+      <span>${this.valueLabel}</span>
+    </div>`
+  }
+
+  /** Content between the rows and the footer. Nothing here; a companion element draws its own. */
+  protected renderBelowRows(): unknown {
+    return nothing
+  }
+
+  protected renderRow(entry: KeyValueEntry, index: number, error: string | undefined) {
     const id = this.idOf(entry)
     const number = index + 1
     const masked = this.isMasked(entry)
@@ -643,13 +686,13 @@ export class KeyValueEditor extends LitElement {
               </slot>
             </button>`
       }
-      ${error ? html`<span class="error" id=${errorId}>${error === 'duplicate' ? this.duplicateMessage : this.patternMessage}</span>` : nothing}
+      ${error ? html`<span class="error" id=${errorId}>${this.keyErrorMessage(error)}</span>` : nothing}
     </div>`
   }
 
   /** View mode: the keyed rows as a description list, values as text or dots. */
-  private renderView() {
-    const rows = this.realRows.filter((entry) => String(entry.key ?? '').trim() !== '')
+  protected renderView() {
+    const rows = this.realRows.filter((entry) => this.isFilled(entry))
     if (rows.length === 0) return this.renderEmpty()
     return html`<dl class="list">
       ${repeat(
@@ -679,10 +722,7 @@ export class KeyValueEditor extends LitElement {
   override render() {
     const rows = this.rows
     const errors = this.keyErrors(this.realRows)
-    const header = html`<div class="header" aria-hidden="true">
-      <span>${this.keyLabel}</span>
-      <span>${this.valueLabel}</span>
-    </div>`
+    const header = this.renderHeader()
     if (this.viewing) {
       return html`<div
         class="editor viewing"
@@ -690,7 +730,7 @@ export class KeyValueEditor extends LitElement {
         aria-label=${ifDefined(this.label || this.formField.label || undefined)}
         aria-describedby=${this.formField.describedBy()}
       >
-        ${this.realRows.some((entry) => String(entry.key ?? '').trim() !== '') ? header : nothing} ${this.renderView()} ${this.renderFooter(false)}
+        ${this.realRows.some((entry) => this.isFilled(entry)) ? header : nothing} ${this.renderView()} ${this.renderBelowRows()} ${this.renderFooter(false)}
         ${this.renderHint()} ${this.formField.renderDescription()}
       </div>`
     }
@@ -713,7 +753,7 @@ export class KeyValueEditor extends LitElement {
             </div>`
           : this.renderEmpty()
       }
-      ${this.renderFooter(!this.lockKeys)} ${this.renderHint()} ${this.formField.renderDescription()}
+      ${this.renderBelowRows()} ${this.renderFooter(!this.lockKeys)} ${this.renderHint()} ${this.formField.renderDescription()}
     </div>`
   }
 }

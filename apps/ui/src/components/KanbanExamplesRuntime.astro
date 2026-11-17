@@ -1,13 +1,42 @@
 ---
-/** Enhances kanban examples whose property-only API (`renderItem`) cannot be expressed as an HTML attribute. */
+/** Enhances kanban and matrix board examples whose property-only API (`renderItem`) cannot be expressed as an HTML attribute. */
 ---
 
 <script>
   import { html } from 'lit'
   import type { Kanban, KanbanItem } from '@c2n/components/kanban'
+  import type { MatrixBoard } from '@c2n/components/kanban/matrix-board'
   import '@c2n/components/kanban'
+  import '@c2n/components/kanban/matrix-board'
   import '@c2n/components/avatar'
   import '@c2n/components/badge'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'matrix-board': {
+        card: 'Carte',
+        pickedUp: '{0} prise dans {1}, position {2} sur {3}. Déplacez-la avec les flèches, posez-la avec Espace, annulez avec Échap.',
+        dragStarted: '{0} prise.',
+        moved: '{0} déplacée dans {1}, position {2} sur {3}.',
+        dropped: '{0} posée dans {1}, position {2} sur {3}.',
+        droppedInPlace: '{0} reposée à sa place.',
+        returned: '{0} revenue dans {1}, position {2}.',
+        returnedInPlace: '{0} revenue à sa place.',
+        refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
+        atTop: '{0} est déjà sur la première ligne.',
+        atBottom: '{0} est déjà sur la dernière ligne.',
+        atStart: '{0} est déjà dans la première colonne.',
+        atEnd: '{0} est déjà dans la dernière colonne.',
+        readOnly: 'Déplacement annulé : le tableau n’est plus modifiable.',
+        itemsChanged: 'Les cartes ont changé. Déplacement annulé.',
+        instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la entre les cases avec les flèches, dans une case avec Début ou Fin ; Espace la pose et Échap annule.',
+        axisValue: '{0} : {1}',
+        cell: '{0}, {1}',
+        namedCell: '{0} ({1}, {2})',
+      },
+    },
+  })
 
   interface Task extends KanbanItem {
     id: string
@@ -41,7 +70,39 @@
     })
   }
 
+  interface Person extends KanbanItem {
+    id: string
+    name: string
+    role: string
+  }
+
+  const initializedMatrices = new WeakSet<MatrixBoard>()
+
+  function setupPeople(board: MatrixBoard) {
+    board.renderItem = ({ item }) => {
+      const person = item as Person
+      return html`
+        <span style="display:flex;align-items:center;gap:8px;min-width:0">
+          <c2-avatar name=${person.name} auto-color style="--c2-avatar--size:24px;flex:none" aria-hidden="true"></c2-avatar>
+          <span style="display:grid;min-width:0">
+            <span style="font-weight:500">${person.name}</span>
+            <span style="font-size:11px;opacity:0.7">${person.role}</span>
+          </span>
+        </span>
+      `
+    }
+    const status = board.parentElement?.querySelector<HTMLElement>('[data-matrix-status]')
+    board.addEventListener('card-move', ({ detail }) => {
+      if (status) status.textContent = `card-move: ${detail.key} ${detail.fromRow}/${detail.fromColumn} → ${detail.toRow}/${detail.toColumn}`
+    })
+  }
+
   function setup() {
+    document.querySelectorAll<MatrixBoard>('c2-matrix-board[data-matrix-example]').forEach((board) => {
+      if (initializedMatrices.has(board)) return
+      initializedMatrices.add(board)
+      if (board.dataset.matrixExample === 'people') setupPeople(board)
+    })
     document.querySelectorAll<Kanban>('c2-kanban[data-kanban-example]').forEach((board) => {
       if (initialized.has(board)) return
       initialized.add(board)

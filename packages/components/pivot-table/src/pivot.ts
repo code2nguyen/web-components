@@ -36,6 +36,12 @@ export interface PivotConfig {
    * several listed groups flips once.
    */
   invertSigns?: Record<string, string[]>
+  /**
+   * Members a field always shows, by field: `{ "quarter": ["Q1", "Q2", "Q3", "Q4"] }`. For the last field of `rows` or
+   * `columns`, they join the header tree under every group of the level above even when no record has them, so a
+   * column with nothing in it still shows. A field on any other level ignores them.
+   */
+  members?: Record<string, string[]>
 }
 
 /** A group of the row or column header tree. The root has an empty path. */
@@ -62,7 +68,8 @@ export interface PivotResult {
 export const PIVOT_BLANK = '(blank)'
 const SEP = '\u001f'
 
-function fieldValue(record: unknown, field: string): unknown {
+/** The value of `field` in a record; a dotted field (`customer.country`) reads a nested value. */
+export function pivotFieldValue(record: unknown, field: string): unknown {
   if (record === null || typeof record !== 'object') return undefined
   let value: unknown = record
   for (const part of field.split('.')) {
@@ -121,7 +128,7 @@ class Accumulator {
   }
 }
 
-function buildTree(paths: string[][]): PivotNode {
+function buildTree(paths: string[][], fields: readonly string[], members: Record<string, string[]> | undefined): PivotNode {
   const root: PivotNode = { label: '', path: [], children: [] }
   const index = new Map<string, PivotNode>([['', root]])
   for (const path of paths) {
@@ -138,6 +145,16 @@ function buildTree(paths: string[][]): PivotNode {
     }
   }
   const sort = (node: PivotNode) => {
+    // A listed member no record has joins the last level of the axis, where a group needs no children of its own.
+    const listed = node.path.length === fields.length - 1 ? members?.[fields[node.path.length]] : undefined
+    for (const member of Array.isArray(listed) ? listed : []) {
+      const path = [...node.path, String(member)]
+      const key = path.join(SEP)
+      if (index.has(key)) continue
+      const child = { label: path[path.length - 1], path, children: [] }
+      index.set(key, child)
+      node.children.push(child)
+    }
     node.children.sort((a, b) => compareLabels(a.label, b.label))
     node.children.forEach(sort)
   }
@@ -181,9 +198,9 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
 
   ;(Array.isArray(data) ? data : []).forEach((record, recordIndex) => {
     // A record in any listed group counts negative once, however many fields name it.
-    const sign = inverted.some(([field, groups]) => groups.includes(groupLabel(fieldValue(record, field)))) ? -1 : 1
-    const rowPath = rows.map((field) => groupLabel(fieldValue(record, field)))
-    const columnPath = columns.map((field) => groupLabel(fieldValue(record, field)))
+    const sign = inverted.some(([field, groups]) => groups.includes(groupLabel(pivotFieldValue(record, field)))) ? -1 : 1
+    const rowPath = rows.map((field) => groupLabel(pivotFieldValue(record, field)))
+    const columnPath = columns.map((field) => groupLabel(pivotFieldValue(record, field)))
     const rowKey = rowPath.join(SEP)
     const columnKey = columnPath.join(SEP)
     if (!seenRows.has(rowKey)) {
@@ -206,7 +223,7 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
           members.set(key, [])
         }
         values.forEach((value, index) => {
-          if (!value.compute) accumulators![index].add(fieldValue(record, value.field), value.aggregate, sign)
+          if (!value.compute) accumulators![index].add(pivotFieldValue(record, value.field), value.aggregate, sign)
         })
         members.get(key)!.push(recordIndex)
       }
@@ -229,8 +246,8 @@ export function pivot(data: readonly unknown[], config: PivotConfig): PivotResul
     return value.compute === 'percent-difference' ? (a - b) / Math.abs(b) : null
   }
   return {
-    rows: buildTree(rowPaths),
-    columns: buildTree(columnPaths),
+    rows: buildTree(rowPaths, rows, config.members),
+    columns: buildTree(columnPaths, columns, config.members),
     values,
     cell,
     records(rowPath, columnPath) {

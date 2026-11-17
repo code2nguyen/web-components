@@ -1,7 +1,11 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
+import CodeBlock from '../../components/CodeBlock.astro'
+import StickyExamplesRuntime from '../../components/StickyExamplesRuntime.astro'
+
 import { Sticky } from '@c2n/components/sticky'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -156,4 +160,220 @@ Curated looks for `c2-sticky`. Scroll inside each card to see the stuck state. T
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=Sticky call to action
+<style>
+  .cta-box {
+    height: 220px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .cta-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .cta-sticky {
+    --c2-sticky--offset: 8px;
+    --c2-sticky--padding: 0 8px;
+  }
+  .cta-sticky .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 16px;
+    border-radius: 999px;
+    background: #18181b;
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(24, 24, 27, 0.24);
+    font-size: 14px;
+  }
+  .cta-sticky .bar span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+<div class="cta-box">
+  <p><strong>Trail runner 2</strong> · €129</p>
+  <p><c2-button id="sticky-gallery-buy">Add to cart</c2-button></p>
+  <p>Scroll down: once Add to cart leaves the box, the bar takes its place.</p>
+  <p>Recycled mesh upper with a reinforced toe cap.</p>
+  <p>Responsive foam midsole, 6 mm drop.</p>
+  <p>4 mm lugs in a sticky rubber compound.</p>
+  <p>280 g for a size 42.</p>
+  <p>Free returns within 30 days.</p>
+  <c2-sticky class="cta-sticky" edge="bottom" show-when-hidden="sticky-gallery-buy">
+    <div class="bar"><span>€129</span><c2-button>Add to cart</c2-button></div>
+  </c2-sticky>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Buy bar at the top
+<style>
+  .topbar-box {
+    height: 220px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .topbar-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .topbar-box .hero {
+    padding: 24px 12px 8px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .topbar-sticky {
+    /* Overlaps the content below it, so the concealed bar leaves no gap at the top. */
+    margin-block-end: -48px;
+    --c2-sticky__stuck--background: light-dark(rgba(255, 255, 255, 0.72), rgba(24, 24, 27, 0.72));
+    --c2-sticky__stuck--backdrop-filter: blur(12px) saturate(1.4);
+    --c2-sticky__stuck--box-shadow: 0 1px 0 rgba(24, 24, 27, 0.12);
+  }
+  .topbar-sticky .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .topbar-sticky .bar strong {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+<div class="topbar-box">
+  <c2-sticky class="topbar-sticky" show-when-hidden="sticky-gallery-preorder">
+    <div class="bar"><strong>Display</strong><c2-button>Pre-order</c2-button></div>
+  </c2-sticky>
+  <p class="hero">Studio display</p>
+  <p><c2-button id="sticky-gallery-preorder">Pre-order</c2-button></p>
+  <p>Scroll down: the bar drops in at the top once Pre-order is out of view.</p>
+  <p>27-inch panel, 600 nits.</p>
+  <p>12 MP camera that keeps you in frame.</p>
+  <p>Three-mic array and six speakers.</p>
+  <p>Tilt-adjustable stand included.</p>
+  <p>Ships in two to three weeks.</p>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Apply bar in French
+<style>
+  .apply-box {
+    height: 220px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .apply-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .apply-sticky {
+    --c2-sticky__stuck--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-sticky__stuck--box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.18);
+  }
+  .apply-sticky .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    font-size: 14px;
+  }
+  .apply-sticky .bar span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<div class="apply-box" lang="fr">
+  <p><strong>Développeuse front-end</strong> · Lyon · CDI</p>
+  <p><c2-button id="sticky-gallery-apply">Postuler</c2-button></p>
+  <p>Faites défiler : la barre reprend l’action dès que le bouton Postuler sort du cadre.</p>
+  <p>Vous rejoignez une équipe de six personnes.</p>
+  <p>Stack : TypeScript, Lit et Vite.</p>
+  <p>Télétravail deux jours par semaine.</p>
+  <p>Salaire : 48 à 55 k€ selon expérience.</p>
+  <p>Réponse sous dix jours ouvrés.</p>
+  <c2-sticky class="apply-sticky" edge="bottom" show-when-hidden="sticky-gallery-apply">
+    <div class="bar"><span>CDI · Lyon</span><c2-button>Postuler</c2-button></div>
+  </c2-sticky>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Watched by reference
+<style>
+  .reference-box {
+    height: 220px;
+    overflow: auto;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .reference-box p {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .reference-sticky {
+    --c2-sticky__stuck--background: var(--c2-theme--color-surface, #ffffff);
+  }
+  .reference-sticky .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    font-size: 14px;
+  }
+  .reference-sticky .bar span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+<div class="reference-box">
+  <p><strong>Pro plan</strong> · €12 per seat per month</p>
+  <p data-sticky-watch="reference"><c2-button>Try it free</c2-button></p>
+  <p>The bar watches the paragraph above through showWhenHiddenElement, set from script, with no id.</p>
+  <p>Unlimited projects and guests.</p>
+  <p>Single sign-on and audit log.</p>
+  <p>Priority support within four hours.</p>
+  <p>Cancel at any time.</p>
+  <p>Billed monthly or yearly.</p>
+  <c2-sticky class="reference-sticky" edge="bottom" data-sticky-example="reference">
+    <div class="bar"><span>€12</span><c2-button>Try it free</c2-button></div>
+  </c2-sticky>
+</div>
+```
+
 </GalleryGrid>
+
+<StickyExamplesRuntime />
+
+## Sticky call to action
+
+`show-when-hidden` takes the id of the element the bar stands in for. The bar is hidden while that element is on screen and slides in once it is scrolled out of view. The last card watches its element by reference instead, which also reaches an element in another shadow root or one rendered later:
+
+```ts tag=CodeBlock
+const bar = document.querySelector('c2-sticky')!
+bar.showWhenHiddenElement = document.querySelector('#pricing-cta')
+bar.addEventListener('conceal-change', (event) => {
+  console.log(event.detail.concealed ? 'main button on screen' : 'bar shown')
+})
+```
+
+`c2-sticky` draws no text of its own, so the French card is translated by its author alone.

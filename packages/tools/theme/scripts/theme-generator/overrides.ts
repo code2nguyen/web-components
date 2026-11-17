@@ -79,6 +79,12 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline',
     value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
   },
+  // Matrix board bands are translucent hue washes on purpose: they read over the light and the dark surface alike.
+  '--c2-matrix-board__band-1--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-2--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-3--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-4--background-color': { exclude: 'translucent band wash' },
+  '--c2-matrix-board__band-5--background-color': { exclude: 'translucent band wash' },
   // The click-to-load placeholder keeps its dashed outline while following the theme outline and surface.
   '--c2-image__load-button--border': {
     token: 'color-outline',
@@ -270,6 +276,45 @@ export const overrides: Record<string, Override> = {
   '--c2-upload__list--gap': { exclude: 'attachment queue rhythm' },
   '--c2-upload__list--margin-top': { exclude: 'attachment queue spacing' },
   '--c2-upload__error--gap': { exclude: 'validation message rhythm' },
+  // Document checklist: the meter track and the drop highlight follow the theme; the status badges are light-dark()
+  // pairs chosen against each other, so they keep their own colours in both themes.
+  '--c2-document-checklist__meter--background': { token: 'color-outline-variant' },
+  '--c2-document-checklist__row__drag--background': { token: 'color-primary-container' },
+  '--c2-document-checklist__reason--color': { exclude: 'light-dark rejection text pair' },
+  '--c2-document-checklist__status__needed--color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__needed--background-color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__uploaded--color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__uploaded--background-color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__in-review--color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__in-review--background-color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__approved--color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__approved--background-color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__rejected--color': { exclude: 'light-dark status badge pair' },
+  '--c2-document-checklist__status__rejected--background-color': { exclude: 'light-dark status badge pair' },
+  // Image uploader: the add tile's dashed borders follow theme colours like the upload drop zone; the overlays,
+  // corner buttons and badges sit on the photo itself, so they stay dark scrims with light text in both themes.
+  '--c2-image-uploader__add--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  '--c2-image-uploader__add__hover--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline-strong, #a1a1aa)',
+  },
+  '--c2-image-uploader__add__drag--background': { token: 'color-primary-container' },
+  '--c2-image-uploader__add__drag--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
+  '--c2-image-uploader__overlay--background': { exclude: 'scrim over a photo' },
+  '--c2-image-uploader__overlay__error--background': { exclude: 'error scrim over a photo' },
+  '--c2-image-uploader__overlay--color': { exclude: 'text on a scrim over a photo' },
+  '--c2-image-uploader__action--background': { exclude: 'button scrim over a photo' },
+  '--c2-image-uploader__action__hover--background': { exclude: 'button scrim over a photo' },
+  '--c2-image-uploader__action--color': { exclude: 'icon on a scrim over a photo' },
+  '--c2-image-uploader__badge--background': { exclude: 'badge scrim over a photo' },
+  '--c2-image-uploader__badge--color': { exclude: 'text on a scrim over a photo' },
+  '--c2-image-uploader__grabbed--box-shadow': { token: 'shadow-md' },
   // Rate geometry and its familiar gold score colour are intentionally independent of the brand accent.
   '--c2-rate__icon--size': { exclude: 'rating icon size' },
   '--c2-rate__container--gap': { exclude: 'rating icon rhythm' },
@@ -325,6 +370,8 @@ export const overrides: Record<string, Override> = {
   '--c2-questionnaire__primary-action--color': onPrimary,
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
+  // The comparison band is the second series of the report it filters, so it follows the chart palette's second slot.
+  '--c2-date-selector__compare--background': { token: 'chart-series-2' },
   // The calendar's month picker floats over the grid like any popover.
   '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The date-time popup floats over the page like any popover.
@@ -338,6 +385,10 @@ export const overrides: Record<string, Override> = {
   '--c2-recurrence-editor__weekday__selected--border': { token: 'color-primary', value: '1px solid var(--c2-theme--color-primary, #0265dc)' },
   // The From and To fields hold expressions such as now-1d/d, which read best in a monospace face whatever the app font.
   '--c2-time-range-picker__input--font-family': { exclude: 'monospace for typed expressions' },
+  // The phrase a typed confirmation asks for is an identifier (a repository's name), set in a monospace face.
+  '--c2-confirm-dialog__phrase--font-family': { exclude: 'monospace for the phrase to type' },
+  // A suggested password is read character by character (l, 1, I, O, 0), so it stays in a monospace face.
+  '--c2-password-field__generator-preview--font-family': { exclude: 'monospace for the suggested password' },
   // The zone chip sits on a muted fill, where the muted text role drops below 4.5:1; a deeper mix of the ink keeps it.
   '--c2-time-range-picker__time-zone--color': {
     token: 'color-on-surface',
@@ -439,6 +490,50 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
   },
+  // A table cell's change from its baseline: success and error hues mixed with the ink, readable on a dark page.
+  '--c2-table__delta__up--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  // A change in `c2-delta`: the same success and error hues as the table's delta, readable on a dark page.
+  '--c2-delta__good--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-delta__bad--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  // The current time's column of a flowsheet: tints of the primary, so they follow the theme with its text.
+  '--c2-flowsheet__now--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 6%, transparent)',
+  },
+  '--c2-flowsheet__now-header--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 12%, transparent)',
+  },
+  '--c2-flowsheet__now-header--box-shadow': {
+    token: 'color-primary',
+    value: 'inset 0 -2px 0 0 var(--c2-theme--color-primary, #0265dc)',
+  },
+  // An allocation's load: success and error hues mixed with the ink, readable on a dark page.
+  '--c2-allocation-grid__at--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-allocation-grid__over--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-table__flag__high--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-table__delta__down--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
   // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
   '--c2-chart__positive--color': { token: 'chart-positive' },
@@ -536,6 +631,13 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // A milestone's dot is ringed in the page surface so it stands off the track; a dot not reached yet is the strong
+  // outline grey. The claimable green and its halo are accents the theme has no token for.
+  '--c2-progress__mark--border-color': { token: 'color-surface' },
+  '--c2-progress__mark--background-color': { token: 'color-outline-strong' },
+  '--c2-progress__mark__claimable--background-color': { exclude: 'reward accent, like the meter optimum green' },
+  '--c2-progress__mark__claimable--box-shadow': { exclude: 'halo in the claimable accent' },
+  '--c2-navigation-progress__indicator--border-radius': { exclude: 'a square bar by default; rounding is a look, not a theme scale' },
   // Secret field: the show button's pressed fill is the same hairline grey, a step above the hover surface.
   '--c2-secret-field__action__selected--background-color': { token: 'color-outline-variant' },
   // Meter: the unused range is the progress track's hairline grey, a critical value is the error colour, and the
@@ -543,6 +645,13 @@ export const overrides: Record<string, Override> = {
   // amber is an accent the theme has no token for.
   '--c2-meter__track--background-color': { token: 'color-outline-variant' },
   '--c2-meter__indicator__critical--background-color': { token: 'color-error' },
+  // The overage past a meter's limit is the error colour, and its limit mark is drawn in the text colour.
+  '--c2-meter__overage--background-color': { token: 'color-error' },
+  // Range indicator: the bare scale is the meter's track, a band without a tone the strong outline grey, and a
+  // critical band the error colour. The optimum green and sub-optimum amber are accents the theme has no token for.
+  '--c2-range-indicator__track--background-color': { token: 'color-outline-variant' },
+  '--c2-range-indicator__band--background-color': { token: 'color-outline-strong' },
+  '--c2-range-indicator__band__critical--background-color': { token: 'color-error' },
   ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-meter__segment-${i + 1}--background-color`, { token: `chart-series-${i + 1}` }])),
   ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`--c2-distribution-bar__segment-${i + 1}--color`, { token: `chart-series-${i + 1}` }])),
   // The empty bar is a track, like the meter's; the hover bubble is an inverse surface, like the chart tooltip.
@@ -563,6 +672,9 @@ export const overrides: Record<string, Override> = {
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.
   '--c2-tabs__indicator--color': { token: 'color-primary' },
   '--c2-tabs--box-shadow': { token: 'color-outline-variant', value: 'inset 0px -2px 0px 0px var(--c2-theme--color-outline-variant, rgb(230, 230, 230))' },
+  // Tab nav: the same strip, so the same accent indicator and hairline baseline.
+  '--c2-tab-nav__indicator--color': { token: 'color-primary' },
+  '--c2-tab-nav--box-shadow': { token: 'color-outline-variant', value: 'inset 0px -2px 0px 0px var(--c2-theme--color-outline-variant, rgb(230, 230, 230))' },
   // Selected + hovered list item: a slightly stronger tint of the selected surface.
   '--c2-list-item__selected__hover--background': {
     token: 'color-primary-container',
@@ -627,6 +739,8 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
   },
+  // The ring between the icons of a citation list's stack is the surface behind them, like a progress mark's.
+  '--c2-citation-list__icon--border-color': { token: 'color-surface' },
   '--c2-indicator__warning--background': { exclude: 'solid status fill' },
   '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
   '--c2-indicator__danger--background': { exclude: 'solid status fill' },
@@ -691,6 +805,25 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  // Schema tree: its type, option, enum and marker hues are the JSON viewer's syntax hues, paired the same way; the
+  // required marker is the error colour.
+  '--c2-schema-tree__type--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__option--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__enum--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#116329, #7ee787) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__mark--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__required--color': { token: 'color-error' },
   // Query input: the token colours are syntax hues like the JSON viewer's, paired the same way; negations and unknown
   // keys are the error colour, and the selection is a translucent accent wash over either surface.
   '--c2-query-input__key--color': {
@@ -717,6 +850,11 @@ export const overrides: Record<string, Override> = {
   '--c2-json-viewer__action__hover--background-color': { token: 'color-outline-variant' },
   '--c2-json-viewer__action__copied--color': { exclude: 'success status colour' },
   '--c2-key-value-editor__field--font-family': { exclude: 'monospace font for variable names and values, not the UI font' },
+  // The tier a previewed quantity falls in is outlined in the accent, as a selected item is.
+  '--c2-tier-editor__from__match--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__header--border-bottom': { exclude: 'translucent grey works on light and dark syntax themes' },
   '--c2-code-viewer__copy__hover--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -1197,6 +1335,12 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-import-mapper__error--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  // Aging table: the oldest amounts are text on the total row's container surface too, where the error red alone
+  // reaches 4.39:1; mixed with the ink like the import mapper's error text.
+  '--c2-aging-table__oldest--color': {
     token: 'color-error',
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #b91c1c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },

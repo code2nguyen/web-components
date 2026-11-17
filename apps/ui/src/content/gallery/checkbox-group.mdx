@@ -76,4 +76,68 @@ Curated looks for `c2-checkbox-group`. Variables set on the group inherit into e
 </c2-checkbox-group>
 ```
 
+```html tag=MdxCodeBlock,label=Modifier group
+<style>
+  .modifier-group {
+    width: 100%;
+    --c2-checkbox-group--align-items: stretch;
+    --c2-checkbox-group--gap: 4px;
+    --c2-checkbox-group__label--font-size: 16px;
+    --c2-checkbox-group__label--font-weight: 600;
+    --c2-checkbox-group__header--margin-bottom: 8px;
+    --c2-checkbox__trailing--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__trailing--font-weight: 500;
+    --c2-checkbox__label--font-size: 14px;
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="modifier-group" name="toppings" min="1" max="3" value="mozzarella;basil">
+  <span slot="label">Extra toppings</span>
+  <span slot="description">Required · choose 1 to 3</span>
+  <c2-checkbox value="mozzarella">Mozzarella<span slot="trailing">+$2.00</span></c2-checkbox>
+  <c2-checkbox value="basil">Basil<span slot="trailing">+$0.50</span></c2-checkbox>
+  <c2-checkbox value="mushrooms">Mushrooms<span slot="trailing">+$1.50</span></c2-checkbox>
+  <c2-checkbox value="pepperoni">Pepperoni<span slot="trailing">+$2.50</span></c2-checkbox>
+  <c2-checkbox value="anchovies" disabled>Anchovies<span slot="trailing">Sold out</span></c2-checkbox>
+</c2-checkbox-group>
+```
+
+```html tag=MdxCodeBlock,label=Limit reached
+<style>
+  .limit-reached {
+    width: 100%;
+    --c2-checkbox-group--align-items: stretch;
+    --c2-checkbox-group--gap: 6px;
+    --c2-checkbox-group__description--color: light-dark(#b45309, #f5b066);
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="limit-reached" max="2" value="design;research">
+  <span slot="label">Pick two tracks</span>
+  <span slot="description">2 of 2 chosen</span>
+  <c2-checkbox value="design">Design systems</c2-checkbox>
+  <c2-checkbox value="research">User research</c2-checkbox>
+  <c2-checkbox value="motion">Motion</c2-checkbox>
+  <c2-checkbox value="writing">UX writing</c2-checkbox>
+</c2-checkbox-group>
+```
+
+```html tag=MdxCodeBlock,label=Add-ons with prices
+<style>
+  .priced-cards {
+    width: 100%;
+    --c2-checkbox-group--align-items: stretch;
+    --c2-checkbox-group--gap: 12px;
+    --c2-checkbox__field--gap: 8px;
+    --c2-checkbox__label--font-weight: 500;
+    --c2-checkbox__trailing--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__trailing--font-weight: 600;
+  }
+</style>
+<c2-checkbox-group client:only="lit" class="priced-cards" name="addons" value="backup">
+  <span slot="label">Add-ons</span>
+  <c2-checkbox value="backup">Backups<span slot="description">Kept 30 days</span><span slot="trailing">$5/mo</span></c2-checkbox>
+  <c2-checkbox value="domain">Domain<span slot="description">Use your own</span><span slot="trailing">$2/mo</span></c2-checkbox>
+  <c2-checkbox value="support">Support<span slot="description">4-hour replies</span><span slot="trailing">$19/mo</span></c2-checkbox>
+</c2-checkbox-group>
+```
+
 </GalleryGrid>

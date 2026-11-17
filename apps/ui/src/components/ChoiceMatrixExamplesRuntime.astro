@@ -1,0 +1,66 @@
+---
+/**
+ * Sets the property-only features of the choice-matrix galleries: `renderCell` and `renderRowDetail` on a
+ * `c2-choice-matrix` marked `data-choice-matrix-example="render-cell"` or `"row-detail"`, and `formatValue` on a
+ * `c2-record-merge` marked `data-record-merge-example="format"`. Also adds the French for the cards under `lang="fr"`.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { ChoiceMatrix } from '@c2n/components/choice-matrix'
+  import type { RecordMerge } from '@c2n/components/choice-matrix/record-merge'
+  import '@c2n/components/choice-matrix'
+  import '@c2n/components/choice-matrix/record-merge'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'choice-matrix': { useAll: 'Tout prendre', useAllFrom: 'Tout prendre de {0}' },
+      'input-matrix': { label: 'Valeurs', total: 'Total', duration: '{0} h {1}' },
+      'record-merge': { result: 'Résultat', emptyValue: 'Vide', label: 'Fusionner les fiches' },
+      scorecard: {
+        label: "Grille d'évaluation",
+        score: 'Note',
+        total: 'Total',
+        notApplicable: 'S.O.',
+        critical: 'Critique',
+        weightName: ', coefficient {0}',
+        answered: '{0} sur {1} renseignés',
+        failed: 'Échec : {0}',
+      },
+    },
+  })
+
+  const PRICES: Record<string, Record<string, number>> = {
+    starter: { monthly: 9, yearly: 90 },
+    team: { monthly: 29, yearly: 290 },
+    scale: { monthly: 99, yearly: 990 },
+  }
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+
+  function setup() {
+    document.querySelectorAll<ChoiceMatrix>('c2-choice-matrix[data-choice-matrix-example="render-cell"]').forEach((matrix) => {
+      matrix.renderCell = ({ row, column, checked }) => {
+        const price = PRICES[row.value]?.[column.value]
+        return price === undefined ? undefined : html`<strong>${money.format(price)}</strong>${checked ? html` <span part="plan-pick">· selected</span>` : ''}`
+      }
+    })
+    document.querySelectorAll<ChoiceMatrix>('c2-choice-matrix[data-choice-matrix-example="row-detail"]').forEach((matrix) => {
+      matrix.renderRowDetail = ({ row, chosen }) =>
+        chosen.includes('blocked') ? html`<span part="blocked-note">${row.label} is blocking the launch: add an owner and a date.</span>` : undefined
+    })
+    document.querySelectorAll<RecordMerge>('c2-record-merge[data-record-merge-example="format"]').forEach((merge) => {
+      merge.formatValue = ({ field, value }) => {
+        if (value === undefined || value === null || value === '') return html`<span class="merge-none">none</span>`
+        if (field.key === 'created') return new Date(String(value)).toLocaleDateString('en-US', { dateStyle: 'medium' })
+        if (field.key === 'revenue') return money.format(Number(value))
+        return String(value)
+      }
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+  customElements.whenDefined('c2-record-merge').then(setup)
+</script>

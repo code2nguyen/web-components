@@ -37,7 +37,7 @@ const MIXED_FILE = /\.(mdx|vue|svelte|astro)$/i
 const NATIVE: Record<string, string[]> = {
   button: ['c2-button', 'c2-icon-button'],
   textarea: ['c2-textarea'],
-  select: ['c2-select', 'c2-autocomplete'],
+  select: ['c2-select', 'c2-native-select', 'c2-autocomplete'],
   dialog: ['c2-modal', 'c2-sheet'],
   details: ['c2-details', 'c2-accordion'],
   progress: ['c2-progress'],

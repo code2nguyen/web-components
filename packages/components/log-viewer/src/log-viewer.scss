@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-log-viewer,
   $theme: (
@@ -114,7 +115,7 @@
   left: 0;
   min-width: 100%;
   box-shadow: css.cssVar(entry--box-shadow);
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(entry__hover--background);
   }
 }
@@ -343,7 +344,7 @@
     stroke: currentColor;
     stroke-width: css.cssVar(copy--stroke-width);
   }
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(copy__hover--background);
   }
   &:focus-visible {

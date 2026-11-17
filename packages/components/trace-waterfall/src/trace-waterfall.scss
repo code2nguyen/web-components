@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-trace-waterfall,
   $theme: (
@@ -138,7 +139,7 @@
   cursor: pointer;
   outline: none;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(row__hover--background);
   }
 

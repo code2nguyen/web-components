@@ -13,6 +13,10 @@
       "types": "./types/src/tab.d.ts",
       "default": "./dist/tab.js"
     },
+    "./tab-nav.js": {
+      "types": "./types/src/tab-nav.d.ts",
+      "default": "./dist/tab-nav.js"
+    },
     "./tab-context.js": {
       "types": "./types/src/tab-context.d.ts",
       "default": "./dist/tab-context.js"
@@ -54,7 +58,8 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../menu:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -67,11 +72,17 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/menu": "*",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./tab-nav.js"
+    ]
+  }
 }

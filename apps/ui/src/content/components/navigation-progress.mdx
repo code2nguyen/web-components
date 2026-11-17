@@ -1,0 +1,99 @@
+---
+title: 'Navigation Progress'
+description: 'The thin loading bar across the top of the page during a route change or a request: start() trickles it forward, done() fills it and fades it out.'
+category: 'Feedback'
+package: '@c2n/progress'
+tag: 'c2-navigation-progress'
+apiTags: ['c2-navigation-progress']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import NavigationProgressExamplesRuntime from '../../components/NavigationProgressExamplesRuntime.astro'
+
+import { NavigationProgress } from '@c2n/components/progress/navigation-progress'
+import { Button } from '@c2n/components/button'
+
+<NavigationProgressExamplesRuntime />
+
+`c2-navigation-progress` is the bar that runs across the top of a single-page application while the next route loads. `start()` shows it and trickles it forward in smaller and smaller steps, so it keeps moving without ever reaching the end; `done()` fills it and fades it out. Calling `start()` again while it fades begins a new run. For a framework that binds a "navigating" flag rather than calling methods, the `active` property is the same run: `true` starts it, `false` finishes it.
+
+Put one on the page. It draws in the top layer, above dialogs, drawers and anything positioned, so a navigation started from a modal still shows. Add `contained` to draw it at the top of the nearest positioned ancestor instead: a panel, a card or a frame that loads on its own.
+
+The trickle measures time, not work, so the bar is announced as a progress bar with a name ("Loading page", or `label`) and no value. Use [`c2-progress`](/web-components/components/progress) when you know how much is done.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/progress/navigation-progress'
+```
+
+The entry is separate from `@c2n/components/progress`, so importing it does not load `c2-progress`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/progress
+<style>
+  .nav-frame {
+    position: relative;
+    display: grid;
+    gap: 6px;
+    width: 280px;
+    max-width: 100%;
+    padding: 18px 16px 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 13px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .nav-frame strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+  .nav-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .nav-glow {
+    --c2-navigation-progress--height: 2px;
+    --c2-navigation-progress__indicator--background-color: #7c3aed;
+    --c2-navigation-progress__indicator--box-shadow: 0 0 8px #7c3aed;
+  }
+</style>
+<div data-label="Running">
+  <div class="nav-frame">
+    <c2-navigation-progress contained active></c2-navigation-progress>
+    <strong>Invoices</strong>
+    <span>Loading the next page…</span>
+  </div>
+</div>
+<div data-label="Start and done">
+  <div class="nav-frame" data-navigation-progress-example="panel">
+    <c2-navigation-progress contained></c2-navigation-progress>
+    <strong>Orders</strong>
+    <div class="nav-actions">
+      <c2-button data-navigation-progress-action="start">Start</c2-button>
+      <c2-button data-navigation-progress-action="done">Done</c2-button>
+    </div>
+  </div>
+</div>
+<div data-label="Restyled">
+  <div class="nav-frame">
+    <c2-navigation-progress class="nav-glow" contained active></c2-navigation-progress>
+    <strong>Settings</strong>
+    <span>A 2px violet bar with a glow.</span>
+  </div>
+</div>
+```
+
+In an application the bar sits once in the page shell and the router drives it:
+
+```ts tag=CodeBlock
+import '@c2n/components/progress/navigation-progress'
+
+const bar = document.querySelector('c2-navigation-progress')!
+router.beforeEach(() => bar.start())
+router.afterEach(() => bar.done())
+```
+
+`--c2-navigation-progress--height` and `--c2-navigation-progress__indicator--background-color` set the bar, `--c2-navigation-progress__indicator--box-shadow` adds a glow, `--c2-navigation-progress--animation-duration` paces the fade-in, each step and the final fill, and `--c2-navigation-progress--fade-duration` the fade-out. Under reduced motion the steps jump instead of sliding; the fades stay.

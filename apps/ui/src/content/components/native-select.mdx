@@ -1,0 +1,106 @@
+---
+title: 'Native Select'
+description: "A field around the browser's own select, themed like the text field: the phone's own picker, the platform's keyboard and typeahead, and no popover code."
+category: 'Inputs'
+package: '@c2n/select'
+tag: 'c2-native-select'
+apiTags: ['c2-native-select']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { NativeSelect } from '@c2n/components/select/native-select'
+
+`c2-native-select` puts the browser's own `<select>` in a field drawn like [`c2-text-field`](/web-components/components/text-field):
+same height, border, focus and error looks, and the same theme tokens. Opening it shows the operating system's picker
+(the wheel on iOS, the sheet on Android), the keyboard and typeahead are the platform's, and the page loads no popover,
+no listbox and no positioning code: its entry is a few kilobytes, where [`c2-select`](/web-components/components/select)
+brings a whole listbox. Reach for it in forms that are mostly filled in on phones and for long plain lists (countries,
+months, quantities); use `c2-select` for search, multiple selection or options with icons and descriptions.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/select/native-select'
+```
+
+The entry is separate from `@c2n/components/select`, so importing it does not load `c2-select`.
+
+## Usage
+
+Write the options as `<option>` and `<optgroup>` children, exactly as in a native select, or pass them as `options`.
+
+```html tag=UsageBlock,package=@c2n/select
+<style>
+  .country {
+    width: 220px;
+  }
+</style>
+<div data-label="Default">
+  <c2-native-select aria-label="Country" value="FR" class="country">
+    <option value="US">United States</option>
+    <option value="CA">Canada</option>
+    <option value="FR">France</option>
+    <option value="DE">Germany</option>
+    <option value="VN">Vietnam</option>
+  </c2-native-select>
+</div>
+<div data-label="Placeholder">
+  <c2-native-select aria-label="Size" placeholder="Choose a size" required class="country" options='["XS","S","M","L","XL"]'></c2-native-select>
+</div>
+<div data-label="Groups">
+  <c2-native-select aria-label="Time zone" value="Europe/Paris" class="country">
+    <optgroup label="Europe">
+      <option value="Europe/London">London</option>
+      <option value="Europe/Paris">Paris</option>
+    </optgroup>
+    <optgroup label="Asia">
+      <option value="Asia/Ho_Chi_Minh">Ho Chi Minh City</option>
+      <option value="Asia/Tokyo">Tokyo</option>
+    </optgroup>
+  </c2-native-select>
+</div>
+<div data-label="Disabled">
+  <c2-native-select aria-label="Plan" disabled class="country"><option>Team</option></c2-native-select>
+</div>
+```
+
+### Options
+
+`<option>` and `<optgroup>` children are copied into the select inside the shadow root, because a native select only
+shows the options it contains, and followed as they change: add, remove or rename one and the select follows. A
+`<option selected>` gives the starting value when the host has no `value`. From script, or as JSON in markup,
+`options` takes `{ value, label?, disabled? }` objects, plain strings (the value is the label) and groups
+`{ label, options, disabled? }`. When both are given, the children win.
+
+```typescript tag=CodeBlock
+const country = document.querySelector('c2-native-select')!
+country.options = countries.map((c) => ({ value: c.code, label: c.name }))
+country.addEventListener('change', () => save(country.value))
+```
+
+### Value and placeholder
+
+`value` is the chosen option's value. As in a native select, a value that matches no option falls back to the first
+enabled option, or to the placeholder when there is one; while there are no options yet, `value` keeps what was set,
+so a list loaded later still selects it. `placeholder` adds a first, empty option drawn in the placeholder colour; with
+`required` it cannot be picked back, and the form stays invalid until a real option is chosen.
+
+### In a form
+
+With `name`, the select submits its value, resets with the form, follows a disabled fieldset and takes part in
+constraint validation; `autocomplete` is forwarded to the select. The field turns red once the user has left it
+invalid, while `error` is set, and inside a [`c2-form-field`](/web-components/components/form-field) showing an
+error; the field also names and describes it. A `<label for>` or a `c2-label` names it too.
+
+### Language
+
+The required message ("Please select an option.") is in English. An app translates it under `native-select`, and it
+follows the nearest `lang`, where the browser's own message would follow the browser's language.
+
+```typescript tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'native-select': { valueMissing: 'Veuillez sélectionner une option.' } } })
+```

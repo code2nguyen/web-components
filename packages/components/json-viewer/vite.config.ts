@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/json-viewer.ts'],
+      entry: ['src/json-viewer.ts', 'src/schema-tree.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/json-viewer.ts'],
+      files: ['src/json-viewer.ts', 'src/schema-tree.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

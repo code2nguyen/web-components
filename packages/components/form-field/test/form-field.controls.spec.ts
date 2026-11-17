@@ -7,11 +7,13 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-text-field', markup: '<c2-text-field></c2-text-field>' },
   { tag: 'c2-textarea', markup: '<c2-textarea></c2-textarea>' },
   { tag: 'c2-select', markup: '<c2-select><c2-list-item value="a">A</c2-list-item></c2-select>' },
+  { tag: 'c2-native-select', markup: '<c2-native-select><option value="a">A</option></c2-native-select>' },
   { tag: 'c2-checkbox', markup: '<c2-checkbox>Agree</c2-checkbox>', selfLabelled: true },
   { tag: 'c2-switch', markup: '<c2-switch>Digest</c2-switch>', selfLabelled: true },
   { tag: 'c2-mask-input', markup: '<c2-mask-input mask="99999"></c2-mask-input>' },
   { tag: 'c2-money-input', markup: '<c2-money-input currency="EUR"></c2-money-input>' },
   { tag: 'c2-number-input', markup: '<c2-number-input></c2-number-input>' },
+  { tag: 'c2-unit-input', markup: '<c2-unit-input units="ea=1;dozen=12"></c2-unit-input>' },
   { tag: 'c2-duration-input', markup: '<c2-duration-input></c2-duration-input>' },
   { tag: 'c2-password-field', markup: '<c2-password-field></c2-password-field>' },
   { tag: 'c2-search-field', markup: '<c2-search-field></c2-search-field>' },
@@ -39,6 +41,7 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   { tag: 'c2-chat-input', markup: '<c2-chat-input></c2-chat-input>' },
   { tag: 'c2-inline-edit', markup: '<c2-inline-edit value="Ada"></c2-inline-edit>' },
   { tag: 'c2-key-value-editor', markup: '<c2-key-value-editor></c2-key-value-editor>' },
+  { tag: 'c2-tier-editor', markup: '<c2-tier-editor></c2-tier-editor>' },
   { tag: 'c2-query-input', markup: '<c2-query-input></c2-query-input>' },
   { tag: 'c2-tree-select', markup: '<c2-tree-select><c2-tree-item value="a" label="A"></c2-tree-item></c2-tree-select>' },
   { tag: 'c2-month-picker', markup: '<c2-month-picker></c2-month-picker>' },
@@ -60,6 +63,19 @@ const controls: { tag: string; markup: string; selfLabelled?: boolean }[] = [
   {
     tag: 'c2-choice-matrix',
     markup: `<c2-choice-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-choice-matrix>`,
+  },
+  {
+    tag: 'c2-input-matrix',
+    markup: `<c2-input-matrix rows='[{"value":"a","label":"A"}]' columns='[{"value":"x","label":"X"}]'></c2-input-matrix>`,
+  },
+  {
+    tag: 'c2-scorecard',
+    markup: `<c2-scorecard rows='[{"value":"a","label":"A"}]' columns='[{"value":"1","label":"1"}]'></c2-scorecard>`,
+  },
+  { tag: 'c2-reorder-list', markup: '<c2-reorder-list name="ranking" editable><div data-reorder-key="a">A</div></c2-reorder-list>' },
+  {
+    tag: 'c2-record-merge',
+    markup: `<c2-record-merge records='[{"id":"a","label":"A","values":{"name":"Ada"}}]'></c2-record-merge>`,
   },
 ]
 

@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { KeyValueEditor } from '@c2n/key-value-editor'
+import type { TierEditor } from '@c2n/key-value-editor/tier-editor.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -31,6 +32,22 @@ declare module 'vue' {
         'lock-keys'?: unknown
         onInput?: (event: EventOf<KeyValueEditor, 'input'>) => void
         onChange?: (event: EventOf<KeyValueEditor, 'change'>) => void
+      }
+    >
+    'c2-tier-editor': DefineComponent<
+      C2Props<TierEditor> & {
+        'total-format'?: unknown
+        'key-label'?: unknown
+        'value-label'?: unknown
+        'key-placeholder'?: unknown
+        'value-placeholder'?: unknown
+        'add-label'?: unknown
+        'duplicate-message'?: unknown
+        'pattern-message'?: unknown
+        'key-pattern'?: unknown
+        'lock-keys'?: unknown
+        onInput?: (event: EventOf<TierEditor, 'input'>) => void
+        onChange?: (event: EventOf<TierEditor, 'change'>) => void
       }
     >
   }

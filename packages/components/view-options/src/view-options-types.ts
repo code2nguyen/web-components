@@ -59,3 +59,42 @@ export interface ViewChangeEventDetail {
 export interface ViewDefaultRequestEventDetail {
   value: ViewOptionsValue
 }
+
+/**
+ * A named view the app keeps: its value, and whether it is shared with others or locked against changes. The
+ * component lists them and fires events; it saves nothing, so the app updates `views` after each event.
+ */
+export interface ViewSavedView {
+  id: string
+  name: string
+  value: Partial<ViewOptionsValue>
+  /** Listed under Shared rather than among the user's own views. */
+  shared?: boolean
+  /** Cannot be saved over, renamed or deleted (a team view, a built-in one). "Save as" still copies it. */
+  locked?: boolean
+}
+
+/** Detail of `view-select`: the view picked and the value it gave, already in `value`. */
+export interface ViewSelectEventDetail {
+  id: string
+  view: ViewSavedView
+  value: ViewOptionsValue
+}
+
+/** Detail of `view-save`: `id` is the view saved over, or `null` for "Save as", which the app gives an id of its own. */
+export interface ViewSaveEventDetail {
+  id: string | null
+  name: string
+  value: ViewOptionsValue
+}
+
+/** Detail of `view-rename`. */
+export interface ViewRenameEventDetail {
+  id: string
+  name: string
+}
+
+/** Detail of `view-delete`. */
+export interface ViewDeleteEventDetail {
+  id: string
+}

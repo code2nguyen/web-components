@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { NumberInput } from '@c2n/number-input'
+import type { UnitInput } from '@c2n/number-input/unit-input.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -28,6 +29,15 @@ declare module 'react' {
         'hide-steppers'?: Attribute
         'error-text'?: Attribute
         'aria-label'?: Attribute
+      }
+      'c2-unit-input': Omit<C2Props<UnitInput>, 'units'> & {
+        'unit-name'?: Attribute
+        'unit-label'?: Attribute
+        readonly?: Attribute
+        'hide-steppers'?: Attribute
+        'error-text'?: Attribute
+        'aria-label'?: Attribute
+        units?: UnitInput['units'] | string
       }
     }
   }

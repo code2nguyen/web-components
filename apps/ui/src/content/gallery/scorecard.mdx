@@ -1,0 +1,89 @@
+---
+title: 'Scorecard gallery'
+description: 'Ready-made c2-scorecard setups: an interview scorecard, a support QA review with a critical check, a grading rubric, an inspection checklist with notes, French, and an accent look.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ChoiceMatrixExamplesRuntime from '../../components/ChoiceMatrixExamplesRuntime.astro'
+
+import { Scorecard } from '@c2n/components/choice-matrix/scorecard'
+import { Textarea } from '@c2n/components/textarea'
+
+<ChoiceMatrixExamplesRuntime />
+
+## Scorecards
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-scorecard label="Interview scorecard" row-header="Criterion"
+  columns='[{"value":"1","label":"Strong no","fail":true},{"value":"2","label":"No"},{"value":"3","label":"Yes"},{"value":"4","label":"Strong yes"}]'
+  rows='[{"value":"design","label":"System design","group":"Skills","weight":2},{"value":"code","label":"Coding","group":"Skills"},{"value":"values","label":"Works with others","group":"Culture","critical":true}]'
+  bands='[{"min":75,"label":"Hire","tone":"success"},{"min":50,"label":"Lean hire","tone":"warning"},{"min":0,"label":"No hire","tone":"error"}]'
+  value='{"design":"4","code":"3"}'></c2-scorecard>
+```
+
+```html tag=MdxCodeBlock,label=Support QA with a critical check
+<c2-scorecard label="Ticket review" row-header="Check"
+  columns='[{"value":"fail","label":"Fail","points":0,"fail":true},{"value":"pass","label":"Pass","points":1},{"value":"na","label":"N/A","na":true}]'
+  rows='[{"value":"identity","label":"Verifies the account","critical":true},{"value":"tone","label":"Friendly tone"},{"value":"macro","label":"Uses the right macro"},{"value":"followup","label":"Sets a follow-up"}]'
+  bands='[{"min":90,"label":"Meets the bar","tone":"success"},{"min":0,"label":"Coaching","tone":"warning"}]'
+  value='{"identity":"fail","tone":"pass","macro":"pass","followup":"na"}'></c2-scorecard>
+```
+
+```html tag=MdxCodeBlock,label=Grading rubric
+<c2-scorecard label="Essay rubric" row-header="Criterion"
+  columns='[{"value":"beginning","label":"Beginning","points":1},{"value":"developing","label":"Developing","points":2},{"value":"proficient","label":"Proficient","points":3},{"value":"exemplary","label":"Exemplary","points":4}]'
+  rows='[{"value":"thesis","label":"Thesis"},{"value":"evidence","label":"Evidence","weight":2},{"value":"style","label":"Style"}]'
+  cells='{"thesis":{"beginning":"No clear claim","developing":"Claim is vague","proficient":"Clear, arguable claim","exemplary":"Precise claim that frames the essay"},"evidence":{"beginning":"Little support","developing":"Some sources, loosely tied","proficient":"Relevant sources, explained","exemplary":"Well-chosen sources, analysed"},"style":{"beginning":"Hard to follow","developing":"Mostly clear","proficient":"Clear and varied","exemplary":"Fluent and engaging"}}'
+  bands='[{"min":85,"label":"A","tone":"success"},{"min":70,"label":"B","tone":"neutral"},{"min":0,"label":"Revise","tone":"warning"}]'
+  value='{"thesis":"proficient","evidence":"exemplary"}'></c2-scorecard>
+```
+
+```html tag=MdxCodeBlock,label=Inspection checklist
+<style>
+  .inspection-note {
+    width: 100%;
+  }
+</style>
+<c2-scorecard label="Site inspection" row-header="Item"
+  columns='[{"value":"pass","label":"Pass","points":1},{"value":"fail","label":"Fail","points":0,"fail":true},{"value":"na","label":"N/A","na":true}]'
+  rows='[{"value":"exits","label":"Fire exits clear","group":"Safety","critical":true},{"value":"extinguisher","label":"Extinguisher in date","group":"Safety"},{"value":"ppe","label":"PPE available","group":"Safety"},{"value":"spill","label":"Spill kit stocked","group":"Housekeeping"}]'
+  value='{"exits":"pass","extinguisher":"fail","ppe":"pass","spill":"na"}'>
+  <c2-textarea class="inspection-note" slot="detail-extinguisher" aria-label="Follow-up for the extinguisher" value="Tag expired in October. Replacement ordered, due Friday."></c2-textarea>
+</c2-scorecard>
+```
+
+```html tag=MdxCodeBlock,label=Grille (French)
+<div lang="fr">
+  <c2-scorecard client:only="lit" label="Évaluation fournisseur" row-header="Critère"
+    columns='[{"value":"1","label":"Faible"},{"value":"2","label":"Moyen"},{"value":"3","label":"Bon"},{"value":"na","label":"S.O.","na":true}]'
+    rows='[{"value":"delai","label":"Délais","weight":2},{"value":"qualite","label":"Qualité","critical":true},{"value":"prix","label":"Prix"}]'
+    bands='[{"min":70,"label":"Retenu","tone":"success"},{"min":0,"label":"À revoir","tone":"warning"}]'
+    value='{"delai":"3","qualite":"2","prix":"na"}'></c2-scorecard>
+</div>
+```
+
+</GalleryGrid>
+
+## Looks
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Accent summary
+<style>
+  .scorecard-accent {
+    --c2-scorecard__summary--background-color: light-dark(#eef2ff, #1c2142);
+    --c2-scorecard__score--background-color: light-dark(#eef2ff, #1c2142);
+    --c2-scorecard__score--color: light-dark(#3730a3, #a5b0f5);
+    --c2-choice-matrix__control__selected--background-color: #4f46e5;
+  }
+</style>
+<c2-scorecard class="scorecard-accent" label="Supplier score" row-header="Criterion"
+  columns='[{"value":"1","label":"1"},{"value":"2","label":"2"},{"value":"3","label":"3"},{"value":"4","label":"4"},{"value":"5","label":"5"}]'
+  rows='[{"value":"price","label":"Price"},{"value":"quality","label":"Quality","weight":2},{"value":"service","label":"Service"}]'
+  value='{"price":"4","quality":"5","service":"3"}'></c2-scorecard>
+```
+
+</GalleryGrid>

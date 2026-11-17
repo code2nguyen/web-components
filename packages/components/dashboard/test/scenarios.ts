@@ -24,6 +24,13 @@ const markup: Record<string, string> = {
       <c2-dash-card id="two" col="2" row="1" expand-width expand-height><span slot="header">Two</span><div class="pane">Two</div></c2-dash-card>
       <c2-dash-card id="three" col="2" row="2"><span slot="header">Three</span><div class="pane">Three</div></c2-dash-card>
     </c2-dashboard>`,
+  // `layouts` written as a JSON attribute, and a host given a min-height rather than a height: the fr rows share the
+  // min-height, while the narrow entry's fixed rows size the host themselves.
+  'json-layouts': `<c2-dashboard id="subject" columns="2" rows="1" style="height: auto; min-height: 300px"
+      layouts='[{"media":"(max-width: 600px)","columns":1,"rows":"120px 200px","layout":{"one":{"col":1,"row":1},"two":{"col":1,"row":2}}}]'>
+      <c2-dash-card id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
+      <c2-dash-card id="two" col="2" row="1"><div class="pane">Two</div></c2-dash-card>
+    </c2-dashboard>`,
   // Nothing flexes here, so a drag can only take the free space that is left.
   'fixed-tracks': `<c2-dashboard id="subject" columns="200px 200px" rows="1">
       <c2-dash-card id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>

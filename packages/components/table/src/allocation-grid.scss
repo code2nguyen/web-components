@@ -1,0 +1,35 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-allocation-grid,
+  $theme: (
+    under--background: transparent,
+    under--color: #71717a,
+    at--background: rgba(21, 128, 61, 0.12),
+    at--color: #166534,
+    over--background: rgba(185, 28, 28, 0.12),
+    over--color: #b91c1c,
+    over--font-weight: 600,
+  )
+);
+@use '@c2n/sass/visually-hidden';
+
+// A cell compared with its row's capacity. The colour carries the load at a glance; the `load` text says it for a
+// screen reader, after the value.
+.cell[part~='cell-under'] {
+  background: css.cssVar(under--background);
+  color: css.cssVar(under--color);
+}
+
+.cell[part~='cell-at'] {
+  background: css.cssVar(at--background);
+  color: css.cssVar(at--color);
+}
+
+.cell[part~='cell-over'] {
+  background: css.cssVar(over--background);
+  color: css.cssVar(over--color);
+  font-weight: css.cssVar(over--font-weight);
+}
+
+.load {
+  @include visually-hidden.visually-hidden;
+}

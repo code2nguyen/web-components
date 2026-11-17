@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -199,7 +200,7 @@ $fg-dark: css.cssVar(color, --cv-fg, --shiki-dark);
     height: css.cssVar(copy--icon-size);
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(copy__hover--background);
     opacity: 1;
   }
@@ -305,13 +306,45 @@ pre.shiki {
   }
 }
 
+$auto: ':not([color-scheme="light"]):not([color-scheme="dark"])';
+// light-dark() for the palette, :state() for the OS fallback below: `auto` needs both, or it keeps the media query.
+$scheme-aware: '(color: light-dark(white, black)) and selector(:state(a))';
+
 :host([color-scheme='dark']) {
   @include dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :host(:not([color-scheme='light'])) {
-    @include dark;
+// `auto` follows the color-scheme the element inherits (a page's theme switch, @c2n/theme's dark mode), through
+// light-dark(). Only the theme's own colours go through it: an author's --c2-code-viewer--background may be a gradient,
+// which light-dark() does not take. Where nothing on the page sets color-scheme it is `normal`, which light-dark() reads
+// as light: a viewer with a `dark-theme` then marks itself `scheme-from-os` and opts its frame into `light dark`, so
+// the OS preference decides as before.
+@supports #{$scheme-aware} {
+  :host(#{$auto}) {
+    .c2-code-viewer,
+    .c2-code-viewer-inline {
+      background: var(--c2-code-viewer--background, light-dark(var(--cv-bg, var(--shiki-light-bg)), var(--cv-bg, var(--shiki-dark-bg))));
+      color: var(--c2-code-viewer--color, light-dark(var(--cv-fg, var(--shiki-light)), var(--cv-fg, var(--shiki-dark))));
+    }
+    .dual span {
+      color: light-dark(var(--shiki-light), var(--shiki-dark));
+    }
+  }
+
+  :host(:state(scheme-from-os)#{$auto}) {
+    .c2-code-viewer,
+    .c2-code-viewer-inline {
+      color-scheme: light dark;
+    }
+  }
+}
+
+// Without them (browsers before mid-2024), `auto` follows the OS preference only.
+@supports not (#{$scheme-aware}) {
+  @media (prefers-color-scheme: dark) {
+    :host(#{$auto}) {
+      @include dark;
+    }
   }
 }
 

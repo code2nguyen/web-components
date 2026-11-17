@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-modal,
@@ -180,7 +181,7 @@
     height: css.cssVar(close--icon-size);
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(close__hover--background);
     color: css.cssVar(close__hover--color);
   }

@@ -134,3 +134,78 @@ test('a segmented meter counts its total from min, like its legend', async ({ pa
   await expect(page.locator('c2-meter').locator('[part="value"]')).toHaveText('5 of 10')
   await expect(page.getByRole('meter', { name: 'Offset' })).toHaveAttribute('aria-valuenow', '15')
 })
+
+const seats = (assigned: number, pending: number) =>
+  JSON.stringify([
+    { label: 'Assigned', value: assigned },
+    { label: 'Pending', value: pending },
+  ])
+
+test('without overage a sum past max is still cut, with no overage segment or state', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-meter max="50" segments='${seats(48, 8)}'>Seats</c2-meter>`)
+  const host = page.locator('c2-meter')
+  await expect(host.locator('[part~="overage"]')).toHaveCount(0)
+  await expect(host.locator('[part="value"]')).toHaveText('50 of 50')
+  await expect(host).not.toHaveState('overage')
+  await expect(host.locator('[part="legend-item"]')).toHaveCount(2)
+})
+
+test('overage draws the part past max as its own segment after a limit mark, lists and announces it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-meter max="50" overage segments='${seats(48, 8)}'>Seats</c2-meter>`)
+  const host = page.locator('c2-meter')
+  const meter = page.getByRole('meter', { name: 'Seats' })
+  await expect(host).toHaveState('overage')
+  await expect(host.locator('[part="value"]')).toHaveText('56 of 50')
+  await expect(meter).toHaveAttribute('aria-valuenow', '50')
+  await expect(meter).toHaveAttribute('aria-valuetext', 'Assigned: 48, Pending: 8, Over limit: 6, 56 of 50')
+  const overage = host.locator('[part~="overage"]')
+  await expect(overage).toHaveCSS('background-color', 'rgb(220, 38, 38)')
+  // The bar spans the whole sum: the overage takes 6/56 of it, the segments the 50 up to the limit.
+  await expect.poll(() => widthRatio(page, 'segment overage')).toBeCloseTo(6 / 56, 1)
+  await expect.poll(() => widthRatio(page, 'segment', 0)).toBeCloseTo(48 / 56, 1)
+  // The limit mark sits in the gap before the overage, at max.
+  const mark = await overage.evaluate((el) => {
+    const before = getComputedStyle(el, '::before')
+    return { width: before.width, color: before.backgroundColor }
+  })
+  expect(mark).toEqual({ width: '2px', color: 'rgb(24, 24, 27)' })
+  await expect(overage).not.toHaveCSS('border-top-right-radius', '0px')
+  await expect(host.locator('[part="segment"]').nth(1)).toHaveCSS('border-top-right-radius', '0px')
+  await expect(host.locator('[part="legend-item"]')).toHaveText([/Assigned\s*48/, /Pending\s*8/, /Over limit\s*6/])
+  await expect(host.locator('[part="swatch"]').nth(2)).toHaveCSS('background-color', 'rgb(220, 38, 38)')
+  await accessible(page)
+})
+
+test('overage follows the data, and its colour and text are themable and translatable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div lang="fr"><c2-meter max="50" overage style="--c2-meter__overage--background-color: rgb(0, 0, 255)" segments='${seats(48, 4)}'>Postes</c2-meter></div>`,
+  )
+  const host = page.locator('c2-meter')
+  await expect(host.locator('[part~="overage"]')).toHaveCSS('background-color', 'rgb(0, 0, 255)')
+  await expect(page.getByRole('meter', { name: 'Postes' })).toHaveAttribute('aria-valuetext', 'Assigned : 48, Pending : 4, Dépassement : 2, 52 sur 50')
+  await host.evaluate((el) => ((el as HTMLElement & { segments: unknown }).segments = [{ label: 'Assigned', value: 40 }]))
+  await expect(host.locator('[part~="overage"]')).toHaveCount(0)
+  await expect(host).not.toHaveState('overage')
+  await expect(host.locator('[part="value"]')).toHaveText('40 sur 50')
+})
+
+test('a sum that passes max only by a rounding error is not an overage', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-meter max="0.3" overage segments='[{"label":"A","value":0.1},{"label":"B","value":0.2}]'>Float</c2-meter>`)
+  await expect(page.locator('c2-meter').locator('[part="segment"]')).toHaveCount(2)
+  await expect(page.locator('c2-meter').locator('[part~="overage"]')).toHaveCount(0)
+  await expect(page.locator('c2-meter')).not.toHaveState('overage')
+})
+
+test('overage leaves a single-value meter clamped', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-meter overage value="70" max="50">Seats</c2-meter>')
+  await expect(page.locator('c2-meter').locator('[part="value"]')).toHaveText('100%')
+  await expect(page.locator('c2-meter')).not.toHaveState('overage')
+})
+
+test('a long label and value text in a narrow box wrap instead of overlapping', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-meter style="width: 180px" max="1000" value="640" value-text="1,140 of 1,000 GB · billed as overage">Storage this month</c2-meter>`)
+  const host = page.locator('c2-meter')
+  const [label, value, track] = await Promise.all(['label', 'value', 'track'].map((part) => host.locator(`[part="${part}"]`).boundingBox()))
+  expect(label!.y + label!.height <= value!.y + 0.5 || label!.x + label!.width <= value!.x + 0.5).toBe(true)
+  expect(value!.x + value!.width).toBeLessThanOrEqual(track!.x + track!.width + 0.5)
+})

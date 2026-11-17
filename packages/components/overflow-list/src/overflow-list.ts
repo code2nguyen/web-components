@@ -150,6 +150,7 @@ function activate(element: Element) {
  *
  * @cssproperty {pixel} [--c2-overflow-list--gap=8px] - Space between the children and before the trigger, included in the fit.
  * @cssproperty {align-items} [--c2-overflow-list--align-items=center]
+ * @cssproperty {justify-content} --c2-overflow-list--justify-content - Where the row sits when it is narrower than the list: `flex-end` pushes a nav to the end of a header, `center` centres it. The fit is unchanged; the trigger stays last.
  *
  * @cssproperty {pixel} [--c2-overflow-list__more--height=36px]
  * @cssproperty {pixel} [--c2-overflow-list__more--min-width=36px]

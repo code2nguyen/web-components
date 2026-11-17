@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-app-shell-toggle,
   $theme: (
@@ -36,7 +37,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(hover--background-color);
   }
 

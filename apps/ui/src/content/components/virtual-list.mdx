@@ -95,6 +95,27 @@ list.dataSource = {
 }
 ```
 
+### Infinite scroll
+
+For a feed that grows as it is read, keep `items` and set `has-more`. When the end of the list comes within
+`load-more-distance` pixels (240 by default) of the view, the list fires `load-more` with the number of items so far
+and shows a loading row under the last one. Append the next page to `items` and set `has-more` to false after the last
+page (an empty page with more still to come asks again at once, so end with `has-more` false). Until `items`, `has-more` or `load-more-error` changes, `load-more` is not fired again, and a page too short to
+fill the view asks for the next one at once.
+
+```typescript tag=CodeBlock
+list.addEventListener('load-more', async () => {
+  const page = await api.next()
+  list.items = [...list.items, ...page.items]
+  list.hasMore = page.hasMore
+})
+```
+
+A page that fails sets `load-more-error` (a message, or `true` for the built-in one): the row shows it with a Retry
+button, which clears it and fires `load-more` again with `retry: true`. With a `dataSource` the list pages by itself
+and `has-more` is ignored. The `more-loading` and `more-error` slots replace the two rows; a button of your own in `more-error` calls
+`list.retryLoadMore()`.
+
 ### Custom rows
 
 `renderItem` replaces the label/description pair with any markup — the row is still a `c2-list-item`, so its slots are yours.

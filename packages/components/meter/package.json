@@ -9,6 +9,10 @@
       "types": "./types/src/meter.d.ts",
       "default": "./dist/meter.js"
     },
+    "./range-indicator.js": {
+      "types": "./types/src/range-indicator.d.ts",
+      "default": "./dist/range-indicator.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +70,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./range-indicator.js"
+    ]
+  }
 }

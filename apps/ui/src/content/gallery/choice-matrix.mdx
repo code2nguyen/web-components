@@ -1,7 +1,12 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChoiceMatrixExamplesRuntime from '../../components/ChoiceMatrixExamplesRuntime.astro'
 
 import { ChoiceMatrix } from '@c2n/components/choice-matrix'
+import { Textarea } from '@c2n/components/textarea'
+
+<ChoiceMatrixExamplesRuntime />
 
 ## Presets
 
@@ -49,3 +54,93 @@ Looks for `c2-choice-matrix`. The row borders and the cell padding set the densi
 ```
 
 </GalleryGrid>
+
+## Cell content
+
+A cell can show what it stands for beside its control, from `cells` or from `renderCell`; the control and the content
+are one label. With `type="radio"`, `use-all` puts a "Use all" button under each column.
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Medication reconciliation
+<c2-choice-matrix type="radio" use-all label="Reconcile medications" row-header="Medication"
+  columns='[{"value":"keep","label":"Keep"},{"value":"change","label":"Change"},{"value":"stop","label":"Stop"}]'
+  rows='[{"value":"aspirin","label":"Aspirin","description":"Home list"},{"value":"statin","label":"Atorvastatin","description":"Home and hospital differ"},{"value":"ppi","label":"Omeprazole","description":"Hospital only"}]'
+  cells='{"aspirin":{"keep":"81 mg daily"},"statin":{"keep":"20 mg nightly","change":"40 mg nightly"},"ppi":{"keep":"20 mg daily","stop":"Not on home list"}}'
+  value='{"aspirin":"keep"}'></c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Plan picker (renderCell)
+<style>
+  .plan-matrix::part(plan-pick) {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-choice-matrix class="plan-matrix" data-choice-matrix-example="render-cell" type="radio" label="Plan and billing" row-header="Plan"
+  columns='[{"value":"monthly","label":"Monthly"},{"value":"yearly","label":"Yearly"}]'
+  rows='[{"value":"starter","label":"Starter"},{"value":"team","label":"Team"},{"value":"scale","label":"Scale"}]'
+  value='{"team":"yearly"}'></c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Tout prendre (French)
+<div lang="fr">
+  <c2-choice-matrix client:only="lit" type="radio" use-all label="Source par champ" row-header="Champ"
+    columns='[{"value":"crm","label":"CRM"},{"value":"erp","label":"ERP"}]'
+    rows='[{"value":"adresse","label":"Adresse"},{"value":"tva","label":"N° TVA"}]'
+    cells='{"adresse":{"crm":"12 rue Lepic","erp":"12, rue Lepic"},"tva":{"crm":"FR40303265045","erp":"—"}}'></c2-choice-matrix>
+</div>
+```
+
+</GalleryGrid>
+
+## Under a row
+
+A row's `detail-<row>` slot, or `renderRowDetail`, puts a line under it across the matrix: a comment field, a note, a
+photo. What a renderer draws sits in the shadow root, so it carries a `part` for the page to style.
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Comment under a row
+<style>
+  .matrix-note {
+    width: 100%;
+  }
+</style>
+<c2-choice-matrix type="radio" label="Release checklist" row-header="Check"
+  columns='[{"value":"done","label":"Done"},{"value":"blocked","label":"Blocked"},{"value":"skip","label":"Skip"}]'
+  rows='[{"value":"tests","label":"Tests green"},{"value":"docs","label":"Docs updated"},{"value":"notes","label":"Release notes"}]'
+  value='{"tests":"done","docs":"blocked"}'>
+  <c2-textarea class="matrix-note" slot="detail-docs" aria-label="Why the docs are blocked" value="Waiting on the new screenshots."></c2-textarea>
+</c2-choice-matrix>
+```
+
+```html tag=MdxCodeBlock,label=Note when blocked (renderRowDetail)
+<style>
+  .launch-matrix::part(blocked-note) {
+    color: light-dark(#9a3412, #f0a37a);
+    font-size: 13px;
+  }
+</style>
+<c2-choice-matrix class="launch-matrix" data-choice-matrix-example="row-detail" type="radio" label="Launch readiness" row-header="Area"
+  columns='[{"value":"ready","label":"Ready"},{"value":"blocked","label":"Blocked"}]'
+  rows='[{"value":"legal","label":"Legal review"},{"value":"support","label":"Support trained"},{"value":"billing","label":"Billing live"}]'
+  value='{"legal":"ready","support":"blocked"}'></c2-choice-matrix>
+```
+
+</GalleryGrid>
+
+The note when blocked sets `renderRowDetail`:
+
+```ts tag=CodeBlock
+matrix.renderRowDetail = ({ row, chosen }) =>
+  chosen.includes('blocked') ? html`<span part="blocked-note">${row.label} is blocking the launch: add an owner and a date.</span>` : undefined
+```
+
+The plan picker sets `renderCell`:
+
+```ts tag=CodeBlock
+matrix.renderCell = ({ row, column, checked }) => {
+  const price = PRICES[row.value]?.[column.value]
+  return price === undefined ? undefined : html`<strong>${money.format(price)}</strong>${checked ? html` <span part="plan-pick">· selected</span>` : ''}`
+}
+```

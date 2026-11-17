@@ -28,6 +28,7 @@ declare module 'react' {
         'complete-label'?: Attribute
         'previous-label'?: Attribute
         'skip-label'?: Attribute
+        'skipped-label'?: Attribute
         questions?: Questionnaire['questions'] | string
       }
     }

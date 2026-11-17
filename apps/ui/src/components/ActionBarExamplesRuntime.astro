@@ -1,0 +1,46 @@
+---
+/**
+ * Plays the application's part in the action bar gallery: the French of the card under `lang="fr"`, and the selection
+ * of the card marked `data-action-bar-example="turns"`, whose open toolbar becomes a selection bar while any of its
+ * checkboxes is ticked.
+ */
+---
+
+<script>
+  import type { ActionBar } from '@c2n/components/action-bar'
+  import type { Checkbox } from '@c2n/components/checkbox'
+  import '@c2n/components/action-bar'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'action-bar': {
+        selected: { one: '{0} sélectionné', other: '{0} sélectionnés' },
+        clear: 'Effacer la sélection',
+        actions: 'Actions sur la sélection',
+        toolbar: 'Actions',
+      },
+    },
+  })
+
+  const wired = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-action-bar-example="turns"]').forEach((card) => {
+      const bar = card.querySelector<ActionBar>('c2-action-bar')
+      const boxes = [...card.querySelectorAll<Checkbox>('c2-checkbox')]
+      if (!bar || wired.has(card)) return
+      wired.add(card)
+      const sync = () => (bar.count = boxes.filter((box) => box.checked).length)
+      boxes.forEach((box) => box.addEventListener('change', sync))
+      bar.addEventListener('clear', () => {
+        boxes.forEach((box) => (box.checked = false))
+        sync()
+        boxes[0]?.focus()
+      })
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+</script>

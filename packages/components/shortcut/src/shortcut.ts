@@ -17,8 +17,10 @@ export interface ShortcutBinding extends ShortcutBindingOptions {
   for?: string
   /** Called when the shortcut fires, after the `shortcut` event, unless that event was cancelled. Script only. */
   handler?: (detail: ShortcutEventDetail) => void
-  /** Human text for a cheatsheet or a command palette. */
+  /** Human text for a cheatsheet or a command palette. A `c2-shortcut-sheet` lists the bindings that have one. */
   description?: string
+  /** Section a `c2-shortcut-sheet` lists the binding under (`Navigation`, `Editing`). */
+  group?: string
 }
 
 /** A binding with its platform-aware labels, as returned by {@link Shortcut.entries}. */
@@ -72,7 +74,7 @@ export class Shortcut extends LitElement {
   static override styles = unsafeCSS(styles)
 
   /**
-   * The shortcuts: `{ keys, action?, for?, handler?, scope?, description?, allowInInputs?, allowDefault?, repeat?, disabled? }`
+   * The shortcuts: `{ keys, action?, for?, handler?, scope?, description?, group?, allowInInputs?, allowDefault?, repeat?, disabled? }`
    * objects. As an attribute, a JSON array. Assigning a new array replaces every binding.
    */
   @property({ converter: jsonPropertyConverter }) bindings: ShortcutBinding[] = []

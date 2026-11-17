@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 import '@fontsource/material-icons'
 
 import { Button } from '@c2n/components/button'
+import { Details } from '@c2n/components/details'
 import { MatIcon } from '@c2n/components/mat-icon'
 import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
 import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
@@ -649,6 +650,60 @@ Icons from `@c2n/feather-icons` and `@c2n/components/mat-icon` drop straight int
   <c2-button class="toolbar-item toolbar-item-selected">Day</c2-button>
   <c2-button class="toolbar-item">Week</c2-button>
   <c2-button class="toolbar-item">Month</c2-button>
+</div>
+```
+
+</GalleryGrid>
+
+## Invoker commands
+
+`commandfor` names the element a button controls and `command` says what to do, as on a native button: a built-in command (`toggle-popover`, `show-modal`) or a custom `--name` the target receives as a `command` event. `aria-expanded` and `aria-controls` written on `c2-button` reach its inner button. Here a headless `c2-details` takes `--toggle` and keeps the button's `aria-expanded` in step, with no script.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Disclosure trigger
+<style>
+  .invoker {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    width: 260px;
+  }
+  .invoker-trigger {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .invoker-panel {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .invoker-panel strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<div class="invoker">
+  <c2-button class="invoker-trigger" commandfor="button-invoker-panel" command="--toggle" aria-controls="button-invoker-panel" aria-expanded="false">
+    Shipping options
+  </c2-button>
+  <c2-details id="button-invoker-panel" headless>
+    <div class="invoker-panel">
+      <span><strong>Standard</strong> 3 to 5 days, free</span>
+      <span><strong>Express</strong> Next day, $12</span>
+    </div>
+  </c2-details>
 </div>
 ```
 

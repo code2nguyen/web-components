@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Citation } from '@c2n/citation'
+import type { CitationList } from '@c2n/citation/citation-list.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -26,6 +27,10 @@ declare module 'react' {
       'c2-citation': C2Props<Citation> & {
         'source-title'?: Attribute
         'open-delay'?: Attribute
+      }
+      'c2-citation-list': Omit<C2Props<CitationList>, 'sources'> & {
+        'max-icons'?: Attribute
+        sources?: CitationList['sources'] | string
       }
     }
   }

@@ -1,7 +1,8 @@
 ---
 title: 'Table'
 description: 'Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.'
-category: 'Data display'
+category: 'Table'
+apiTags: ['c2-table', 'c2-table-column']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -86,19 +87,34 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
   </c2-table>
 </div>
-<div data-label="Grouped">
-  <c2-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
-    <c2-table-column field="task" header="Task" width="2fr" min-width="140"></c2-table-column>
-    <c2-table-column field="team" header="Team" hidden></c2-table-column>
-    <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
-    <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
+<div data-label="Editable">
+  <c2-table client:only="lit" class="grid" editable row-key="id" rows='[{"id":"1","item":"Standing desk","qty":2,"price":490,"status":"ordered","received":false},{"id":"2","item":"Monitor arm","qty":4,"price":89,"status":"draft","received":false},{"id":"3","item":"Desk lamp","qty":6,"price":42,"status":"received","received":true}]'>
+    <c2-table-column field="item" header="Item" width="2fr" min-width="140" editor="text" required summary-label="Total"></c2-table-column>
+    <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" editor="number" summary="sum"></c2-table-column>
+    <c2-table-column field="price" header="Price" width="100px" align="end" format="currency" editor="number"></c2-table-column>
+    <c2-table-column field="status" header="Status" width="120px" editor="select" options='[{"value":"draft","label":"Draft"},{"value":"ordered","label":"Ordered"},{"value":"received","label":"Received"}]'></c2-table-column>
+    <c2-table-column field="received" header="In" width="70px" align="center" editor="checkbox"></c2-table-column>
   </c2-table>
 </div>
-<div data-label="Tree">
-  <c2-table client:only="lit" class="grid" row-key="id" children-field="children" expanded-rows="eng" selection="multiple" checkbox-selection rows='[{"id":"eng","name":"Engineering","children":[{"id":"web","name":"Web platform","headcount":14,"budget":1820000},{"id":"mobile","name":"Mobile","headcount":9,"budget":1160000}]},{"id":"design","name":"Design","children":[{"id":"brand","name":"Brand","headcount":4,"budget":420000},{"id":"product-design","name":"Product design","headcount":7,"budget":810000}]},{"id":"ops","name":"Operations","headcount":5,"budget":390000}]'>
-    <c2-table-column field="name" header="Team" width="2fr" min-width="160" summary-label="Total"></c2-table-column>
-    <c2-table-column field="headcount" header="People" width="90px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>
-    <c2-table-column field="budget" header="Budget" width="130px" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>
+<div data-label="Statuses and balance">
+  <c2-table client:only="lit" class="grid" row-key="id" sort="date:asc" rows='[{"id":"1","date":"2026-11-01","memo":"Rent","debit":2400,"state":"posted"},{"id":"2","date":"2026-11-03","memo":"Invoice INV-1042","credit":5600,"state":"posted"},{"id":"3","date":"2026-11-04","memo":"Hosting","debit":318,"state":"posted"},{"id":"4","date":"2026-11-08","memo":"Invoice INV-1047","credit":1250,"state":"pending"}]'>
+    <c2-table-column field="date" header="Date" width="110px" format="date" summary-label="Closing"></c2-table-column>
+    <c2-table-column field="memo" header="Description" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="state" header="State" width="110px" format="status" options='[{"value":"posted","label":"Posted","color":"#16a34a"},{"value":"pending","label":"Pending","color":"#d97706"}]' summary="tally"></c2-table-column>
+    <c2-table-column column-id="balance" header="Balance" width="110px" align="end" format="currency" running="credit,-debit" opening="1000" summary="last"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Filters and changes">
+  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"E-01","name":"Ada Lovelace","team":"Analytics","gross":9200},{"id":"E-02","name":"Grace Hopper","team":"Compilers","gross":8600},{"id":"E-03","name":"Alan Turing","team":"Research","gross":10450},{"id":"E-04","name":"Barbara Liskov","team":"Research","gross":8800}]' baseline='[{"id":"E-01","gross":9200},{"id":"E-02","gross":8400},{"id":"E-03","gross":8650},{"id":"E-04","gross":8800}]'>
+    <c2-table-column field="name" header="Employee" width="2fr" min-width="140"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="130px" filterable></c2-table-column>
+    <c2-table-column field="gross" header="Gross" width="170px" align="end" format="currency" format-options='{"maximumFractionDigits":0}' compare="delta" variance-threshold="0.1"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Range flags">
+  <c2-table client:only="lit" class="grid" row-key="id" rows='[{"id":"glu","test":"Glucose","result":131,"low":70,"high":99},{"id":"k","test":"Potassium","result":6.4,"low":3.5,"high":5.1,"critHigh":6.2},{"id":"na","test":"Sodium","result":139,"low":135,"high":145},{"id":"tsh","test":"TSH","result":0.3,"low":0.4,"high":4}]'>
+    <c2-table-column field="test" header="Test" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="result" header="Result" width="120px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
   </c2-table>
 </div>
 <div data-label="Empty">
@@ -107,6 +123,45 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
   </c2-table>
 </div>
+```
+
+### Filters and baselines
+
+`filterable` (on a column, or on the table for every column) adds a funnel to the header that lists the column's values
+with their counts; the code behind it loads the first time one opens. The choice is kept in `filters`, which is also a
+JSON attribute, so a filtered view can be written in markup:
+
+```html tag=CodeBlock
+<c2-table filterable filters='{"status":{"exclude":["Archived"]}}' rows="..."></c2-table>
+```
+
+`filter-change` reports each change with the whole `filters` object. With a `dataSource` the table filters nothing
+itself: the request carries `filters`, and the source answers with the rows they let through.
+
+`baseline` holds the same rows from an earlier period, matched by `row-key`. A column with `compare="delta"` or
+`compare="percent"` shows the change from it under the value, and `variance-threshold="0.1"` marks a cell that moved by
+more than 10% (`::part(cell-variance)`, `--c2-table__cell__variance--*`).
+
+### Range flags
+
+`reference-range="low,high"` flags a value outside its row's normal range with `H` or `L` (`::part(cell-flag-high)`),
+and `critical-range` with `HH` or `LL`; each limit is a number or the field of the row that holds it, the mark's tooltip
+gives the range, and a screen reader hears the word, not the letter. A measure per row and a column per reading time is
+[`c2-flowsheet`](/web-components/components/flowsheet), built on these flags.
+
+### Parts for a cell's state
+
+`rowPart` returns part names for a row from its data, and `cellPart` does the same for a cell from its value and row,
+so a stylesheet can reach cells by state without a renderer:
+
+```typescript tag=CodeBlock
+table.cellPart = ({ column, value }) => (column.field === 'score' && Number(value) < 50 ? 'cell-failing' : undefined)
+```
+
+```css tag=CodeBlock
+c2-table::part(cell-failing) {
+  color: #b91c1c;
+}
 ```
 
 ### Columns as data
@@ -142,6 +197,21 @@ table.columns = columns
 The two ways are exclusive per table, not merged: `c2-table-column` children win whenever there are any, so `columns`
 is the fallback and never a way to patch a child. With neither, the table derives one column per key of the first row,
 which is enough to look at a response before deciding how to present it.
+
+### Selecting a page or every row
+
+The header checkbox selects the rows on show: every row, or the page while the table is paginated. `bulk-select` adds a
+caret beside it with a menu of the three choices a long list needs: this page, all N rows, or none. `selectPage()`,
+`selectAll()` and `clearSelection()` do the same from script.
+
+```html tag=CodeBlock
+<c2-table selection="multiple" checkbox-selection bulk-select paginated page-size="25" row-key="id" rows="..."></c2-table>
+```
+
+`selection-change` says how the selection was made in `detail.scope`, also kept in `selectionScope`: `rows` one by one,
+`page` the page on show, `all` every row. With a `dataSource` the table only holds the pages it fetched, so `value`
+has the loaded keys while `scope` is `all`: act on the whole set server side ("archive every invoice that matches"), and
+the rows that arrive later are drawn selected.
 
 ### Selecting rows: row keys
 
@@ -233,79 +303,11 @@ table.summaryValues = { amount: totals.amount, qty: totals.qty }
 `--c2-table__summary--{height,background,color,font-size,font-weight,box-shadow}`, and one figure with
 `::part(summary-content-<id>)`. The row is hidden while the table is empty, loading its first rows or showing an error.
 
-### Grouping rows
+### Groups and trees
 
-`group-by` gathers the rows into collapsible groups, outermost level first, and turns the grid into a `treegrid`.
-With the default `group-display="row"` a group is a row of the same grid: its label and row count in the first
-column (or the one marked `group-column`, which also indents the rows under it), and under every column with a
-`summary` that aggregate over the group's rows, formatted like the column. So one `summary="sum"` gives the subtotals
-and the total. `group-display="band"` draws a full-width band per group instead, holding its label and count.
-
-```html tag=CodeBlock
-<c2-table row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows="...">
-  <c2-table-column field="customer" header="Customer" summary-label="Total"></c2-table-column>
-  <c2-table-column field="region" header="Region" hidden></c2-table-column>
-  <c2-table-column field="amount" header="Amount" align="end" format="currency" summary="sum"></c2-table-column>
-</c2-table>
-```
-
-Groups are ordered by their value: ascending, the direction the table is sorted by that field, or a level's own
-`sort`. The rows inside a group keep the table's sort. A group's label is its value formatted by the column of that
-field (hidden columns included), `empty-group-label` for rows without one, and `renderGroup` or a
-`slot="group:<key>"` child for anything else. From script a level can compute its value:
-
-```typescript tag=CodeBlock
-table.groupBy = [{ field: 'month', getValue: (row) => String(row.placed).slice(0, 7), sort: 'desc' }, 'status']
-table.renderGroup = ({ value, summary }) => `${value} · ${summary.amount} €`
-```
-
-A group is named by its path, `region=EMEA/status=Paid`. Every group is open until `expanded-groups` lists the open
-ones (`;`-separated in the attribute) or `groups-collapsed` starts them closed; the first click writes the whole list
-into `expandedGroups`, so it can be stored and handed back. `group-toggle` reports a click, `expandGroup(key)`,
-`collapseGroup(key)`, `expandAll()` and `collapseAll()` do it from script, and `getGroups()` lists every group with
-its rows and aggregates. A group's checkbox selects the rows under it (the selection still holds row keys only),
-and ←/→ on a group's first cell close, open and climb the tree.
-
-The groups of the rows at the top of the view stay under the header while their rows scroll. Pages count display
-lines, so a closed group takes one line, and a page that starts inside a group repeats that group's headers above
-its first line. Grouping is done on the client: with a `dataSource` the table only holds the rows it fetched, so it
-ignores `group-by` and says so in the console. Style a group with `--c2-table__group-row--*`,
-`--c2-table__group-band--background`, `--c2-table__group--indent`, `--c2-table__group-toggle--*` and
-`--c2-table__group-count--*`, or with the `group-row`, `group-cell`, `group-label` and `group-count` parts.
-
-### Tree rows
-
-`children-field` names the field that holds each row's child rows, nested to any depth, and the grid becomes a
-`treegrid`: a parent is an ordinary row with a chevron, and the first column (or the one marked `group-column`)
-indents each level. Rows start closed; `tree-expanded` opens them all, and `expanded-rows` lists the open ones by key
-(`;`-separated in the attribute; the first click writes the whole list into `expandedRows`). A click on the chevron,
-←/→ on the tree column, `expandRow(key)`, `collapseRow(key)`, `expandAll()` and `collapseAll()` open and close them,
-and `row-toggle` reports a click.
-
-```html tag=CodeBlock
-<c2-table row-key="id" children-field="children" selection="multiple" checkbox-selection rows="...">
-  <c2-table-column field="name" header="Account" summary-label="Total"></c2-table-column>
-  <c2-table-column field="amount" header="Amount" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>
-</c2-table>
-```
-
-A column with `rollup` (`sum`, `avg`, `min`, `max`, `count`, or a function of the rows from script) shows in a parent
-row the aggregate of the leaf rows under it, and a sort on that column orders each level by those figures. Sorting
-keeps the tree: rows are ordered among their siblings. The summary row adds up the leaves, so every amount counts
-once. With `selection="multiple"` a row is selected together with the rows under it, a parent is selected once all
-its children are, and its checkbox shows the mixed state in between; the selection still holds row keys only.
-
-A row whose field holds `true` is a parent whose children are not loaded yet. The first time it opens the table asks
-`loadChildren` for them and shows a spinner in place of the chevron; a rejection closes the row again and fires
-`children-error`, and the next open asks again. Lazy children are cached by key, so give the rows a `row-key`.
-
-```typescript tag=CodeBlock
-table.loadChildren = async ({ key }) => (await fetch(`/api/accounts/${key}/children`)).json()
-```
-
-The tree is built on the client and wins over `group-by`; with a `dataSource` it is ignored, with a console warning.
-The chevron is the `row-toggle` part and takes the `--c2-table__group-toggle--*` and `--c2-table__group--indent`
-variables.
+Grouping rows (`group-by`) is [`c2-group-table`](/web-components/components/group-table)'s and nested tree rows
+(`children-field`) are [`c2-tree-table`](/web-components/components/tree-table)'s: the same table with that one feature
+added. `c2-table` leaves their code out, and each leaves out the other's.
 
 ### Row detail
 
@@ -550,3 +552,26 @@ same. The table emits one `page-change`: the pager's own event does not leave th
 one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
 
 `@c2n/components/table` deliberately does **not** import `@c2n/components/pagination` — import it yourself.
+
+### Editing
+
+`editable` lets people type into the cells of the columns that have an `editor` — `text`, `number`, `date`, `url`,
+`select` (with its `options`) or `checkbox` — the way they would in a spreadsheet: Enter, F2, a double click or typing
+opens the editor, Enter or Tab commits and moves on, Escape cancels, and a block copied from Excel or Sheets pastes from
+the focused cell. Only one editor exists at a time and its code loads on the first edit, so a read-only table pays
+nothing for it. The table never mutates your rows: every change fires `cell-change` (cancelable) and `rows-change` with
+a new array, so keep the array in your state from there.
+
+```typescript tag=CodeBlock
+table.addEventListener('rows-change', ({ detail }) => (state.rows = detail.rows))
+// A row rule runs after each edit: recompute what depends on the edited cell.
+table.rowRule = ({ row }) => ({ ...row, total: row.qty * row.price })
+// Lock rows, and check values beyond `required` and the editor's type.
+table.isCellEditable = ({ row }) => row.status !== 'received'
+priceColumn.validate = ({ value }) => (value < 0 ? 'A price cannot be negative' : undefined)
+
+await table.addRow({ id: crypto.randomUUID(), qty: 1 })
+const { added, updated, removed } = table.getChanges()
+await save(added, updated, removed)
+table.acceptChanges()
+```

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-float-button,
@@ -79,7 +80,7 @@ $stagger: css.cssVar(actions--stagger);
   -webkit-tap-highlight-color: transparent;
   transition: animation.standard(background-color), animation.standard(box-shadow), animation.standard(transform, 150ms);
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(button__hover--background-color);
     box-shadow: css.cssVar(button__hover--box-shadow);
   }

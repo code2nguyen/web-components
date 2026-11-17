@@ -7,11 +7,14 @@ import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/co
 import { defaultCompare, getFieldValue, sortEntryConverter, type SortEntry } from '@c2n/core/data-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { virtualListMessages } from './messages.js'
 import type {
   VirtualListDataSource,
   VirtualListItemContext,
   VirtualListItemEventDetail,
   VirtualListItemRenderer,
+  VirtualListLoadMoreEventDetail,
   VirtualListMatcher,
   VirtualListSearchChangeEventDetail,
   VirtualListSelectionChangeEventDetail,
@@ -39,6 +42,7 @@ export interface VirtualListEventMap {
   'selection-change': CustomEvent<VirtualListSelectionChangeEventDetail>
   'item-click': CustomEvent<VirtualListItemEventDetail>
   'search-change': CustomEvent<VirtualListSearchChangeEventDetail>
+  'load-more': CustomEvent<VirtualListLoadMoreEventDetail>
 }
 
 export interface VirtualList {
@@ -97,6 +101,8 @@ export interface VirtualList {
  * @slot no-results - Replaces the built-in "no matches" message shown while a search is active.
  * @slot loading - Replaces the built-in spinner shown while the first items load.
  * @slot error - Replaces the built-in message shown when `error` is set.
+ * @slot more-loading - Replaces the spinner and "Loading more…" under the last item while a page loads (`has-more`).
+ * @slot more-error - Replaces the message and Retry button of a failed page (`load-more-error`); call `retryLoadMore()` from it.
  *
  * @csspart search - Header row containing the built-in search field and the `search` and `toolbar` slots.
  * @csspart viewport - Scroll container that holds the listbox and its empty, loading or error state.
@@ -107,6 +113,8 @@ export interface VirtualList {
  * @csspart state - Shared container for the `empty`, `loading`, or `error` slot and its fallback message.
  * @csspart highlight - A `<mark>` around text that matches the active search query.
  * @csspart footer - Footer row containing the `footer` slot.
+ * @csspart more - Row under the last item while `has-more`, containing the `more-loading` slot (fallback: spinner and message) or the `more-error` slot (fallback: message and Retry button).
+ * @csspart more-retry - The Retry button of a failed page (`load-more-error`).
  *
  * @internalcomponent c2-list-item
  * @internalcomponent c2-text-field
@@ -115,6 +123,7 @@ export interface VirtualList {
  * @event {CustomEvent<VirtualListSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected keys, `detail.items` the matching items. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<VirtualListItemEventDetail>} item-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<VirtualListSearchChangeEventDetail>} search-change - Fired after the query settles, with the number of items that match.
+ * @event {CustomEvent<VirtualListLoadMoreEventDetail>} load-more - Fired while `has-more` when the end of the list comes within `load-more-distance` of the view, with the number of items loaded so far (and `retry` after the Retry button). Append the next page to `items`; until `items`, `has-more` or `load-more-error` changes, it is not fired again. Does not bubble.
  *
  * @cssproperty {color} [--c2-virtual-list--background=#ffffff]
  * @cssproperty {color} [--c2-virtual-list--color=#18181b]
@@ -160,6 +169,12 @@ export interface VirtualList {
  * @cssproperty {padding} [--c2-virtual-list__state--padding=32px 12px]
  * @cssproperty {font-size} [--c2-virtual-list__state--font-size=14px]
  * @cssproperty {color} [--c2-virtual-list__state__error--color=rgb(211, 21, 16)]
+ *
+ * @cssproperty {padding} [--c2-virtual-list__more--padding=12px] - The loading or error row under the last item (`has-more`).
+ * @cssproperty {color} [--c2-virtual-list__more--color=#71717a]
+ * @cssproperty {font-size} [--c2-virtual-list__more--font-size=13px]
+ * @cssproperty {color} [--c2-virtual-list__more__error--color=rgb(211, 21, 16)]
+ * @cssproperty {color} [--c2-virtual-list__more-retry--color=rgb(2, 101, 220)] - The Retry button of a failed page.
  *
  * @cssproperty {color} [--c2-virtual-list__footer--background=transparent]
  * @cssproperty {padding} [--c2-virtual-list__footer--padding=8px 12px]
@@ -245,6 +260,27 @@ export class VirtualList extends LitElement {
   /** Item count past which `virtual="auto"` starts windowing. */
   @property({ type: Number, attribute: 'virtual-threshold' }) virtualThreshold = 100
 
+  /**
+   * More items can be loaded after the last one: when the end of the list comes within `load-more-distance` of the
+   * view, the list fires `load-more` and shows a loading row under the last item until `items` changes. Set it to
+   * false once the last page is in. Ignored with a `dataSource`, which pages by itself.
+   */
+  @property({ type: Boolean, attribute: 'has-more' }) hasMore = false
+
+  /** How close to the view, in pixels, the end of the list comes before `load-more` fires. */
+  @property({ type: Number, attribute: 'load-more-distance' }) loadMoreDistance = 240
+
+  /**
+   * Loading the next page failed: the row under the last item shows this message (or a built-in one for `true`) and a
+   * Retry button, which clears it and fires `load-more` again with `retry`.
+   */
+  @property({
+    attribute: 'load-more-error',
+    // `"false"` and `"0"` are what a framework writes for a false flag, as for the boolean properties.
+    converter: { fromAttribute: (value: string | null) => (value === null || value === 'false' || value === '0' ? '' : value || true) },
+  })
+  loadMoreError: string | boolean = ''
+
   /** Number of items the list asks a `dataSource` for at a time. */
   @property({ type: Number, attribute: 'block-size' }) blockSize = 100
 
@@ -261,6 +297,21 @@ export class VirtualList extends LitElement {
   @property({ type: String, attribute: 'no-results-message' }) noResultsMessage = 'No matches'
 
   private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
+  private readonly msg = new LocalizeController(this, virtualListMessages)
+
+  /** `load-more` was fired and the page has not arrived: no second request until the items change. */
+  #loadingMore = false
+  /** The number of items when `load-more` was fired: a different number is the page arriving. */
+  #requestedAt = 0
+  /** Wakes the end check when the page scrolls, for a list that grows with its content rather than scrolling. */
+  #moreObserver?: IntersectionObserver
+  #observedMore?: Element
+  /** The end check waiting for the next frame, when the rows drawn by the last update have their height. */
+  #endFrame = 0
+  /** The next `load-more` is the retry of a failed page. */
+  #retrying = false
+  /** A page has arrived since the last update: the observer reads the row afresh. */
+  #pageArrived = false
   @state() private remoteTotal = -1
   @state() private focusedIndex = 0
 
@@ -371,13 +422,41 @@ export class VirtualList extends LitElement {
     this.requestUpdate()
   }
 
+  /**
+   * Asks for the page that failed again: clears `load-more-error` and fires `load-more` with `retry`. The built-in
+   * Retry button calls it; a `more-error` slot calls it from its own.
+   */
+  async retryLoadMore() {
+    this.#retrying = true
+    this.loadMoreError = ''
+    // The cleared error resets the request state in the next update; ask once it has.
+    await this.updateComplete
+    this.#requestMore()
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    // Moved in the page: the observer was dropped on the way out.
+    if (this.hasUpdated) this.requestUpdate()
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.#moreObserver?.disconnect()
+    this.#moreObserver = undefined
+    this.#observedMore = undefined
+    cancelAnimationFrame(this.#endFrame)
     clearTimeout(this.#searchTimer)
     clearTimeout(this.#typeaheadTimer)
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    // The page asked for has arrived, or the app has said there is none: a new request may go.
+    // An `items` array grown in place and `refresh()` count as the page arriving too.
+    if (this.#loadingMore && (changed.has('items') || changed.has('hasMore') || changed.has('loadMoreError') || this.items.length !== this.#requestedAt)) {
+      this.#loadingMore = false
+      this.#pageArrived = true
+    }
     // A string slips in through `@astrojs/lit`, which assigns island props directly and so skips the converter.
     if (typeof this.value === 'string') this.value = arrayPropertyConverter.fromAttribute(this.value)
     if (typeof this.searchFields === 'string') this.searchFields = arrayPropertyConverter.fromAttribute(this.searchFields)
@@ -430,6 +509,83 @@ export class VirtualList extends LitElement {
       this.#syncFocusToWindow()
     }
     if (this.dataSource) this.#ensureBlocks()
+    this.#watchEnd(changed.has('loadMoreDistance'))
+  }
+
+  /**
+   * Fires `load-more` when the row under the last item is within `load-more-distance` of the view. The position is
+   * read after each update and on each scroll of the viewport, so a page that does not fill the view asks for the next
+   * at once and a page that does waits for the scroll. A list that grows with its content scrolls with the page
+   * instead, which an IntersectionObserver reports.
+   */
+  #watchEnd(distanceChanged = false) {
+    const more = this.renderRoot.querySelector('.more')
+    if (more !== this.#observedMore || distanceChanged) {
+      this.#moreObserver?.disconnect()
+      this.#moreObserver = undefined
+      this.#observedMore = more ?? undefined
+      if (more && typeof IntersectionObserver !== 'undefined') {
+        this.#moreObserver = new IntersectionObserver((entries) => entries.some((entry) => entry.isIntersecting) && this.#requestMore(), {
+          rootMargin: `0px 0px ${Math.max(0, this.loadMoreDistance)}px 0px`,
+        })
+        this.#moreObserver.observe(more)
+      }
+    } else if (this.#pageArrived && more && this.#moreObserver) {
+      // An observer reports changes only: observed again, it reports where the row now is, near the view or not.
+      this.#moreObserver.unobserve(more)
+      this.#moreObserver.observe(more)
+    }
+    this.#pageArrived = false
+    // The rows are list items that draw themselves after this update: measure once they have.
+    cancelAnimationFrame(this.#endFrame)
+    this.#endFrame = requestAnimationFrame(this.#checkEnd)
+  }
+
+  #checkEnd = () => {
+    if (!this.hasMore || this.dataSource || this.#loadingMore || this.loadMoreError) return
+    const more = this.#observedMore
+    const viewport = this.viewport
+    if (!more || !viewport) return
+    const row = more.getBoundingClientRect()
+    // Hidden (`display: none` on the list or a parent): nothing is in view.
+    if (!row.width && !row.height) return
+    const bottom = viewport.scrollHeight > viewport.clientHeight ? viewport.getBoundingClientRect().bottom : document.documentElement.clientHeight
+    if (row.top <= bottom + Math.max(0, this.loadMoreDistance)) this.#requestMore()
+  }
+
+  /** Fires `load-more` once per page: not while one is on its way, not after an error, not with a `dataSource`. */
+  #requestMore() {
+    if (!this.hasMore || this.dataSource || this.#loadingMore || this.loadMoreError) return
+    const retry = this.#retrying
+    this.#retrying = false
+    this.#loadingMore = true
+    this.#requestedAt = this.items.length
+    this.requestUpdate()
+    this.dispatchEvent(new CustomEvent<VirtualListLoadMoreEventDetail>('load-more', { detail: { count: this.items.length, retry } }))
+  }
+
+  #retryMore = () => {
+    // The button goes with the error: keep the focus in the list, on the last item, where the next page starts.
+    const focused = this.shadowRoot?.activeElement?.classList.contains('more-retry')
+    void this.retryLoadMore()
+    if (focused && this.itemCount > 0) this.#moveFocus(this.itemCount - 1)
+  }
+
+  /** The row under the last item while more can be loaded: the loading message, or the error with Retry. */
+  #renderMore() {
+    if (this.dataSource || !this.hasMore) return nothing
+    const failed = this.loadMoreError
+    if (failed) {
+      return html`<div class="more more--error" part="more" role="alert">
+        <slot name="more-error">
+          <span>${typeof failed === 'string' && failed !== 'true' ? failed : this.msg.t('loadMoreFailed')}</span>
+          <button class="more-retry" part="more-retry" type="button" @click=${this.#retryMore}>${this.msg.t('retry')}</button>
+        </slot>
+      </div>`
+    }
+    return html`<div class="more" part="more" role="status">
+      ${this.#loadingMore ? html`<slot name="more-loading"><c2-spinner></c2-spinner><span>${this.msg.t('loadingMore')}</span></slot>` : nothing}
+    </div>`
   }
 
   override render() {
@@ -442,7 +598,7 @@ export class VirtualList extends LitElement {
         ${this.searchable ? html`<slot name="search">${this.#renderSearchField()}</slot>` : nothing}
         <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
-      <div class="viewport" part="viewport">
+      <div class="viewport" part="viewport" @scroll=${this.#checkEnd}>
         <div
           class="items"
           part="items"
@@ -457,7 +613,7 @@ export class VirtualList extends LitElement {
           ${this.#renderRows(range.start, Math.min(range.end, count))}
           ${range.paddingBottom > 0 ? html`<div class="spacer" role="presentation" style="height:${range.paddingBottom}px"></div>` : nothing}
         </div>
-        ${this.#renderState(count)}
+        ${this.#renderMore()} ${this.#renderState(count)}
       </div>
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
@@ -486,6 +642,8 @@ export class VirtualList extends LitElement {
       return html`<div class="state state--error" part="state"><slot name="error">${this.error}</slot></div>`
     }
     if (count > 0) return nothing
+    // An empty list with more to come is waiting for its first page: the row under it says so.
+    if (this.hasMore && !this.dataSource && !this.searching) return nothing
     if (this.loading || this.#isBootstrapping) {
       return html`<div class="state" part="state">
         <slot name="loading"><c2-spinner></c2-spinner></slot>

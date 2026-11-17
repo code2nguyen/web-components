@@ -9,6 +9,22 @@
       "types": "./types/src/table.d.ts",
       "default": "./dist/table.js"
     },
+    "./allocation-grid.js": {
+      "types": "./types/src/allocation-grid.d.ts",
+      "default": "./dist/allocation-grid.js"
+    },
+    "./flowsheet.js": {
+      "types": "./types/src/flowsheet.d.ts",
+      "default": "./dist/flowsheet.js"
+    },
+    "./group-table.js": {
+      "types": "./types/src/group-table.d.ts",
+      "default": "./dist/group-table.js"
+    },
+    "./tree-table.js": {
+      "types": "./types/src/tree-table.d.ts",
+      "default": "./dist/tree-table.js"
+    },
     "./table-column.js": {
       "types": "./types/src/table-column.d.ts",
       "default": "./dist/table-column.js"
@@ -41,7 +57,9 @@
     "data grid",
     "virtual scroll",
     "web component",
-    "lit"
+    "lit",
+    "tree grid",
+    "grouping"
   ],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",
@@ -59,7 +77,11 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
+        "../button:build",
         "../checkbox:build",
+        "../facet-list:build",
+        "../menu:build",
+        "../overlay:build",
         "../spinner:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
@@ -72,8 +94,12 @@
     }
   },
   "dependencies": {
+    "@c2n/button": "*",
     "@c2n/checkbox": "*",
     "@c2n/core": "*",
+    "@c2n/facet-list": "*",
+    "@c2n/menu": "*",
+    "@c2n/overlay": "*",
     "@c2n/spinner": "*",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
@@ -96,5 +122,13 @@
     "vue": {
       "optional": true
     }
+  },
+  "c2n": {
+    "separateEntries": [
+      "./allocation-grid.js",
+      "./flowsheet.js",
+      "./group-table.js",
+      "./tree-table.js"
+    ]
   }
 }

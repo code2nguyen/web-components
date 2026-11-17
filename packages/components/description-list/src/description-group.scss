@@ -1,0 +1,112 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-description-group,
+  $theme: (
+    heading--padding: 8px 0px,
+    heading--margin-bottom: 8px,
+    heading--border-bottom: 1px solid #e4e4e7,
+    heading--color: #18181b,
+    heading--font-size: 14px,
+    heading--font-weight: 600,
+    heading__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    chevron--size: 16px,
+  )
+);
+@use '@c2n/sass/focus';
+
+:host {
+  display: block;
+  // The section spans the list's grid; its items lay out in a grid of their own with the list's column variables.
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: css.cssVar(heading--margin-bottom);
+  padding: css.cssVar(heading--padding);
+  border-bottom: css.cssVar(heading--border-bottom);
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+}
+
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:focus-visible {
+    border-radius: 2px;
+    outline: css.cssVar(heading__focus--outline);
+    outline-offset: 2px;
+
+    @include focus.forced-colors-ring;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.chevron {
+  flex: none;
+  width: css.cssVar(chevron--size);
+  height: css.cssVar(chevron--size);
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  transition: transform 150ms ease;
+}
+
+.toggle[aria-expanded='true'] .chevron {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+// The list's grid, with its variables: set on the list, they reach the section too.
+.grid {
+  $columns: var(--c2-description-list__grid--columns, 3);
+  $gap: var(--c2-description-list__grid--column-gap, 24px);
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, max(var(--c2-description-list__grid--min-column-width, 200px), calc((100% - (#{$columns} - 1) * #{$gap}) / #{$columns}))), 1fr)
+  );
+  column-gap: $gap;
+  row-gap: var(--c2-description-list__grid--row-gap, 16px);
+}
+
+.grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}

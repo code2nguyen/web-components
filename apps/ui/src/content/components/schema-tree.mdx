@@ -1,0 +1,81 @@
+---
+title: 'Schema Tree'
+description: 'A JSON Schema or OpenAPI schema as a tree of its properties: types, required and deprecated marks, constraints, allowed values and options.'
+category: 'Editors & viewers'
+package: '@c2n/json-viewer'
+tag: 'c2-schema-tree'
+apiTags: ['c2-schema-tree']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SchemaTree } from '@c2n/components/json-viewer/schema-tree'
+
+`c2-schema-tree` is [`c2-json-viewer`](/web-components/components/json-viewer) reading a JSON Schema: the property view
+of an API reference. Each line is a property with its **type** (`string<email>`, `integer | null`, `Tag[]`, or the name
+of the schema it refers to), its **marks** (`required`, `deprecated`, `read-only`, `write-only`), its **constraints**
+(`≥ 0`, `≤ 40 chars`, `/^[A-Z]{3}$/`, `default 10`), its **allowed values** and its description. An object property
+opens on its properties, an array of objects on its items' properties, and a `oneOf` or `anyOf` on one line per option.
+
+Local `$ref`s (`#/$defs/Address`, `#/components/schemas/Address`) are followed, `allOf` is merged, and a schema that
+refers back to one of its ancestors is marked `recursive` instead of opening forever. To show one schema of an OpenAPI
+document with its references, give the whole document to `schema` and the schema's place to `pointer`
+(`/components/schemas/Order`).
+
+Everything else is the JSON viewer's: the keyboard, `search` (which matches names and types) with `filter`,
+`expand-depth`, `expandAll()`, the events and the `--c2-json-viewer-*` variables. Paths are keyword locations, the
+walk from the root schema with its `$ref`s (`/properties/address/$ref/properties/city`), so two properties sharing a
+schema keep paths of their own; "copy value" copies a line's schema. The code that reads a schema loads the first time
+one is given, so pages showing only JSON never download it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/json-viewer/schema-tree'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/json-viewer
+<style>
+  .schema-demo {
+    width: 100%;
+    --c2-json-viewer--max-height: 260px;
+  }
+</style>
+<div data-label="JSON Schema">
+  <c2-schema-tree
+    class="schema-demo"
+    label="User"
+    schema='{"type":"object","required":["id","email"],"properties":{"id":{"type":"string","format":"uuid","readOnly":true,"description":"Assigned by the server."},"email":{"type":"string","format":"email","maxLength":120},"plan":{"type":"string","enum":["free","pro","team"],"default":"free"},"age":{"type":"integer","minimum":0},"nickname":{"type":["string","null"],"deprecated":true},"address":{"$ref":"#/$defs/Address"}},"$defs":{"Address":{"type":"object","required":["city"],"properties":{"city":{"type":"string","minLength":1},"country":{"type":"string","pattern":"^[A-Z]{2}$"}}}}}'
+  ></c2-schema-tree>
+</div>
+<div data-label="OpenAPI component">
+  <c2-schema-tree
+    class="schema-demo"
+    label="Order"
+    pointer="/components/schemas/Order"
+    schema='{"openapi":"3.0.3","components":{"schemas":{"Order":{"type":"object","required":["id","lines"],"properties":{"id":{"type":"string","readOnly":true},"lines":{"type":"array","minItems":1,"items":{"$ref":"#/components/schemas/Line"}},"note":{"type":"string","nullable":true},"payment":{"oneOf":[{"$ref":"#/components/schemas/Card"},{"$ref":"#/components/schemas/Transfer"}]}}},"Line":{"type":"object","required":["sku"],"properties":{"sku":{"type":"string"},"qty":{"type":"integer","minimum":1,"default":1}}},"Card":{"type":"object","properties":{"last4":{"type":"string","maxLength":4}}},"Transfer":{"type":"object","properties":{"iban":{"type":"string"}}}}}}'
+  ></c2-schema-tree>
+</div>
+```
+
+Load the schema of an API and let a search field narrow it:
+
+```html tag=CodeBlock
+<c2-search-field label="Search properties"></c2-search-field>
+<c2-schema-tree filter pointer="/components/schemas/Order"></c2-schema-tree>
+
+<script type="module">
+  import '@c2n/components/search-field'
+  import '@c2n/components/json-viewer/schema-tree'
+
+  const tree = document.querySelector('c2-schema-tree')
+  tree.schema = await (await fetch('/openapi.json')).json()
+
+  document.querySelector('c2-search-field').addEventListener('search', (event) => {
+    tree.search = event.detail.value
+  })
+</script>
+```

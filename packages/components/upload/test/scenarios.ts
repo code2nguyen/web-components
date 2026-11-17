@@ -1,4 +1,7 @@
 import '../src/upload'
+import '../src/document-checklist'
+import '../src/image-uploader'
+import './translations'
 import type { Upload } from '../src/upload'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'

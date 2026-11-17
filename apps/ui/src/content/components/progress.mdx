@@ -2,6 +2,7 @@
 title: 'Progress'
 description: 'Progress bar or ring, indeterminate or filling to a value, with an optional label and count.'
 category: 'Feedback'
+apiTags: ['c2-progress']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -92,6 +93,12 @@ import '@c2n/components/progress'
     <c2-progress value="1.2" max="4">Downloading<span slot="value">1.2 / 4 MB</span></c2-progress>
   </div>
 </div>
+<div data-label="Milestones">
+  <div class="stack">
+    <c2-progress value="38" max="50" marks='[{"value":50,"label":"Free shipping"}]'>Spend $12 more for free shipping</c2-progress>
+    <c2-progress value="1800" max="3000" marks='[{"value":500,"label":"Silver"},{"value":1500,"label":"Gold","state":"claimable"},{"value":3000,"label":"Platinum"}]'>Loyalty points</c2-progress>
+  </div>
+</div>
 <div data-label="In context">
   <div class="card">
     <strong>Deploying</strong>
@@ -112,3 +119,11 @@ The label row only appears when there is a label or a value to show, so a bare `
 ## Circular
 
 `variant="circular"` draws the same track and indicator as a ring that starts at the top and fills clockwise. `--c2-progress--size` is its diameter and `--c2-progress--height` the thickness of the stroke. `show-value` prints the percentage in the middle (sized by `--c2-progress__ring-value--font-size`, with the `%` sign as the `unit` part), the `value` slot replaces it as on the bar, and the label moves underneath the ring. Without a value the arc spins. `--c2-progress__indicator--stroke-linecap` chooses between rounded (`round`, the default) and square (`butt`) arc ends.
+
+## Milestones
+
+`marks` puts milestones on a linear track: the tiers of a loyalty programme, the threshold of a free-shipping offer, the accelerators of a sales commission, the rewards of a season pass. Each is `{ "value": …, "label": …, "state": … }` in the units of `value`, as JSON in the attribute or an array in the property, and draws a dot on the track at its value with its label underneath. A milestone is `locked` until the value reaches it and `reached` from then on; give it `"state": "claimable"` for a reward the user has reached but not claimed yet (or any state to override the one the value gives). Labels near either end line up with that end of the track instead of centring on their dot.
+
+Each milestone is announced after the bar with its value and its state: "1,500, ready to claim", or "3,000, 1,200 to go" for one ahead of the value ("not reached" while the bar is indeterminate, as the distance is unknown). The bar's own label is yours to write; `nextMark` returns the first milestone ahead of the value and the distance to it (`{ mark, index, remaining }`), which is what a line such as "Spend $12 more for free shipping" needs. `renderMark` replaces each label with your own content (`{ mark, index, state, remaining }` in, anything Lit renders out); the dot, its place and its announcement stay the component's. The `circular` variant has no marks.
+
+The `--c2-progress__mark--*` variables style the dots (size, ring, a colour per state and a halo for claimable ones) and the `--c2-progress__mark-label--*` variables the labels.

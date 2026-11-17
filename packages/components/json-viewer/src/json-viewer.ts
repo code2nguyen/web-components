@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -13,12 +13,12 @@ import {
   kindOf,
   leafText,
   MORE_PREFIX,
-  pathOf,
   search,
   type JsonPathFormat,
   type JsonPathSegment,
   type JsonRow,
   type SearchResult,
+  type SearchText,
 } from './json-model.js'
 import styles from './json-viewer.scss?inline'
 
@@ -147,7 +147,7 @@ export interface JsonViewer {
  */
 @customElement('c2-json-viewer')
 export class JsonViewer extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The JSON value to show. As an attribute it is parsed as JSON. */
   @property({ converter: jsonPropertyConverter }) data: unknown
@@ -206,6 +206,27 @@ export class JsonViewer extends LitElement {
   private frame = 0
   private resizeObserver: ResizeObserver | undefined
 
+  /**
+   * The value the lines are built from: `data` here. A companion element overrides it (with {@link sourceChanged}) to
+   * show a value derived from its own input, as `c2-schema-tree` shows the properties of a schema.
+   */
+  protected get source(): unknown {
+    return this.data
+  }
+
+  /** Whether an update brings a new {@link source}, which resets the expansion. */
+  protected sourceChanged(changed: PropertyValues<this>): boolean {
+    return changed.has('data')
+  }
+
+  /** The tree's accessible name. */
+  protected get treeLabel(): string {
+    return this.label
+  }
+
+  /** What `search` matches for a line in place of its key and value; unset here. */
+  protected searchText?: SearchText
+
   /** Paths of the nodes matching `search`, in document order, written in `path-format`. */
   get searchMatches(): string[] {
     return (this.searchResult?.matches ?? []).map((id) => formatPath(this.segmentsOf(id), this.pathFormat))
@@ -253,24 +274,26 @@ export class JsonViewer extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    if (changed.has('data') || changed.has('expandDepth')) {
+    const sourceChanged = this.sourceChanged(changed)
+    if (sourceChanged || changed.has('expandDepth')) {
       this.openDepth = this.expandDepth
       this.overrides = new Map()
       this.pages = new Map()
     }
-    if (changed.has('data') || changed.has('search') || changed.has('sortKeys') || changed.has('filter')) {
+    const source = this.source
+    if (sourceChanged || changed.has('search') || changed.has('sortKeys') || changed.has('filter')) {
       const query = this.search.trim()
       this.searchOverrides = new Map()
-      this.searchResult = query ? search(this.data, query, this.sortKeys) : undefined
+      this.searchResult = query ? search(source, query, this.sortKeys, this.searchText) : undefined
       this.matchSet = new Set(this.searchResult?.matches)
-      this.visible = this.searchResult && this.filter ? filterVisible(this.data, this.searchResult, this.sortKeys) : undefined
+      this.visible = this.searchResult && this.filter ? filterVisible(source, this.searchResult, this.sortKeys) : undefined
     }
     // Focus, copy feedback and scrolling change none of the lines, so they skip the flatten.
     const structural = ['data', 'expandDepth', 'search', 'filter', 'sortKeys', 'pageSize', 'overrides', 'searchOverrides', 'openDepth', 'pages']
-    this.rowsChanged = structural.some((key) => changed.has(key as keyof JsonViewer))
+    this.rowsChanged = sourceChanged || structural.some((key) => changed.has(key as keyof JsonViewer))
     if (!this.rowsChanged) return
     this.rows = flatten(
-      this.data,
+      source,
       {
         isExpanded: (id, level) => this.isExpanded(id, level),
         limit: (id) => Math.max(this.pages.get(id) ?? this.pageStep, (this.searchResult?.deepest.get(id) ?? -1) + 1),
@@ -362,15 +385,16 @@ export class JsonViewer extends LitElement {
   }
 
   override render() {
-    if (this.data === undefined) {
+    const source = this.source
+    if (source === undefined) {
       return html`<div class="empty" part="tree"><slot name="empty">No data</slot></div>`
     }
-    const rootKind = kindOf(this.data)
+    const rootKind = kindOf(source)
     if (isBranch(rootKind) && this.rows.length === 0 && !this.searchResult) {
       return html`<div class="empty" part="tree">${rootKind === 'array' ? '[]' : '{}'}</div>`
     }
     if (this.rows.length === 0) {
-      return html`<div class="tree" part="tree" role="tree" aria-label=${this.label}><div class="empty" role="none">No match</div></div>`
+      return html`<div class="tree" part="tree" role="tree" aria-label=${this.treeLabel}><div class="empty" role="none">No match</div></div>`
     }
     // The window's lines sit in normal flow between padding standing for the lines above and below, so the viewer
     // still takes its width from its content. The focused line is rendered too wherever it is, so keyboard focus
@@ -395,7 +419,7 @@ export class JsonViewer extends LitElement {
         <div
           class="tree"
           role="tree"
-          aria-label=${this.label}
+          aria-label=${this.treeLabel}
           style="padding-top: ${before}px; padding-bottom: ${after}px"
           @keydown=${this.onKeydown}
           @click=${this.onClick}
@@ -457,18 +481,20 @@ export class JsonViewer extends LitElement {
             : nothing
         }
       </span>
-      ${
-        row.key === undefined
-          ? nothing
-          : html`<span class="key ${typeof row.key === 'number' ? 'index' : ''}" part="key">${this.highlight(String(row.key))}</span
-              ><span class="colon">:</span>`
-      }
-      ${this.renderValue(row)}
+      ${this.renderKey(row)} ${this.renderValue(row)}
       <span class="actions" aria-hidden="true"> ${this.renderAction('path', copied === 'path')} ${this.renderAction('value', copied === 'value')} </span>
     </div>`
   }
 
-  private renderValue(row: JsonRow): TemplateResult {
+  /** The key of a line and its colon; nothing for the root. */
+  protected renderKey(row: JsonRow): TemplateResult | typeof nothing {
+    return row.key === undefined
+      ? nothing
+      : html`<span class="key ${typeof row.key === 'number' ? 'index' : ''}" part="key">${this.highlight(String(row.key))}</span><span class="colon">:</span>`
+  }
+
+  /** What follows the key: a leaf's value or a branch's size summary. */
+  protected renderValue(row: JsonRow): TemplateResult {
     switch (row.kind) {
       case 'object':
       case 'array': {
@@ -515,7 +541,7 @@ export class JsonViewer extends LitElement {
   }
 
   /** Wraps each case-insensitive occurrence of the search text in a `<mark>`. */
-  private highlight(text: string): TemplateResult | string {
+  protected highlight(text: string): TemplateResult | string {
     const query = this.search.trim().toLowerCase()
     if (!query) return text
     const lower = text.toLowerCase()
@@ -644,9 +670,10 @@ export class JsonViewer extends LitElement {
   private toggle(row: JsonRow, expanded: boolean) {
     if (this.searchResult) this.searchOverrides = new Map(this.searchOverrides).set(row.id, expanded)
     else this.overrides = new Map(this.overrides).set(row.id, expanded)
+    const segments = this.segmentsOf(row.id)
     this.dispatchEvent(
       new CustomEvent<JsonViewerExpansionChangeEventDetail>('expansion-change', {
-        detail: { path: formatPath(pathOf(row), this.pathFormat), segments: pathOf(row), expanded },
+        detail: { path: formatPath(segments, this.pathFormat), segments, expanded },
       }),
     )
   }
@@ -660,8 +687,8 @@ export class JsonViewer extends LitElement {
   }
 
   private async copy(row: JsonRow, kind: 'path' | 'value') {
-    const path = pathOf(row)
-    const text = kind === 'path' ? formatPath(path, this.pathFormat) : copyText(row.value)
+    const path = this.segmentsOf(row.id)
+    const text = kind === 'path' ? formatPath(path, this.pathFormat) : this.copyValue(row)
     try {
       if (!navigator.clipboard) throw new Error('Clipboard API unavailable')
       await navigator.clipboard.writeText(text)
@@ -675,7 +702,13 @@ export class JsonViewer extends LitElement {
     this.dispatchEvent(new CustomEvent<JsonViewerCopiedEventDetail>('copied', { detail: { text, kind, path }, bubbles: true, composed: true }))
   }
 
-  private segmentsOf(id: string): JsonPathSegment[] {
+  /** What "copy value" puts on the clipboard for a line. */
+  protected copyValue(row: JsonRow): string {
+    return copyText(row.value)
+  }
+
+  /** The path a line reports (copied, in `expansion-change`, in `searchMatches`), from its pointer. */
+  protected segmentsOf(id: string): JsonPathSegment[] {
     const segments: JsonPathSegment[] = []
     let node: unknown = this.data
     for (const raw of id.split('/').slice(1)) {

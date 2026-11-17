@@ -1,0 +1,77 @@
+---
+title: 'Tab Nav'
+description: 'Tabs that are links: a row of pages with the tabs look, the current one marked, for navigation rather than panels.'
+category: 'Navigation'
+package: '@c2n/tabs'
+tag: 'c2-tab-nav'
+apiTags: ['c2-tab-nav', 'c2-tab']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TabNav } from '@c2n/components/tabs/tab-nav'
+import { Badge } from '@c2n/components/badge'
+import { FeatherCodeIcon as FeatherCode } from '@c2n/feather-icons/icons/code.js'
+import { FeatherAlertCircleIcon as FeatherAlertCircle } from '@c2n/feather-icons/icons/alert-circle.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+`c2-tab-nav` is a row of tabs where each tab is a page: a repository's Code, Issues and Settings, the sections of an account. Each `<c2-tab href="…">` inside it is a real link, so the browser (or your router) moves to that page; there are no panels and nothing to select. Mark the tab of the page being shown with `current`, where the page is rendered or from your router, and it gets the indicator and is announced as `aria-current="page"`.
+
+Use [`c2-tabs`](/web-components/components/tabs) when the tabs switch panels within one page. The two look alike but are not built alike: `c2-tabs` is a `tablist`, one Tab stop with arrow keys between its tabs, while `c2-tab-nav` is a navigation landmark (name it with `aria-label`) holding a list of links, each a Tab stop of its own, Enter following it. The indicator is the current tab's bottom border, drawn with CSS: a server-rendered strip shows it before any script runs. When the tabs do not fit, the strip scrolls sideways, fades the edge that has more tabs beyond it and scrolls the current tab into view.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/tabs/tab-nav'
+```
+
+The entry is separate from `@c2n/components/tabs`, so importing it does not load `c2-tabs`; it registers `c2-tab`. The icons in the examples come from `npm install @c2n/feather-icons`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tabs
+<style>
+  .nav-row {
+    width: 100%;
+    max-width: 440px;
+  }
+  .nav-row--narrow {
+    max-width: 220px;
+  }
+  .nav-icons {
+    --c2-feather-icon--size: 16px;
+  }
+</style>
+<div data-label="Links">
+  <c2-tab-nav class="nav-row" aria-label="Repository">
+    <c2-tab href="#code" current>Code</c2-tab>
+    <c2-tab href="#issues">Issues</c2-tab>
+    <c2-tab href="#pulls">Pull requests</c2-tab>
+    <c2-tab href="#settings">Settings</c2-tab>
+  </c2-tab-nav>
+</div>
+<div data-label="Icons and counters">
+  <c2-tab-nav class="nav-row nav-icons" aria-label="Project">
+    <c2-tab href="#code"><c2-feather-code></c2-feather-code>Code</c2-tab>
+    <c2-tab href="#issues" current><c2-feather-alert-circle></c2-feather-alert-circle>Issues <c2-badge>128</c2-badge></c2-tab>
+    <c2-tab href="#settings"><c2-feather-settings></c2-feather-settings>Settings</c2-tab>
+  </c2-tab-nav>
+</div>
+<div data-label="Too many to fit">
+  <c2-tab-nav class="nav-row nav-row--narrow" aria-label="Account">
+    <c2-tab href="#profile">Profile</c2-tab>
+    <c2-tab href="#security">Security</c2-tab>
+    <c2-tab href="#billing" current>Billing</c2-tab>
+    <c2-tab href="#notifications">Notifications</c2-tab>
+  </c2-tab-nav>
+</div>
+```
+
+With a client-side router, move `current` when the route changes, and let the router handle the link clicks as it does for any `<a>`:
+
+```ts tag=CodeBlock
+router.afterEach((to) => {
+  for (const tab of document.querySelectorAll('c2-tab-nav c2-tab')) tab.current = tab.getAttribute('href') === to.path
+})
+```

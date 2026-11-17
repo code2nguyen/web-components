@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 // Rows and menu items state their role through ElementInternals, which getByRole cannot see, so they are found by
 // tag and text; the buttons inside the components' shadow roots are real buttons.
-const table = (page: Page) => page.locator('c2-table')
+const table = (page: Page) => page.locator('c2-group-table')
 const header = (page: Page, name: string) => table(page).getByRole('columnheader', { name })
 const check = (page: Page, line: number) =>
   table(page)

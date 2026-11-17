@@ -1,6 +1,6 @@
 {
   "name": "@c2n/components",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "Every c2n web component in one package: one import per component, JSX and Vue template types for every tag, and the base theme",
   "type": "module",
   "sideEffects": true,
@@ -353,9 +353,25 @@
       "types": "./dist/choice-matrix.d.ts",
       "default": "./dist/choice-matrix.js"
     },
+    "./choice-matrix/input-matrix": {
+      "types": "./dist/choice-matrix/input-matrix.d.ts",
+      "default": "./dist/choice-matrix/input-matrix.js"
+    },
+    "./choice-matrix/record-merge": {
+      "types": "./dist/choice-matrix/record-merge.d.ts",
+      "default": "./dist/choice-matrix/record-merge.js"
+    },
+    "./choice-matrix/scorecard": {
+      "types": "./dist/choice-matrix/scorecard.d.ts",
+      "default": "./dist/choice-matrix/scorecard.js"
+    },
     "./citation": {
       "types": "./dist/citation.d.ts",
       "default": "./dist/citation.js"
+    },
+    "./citation/citation-list": {
+      "types": "./dist/citation/citation-list.d.ts",
+      "default": "./dist/citation/citation-list.js"
     },
     "./code-editor": {
       "types": "./dist/code-editor.d.ts",
@@ -453,6 +469,10 @@
       "types": "./dist/description-list/description-value.d.ts",
       "default": "./dist/description-list/description-value.js"
     },
+    "./description-list/description-group": {
+      "types": "./dist/description-list/description-group.d.ts",
+      "default": "./dist/description-list/description-group.js"
+    },
     "./details": {
       "types": "./dist/details.d.ts",
       "default": "./dist/details.js"
@@ -528,6 +548,10 @@
     "./format-number": {
       "types": "./dist/format-number.d.ts",
       "default": "./dist/format-number.js"
+    },
+    "./format-number/delta": {
+      "types": "./dist/format-number/delta.d.ts",
+      "default": "./dist/format-number/delta.js"
     },
     "./fx-converter": {
       "types": "./dist/fx-converter.d.ts",
@@ -625,6 +649,10 @@
       "types": "./dist/json-viewer.d.ts",
       "default": "./dist/json-viewer.js"
     },
+    "./json-viewer/schema-tree": {
+      "types": "./dist/json-viewer/schema-tree.d.ts",
+      "default": "./dist/json-viewer/schema-tree.js"
+    },
     "./kanban": {
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
@@ -633,6 +661,10 @@
       "types": "./dist/kanban/kanban-column.d.ts",
       "default": "./dist/kanban/kanban-column.js"
     },
+    "./kanban/matrix-board": {
+      "types": "./dist/kanban/matrix-board.d.ts",
+      "default": "./dist/kanban/matrix-board.js"
+    },
     "./kbd": {
       "types": "./dist/kbd.d.ts",
       "default": "./dist/kbd.js"
@@ -640,6 +672,10 @@
     "./key-value-editor": {
       "types": "./dist/key-value-editor.d.ts",
       "default": "./dist/key-value-editor.js"
+    },
+    "./key-value-editor/tier-editor": {
+      "types": "./dist/key-value-editor/tier-editor.d.ts",
+      "default": "./dist/key-value-editor/tier-editor.js"
     },
     "./keypad": {
       "types": "./dist/keypad.d.ts",
@@ -737,6 +773,10 @@
       "types": "./dist/meter.d.ts",
       "default": "./dist/meter.js"
     },
+    "./meter/range-indicator": {
+      "types": "./dist/meter/range-indicator.d.ts",
+      "default": "./dist/meter/range-indicator.js"
+    },
     "./mind-map": {
       "types": "./dist/mind-map.d.ts",
       "default": "./dist/mind-map.js"
@@ -780,6 +820,10 @@
     "./number-input": {
       "types": "./dist/number-input.d.ts",
       "default": "./dist/number-input.js"
+    },
+    "./number-input/unit-input": {
+      "types": "./dist/number-input/unit-input.d.ts",
+      "default": "./dist/number-input/unit-input.js"
     },
     "./order-book": {
       "types": "./dist/order-book.d.ts",
@@ -833,6 +877,10 @@
       "types": "./dist/pivot-table.d.ts",
       "default": "./dist/pivot-table.js"
     },
+    "./pivot-table/aging-table": {
+      "types": "./dist/pivot-table/aging-table.d.ts",
+      "default": "./dist/pivot-table/aging-table.js"
+    },
     "./popconfirm": {
       "types": "./dist/popconfirm.d.ts",
       "default": "./dist/popconfirm.js"
@@ -840,6 +888,10 @@
     "./progress": {
       "types": "./dist/progress.d.ts",
       "default": "./dist/progress.js"
+    },
+    "./progress/navigation-progress": {
+      "types": "./dist/progress/navigation-progress.d.ts",
+      "default": "./dist/progress/navigation-progress.js"
     },
     "./promo-code-field": {
       "types": "./dist/promo-code-field.d.ts",
@@ -929,6 +981,10 @@
       "types": "./dist/select.d.ts",
       "default": "./dist/select.js"
     },
+    "./select/native-select": {
+      "types": "./dist/select/native-select.d.ts",
+      "default": "./dist/select/native-select.js"
+    },
     "./selection-toolbar": {
       "types": "./dist/selection-toolbar.d.ts",
       "default": "./dist/selection-toolbar.js"
@@ -948,6 +1004,10 @@
     "./shortcut": {
       "types": "./dist/shortcut.d.ts",
       "default": "./dist/shortcut.js"
+    },
+    "./shortcut/shortcut-sheet": {
+      "types": "./dist/shortcut/shortcut-sheet.d.ts",
+      "default": "./dist/shortcut/shortcut-sheet.js"
     },
     "./side-nav": {
       "types": "./dist/side-nav.d.ts",
@@ -1033,9 +1093,29 @@
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
     },
+    "./table/allocation-grid": {
+      "types": "./dist/table/allocation-grid.d.ts",
+      "default": "./dist/table/allocation-grid.js"
+    },
+    "./table/flowsheet": {
+      "types": "./dist/table/flowsheet.d.ts",
+      "default": "./dist/table/flowsheet.js"
+    },
+    "./table/group-table": {
+      "types": "./dist/table/group-table.d.ts",
+      "default": "./dist/table/group-table.js"
+    },
+    "./table/tree-table": {
+      "types": "./dist/table/tree-table.d.ts",
+      "default": "./dist/table/tree-table.js"
+    },
     "./table-of-contents": {
       "types": "./dist/table-of-contents.d.ts",
       "default": "./dist/table-of-contents.js"
+    },
+    "./table-of-contents/index-bar": {
+      "types": "./dist/table-of-contents/index-bar.d.ts",
+      "default": "./dist/table-of-contents/index-bar.js"
     },
     "./tabs": {
       "types": "./dist/tabs.d.ts",
@@ -1044,6 +1124,10 @@
     "./tabs/tab": {
       "types": "./dist/tabs/tab.d.ts",
       "default": "./dist/tabs/tab.js"
+    },
+    "./tabs/tab-nav": {
+      "types": "./dist/tabs/tab-nav.d.ts",
+      "default": "./dist/tabs/tab-nav.js"
     },
     "./tag-input": {
       "types": "./dist/tag-input.d.ts",
@@ -1117,6 +1201,10 @@
       "types": "./dist/tour/tour-step.d.ts",
       "default": "./dist/tour/tour-step.js"
     },
+    "./tour/beacon": {
+      "types": "./dist/tour/beacon.d.ts",
+      "default": "./dist/tour/beacon.js"
+    },
     "./trace-waterfall": {
       "types": "./dist/trace-waterfall.d.ts",
       "default": "./dist/trace-waterfall.js"
@@ -1144,6 +1232,14 @@
     "./upload": {
       "types": "./dist/upload.d.ts",
       "default": "./dist/upload.js"
+    },
+    "./upload/document-checklist": {
+      "types": "./dist/upload/document-checklist.d.ts",
+      "default": "./dist/upload/document-checklist.js"
+    },
+    "./upload/image-uploader": {
+      "types": "./dist/upload/image-uploader.d.ts",
+      "default": "./dist/upload/image-uploader.js"
     },
     "./video-grid": {
       "types": "./dist/video-grid.d.ts",
@@ -1204,10 +1300,10 @@
   ],
   "customElements": "custom-elements.json",
   "dependencies": {
-    "@c2n/core": "1.0.26",
-    "@c2n/phosphor-icons": "1.0.26",
-    "@c2n/task-icons": "1.0.26",
-    "@c2n/theme": "1.0.26",
+    "@c2n/core": "1.0.27",
+    "@c2n/phosphor-icons": "1.0.27",
+    "@c2n/task-icons": "1.0.27",
+    "@c2n/theme": "1.0.27",
     "@ctrl/tinycolor": "4.2.0",
     "@floating-ui/dom": "1.8.0",
     "@lit-labs/motion": "1.1.0",

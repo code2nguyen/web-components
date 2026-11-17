@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-action-bar,
   $theme: (
@@ -10,6 +11,7 @@
     container--border-radius: 8px,
     container--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
     container--padding: 6px 6px 6px 16px,
+    container__toolbar--padding: 6px,
     container--gap: 12px,
     container--max-width: calc(100% - 32px),
     container--offset: 8px,
@@ -77,6 +79,11 @@
   transition:
     opacity css.cssVar(container--transition-duration) ease,
     visibility 0s linear;
+}
+
+// Open with nothing selected: the actions alone, so the padding is even all round.
+.bar.toolbar {
+  padding: css.cssVar(container__toolbar--padding);
 }
 
 // Closed: faded and invisible, which also takes the bar and its slotted actions out of the Tab order. Visibility flips
@@ -177,7 +184,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(clear__hover--background);
     color: css.cssVar(clear__hover--color);
   }
@@ -196,8 +203,9 @@
 
 // Narrow (a phone): the count and the clear button share the top row, and the actions get a row of their own, full
 // width and still one line, so two or three actions show in full instead of scrolling behind the count.
+// A toolbar keeps the wide layout: it has no count to share a row with, and its actions scroll sideways when they do not fit.
 @container (max-width: 480px) {
-  .bar {
+  .bar:not(.toolbar) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     width: calc(100% - 16px);

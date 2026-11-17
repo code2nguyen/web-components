@@ -1,4 +1,6 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
+@use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
 @use 'sass:map';
 @use '@c2n/sass/css-variable' as css with (
@@ -82,6 +84,28 @@
 
     list--min-width: auto,
     list--max-height: 280px,
+
+    search--padding: 10px 12px,
+    search--font-size: 14px,
+    search--color: #18181b,
+    search--background: transparent,
+    search--border-bottom: 1px solid #e4e4e7,
+    search__placeholder--color: #71717a,
+
+    status--padding: 10px 12px,
+    status--font-size: 14px,
+    status--color: #71717a,
+
+    create--padding: 8px 10px,
+    create--font-size: 14px,
+    create--color: #18181b,
+    create--border-radius: 6px,
+    create__hover--background: #f4f4f5,
+    create__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    footer--padding: 8px,
+    footer--gap: 8px,
+    footer--justify-content: flex-end,
+    footer--border-top: 1px solid #e4e4e7,
   )
 );
 
@@ -139,7 +163,7 @@
   will-change: background, color, border;
   transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
-  &:hover {
+  @include pointer.hover {
     border-top: css.cssVar(button__hover--border-top);
     border-bottom: css.cssVar(button__hover--border-bottom);
     border-right: css.cssVar(button__hover--border-right);
@@ -249,4 +273,129 @@
   --c2-list--padding-left: #{css.cssVar(list--padding-left)};
 
   --c2-list--max-height: #{css.cssVar(list--max-height)};
+}
+
+// Group headings and dividers among the options. They are the select's light DOM, so the list's own `::slotted`
+// rules do not reach them (they are slotted through the select's slot): style them here with the list's variables.
+// The fallbacks repeat the list's `$theme` defaults (list.scss); keep the two in step.
+::slotted(hr) {
+  border: none;
+  border-top: 1px solid var(--c2-list__divider--color, #e4e4e7);
+  margin: var(--c2-list__divider--margin, 4px 0);
+}
+
+::slotted(:is(h1, h2, h3, h4, h5, h6)) {
+  margin: 0;
+  color: var(--c2-list__heading--color, #71717a);
+  font-size: var(--c2-list__heading--font-size, 11px);
+  font-weight: var(--c2-list__heading--font-weight, 600);
+  letter-spacing: var(--c2-list__heading--letter-spacing, 0.06em);
+  text-transform: var(--c2-list__heading--text-transform, uppercase);
+  line-height: 1.4;
+  padding-top: var(--c2-list__heading--padding-top, 10px);
+  padding-right: var(--c2-list__heading--padding-right, 10px);
+  padding-bottom: var(--c2-list__heading--padding-bottom, 4px);
+  padding-left: var(--c2-list__heading--padding-left, 10px);
+  user-select: none;
+}
+
+// With a search field, a message or a footer, the box moves from the list to the panel around all of them.
+.panel.boxed {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: css.cssVar(list--min-width);
+  overflow: hidden;
+  background: css.cssVar(list--background);
+  border-top: css.cssVar(list--border-top);
+  border-right: css.cssVar(list--border-right);
+  border-bottom: css.cssVar(list--border-bottom);
+  border-left: css.cssVar(list--border-left);
+  border-top-left-radius: css.cssVar(list--border-top-left-radius);
+  border-top-right-radius: css.cssVar(list--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(list--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(list--border-bottom-right-radius);
+  box-shadow: css.cssVar(list--box-shadow);
+
+  .list {
+    --c2-list--background: transparent;
+    --c2-list--border-top: none;
+    --c2-list--border-right: none;
+    --c2-list--border-bottom: none;
+    --c2-list--border-left: none;
+    --c2-list--box-shadow: none;
+    --c2-list--border-top-left-radius: 0;
+    --c2-list--border-top-right-radius: 0;
+    --c2-list--border-bottom-left-radius: 0;
+    --c2-list--border-bottom-right-radius: 0;
+  }
+}
+
+.search {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  font: inherit;
+  padding: css.cssVar(search--padding);
+  font-size: css.cssVar(search--font-size);
+  color: css.cssVar(search--color);
+  background: css.cssVar(search--background);
+  border-bottom: css.cssVar(search--border-bottom);
+
+  &::placeholder {
+    color: css.cssVar(search__placeholder--color);
+    opacity: 1;
+  }
+
+  // The caret marks focus in the field; forced colors still get a ring.
+  &:focus-visible {
+    @include focus.forced-colors-ring(2px, -2px);
+  }
+}
+
+.status {
+  padding: css.cssVar(status--padding);
+  font-size: css.cssVar(status--font-size);
+  color: css.cssVar(status--color);
+}
+
+.create {
+  display: block;
+  margin: 0 4px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: start;
+  font: inherit;
+  padding: css.cssVar(create--padding);
+  font-size: css.cssVar(create--font-size);
+  color: css.cssVar(create--color);
+  border-radius: css.cssVar(create--border-radius);
+
+  &:hover,
+  &:focus-visible {
+    background: css.cssVar(create__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(create__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: css.cssVar(footer--padding);
+  gap: css.cssVar(footer--gap);
+  justify-content: css.cssVar(footer--justify-content);
+  border-top: css.cssVar(footer--border-top);
+
+  &[hidden] {
+    display: none;
+  }
 }

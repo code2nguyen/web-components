@@ -55,13 +55,13 @@ Without `presets` the rows are Later today (in about 3 hours, on the hour), This
 
 `presets` replaces them. Each row is `{ id, label, at }`, where `at` is either a function of the current time (set the array as a property) or an expression, which also works in a JSON attribute:
 
-| Expression                        | Falls at                                                    |
-| --------------------------------- | ----------------------------------------------------------- |
-| `+20m`, `+3h`, `+1h30m`, `+2d`    | That long from now                                          |
-| `today 16:00`, `tomorrow`         | That day, at the time given or at `morning`                 |
-| `friday 09:00`                    | The first Friday whose time is still ahead, today included  |
-| `next monday 09:00`               | The first Monday after today                                |
-| `later today`, `this evening`, `end of day`, `this weekend`, `next week` | The default rows' rules     |
+| Expression                                                               | Falls at                                                   |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `+20m`, `+3h`, `+1h30m`, `+2d`                                           | That long from now                                         |
+| `today 16:00`, `tomorrow`                                                | That day, at the time given or at `morning`                |
+| `friday 09:00`                                                           | The first Friday whose time is still ahead, today included |
+| `next monday 09:00`                                                      | The first Monday after today                               |
+| `later today`, `this evening`, `end of day`, `this weekend`, `next week` | The default rows' rules                                    |
 
 Times are `HH:mm`, `9am` or `5:30pm`. `min` and `max` hide the rows that fall outside them, and bound the date and time panel. A row is resolved again when it is picked, so a menu left open still picks the right time.
 

@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test'
 import { test, expect, props, watch, accessible, clipboard } from '../../../../tests/component-fixture'
 
 test('initial title and source discovery do not schedule a second Lit update', async ({ page, renderScenario }) => {
@@ -60,4 +61,103 @@ test('the css-variables theme colours tokens and the frame from the --c2-code-vi
   await expect(page.locator('pre.shiki:not(.plain)')).toBeVisible()
   await expect(page.locator('pre code span', { hasText: /^const$/ })).toHaveCSS('color', 'rgb(1, 2, 3)')
   await expect(page.locator('c2-code-viewer .c2-code-viewer')).toHaveCSS('background-color', 'rgb(250, 240, 230)')
+})
+
+const LIGHT_BG = 'rgb(255, 255, 255)' // github-light
+const DARK_BG = 'rgb(13, 17, 23)' // github-dark-default
+const dual = (scheme: string) =>
+  `<c2-code-viewer data-scheme="${scheme}" ${scheme === 'auto' ? '' : `color-scheme="${scheme}"`} language="ts" theme="github-light" dark-theme="github-dark-default" code="const a = 1"></c2-code-viewer>`
+const frame = (page: Page, scheme: string) => page.locator(`c2-code-viewer[data-scheme="${scheme}"] .c2-code-viewer`)
+const keyword = (page: Page, scheme: string) => page.locator(`c2-code-viewer[data-scheme="${scheme}"] pre.shiki span`, { hasText: /^const$/ })
+
+test.describe('color-scheme="auto"', () => {
+  test('follows a dark color-scheme on the root, on a light OS', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await renderScenario(`<style>:root { color-scheme: dark }</style>${dual('auto')}${dual('dark')}`)
+    await expect(page.locator('pre.shiki:not(.plain)')).toHaveCount(2)
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+    const darkKeyword = await keyword(page, 'dark').evaluate((el) => getComputedStyle(el).color)
+    await expect(keyword(page, 'auto')).toHaveCSS('color', darkKeyword)
+    await accessible(page)
+  })
+
+  test('follows a light color-scheme on the root, on a dark OS', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await renderScenario(`<style>:root { color-scheme: light }</style>${dual('auto')}${dual('light')}`)
+    await expect(page.locator('pre.shiki:not(.plain)')).toHaveCount(2)
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', LIGHT_BG)
+    const lightKeyword = await keyword(page, 'light').evaluate((el) => getComputedStyle(el).color)
+    await expect(keyword(page, 'auto')).toHaveCSS('color', lightKeyword)
+  })
+
+  test('follows the color-scheme of an ancestor', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await renderScenario(`<style>:root { color-scheme: light }</style><div style="color-scheme: dark; background: #000">${dual('auto')}</div>`)
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+  })
+
+  test('switches live with the page theme', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await renderScenario(`<style>:root { color-scheme: light } :root[data-theme='dark'] { color-scheme: dark }</style>${dual('auto')}`)
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', LIGHT_BG)
+    await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'))
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+    await page.evaluate(() => delete document.documentElement.dataset.theme)
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', LIGHT_BG)
+  })
+
+  test('follows the OS preference while nothing on the page sets color-scheme', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await renderScenario(dual('auto'))
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+    await page.emulateMedia({ colorScheme: 'light' })
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', LIGHT_BG)
+    await accessible(page)
+  })
+
+  test('only a viewer with a dark-theme falls back to the OS, and setting one later opts it in', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await renderScenario('<c2-code-viewer data-scheme="single" language="ts" theme="github-light" code="const a = 1"></c2-code-viewer>')
+    const host = page.locator('c2-code-viewer')
+    await expect(page.locator('pre.shiki:not(.plain)')).toBeVisible()
+    // A single light theme keeps its light frame, and its scrollbars are not turned dark under it.
+    await expect(frame(page, 'single')).toHaveCSS('background-color', LIGHT_BG)
+    await expect(frame(page, 'single')).toHaveCSS('color-scheme', 'normal')
+    expect(await host.evaluate((el) => el.matches(':state(scheme-from-os)'))).toBe(false)
+    await props(host, { darkTheme: 'github-dark-default' })
+    await expect.poll(() => host.evaluate((el) => el.matches(':state(scheme-from-os)'))).toBe(true)
+    await expect(frame(page, 'single')).toHaveCSS('background-color', DARK_BG)
+  })
+
+  test('an author background that is not a colour still applies', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await renderScenario(`<style>c2-code-viewer { --c2-code-viewer--background: linear-gradient(rgb(1, 2, 3), rgb(4, 5, 6)) }</style>${dual('auto')}`)
+    await expect(page.locator('pre.shiki:not(.plain)')).toBeVisible()
+    await expect(frame(page, 'auto')).toHaveCSS('background-image', /linear-gradient/)
+  })
+
+  test('picks up a color-scheme the page sets after the viewer connected', async ({ page, renderScenario }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await renderScenario(dual('auto'))
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+    // A theme stylesheet that arrives late pins the page to light: the OS fallback must step aside.
+    await page.addStyleTag({ content: ':root { color-scheme: light }' })
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', LIGHT_BG)
+    // And a theme set through an attribute on <html>, with the rule already in place.
+    await page.addStyleTag({ content: ':root[data-theme="dark"] { color-scheme: dark }' })
+    await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'))
+    await expect(frame(page, 'auto')).toHaveCSS('background-color', DARK_BG)
+  })
+})
+
+test('explicit color-scheme values ignore the page and the OS', async ({ page, renderScenario }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await renderScenario(`<style>:root { color-scheme: dark }</style>${dual('light')}<div style="color-scheme: light">${dual('dark')}</div>`)
+  await expect(page.locator('pre.shiki:not(.plain)')).toHaveCount(2)
+  await expect(frame(page, 'light')).toHaveCSS('background-color', LIGHT_BG)
+  await expect(frame(page, 'dark')).toHaveCSS('background-color', DARK_BG)
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.evaluate(() => (document.documentElement.style.colorScheme = 'light'))
+  await expect(frame(page, 'light')).toHaveCSS('background-color', LIGHT_BG)
+  await expect(frame(page, 'dark')).toHaveCSS('background-color', DARK_BG)
 })

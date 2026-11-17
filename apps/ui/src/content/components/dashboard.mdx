@@ -16,7 +16,9 @@ one resizes the whole track, so the panes on either side of it stay aligned. `co
 count (`columns="3"` is three equal columns) or an explicit list (`columns="320px 1fr"`). The first drag switches a
 track to pixels and the `fr` tracks around it give up the space in proportion to their weight, down to
 `min-column-width` / `min-row-height` and to whatever `min-width` / `min-height` the panes over those tracks ask for.
-Give the grid a height whenever its rows use `fr` — the row tracks divide the host's height.
+Give the grid a height whenever its rows use `fr` — the row tracks divide the host's height. A `min-height` works too,
+and is the better choice with `layouts` below: the `fr` rows share it, while an entry whose rows are all fixed lengths
+makes the grid exactly as tall as its tracks, so no media query has to repeat that total.
 
 A pane draws no surface of its own: put a `c2-card`, or any markup, in its default slot. Filling `header`,
 `actions` or `footer` turns that row on; with `header` and `actions` both empty, the optional `expand-width` /
@@ -37,7 +39,8 @@ window splitter: it is in the tab order and the arrow keys move it, 10px a step 
 For a grid that changes shape with the viewport, set `layouts` instead of remounting: an ordered list of entries,
 each with a `media` query and the `columns`, `rows` and `layout` (placements by `card-id`) to use while it matches.
 The first match wins, the grid switches in place as the viewport crosses a breakpoint, `layout-change` reports the
-switch, and each entry keeps its own stored sizes under `<storage-key>@<media>`.
+switch, and each entry keeps its own stored sizes under `<storage-key>@<media>`. `layouts` is also read from a JSON
+attribute, so a responsive grid can be written in plain markup, a template or a server render with no script.
 
 ```js tag=CodeBlock
 grid.layouts = [

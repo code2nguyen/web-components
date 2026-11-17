@@ -11,6 +11,7 @@ export type { StickyEdge }
 export interface StickyEventMap {
   'stuck-change': StickyControllerEventMap['stuck-change']
   'retract-change': StickyControllerEventMap['retract-change']
+  'conceal-change': CustomEvent<{ concealed: boolean }>
 }
 
 export interface Sticky {
@@ -22,7 +23,9 @@ export interface Sticky {
  * Keeps its content pinned to the top or bottom edge of the nearest scroll container while the rest scrolls past, and
  * tells you when it is stuck: the host matches `:state(stuck)` and fires `stuck-change`, so the surface can gain a
  * background and shadow only once content runs beneath it. With `hide-on-scroll` it slides out of view while the reader
- * scrolls down and comes back on the way up or when focus moves into it (`:state(retracted)`).
+ * scrolls down and comes back on the way up or when focus moves into it (`:state(retracted)`). With `show-when-hidden`
+ * it stays out of view while a watched element (the page's main Buy or Apply button) is on screen and slides in once
+ * that element is scrolled out of view, as a sticky call to action that mirrors it (`:state(concealed)`).
  *
  * Stickiness is CSS `position: sticky` on the host, so the usual rules apply: the host sticks within its parent, and
  * an ancestor with `overflow` set becomes the scroll container it sticks to. Turn it off with
@@ -32,7 +35,8 @@ export interface Sticky {
  * @slot - Content to keep in view: a toolbar, tabs, a table header, a section heading.
  * @event {CustomEvent<{ stuck: boolean }>} stuck-change - Fired when the element becomes stuck to its edge or leaves it.
  * @event {CustomEvent<{ retracted: boolean }>} retract-change - Fired when `hide-on-scroll` slides the element out of view or back in.
- * @csspart surface - Box wrapping the assigned default slot: it draws the padding, background and shadow around the slotted content, does not style inside it, and slides out of view while retracted.
+ * @event {CustomEvent<{ concealed: boolean }>} conceal-change - Fired when `show-when-hidden` slides the element out of view because the watched element came into view, or back in once it left.
+ * @csspart surface - Box wrapping the assigned default slot: it draws the padding, background and shadow around the slotted content, does not style inside it, and slides out of view while retracted or concealed.
  *
  * @cssproperty {string} [--c2-sticky--position=sticky] - `sticky` pins the element; `static` turns pinning off, e.g. under a breakpoint.
  * @cssproperty {pixel} [--c2-sticky--offset=0px] - Distance kept from the edge, e.g. the height of a sticky header above.
@@ -56,6 +60,16 @@ export class Sticky extends LitElement {
   /** Slides the stuck content out of view while the reader scrolls down, and back in on the way up. */
   @property({ type: Boolean, attribute: 'hide-on-scroll' }) hideOnScroll = false
 
+  /**
+   * Id of an element, in the same document or shadow root, that this one stands in for: the content stays out of view
+   * while that element is on screen and slides in while it is scrolled out of view, e.g. a sticky Buy bar mirroring
+   * the page's main Buy button. An id that matches nothing leaves the content in view. `showWhenHiddenElement` wins.
+   */
+  @property({ attribute: 'show-when-hidden' }) showWhenHidden = ''
+
+  /** The element to watch, as a reference: use it for an element in another shadow root or one added later. Wins over `show-when-hidden`. */
+  @property({ attribute: false }) showWhenHiddenElement: Element | null = null
+
   private readonly internals = this.attachInternals()
 
   private readonly sticky = new StickyController(this, {
@@ -74,9 +88,31 @@ export class Sticky extends LitElement {
     return this.sticky.retracted
   }
 
+  private watching = false
+
+  /** Whether `show-when-hidden` currently keeps the content out of view because the watched element is on screen. */
+  get concealed(): boolean {
+    return this.internals.states.has('concealed')
+  }
+
   /** Brings retracted content back into view. */
   reveal(): void {
     this.sticky.reveal()
+  }
+
+  protected override updated(): void {
+    if (this.watching || !(this.showWhenHidden || this.showWhenHiddenElement)) return
+    this.watching = true
+    // The watched element counts as on screen until the watcher, loaded on first use, reports: no flash on load.
+    this.internals.states.add('concealed')
+    import('./sticky-watch.js').then(
+      ({ StickyWatch }) => new StickyWatch(this, this.internals),
+      () => {
+        // A failed load (offline, a stale deploy) leaves the action in view and is tried again on the next update.
+        this.watching = false
+        this.internals.states.delete('concealed')
+      },
+    )
   }
 
   override render() {

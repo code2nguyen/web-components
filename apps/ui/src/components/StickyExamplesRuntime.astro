@@ -1,0 +1,12 @@
+---
+/** Wires the sticky gallery card whose watched element is a property (`showWhenHiddenElement`), not an id attribute. */
+---
+
+<script>
+  import type { Sticky } from '@c2n/components/sticky'
+
+  for (const sticky of document.querySelectorAll<Sticky>('c2-sticky[data-sticky-example]')) {
+    const name = sticky.dataset.stickyExample
+    sticky.showWhenHiddenElement = document.querySelector(`[data-sticky-watch="${name}"]`)
+  }
+</script>

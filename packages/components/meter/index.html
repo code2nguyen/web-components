@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-meter</title>
     <script type="module" src="/src/meter.ts"></script>
+    <script type="module" src="/src/range-indicator.ts"></script>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -28,5 +29,21 @@
     <c2-meter value="12" low="20" high="60" optimum="100">Battery</c2-meter>
     <c2-meter class="thick" max="15" segments='[{"label":"Photos","value":6},{"label":"Documents","value":3},{"label":"Mail","value":1.5}]'>Storage</c2-meter>
     <div lang="fr"><c2-meter max="15" segments='[{"label":"Photos","value":6.5}]'>Stockage</c2-meter></div>
+    <c2-meter max="50" overage segments='[{"label":"Assigned","value":48},{"label":"Pending","value":8}]'>Seats · overage</c2-meter>
+    <c2-range-indicator
+      min="40"
+      max="160"
+      value="88"
+      value-text="88 mg/dL"
+      bands='[{"label":"Low","to":70,"tone":"suboptimum"},{"label":"Normal","to":100,"tone":"optimum"},{"label":"Prediabetes","to":126,"tone":"suboptimum"},{"label":"Diabetes","tone":"critical"}]'
+      >Fasting glucose</c2-range-indicator
+    >
+    <c2-range-indicator
+      min="2.5"
+      max="6"
+      value="2.1"
+      bands='[{"label":"Low","to":3.5,"tone":"critical"},{"label":"Normal","to":5.2,"tone":"optimum"},{"label":"High","tone":"critical"}]'
+      >Potassium · off the scale</c2-range-indicator
+    >
   </body>
 </html>

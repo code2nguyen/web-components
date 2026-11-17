@@ -23,7 +23,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-autocomplete': Omit<C2Props<Autocomplete>, 'suggestions' | 'searchFields'> & {
+      'c2-autocomplete': Omit<C2Props<Autocomplete>, 'suggestions' | 'searchFields' | 'selectedItems' | 'recentItems'> & {
         'aria-label'?: Attribute
         'item-key'?: Attribute
         'label-field'?: Attribute
@@ -34,8 +34,12 @@ declare module 'react' {
         'min-query-length'?: Attribute
         'max-results'?: Attribute
         'show-empty'?: Attribute
+        'selected-items'?: Attribute
+        'recent-items'?: Attribute
         suggestions?: Autocomplete['suggestions'] | string
         searchFields?: Autocomplete['searchFields'] | string
+        selectedItems?: Autocomplete['selectedItems'] | string
+        recentItems?: Autocomplete['recentItems'] | string
       }
     }
   }

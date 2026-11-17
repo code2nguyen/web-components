@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-time-slot-picker,
   $theme: (
@@ -162,7 +163,7 @@
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 

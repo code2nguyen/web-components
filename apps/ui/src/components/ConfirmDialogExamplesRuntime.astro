@@ -1,0 +1,74 @@
+---
+/** Drives the confirm dialog's prompt examples, whose method-only API (`prompt()`, `validate`) cannot be written as HTML attributes. */
+---
+
+<script>
+  import { prompt, type ConfirmDialog, type PromptOptions } from '@c2n/components/confirm-dialog'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French a page adds for the "En français" card: the library ships its text in English only.
+  addTranslations({
+    fr: {
+      'confirm-dialog': {
+        confirm: 'Confirmer',
+        cancel: 'Annuler',
+        typeToConfirm: 'Saisissez {0} pour confirmer',
+        answer: 'Réponse',
+        errorPrefix: 'Erreur :',
+        valueMissing: 'Remplissez ce champ.',
+        invalid: 'Saisissez une valeur valide.',
+      },
+    },
+  })
+
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+  /** The `prompt()` options of each example, keyed by the trigger's `data-confirm-dialog-example`. */
+  const examples: Record<string, PromptOptions<never>> = {
+    rename: {
+      label: 'File name',
+      value: 'quarterly-report.pdf',
+      required: true,
+      validate: (value: string) => (value.includes('/') ? 'A file name cannot contain a slash.' : null),
+    },
+    invite: {
+      label: 'Email address',
+      type: 'email',
+      placeholder: 'name@example.com',
+      required: true,
+      // Stands in for a server check: resolves after a short delay, never over the network.
+      validate: async (value: string) => {
+        await delay(700)
+        return value.endsWith('@example.org') ? 'This address already has access.' : null
+      },
+    },
+    move: {},
+  }
+
+  const show = (trigger: Element, answer: unknown) => {
+    const result = trigger.parentElement?.querySelector('[data-confirm-dialog-result]')
+    if (result) result.textContent = `Resolved: ${JSON.stringify(answer)}`
+  }
+
+  document.addEventListener('click', async (event) => {
+    const trigger = (event.target as Element | null)?.closest?.('[data-confirm-dialog-example]')
+    if (!(trigger instanceof HTMLElement)) return
+    const example = trigger.dataset.confirmDialogExample ?? ''
+    if (example === 'helper') {
+      show(trigger, await prompt({ heading: 'New folder', label: 'Folder name', placeholder: 'Untitled folder', confirmLabel: 'Create', required: true }))
+      return
+    }
+    const dialog = trigger.parentElement?.querySelector<ConfirmDialog>('c2-confirm-dialog')
+    if (dialog && example in examples) show(trigger, await dialog.prompt(examples[example]))
+  })
+</script>
+
+<style is:global>
+  .confirm-dialog-example-result {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--site-color-on-surface-muted);
+  }
+</style>

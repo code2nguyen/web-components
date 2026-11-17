@@ -1,0 +1,123 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tab-nav,
+  $theme: (
+    box-shadow: inset 0px -2px 0px 0px variables.$color-border-light,
+    justify-content: flex-start,
+    background-color: null,
+    gap: null,
+    padding: null,
+    fade--width: 32px,
+
+    indicator--color: variables.$color-border-dark,
+    indicator--height: 2px,
+
+    tab--gap: 8px,
+    tab--padding-top: 8px,
+    tab--padding-right: 16px,
+    tab--padding-bottom: 8px,
+    tab--padding-left: 16px,
+    tab--font-weight: null,
+    tab--font-size: null,
+    tab--color: null,
+    tab--background-color: null,
+    tab--border-radius: null,
+
+    tab__hover--color: variables.$color-blue,
+    tab__hover--background-color: null,
+
+    tab__current--color: variables.$color-blue,
+    tab__current--background-color: null,
+    tab__current--font-weight: null,
+
+    tab__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    tab__focus--outline-offset: -2px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+// The strip scrolls sideways when its tabs do not fit. Its scrollbar is hidden, and the edge that has more tabs beyond
+// it fades out instead (the `more-start` / `more-end` classes, set by an IntersectionObserver).
+.list {
+  --_fade-start: 0px;
+  --_fade-end: 0px;
+  --_fade-direction: to right;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  justify-content: css.cssVar(justify-content);
+  background-color: css.cssVar(background-color);
+  box-shadow: css.cssVar(box-shadow);
+  scroll-padding-inline: css.cssVar(fade--width);
+
+  &.more-start {
+    --_fade-start: #{css.cssVar(fade--width)};
+  }
+
+  &.more-end {
+    --_fade-end: #{css.cssVar(fade--width)};
+  }
+
+  &.more-start,
+  &.more-end {
+    mask-image: linear-gradient(var(--_fade-direction), transparent, #000 var(--_fade-start), #000 calc(100% - var(--_fade-end)), transparent);
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+:host(:dir(rtl)) .list {
+  --_fade-direction: to left;
+}
+
+// The indicator is the current tab's bottom border, drawn over the strip's line: no measuring, so it is in place on
+// the first paint, server-rendered or not, and a border survives forced colors where a background would not.
+::slotted(c2-tab) {
+  position: relative;
+  flex: none;
+  gap: css.cssVar(tab--gap);
+  padding-top: css.cssVar(tab--padding-top);
+  padding-right: css.cssVar(tab--padding-right);
+  padding-bottom: css.cssVar(tab--padding-bottom);
+  padding-left: css.cssVar(tab--padding-left);
+  border-bottom: css.cssVar(indicator--height) solid transparent;
+  border-radius: css.cssVar(tab--border-radius);
+  font-weight: css.cssVar(tab--font-weight);
+  font-size: css.cssVar(tab--font-size);
+  color: css.cssVar(tab--color);
+  background-color: css.cssVar(tab--background-color);
+  --_c2-tab-focus-outline: #{css.cssVar(tab__focus--outline)};
+  --_c2-tab-focus-outline-offset: #{css.cssVar(tab__focus--outline-offset)};
+}
+
+@media (hover: hover) {
+  ::slotted(c2-tab:hover) {
+    color: css.cssVar(tab__hover--color, tab--color);
+    background-color: css.cssVar(tab__hover--background-color, tab--background-color);
+  }
+}
+
+::slotted(c2-tab[current]) {
+  color: css.cssVar(tab__current--color, tab--color);
+  background-color: css.cssVar(tab__current--background-color, tab--background-color);
+  font-weight: css.cssVar(tab__current--font-weight, tab--font-weight);
+  border-bottom-color: css.cssVar(indicator--color);
+}
+
+@media (forced-colors: active) {
+  ::slotted(c2-tab) {
+    border-bottom-color: Canvas;
+  }
+
+  ::slotted(c2-tab[current]) {
+    border-bottom-color: LinkText;
+  }
+}

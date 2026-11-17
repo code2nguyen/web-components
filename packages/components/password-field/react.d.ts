@@ -29,6 +29,7 @@ declare module 'react' {
         maxlength?: Attribute
         'hide-toggle'?: Attribute
         'strength-labels'?: Attribute
+        'generator-options'?: Attribute
         'error-text'?: Attribute
         'toggle-label'?: Attribute
         'caps-lock-text'?: Attribute

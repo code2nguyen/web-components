@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { DescriptionGroup } from '@c2n/description-list/description-group.js'
 import type { DescriptionItem } from '@c2n/description-list/description-item.js'
 import type { DescriptionList } from '@c2n/description-list'
 import type { DescriptionValue } from '@c2n/description-list/description-value.js'
@@ -25,8 +26,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-description-item': C2Props<DescriptionItem> & {
+      'c2-description-group': C2Props<DescriptionGroup>
+      'c2-description-item': Omit<C2Props<DescriptionItem>, 'options'> & {
         'empty-text'?: Attribute
+        'edit-value'?: Attribute
+        options?: DescriptionItem['options'] | string
       }
       'c2-description-list': Omit<C2Props<DescriptionList>, 'valueLabels'> & {
         'value-labels'?: Attribute

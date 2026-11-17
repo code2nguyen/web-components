@@ -254,3 +254,165 @@ test('actions that grow after the first measurement (a late upgrade) fold', asyn
   await expect(host).toHaveState('has-folded')
   await expect(page.getByRole('button', { name: 'More actions' })).toBeVisible()
 })
+
+const navBar = (attributes = 'sticky large-title') => `
+  <div class="phone" style="width: 390px; height: 480px; overflow: auto">
+    <c2-page-header ${attributes}>
+      <c2-breadcrumb slot="breadcrumb">
+        <c2-link-button href="#settings">Settings</c2-link-button>
+        <c2-link-button>Notifications</c2-link-button>
+      </c2-breadcrumb>
+      <h1>Notifications</h1>
+      <c2-button slot="actions" primary>Done</c2-button>
+    </c2-page-header>
+    <div style="height: 1600px"></div>
+  </div>`
+
+/** A value from the page header's shadow root, as the stylesheet resolves it. */
+const shadowStyle = (page: Page, selector: string, property: string) =>
+  page
+    .locator('c2-page-header')
+    .evaluate((element, [selector, property]) => getComputedStyle(element.shadowRoot!.querySelector(selector)!).getPropertyValue(property), [
+      selector,
+      property,
+    ] as const)
+
+const scrollPhone = (page: Page, top: number) => page.locator('.phone').evaluate((phone, value) => (phone.scrollTop = value), top)
+
+/** Scroll-driven animations are a progressive enhancement: the engines without them keep the condensed toggle. */
+const scrollDriven = (page: Page) => page.evaluate(() => CSS.supports('(animation-timeline: scroll()) and (animation-range: 0% 100%)'))
+
+test('narrow: a lone primary action lines up with the title', async ({ page, renderScenario }) => {
+  await renderScenario(navBar(''))
+  const left = async (selector: string) => (await page.locator(selector).boundingBox())!.x
+  expect(Math.abs((await left('c2-button')) - (await left('h1')))).toBeLessThan(1)
+})
+
+test('large-title: the title stays large on narrow widths', async ({ page, renderScenario }) => {
+  await renderScenario(navBar('large-title'))
+  await expect(page.locator('c2-page-header')).toHaveState('narrow')
+  expect(await page.locator('h1').evaluate((h1) => getComputedStyle(h1).fontSize)).toBe('32px')
+  // Without it, the narrow title shrinks as before.
+  await renderScenario(navBar(''))
+  await expect(page.locator('c2-page-header')).toHaveState('narrow')
+  expect(await page.locator('h1').evaluate((h1) => getComputedStyle(h1).fontSize)).toBe('20px')
+})
+
+test('large-title in a scrolling pane: collapses into a bar with a centred title, the back link and the primary action', async ({ page, renderScenario }) => {
+  await renderScenario(navBar())
+  const host = page.locator('c2-page-header')
+  await watch(host, 'condensed-change')
+  // The back control: the parent link, repeated in the bar (inert until condensed).
+  await expect(host.locator('.parent .parent-link')).toBeVisible()
+  await scrollPhone(page, 400)
+  await expect(host).toHaveState('condensed')
+  const bar = host.locator('[part="condensed"]')
+  await expect(bar).toBeInViewport()
+  await expect(bar).toContainText('Notifications')
+  // The bar's title is centred on the bar, whatever sits at each end.
+  const centre = await host.evaluate((element) => {
+    const bar = element.shadowRoot!.querySelector('.condensed-bar')!.getBoundingClientRect()
+    const title = element.shadowRoot!.querySelector('.condensed-title')!.getBoundingClientRect()
+    return Math.abs(bar.left + bar.width / 2 - (title.left + title.width / 2))
+  })
+  expect(centre).toBeLessThan(2)
+  await expect.poll(() => shadowStyle(page, '.condensed-bar', 'opacity')).toBe('1')
+  // The bar's back control is reachable once the title has gone.
+  expect(await shadowStyle(page, '.condensed-bar .parent-link', 'visibility')).toBe('visible')
+  await host.evaluate((element) => (element.shadowRoot!.querySelector('.condensed-bar .parent-link') as HTMLElement).focus())
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/#settings$/)
+  const done = page.getByRole('button', { name: 'Done' })
+  await expect
+    .poll(async () => {
+      const barBox = (await bar.boundingBox())!
+      const box = (await done.boundingBox())!
+      return box.y >= barBox.y - 1 && box.y + box.height <= barBox.y + barBox.height + 1
+    })
+    .toBe(true)
+  await scrollPhone(page, 0)
+  await expect(host).not.toHaveState('condensed')
+  await expect(host).toHaveAttribute('data-events', '[{"condensed":true},{"condensed":false}]')
+})
+
+test('large-title: a bar too narrow to centre the title still shows it beside the back link', async ({ page, renderScenario }) => {
+  await renderScenario(navBar().replace('width: 390px', 'width: 200px'))
+  const host = page.locator('c2-page-header')
+  await scrollPhone(page, 400)
+  await expect(host).toHaveState('condensed')
+  const title = await host.evaluate((element) => element.shadowRoot!.querySelector('.condensed-title')!.getBoundingClientRect().width)
+  expect(title).toBeGreaterThan(20)
+})
+
+test('large-title: a header holding only its title condenses on the page scroller too', async ({ page, renderScenario }) => {
+  await renderScenario(`<div class="frame narrow"><c2-page-header sticky large-title><h1>Inbox</h1></c2-page-header><div class="tall"></div></div>`)
+  const host = page.locator('c2-page-header')
+  await page.mouse.wheel(0, 300)
+  await expect(host).toHaveState('condensed')
+  await expect(host.locator('[part="condensed"]')).toBeInViewport()
+  await expect(host.locator('[part="condensed"]')).toContainText('Inbox')
+})
+
+/** Scrolls the pane step by step and records how far the fade and the condensed state have gone at each step. */
+const fadeSteps = (page: Page, until: number) =>
+  page.locator('c2-page-header').evaluate(async (element, until) => {
+    const pane = element.parentElement!
+    const root = element.shadowRoot!
+    const frame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    const steps: { top: number; title: number; bar: number; condensed: boolean; inert: boolean }[] = []
+    for (let top = 0; top <= until; top += 4) {
+      pane.scrollTop = top
+      await frame()
+      steps.push({
+        top,
+        title: Number(getComputedStyle(root.querySelector('.heading')!).opacity),
+        bar: Number(getComputedStyle(root.querySelector('.condensed-bar')!).opacity),
+        condensed: root.querySelector('.c2-page-header')!.classList.contains('condensed'),
+        inert: root.querySelector('.condensed-bar')!.hasAttribute('inert'),
+      })
+    }
+    return steps
+  }, until)
+
+test('large-title: the fade follows the scroll position where scroll-driven animations exist', async ({ page, renderScenario }) => {
+  await renderScenario(navBar())
+  test.skip(!(await scrollDriven(page)), 'No scroll-driven animations: the condensed toggle is the whole behaviour')
+  const steps = await fadeSteps(page, 200)
+  expect(steps[0]).toMatchObject({ title: 1, bar: 0, condensed: false, inert: true })
+  // Part way: both half drawn, the bar still inert (its back link out of reach).
+  const midway = steps.filter((step) => step.title > 0.1 && step.title < 0.9)
+  expect(midway.length).toBeGreaterThan(1)
+  for (const step of midway) expect(step).toMatchObject({ condensed: false, inert: true })
+  expect(midway.some((step) => step.bar > 0.1 && step.bar < 0.9)).toBe(true)
+  // The fade is complete by the time the header condenses.
+  const first = steps.find((step) => step.condensed)!
+  expect(first).toMatchObject({ bar: 1, inert: false })
+  expect(first.title).toBeLessThan(0.05)
+})
+
+test('large-title: a short header is not faded at rest and condenses as it sticks', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div class="phone" style="width: 390px; height: 400px; overflow: auto"><c2-page-header sticky large-title><h1>Inbox</h1></c2-page-header><div style="height: 1600px"></div></div>`,
+  )
+  const host = page.locator('c2-page-header')
+  const steps = await fadeSteps(page, 80)
+  expect(steps[0]).toMatchObject({ title: 1, condensed: false })
+  const offset = await host.evaluate((element) => (element as HTMLElement).offsetHeight - 48)
+  const first = steps.find((step) => step.condensed)!
+  // Condensed within a step of the point where the header sticks, not while its bar is still moving.
+  expect(Math.abs(first.top - offset)).toBeLessThanOrEqual(4)
+  if (await scrollDriven(page)) expect(steps.find((step) => step.top >= offset)!.title).toBeLessThan(0.05)
+})
+
+test('large-title: no scroll animation without it or with reduced motion', async ({ page, renderScenario }) => {
+  const animations = () => page.locator('c2-page-header').evaluate((element) => element.shadowRoot!.getAnimations().length)
+  await renderScenario(navBar('sticky'))
+  expect(await animations()).toBe(0)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await renderScenario(navBar())
+  expect(await animations()).toBe(0)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await renderScenario(navBar())
+  // The heading and the bar (the hidden leading and badge boxes have none).
+  expect(await animations()).toBe((await scrollDriven(page)) ? 2 : 0)
+})

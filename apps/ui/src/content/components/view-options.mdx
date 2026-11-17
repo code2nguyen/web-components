@@ -41,6 +41,13 @@ import '@c2n/components/view-options'
 <div data-label="Single sort">
   <c2-view-options max-sorts="1" value='{"orderBy":[{"field":"name","direction":"asc"}]}' fields='[{"id":"name","label":"Name","orderable":true,"property":true},{"id":"team","label":"Team","groupable":true,"property":true},{"id":"joined","label":"Joined","orderable":true,"property":true}]'></c2-view-options>
 </div>
+<div data-label="Saved views">
+  <c2-view-options layouts="list board" view-id="mine" views='[{"id":"mine","name":"My open bugs","value":{"layout":"list","groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}},{"id":"triage","name":"Triage board","value":{"layout":"board","groupBy":"priority"}},{"id":"team","name":"Team backlog","value":{"layout":"list","groupBy":"assignee"},"shared":true,"locked":true}]' value='{"layout":"list","groupBy":"status","orderBy":[{"field":"priority","direction":"desc"}]}'>
+    <c2-view-field field="status" label="Status" groupable orderable property></c2-view-field>
+    <c2-view-field field="priority" label="Priority" groupable orderable property></c2-view-field>
+    <c2-view-field field="assignee" label="Assignee" groupable property></c2-view-field>
+  </c2-view-options>
+</div>
 <div data-label="Custom trigger">
   <c2-view-options layouts="gallery table" fields='[{"id":"type","label":"Type","groupable":true,"property":true},{"id":"size","label":"Size","orderable":true,"property":true},{"id":"modified","label":"Modified","orderable":true,"property":true}]'>
     <c2-button slot="trigger">View</c2-button>
@@ -48,11 +55,11 @@ import '@c2n/components/view-options'
 </div>
 ```
 
-Listen to `view-change` and apply the value to the collection. With a `c2-table` built from `c2-table-column` children that takes three assignments:
+Listen to `view-change` and apply the value to the collection. With a `c2-group-table` (the table that groups rows) built from `c2-table-column` children that takes three assignments:
 
 ```typescript tag=CodeBlock
 const options = document.querySelector('c2-view-options')!
-const table = document.querySelector('c2-table')!
+const table = document.querySelector('c2-group-table')!
 
 options.addEventListener('view-change', (event) => {
   const view = event.detail.value
@@ -65,3 +72,19 @@ options.addEventListener('default-request', (event) => {
   options.defaultValue = event.detail.value // after saving it for everyone
 })
 ```
+
+### Saved views
+
+`views` lists named views, each `{ id, name, value, shared?, locked? }`, and `view-id` names the current one. The panel
+opens with a Views section: a select of the user's views then the shared ones, "Modified" while `value` differs from the
+current view (the host matches `:state(modified)` and the default trigger shows a dot), and four actions. Save fires
+`view-save` with the current view's `id`; Save as… asks for a name and fires `view-save` with `id: null`; Rename fires
+`view-rename`; Delete fires `view-delete`. A `locked` view can only be copied. Picking a view sets `value` and `view-id`
+and fires `view-select`, then `view-change`; Revert, beside "Modified", goes back to the current view's value. The default trigger reads the current view's name.
+
+```html tag=CodeBlock
+<c2-view-options view-id="mine" views='[{"id":"mine","name":"My open bugs","value":{"groupBy":"status"}}]'></c2-view-options>
+```
+
+The component stores nothing, as for `value`: save each change where the app keeps its settings, then hand back `views`
+(and `view-id` for a new view). The name field of Save as and Rename loads the first time one is used.

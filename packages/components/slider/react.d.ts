@@ -23,7 +23,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-slider': C2Props<Slider> & {
+      'c2-slider': Omit<C2Props<Slider>, 'markers'> & {
         'value-start'?: Attribute
         'value-end'?: Attribute
         'show-value'?: Attribute
@@ -31,6 +31,7 @@ declare module 'react' {
         'end-label'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
+        markers?: Slider['markers'] | string
       }
     }
   }

@@ -34,6 +34,9 @@ declare module 'react' {
         'search-placeholder'?: Attribute
         'item-height'?: Attribute
         'virtual-threshold'?: Attribute
+        'has-more'?: Attribute
+        'load-more-distance'?: Attribute
+        'load-more-error'?: Attribute
         'block-size'?: Attribute
         'empty-message'?: Attribute
         'no-results-message'?: Attribute

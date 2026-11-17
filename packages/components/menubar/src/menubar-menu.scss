@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-menubar-menu,
@@ -58,7 +59,7 @@ c2-menu {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 
-  &:hover:not([aria-disabled]) {
+  @include pointer.hover(':not([aria-disabled])') {
     background-color: css.cssVar(trigger__hover--background-color);
     color: css.cssVar(trigger__hover--color, trigger--color);
   }

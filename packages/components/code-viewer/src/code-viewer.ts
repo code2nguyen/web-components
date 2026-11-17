@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type ReactiveController, type ReactiveControllerHost } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -17,6 +17,78 @@ const LEGACY_LANG_ATTRIBUTE = 'langage'
 /** Events fired by {@link CodeViewer}, keyed for `addEventListener`. */
 export interface CodeViewerEventMap {
   'code-copy': CustomEvent<{ code: string }>
+}
+
+/** Custom state set while nothing on the page sets `color-scheme`, so `auto` falls back to the OS preference. */
+const SCHEME_FROM_OS = 'scheme-from-os'
+
+const schemeWatchers = new Set<PageSchemeController>()
+let schemeFrame = 0
+let schemeObserver: MutationObserver | undefined
+
+function onSchemeSourceLoad(event: Event) {
+  if (event.target instanceof HTMLLinkElement) scheduleSchemeCheck()
+}
+
+/** One check per frame for every connected viewer: the first `getComputedStyle` flushes style, the rest read it. */
+function scheduleSchemeCheck() {
+  if (schemeFrame) return
+  schemeFrame = requestAnimationFrame(() => {
+    schemeFrame = 0
+    for (const watcher of schemeWatchers) watcher.check()
+  })
+}
+
+/**
+ * Tells the stylesheet whether the page sets `color-scheme` at all. CSS cannot: an unset (`normal`) scheme and `light`
+ * resolve `light-dark()` the same way, but only the first should fall back to `prefers-color-scheme`. The switch between
+ * two set schemes (a theme toggle) needs no script, `light-dark()` follows it; what is watched here is the rare move from
+ * unset to set, through what a page uses to change it: attributes on `<html>` and `<body>`, and stylesheets added or loaded.
+ */
+class PageSchemeController implements ReactiveController {
+  constructor(
+    private readonly host: ReactiveControllerHost & HTMLElement,
+    private readonly internals: ElementInternals,
+    /** Whether the fallback can change anything: only a viewer with two palettes has one to pick. */
+    private readonly active: () => boolean,
+  ) {
+    host.addController(this)
+  }
+
+  hostConnected() {
+    if (isServer) return
+    schemeWatchers.add(this)
+    if (!schemeObserver) {
+      schemeObserver = new MutationObserver(scheduleSchemeCheck)
+      const attributes = { attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'data-color-scheme', 'data-mode'] }
+      schemeObserver.observe(document.documentElement, attributes)
+      if (document.body) schemeObserver.observe(document.body, attributes)
+      if (document.head) schemeObserver.observe(document.head, { childList: true })
+      document.addEventListener('load', onSchemeSourceLoad, true)
+    }
+    scheduleSchemeCheck()
+  }
+
+  hostDisconnected() {
+    schemeWatchers.delete(this)
+    if (schemeWatchers.size || !schemeObserver) return
+    schemeObserver.disconnect()
+    schemeObserver = undefined
+    document.removeEventListener('load', onSchemeSourceLoad, true)
+    cancelAnimationFrame(schemeFrame)
+    schemeFrame = 0
+  }
+
+  check() {
+    // The host never sets color-scheme itself, so its computed value is the one it inherits.
+    const unset = this.active() && getComputedStyle(this.host).colorScheme === 'normal'
+    try {
+      if (unset) this.internals.states.add(SCHEME_FROM_OS)
+      else this.internals.states.delete(SCHEME_FROM_OS)
+    } catch {
+      // Browsers that only accept `--`-prefixed states (before 2024) keep following the inherited scheme.
+    }
+  }
 }
 
 export interface CodeViewer {
@@ -129,7 +201,10 @@ export class CodeViewer extends LitElement {
   /** Second theme for dark mode. When set both palettes are rendered and `color-scheme` picks one. */
   @property({ attribute: 'dark-theme' }) darkTheme: ThemeName | undefined = undefined
 
-  /** Which palette to show when `dark-theme` is set: follow the OS (`auto`), or force one. */
+  /**
+   * Which palette to show when `dark-theme` is set, or force one. `auto` follows the `color-scheme` the element inherits
+   * (the page's theme switch, `@c2n/theme`'s dark mode), and the OS preference where nothing on the page sets one.
+   */
   @property({ reflect: true, attribute: 'color-scheme' }) colorScheme: 'auto' | 'light' | 'dark' = 'auto'
 
   /** Soft-wrap long lines instead of scrolling horizontally. */
@@ -157,8 +232,14 @@ export class CodeViewer extends LitElement {
   @state() private highlighted: HighlightResult | undefined = undefined
   @state() private copied = false
   private readonly slotPresence = new SlotPresenceController(this, ['title'])
+  private readonly internals = this.attachInternals()
 
   private copiedTimer: ReturnType<typeof setTimeout> | undefined
+
+  constructor() {
+    super()
+    new PageSchemeController(this, this.internals, () => !!this.darkTheme)
+  }
 
   /** Accepts the pre-1.0 `langage` attribute. */
   static override get observedAttributes() {
@@ -213,6 +294,7 @@ export class CodeViewer extends LitElement {
   })
 
   override willUpdate(changed: PropertyValues) {
+    if (!isServer && changed.has('darkTheme') && this.isConnected) scheduleSchemeCheck()
     // New text or language: show the plain version until the new highlight lands, rather than stale colours over new code.
     if (changed.has('code') || changed.has('slotCode') || changed.has('language') || changed.has('inline')) this.highlighted = undefined
   }

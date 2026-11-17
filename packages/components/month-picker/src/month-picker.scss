@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-month-picker,
   $theme: (
@@ -123,7 +124,7 @@ span.title {
     stroke-width: 1.5;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(navigation__hover--background);
   }
 
@@ -148,7 +149,7 @@ span.title {
   border-radius: css.cssVar(cell--border-radius);
   white-space: nowrap;
 
-  &:hover:not(:disabled):not(.cell--selected) {
+  @include pointer.hover(':not(:disabled):not(.cell--selected)') {
     background: css.cssVar(cell__hover--background);
   }
 

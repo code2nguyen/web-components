@@ -85,6 +85,76 @@ test('colours gains, losses and the unit through its variables', async ({ page, 
   await expect(page.locator('#gain [part="unit"]')).toHaveCSS('color', 'rgb(113, 113, 122)')
 })
 
+test('c2-delta draws an arrow, the sign and the good or bad colour of a change', async ({ page, scenario }) => {
+  await scenario('delta')
+  await expect(page.locator(number('rise'))).toHaveText('+12.4%')
+  await expect(page.locator(number('rise'))).toHaveClass(/\bgood\b/)
+  await expect(page.locator('#rise [part="arrow"]')).toHaveAttribute('aria-label', 'Increase, better')
+  await expect(page.locator('#rise [slot="comparison"]')).toBeVisible()
+  await expect(page.locator('#rise [slot="comparison"]')).toHaveCSS('margin-inline-start', /^[1-9]/)
+
+  await expect(page.locator(number('fall'))).toHaveClass(/\bbad\b/)
+  await expect(page.locator('#fall [part="arrow"]')).toHaveAttribute('aria-label', 'Decrease, worse')
+  await expect(page.locator(number('fall'))).toHaveText('-3.1%')
+
+  // 0.01% shows as "0%": flat, with no arrow.
+  await expect(page.locator(number('rounds-flat'))).toHaveText('0%')
+  await expect(page.locator(number('rounds-flat'))).toHaveClass(/\bflat\b/)
+  await expect(page.locator('#rounds-flat [part="arrow"]')).toHaveCount(0)
+})
+
+test('better="lower" makes a fall good and a rise bad', async ({ page, scenario }) => {
+  await scenario('delta')
+  await expect(page.locator(number('cost-up'))).toHaveClass(/\bbad\b/)
+  await expect(page.locator('#cost-up [part="arrow"]')).toHaveAttribute('aria-label', 'Increase, worse')
+  await expect(page.locator(number('cost-down'))).toHaveClass(/\bgood\b/)
+  await expect(page.locator('#cost-down [part="arrow"]')).toHaveAttribute('aria-label', 'Decrease, better')
+})
+
+test('c2-format-number draws no arrow, tone or comparison, and c2-delta takes its sign-display', async ({ page, scenario }) => {
+  await scenario('delta')
+  const plain = page.locator(number('plain'))
+  await expect(plain).toHaveText('-5')
+  await expect(plain).toHaveClass(/^\s*negative\s*$/)
+  await expect(page.locator('#plain [part="arrow"]')).toHaveCount(0)
+  await expect(page.locator('#plain [part="comparison"]')).toHaveCount(0)
+  await expect(page.locator(number('sign-auto'))).toHaveText('5')
+})
+
+test('the increase-icon slot replaces the arrow', async ({ page, scenario }) => {
+  await scenario('delta')
+  await expect(page.locator('#custom-icon [part="arrow"] svg')).toBeHidden()
+  await expect(page.locator('#custom-icon b')).toBeVisible()
+  await expect(page.locator('#custom-icon [part="arrow"]')).toHaveAttribute('aria-label', 'Increase, better')
+})
+
+test('colours a change and its comparison label through their variables', async ({ page, scenario }) => {
+  await scenario('delta-colour')
+  await expect(page.locator(number('good'))).toHaveCSS('color', 'rgb(0, 128, 0)')
+  await expect(page.locator('#good [part="arrow"] path')).toHaveCSS('fill', 'rgb(0, 128, 0)')
+  // The tone wins over the sign colour.
+  await expect(page.locator(number('bad'))).toHaveCSS('color', 'rgb(200, 0, 0)')
+  await expect(page.locator(number('flat'))).toHaveCSS('color', 'rgb(100, 100, 100)')
+  await expect(page.locator('#good [slot="comparison"]')).toHaveCSS('color', 'rgb(10, 20, 30)')
+})
+
+test('keeps the comparison beside the fallback while there is no number', async ({ page, scenario }) => {
+  await scenario('delta')
+  await expect(page.locator('#pending [part="number"]')).toHaveCount(0)
+  await expect(page.locator('#pending [slot="comparison"]')).toBeVisible()
+})
+
+test('names the arrow in the language of the page', async ({ page, scenario }) => {
+  await scenario('delta-fr')
+  await expect(page.locator('#subject [part="arrow"]')).toHaveAttribute('aria-label', 'Hausse, mieux')
+})
+
+test('has no axe violations with c2-delta', async ({ page, scenario }) => {
+  await scenario('delta')
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations).toEqual([])
+})
+
 test('has no axe violations', async ({ page, scenario }) => {
   await scenario('types')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()

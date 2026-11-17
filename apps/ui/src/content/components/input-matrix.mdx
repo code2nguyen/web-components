@@ -1,0 +1,73 @@
+---
+title: 'Input Matrix'
+description: 'Rows × columns of typed inputs in one form control, with row, column and grand totals: quantities by size and colour, hours by person and day, SLA targets by priority.'
+category: 'Inputs'
+package: '@c2n/choice-matrix'
+tag: 'c2-input-matrix'
+apiTags: ['c2-input-matrix']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { InputMatrix } from '@c2n/components/choice-matrix/input-matrix'
+
+`c2-input-matrix` is [`c2-choice-matrix`](/web-components/components/choice-matrix) with an input in every cell
+instead of a checkbox: quantities by size and colour, hours by person and day, response targets by priority and
+channel. Each column says what its cells take (a number, a duration, a date, a time, text or a choice), and `totals`
+adds each row's total, each column's total and the grand total. The keys travel like a sheet, and cells copied from a
+sheet paste in one go.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/choice-matrix/input-matrix'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/choice-matrix
+<div data-label="Quantities">
+  <c2-input-matrix name="qty" label="Quantities by size" row-header="Size" totals="both"
+    columns='[{"value":"black","label":"Black","min":0},{"value":"sand","label":"Sand","min":0},{"value":"olive","label":"Olive","min":0}]'
+    rows='[{"value":"s","label":"S"},{"value":"m","label":"M"},{"value":"l","label":"L"},{"value":"xl","label":"XL","disabled":true,"description":"Sold out"}]'
+    value='{"s":{"black":12,"sand":4},"m":{"black":20,"sand":8,"olive":6},"l":{"black":14,"olive":3}}'></c2-input-matrix>
+</div>
+<div data-label="SLA targets">
+  <c2-input-matrix name="sla" label="Response targets" row-header="Priority" cell-type="duration"
+    columns='[{"value":"first","label":"First reply"},{"value":"next","label":"Next reply"},{"value":"tier","label":"Owner","type":"select","options":["Tier 1","Tier 2","On call"]}]'
+    rows='[{"value":"urgent","label":"Urgent"},{"value":"high","label":"High"},{"value":"normal","label":"Normal"}]'
+    value='{"urgent":{"first":15,"next":60,"tier":"On call"},"high":{"first":60,"next":240,"tier":"Tier 2"},"normal":{"first":480,"tier":"Tier 1"}}'></c2-input-matrix>
+</div>
+```
+
+### Typed cells
+
+Each column's `type` is one of `number` (the default, or the matrix's `cell-type`), `duration`, `date`, `time`,
+`text` and `select` with its `options`. A number is read and written in the page's language (`1,5` in French) and a
+`min` or `max` makes the matrix invalid past it. A duration is stored in minutes and typed as `1:30`, `1h 30m` or `90`.
+Text that is not a value of its column stays as typed, marked invalid, until it is fixed.
+
+### Totals
+
+`totals="rows"` adds a column with each row's total, `totals="columns"` a row with each column's total, and `both`
+adds the grand total where they meet. Only `number` and `duration` columns are summed; a total of durations reads as
+one.
+
+### Keyboard and paste
+
+Enter moves down a column (Shift+Enter up), the up and down arrows move between rows in a text cell, and left and right
+move to the next column once the caret is at the edge. Disabled cells are skipped. Pasting a block copied from a sheet
+fills the cells from the one pasted into: values that are not right for their column are left out, and the matrix
+fires one `change`.
+
+### In a form
+
+`value` maps each row to its cells by column (`{"s":{"black":12}}`); an empty cell has no key. Under a `name` the form
+receives `name[row][column]=value` for each value. `required` asks for at least one value, and the matrix takes part in
+[`c2-form-field`](/web-components/components/form-field), which names and describes it.
+
+```typescript tag=CodeBlock
+const matrix = document.querySelector('c2-input-matrix')!
+matrix.addEventListener('change', (event) => save(event.detail.value))
+```

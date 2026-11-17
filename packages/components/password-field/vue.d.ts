@@ -25,6 +25,7 @@ declare module 'vue' {
         maxlength?: unknown
         'hide-toggle'?: unknown
         'strength-labels'?: unknown
+        'generator-options'?: unknown
         'error-text'?: unknown
         'toggle-label'?: unknown
         'caps-lock-text'?: unknown

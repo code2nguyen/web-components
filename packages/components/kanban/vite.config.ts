@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/kanban.ts', 'src/kanban-column.ts'],
+      entry: ['src/kanban.ts', 'src/kanban-column.ts', 'src/matrix-board.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/kanban.ts', 'src/kanban-column.ts'],
+      files: ['src/kanban.ts', 'src/kanban-column.ts', 'src/matrix-board.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
@@ -50,6 +51,11 @@
     highlight--font-weight: 600,
     status--color: #71717a,
     status--padding: 14px 12px,
+    picks--gap: 4px,
+    pick--height: 24px,
+    pick--font-size: 12px,
+    input--min-width: 80px,
+    create--color: rgb(2, 101, 220),
   )
 );
 
@@ -77,7 +83,7 @@
   transition: animation.standard(border), animation.standard(outline);
   cursor: text;
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 
@@ -230,4 +236,27 @@ mark {
   padding: css.cssVar(status--padding);
   color: css.cssVar(status--color);
   text-align: center;
+}
+
+// `multiple`: the picks and the input share the field and wrap onto further lines.
+.field.multiple {
+  flex-wrap: wrap;
+  gap: css.cssVar(picks--gap);
+
+  .input {
+    min-width: css.cssVar(input--min-width);
+  }
+}
+
+.pick {
+  flex: none;
+  max-width: 100%;
+
+  --c2-chip__container--height: #{css.cssVar(pick--height)};
+  --c2-chip__container--font-size: #{css.cssVar(pick--font-size)};
+}
+
+.create {
+  --c2-list-item--color: #{css.cssVar(create--color)};
+  --c2-list-item__selected--color: #{css.cssVar(create--color)};
 }

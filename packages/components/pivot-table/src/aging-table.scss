@@ -1,0 +1,26 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-aging-table,
+  $theme: (
+    as-of--color: #71717a,
+    as-of--font-size: 12px,
+    as-of--margin: 0 0 8px,
+    overdue--color: inherit,
+    oldest--color: #b91c1c,
+    oldest--font-weight: inherit,
+  )
+);
+
+.as-of {
+  margin: css.cssVar(as-of--margin);
+  color: css.cssVar(as-of--color);
+  font-size: css.cssVar(as-of--font-size);
+}
+
+td.overdue:not(.hot, .negative, .positive) {
+  color: css.cssVar(overdue--color);
+}
+
+td.oldest:not(.hot, .negative, .positive) {
+  color: css.cssVar(oldest--color);
+  font-weight: css.cssVar(oldest--font-weight);
+}

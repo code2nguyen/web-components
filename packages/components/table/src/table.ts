@@ -1,14 +1,15 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { guard } from 'lit/directives/guard.js'
+import { live } from 'lit/directives/live.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
-import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { VirtualScrollController, type VirtualScrollRange } from '@c2n/core/controllers/virtual-scroll.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -20,39 +21,56 @@ import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type P
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
 import {
   getFieldValue,
-  groupByConverter,
   sortModelConverter,
-  type ColumnPin,
   type SortDirection,
   type SortModel,
+  type TableCellChangeEventDetail,
+  type TableCellContext,
+  type TableCellError,
   type TableCellEventDetail,
-  type TableChildrenErrorEventDetail,
-  type TableChildrenLoader,
+  type TableCellOption,
+  type TableChanges,
+  type TableCellFlag,
+  type TableCellPartResolver,
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
+  type TableFilterChangeEventDetail,
+  type TableFilters,
   type TableDataSource,
   type TableDetailRenderer,
   type TableDetailToggleEventDetail,
-  type TableGroupBy,
-  type TableGroupContext,
-  type TableGroupDisplay,
-  type TableGroupRenderer,
-  type TableGroupToggleEventDetail,
   type TableRangeChangeEventDetail,
   type TableRenderedRow,
   type TableRow,
   type TableRowEventDetail,
   type TableRowPartResolver,
+  type TableRowRule,
+  type TableRowsChangeEventDetail,
   type TableRowStyler,
-  type TableRowToggleEventDetail,
   type TableSelectionChangeEventDetail,
+  type TableSelectionScope,
   type TableSortChangeEventDetail,
-  type TableSummaryAggregate,
 } from './table-types.js'
 
+import {
+  aggregate,
+  CHEVRON,
+  columnKey,
+  filterText,
+  rowKeyListConverter,
+  rowKeysConverter,
+  SELECTION_FIELD,
+  toNumber,
+  type PinPlacement,
+  type TableRowLevel,
+} from './table-shared.js'
 import '@c2n/checkbox'
 import '@c2n/spinner'
 import type { Checkbox } from '@c2n/checkbox'
+import type { EditTrigger, TableEditing } from './table-editing.js'
+import type { RowsAnimation } from './table-animation.js'
+import type { TableFilter } from './table-filter.js'
+import type { TableBulk } from './table-bulk.js'
 
 // Framework-free: `useRenderedRows` in `@c2n/components/react` and `@c2n/components/vue` is built on it, and any other framework
 // (Svelte, Solid, Angular, plain DOM) subscribes with it directly. It imports nothing at runtime.
@@ -61,113 +79,24 @@ export { subscribeRenderedRows, type RenderedRowsListener } from './rendered-row
 export type TableSelectionMode = 'none' | 'single' | 'multiple'
 export type TableVirtualMode = 'auto' | 'always' | 'never'
 
-/** Field of the synthetic checkbox column, so it can live in the same render pipeline as the real columns. */
-const SELECTION_FIELD = '__c2-selection'
 /** Floor of a flexible track and of a column being resized, unless the column sets `minWidth`. */
 const DEFAULT_MIN_WIDTH = 64
 /** A plain flexible track such as `1fr` or `2.5fr`. */
 const FLEX_TRACK = /^\s*\d*\.?\d+fr\s*$/
-
-interface PinPlacement {
-  side: ColumnPin
-  offset: number
-  edge: boolean
-}
-
-type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modified'
 
 const HEADER_ROW = -1
 /** Row index of the summary row in `focusedCell`; body rows are numbered from 0 and the header is `HEADER_ROW`. */
 const SUMMARY_ROW = -2
 /** No detail panel is open: the one value `#detailLines` returns for it, so the windowing takes its short path. */
 const NO_LINES: number[] = []
+/** No rows: one array, so a cache keyed on the rows keeps hitting while there are none. */
+const NO_ROWS: TableRow[] = []
 /** Whether the browser can keep a closed panel findable (`hidden="until-found"`), which it tells by firing `beforematch`. */
 const FINDABLE = typeof HTMLElement !== 'undefined' && 'onbeforematch' in HTMLElement.prototype
 
 export type TableSummaryScope = 'all' | 'page'
 
-interface SummaryCell {
-  column: TableColumnConfig
-  index: number
-  span: number
-}
-
-/** One group of the row tree, built from the sorted rows whenever they or `groupBy` change. */
-interface GroupNode {
-  key: string
-  level: number
-  field: string
-  value: unknown
-  /** Indices of the group's rows, sub-groups included, in the array the tree was built from. */
-  rowIndices: number[]
-  children: GroupNode[]
-  parent?: GroupNode
-  /** Where the group's own row sits in the display list; -1 while a closed parent hides it. */
-  position: number
-  /** The rows, their keys and the aggregates, computed on first use: the tree is rebuilt whenever the rows change. */
-  rows?: TableRow[]
-  keys?: string[]
-  selection?: { value: string[]; count: number }
-  summary?: { inputs: unknown[]; values: Map<string, unknown> }
-}
-
-/** One line of a grouped body: a group row, or a data row pointing into the array the tree was built from. */
-type DisplayItem = { kind: 'group'; node: GroupNode } | { kind: 'row'; rowIndex: number; parent: GroupNode }
-
-interface Grouping {
-  levels: TableGroupBy[]
-  /** The rows the tree indexes into: the sorted rows, or the transition rows while an update animates. */
-  source: TableRow[]
-  roots: GroupNode[]
-  nodes: Map<string, GroupNode>
-  items: DisplayItem[]
-}
-
-/** One row of a tree (`children-field`). */
-interface TreeNode {
-  row: TableRow
-  /** Position in the flattened rows (`#sortedRows`): every row of the tree, depth first, sorted among its siblings. */
-  index: number
-  key: string
-  level: number
-  parent?: TreeNode
-  /** The child rows, sorted; undefined for a leaf and for a parent `loadChildren` has not answered yet. */
-  children?: TreeNode[]
-  /** The children field holds `true`: the children come from `loadChildren`. */
-  lazy: boolean
-  /** The leaf rows under the row, the inputs of its `rollup` columns. */
-  leaves: TableRow[]
-  rollup?: Map<string, unknown>
-}
-
-interface TreeRows {
-  roots: TreeNode[]
-  /** Indexed like the flattened rows. */
-  nodes: TreeNode[]
-  byKey: Map<string, TreeNode>
-}
-
-/** Group keys are `field=value` pairs joined by `/`, so those characters (and `;`, the list separator) are escaped. */
-function encodeGroupPart(value: string): string {
-  return value.replace(/[%/=;]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
-}
-
-/** Groups rows by the string form of their value: `1` and `"1"` share a group, and an empty value is its own. */
-function groupBucketId(value: unknown): string {
-  if (value === null || value === undefined || value === '') return ''
-  if (value instanceof Date) return value.toISOString()
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
-
-/** Keys of the expanded groups: a `;`-separated list in the attribute, since a key holds `/` and `=`. */
-const groupKeysConverter = {
-  ...arrayPropertyConverter,
-  fromAttribute: (value: string | null) => (value === null ? undefined : arrayPropertyConverter.fromAttribute(value)),
-  toAttribute: (value: string[] | undefined) => (Array.isArray(value) ? arrayPropertyConverter.toAttribute(value) : null),
-}
-
-const CHEVRON = html`<svg
+const FUNNEL = html`<svg
   viewBox="0 0 24 24"
   fill="none"
   stroke="currentColor"
@@ -176,62 +105,35 @@ const CHEVRON = html`<svg
   stroke-linejoin="round"
   aria-hidden="true"
 >
-  <path d="M6 9l6 6 6-6" />
+  <path d="M3 5h18l-7 8.5V19l-4 2v-7.5z" />
 </svg>`
 
-/** A column's identity: its `id` (the `column-id` attribute on an element, never the HTML `id`), otherwise its field. */
-function columnKey(column: TableColumnConfig): string {
-  return (column instanceof TableColumn ? column.columnId : column.id) || column.field
+/**
+ * The attributes of the variants, with the property that marks an element owning them and the variant that does. An
+ * element given one it does not own (`children-field` on `c2-group-table`) says where it went, once per attribute.
+ */
+const VARIANT_ATTRIBUTES: [attribute: string, property: string, variant: string][] = [
+  ['group-by', 'groupBy', 'group-table'],
+  ['expanded-groups', 'expandedGroups', 'group-table'],
+  ['children-field', 'childrenField', 'tree-table'],
+  ['expanded-rows', 'expandedRows', 'tree-table'],
+  ['tree-expanded', 'treeExpanded', 'tree-table'],
+]
+const warnedVariants = new Set<string>()
+
+interface SummaryCell {
+  column: TableColumnConfig
+  index: number
+  span: number
 }
 
 /**
- * `value` holds row keys, and a row key is always a string. `arrayPropertyConverter` only splits strings, so an array
- * of numeric ids assigned from script (`table.value = [1, 2]`) used to be stored as numbers and match no row.
+ * The legend entry of `value` in a column's `options`. Compared as text, as `count-value` does: JSON in an attribute
+ * makes `"4"` and `4` easy to mix between the rows and the legend.
  */
-const rowKeysConverter = {
-  ...arrayPropertyConverter,
-  fromProperty: (value: unknown) => {
-    const parsed = arrayPropertyConverter.fromProperty(value)
-    return Array.isArray(parsed) ? parsed.filter((key) => key !== null && key !== undefined).map(String) : parsed
-  },
-}
-
-/** Keys of the open tree rows: unset until written, like `expanded-groups`, and stored as strings, like `value`. */
-const rowKeysOrUnsetConverter = { ...groupKeysConverter, fromProperty: rowKeysConverter.fromProperty }
-
-function toNumber(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value === 'string' && value.trim() !== '') return Number(value)
-  return Number.NaN
-}
-
-/** Reduces a column's values to one of the built-in aggregates; non-numeric values are skipped by all but `count`. */
-function aggregate(kind: TableSummaryAggregate, values: unknown[]): unknown {
-  if (kind === 'count') return values.filter((value) => value !== null && value !== undefined && value !== '').length
-  let sum = 0
-  let count = 0
-  let min = Number.POSITIVE_INFINITY
-  let max = Number.NEGATIVE_INFINITY
-  for (const value of values) {
-    const number = toNumber(value)
-    if (!Number.isFinite(number)) continue
-    sum += number
-    count++
-    if (number < min) min = number
-    if (number > max) max = number
-  }
-  switch (kind) {
-    case 'sum':
-      return sum
-    case 'avg':
-      return count ? sum / count : undefined
-    case 'min':
-      return count ? min : undefined
-    case 'max':
-      return count ? max : undefined
-    default:
-      return undefined
-  }
+function optionOf(column: TableColumnConfig, value: unknown): TableCellOption | undefined {
+  const text = String(value)
+  return column.options?.find((entry) => String(typeof entry === 'object' ? entry.value : entry) === text)
 }
 
 export interface TablePageChangeEventDetail {
@@ -254,55 +156,31 @@ function numberFormatOptions(base: Intl.NumberFormatOptions, extra: Record<strin
   return Object.assign({}, base, extra ?? {})
 }
 
+/**
+ * The column's default style for `format`, and the same written as parts. `Intl` refuses `dateStyle` or `timeStyle`
+ * next to any part, so `format-options` naming one get the parts instead: a date part (`year`, `month`, `day`)
+ * replaces the date's, a time part the time's, and `weekday`, `era` or `timeZoneName` add to them.
+ */
+const DATE_PARTS = { year: 'numeric', month: 'short', day: 'numeric' } as const
+const TIME_PARTS = { hour: 'numeric', minute: '2-digit' } as const
+
 function dateFormatOptions(base: Intl.DateTimeFormatOptions, extra: Record<string, unknown> | undefined): Intl.DateTimeFormatOptions {
-  return Object.assign({}, base, extra ?? {})
+  const keys = Object.keys(extra ?? {})
+  const has = (parts: string[]) => keys.some((key) => parts.includes(key))
+  if (!has(['weekday', 'era', 'year', 'month', 'day', 'dayPeriod', 'hour', 'minute', 'second', 'fractionalSecondDigits', 'timeZoneName']))
+    return Object.assign({}, base, extra ?? {})
+  return Object.assign(
+    {},
+    base.dateStyle && !has(['year', 'month', 'day']) ? DATE_PARTS : {},
+    base.timeStyle && !has(['hour', 'minute', 'second', 'dayPeriod', 'fractionalSecondDigits']) ? TIME_PARTS : {},
+    extra,
+  )
 }
 
 function humanize(field: string): string {
   const last = field.split('.').pop() ?? field
   const spaced = last.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
-  const prototype = Object.getPrototypeOf(value)
-  return prototype === Object.prototype || prototype === null
-}
-
-/**
- * Builds the transient value shown during a row update. Target shape and non-numeric values win immediately; finite
- * numbers are the only values with a meaningful generic interpolation, including numbers nested in arrays/objects.
- */
-function interpolateValue(from: unknown, to: unknown, progress: number): unknown {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to)) return from + (to - from) * progress
-  if (Array.isArray(from) && Array.isArray(to)) return to.map((value, index) => interpolateValue(from[index], value, progress))
-  if (isRecord(from) && isRecord(to)) return Object.fromEntries(Object.entries(to).map(([key, value]) => [key, interpolateValue(from[key], value, progress)]))
-  return to
-}
-
-function hasNumericChange(from: unknown, to: unknown): boolean {
-  if (typeof from === 'number' && typeof to === 'number') return Number.isFinite(from) && Number.isFinite(to) && from !== to
-  if (Array.isArray(from) && Array.isArray(to)) return to.some((value, index) => hasNumericChange(from[index], value))
-  if (isRecord(from) && isRecord(to)) return Object.entries(to).some(([key, value]) => hasNumericChange(from[key], value))
-  return false
-}
-
-function firstNumericDelta(from: unknown, to: unknown): number | undefined {
-  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to) && from !== to) return to - from
-  if (Array.isArray(from) && Array.isArray(to)) {
-    for (let index = 0; index < to.length; index++) {
-      const delta = firstNumericDelta(from[index], to[index])
-      if (delta !== undefined) return delta
-    }
-  }
-  if (isRecord(from) && isRecord(to)) {
-    for (const [key, value] of Object.entries(to)) {
-      const delta = firstNumericDelta(from[key], value)
-      if (delta !== undefined) return delta
-    }
-  }
-  return undefined
 }
 
 /** Events fired by {@link Table}, keyed for `addEventListener`. */
@@ -314,11 +192,11 @@ export interface TableEventMap {
   'cell-click': CustomEvent<TableCellEventDetail>
   'column-resize': CustomEvent<TableColumnResizeEventDetail>
   'page-change': CustomEvent<TablePageChangeEventDetail>
-  'group-toggle': CustomEvent<TableGroupToggleEventDetail>
   'range-change': CustomEvent<TableRangeChangeEventDetail>
-  'row-toggle': CustomEvent<TableRowToggleEventDetail>
-  'children-error': CustomEvent<TableChildrenErrorEventDetail>
   'detail-toggle': CustomEvent<TableDetailToggleEventDetail>
+  'cell-change': CustomEvent<TableCellChangeEventDetail>
+  'filter-change': CustomEvent<TableFilterChangeEventDetail>
+  'rows-change': CustomEvent<TableRowsChangeEventDetail>
 }
 
 export interface Table {
@@ -351,7 +229,7 @@ export interface Table {
  * shape from outside: `::part(cell-content-status) { border-radius: 999px; background: #f4f4f5 }`. Rows are
  * `::part(row)` and `::part(row-selected)`.
  *
- * **Styling renderer output.** What `renderCell` (or `renderGroup`) returns is placed in the table's own shadow root,
+ * **Styling renderer output.** What `renderCell` returns is placed in the table's own shadow root,
  * so a page stylesheet cannot select it — but a `part` it carries is exposed as-is: return
  * `` html`<span part="badge badge-${row.status}">…</span>` `` (or a node with that attribute) and style it with
  * `c2-table::part(badge)`. A part cannot be combined with an attribute or class selector, so encode the variant in the
@@ -378,12 +256,17 @@ export interface Table {
  * added rows expand in and deleted rows collapse out. Nested numbers in arrays and objects animate too, so a custom
  * `renderCell` such as a sparkline receives the same transient row as the formatted cells around it. Add
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
- * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
+ * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected. The
+ * code loads once `animate-updates` is set; a snapshot assigned before it arrives waits for it, so it animates too.
  *
  * **Row keys.** Selection, `value` and events name a row by its key: the `row-key` field of the row (or
  * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
  * points at another row after a sort, so set one on any selectable table. `keyOf(row)`, `isSelected(row)`,
  * `selectRows(rows)` and `deselectRows(rows)` work from the rows themselves when the key rule is beside the point.
+ * The header checkbox selects the rows on show (the page, while paginated); `bulk-select` adds a caret beside it with
+ * a menu of this page, all N rows and none, loaded on first use. `selectPage()` and `selectAll()` do the same from
+ * script, and `selectionScope` (with `detail.scope`) says which the user chose: with a `dataSource`, `all` means every
+ * row the source holds, though `value` only has the loaded keys.
  *
  * **Summary row.** Give a column `summary="sum"` (or `avg`, `min`, `max`, `count`, or a function of the rows) and the
  * table adds a totals row below the body. It is a row of the same grid, so every value sits under its own column
@@ -401,49 +284,50 @@ export interface Table {
  * </c2-table>
  * ```
  *
- * **Grouping.** `group-by="region,status"` gathers the rows into collapsible groups, outermost level first; the grid
- * becomes a `treegrid`. With the default `group-display="row"` each group is a row of the grid: its label and row
- * count in the first column (or the one marked `group-column`), and under every column with a `summary` that
- * aggregate over the group's rows, formatted like the column. `group-display="band"` draws one full-width band per
- * group instead. A group is named by its path, `region=EMEA/status=Paid`: `expanded-groups` lists the open ones
- * (every group is open until then, or closed with `groups-collapsed`), `group-toggle` reports a click, and a group's
- * checkbox selects its rows. The groups of the rows at the top stay under the header while their rows scroll, and
- * a page that starts inside a group repeats its headers; pages count display lines, so a closed group takes one.
- * Grouping is done on the client and does not apply to a `dataSource`.
- *
- * ```html
- * <c2-table row-key="id" group-by="region" selection="multiple" checkbox-selection>
- *   <c2-table-column field="customer" header="Customer"></c2-table-column>
- *   <c2-table-column field="region" hidden></c2-table-column>
- *   <c2-table-column field="amount" format="currency" align="end" summary="sum"></c2-table-column>
- * </c2-table>
- * ```
- *
  * **Row detail.** `detail-height="240"` gives every row a chevron in the first column that opens a panel of that
  * height under the row (master/detail). The panel is filled by `renderDetail` (`{ row, rowIndex, key }`), which runs
  * when the row opens, or, without it, from a child in the row's slot (`slot="detail:{key}"`), which find-in-page
  * reaches while the row is closed and opens. Keys pressed inside a panel belong to its content. Rows open with a click on the chevron,
  * Alt+↓ and Alt+↑ on the row, `expandDetail()` or `expanded-details` (the keys of the open rows), and `detail-toggle`
  * reports a click or a key. The height is declared so the table keeps windowing its rows: an open panel adds a known
- * offset. Give the rows a `row-key`. It is ignored while the rows are grouped or a tree.
+ * offset. Give the rows a `row-key`. `c2-group-table` ignores it while its rows are grouped, `c2-tree-table` while they are a tree.
  *
- * **Tree.** `children-field="children"` reads each row's child rows from that field, nested to any depth, and the grid
- * becomes a `treegrid`: every row is a row of the grid, and the first column (or the one marked `group-column`) gets
- * a chevron and an indentation per level. Rows open with a click on the chevron, ←/→ on that column, `expandRow()` or
- * `expanded-rows` (the keys of the open rows; all closed until then, or open with `tree-expanded`), and `row-toggle`
- * reports a click. Sorting orders each level among its siblings. A column with `rollup="sum"` (or `avg`, `min`, `max`,
- * `count`, or a function) shows in a parent row the aggregate of the leaf rows under it, and the summary row counts
- * leaves only. With `selection="multiple"` a row is selected with the rows under it, and a parent is selected when
- * all its children are; its checkbox shows the mixed state in between. A row whose field holds `true` loads its
- * children from `loadChildren` when it first opens. Give the rows a `row-key`. The tree is built on the client and
- * does not apply to a `dataSource`.
+ * **Editing.** `editable` lets the user change the cells of every column with an `editor` (`text`, `number`, `date`,
+ * `url`, `select` with its `options`, or `checkbox`), or a `renderEditor` of its own. Enter, F2, a double click or
+ * typing opens one editor over the cell (never one input per cell, so a long table scrolls as fast as before); Enter
+ * commits and moves down, Tab across, Escape cancels, Delete clears. A block copied from a spreadsheet pastes from the
+ * focused cell, adding rows past the last. Each change fires the cancelable `cell-change`, goes through `rowRule`, and
+ * replaces the row with a copy and `rows` with a new array (`rows-change`): the application's objects are never
+ * mutated. Changed cells are marked (`cell-dirty`), invalid ones too (`required`, the editor's type, the column's
+ * `validate`; `cell-invalid`), and `getChanges()`, `acceptChanges()`, `revertChanges()`, `validate()`, `addRow()`,
+ * `duplicateRow()` and `deleteRows()` are what a toolbar's buttons call. `isCellEditable` locks cells by row. The
+ * editing code loads on the first edit. Not applied to a `dataSource`.
  *
  * ```html
- * <c2-table row-key="id" children-field="children" tree-expanded>
- *   <c2-table-column field="name" header="Account"></c2-table-column>
- *   <c2-table-column field="amount" format="currency" align="end" rollup="sum"></c2-table-column>
+ * <c2-table row-key="id" editable>
+ *   <c2-table-column field="item" editor="text" required></c2-table-column>
+ *   <c2-table-column field="qty" editor="number" align="end" summary="sum"></c2-table-column>
+ *   <c2-table-column field="status" editor="select" options='["Open","Done"]'></c2-table-column>
  * </c2-table>
  * ```
+ *
+ * **Filters and comparisons.** `filterable` (on the table or a column) puts a filter in a column's header: a click,
+ * or Alt+↓ on the header, opens the column's values with their counts, a search, the sort buttons and Clear, loaded
+ * on first use. The choice lands in `filters` (`{ "status": { "include": ["Paid"] } }`, settable from markup too) and
+ * `filter-change`; a `dataSource` receives it in `getRows`. `baseline` takes the rows to compare with, such as the last
+ * payroll run: a column with `compare="delta"` (or `percent`) shows each cell's change, the previous value as its
+ * tooltip, and `variance-threshold="0.1"` marks a cell that moved by more than 10% (`cell-variance`).
+ *
+ * **Range flags.** `reference-range="low,high"` on a column flags a value outside its row's normal range with `L` or
+ * `H`, and `critical-range` with `LL` or `HH`, as a lab report does: each limit is a number or the row field holding
+ * it. `c2-flowsheet` (`@c2n/table/flowsheet.js`) builds on them: a measure per row and a column per reading time.
+ *
+ * **Statuses and ledgers.** `format="status"` draws each value as a mark and a label from the column's `options`
+ * (`{ "value": "fail", "label": "Failed", "color": "#dc2626", "glyph": "✕" }`), so a grid of controls or skills
+ * reads as a status matrix; `summary="tally"` counts each status under its column, and a column with `count-value`
+ * counts the statuses of a row that hold that value. `running="credit,-debit"` makes a running total, such as an
+ * account balance, from `opening` and the fields named, over the rows in their sorted order, and `summary="last"`
+ * puts the closing balance in the summary row. Both are computed once when the rows change, not while scrolling.
  *
  * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
  * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
@@ -460,24 +344,23 @@ export interface Table {
  * @slot error - Replaces the built-in message shown when `error` is set.
  * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
  * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
- * @slot group:{groupKey} - Label of one group, e.g. `slot="group:region=EMEA"`, in place of its formatted value and row count. The copy of the group kept under the header while its rows scroll shows the built-in label.
  * @slot detail:{key} - Detail panel of one row (`detail-height`), e.g. `slot="detail:ORD-7"`, shown while that row is open and `renderDetail` is unset.
  * @slot cell:{line}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:0:change"` for the first displayed row. `line` is the cell's display line, counted across the whole dataset after sort, filter and grouping with the page offset included — the numbering of `range-change`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback. Children are needed only for the lines `range-change` reports (map `detail.rows`, or `renderedRange.rows`, each `{ line, key, row }`); a child whose line is outside the rendered window is left unassigned. After a sort, filter or page change the same line holds a different row, so re-render the children from the next `range-change`.
  *
  * @slotcomponent c2-table-column
  * @slotcomponent c2-pagination
  *
- * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
+ * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows, `detail.scope` how they were chosen (`rows`, `page`, `all`). Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<TableSortChangeEventDetail>} sort-change - Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order.
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<TableRowEventDetail>} row-activate - Fired when the user opens a row: a pointer click on it, or Enter on one of its focused cells — so one listener serves a table used for navigation from the mouse and the keyboard alike. Not fired by a click or Enter that belongs to a control inside a cell (a button, link or input), and fired before the selection is applied. Does not bubble: a table nested in another table's cell would otherwise open the outer row too, so the listener belongs on the element itself.
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
- * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
- * @event {CustomEvent<TableRowToggleEventDetail>} row-toggle - Fired after the user opens or closes a row of a tree, with its `key`, the `row` and whether it is now `expanded`. `expandedRows` already holds the new state. Does not bubble.
  * @event {CustomEvent<TableDetailToggleEventDetail>} detail-toggle - Fired after the user opens or closes a row's detail panel (`detail-height`), with its `key`, the `row` and whether it is now open. Does not bubble.
- * @event {CustomEvent<TableChildrenErrorEventDetail>} children-error - Fired when `loadChildren` rejects, with the row's `key`, the `row` and the `error`. The row has closed again. Does not bubble.
+ * @event {CustomEvent<TableCellChangeEventDetail>} cell-change - Fired when the user commits a new value to a cell of an `editable` table (typed, toggled, cleared or pasted), before the table stores it: `detail.row` is the row as it was, with `key`, `column`, `field`, `value` and `previousValue`. Cancelable: `preventDefault()` keeps the old value. Does not bubble.
+ * @event {CustomEvent<TableFilterChangeEventDetail>} filter-change - Fired after the user changes a column's filter. `detail.filters` is every column's filter, as `filters` now holds them, and `detail.column` the id of the column that changed.
+ * @event {CustomEvent<TableRowsChangeEventDetail>} rows-change - Fired after the table replaced `rows` itself: a cell edited or pasted, a row added, duplicated or deleted, changes reverted. `detail.rows` is the new array and `detail.reason` says why. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -490,7 +373,7 @@ export interface Table {
  * @csspart selection-header-cell - The header cell containing the select-all checkbox.
  * @csspart resizer - The pointer target used to resize a column.
  * @csspart sort-icon - The sort-direction indicator in a sortable header.
- * @csspart cell - Every body grid cell.
+ * @csspart cell - Every body grid cell. Also carries the names `cellPart` returns for it, such as `cell-failing`.
  * @csspart selection-cell - A body cell containing a row-selection checkbox.
  * @csspart skeleton - Placeholder displayed while a remote row is loading.
  * @csspart cell-content - The content wrapper inside a body cell.
@@ -498,15 +381,25 @@ export interface Table {
  * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
  * @csspart summary-row - The totals row kept at the bottom of the grid.
  * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
+ * @csspart summary-cell-off-target - A summary cell whose value misses its column's `summary-target`; exposed in addition to `summary-cell`.
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
- * @csspart group-row - Every group row. Also `group-row-level-<n>` (0 for the outermost level), `group-band` with `group-display="band"`, and `group-row-echo` on a copy kept under the header.
- * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
- * @csspart group-toggle - The chevron of a group row.
- * @csspart row-toggle - The chevron of a tree row (`children-field`), in the tree column; kept as an empty space on a leaf so labels line up. Turns into a spinner while `loadChildren` runs.
  * @csspart detail-toggle - The chevron button that opens a row's detail panel (`detail-height`).
  * @csspart detail - The detail panel under an open row. It wraps the row's `detail:{key}` slot: assigned content fills the panel, and a `renderDetail` function draws it in place of the slot.
- * @csspart group-label - The group's value, or what `renderGroup` returned.
- * @csspart group-count - The number of rows in the group.
+ * @csspart bulk-select-button - The caret beside the header checkbox (`bulk-select`) that opens the selection menu.
+ * @csspart bulk-menu - The `c2-menu` of select this page, select all and clear.
+ * @csspart filter-button - The filter button of a `filterable` column's header. Also `filter-button-active` while the column is filtered.
+ * @csspart filter - The popover of a column's filter: its values with their counts, the sort buttons and Clear.
+ * @csspart delta - A cell's change from the `baseline` (`compare`). Also `delta-up`, `delta-down` or `delta-flat`.
+ * @csspart flag - The mark of a value outside its row's range. Also `flag-low`, `flag-high`, `flag-critical-low` or `flag-critical-high`.
+ * @csspart cell-flag - A body cell with a flag; exposed in addition to `cell`, with `cell-flag-low`, `cell-flag-high`, `cell-flag-critical-low` or `cell-flag-critical-high`.
+ * @csspart cell-variance - A body cell whose change from the `baseline` passes its column's `variance-threshold`; exposed in addition to `cell`.
+ * @csspart status - A value of a `status` column: its mark and label. Also `status-<value>`, so one value can be styled.
+ * @csspart status-mark - The dot, or the square holding the `glyph`, of a status.
+ * @csspart status-label - The label of a status.
+ * @csspart cell-dirty - A body cell whose value was edited since the rows were given or `acceptChanges()` ran; exposed in addition to `cell`.
+ * @csspart cell-invalid - A body cell whose value failed its check (`required`, the editor's type, `validate`); exposed in addition to `cell`.
+ * @csspart row-new - A body row added by `addRow`, `duplicateRow` or a paste, until `acceptChanges()`; exposed in addition to `row`.
+ * @csspart editor - The box holding the editor of the cell being edited.
  *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
@@ -573,6 +466,56 @@ export interface Table {
  * @cssproperty {outline} [--c2-table__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-table__cell__focus--outline-offset=-2px]
  *
+ * @cssproperty {color} [--c2-table__cell__dirty--color=rgb(2, 101, 220)] - The corner mark of an edited cell.
+ * @cssproperty {pixel} [--c2-table__cell__dirty--size=6px]
+ * @cssproperty {color} [--c2-table__cell__invalid--background=rgba(220, 38, 38, 0.06)]
+ * @cssproperty {box-shadow} [--c2-table__cell__invalid--box-shadow=inset 0 0 0 1px rgb(211, 21, 16)]
+ * @cssproperty {color} [--c2-table__editor--background=#ffffff]
+ * @cssproperty {color} [--c2-table__editor--color=#18181b]
+ * @cssproperty {font-size} [--c2-table__editor--font-size=14px]
+ * @cssproperty {padding} [--c2-table__editor--padding=0 11px]
+ * @cssproperty {box-shadow} [--c2-table__editor--box-shadow=inset 0 0 0 2px rgb(2, 101, 220)] - The ring of the cell being edited.
+ *
+ * @cssproperty {pixel} [--c2-table__filter-button--size=22px] - The filter button of a `filterable` column's header.
+ * @cssproperty {color} [--c2-table__filter-button--color=#a1a1aa]
+ * @cssproperty {border-radius} [--c2-table__filter-button--border-radius=4px]
+ * @cssproperty {color} [--c2-table__filter-button__hover--background=#e4e4e7]
+ * @cssproperty {color} [--c2-table__filter-button__active--color=rgb(2, 101, 220)] - The button of a column that is filtered.
+ * @cssproperty {color} [--c2-table__filter-panel--background=#ffffff] - The popover a filter button opens.
+ * @cssproperty {color} [--c2-table__filter-panel--color=#18181b]
+ * @cssproperty {border} [--c2-table__filter-panel--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-table__filter-panel--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-table__filter-panel--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-table__filter-panel--padding=8px]
+ * @cssproperty {font-size} [--c2-table__delta--font-size=12px] - A cell's change from the `baseline` (`compare`).
+ * @cssproperty {color} [--c2-table__delta--color=#71717a] - A change of 0.
+ * @cssproperty {color} [--c2-table__delta__up--color=#166534]
+ * @cssproperty {color} [--c2-table__delta__down--color=#b91c1c]
+ * @cssproperty {color} [--c2-table__cell__variance--background=rgba(217, 119, 6, 0.16)] - A cell past its column's `variance-threshold`.
+ * @cssproperty {box-shadow} [--c2-table__cell__variance--box-shadow=inset 3px 0 0 0 #d97706]
+ * @cssproperty {font-size} [--c2-table__flag--font-size=11px] - The `L`/`H` mark of a value outside its row's `reference-range`.
+ * @cssproperty {font-weight} [--c2-table__flag--font-weight=600]
+ * @cssproperty {color} [--c2-table__flag__low--color=rgb(2, 101, 220)]
+ * @cssproperty {color} [--c2-table__flag__high--color=#b91c1c]
+ * @cssproperty {color} [--c2-table__flag__critical--color=#ffffff] - The `LL`/`HH` mark of a value past the `critical-range`.
+ * @cssproperty {color} [--c2-table__flag__critical--background=#b91c1c]
+ * @cssproperty {color} [--c2-table__cell__flag--background=rgba(185, 28, 28, 0.08)] - A cell flagged low or high.
+ * @cssproperty {color} [--c2-table__cell__critical--background=rgba(185, 28, 28, 0.16)] - A cell flagged critical.
+ * @cssproperty {pixel} [--c2-table__status--gap=6px] - Space between a status's mark and its label (`format="status"`).
+ * @cssproperty {color} [--c2-table__status-mark--background=#a1a1aa] - Mark of a status whose legend entry has no `color`.
+ * @cssproperty {pixel} [--c2-table__status-mark--size=8px] - The dot of a status without a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark--border-radius=999px]
+ * @cssproperty {pixel} [--c2-table__status-mark__glyph--size=18px] - The square of a status with a `glyph`.
+ * @cssproperty {border-radius} [--c2-table__status-mark__glyph--border-radius=4px]
+ * @cssproperty {color} [--c2-table__status-mark__glyph--color=#ffffff]
+ * @cssproperty {font-size} [--c2-table__status-mark__glyph--font-size=11px]
+ * @cssproperty {font-weight} [--c2-table__status-mark__glyph--font-weight=700]
+ * @cssproperty {pixel} [--c2-table__status-label--max-width=none] - `0` leaves only the mark, as in a matrix; the label stays readable by assistive technology.
+ * @cssproperty {pixel} [--c2-table__tally--gap=12px] - Space between the values of a `tally` summary.
+ * @cssproperty {pixel} [--c2-table__tally-entry--gap=4px] - Space between a status's mark and its count in a `tally` summary.
+ * @cssproperty {color} [--c2-table__tally-count--color=#71717a]
+ * @cssproperty {pixel} [--c2-table__tally-label--max-width=0] - Width of each status's label in a `tally` summary: `0` shows the mark and the count only, `none` the whole label.
+ *
  * @cssproperty {box-shadow} [--c2-table__pinned-start--box-shadow=1px 0 0 0 #e4e4e7] - Separator on the last column pinned to the start.
  * @cssproperty {box-shadow} [--c2-table__pinned-end--box-shadow=-1px 0 0 0 #e4e4e7] - Separator on the first column pinned to the end.
  *
@@ -581,26 +524,15 @@ export interface Table {
  * @cssproperty {color} [--c2-table__summary--color=#18181b]
  * @cssproperty {font-size} [--c2-table__summary--font-size=14px]
  * @cssproperty {font-weight} [--c2-table__summary--font-weight=600]
+ * @cssproperty {color} [--c2-table__summary__off-target--color=rgb(211, 21, 16)] - Text of a summary that misses its `summary-target`.
  * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
  *
- * @cssproperty {color} [--c2-table__group-row--background=#fafafa]
- * @cssproperty {color} [--c2-table__group-row--color=#18181b]
- * @cssproperty {font-weight} [--c2-table__group-row--font-weight=600]
- * @cssproperty {color} [--c2-table__group-row__hover--background=#f4f4f5]
- * @cssproperty {box-shadow} [--c2-table__group-row__echo--box-shadow=0 1px 0 0 #e4e4e7] - Separator under a group row kept under the header.
- * @cssproperty {color} [--c2-table__group-band--background=#f4f4f5] - Background of a group with `group-display="band"`.
- * @cssproperty {pixel} [--c2-table__group--indent=24px] - Indentation per group level; the default lines rows up with their group's label.
  * @cssproperty {pixel} [--c2-table__group-toggle--size=16px]
  * @cssproperty {color} [--c2-table__group-toggle--color=#71717a]
  * @cssproperty {time} [--c2-table__group-toggle--transition-duration=150ms] - Chevron turn when a group opens or closes; respects reduced motion.
- * @cssproperty {color} [--c2-table__group-count--background=#f4f4f5]
- * @cssproperty {color} [--c2-table__group-count--color=#52525b]
- * @cssproperty {font-size} [--c2-table__group-count--font-size=12px]
- * @cssproperty {font-weight} [--c2-table__group-count--font-weight=600]
- * @cssproperty {padding} [--c2-table__group-count--padding=1px 7px]
- * @cssproperty {border-radius} [--c2-table__group-count--border-radius=999px]
  *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
+ * @cssproperty {pixel} [--c2-table__bulk-selection-cell--width=64px] - The checkbox column with `bulk-select`, which holds the caret of the selection menu too.
  *
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
  * @cssproperty {border-radius} [--c2-table__skeleton--border-radius=4px]
@@ -622,9 +554,9 @@ export interface Table {
  */
 @customElement('c2-table')
 export class Table extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
-  @query('.viewport') private viewport!: HTMLElement | null
+  @query('.viewport') protected viewport!: HTMLElement | null
 
   /**
    * The host's `aria-label`, observed so the grid inside the shadow root is named after it: the host is not the
@@ -694,6 +626,13 @@ export class Table extends LitElement {
 
   /** Duration of an animated rows update in milliseconds. */
   @property({ type: Number, attribute: 'update-duration' }) updateDuration = 400
+
+  /**
+   * Returns extra part names for a body cell from its value and row, added beside `cell` so a stylesheet can reach
+   * cells by state: `({ column, value }) => column.field === 'score' && value < 50 ? 'cell-failing' : undefined` and
+   * `c2-table::part(cell-failing)`. A string (whitespace-separated names) or an array. Property only.
+   */
+  @property({ attribute: false }) cellPart?: TableCellPartResolver
 
   /** Returns inline styles for a row from its current data. Property only; animated updates pass the intermediate row. */
   @property({ attribute: false }) rowStyle?: TableRowStyler
@@ -765,55 +704,9 @@ export class Table extends LitElement {
   @property({ type: String, attribute: 'summary-scope' }) summaryScope: TableSummaryScope = 'all'
 
   /**
-   * Groups the rows by these fields, outermost first: `group-by="region,status"` in the attribute, and field names or
-   * {@link TableGroupBy} objects in the property. Not applied to a `dataSource`, which only holds the rows it fetched.
-   */
-  @property({ converter: groupByConverter, attribute: 'group-by' }) groupBy: (string | TableGroupBy)[] = []
-
-  /** `row` gives each group a row of the grid with its column aggregates; `band` draws a full-width band per group. */
-  @property({ type: String, attribute: 'group-display' }) groupDisplay: TableGroupDisplay = 'row'
-
-  /**
-   * Keys of the open groups (`region=EMEA/status=Paid`). While unset, every group follows `groups-collapsed`; the
-   * first toggle writes the full list here, so it can be read, stored and handed back. `;`-separated in the attribute.
-   */
-  @property({ converter: groupKeysConverter, attribute: 'expanded-groups' }) expandedGroups?: string[]
-
-  /** Starts every group closed while `expandedGroups` is unset. */
-  @property({ type: Boolean, attribute: 'groups-collapsed' }) groupsCollapsed = false
-
-  /** Renders a group's label in place of its formatted value. The slot `group:<key>` wins over both. */
-  @property({ attribute: false }) renderGroup?: TableGroupRenderer
-
-  /** Label of the group of rows whose value is empty. */
-  @property({ type: String, attribute: 'empty-group-label' }) emptyGroupLabel = 'No value'
-
-  /**
-   * Turns the rows into a tree: the field (a dotted path is fine) holding each row's child rows, nested to any depth.
-   * A row whose field holds `true` has children `loadChildren` delivers when it is first opened. Wins over `group-by`;
-   * not applied to a `dataSource`.
-   */
-  @property({ type: String, attribute: 'children-field' }) childrenField = ''
-
-  /**
-   * Keys of the open rows of a tree. While unset, every row follows `tree-expanded`; the first toggle writes the full
-   * list here. `;`-separated in the attribute.
-   */
-  @property({ converter: rowKeysOrUnsetConverter, attribute: 'expanded-rows' }) expandedRows?: string[]
-
-  /** Starts every parent row of a tree open while `expandedRows` is unset. */
-  @property({ type: Boolean, attribute: 'tree-expanded' }) treeExpanded = false
-
-  /**
-   * Loads the children of a tree row whose `children-field` holds `true`, the first time it opens. A rejection closes
-   * the row again and fires `children-error`; the next open asks again. Needs `row-key`. Property only.
-   */
-  @property({ attribute: false }) loadChildren?: TableChildrenLoader
-
-  /**
    * Height in pixels of a row's detail panel, and the switch of the feature: above 0, every row gets a chevron that
-   * opens a panel of this height under it. Declared, like `row-height`, so the rows stay windowed. Ignored while the
-   * rows are grouped (`group-by`) or a tree (`children-field`).
+   * opens a panel of this height under it. Declared, like `row-height`, so the rows stay windowed. `c2-group-table`
+   * ignores it while its rows are grouped (`group-by`), and `c2-tree-table` while they are a tree (`children-field`).
    */
   @property({ type: Number, attribute: 'detail-height' }) detailHeight = 0
 
@@ -821,55 +714,107 @@ export class Table extends LitElement {
   @property({ attribute: false }) renderDetail?: TableDetailRenderer
 
   /** Keys of the rows whose detail panel is open, `;`-separated in the attribute. The table writes it as rows are opened and closed. */
-  @property({ converter: rowKeysOrUnsetConverter, attribute: 'expanded-details' }) expandedDetails?: string[]
+  @property({ converter: rowKeyListConverter, attribute: 'expanded-details' }) expandedDetails?: string[]
 
   /** Accessible name of the chevron that opens a row's detail panel. Unset, `Details` in the table's language. */
   @property({ type: String, attribute: 'detail-label' }) detailLabel = ''
 
-  @state() private columnElements: TableColumn[] = []
+  /**
+   * Adds a caret beside the header checkbox (`selection="multiple"` with `checkbox-selection`) that opens a menu: select
+   * this page, select all N rows, or clear the selection. The checkbox itself selects the rows on show. Which of them
+   * the user chose is `selectionScope`, and `selection-change` reports it as `scope`.
+   */
+  @property({ type: Boolean, attribute: 'bulk-select' }) bulkSelect = false
+
+  /**
+   * How the current selection was made: `rows` one by one, `page` the page on show, `all` every row. With a
+   * `dataSource`, `all` means every row the source holds, not only the keys in `value` (the loaded ones), and rows
+   * that arrive later are drawn selected: act on the whole set server side. The table writes it with each selection.
+   */
+  @property({ type: String, attribute: 'selection-scope' }) selectionScope: TableSelectionScope = 'rows'
+
+  /**
+   * Adds a filter of its values to every column's header; a column's own `filterable` still wins. With a `dataSource`
+   * a column lists the values of its `options`, and one without `options` gets no filter.
+   */
+  @property({ type: Boolean }) filterable = false
+
+  /**
+   * The column filters, keyed by column id: `{ "status": { "include": ["Paid"] } }`. A filterable column's header
+   * writes it as the user picks values, and `filter-change` reports it. Applied on the client; with a `dataSource`
+   * they go to `getRows` instead. An object in the property, JSON in the attribute.
+   */
+  @property({ converter: jsonPropertyConverter }) filters: TableFilters = {}
+
+  /**
+   * The rows to compare with, such as the last payroll run: matched by `row-key` (or `getRowKey`, one is needed), they give each column with
+   * `compare` or `variance-threshold` its previous value. An array in the property, JSON in the attribute.
+   */
+  @property({ converter: jsonPropertyConverter }) baseline?: TableRow[]
+
+  /**
+   * Lets the user edit the cells of the columns that have an `editor` (or a `renderEditor`): Enter, F2, a double click
+   * or typing opens one editor over the cell, Enter or Tab commits it and moves on, Escape cancels, Delete clears the
+   * cell, and a block copied from a spreadsheet pastes from the focused cell. Each change fires `cell-change` and
+   * replaces `rows`. The editing code loads on the first edit. Not applied to a `dataSource`.
+   */
+  @property({ type: Boolean }) editable = false
+
+  /** Decides per cell whether an `editable` table lets it be edited, such as `({ row }) => row.status !== 'approved'`. Property only. */
+  @property({ attribute: false }) isCellEditable?: (context: TableCellContext) => boolean
+
+  /**
+   * Adjusts a row after one of its cells is edited or pasted, before the table stores it: return the row to keep, such
+   * as the debit cleared when a credit is typed, or a total recomputed from a quantity. Property only.
+   */
+  @property({ attribute: false }) rowRule?: TableRowRule
+
+  @state() protected columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
-  @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
+  @state() protected focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
   private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
-  private readonly msg = new LocalizeController(this, tableMessages)
+  protected readonly msg = new LocalizeController(this, tableMessages)
   @state() private remoteTotal = -1
 
-  #sortedRows: TableRow[] = []
+  protected sortedRows: TableRow[] = []
   #blocks = new Map<number, TableRow[]>()
   #pendingBlocks = new Set<number>()
   #measuredWidths = new Map<string, number>()
   #measuredRowHeight = 0
   #selectionAnchor = -1
-  #pendingFocus = false
+  protected pendingFocus = false
   #pendingFocusOptions?: FocusOptions
   #requestToken = 0
   /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
   #pagers = new WeakSet<EventTarget>()
   #pendingScrollTop = false
-  #animationFrom = new Map<string, TableRow>()
-  #animationProgress = 1
-  #animationFrame?: number
-  #transitionRows?: TableRow[]
-  #rowUpdateStates = new Map<string, RowUpdateState>()
+  /** The realtime update code (`animate-updates`) once loaded, and its load while it is on the way. */
+  #animation?: RowsAnimation
+  #animationLoad?: Promise<RowsAnimation>
+  /** `rows` was replaced before that code arrived: the update waits for it rather than skip the animation. */
+  #awaitAnimation = false
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
-  #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
-  #warnedGroupedSource = false
-  #warnedTreeSource = false
-  #tree?: TreeRows
-  #treeCache?: { inputs: unknown[]; lines: TreeNode[]; wanted: TreeNode[] }
-  #partialCache?: { inputs: unknown[]; keys: Set<string> }
-  #openRows?: { source: string[]; keys: Set<string> }
-  #loadedChildren = new Map<string, TableRow[]>()
-  #pendingChildren = new Set<string>()
-  #headerHeightPx = 0
+  /** The totals of each `running` column, by column key. */
+  #runningCache = new WeakMap<TableColumnConfig, { inputs: unknown[]; totals: Map<TableRow, number> }>()
+  #statusCache?: { source: TableColumnConfig[]; columns: TableColumnConfig[] }
   #openDetails?: { source: string[]; keys: Set<string> }
   #detailCache?: { inputs: unknown[]; lines: number[] }
   #windowCache?: { inputs: unknown[]; range: VirtualScrollRange }
   /** Counts the blocks a `dataSource` delivered, which is when a row of an open detail may appear. */
   #blocksVersion = 0
-  #warnedDetail = false
-  /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
-  #echoSignature = ''
+  /** The column filter popover once loaded, and its load while it is on the way. */
+  #filter?: TableFilter
+  #filterLoad?: Promise<TableFilter>
+  #bulk?: TableBulk
+  #committingSelection = false
+  #bulkWasOpen = false
+  #bulkLoad?: Promise<TableBulk>
+  #baselineCache?: { inputs: unknown[]; rows: Map<string, TableRow> }
+  #baselineWarned = false
+  /** The editing module once loaded (`editable`, `addRow`…), and its load while it is on the way. */
+  #editing?: TableEditing
+  #editingLoad?: Promise<TableEditing>
   /** The window `range-change` last reported, to fire only when it moves. */
   #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [], rows: [] }
   /** Whether `range-change` has fired yet: the first update reports even an empty window. */
@@ -885,14 +830,14 @@ export class Table extends LitElement {
   #virtualizer = new VirtualScrollController(this, {
     scrollElement: () => this.viewport,
     itemCount: () => this.rowCount,
-    itemHeight: () => this.#rowHeightPx,
+    itemHeight: () => this.rowHeightPx,
     overscan: () => this.overscan,
     enabled: () => this.isVirtualized,
   })
 
   /** Total number of rows the table knows about: `rows.length`, or the `dataSource` total. */
   get totalRows(): number {
-    return this.dataSource ? Math.max(0, this.remoteTotal) : this.#sortedRows.length
+    return this.dataSource ? Math.max(0, this.remoteTotal) : this.sortedRows.length
   }
 
   /**
@@ -901,10 +846,10 @@ export class Table extends LitElement {
    * million-row total.
    */
   get rowCount(): number {
-    const lines = this.#grouping()?.items.length ?? this.#treeLines()?.length
-    if (lines !== undefined) return this.paginated ? Math.max(0, Math.min(this.pageSize, lines - this.#pageStart)) : lines
-    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
-    const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
+    const lines = this.lineCount()
+    if (lines !== undefined) return this.paginated ? Math.max(0, Math.min(this.pageSize, lines - this.pageStart)) : lines
+    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#animation?.transitionRows?.length ?? this.totalRows)
+    const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.pageStart))
     if (!this.dataSource) return onPage
     // Once the page is in it is the truth; before that the arithmetic gives the right number of skeleton rows.
     const loaded = this.#blocks.get(this.page - 1)?.length
@@ -931,11 +876,11 @@ export class Table extends LitElement {
    * and `aria-rowcount` count these, so a collapsed group takes one line.
    */
   get #lineCount(): number {
-    return this.#grouping()?.items.length ?? this.#treeLines()?.length ?? this.totalRows
+    return this.lineCount() ?? this.totalRows
   }
 
   /** Index of the first row of the current page within the whole dataset. */
-  get #pageStart(): number {
+  protected get pageStart(): number {
     return this.paginated ? (this.page - 1) * this.pageSize : 0
   }
 
@@ -951,7 +896,7 @@ export class Table extends LitElement {
     return this.rowCount > this.virtualThreshold
   }
 
-  get #rowHeightPx(): number {
+  protected get rowHeightPx(): number {
     return this.#measuredRowHeight || this.rowHeight
   }
 
@@ -961,8 +906,8 @@ export class Table extends LitElement {
 
   /** The resolved, ordered, visible columns — children first, then the `columns` property, then one per key of the first row. */
   get resolvedColumns(): TableColumnConfig[] {
-    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
-    const visible = source.filter((column) => columnKey(column) && !column.hidden)
+    const declared: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
+    const visible = this.expandColumns(declared).filter((column) => columnKey(column) && !column.hidden)
     return [
       ...visible.filter((column) => column.pinned === 'start'),
       ...visible.filter((column) => !column.pinned),
@@ -970,12 +915,30 @@ export class Table extends LitElement {
     ]
   }
 
+  /** The declared columns as the table draws them: a variant may stand several columns for one (`c2-flowsheet`). */
+  protected expandColumns(declared: TableColumnConfig[]): TableColumnConfig[] {
+    return declared
+  }
+
+  /**
+   * A cell's value as drawn and sorted: its field. `row` may be the copy an animated update interpolates, which is why
+   * this is not `cellValue`; a variant reads its derived columns here (`c2-flowsheet`).
+   */
+  protected readCell(row: TableRow, column: TableColumnConfig): unknown {
+    return getFieldValue(row, column.field)
+  }
+
+  /** The rows the table sorts, filters and draws: `rows`, or what a variant makes of its own input (`c2-flowsheet`). */
+  protected sourceRows(): TableRow[] {
+    return Array.isArray(this.rows) ? this.rows : NO_ROWS
+  }
+
   /**
    * The key of `row`: `getRowKey(row)`, else its `row-key` field, as a string. Without either it is the row's current
    * position, found by identity among the rows the table holds, and `undefined` when the row is not one of them.
    */
   keyOf(row: TableRow): string | undefined {
-    const identity = this.#identityOf(row)
+    const identity = this.identityOf(row)
     if (identity !== undefined) return identity
     if (this.dataSource) {
       const size = this.#effectiveBlockSize
@@ -985,14 +948,24 @@ export class Table extends LitElement {
       }
       return undefined
     }
-    const index = this.#sortedRows.indexOf(row)
+    const index = this.sortedRows.indexOf(row)
     return index >= 0 ? String(index) : undefined
   }
 
   /** Whether `row` is selected. */
   isSelected(row: TableRow): boolean {
     const key = this.keyOf(row)
-    return key !== undefined && this.value.includes(key)
+    return key !== undefined && this.#isKeySelected(key)
+  }
+
+  /** Whether the row with `key` is selected: in `value`, or every row of a source after "select all" (`bulk-select`). */
+  #isKeySelected(key: string): boolean {
+    return this.value.includes(key) || this.#allOfSource()
+  }
+
+  /** "Select all" on a `dataSource` table with `bulk-select`: every row the source holds, loaded or not. */
+  #allOfSource(): boolean {
+    return this.bulkSelect && this.selectionScope === 'all' && Boolean(this.dataSource) && this.value.length > 0
   }
 
   /**
@@ -1003,51 +976,100 @@ export class Table extends LitElement {
     if (this.selection === 'none') return
     const keys = rows.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
     if (this.selection === 'single') {
-      this.#commitSelection(keys.length ? [keys[keys.length - 1]] : add ? this.value : [])
+      this.commitSelection(keys.length ? [keys[keys.length - 1]] : add ? this.value : [])
       return
     }
-    this.#commitSelection([...new Set([...(add ? this.value : []), ...keys])])
+    this.commitSelection([...new Set([...(add ? this.value : []), ...keys])])
   }
 
   /** Removes `rows` from the selection. Fires `selection-change`. */
   deselectRows(rows: TableRow[]) {
     const keys = new Set(rows.map((row) => this.keyOf(row)))
-    this.#commitSelection(this.value.filter((key) => !keys.has(key)))
+    this.commitSelection(this.value.filter((key) => !keys.has(key)))
   }
 
-  /** The rows currently selected. Only the loaded ones when a `dataSource` is used. */
+  /** The rows currently selected, on every page. Only the loaded ones when a `dataSource` is used. */
   getSelectedRows(): TableRow[] {
     const keys = new Set(this.value)
     const selected: TableRow[] = []
-    for (let index = 0; index < this.#rowTotal; index++) {
-      const row = this.#rowAt(index)
-      if (row && keys.has(this.#keyAt(index, row))) selected.push(row)
-    }
+    this.#forEachLoadedRow((row, key) => {
+      if (keys.has(key)) selected.push(row)
+    })
     return selected
   }
 
-  /** Selects every loaded row. No-op unless `selection="multiple"`. */
+  /**
+   * Selects every row, on every page. With a `dataSource` only the loaded rows have keys to select: `selectionScope`
+   * becomes `all`, which tells the application the user meant every row the source holds, and with `bulk-select` the
+   * rows that arrive later are drawn selected. No-op unless `selection="multiple"`.
+   */
   selectAll() {
     if (this.selection !== 'multiple') return
     const keys: string[] = []
-    for (let index = 0; index < this.#rowTotal; index++) {
-      const row = this.#rowAt(index)
-      if (row) keys.push(this.#keyAt(index, row))
-    }
-    this.#commitSelection(keys)
+    this.#forEachLoadedRow((_row, key) => keys.push(key))
+    this.commitSelection(keys, 'all')
   }
 
   /**
-   * Upper bound of the row indices `getSelectedRows` and `selectAll` visit: the rows on show, or while grouped or in a
-   * tree every row, including those in closed groups and under closed rows — a parent's checkbox selects them too.
+   * Adds the rows on the page on show to the selection (every row while the table is not paginated), keeping the rows
+   * selected on other pages. No-op unless `selection="multiple"`.
    */
-  get #rowTotal(): number {
-    return this.#grouping()?.source.length ?? (this.#tree ? this.#sortedRows.length : this.rowCount)
+  selectPage() {
+    if (this.selection !== 'multiple') return
+    if (!this.paginated) return this.selectAll()
+    const page = this.#pageKeys()
+    const keys = [...new Set([...this.#selectedKeys(), ...page])]
+    this.commitSelection(keys, keys.length === page.length ? 'page' : 'rows')
+  }
+
+  /** Takes the rows on the page on show out of the selection, keeping those of other pages. */
+  #deselectPage() {
+    const page = new Set(this.#pageKeys())
+    this.commitSelection(this.#selectedKeys().filter((key) => !page.has(key)))
+  }
+
+  /** The selected keys as a list: `value`, or every loaded key while "select all" covers a source. */
+  #selectedKeys(): string[] {
+    if (!this.#allOfSource()) return this.value
+    const keys: string[] = []
+    this.#forEachLoadedRow((_row, key) => keys.push(key))
+    return keys
+  }
+
+  /** The keys of the data rows on the page on show, groups and closed rows aside. */
+  #pageKeys(): string[] {
+    const keys: string[] = []
+    const first = this.pageStart
+    for (let line = first; line < first + this.rowCount; line++) {
+      const index = this.rowIndexAt(line)
+      const row = index >= 0 ? this.#rowAt(index) : undefined
+      if (row) keys.push(this.keyAt(index, row))
+    }
+    return keys
+  }
+
+  /** Every row the table holds with its key: all of them on the client, the fetched blocks with a `dataSource`. */
+  #forEachLoadedRow(visit: (row: TableRow, key: string) => void) {
+    if (this.dataSource) {
+      const size = this.#effectiveBlockSize
+      for (const [block, rows] of this.#blocks) rows.forEach((row, offset) => visit(row, this.keyAt(block * size + offset, row)))
+      return
+    }
+    const rows = this.#animation?.transitionRows ?? this.sortedRows
+    rows.forEach((row, index) => visit(row, this.keyAt(index, row)))
+  }
+
+  /**
+   * How many rows the header checkbox counts against on a table that is not paginated: the rows on show, or while
+   * grouped or in a tree every row, including those in closed groups and under closed rows.
+   */
+  protected get rowTotal(): number {
+    return this.rowCount
   }
 
   /** Clears the selection. */
   clearSelection() {
-    this.#commitSelection([])
+    this.commitSelection([], 'rows')
   }
 
   /**
@@ -1055,65 +1077,8 @@ export class Table extends LitElement {
    * a place to scroll to.
    */
   scrollToIndex(index: number) {
-    const grouping = this.#grouping()
-    const tree = this.#treeLines()
-    const line = grouping
-      ? grouping.items.findIndex((item) => item.kind === 'row' && item.rowIndex === index)
-      : tree
-        ? tree.findIndex((node) => node.index === index)
-        : index
-    if (line >= 0) this.#scrollToLine(line)
-  }
-
-  /** Whether the rows are currently grouped: `groupBy` names a level and the rows are the table's own. */
-  get grouped(): boolean {
-    return this.#grouping() !== undefined
-  }
-
-  /** Every group, outermost first and each followed by its sub-groups, whether its parent is open or not. */
-  getGroups(): TableGroupContext[] {
-    const grouping = this.#grouping()
-    if (!grouping) return []
-    const groups: TableGroupContext[] = []
-    const visit = (node: GroupNode) => {
-      groups.push(this.#groupContext(node, grouping))
-      node.children.forEach(visit)
-    }
-    grouping.roots.forEach(visit)
-    return groups
-  }
-
-  /** Opens the group with `key`. Does not fire `group-toggle`, which reports what the user did. */
-  expandGroup(key: string) {
-    this.#setGroupExpanded(key, true)
-  }
-
-  /** Closes the group with `key`. */
-  collapseGroup(key: string) {
-    this.#setGroupExpanded(key, false)
-  }
-
-  /** Opens every group, or in a tree every row whose children are loaded. */
-  expandAll() {
-    const grouping = this.#grouping()
-    if (grouping) this.expandedGroups = [...grouping.nodes.keys()]
-    else if (this.#tree) this.expandedRows = this.#tree.nodes.filter((node) => node.children?.length).map((node) => node.key)
-  }
-
-  /** Closes every group, or every row of a tree. */
-  collapseAll() {
-    if (this.#tree) this.expandedRows = []
-    else this.expandedGroups = []
-  }
-
-  /** Opens the tree row with `key`, loading its children if needed. Does not fire `row-toggle`. */
-  expandRow(key: string) {
-    this.#setRowExpanded(key, true)
-  }
-
-  /** Closes the tree row with `key`. */
-  collapseRow(key: string) {
-    this.#setRowExpanded(key, false)
+    const line = this.lineOfRow(index)
+    if (line >= 0) this.scrollToLine(line)
   }
 
   /** Opens the detail panel of the row with `key` (`detail-height`). Does not fire `detail-toggle`. */
@@ -1126,6 +1091,257 @@ export class Table extends LitElement {
     this.#setDetailExpanded(key, false)
   }
 
+  /**
+   * Adds `row` at `index` (the end by default) of `rows`, as a new row of `getChanges()`, and fires `rows-change`.
+   * Resolves to the row once it is drawn, so `scrollToIndex` can reach it.
+   */
+  async addRow(row: TableRow = {}, index?: number): Promise<TableRow> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.addRow(row, index))
+  }
+
+  /**
+   * Adds a copy of `row` under it, without its `row-key` field, with `overrides` written over it: pass the copy's new
+   * key there when `getRowKey` builds keys. Resolves to the copy once it is drawn, or `undefined` when `row` is not a
+   * top-level row.
+   */
+  async duplicateRow(row: TableRow, overrides?: TableRow): Promise<TableRow | undefined> {
+    const editing = await this.#loadEditing()
+    return this.#keepSelection(() => editing.duplicateRow(row, overrides))
+  }
+
+  /** Removes `rows` from `rows` (and from the children of a tree), and from the selection; fires `rows-change`. */
+  async deleteRows(rows: TableRow[]): Promise<void> {
+    const editing = await this.#loadEditing()
+    const drop = new Set(rows)
+    await this.#keepSelection(() => editing.deleteRows(rows), drop)
+  }
+
+  /**
+   * Runs a change of the rows and keeps the selection on the same rows (less the `dropped` ones): without a `row-key`
+   * a key is a position, which now points at another row. Fires `selection-change` only if the keys moved.
+   */
+  async #keepSelection<T>(change: () => T, dropped?: Set<TableRow>): Promise<T> {
+    // Every selected row of the dataset, on every page, as `getSelectedRows` returns them.
+    const keys = new Set(this.value)
+    const selected =
+      keys.size && !this.dataSource ? this.#selectableRows().filter((row, index) => keys.has(this.keyAt(index, row)) && !dropped?.has(row)) : undefined
+    const result = change()
+    await this.updateComplete
+    if (selected) {
+      const next = selected.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
+      if (next.length !== this.value.length || next.some((key, index) => key !== this.value[index])) this.commitSelection(next)
+    }
+    return result
+  }
+
+  /**
+   * The rows whose selection survives a change: those on show, plus with a key the ones a filter hides (a selected row
+   * stays selected while it is filtered out). Without a key a position is the key, so only the rows on show count.
+   */
+  #selectableRows(): TableRow[] {
+    if (!this.rowKey && !this.getRowKey) return this.sortedRows
+    const shown = new Set(this.sortedRows)
+    const hidden = this.sourceRows().filter((row) => !shown.has(row))
+    return hidden.length ? [...this.sortedRows, ...hidden] : this.sortedRows
+  }
+
+  /** The rows added, edited and deleted since the rows were given or `acceptChanges()` ran. */
+  getChanges(): TableChanges {
+    return this.#editing?.changes() ?? { added: [], updated: [], removed: [] }
+  }
+
+  /** Takes the rows as they are as the new baseline, after a save: no cell is marked as changed any more. */
+  acceptChanges() {
+    this.#editing?.accept()
+  }
+
+  /** Undoes every change since the baseline: edits, added and deleted rows. Fires `rows-change`. */
+  revertChanges() {
+    this.#editing?.revert()
+  }
+
+  /** Checks every cell of the editable columns (`required`, the editor's type, `validate`), marks the invalid ones and resolves to them. */
+  async validate(): Promise<TableCellError[]> {
+    return (await this.#loadEditing()).validate()
+  }
+
+  #loadEditing(): Promise<TableEditing> {
+    this.#editingLoad ??= import('./table-editing.js').then(({ TableEditing }) => {
+      this.#editing = new TableEditing({
+        table: this,
+        columns: () => this.#renderColumns(),
+        rowAt: (line) => {
+          const index = this.rowIndexAt(line)
+          const row = this.#sourceRowAt(index)
+          return row && { row, index, key: this.keyAt(index, row) }
+        },
+        canEdit: (line, column) => this.#canEdit(line, column),
+        flat: () => !this.structured,
+        childrenField: () => this.childField,
+        focus: (line, column) => {
+          this.focusedCell = { row: line, column }
+          this.pendingFocus = true
+          this.scrollToLine(line)
+        },
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: string[]) => string).call(this.msg, key, ...args),
+      })
+      this.requestUpdate()
+      return this.#editing
+    })
+    return this.#editingLoad
+  }
+
+  /** Whether the cell on display line `line` can be edited: an editable column, a data row, and `isCellEditable` agrees. */
+  #canEdit(line: number, columnIndex: number): boolean {
+    const column = this.#renderColumns()[columnIndex]
+    if (!this.editable || this.dataSource || !column || !(column.editor || column.renderEditor) || !column.field) return false
+    const index = this.rowIndexAt(line)
+    const row = this.#sourceRowAt(index)
+    // A parent row of a tree shows the rollup of its leaves in such a column, not a value of its own.
+    if (!row || (column.rollup && this.rowLevel(line)?.rollup)) return false
+    return this.isCellEditable?.({ value: getFieldValue(row, column.field), row, rowIndex: index, column }) ?? true
+  }
+
+  /** Starts an edit of a cell once the editing module is in. */
+  #beginEdit(line: number, columnIndex: number, trigger: EditTrigger) {
+    void this.#loadEditing().then((editing) => editing.begin(line, columnIndex, trigger))
+  }
+
+  /**
+   * A double click on a cell, or a block pasted from a spreadsheet, in an editable table: handed to the editing module.
+   * One listener each on the grid, so the cells carry none. The pasted text is read now: it is gone once the event ends.
+   */
+  #handleEditGesture = (event: MouseEvent | ClipboardEvent) => {
+    const paste = event instanceof ClipboardEvent
+    if (
+      !this.editable ||
+      this.dataSource ||
+      event.composedPath().some((node) => node instanceof Element && node.matches('input, select, textarea, .editor-host'))
+    )
+      return
+    const text = paste ? event.clipboardData?.getData('text/plain') : ''
+    if (paste && (!text || this.focusedCell.row < 0)) return
+    if (paste) event.preventDefault()
+    // The path is empty once the event has been dispatched, and the module may still be on its way.
+    const path = event.composedPath()
+    void this.#loadEditing().then((editing) => editing.gesture(path, text, this.focusedCell))
+  }
+
+  // ---- Hooks of a table with lines of its own -----------------------------------------------------------------------
+  //
+  // A flat table's display lines are its rows. `c2-group-table` and `c2-tree-table` override these to add group rows and tree rows; the
+  // defaults below keep `c2-table` free of that code, and cost a flat table one call that returns at once.
+
+  /** The rows in display order: sorted, and in a subclass gathered by group. Free of side effects. */
+  protected orderRows(rows: TableRow[]): TableRow[] {
+    return this.sortBySortModel(rows)
+  }
+
+  /** The rows the table shows, by index: `orderRows`, or in a subclass the flattened tree it builds. */
+  protected buildRows(rows: TableRow[]): TableRow[] {
+    return this.orderRows(rows)
+  }
+
+  /** Whether `changed` holds a property the rows are built from beyond those of a flat table. */
+  protected needsSort(_changed: PropertyValues): boolean {
+    return false
+  }
+
+  /** Whether the display lines are not simply the rows (groups, a tree): a `treegrid`, with no detail panels. */
+  protected get structured(): boolean {
+    return false
+  }
+
+  /** The field holding a row's child rows, or `''` without a tree. */
+  protected get childField(): string {
+    return ''
+  }
+
+  /** Number of display lines across every page when they are not the rows; `undefined` for a flat table. */
+  protected lineCount(): number | undefined {
+    return undefined
+  }
+
+  /** The row index on display line `line`, or -1 for a line that is no data row (a group row). */
+  protected rowIndexAt(line: number): number {
+    return line
+  }
+
+  /** The display line of the row at `index`, or -1 while a closed group or parent hides it. */
+  protected lineOfRow(index: number): number {
+    return index
+  }
+
+  /** A line that is no data row, such as a group row, drawn by the subclass; `undefined` draws the line's data row. */
+  protected renderLine(_line: number, _columns: TableColumnConfig[], _pins: Map<string, PinPlacement>): unknown {
+    return undefined
+  }
+
+  /** The `repeat` key of a line that is no data row. */
+  protected lineKey(_line: number): string | undefined {
+    return undefined
+  }
+
+  /** The place of the data row on line `line` in a hierarchy; `undefined` in a flat table. */
+  protected rowLevel(_line: number, _columns?: TableColumnConfig[]): TableRowLevel | undefined {
+    return undefined
+  }
+
+  /** Whether row `key` shows the mixed state in its checkbox: some of the rows under it are selected. */
+  protected isPartial(_key: string): boolean {
+    return false
+  }
+
+  /** Turns row `key` on or off in `keys`; a tree takes the rows under it along. */
+  protected cascade(keys: Set<string>, key: string, on: boolean) {
+    if (on) keys.add(key)
+    else keys.delete(key)
+  }
+
+  /** Adds the rows of a shift-click range to `keys`. */
+  protected selectRange(keys: Set<string>, range: string[]) {
+    for (const key of range) keys.add(key)
+  }
+
+  /** Drawn between the header and the body: the group rows kept under the header. */
+  protected renderAbove(_columns: TableColumnConfig[], _pins: Map<string, PinPlacement>): unknown {
+    return nothing
+  }
+
+  /** Handles a key a hierarchy owns (the treegrid's ←/→, Enter on a group); `true` when it did. */
+  protected handleLineKey(_event: KeyboardEvent, _columns: TableColumnConfig[]): boolean {
+    return false
+  }
+
+  /** Scrolls a line of a hierarchy that windows its own way into view; `true` when it did. */
+  protected scrollToStructuredLine(_line: number): boolean {
+    return false
+  }
+
+  /** Whether the row at `index` counts in the summary row and a running total: in a tree, only the leaves do. */
+  protected inSummary(_index: number): boolean {
+    return true
+  }
+
+  /** What the page-scoped summary depends on beyond the rows: the display lines of a hierarchy. */
+  protected lineInputs(): unknown {
+    return undefined
+  }
+
+  /** A field of the first row the automatic columns leave out: a tree's children field. */
+  protected hiddenAutoField(): string {
+    return ''
+  }
+
+  /** The body scrolled; a subclass with rows kept under the header redraws them. */
+  protected onViewportScroll() {}
+
+  /** The rows as the application gave them, in display order: the update's transition rows while one animates. */
+  protected get displayRows(): TableRow[] {
+    return this.#animation?.transitionRows ?? this.sortedRows
+  }
+
   /** Drops the `dataSource` cache and reloads the visible rows. */
   refresh() {
     this.error = ''
@@ -1133,39 +1349,68 @@ export class Table extends LitElement {
     this.requestUpdate()
   }
 
+  #loadAnimation(): Promise<RowsAnimation> {
+    this.#animationLoad ??= import('./table-animation.js').then(({ RowsAnimation }) => {
+      this.#animation = new RowsAnimation({
+        table: this,
+        keyAt: (index, row) => this.keyAt(index, row),
+        sortRows: (rows) => this.orderRows(rows),
+        hasIdentity: () => this.#hasRowIdentity,
+        isTree: () => this.childField !== '',
+      })
+      return this.#animation
+    })
+    return this.#animationLoad
+  }
+
+  override requestUpdate(...args: Parameters<LitElement['requestUpdate']>) {
+    if (args[0] === 'rows' && this.hasUpdated && this.animateUpdates && !this.#animation) this.#awaitAnimation = true
+    super.requestUpdate(...args)
+  }
+
+  /** A snapshot that comes before the realtime code is held for it, so it animates like every later one. */
+  protected override scheduleUpdate(): void | Promise<unknown> {
+    if (!this.#awaitAnimation) return super.scheduleUpdate()
+    this.#awaitAnimation = false
+    return this.#loadAnimation().then(
+      () => super.scheduleUpdate(),
+      () => super.scheduleUpdate(),
+    )
+  }
+
   protected override willUpdate(changed: PropertyValues) {
-    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
-    if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
-    const regroup = changed.has('groupBy') || changed.has('dataSource')
-    // A tree's keys, rollups and loaded children depend on these too; a flat table does not look at them.
-    const retree = changed.has('childrenField') || (this.childrenField && (changed.has('rowKey') || changed.has('getRowKey')))
-    // Replaced rather than cleared, so a load still in flight for the old tree knows to drop its answer. A new
-    // `loadChildren` keeps what is loaded: a framework may pass a fresh closure on every render.
-    if (changed.has('childrenField')) this.#loadedChildren = new Map()
-    if (!this.hasUpdated || regroup || retree || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
-      this.#applySort()
-    if (this.dataSource && this.childrenField && !this.#warnedTreeSource) {
-      this.#warnedTreeSource = true
-      console.warn('[c2-table] children-field is ignored with a dataSource. Pass the rows in rows, and load children with loadChildren.')
-    }
-    if (this.detailHeight > 0 && !this.#warnedDetail && (this.childrenField || this.#groupLevels().length)) {
-      this.#warnedDetail = true
-      console.warn('[c2-table] detail-height is ignored while the rows are grouped (group-by) or a tree (children-field).')
-    }
-    if (this.dataSource && this.#groupLevels().length && !this.#warnedGroupedSource) {
-      this.#warnedGroupedSource = true
-      console.warn(
-        '[c2-table] group-by is ignored with a dataSource: the table only holds the rows it has fetched, so it cannot know every group. Group the rows yourself, or pass them in rows.',
-      )
-    }
+    // `value` set by the application (not by a selection the table made) is a set of rows: its scope is `rows`.
+    if (changed.has('value') && !changed.has('selectionScope') && !this.#committingSelection && changed.get('value') !== undefined) this.selectionScope = 'rows'
+    this.#committingSelection = false
+    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#animation?.cancel()
+    // Loaded with `animate-updates`, before the first snapshot comes, rather than on it.
+    if (this.animateUpdates) void this.#loadAnimation()
+    if (changed.has('rows')) this.#animation?.prepare(changed.get('rows'))
+    if (
+      !this.hasUpdated ||
+      this.needsSort(changed) ||
+      changed.has('dataSource') ||
+      changed.has('rows') ||
+      changed.has('filters') ||
+      changed.has('sortModel') ||
+      changed.has('columns') ||
+      changed.has('columnElements')
+    )
+      this.applySort()
     // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
     // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
-    if (changed.has('dataSource') || changed.has('blockSize') || changed.has('pageSize') || (this.dataSource && changed.has('sortModel'))) {
+    if (
+      changed.has('dataSource') ||
+      changed.has('blockSize') ||
+      changed.has('pageSize') ||
+      (this.dataSource && (changed.has('sortModel') || changed.has('filters')))
+    ) {
       this.#resetRemote()
     }
     if (this.paginated) {
       // A new sort is a new dataset; start it at the top rather than on a page that may no longer exist.
-      if (changed.has('sortModel') && changed.get('sortModel') !== undefined) this.page = 1
+      if ((changed.has('sortModel') && changed.get('sortModel') !== undefined) || (changed.has('filters') && changed.get('filters') !== undefined))
+        this.page = 1
       if (!this.dataSource || this.remoteTotal >= 0) {
         const clamped = Math.min(Math.max(1, Math.floor(this.page) || 1), this.pageCount)
         if (clamped !== this.page) this.page = clamped
@@ -1232,7 +1477,7 @@ export class Table extends LitElement {
   setPageSize(pageSize: number) {
     const next = Math.floor(pageSize)
     if (!Number.isFinite(next) || next <= 0 || next === this.pageSize) return
-    const firstRow = this.#pageStart
+    const firstRow = this.pageStart
     this.pageSize = next
     this.page = Math.floor(firstRow / next) + 1
   }
@@ -1245,17 +1490,14 @@ export class Table extends LitElement {
     }
     this.#warnPositionalKeys()
     this.#measureRowHeight()
-    this.#measureHeaderHeight()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
-    if (this.#pendingFocus) {
-      this.#pendingFocus = false
+    if (this.pendingFocus) {
+      this.pendingFocus = false
       this.renderRoot.querySelector<HTMLElement>('.cell[tabindex="0"]')?.focus(this.#pendingFocusOptions)
       this.#pendingFocusOptions = undefined
     }
     if (this.dataSource) this.#ensureBlocks()
-    // Open rows whose children `loadChildren` still owes: opened by a click, `expandRow` or `expanded-rows` alike.
-    if (this.#tree) for (const node of this.#treeCache?.wanted ?? []) void this.#fetchChildren(node)
     this.#reportRenderedRange()
   }
 
@@ -1277,17 +1519,15 @@ export class Table extends LitElement {
     if (!this.error && this.rowCount > 0) {
       // The same window `render` drew (`#renderBody` gets `offset + range.start` to `offset + range.end`, clamped the
       // same way while grouped), so each `line` here is the one its cells' `cell:{line}:{field}` slots carry.
-      const offset = this.#pageStart
+      const offset = this.pageStart
       const range = this.#window()
-      const grouping = this.#grouping()
       start = offset + range.start
-      end = grouping || this.#tree ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
+      end = this.structured ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
       for (let line = start; line < end; line++) {
-        const item = grouping?.items[line]
-        if (item?.kind === 'group') continue
-        const index = this.#rowIndexAt(line)
+        // A line that is no data row (a group row) has no index, and so no row.
+        const index = this.rowIndexAt(line)
         const row = this.#sourceRowAt(index)
-        if (row) rows.push({ line, key: this.#keyAt(index, row), row })
+        if (row) rows.push({ line, key: this.keyAt(index, row), row })
       }
     }
     // Lines are part of the comparison: a re-sort that keeps the same keys in the window moves them to other lines,
@@ -1311,21 +1551,17 @@ export class Table extends LitElement {
     const pins = this.#pinPlacements(columns)
     const range = this.#window()
     // The virtualizer windows the page; the body renders dataset indices, so shift its range by the page offset.
-    const offset = this.#pageStart
+    const offset = this.pageStart
     const summary = this.#hasSummary(columns)
-    const grouping = this.#grouping()
-    const stuck = grouping ? this.#stuckGroups(grouping) : []
-    this.#echoSignature = stuck.map((node) => node.key).join('\n')
-    const prefix = grouping ? this.#pagePrefix(grouping) * this.#rowHeightPx : 0
 
     return html`
       <div class="toolbar" part="toolbar" ?hidden=${!this.slotPresence.has('toolbar')}>
         <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
-      <div class="viewport" part="viewport" @scroll=${this.#handleViewportScroll}>
+      <div class="viewport" part="viewport" @scroll=${() => this.onViewportScroll()}>
         <div
           class=${classMap({ grid: true, 'grid--wrap': this.wrap })}
-          role=${grouping || this.#tree ? 'treegrid' : 'grid'}
+          role=${this.structured ? 'treegrid' : 'grid'}
           part="grid"
           aria-rowcount=${this.#lineCount + (summary ? 2 : 1)}
           aria-colcount=${columns.length}
@@ -1333,16 +1569,10 @@ export class Table extends LitElement {
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
+          @dblclick=${this.#handleEditGesture}
+          @paste=${this.#handleEditGesture}
         >
-          ${this.#renderHeaderRow(columns, pins)}
-          ${
-            grouping && stuck.length
-              ? html`<div class="group-echoes" style=${styleMap({ top: `${this.#headerHeightPx}px` })}>
-                  ${stuck.map((node) => this.#renderGroupRow(node, -1, columns, pins, grouping, true))}
-                </div>`
-              : nothing
-          }
-          ${prefix > 0 ? html`<div class="spacer spacer--group-prefix" style="height:${prefix}px"></div>` : nothing}
+          ${this.#renderHeaderRow(columns, pins)} ${this.renderAbove(columns, pins)}
           ${range.paddingTop > 0 ? html`<div class="spacer" style="height:${range.paddingTop}px"></div>` : nothing}
           ${this.#renderBody(columns, pins, offset + range.start, offset + range.end)}
           ${range.paddingBottom > 0 ? html`<div class="spacer" style="height:${range.paddingBottom}px"></div>` : nothing}
@@ -1352,6 +1582,7 @@ export class Table extends LitElement {
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
+      ${this.#filter?.render() ?? nothing} ${this.#bulk?.render() ?? nothing}
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
       <slot name="fallback" class="definitions"></slot>
     `
@@ -1372,180 +1603,27 @@ export class Table extends LitElement {
       </div>`
     }
     const lines: number[] = []
-    const grouping = this.#grouping()
     // The window is the virtualizer's from the last layout; closing a group shortens the list before it catches up.
-    const last = grouping || this.#tree ? Math.min(end, this.#pageStart + this.rowCount) : end
+    const last = this.structured ? Math.min(end, this.pageStart + this.rowCount) : end
     for (let line = start; line < last; line++) lines.push(line)
-    if (grouping) {
-      return repeat(
-        lines,
-        (line) => {
-          const item = grouping.items[line]
-          if (item.kind === 'group') return `group:${item.node.key}`
-          return this.#keyAt(item.rowIndex, grouping.source[item.rowIndex])
-        },
-        (line) => {
-          const item = grouping.items[line]
-          return item.kind === 'group' ? this.#renderGroupRow(item.node, line, columns, pins, grouping, false) : this.#renderRow(line, columns, pins)
-        },
-      )
-    }
     const detail = this.#detail
     return repeat(
       lines,
       (line) => {
-        const index = this.#rowIndexAt(line)
+        const own = this.lineKey(line)
+        if (own !== undefined) return own
+        const index = this.rowIndexAt(line)
         const row = this.#rowAt(index)
-        return row ? this.#keyAt(index, row) : `skeleton:${index}`
+        return row ? this.keyAt(index, row) : `skeleton:${index}`
       },
-      (line) => (detail ? html`${this.#renderRow(line, columns, pins)}${this.#renderDetailRow(line, columns)}` : this.#renderRow(line, columns, pins)),
+      (line) =>
+        this.renderLine(line, columns, pins) ??
+        (detail ? html`${this.#renderRow(line, columns, pins)}${this.#renderDetailRow(line, columns)}` : this.#renderRow(line, columns, pins)),
     )
   }
 
-  /** The column holding the group tree: the one marked `group-column`, else the first data column. */
-  #groupTreeColumn(columns: TableColumnConfig[]): TableColumnConfig | undefined {
-    return columns.find((column) => column.groupColumn && column.field !== SELECTION_FIELD) ?? columns.find((column) => column.field !== SELECTION_FIELD)
-  }
-
-  #renderGroupLabel(node: GroupNode, grouping: Grouping, echo: boolean) {
-    const column = this.#fieldColumn(node.field)
-    const empty = node.value === null || node.value === undefined || node.value === ''
-    const label = this.renderGroup
-      ? this.renderGroup(this.#groupContext(node, grouping))
-      : empty
-        ? this.emptyGroupLabel
-        : column
-          ? this.#formatValue(column, node.value)
-          : String(node.value)
-    const content = html`<span class="group-label" part="group-label">${label}</span>
-      <span class="group-count" part="group-count">${node.rowIndices.length}</span>`
-    // Two slots of one name would split the slotted label between the row and its stuck copy; the copy shows the fallback.
-    return echo ? content : html`<slot name=${`group:${node.key}`}>${content}</slot>`
-  }
-
-  #renderGroupCheckbox(node: GroupNode, grouping: Grouping) {
-    if (this.selection !== 'multiple') return nothing
-    const keys = this.#groupKeys(node, grouping)
-    // Counted once per selection rather than on every scroll frame: a group can hold thousands of rows.
-    if (node.selection?.value !== this.value) {
-      const selected = new Set(this.value)
-      node.selection = { value: this.value, count: keys.filter((key) => selected.has(key)).length }
-    }
-    const count = node.selection.count
-    const all = count > 0 && count === keys.length
-    return html`<c2-checkbox
-      aria-label="Select group rows"
-      ?checked=${all}
-      ?indeterminate=${count > 0 && !all}
-      @click=${(event: Event) => event.stopPropagation()}
-      @change=${(event: Event) => {
-        event.stopPropagation()
-        const own = new Set(keys)
-        const rest = this.value.filter((key) => !own.has(key))
-        this.#commitSelection((event.target as Checkbox).checked ? [...rest, ...keys] : rest)
-      }}
-    ></c2-checkbox>`
-  }
-
-  /**
-   * One group's row. `line` is its display line, or -1 for a copy stuck under the header ("echo"), which is hidden
-   * from assistive technology — the real row is further up — holds nothing focusable, and toggles the real group.
-   */
-  #renderGroupRow(node: GroupNode, line: number, columns: TableColumnConfig[], pins: Map<string, PinPlacement>, grouping: Grouping, echo: boolean) {
-    const expanded = this.#isGroupExpanded(node.key)
-    const band = this.groupDisplay === 'band'
-    const treeColumn = this.#groupTreeColumn(columns)
-    const focusable = (columnIndex: number) => (echo ? undefined : this.#tabIndexFor(line, columnIndex))
-    const toggle = html`<span class="group-toggle" part="group-toggle" style=${styleMap({ '--_group-level': String(node.level) })}>${CHEVRON}</span>`
-    const rowParts = ['group-row', `group-row-level-${node.level}`, band ? 'group-band' : '', echo ? 'group-row-echo' : ''].filter(Boolean).join(' ')
-
-    let cells: unknown
-    if (band) {
-      const selectionColumn = columns.findIndex((column) => column.field === SELECTION_FIELD)
-      cells = html`<div
-        class="cell cell--group cell--band"
-        role="gridcell"
-        part="group-cell"
-        aria-colindex="1"
-        aria-colspan=${columns.length}
-        tabindex=${ifDefined(focusable(this.focusedCell.row === line ? this.focusedCell.column : 0))}
-        @click=${() => this.#focusLine(line)}
-      >
-        <span class="band-content">
-          ${selectionColumn >= 0 && !echo ? this.#renderGroupCheckbox(node, grouping) : nothing} ${toggle} ${this.#renderGroupLabel(node, grouping, echo)}
-        </span>
-      </div>`
-    } else {
-      const values = this.#groupSummary(node, grouping)
-      cells = columns.map((column, columnIndex) => {
-        const pinClasses = this.#pinClasses(column, pins)
-        const style = styleMap(this.#pinStyle(column, pins))
-        if (column.field === SELECTION_FIELD) {
-          return html`<div
-            class=${classMap({ cell: true, 'cell--selection': true, ...pinClasses })}
-            role="gridcell"
-            part="group-cell selection-cell"
-            aria-colindex=${columnIndex + 1}
-            tabindex=${ifDefined(focusable(columnIndex))}
-            style=${style}
-          >
-            ${echo ? nothing : this.#renderGroupCheckbox(node, grouping)}
-          </div>`
-        }
-        const part = columnKey(column).replace(/[^\w-]/g, '-')
-        if (column === treeColumn) {
-          return html`<div
-            class=${classMap({ cell: true, 'cell--group': true, 'cell--group-tree': true, ...pinClasses })}
-            role="gridcell"
-            part="group-cell group-cell-${part}"
-            aria-colindex=${columnIndex + 1}
-            tabindex=${ifDefined(focusable(columnIndex))}
-            style=${style}
-            @click=${() => this.#focusLine(line, columnIndex)}
-          >
-            ${toggle} ${this.#renderGroupLabel(node, grouping, echo)}
-          </div>`
-        }
-        const value = values.get(columnKey(column))
-        const content =
-          value === undefined || value === null || value === ''
-            ? ''
-            : column.summary === 'count'
-              ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-              : this.#formatValue(column, value)
-        return html`<div
-          class=${classMap({ cell: true, 'cell--group': true, [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true, ...pinClasses, ...(column.cellClass ? { [column.cellClass]: true } : {}) })}
-          role="gridcell"
-          part="group-cell group-cell-${part}"
-          aria-colindex=${columnIndex + 1}
-          tabindex=${ifDefined(focusable(columnIndex))}
-          style=${style}
-          @click=${() => this.#focusLine(line, columnIndex)}
-        >
-          <span class="cell-content">${content}</span>
-        </div>`
-      })
-    }
-
-    return html`
-      <div
-        class=${classMap({ row: true, 'row--group': true, 'row--band': band, 'row--group-echo': echo, 'row--group-collapsed': !expanded, [`row--group-level-${node.level}`]: true })}
-        role=${ifDefined(echo ? undefined : 'row')}
-        part=${rowParts}
-        data-group-key=${node.key}
-        aria-level=${ifDefined(echo ? undefined : node.level + 1)}
-        aria-expanded=${ifDefined(echo ? undefined : String(expanded))}
-        aria-rowindex=${ifDefined(echo ? undefined : line + 2)}
-        aria-hidden=${ifDefined(echo ? 'true' : undefined)}
-        @click=${() => this.#toggleGroup(node)}
-      >
-        ${cells}
-      </div>
-    `
-  }
-
   /** Moves the roving tabindex to a cell of display line `line` (a click on a group row, which does not select). */
-  #focusLine(line: number, column = this.focusedCell.column) {
+  protected focusLine(line: number, column = this.focusedCell.column) {
     if (line >= 0) this.focusedCell = { row: line, column }
   }
 
@@ -1559,27 +1637,27 @@ export class Table extends LitElement {
 
   #renderHeaderCell(column: TableColumnConfig, columnIndex: number, pins: Map<string, PinPlacement>) {
     if (column.field === SELECTION_FIELD) {
-      const total = this.#rowTotal
-      const selected = this.value.length
-      const allSelected = total > 0 && selected >= total
+      const { all: allSelected, some } = this.#headerSelection()
+      const bulk = this.bulkSelect && this.selection === 'multiple'
       return html`
         <div
-          class=${classMap({ cell: true, 'cell--header': true, 'cell--selection': true, ...this.#pinClasses(column, pins) })}
+          class=${classMap({ cell: true, 'cell--header': true, 'cell--selection': true, ...this.pinClasses(column, pins) })}
           role="columnheader"
           part="header-cell selection-header-cell"
           data-field=${column.field}
           data-column-id=${columnKey(column)}
           aria-colindex=${columnIndex + 1}
-          tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
-          style=${styleMap(this.#pinStyle(column, pins))}
+          tabindex=${this.tabIndexFor(HEADER_ROW, columnIndex)}
+          style=${styleMap(this.pinStyle(column, pins))}
         >
           <c2-checkbox
-            aria-label="Select all rows"
+            aria-label=${this.msg.t('selectAllRows')}
             ?checked=${allSelected}
-            ?indeterminate=${selected > 0 && !allSelected}
-            ?disabled=${this.selection !== 'multiple' || Boolean(this.dataSource)}
+            ?indeterminate=${some && !allSelected}
+            ?disabled=${this.selection !== 'multiple' || (Boolean(this.dataSource) && !bulk)}
             @change=${this.#handleSelectAll}
           ></c2-checkbox>
+          ${bulk ? this.#renderBulkButton(columnIndex) : nothing}
         </div>
       `
     }
@@ -1598,7 +1676,7 @@ export class Table extends LitElement {
           'cell--sortable': sortable,
           'cell--sorted': Boolean(sort),
           [`cell--align-${column.align ?? 'start'}`]: true,
-          ...this.#pinClasses(column, pins),
+          ...this.pinClasses(column, pins),
         })}
         role="columnheader"
         part="header-cell"
@@ -1606,15 +1684,15 @@ export class Table extends LitElement {
         data-column-id=${columnKey(column)}
         aria-colindex=${columnIndex + 1}
         aria-sort=${ifDefined(sortable ? (sort ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none') : undefined)}
-        tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
-        style=${styleMap(this.#pinStyle(column, pins))}
+        tabindex=${this.tabIndexFor(HEADER_ROW, columnIndex)}
+        style=${styleMap(this.pinStyle(column, pins))}
         @click=${(event: MouseEvent) => {
           this.focusedCell = { row: HEADER_ROW, column: columnIndex }
           this.#toggleSort(column, event.shiftKey)
         }}
       >
         <span class="cell-content">${label}</span>
-        ${sortable ? this.#renderSortIcon(sort?.direction) : nothing}
+        ${sortable ? this.#renderSortIcon(sort?.direction) : nothing} ${this.#isFilterable(column) ? this.#renderFilterButton(column, columnIndex) : nothing}
         ${sort && this.sortModel.length > 1 ? html`<span class="sort-order">${sortIndex + 1}</span>` : nothing}
         ${resizable ? html`<span class="resizer" part="resizer" @pointerdown=${(event: PointerEvent) => this.#startResize(event, column)}></span>` : nothing}
       </div>
@@ -1642,19 +1720,16 @@ export class Table extends LitElement {
 
   /** A data row on display line `line`, which is also its row index unless the rows are grouped. */
   #renderRow(line: number, columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
-    const index = this.#rowIndexAt(line)
+    const index = this.rowIndexAt(line)
     const row = this.#rowAt(index)
-    const key = row ? this.#keyAt(index, row) : ''
-    const grouping = this.#grouping()
-    const item = grouping?.items[line]
-    const node = this.#treeLines()?.[line]
-    const depth = item?.kind === 'row' ? item.parent.level + 1 : 0
-    const treeColumn = (grouping && this.groupDisplay !== 'band') || node ? this.#groupTreeColumn(columns) : undefined
-    const open = node && this.#isParent(node) ? this.#isRowExpanded(node.key) : undefined
+    const key = row ? this.keyAt(index, row) : ''
+    // Its place in a hierarchy (a group, a tree), when the table has one: undefined in a flat table.
+    const level = this.rowLevel(line, columns)
+    const open = level?.expanded
     const detailColumn = row && this.#detail ? columns.find((column) => column.field !== SELECTION_FIELD) : undefined
-    const selected = key !== '' && this.value.includes(key)
+    const selected = key !== '' && this.#isKeySelected(key)
     const selectable = this.selection !== 'none'
-    const updateState = key ? this.#rowUpdateStates.get(key) : undefined
+    const updateState = key ? this.#animation?.states.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
     const extraParts = row && updateState !== 'removed' ? this.rowPart?.({ row, rowIndex: index, key }) : undefined
 
@@ -1675,6 +1750,7 @@ export class Table extends LitElement {
           'row',
           selected ? 'row-selected' : '',
           updateState ? `row-${updateState}` : '',
+          row && this.#editing?.isNew(this.#sourceRowAt(index) ?? row) ? 'row-new' : '',
           ...(typeof extraParts === 'string' ? extraParts.split(/\s+/) : (extraParts ?? [])),
         ]
           .filter(Boolean)
@@ -1682,35 +1758,22 @@ export class Table extends LitElement {
         data-row-key=${key}
         data-update-state=${ifDefined(updateState)}
         aria-rowindex=${line + 2}
-        aria-level=${ifDefined(grouping ? depth + 1 : node ? node.level + 1 : undefined)}
+        aria-level=${ifDefined(level?.level)}
         aria-expanded=${ifDefined(open === undefined ? undefined : String(open))}
-        aria-busy=${ifDefined(node && this.#pendingChildren.has(node.key) ? 'true' : undefined)}
+        aria-busy=${ifDefined(level?.busy ? 'true' : undefined)}
         aria-selected=${ifDefined(selectable ? String(selected) : undefined)}
         aria-hidden=${ifDefined(updateState === 'removed' ? 'true' : undefined)}
         style=${styleMap({ ...rowStyle, '--_update-duration': `${Math.max(0, this.updateDuration)}ms` })}
         @click=${(event: MouseEvent) => this.#handleRowClick(event, line)}
       >
-        ${columns.map((column, columnIndex) =>
-          this.#renderCell(
-            row,
-            line,
-            index,
-            column,
-            columnIndex,
-            pins,
-            column === treeColumn ? depth : 0,
-            node,
-            column === treeColumn,
-            column === detailColumn,
-          ),
-        )}
+        ${columns.map((column, columnIndex) => this.#renderCell(row, line, index, column, columnIndex, pins, level, column === detailColumn))}
       </div>
     `
   }
 
   /**
-   * `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys); `indent` is its group
-   * depth. In a tree, `node` is the row's place in it and `tree` marks the column holding the chevron.
+   * `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys). `level` is the row's
+   * place in a hierarchy (a group, a tree), from `rowLevel`: its column holds the indentation and the chevron.
    */
   #renderCell(
     row: TableRow | undefined,
@@ -1719,26 +1782,27 @@ export class Table extends LitElement {
     column: TableColumnConfig,
     columnIndex: number,
     pins: Map<string, PinPlacement>,
-    indent = 0,
-    node?: TreeNode,
-    tree = false,
+    level?: TableRowLevel,
     detail = false,
   ) {
+    // The column of a hierarchy holds the indentation and the chevron; every column may show a parent's rollup.
+    const own = level && column === level.column
+    const indent = own ? level.indent : 0
     const classes = {
       cell: true,
       [`cell--align-${column.align ?? 'start'}`]: true,
       'cell--selection': column.field === SELECTION_FIELD,
-      ...this.#pinClasses(column, pins),
+      ...this.pinClasses(column, pins),
       ...(column.cellClass ? { [column.cellClass]: true } : {}),
     }
     const shared = {
       class: classMap(classes),
-      tabindex: this.#tabIndexFor(line, columnIndex),
-      style: styleMap(this.#pinStyle(column, pins)),
+      tabindex: this.tabIndexFor(line, columnIndex),
+      style: styleMap(this.pinStyle(column, pins)),
     }
 
     if (column.field === SELECTION_FIELD) {
-      const key = row ? this.#keyAt(rowIndex, row) : ''
+      const key = row ? this.keyAt(rowIndex, row) : ''
       return html`
         <div
           class=${shared.class}
@@ -1751,9 +1815,9 @@ export class Table extends LitElement {
           ${
             row
               ? html`<c2-checkbox
-                  aria-label="Select row"
-                  ?checked=${this.value.includes(key)}
-                  ?indeterminate=${Boolean(node && this.#partialKeys().has(key))}
+                  aria-label=${this.msg.t('selectRow')}
+                  ?checked=${this.#isKeySelected(key)}
+                  ?indeterminate=${this.isPartial(key)}
                   @click=${(event: Event) => event.stopPropagation()}
                   @change=${() => this.#handleCheckboxToggle(line)}
                 ></c2-checkbox>`
@@ -1764,61 +1828,295 @@ export class Table extends LitElement {
     }
 
     const id = columnKey(column)
-    const value = node?.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(row, column.field)
-    const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
+    const value = level?.rollup?.has(id)
+      ? level.rollup.get(id)
+      : row && (column.running || column.countValue !== undefined || !column.field)
+        ? this.cellValue(this.#sourceRowAt(rowIndex) ?? row, column)
+        : row && this.readCell(row, column)
+    const rendered = row
+      ? column.renderCell
+        ? column.renderCell({ value, row, rowIndex, column })
+        : value instanceof Map
+          ? // A tree parent's `tally` rollup: each value with its count, as the summary row draws it.
+            this.formatAggregate(column, value, false)
+          : column.editor === 'checkbox'
+            ? this.#renderCheckCell(line, columnIndex, column, value)
+            : column.format === 'status'
+              ? this.#renderStatus(column, value)
+              : this.formatValue(column, value)
+      : undefined
+    // A column comparing with `baseline` shows each cell's change, and marks a change past its threshold.
+    const versus = row && this.baseline && (column.compare || column.varianceThreshold !== undefined) ? this.#versus(rowIndex, row, column, value) : undefined
+    const flag = row && (column.referenceRange || column.criticalRange) ? this.#flagOf(this.#sourceRowAt(rowIndex) ?? row, column, value) : undefined
+    const decoration = row && column.field !== SELECTION_FIELD ? this.cellDecoration(this.#sourceRowAt(rowIndex) ?? row, rowIndex, column, value) : undefined
+    // Only once something was edited: until then an editable table renders its cells exactly as a read-only one. The
+    // module knows rows as the application gave them, not the interpolated copy an animated update draws.
+    const editing = row ? this.#editing : undefined
+    const source = editing && this.#sourceRowAt(rowIndex)
+    const editor = source ? editing!.editor(source, column, rowIndex) : undefined
+    const state = source ? editing!.cellState(source, column) : undefined
     // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
     // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
     // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
-    const content = row
-      ? column.cellSlot
-        ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
-        : rendered
-      : html`<span class="skeleton" part="skeleton"></span>`
+    const content = editor
+      ? editor
+      : row
+        ? column.cellSlot
+          ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
+          : versus?.delta !== undefined || flag || decoration?.mark !== undefined
+            ? html`${rendered}${flag?.mark}${decoration?.mark}${versus?.delta}`
+            : rendered
+        : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
     // the cell for its box, the content for the text itself, which is what a pill or a chip needs.
     const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
     return html`
       <div
-        class=${shared.class}
+        class=${
+          state || editor || versus?.over || flag
+            ? classMap({
+                [`cell--flag-${flag?.flag}`]: Boolean(flag),
+                ...classes,
+                'cell--editing': Boolean(editor),
+                'cell--dirty': Boolean(state?.dirty),
+                'cell--invalid': Boolean(state?.error),
+                'cell--variance': Boolean(versus?.over),
+              })
+            : shared.class
+        }
         role="gridcell"
-        part="cell cell-${fieldPart}"
+        part="cell cell-${fieldPart}${state?.dirty ? ' cell-dirty' : ''}${state?.error ? ' cell-invalid' : ''}${versus?.over ? ' cell-variance' : ''}${flag ? ` cell-flag cell-flag-${flag.flag}` : ''}${decoration?.parts ? ` ${decoration.parts}` : ''}"
         aria-colindex=${columnIndex + 1}
+        aria-invalid=${ifDefined(state?.error ? 'true' : undefined)}
+        title=${ifDefined(state?.error)}
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
         @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
-        ${node && tree ? this.#renderRowToggle(node) : nothing} ${detail && row ? this.#renderDetailToggle(row, rowIndex, line, columnIndex) : nothing}
+        ${own && level.toggle ? level.toggle() : nothing} ${detail && row ? this.#renderDetailToggle(row, rowIndex, line, columnIndex) : nothing}
         <span
           class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
           part="cell-content cell-content-${fieldPart}"
           style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
           >${content}</span
-        >
+        >${state?.error ? html`<span class="cell-error">${state.error}</span>` : nothing}
       </div>
     `
   }
 
-  /** The chevron of a tree row, indented by its depth; a leaf keeps the room empty so labels line up across levels. */
-  #renderRowToggle(node: TreeNode) {
-    const parent = this.#isParent(node)
-    return html`<span
-      class=${classMap({ 'group-toggle': true, 'row-toggle': true, 'row-toggle--leaf': !parent })}
-      part="row-toggle"
-      style=${styleMap({ '--_group-level': String(node.level) })}
-      @click=${(event: Event) => {
-        if (!parent) return
-        event.stopPropagation()
-        this.#toggleRow(node)
-      }}
-      >${this.#pendingChildren.has(node.key) ? html`<c2-spinner></c2-spinner>` : CHEVRON}</span
+  /**
+   * A cell against the matching row of `baseline`: the change as `compare` shows it, and whether it passes the
+   * column's `variance-threshold`. Nothing when either value is not a number.
+   */
+  #versus(rowIndex: number, row: TableRow, column: TableColumnConfig, value: unknown): { delta?: unknown; over: boolean } | undefined {
+    if (!this.rowKey && !this.getRowKey) {
+      // Without a key a position would match the baseline, and a sort or a filter moves the rows.
+      if (!this.#baselineWarned) console.warn('c2-table: `baseline` matches rows by `row-key` (or `getRowKey`); set one to compare.')
+      this.#baselineWarned = true
+      return undefined
+    }
+    const source = this.#sourceRowAt(rowIndex) ?? row
+    const inputs = [this.baseline, this.rowKey, this.getRowKey]
+    // Keyed once per baseline (and key rule): a lookup per cell, not a search.
+    if (!this.#baselineCache?.inputs.every((input, index) => input === inputs[index])) {
+      const rows = new Map<string, TableRow>()
+      ;(Array.isArray(this.baseline) ? this.baseline : []).forEach((entry, index) => rows.set(this.keyAt(index, entry), entry))
+      this.#baselineCache = { inputs, rows }
+    }
+    const before = this.#baselineCache.rows.get(this.keyAt(rowIndex, source))
+    const previous = before && toNumber(this.cellValue(before, column))
+    const current = toNumber(value)
+    if (previous === undefined || !Number.isFinite(previous) || !Number.isFinite(current)) return undefined
+    const change = current - previous
+    const threshold = column.varianceThreshold
+    const over = threshold !== undefined && (previous === 0 ? change !== 0 : Math.abs(change) > Math.abs(previous) * threshold)
+    if (!column.compare) return { over }
+    // An unchanged value shows no change: a column of zeros would hide the rows that moved.
+    const text =
+      change === 0
+        ? ''
+        : column.compare === 'percent'
+          ? previous === 0
+            ? ''
+            : new Intl.NumberFormat(column.locale, { style: 'percent', maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(
+                change / Math.abs(previous),
+              )
+          : this.formatValue(
+              {
+                ...column,
+                options: undefined,
+                format: column.format && column.format !== 'text' && column.format !== 'status' ? column.format : 'number',
+                formatOptions: { ...column.formatOptions, signDisplay: 'exceptZero' },
+              },
+              change,
+            )
+    const delta = html`<span
+      class="delta"
+      part="delta delta-${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}"
+      title=${this.msg.t('previousValue', this.formatValue(column, previous))}
+      >${text}</span
     >`
+    return { delta, over }
+  }
+
+  /**
+   * Where a cell stands against its row's `critical-range`, then its `reference-range`, and the mark it shows: the
+   * short letter a lab report prints (`H`, `L`), its name for a screen reader and the range as its tooltip.
+   */
+  #flagOf(row: TableRow, column: TableColumnConfig, value: unknown): { flag: TableCellFlag; mark: unknown } | undefined {
+    const number = toNumber(value)
+    if (!Number.isFinite(number)) return undefined
+    const [criticalLow, criticalHigh] = this.#limits(row, column.criticalRange)
+    const [low, high] = this.#limits(row, column.referenceRange)
+    const flag: TableCellFlag | undefined =
+      criticalLow !== undefined && number < criticalLow
+        ? 'critical-low'
+        : criticalHigh !== undefined && number > criticalHigh
+          ? 'critical-high'
+          : low !== undefined && number < low
+            ? 'low'
+            : high !== undefined && number > high
+              ? 'high'
+              : undefined
+    if (!flag) return undefined
+    const [letter, name] = {
+      low: ['flagLow', 'flagLowName'],
+      high: ['flagHigh', 'flagHighName'],
+      'critical-low': ['flagCriticalLow', 'flagCriticalLowName'],
+      'critical-high': ['flagCriticalHigh', 'flagCriticalHighName'],
+    }[flag] as ['flagLow', 'flagLowName']
+    const limit = (bound: number | undefined) => (bound === undefined ? '' : this.formatValue(column, bound))
+    const range = low === undefined && high === undefined ? '' : `${limit(low)}–${limit(high)}`
+    const label = this.msg.t(name)
+    const mark = html`<span class="flag" part="flag flag-${flag}" title=${range ? this.msg.t('flagRange', label, range) : label}
+      ><span aria-hidden="true">${this.msg.t(letter)}</span><span class="flag-name">${label}</span></span
+    >`
+    return { flag, mark }
+  }
+
+  /** The two limits of a range attribute (`low,high`): each a number, or the field of the row that holds one. */
+  #limits(row: TableRow, range?: string): [number | undefined, number | undefined] {
+    if (!range) return [undefined, undefined]
+    const [low, high] = range.split(',').map((part) => {
+      const text = part.trim()
+      if (!text) return undefined
+      const literal = Number(text)
+      const number = Number.isFinite(literal) ? literal : toNumber(getFieldValue(row, text))
+      return Number.isFinite(number) ? number : undefined
+    })
+    return [low, high]
+  }
+
+  /**
+   * What a body cell adds to its parts and after its content: the names `cellPart` returns, and what a variant adds
+   * (`c2-allocation-grid` marks a week over capacity). Called for every rendered cell, so it stays cheap.
+   */
+  protected cellDecoration(row: TableRow, rowIndex: number, column: TableColumnConfig, value: unknown): { parts?: string; mark?: unknown } | undefined {
+    if (!this.cellPart) return undefined
+    const parts = this.cellPart({ row, rowIndex, column, value })
+    if (!parts) return undefined
+    return { parts: Array.isArray(parts) ? parts.join(' ') : String(parts) }
+  }
+
+  /** Whether `column` has a filter in its header: its own `filterable`, else the table's. */
+  #isFilterable(column: TableColumnConfig): boolean {
+    if (column.field === SELECTION_FIELD || !(column.filterable ?? this.filterable)) return false
+    // A data source has no values to list but the ones a column declares in `options`.
+    return !this.dataSource || Boolean(column.options?.length)
+  }
+
+  /** The filter button of a header: it opens the column's values, and shows when the column is filtered. */
+  #renderFilterButton(column: TableColumnConfig, columnIndex: number) {
+    const id = columnKey(column)
+    const filter = this.filters?.[id]
+    const active = Boolean(filter?.include?.length || filter?.exclude?.length)
+    return html`<button
+      class=${classMap({ 'filter-button': true, 'filter-button--active': active })}
+      part=${active ? 'filter-button filter-button-active' : 'filter-button'}
+      type="button"
+      tabindex="-1"
+      aria-label=${this.msg.t('filterColumn', column.header ?? humanize(column.field || id))}
+      aria-haspopup="dialog"
+      aria-expanded=${String(this.#filter?.openColumn === id)}
+      @click=${(event: Event) => {
+        event.stopPropagation()
+        this.focusedCell = { row: HEADER_ROW, column: columnIndex }
+        this.#openFilter(column, event.currentTarget as HTMLElement)
+      }}
+    >
+      ${FUNNEL}
+    </button>`
+  }
+
+  #openFilter(column: TableColumnConfig, anchor: HTMLElement) {
+    this.#filterLoad ??= import('./table-filter.js').then(({ TableFilter }) => {
+      this.#filter = new TableFilter({
+        table: this,
+        rowsFor: (id) => (this.dataSource ? [] : this.filterValueRows(id)),
+        cellValue: (row, target) => this.cellValue(row, target),
+        formatValue: (target, value) => this.formatValue(target, value),
+        sortable: (target) => Boolean(target.field && (target.sortable ?? this.sortable)),
+        sort: (target, direction) => {
+          this.sortModel = [{ field: target.field, direction }]
+          this.dispatchEvent(new CustomEvent<TableSortChangeEventDetail>('sort-change', { detail: { sort: this.sortModel }, bubbles: true, composed: true }))
+        },
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: string[]) => string).call(this.msg, key, ...args),
+      })
+      return this.#filter
+    })
+    void this.#filterLoad.then((filter) => filter.open(column, anchor))
+  }
+
+  /**
+   * `rows` without those the column filters drop; `skip` leaves one column's filter out (its own value list shows the
+   * values the other filters let through). Values compare as text. Not applied to a `dataSource`, which filters itself.
+   */
+  protected filterRows(rows: TableRow[], skip?: string): TableRow[] {
+    const test = this.filterTest(skip)
+    return test ? rows.filter(test) : rows
+  }
+
+  /** The rows a column's filter counts its values over: those every other filter lets through. */
+  protected filterValueRows(skip: string): TableRow[] {
+    return this.filterRows(this.sourceRows(), skip)
+  }
+
+  /** Whether a row passes every active filter (but `skip`'s); undefined when no filter is active. */
+  protected filterTest(skip?: string): ((row: TableRow) => boolean) | undefined {
+    const filters = this.filters
+    if (!filters || this.dataSource) return undefined
+    const active = Object.entries(filters).filter(([id, filter]) => id !== skip && (filter?.include?.length || filter?.exclude?.length))
+    if (!active.length) return undefined
+    // Columns a variant derives are found among the resolved ones; a hidden column, among the declared ones.
+    const source: TableColumnConfig[] = [...this.resolvedColumns, ...(this.columnElements.length ? this.columnElements : (this.columns ?? []))]
+    const tests = active.map(([id, filter]) => ({
+      column: source.find((column) => columnKey(column) === id) ?? { field: id },
+      include: filter.include?.length ? new Set(filter.include) : undefined,
+      exclude: new Set(filter.exclude ?? []),
+    }))
+    return (row) =>
+      tests.every(({ column, include, exclude }) => {
+        const text = filterText(this.cellValue(row, column))
+        return (!include || include.has(text)) && !exclude.has(text)
+      })
+  }
+
+  /** The checkbox of a `checkbox` column: toggled in place while the cell can be edited, a read-only mark otherwise. */
+  #renderCheckCell(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    return html`<c2-checkbox
+      aria-label=${column.header ?? column.field}
+      .checked=${live(Boolean(value))}
+      ?disabled=${!this.#canEdit(line, columnIndex)}
+      @click=${(event: Event) => event.stopPropagation()}
+      @change=${() => this.#beginEdit(line, columnIndex, 'edit')}
+    ></c2-checkbox>`
   }
 
   /** Whether rows have a detail panel: `detail-height` is set and the rows are neither grouped nor a tree. */
   get #detail(): boolean {
-    return this.detailHeight > 0 && !this.#tree && !this.#grouping()
+    return this.detailHeight > 0 && !this.structured
   }
 
   #isDetailOpen(key: string): boolean {
@@ -1845,7 +2143,7 @@ export class Table extends LitElement {
         const viewport = this.viewport
         if (!panel || !viewport) return
         const over = panel.getBoundingClientRect().bottom - viewport.getBoundingClientRect().bottom
-        const room = panel.getBoundingClientRect().top - this.#rowHeightPx - viewport.getBoundingClientRect().top - this.#headerHeight()
+        const room = panel.getBoundingClientRect().top - this.rowHeightPx - viewport.getBoundingClientRect().top - this.headerHeight()
         if (over > 0 && room > 0) viewport.scrollTop += Math.min(over, room)
       })
   }
@@ -1858,8 +2156,8 @@ export class Table extends LitElement {
     const keys = this.expandedDetails
     if (!keys?.length || !this.#detail) return NO_LINES
     const count = this.rowCount
-    const first = this.#pageStart
-    const inputs = [keys, this.#sortedRows, this.#transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
+    const first = this.pageStart
+    const inputs = [keys, this.sortedRows, this.#animation?.transitionRows, first, count, this.#blocksVersion, this.rowKey, this.getRowKey]
     const cached = this.#detailCache
     if (cached && inputs.every((input, index) => input === cached.inputs[index])) return cached.lines
     const wanted = new Set(keys)
@@ -1870,14 +2168,14 @@ export class Table extends LitElement {
       for (const [block, rows] of this.#blocks) {
         rows.forEach((row, position) => {
           const line = block * size + position - first
-          if (line >= 0 && line < count && wanted.has(this.#keyAt(first + line, row))) lines.push(line)
+          if (line >= 0 && line < count && wanted.has(this.keyAt(first + line, row))) lines.push(line)
         })
       }
       lines.sort((a, b) => a - b)
     } else {
       for (let line = 0; line < count && lines.length < wanted.size; line++) {
         const row = this.#sourceRowAt(first + line)
-        if (row && wanted.has(this.#keyAt(first + line, row))) lines.push(line)
+        if (row && wanted.has(this.keyAt(first + line, row))) lines.push(line)
       }
     }
     this.#detailCache = { inputs, lines }
@@ -1893,7 +2191,7 @@ export class Table extends LitElement {
     const range = this.#virtualizer.range
     const open = this.#detailLines()
     if (open.length === 0 || !this.isVirtualized) return range
-    const height = this.#rowHeightPx
+    const height = this.rowHeightPx
     const panel = this.detailHeight
     const count = this.rowCount
     // An update reads the window several times (render, focus, blocks, range-change): computed once per scroll position.
@@ -1926,7 +2224,7 @@ export class Table extends LitElement {
 
   /** The chevron that opens a row's detail panel: a button, since a plain grid row has no expanded state of its own. */
   #renderDetailToggle(row: TableRow, rowIndex: number, line: number, columnIndex: number) {
-    const key = this.#keyAt(rowIndex, row)
+    const key = this.keyAt(rowIndex, row)
     const open = this.#isDetailOpen(key)
     return html`<button
       class=${classMap({ 'group-toggle': true, 'detail-toggle': true, 'detail-toggle--closed': !open })}
@@ -1957,10 +2255,10 @@ export class Table extends LitElement {
    * a renderer's panel, which is drawn on open.
    */
   #renderDetailRow(line: number, columns: TableColumnConfig[]) {
-    const index = this.#rowIndexAt(line)
+    const index = this.rowIndexAt(line)
     const row = this.#sourceRowAt(index)
     if (!row) return nothing
-    const key = this.#keyAt(index, row)
+    const key = this.keyAt(index, row)
     const open = this.#isDetailOpen(key)
     const renderer = this.renderDetail
     if (!open && (renderer || !FINDABLE)) return nothing
@@ -2006,20 +2304,21 @@ export class Table extends LitElement {
     // A `dataSource` only holds the blocks it has fetched, so an aggregate over "all" of it would be a partial sum
     // presented as a total. Its page, once loaded, is complete; otherwise the server's figures come in `summaryValues`.
     const aggregatable = !this.dataSource || (pageScope && this.paginated)
-    const start = pageScope ? this.#pageStart : 0
-    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#transitionRows ?? this.#sortedRows).length
+    const start = pageScope ? this.pageStart : 0
+    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#animation?.transitionRows ?? this.sortedRows).length
     const inputs = [
       columns.length,
+      // The ids too: a variant may derive columns (the periods of an allocation grid) whose set changes at one length.
+      ...columns.map(columnKey),
       ...columns.map((column) => column.summary),
       this.columnElements,
       this.columns,
       this.summaryValues,
-      this.#sortedRows,
-      this.#transitionRows,
-      this.#animationProgress,
+      this.sortedRows,
+      this.#animation?.transitionRows,
+      this.#animation?.progress,
       this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
-      pageScope ? this.#grouping()?.items : undefined,
-      pageScope ? this.#treeLines() : undefined,
+      pageScope ? this.lineInputs() : undefined,
       start,
       count,
     ]
@@ -2027,13 +2326,18 @@ export class Table extends LitElement {
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached
 
     const rows: TableRow[] = []
+    // The rows as given, which computed columns (`running`) are keyed by; `rows` may hold an animated update's copies.
+    const sources: TableRow[] = []
     for (let cursor = start; cursor < start + count; cursor++) {
       // The page is made of display lines, so while grouped its rows are those on the page's data lines.
-      const index = pageScope ? this.#rowIndexAt(cursor) : cursor
+      const index = pageScope ? this.rowIndexAt(cursor) : cursor
       const row = this.#rowAt(index)
       // A row collapsing out during an animated update is already gone from the data, so it no longer counts. In a
       // tree only the leaves count: a parent's figures are its children's, and would be counted twice.
-      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed' && !this.#tree?.nodes[index]?.children?.length) rows.push(row)
+      if (row && this.#animation?.states.get(this.keyAt(index, row)) !== 'removed' && this.inSummary(index)) {
+        rows.push(row)
+        sources.push(this.#sourceRowAt(index) ?? row)
+      }
     }
     const values = new Map<string, unknown>()
     for (const column of columns) {
@@ -2042,12 +2346,12 @@ export class Table extends LitElement {
       // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
       else if (!aggregatable) continue
       else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
-      else if (column.summary && column.field)
+      else if (column.summary && (column.field || column.running || column.countValue !== undefined))
         values.set(
           key,
           aggregate(
             column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
+            sources.map((row) => this.cellValue(row, column)),
           ),
         )
     }
@@ -2071,31 +2375,38 @@ export class Table extends LitElement {
     let content: unknown
     if (column.renderSummary) content = column.renderSummary({ column, rows, value })
     else if (value !== undefined && value !== null && value !== '') {
-      // A count is a number of rows, not an amount: a currency or date column must not format it as one.
-      content =
-        column.summary === 'count' && !explicit
-          ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
-          : this.#formatValue(column, value)
+      content = this.formatAggregate(column, value, explicit)
     } else content = column.summaryLabel ?? ''
 
     const focused = this.focusedCell.row === SUMMARY_ROW && this.focusedCell.column >= index && this.focusedCell.column < index + span
     const part = key.replace(/[^\w-]/g, '-')
+    // A total that must reach a value, such as shares adding up to 100%: off target, the cell is marked and says so.
+    const target = column.summaryTarget
+    // Compared as the cell shows them, so 33.33 + 33.33 + 33.34 is on target and a total that reads `100` is never flagged.
+    const off =
+      target !== undefined &&
+      target !== null &&
+      typeof value === 'number' &&
+      this.formatAggregate(column, value, explicit) !== this.formatAggregate(column, target, explicit)
+    const offText = off ? this.msg.t('summaryOffTarget', String(this.formatAggregate(column, target, explicit))) : undefined
     return html`
       <div
         class=${classMap({
           cell: true,
           'cell--summary': true,
+          'cell--off-target': off,
           [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true,
           'cell--selection': column.field === SELECTION_FIELD,
-          ...this.#pinClasses(column, pins),
+          ...this.pinClasses(column, pins),
           ...(column.cellClass ? { [column.cellClass]: true } : {}),
         })}
         role="gridcell"
-        part="summary-cell summary-cell-${part}"
+        part="summary-cell summary-cell-${part}${off ? ' summary-cell-off-target' : ''}"
+        title=${ifDefined(offText)}
         aria-colindex=${index + 1}
         aria-colspan=${ifDefined(span > 1 ? span : undefined)}
         tabindex=${focused ? 0 : -1}
-        style=${styleMap({ ...this.#pinStyle(column, pins), ...(span > 1 ? { 'grid-column': `span ${span}` } : {}) })}
+        style=${styleMap({ ...this.pinStyle(column, pins), ...(span > 1 ? { 'grid-column': `span ${span}` } : {}) })}
         @click=${() => (this.focusedCell = { row: SUMMARY_ROW, column: index })}
       >
         ${column.field === SELECTION_FIELD ? nothing : html`<span class="cell-content" part="summary-content summary-content-${part}">${content}</span>`}
@@ -2109,7 +2420,8 @@ export class Table extends LitElement {
     const selectionColumn: TableColumnConfig = {
       field: SELECTION_FIELD,
       header: '',
-      width: 'var(--c2-table__selection-cell--width, 44px)',
+      // With `bulk-select` the column holds the caret too.
+      width: this.bulkSelect ? 'var(--c2-table__bulk-selection-cell--width, 64px)' : 'var(--c2-table__selection-cell--width, 44px)',
       minWidth: 32,
       align: 'center',
       pinned: 'start',
@@ -2121,7 +2433,7 @@ export class Table extends LitElement {
     const first = Array.isArray(this.rows) ? this.rows[0] : undefined
     if (!first) return []
     // A tree's children field holds rows, not a value to show.
-    const children = this.childrenField.split('.')[0]
+    const children = this.hiddenAutoField().split('.')[0]
     return Object.keys(first)
       .filter((field) => field !== children)
       .map((field) => ({ field, header: humanize(field) }))
@@ -2167,7 +2479,7 @@ export class Table extends LitElement {
     return this.widthOverrides[key] ?? this.#measuredWidths.get(key) ?? 0
   }
 
-  #pinClasses(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, boolean> {
+  protected pinClasses(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, boolean> {
     const pin = pins.get(columnKey(column))
     if (!pin) return {}
     return {
@@ -2177,18 +2489,118 @@ export class Table extends LitElement {
     }
   }
 
-  #pinStyle(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, string> {
+  protected pinStyle(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, string> {
     const pin = pins.get(columnKey(column))
     if (!pin) return {}
     return pin.side === 'start' ? { left: `${pin.offset}px` } : { right: `${pin.offset}px` }
   }
 
-  #tabIndexFor(rowIndex: number, columnIndex: number): number {
+  protected tabIndexFor(rowIndex: number, columnIndex: number): number {
     return this.focusedCell.row === rowIndex && this.focusedCell.column === columnIndex ? 0 : -1
   }
 
-  #formatValue(column: TableColumnConfig, value: unknown): string {
+  /**
+   * A summary or group value as its cell shows it. A count is a number of rows, not an amount: a currency or date
+   * column must not format it as one. A tally lists each value with its count, as a status where the column has them.
+   */
+  protected formatAggregate(column: TableColumnConfig, value: unknown, explicit: boolean): unknown {
+    if (value instanceof Map) {
+      const order = (column.options ?? []).map((option) => String(typeof option === 'object' ? option.value : option))
+      const rank = (entry: unknown) => order.indexOf(String(entry)) + 1 || order.length + 1
+      const entries = [...value].sort(([a], [b]) => rank(a) - rank(b))
+      return html`<span class="tally"
+        >${entries.map(
+          ([entry, count]) =>
+            html`<span class="tally-entry"
+              >${column.format === 'status' ? this.#renderStatus(column, entry) : this.formatValue(column, entry)}
+              <span class="tally-count">${count}</span></span
+            >`,
+        )}</span
+      >`
+    }
+    if (column.summary === 'count' && !explicit) return this.formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
+    return this.formatValue(column, value)
+  }
+
+  /** A value of a `status` column: its mark, painted from its `options` entry, and its label. */
+  #renderStatus(column: TableColumnConfig, value: unknown) {
     if (value === null || value === undefined || value === '') return ''
+    const option = optionOf(column, value)
+    const legend = typeof option === 'object' ? option : undefined
+    const label = this.formatValue(column, value)
+    return html`<span
+      class="status"
+      part="status status-${String(value).replace(/[^\w-]/g, '-')}"
+      title=${this.msg.t('statusTitle', column.header ?? column.field, label)}
+      style=${styleMap(legend?.color ? { '--_status-color': legend.color } : {})}
+      ><span class=${legend?.glyph ? 'status-mark status-mark--glyph' : 'status-mark'} part="status-mark" aria-hidden="true">${legend?.glyph ?? nothing}</span
+      ><span class="status-label" part="status-label">${label}</span></span
+    >`
+  }
+
+  /**
+   * The value of a cell: its field, or what a computed column makes of the row. `row` is the row as given, which
+   * `running` totals are keyed by.
+   */
+  protected cellValue(row: TableRow, column: TableColumnConfig): unknown {
+    if (column.running) return this.#runningTotals(column).get(row)
+    if (column.countValue !== undefined) {
+      const wanted = String(column.countValue)
+      let count = 0
+      for (const other of this.#statusColumns()) if (String(getFieldValue(row, other.field)) === wanted) count++
+      return count
+    }
+    return this.readCell(row, column)
+  }
+
+  /**
+   * Every `status` column, hidden ones included: hiding a column changes what the table shows, not what a row's
+   * `count-value` counts. Kept until the column definitions change.
+   */
+  #statusColumns(): TableColumnConfig[] {
+    const source = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    if (this.#statusCache?.source !== source) this.#statusCache = { source, columns: source.filter((column) => column.format === 'status') }
+    return this.#statusCache.columns
+  }
+
+  /**
+   * A `running` column's total after each row, accumulated once over the rows in their sorted order whenever they or
+   * the column change. Not computed for a `dataSource`, which only holds the rows it has fetched.
+   */
+  #runningTotals(column: TableColumnConfig): Map<TableRow, number> {
+    const inputs = [this.sortedRows, column.running, column.opening, this.dataSource]
+    const cached = this.#runningCache.get(column)
+    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.totals
+    const terms = (column.running ?? '')
+      .split(',')
+      .map((term) => term.trim())
+      .filter(Boolean)
+      .map((term) => (term.startsWith('-') ? { field: term.slice(1).trim(), sign: -1 } : { field: term.replace(/^\+/, '').trim(), sign: 1 }))
+    const totals = new Map<TableRow, number>()
+    let total = Number(column.opening) || 0
+    const rows = this.dataSource ? [] : this.sortedRows
+    for (let index = 0; index < rows.length; index++) {
+      // In a tree only the leaves move the total: a parent's figures are its children's, and would count twice.
+      if (!this.inSummary(index)) continue
+      const row = rows[index]
+      let moved = false
+      for (const { field, sign } of terms) {
+        const number = toNumber(getFieldValue(row, field))
+        if (!Number.isFinite(number)) continue
+        total += sign * number
+        moved = true
+      }
+      if (moved) totals.set(row, total)
+    }
+    this.#runningCache.set(column, { inputs, totals })
+    return totals
+  }
+
+  protected formatValue(column: TableColumnConfig, value: unknown): string {
+    if (value === null || value === undefined || value === '') return ''
+    // A `select` or `status` column shows the label of its option.
+    const option = optionOf(column, value)
+    if (option !== undefined) return typeof option === 'object' ? (option.label ?? String(option.value)) : String(option)
     const locale = column.locale
     const extra = column.formatOptions
     try {
@@ -2220,25 +2632,23 @@ export class Table extends LitElement {
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
-    const row = (this.#transitionRows ?? this.#sortedRows)[index]
-    if (!row || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-    const from = this.#animationFrom.get(this.#keyAt(index, row))
-    return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
+    const row = (this.#animation?.transitionRows ?? this.sortedRows)[index]
+    return row && this.#animation ? this.#animation.rowAt(index, row) : row
   }
 
   /** The row at `index` as the application gave it: `#rowAt` without the interpolation of an animated update. */
   #sourceRowAt(index: number): TableRow | undefined {
     if (index < 0) return undefined
     if (this.dataSource) return this.#rowAt(index)
-    return (this.#transitionRows ?? this.#sortedRows)[index]
+    return (this.#animation?.transitionRows ?? this.sortedRows)[index]
   }
 
-  #keyAt(index: number, row: TableRow): string {
-    return this.#identityOf(row) ?? String(index)
+  protected keyAt(index: number, row: TableRow): string {
+    return this.identityOf(row) ?? String(index)
   }
 
   /** The key a row carries itself, from `getRowKey` or `row-key`; `undefined` when it has none and only its position identifies it. */
-  #identityOf(row: TableRow): string | undefined {
+  protected identityOf(row: TableRow): string | undefined {
     const value = this.getRowKey ? this.getRowKey(row) : this.rowKey ? getFieldValue(row, this.rowKey) : undefined
     return value === null || value === undefined || value === '' ? undefined : String(value)
   }
@@ -2262,437 +2672,12 @@ export class Table extends LitElement {
     )
   }
 
-  #applySort() {
-    const rows = Array.isArray(this.rows) ? this.rows : []
-    this.#tree = this.childrenField && !this.dataSource ? this.#buildTree(rows) : undefined
-    this.#sortedRows = this.#tree ? this.#tree.nodes.map((node) => node.row) : this.#sortRows(rows)
-  }
-
-  /**
-   * Builds the tree of `children-field`: nodes and their rollups first, from the leaves up, then every level sorted
-   * (by the rolled-up values where a column has them) and numbered depth first — the order of the flattened rows.
-   */
-  #buildTree(rows: TableRow[]): TreeRows {
-    const columns = this.resolvedColumns.filter((column) => column.rollup)
-    const build = (list: TableRow[], level: number, parent?: TreeNode): TreeNode[] =>
-      list
-        .filter((row) => row && typeof row === 'object')
-        .map((row) => {
-          const node: TreeNode = { row, index: -1, key: '', level, parent, lazy: false, leaves: [row] }
-          const value = getFieldValue(row, this.childrenField)
-          const identity = this.#identityOf(row)
-          const children = Array.isArray(value) ? value : identity === undefined ? undefined : this.#loadedChildren.get(identity)
-          if (children) {
-            node.children = build(children, level + 1, node)
-            if (node.children.length) {
-              node.leaves = node.children.flatMap((child) => child.leaves)
-              node.rollup = new Map()
-              for (const column of columns) {
-                const rollup = column.rollup!
-                node.rollup.set(
-                  columnKey(column),
-                  typeof rollup === 'function'
-                    ? rollup({ column, rows: node.leaves })
-                    : aggregate(
-                        rollup,
-                        node.leaves.map((leaf) => getFieldValue(leaf, column.field)),
-                      ),
-                )
-              }
-            }
-          } else node.lazy = value === true && identity !== undefined
-          return node
-        })
-    const nodes: TreeNode[] = []
-    const byKey = new Map<string, TreeNode>()
-    const number = (list: TreeNode[]): TreeNode[] =>
-      this.#sortBySortModel(list, (node, field, column) => {
-        const id = column && columnKey(column)
-        // The value the cell shows, so a parent sorts by its rollup even when that is empty.
-        return id && node.rollup?.has(id) ? node.rollup.get(id) : getFieldValue(node.row, field)
-      }).map((node) => {
-        node.index = nodes.push(node) - 1
-        node.key = this.#keyAt(node.index, node.row)
-        byKey.set(node.key, node)
-        if (node.children) node.children = number(node.children)
-        return node
-      })
-    return { roots: number(build(rows, 0)), nodes, byKey }
-  }
-
-  /** The tree rows on display, depth first, skipping the children of closed rows; undefined unless the rows are a tree. */
-  #treeLines(): TreeNode[] | undefined {
-    const tree = this.#tree
-    if (!tree) return undefined
-    const inputs = [tree, this.expandedRows, this.treeExpanded]
-    const cached = this.#treeCache
-    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.lines
-    const lines: TreeNode[] = []
-    const wanted: TreeNode[] = []
-    const visit = (list: TreeNode[]) => {
-      for (const node of list) {
-        lines.push(node)
-        if (!this.#isParent(node) || !this.#isRowExpanded(node.key)) continue
-        if (node.children) visit(node.children)
-        else wanted.push(node)
-      }
-    }
-    visit(tree.roots)
-    this.#treeCache = { inputs, lines, wanted }
-    return lines
-  }
-
-  #isParent(node: TreeNode): boolean {
-    return node.lazy || Boolean(node.children?.length)
-  }
-
-  #isRowExpanded(key: string): boolean {
-    const open = this.expandedRows
-    if (!open) return this.treeExpanded
-    if (this.#openRows?.source !== open) this.#openRows = { source: open, keys: new Set(open) }
-    return this.#openRows.keys.has(key)
-  }
-
-  #setRowExpanded(key: string, expanded: boolean): boolean {
-    const tree = this.#tree
-    const node = tree?.byKey.get(key)
-    if (!node || !this.#isParent(node) || this.#isRowExpanded(key) === expanded) return false
-    // Until a row is toggled the list is implicit; write it out whole so it reads back as the state on screen.
-    const current = this.expandedRows ?? (this.treeExpanded ? tree!.nodes.filter((entry) => this.#isParent(entry)).map((entry) => entry.key) : [])
-    this.expandedRows = expanded ? [...current, key] : current.filter((entry) => entry !== key)
-    return true
-  }
-
-  #toggleRow(node: TreeNode) {
-    const expanded = !this.#isRowExpanded(node.key)
-    if (!this.#setRowExpanded(node.key, expanded)) return
-    this.dispatchEvent(
-      new CustomEvent<TableRowToggleEventDetail>('row-toggle', { detail: { key: node.key, row: node.row, expanded }, bubbles: false, composed: true }),
-    )
-  }
-
-  /** Asks `loadChildren` for the children of an open row, once at a time; a selected parent passes its selection on. */
-  async #fetchChildren({ key, row, level }: TreeNode) {
-    const loaded = this.#loadedChildren
-    if (!this.loadChildren || this.#pendingChildren.has(key)) return
-    this.#pendingChildren.add(key)
-    this.requestUpdate()
-    try {
-      const children = await this.loadChildren({ row, key, level })
-      if (loaded !== this.#loadedChildren) return
-      loaded.set(key, Array.isArray(children) ? children : [])
-      this.#applySort()
-      if (this.selection === 'multiple' && this.value.includes(key)) {
-        const keys = new Set(this.value)
-        this.#cascade(keys, key, true)
-        this.#commitSelection([...keys])
-      }
-    } catch (error) {
-      if (loaded !== this.#loadedChildren) return
-      this.#setRowExpanded(key, false)
-      this.dispatchEvent(new CustomEvent<TableChildrenErrorEventDetail>('children-error', { detail: { key, row, error }, bubbles: false, composed: true }))
-    } finally {
-      this.#pendingChildren.delete(key)
-      this.requestUpdate()
-    }
-  }
-
-  /**
-   * Turns row `key` on or off in `selected`. In a tree the rows under it go with it, and unless `settle` is false its
-   * ancestors are settled: a parent is selected exactly when all its children are.
-   */
-  #cascade(selected: Set<string>, key: string, on: boolean, settle = true) {
-    const node = this.#tree?.byKey.get(key)
-    if (on) selected.add(key)
-    else selected.delete(key)
-    if (!node) return
-    const visit = (entry: TreeNode) => {
-      if (on) selected.add(entry.key)
-      else selected.delete(entry.key)
-      entry.children?.forEach(visit)
-    }
-    node.children?.forEach(visit)
-    if (settle) this.#settle(selected, node.parent, on)
-  }
-
-  /** Selects `parent` and the ancestors above it whose children are now all selected, or clears them when `on` is false. */
-  #settle(selected: Set<string>, parent: TreeNode | undefined, on: boolean) {
-    for (; parent; parent = parent.parent) {
-      if (!on) selected.delete(parent.key)
-      else if (parent.children!.every((child) => selected.has(child.key))) selected.add(parent.key)
-      else break
-    }
-  }
-
-  /** Keys of the unselected tree rows with a selected row under them: their checkbox shows the mixed state. */
-  #partialKeys(): Set<string> {
-    const inputs = [this.#tree, this.value]
-    const cached = this.#partialCache
-    if (cached && cached.inputs.every((input, index) => input === inputs[index])) return cached.keys
-    const selected = new Set(this.value)
-    const keys = new Set<string>()
-    for (const key of this.value) {
-      for (let parent = this.#tree?.byKey.get(key)?.parent; parent && !selected.has(parent.key) && !keys.has(parent.key); parent = parent.parent) {
-        keys.add(parent.key)
-      }
-    }
-    this.#partialCache = { inputs, keys }
-    return keys
-  }
-
-  /** Sorts by `sortModel`, then, while grouped, gathers the rows of each group together in the order of the groups. */
-  #sortRows(rows: TableRow[]): TableRow[] {
-    const sorted = this.#sortBySortModel(rows)
-    const levels = this.groupBy?.length ? this.#groupLevels() : []
-    if (this.dataSource || !levels.length) return sorted
-    const ordered: TableRow[] = []
-    const visit = (node: GroupNode) => {
-      if (node.children.length) node.children.forEach(visit)
-      else for (const index of node.rowIndices) ordered.push(sorted[index])
-    }
-    this.#buildGroupTree(sorted, levels).roots.forEach(visit)
-    return ordered
-  }
-
-  /** The grouping levels, normalized from `groupBy`; empty when the table is not grouped. */
-  #groupLevels(): TableGroupBy[] {
-    if (!Array.isArray(this.groupBy)) return []
-    return this.groupBy
-      .map((entry) => (typeof entry === 'string' ? { field: entry.trim() } : entry))
-      .filter((entry): entry is TableGroupBy => Boolean(entry && typeof entry.field === 'string' && entry.field))
-  }
-
-  /**
-   * The group tree and the display list, or `undefined` when the rows are not grouped. Cached in two layers on their
-   * inputs: the tree only depends on the rows and the levels, and opening a group should not re-bucket 10k rows.
-   */
-  #grouping(): Grouping | undefined {
-    // Read per rendered row, so an ungrouped table leaves before allocating anything. A tree wins over grouping.
-    if (!this.groupBy?.length || this.#tree) return undefined
-    const levels = this.#groupLevels()
-    if (this.dataSource || !levels.length) return undefined
-    const source = this.#transitionRows ?? this.#sortedRows
-    const treeInputs = [source, this.groupBy, this.sortModel, this.columnElements, this.columns, this.rowKey, this.getRowKey]
-    const itemInputs = [this.expandedGroups, this.groupsCollapsed]
-    const cached = this.#groupingCache
-    const sameTree = cached && cached.treeInputs.every((input, index) => input === treeInputs[index])
-    if (sameTree && cached.itemInputs.every((input, index) => input === itemInputs[index])) return cached.grouping
-
-    const tree = sameTree ? cached.grouping : this.#buildGroupTree(source, levels)
-    const expanded = this.expandedGroups ? new Set(this.expandedGroups) : undefined
-    const items: DisplayItem[] = []
-    const flatten = (node: GroupNode) => {
-      node.position = items.length
-      items.push({ kind: 'group', node })
-      if (expanded ? expanded.has(node.key) : !this.groupsCollapsed) {
-        if (node.children.length) node.children.forEach(flatten)
-        else for (const rowIndex of node.rowIndices) items.push({ kind: 'row', rowIndex, parent: node })
-      }
-    }
-    for (const node of tree.nodes.values()) node.position = -1
-    tree.roots.forEach(flatten)
-
-    const grouping: Grouping = { ...tree, items }
-    this.#groupingCache = { treeInputs, itemInputs, grouping }
-    return grouping
-  }
-
-  /**
-   * Buckets `source` level by level. Rows keep their order inside a bucket; the buckets of a level are ordered by
-   * their value, following the level's `sort`, else the direction the table is sorted by that field, else ascending.
-   */
-  #buildGroupTree(source: TableRow[], levels: TableGroupBy[]): Omit<Grouping, 'items'> {
-    const nodes = new Map<string, GroupNode>()
-    const build = (indices: number[], level: number, parent: GroupNode | undefined): GroupNode[] => {
-      const spec = levels[level]
-      const comparator = this.#groupComparator(spec)
-      const buckets = new Map<string, { value: unknown; indices: number[] }>()
-      for (const index of indices) {
-        const row = source[index]
-        const value = spec.getValue ? spec.getValue(row) : getFieldValue(row, spec.field)
-        const id = groupBucketId(value)
-        const bucket = buckets.get(id)
-        if (bucket) bucket.indices.push(index)
-        else buckets.set(id, { value, indices: [index] })
-      }
-      const children = [...buckets].map(([id, bucket]) => {
-        const part = `${encodeGroupPart(spec.field)}=${encodeGroupPart(id)}`
-        const node: GroupNode = {
-          key: parent ? `${parent.key}/${part}` : part,
-          level,
-          field: spec.field,
-          value: bucket.value,
-          rowIndices: bucket.indices,
-          children: [],
-          parent,
-          position: -1,
-        }
-        nodes.set(node.key, node)
-        if (level + 1 < levels.length) node.children = build(bucket.indices, level + 1, node)
-        return node
-      })
-      return children.sort((left, right) => comparator(left.value, right.value))
-    }
-    const roots = build(
-      source.map((_, index) => index),
-      0,
-      undefined,
-    )
-    return { levels, source, roots, nodes }
-  }
-
-  #groupComparator(spec: TableGroupBy): (a: unknown, b: unknown) => number {
-    if (typeof spec.sort === 'function') return spec.sort
-    const column = this.#fieldColumn(spec.field)
-    const compare = column?.comparator ?? defaultCompare
-    const direction = spec.sort ?? this.sortModel.find((entry) => entry.field === spec.field)?.direction ?? 'asc'
-    return direction === 'desc' ? (a, b) => -compare(a, b) : compare
-  }
-
-  /** The column definition showing `field`, hidden ones included: a grouped column is usually hidden, but formats the label. */
-  #fieldColumn(field: string): TableColumnConfig | undefined {
-    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? [])
-    return source.find((column) => column.field === field)
-  }
-
-  #isGroupExpanded(key: string): boolean {
-    return this.expandedGroups ? this.expandedGroups.includes(key) : !this.groupsCollapsed
-  }
-
-  #setGroupExpanded(key: string, expanded: boolean): boolean {
-    const grouping = this.#grouping()
-    if (!grouping?.nodes.has(key) || this.#isGroupExpanded(key) === expanded) return false
-    // Until a group is toggled the list is implicit; write it out whole so it reads back as the state on screen.
-    const current = this.expandedGroups ?? (this.groupsCollapsed ? [] : [...grouping.nodes.keys()])
-    this.expandedGroups = expanded ? [...current, key] : current.filter((entry) => entry !== key)
-    return true
-  }
-
-  #toggleGroup(node: GroupNode) {
-    const expanded = !this.#isGroupExpanded(node.key)
-    if (!this.#setGroupExpanded(node.key, expanded)) return
-    const grouping = this.#grouping()
-    if (!grouping) return
-    this.dispatchEvent(
-      new CustomEvent<TableGroupToggleEventDetail>('group-toggle', {
-        detail: { key: node.key, expanded, group: this.#groupContext(node, grouping) },
-        bubbles: false,
-        composed: true,
-      }),
-    )
-  }
-
-  #groupRows(node: GroupNode, grouping: Grouping): TableRow[] {
-    node.rows ??= node.rowIndices.map((index) => grouping.source[index])
-    return node.rows
-  }
-
-  #groupKeys(node: GroupNode, grouping: Grouping): string[] {
-    node.keys ??= node.rowIndices.map((index) => this.#keyAt(index, grouping.source[index]))
-    return node.keys
-  }
-
-  #groupContext(node: GroupNode, grouping: Grouping): TableGroupContext {
-    return {
-      key: node.key,
-      level: node.level,
-      field: node.field,
-      value: node.value,
-      rows: this.#groupRows(node, grouping),
-      expanded: this.#isGroupExpanded(node.key),
-      summary: Object.fromEntries(this.#groupSummary(node, grouping)),
-    }
-  }
-
-  /** The column aggregates of a group's rows, keyed by column id; the same `summary` the totals row uses. */
-  #groupSummary(node: GroupNode, grouping: Grouping): Map<string, unknown> {
-    const columns = this.resolvedColumns
-    const inputs = [this.columnElements, this.columns, ...columns.map((column) => column.summary)]
-    const cached = node.summary
-    if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.values
-    const rows = this.#groupRows(node, grouping)
-    const values = new Map<string, unknown>()
-    for (const column of columns) {
-      if (typeof column.summary === 'function') values.set(columnKey(column), column.summary({ column, rows }))
-      else if (column.summary && column.field)
-        values.set(
-          columnKey(column),
-          aggregate(
-            column.summary,
-            rows.map((row) => getFieldValue(row, column.field)),
-          ),
-        )
-    }
-    node.summary = { inputs, values }
-    return values
-  }
-
-  /** The item on display line `line`: its group, or the group at `level` above it. */
-  #groupAtLevel(item: DisplayItem | undefined, level: number): GroupNode | undefined {
-    let node: GroupNode | undefined = item?.kind === 'group' ? item.node : item?.parent
-    while (node && node.level > level) node = node.parent
-    return node?.level === level ? node : undefined
-  }
-
-  /** How many group levels a line sits under: the number of groups that can be stuck above it. */
-  #depthOf(item: DisplayItem | undefined): number {
-    if (!item) return 0
-    return item.kind === 'group' ? item.node.level : item.parent.level + 1
-  }
-
-  /**
-   * Blank lines above a page that starts inside a group, where that group's headers are repeated. Every page counts
-   * `pageSize` lines of its own; the repeated headers come on top.
-   */
-  #pagePrefix(grouping: Grouping): number {
-    return this.paginated && this.#pageStart > 0 ? this.#depthOf(grouping.items[this.#pageStart]) : 0
-  }
-
-  /**
-   * The groups whose own row has scrolled past the header (or sits on an earlier page) while lines of theirs are
-   * still on screen, outermost first. They are drawn stuck under the header, one line per level, the way CSS sticky
-   * would place them — the real rows cannot do it themselves, as the virtualizer drops them once off screen.
-   */
-  #stuckGroups(grouping: Grouping): GroupNode[] {
-    const count = this.rowCount
-    if (count === 0) return []
-    const start = this.#pageStart
-    const end = start + count - 1
-    const scrollTop = Math.max(0, this.viewport?.scrollTop ?? 0)
-    // `base + level` is the line behind the level's slot under the header; the page's blank lines come first.
-    const base = start + Math.floor(scrollTop / this.#rowHeightPx) - this.#pagePrefix(grouping)
-    const stuck: GroupNode[] = []
-    for (let level = 0; level < grouping.levels.length; level++) {
-      const line = Math.min(end, Math.max(start, base + level))
-      const node = this.#groupAtLevel(grouping.items[line], level)
-      if (!node || node.position >= Math.max(start, base + level)) break
-      stuck.push(node)
-    }
-    return stuck
-  }
-
-  #handleViewportScroll = () => {
-    const grouping = this.#grouping()
-    if (!grouping) return
-    const signature = this.#stuckGroups(grouping)
-      .map((node) => node.key)
-      .join('\n')
-    if (signature !== this.#echoSignature) this.requestUpdate()
-  }
-
-  /** The data row index on display line `line`, or -1 for a group row. Lines and rows are the same thing ungrouped. */
-  #rowIndexAt(line: number): number {
-    const tree = this.#treeLines()
-    if (tree) return tree[line]?.index ?? -1
-    const grouping = this.#grouping()
-    if (!grouping) return line
-    const item = grouping.items[line]
-    return item?.kind === 'row' ? item.rowIndex : -1
+  protected applySort() {
+    this.sortedRows = this.buildRows(this.filterRows(this.sourceRows()))
   }
 
   /** Scrolls display line `line` into view, below the header and, while grouped, below the groups stuck under it. */
-  #scrollToLine(line: number) {
-    const grouping = this.#grouping()
+  protected scrollToLine(line: number) {
     // Wrapped rows have their own heights, so the uniform-height arithmetic below would aim at the wrong place; every
     // row is rendered then, so scroll to the row itself.
     if (this.wrap) {
@@ -2701,45 +2686,39 @@ export class Table extends LitElement {
         `.row--body[aria-rowindex="${line + 2}"], .row--group:not(.row--group-echo)[aria-rowindex="${line + 2}"]`,
       )
       if (!viewport || !element) return
-      const header = this.#headerHeight()
+      const header = this.headerHeight()
       const top = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top
       const bottom = top + element.getBoundingClientRect().height
       if (top < header) viewport.scrollTop += top - header
-      else if (bottom > viewport.clientHeight) viewport.scrollTop += bottom - viewport.clientHeight
+      else if (bottom > viewport.clientHeight - this.footerHeight()) viewport.scrollTop += bottom - viewport.clientHeight + this.footerHeight()
       return
     }
+    if (this.scrollToStructuredLine(line)) return
     const viewport = this.viewport
-    const height = this.#rowHeightPx
-    if (!grouping) {
-      const open = this.#detailLines()
-      const range = this.#virtualizer.range
-      // Past the browser's height limit the virtualizer scales the scroll: its own arithmetic is the closer one there.
-      const scaled = range.paddingTop + (range.end - range.start) * height + range.paddingBottom < this.rowCount * height - 1
-      if (open.length === 0 || !viewport || scaled) {
-        this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
-        return
-      }
-      // The panels open above the row push it down by their height.
-      const index = line - this.#pageStart
-      const rowTop = index * height + open.filter((entry) => entry < index).length * this.detailHeight
-      const room = viewport.clientHeight - this.#headerHeight()
-      if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop
-      else if (rowTop + height > viewport.scrollTop + room) viewport.scrollTop = rowTop + height - room
+    const height = this.rowHeightPx
+    const open = this.#detailLines()
+    const range = this.#virtualizer.range
+    // Past the browser's height limit the virtualizer scales the scroll: its own arithmetic is the closer one there.
+    const scaled = range.paddingTop + (range.end - range.start) * height + range.paddingBottom < this.rowCount * height - 1
+    if (open.length === 0 || !viewport || scaled) {
+      // The summary row is sticky at the bottom as the header is at the top: a row under either is out of sight.
+      this.#virtualizer.scrollToIndex(line - this.pageStart, this.headerHeight() + this.footerHeight())
       return
     }
-    if (!viewport) return
-    const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
-    const covered = this.#depthOf(grouping.items[line]) * height
-    const visible = viewport.clientHeight - this.#headerHeight()
-    if (top - covered < viewport.scrollTop) viewport.scrollTop = Math.max(0, top - covered)
-    else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
+    // The panels open above the row push it down by their height.
+    const index = line - this.pageStart
+    const rowTop = index * height + open.filter((entry) => entry < index).length * this.detailHeight
+    const room = viewport.clientHeight - this.headerHeight() - this.footerHeight()
+    if (rowTop < viewport.scrollTop) viewport.scrollTop = rowTop
+    else if (rowTop + height > viewport.scrollTop + room) viewport.scrollTop = rowTop + height - room
   }
 
   /** Sorts rows, or tree nodes, by `sortModel`; `read` reads an item's value in a column (a tree node's rollup). */
-  #sortBySortModel<T extends TableRow | TreeNode>(items: T[], read?: (item: T, field: string, column?: TableColumnConfig) => unknown): T[] {
+  protected sortBySortModel<T>(items: T[], read?: (item: T, field: string, column?: TableColumnConfig) => unknown): T[] {
     if (this.dataSource || this.sortModel.length === 0) return items
     const columns = this.resolvedColumns
-    const value = (item: T, field: string, column?: TableColumnConfig) => (read ? read(item, field, column) : getFieldValue(item as TableRow, field))
+    const value = (item: T, field: string, column?: TableColumnConfig) =>
+      read ? read(item, field, column) : this.readCell(item as TableRow, column ?? { field })
     // Each sort key's column and comparator, looked up once rather than once per comparison.
     const keys = this.sortModel.map((entry) => {
       const column = columns.find((candidate) => candidate.field === entry.field)
@@ -2752,97 +2731,6 @@ export class Table extends LitElement {
       }
       return 0
     })
-  }
-
-  #prepareRowsAnimation(previous: unknown) {
-    const displayedPrevious = Array.isArray(previous)
-      ? previous.map((row, index) => {
-          if (!isRecord(row) || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
-          const from = this.#animationFrom.get(this.#keyAt(index, row))
-          return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
-        })
-      : previous
-    this.#cancelRowsAnimation()
-    if (
-      !this.hasUpdated ||
-      !this.animateUpdates ||
-      // A tree is not animated: its rows are matched by their place in the flattened tree, which `rows` does not hold.
-      this.childrenField ||
-      this.updateDuration <= 0 ||
-      !Array.isArray(displayedPrevious) ||
-      !Array.isArray(this.rows) ||
-      typeof requestAnimationFrame === 'undefined' ||
-      (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)
-    ) {
-      return
-    }
-
-    const previousByKey = new Map<string, TableRow>()
-    displayedPrevious.forEach((row, index) => {
-      if (isRecord(row)) previousByKey.set(this.#keyAt(index, row), row)
-    })
-    const nextKeys = new Set(this.rows.map((row, index) => this.#keyAt(index, row)))
-    const previousKeys = new Set(previousByKey.keys())
-    const hasAdded = this.rows.some((row, index) => !previousKeys.has(this.#keyAt(index, row)))
-    const hasRemoved = displayedPrevious.some((row, index) => isRecord(row) && !nextKeys.has(this.#keyAt(index, row)))
-    const hasModified = this.rows.some((row, index) => hasNumericChange(previousByKey.get(this.#keyAt(index, row)), row))
-    if (!hasAdded && !hasRemoved && !hasModified) return
-
-    this.#animationFrom = previousByKey
-    this.#animationProgress = 0
-    this.rows.forEach((row, index) => {
-      const key = this.#keyAt(index, row)
-      const from = previousByKey.get(key)
-      if (!from) {
-        this.#rowUpdateStates.set(key, 'added')
-        return
-      }
-      if (!hasNumericChange(from, row)) return
-      const watchedFrom = this.updateHighlightField ? getFieldValue(from, this.updateHighlightField) : from
-      const watchedTo = this.updateHighlightField ? getFieldValue(row, this.updateHighlightField) : row
-      const delta = firstNumericDelta(watchedFrom, watchedTo)
-      this.#rowUpdateStates.set(key, delta === undefined ? 'modified' : delta > 0 ? 'increased' : 'decreased')
-    })
-
-    // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
-    // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.#hasRowIdentity && !this.paginated && !this.childrenField) {
-      const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
-      const transitionRows = [...this.#sortRows(this.rows)]
-      previousRows.forEach((row, index) => {
-        const key = this.#keyAt(index, row)
-        if (nextKeys.has(key)) return
-        transitionRows.splice(Math.min(index, transitionRows.length), 0, row)
-        this.#rowUpdateStates.set(key, 'removed')
-      })
-      this.#transitionRows = transitionRows
-    }
-
-    let started: number | undefined
-    const draw = (now: number) => {
-      started ??= now
-      const progress = Math.min(1, (now - started) / this.updateDuration)
-      this.#animationProgress = 1 - Math.pow(1 - progress, 3)
-      this.requestUpdate()
-      if (progress < 1) this.#animationFrame = requestAnimationFrame(draw)
-      else {
-        this.#animationFrame = undefined
-        this.#animationFrom.clear()
-        this.#transitionRows = undefined
-        this.#rowUpdateStates.clear()
-        this.requestUpdate()
-      }
-    }
-    this.#animationFrame = requestAnimationFrame(draw)
-  }
-
-  #cancelRowsAnimation() {
-    if (this.#animationFrame !== undefined) cancelAnimationFrame(this.#animationFrame)
-    this.#animationFrame = undefined
-    this.#animationFrom.clear()
-    this.#animationProgress = 1
-    this.#transitionRows = undefined
-    this.#rowUpdateStates.clear()
   }
 
   #resetRemote() {
@@ -2879,7 +2767,7 @@ export class Table extends LitElement {
     const token = this.#requestToken
     try {
       const size = this.#effectiveBlockSize
-      const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel })
+      const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel, filters: this.filters ?? {} })
       if (token !== this.#requestToken) return
       this.#blocks.set(block, result.rows ?? [])
       this.#blocksVersion++
@@ -2909,12 +2797,18 @@ export class Table extends LitElement {
     }
     // Only a table that has not rendered yet waits: once rendered, a later update must not steal focus back.
     if (this.hasUpdated) return
-    this.#pendingFocus = true
+    this.pendingFocus = true
     this.#pendingFocusOptions = options
   }
 
   override connectedCallback() {
     super.connectedCallback()
+    // Groups and trees are variants of their own: say so to an app asking another element for them, once each.
+    for (const [attribute, property, variant] of VARIANT_ATTRIBUTES) {
+      if (warnedVariants.has(attribute) || property in this || !this.hasAttribute(attribute)) continue
+      warnedVariants.add(attribute)
+      console.warn(`[${this.localName}] ${attribute} is c2-${variant}'s: use <c2-${variant}>, from '@c2n/components/table/${variant}'.`)
+    }
     this.addEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
     this.addEventListener(PAGER_CONNECT_EVENT, this.#handlePagerConnect)
     // The table speaks for its pager: swallow the pager's own events so a consumer sees one `page-change`, from here.
@@ -2924,7 +2818,7 @@ export class Table extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
-    this.#cancelRowsAnimation()
+    this.#animation?.cancel()
     this.removeEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
   }
 
@@ -3003,10 +2897,10 @@ export class Table extends LitElement {
   }
 
   #handleRowClick(event: MouseEvent, line: number) {
-    const index = this.#rowIndexAt(line)
+    const index = this.rowIndexAt(line)
     const row = this.#rowAt(index)
     if (!row) return
-    const key = this.#keyAt(index, row)
+    const key = this.keyAt(index, row)
     this.dispatchEvent(new CustomEvent<TableRowEventDetail>('row-click', { detail: { row, rowIndex: index, key }, bubbles: true, composed: true }))
     if (!this.#isFromCellControl(event)) this.#activateRow(index, row, key)
     if (this.selection === 'none') return
@@ -3019,13 +2913,13 @@ export class Table extends LitElement {
   }
 
   #handleCellClick(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
-    const rowIndex = this.#rowIndexAt(line)
+    const rowIndex = this.rowIndexAt(line)
     const row = this.#rowAt(rowIndex)
     if (!row) return
     this.focusedCell = { row: line, column: columnIndex }
     this.dispatchEvent(
       new CustomEvent<TableCellEventDetail>('cell-click', {
-        detail: { row, rowIndex, key: this.#keyAt(rowIndex, row), column, value },
+        detail: { row, rowIndex, key: this.keyAt(rowIndex, row), column, value },
         bubbles: true,
         composed: true,
       }),
@@ -3034,11 +2928,11 @@ export class Table extends LitElement {
 
   /** An enclosing `c2-context-menu` asks what was right-clicked: the cell, with the same detail as `cell-click`. */
   #handleContextMenuRequest(event: Event, line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
-    const rowIndex = this.#rowIndexAt(line)
+    const rowIndex = this.rowIndexAt(line)
     const row = this.#rowAt(rowIndex)
     if (!row) return
     this.focusedCell = { row: line, column: columnIndex }
-    provideContextMenuData(event, this, { row, rowIndex, key: this.#keyAt(rowIndex, row), column, value } satisfies TableCellEventDetail)
+    provideContextMenuData(event, this, { row, rowIndex, key: this.keyAt(rowIndex, row), column, value } satisfies TableCellEventDetail)
   }
 
   #handleCheckboxToggle(index: number) {
@@ -3047,66 +2941,124 @@ export class Table extends LitElement {
 
   #handleSelectAll = (event: Event) => {
     event.stopPropagation()
-    if ((event.target as Checkbox).checked) this.selectAll()
+    // The rows on show: the page while paginated (the other pages keep theirs), every row otherwise. "All N" is the menu's.
+    const checked = (event.target as Checkbox).checked
+    if (this.paginated) {
+      if (checked) this.selectPage()
+      else this.#deselectPage()
+    } else if (checked) this.selectAll()
     else this.clearSelection()
+  }
+
+  /** What the header checkbox shows: every row on show selected, or some of them. */
+  #headerSelection(): { all: boolean; some: boolean } {
+    if (this.#allOfSource()) return { all: true, some: true }
+    const count = this.value.length
+    // A page is a few dozen rows at most; a table that is not paginated compares counts, never walks its rows.
+    if (this.paginated) {
+      const keys = this.#pageKeys()
+      const selected = new Set(this.value)
+      const onPage = keys.filter((key) => selected.has(key)).length
+      return { all: keys.length > 0 && onPage === keys.length, some: onPage > 0 }
+    }
+    const total = this.dataSource ? this.totalRows : this.rowTotal
+    return { all: total > 0 && count >= total, some: count > 0 }
+  }
+
+  /** The caret beside the header checkbox: a menu of this page, every row and none, loaded on first use. */
+  #renderBulkButton(columnIndex: number) {
+    return html`<button
+      class="filter-button bulk-button"
+      part="bulk-select-button"
+      type="button"
+      tabindex="-1"
+      aria-label=${this.msg.t('selectionOptions')}
+      aria-haspopup="menu"
+      aria-expanded=${String(Boolean(this.#bulk?.isOpen))}
+      @pointerdown=${() => {
+        // The press light-dismisses an open menu before the click: the click must not open it again.
+        this.#bulkWasOpen = Boolean(this.#bulk?.isOpen)
+      }}
+      @click=${(event: Event) => {
+        event.stopPropagation()
+        this.focusedCell = { row: HEADER_ROW, column: columnIndex }
+        if (this.#bulkWasOpen) this.#bulkWasOpen = false
+        else this.#openBulk(event.currentTarget as HTMLElement)
+      }}
+    >
+      ${CHEVRON}
+    </button>`
+  }
+
+  #openBulk(anchor: HTMLElement) {
+    this.#bulkLoad ??= import('./table-bulk.js').then(({ TableBulk }) => {
+      this.#bulk = new TableBulk({
+        table: this,
+        counts: () => ({
+          page: this.paginated || this.dataSource ? this.#pageKeys().length : undefined,
+          all: this.totalRows,
+        }),
+        formatCount: (count) => new Intl.NumberFormat(this.msg.locale).format(count),
+        message: (key, ...args) => (this.msg.t as (key: string, ...rest: unknown[]) => string).call(this.msg, key, ...args),
+      })
+      return this.#bulk
+    })
+    void this.#bulkLoad.then((bulk) => bulk.open(anchor))
   }
 
   /** `line` is a display line; a range covers the data rows on the lines between the anchor and it. */
   #applySelection(line: number, modifiers: { toggle: boolean; range: boolean }) {
-    const index = this.#rowIndexAt(line)
+    const index = this.rowIndexAt(line)
     const row = this.#rowAt(index)
     if (!row) return
-    const key = this.#keyAt(index, row)
+    const key = this.keyAt(index, row)
 
     // Clicking the row that is the selection again clears it — with a modifier or without — so a selection can be
     // undone by the same gesture that made it.
     if (this.selection === 'single') {
       this.#selectionAnchor = line
-      this.#commitSelection(this.value.includes(key) ? [] : [key])
+      this.commitSelection(this.value.includes(key) ? [] : [key])
       return
     }
 
-    // In a tree a row is selected with the rows under it, and a parent follows its children (see `#cascade`).
+    // A hierarchy may select a row with the rows under it (see `cascade` and `selectRange`).
     if (modifiers.range && this.#selectionAnchor >= 0) {
       const from = Math.min(this.#selectionAnchor, line)
       const to = Math.max(this.#selectionAnchor, line)
       const keys = new Set(modifiers.toggle ? this.value : [])
-      // In a tree the parents are settled once at the end, deepest first, rather than after every row of the range.
-      const parents = new Set<TreeNode>()
+      const range: string[] = []
       for (let cursor = from; cursor <= to; cursor++) {
-        const cursorIndex = this.#rowIndexAt(cursor)
+        const cursorIndex = this.rowIndexAt(cursor)
         const rangeRow = this.#rowAt(cursorIndex)
-        if (!rangeRow) continue
-        const rangeKey = this.#keyAt(cursorIndex, rangeRow)
-        this.#cascade(keys, rangeKey, true, false)
-        const parent = this.#tree?.byKey.get(rangeKey)?.parent
-        if (parent) parents.add(parent)
+        if (rangeRow) range.push(this.keyAt(cursorIndex, rangeRow))
       }
-      for (const parent of [...parents].sort((a, b) => b.level - a.level)) this.#settle(keys, parent, true)
-      this.#commitSelection([...keys])
+      this.selectRange(keys, range)
+      this.commitSelection([...keys])
       return
     }
 
     this.#selectionAnchor = line
-    const on = !this.value.includes(key)
+    const on = !this.#isKeySelected(key)
     if (modifiers.toggle) {
-      const keys = new Set(this.value)
-      this.#cascade(keys, key, on)
-      this.#commitSelection([...keys])
+      const keys = new Set(this.#selectedKeys())
+      this.cascade(keys, key, on)
+      this.commitSelection([...keys])
       return
     }
     // A plain click narrows the selection to one row (in a tree, with the rows under it); on the row that already is
     // the whole selection, it clears it.
     const next = new Set<string>()
-    this.#cascade(next, key, true)
-    this.#commitSelection(next.size === this.value.length && this.value.every((entry) => next.has(entry)) ? [] : [...next])
+    this.cascade(next, key, true)
+    this.commitSelection(next.size === this.value.length && this.value.every((entry) => next.has(entry)) ? [] : [...next])
   }
 
-  #commitSelection(keys: string[]) {
+  protected commitSelection(keys: string[], scope: TableSelectionScope = 'rows') {
     this.value = keys
+    this.selectionScope = scope
+    this.#committingSelection = true
     this.dispatchEvent(
       new CustomEvent<TableSelectionChangeEventDetail>('selection-change', {
-        detail: { value: keys, rows: this.getSelectedRows() },
+        detail: { value: keys, rows: this.getSelectedRows(), scope },
         bubbles: false,
         composed: true,
       }),
@@ -3159,62 +3111,56 @@ export class Table extends LitElement {
     let { row, column } = this.focusedCell
     // Keyboard movement stays inside the page: rows are numbered across the whole dataset, so page 2 starts at
     // `first`, not at 0.
-    const first = this.#pageStart
+    const first = this.pageStart
     const last = first + this.rowCount - 1
     // Rows per viewport, for PageUp/PageDown — unrelated to the `pageSize` property, which is rows per data page.
-    const viewportRows = Math.max(1, Math.floor((this.viewport?.clientHeight ?? 0) / this.#rowHeightPx) - 1)
+    const viewportRows = Math.max(1, Math.floor((this.viewport?.clientHeight ?? 0) / this.rowHeightPx) - 1)
     const summary = this.#hasSummary(columns)
     // A spanning summary cell covers several column indices; on that row, left/right move from cell to cell.
     const summaryCells = summary ? this.#summaryCells(columns) : []
     const summaryCellAt = (index: number) => [...summaryCells].reverse().find((cell) => cell.index <= index) ?? summaryCells[0]
-    const grouping = this.#grouping()
-    const groupItem = grouping && row >= 0 ? grouping.items[row] : undefined
-    const groupNode = groupItem?.kind === 'group' ? groupItem.node : undefined
-    // The treegrid keys act on the cell holding the tree (the whole row in a band): elsewhere ←/→ keep moving between cells.
-    const onTree = Boolean(groupNode && (this.groupDisplay === 'band' || columns[column] === this.#groupTreeColumn(columns)))
-
-    if (groupNode && onTree && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+    // A hierarchy's own keys come first: the treegrid's ←/→ on a group or a tree row, Enter on a group.
+    if (this.handleLineKey(event, columns)) return
+    // Alt+↓ on the selection header opens the bulk selection menu, on another header the column's filter, as on a select.
+    if (row === HEADER_ROW && event.altKey && event.key === 'ArrowDown' && columns[column]?.field === SELECTION_FIELD && this.bulkSelect) {
       event.preventDefault()
-      const expanded = this.#isGroupExpanded(groupNode.key)
-      if (event.key === 'ArrowRight' && !expanded) this.#toggleGroup(groupNode)
-      else if (event.key === 'ArrowLeft' && expanded) this.#toggleGroup(groupNode)
-      else if (event.key === 'ArrowLeft' && groupNode.parent && groupNode.parent.position >= first) row = groupNode.parent.position
-      else if (event.key === 'ArrowRight' && this.groupDisplay !== 'band') column = Math.min(columns.length - 1, column + 1)
-      this.focusedCell = { row, column }
-      this.#pendingFocus = true
-      this.#scrollToLine(row)
+      const caret = this.renderRoot.querySelector<HTMLElement>('.bulk-button')
+      if (caret) this.#openBulk(caret)
       return
     }
-    // The same keys in a tree: ← closes an open row, then climbs to its parent; → opens a closed one.
-    const lines = this.#treeLines()
-    const node = lines && row >= 0 ? lines[row] : undefined
-    if (node && columns[column] === this.#groupTreeColumn(columns) && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+    if (row === HEADER_ROW && event.altKey && event.key === 'ArrowDown' && this.#isFilterable(columns[column])) {
       event.preventDefault()
-      const open = this.#isParent(node) && this.#isRowExpanded(node.key)
-      const parentLine = node.parent ? lines!.indexOf(node.parent) : -1
-      if (event.key === 'ArrowRight' && this.#isParent(node) && !open) this.#toggleRow(node)
-      else if (event.key === 'ArrowLeft' && open) this.#toggleRow(node)
-      else if (event.key === 'ArrowLeft' && parentLine >= first) row = parentLine
-      else column = Math.min(columns.length - 1, Math.max(0, column + (event.key === 'ArrowRight' ? 1 : -1)))
-      this.focusedCell = { row, column }
-      this.#pendingFocus = true
-      this.#scrollToLine(row)
-      return
-    }
-    // modern-web-ignore: ime-enter the table renders no text field; keys from controls inside a cell (renderCell inputs) are dropped by #isFromCellControl before this grid handler
-    if (groupNode && (event.key === 'Enter' || event.key === ' ')) {
-      event.preventDefault()
-      this.#toggleGroup(groupNode)
+      const button = this.renderRoot.querySelector<HTMLElement>(`.cell--header[data-column-id="${CSS.escape(columnKey(columns[column]))}"] .filter-button`)
+      if (button) this.#openFilter(columns[column], button)
       return
     }
 
     // Alt+↓ opens the row's detail panel and Alt+↑ closes it, from any of its cells.
     if (event.altKey && row >= 0 && (event.key === 'ArrowDown' || event.key === 'ArrowUp') && this.#detail) {
       event.preventDefault()
-      const index = this.#rowIndexAt(row)
+      const index = this.rowIndexAt(row)
       const data = this.#sourceRowAt(index)
-      if (data) this.#toggleDetail(this.#keyAt(index, data), data, event.key === 'ArrowDown')
+      if (data) this.#toggleDetail(this.keyAt(index, data), data, event.key === 'ArrowDown')
       return
+    }
+
+    // An editable cell opens its editor on Enter or F2, takes a typed character as its new value, and Delete clears it.
+    if (this.editable && row >= 0 && !event.ctrlKey && !event.metaKey && !event.altKey && this.#canEdit(row, column)) {
+      const checkbox = columns[column].editor === 'checkbox' && !columns[column].renderEditor
+      const trigger: EditTrigger | undefined =
+        // modern-web-ignore: ime-enter the grid cell is not a text field; a composing key comes from an input and is dropped by #isFromCellControl above
+        event.key === 'Enter' || event.key === 'F2' || (checkbox && event.key === ' ')
+          ? 'edit'
+          : event.key === 'Delete' || event.key === 'Backspace'
+            ? 'clear'
+            : event.key.length === 1 && event.key !== ' ' && !checkbox
+              ? { text: event.key }
+              : undefined
+      if (trigger) {
+        event.preventDefault()
+        this.#beginEdit(row, column, trigger)
+        return
+      }
     }
 
     switch (event.key) {
@@ -3259,9 +3205,9 @@ export class Table extends LitElement {
         }
         // modern-web-ignore: ime-enter the table renders no text field; keys from controls inside a cell (renderCell inputs) are dropped by #isFromCellControl before this grid handler
         if (event.key === 'Enter') {
-          const index = this.#rowIndexAt(row)
+          const index = this.rowIndexAt(row)
           const data = this.#rowAt(index)
-          if (data) this.#activateRow(index, data, this.#keyAt(index, data))
+          if (data) this.#activateRow(index, data, this.keyAt(index, data))
         }
         if (this.selection !== 'none') this.#applySelection(row, { toggle: event.key === ' ' || event.ctrlKey || event.metaKey, range: event.shiftKey })
         return
@@ -3272,8 +3218,8 @@ export class Table extends LitElement {
 
     event.preventDefault()
     this.focusedCell = { row, column }
-    this.#pendingFocus = true
-    if (row >= 0) this.#scrollToLine(row)
+    this.pendingFocus = true
+    if (row >= 0) this.scrollToLine(row)
   }
 
   /**
@@ -3305,8 +3251,13 @@ export class Table extends LitElement {
     )
   }
 
-  #headerHeight(): number {
+  protected headerHeight(): number {
     return this.renderRoot.querySelector('.row--header')?.getBoundingClientRect().height ?? 0
+  }
+
+  /** Height of the summary row, which stays at the bottom of the viewport and covers the rows under it. */
+  protected footerHeight(): number {
+    return this.renderRoot.querySelector('.row--summary')?.getBoundingClientRect().height ?? 0
   }
 
   #measureRowHeight() {
@@ -3318,16 +3269,6 @@ export class Table extends LitElement {
     const height = first.getBoundingClientRect().height
     if (height > 0 && Math.abs(height - this.#measuredRowHeight) > 0.01) {
       this.#measuredRowHeight = height
-      this.requestUpdate()
-    }
-  }
-
-  /** Where the stuck group rows start: right under the header, whose height is themed. */
-  #measureHeaderHeight() {
-    if (!this.#grouping()) return
-    const height = this.#headerHeight()
-    if (height > 0 && Math.abs(height - this.#headerHeightPx) > 0.01) {
-      this.#headerHeightPx = height
       this.requestUpdate()
     }
   }
@@ -3351,7 +3292,7 @@ export class Table extends LitElement {
   #syncFocusToWindow() {
     const { row, column } = this.focusedCell
     if (row < 0) return
-    const offset = this.#pageStart
+    const offset = this.pageStart
     const range = this.#window()
     const start = offset + range.start
     const end = offset + range.end
@@ -3359,7 +3300,7 @@ export class Table extends LitElement {
     const shadowRoot = this.renderRoot as ShadowRoot
     if (shadowRoot.activeElement) {
       this.focusedCell = { row: Math.min(Math.max(row, start), Math.max(start, end - 1)), column }
-      this.#pendingFocus = true
+      this.pendingFocus = true
     } else {
       this.focusedCell = { row: HEADER_ROW, column }
     }

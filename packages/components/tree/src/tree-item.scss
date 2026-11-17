@@ -133,9 +133,11 @@
   );
 }
 
-:host(:not([disabled])) .row:hover {
-  color: css.cssVar(hover--color, color);
-  background: css.cssVar(hover--background);
+@media (hover: hover) {
+  :host(:not([disabled])) .row:hover {
+    color: css.cssVar(hover--color, color);
+    background: css.cssVar(hover--background);
+  }
 }
 
 :host([selected]) .row {
@@ -143,8 +145,10 @@
   background: css.cssVar(selected--background);
 }
 
-:host([selected]:not([disabled])) .row:hover {
-  background: css.cssVar(selected__hover--background, selected--background);
+@media (hover: hover) {
+  :host([selected]:not([disabled])) .row:hover {
+    background: css.cssVar(selected__hover--background, selected--background);
+  }
 }
 
 :host(:focus-visible) .row {

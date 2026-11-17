@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-carousel,
   $theme: (
@@ -121,7 +122,7 @@
   cursor: pointer;
   transition: background-color 150ms ease;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background-color: css.cssVar(control__hover--background-color);
   }
 
@@ -226,7 +227,7 @@
   background-color: transparent;
   border-color: transparent;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     color: css.cssVar(rotation__hover--color);
     background-color: transparent;
   }
@@ -291,7 +292,7 @@
     transition-timing-function: ease;
   }
 
-  &:hover::before {
+  @include pointer.hover('::before') {
     background-color: css.cssVar(indicator__hover--background-color);
   }
 

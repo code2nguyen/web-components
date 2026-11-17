@@ -9,8 +9,12 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { AllocationGrid } from '@c2n/table/allocation-grid.js'
+import type { Flowsheet } from '@c2n/table/flowsheet.js'
+import type { GroupTable } from '@c2n/table/group-table.js'
 import type { Table } from '@c2n/table'
 import type { TableColumn } from '@c2n/table/table-column.js'
+import type { TreeTable } from '@c2n/table/tree-table.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -19,6 +23,145 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-allocation-grid': DefineComponent<
+      C2Props<AllocationGrid> & {
+        'allocations-field'?: unknown
+        'period-format'?: unknown
+        'capacity-field'?: unknown
+        'row-totals'?: unknown
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
+        onGroupToggle?: (event: EventOf<AllocationGrid, 'group-toggle'>) => void
+        onPageChange?: (event: EventOf<AllocationGrid, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<AllocationGrid, 'range-change'>) => void
+        onSortChange?: (event: EventOf<AllocationGrid, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<AllocationGrid, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<AllocationGrid, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<AllocationGrid, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<AllocationGrid, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<AllocationGrid, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<AllocationGrid, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<AllocationGrid, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<AllocationGrid, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<AllocationGrid, 'rows-change'>) => void
+      }
+    >
+    'c2-flowsheet': DefineComponent<
+      C2Props<Flowsheet> & {
+        'readings-field'?: unknown
+        'time-order'?: unknown
+        'time-format'?: unknown
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
+        onGroupToggle?: (event: EventOf<Flowsheet, 'group-toggle'>) => void
+        onPageChange?: (event: EventOf<Flowsheet, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<Flowsheet, 'range-change'>) => void
+        onSortChange?: (event: EventOf<Flowsheet, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<Flowsheet, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<Flowsheet, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<Flowsheet, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<Flowsheet, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<Flowsheet, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<Flowsheet, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<Flowsheet, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<Flowsheet, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<Flowsheet, 'rows-change'>) => void
+      }
+    >
+    'c2-group-table': DefineComponent<
+      C2Props<GroupTable> & {
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
+        onGroupToggle?: (event: EventOf<GroupTable, 'group-toggle'>) => void
+        onPageChange?: (event: EventOf<GroupTable, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<GroupTable, 'range-change'>) => void
+        onSortChange?: (event: EventOf<GroupTable, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<GroupTable, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<GroupTable, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<GroupTable, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<GroupTable, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<GroupTable, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<GroupTable, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<GroupTable, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<GroupTable, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<GroupTable, 'rows-change'>) => void
+      }
+    >
     'c2-table': DefineComponent<
       C2Props<Table> & {
         'aria-label'?: unknown
@@ -38,29 +181,23 @@ declare module 'vue' {
         'page-size'?: unknown
         'summary-values'?: unknown
         'summary-scope'?: unknown
-        'group-by'?: unknown
-        'group-display'?: unknown
-        'expanded-groups'?: unknown
-        'groups-collapsed'?: unknown
-        'empty-group-label'?: unknown
-        'children-field'?: unknown
-        'expanded-rows'?: unknown
-        'tree-expanded'?: unknown
         'detail-height'?: unknown
         'expanded-details'?: unknown
         'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
         onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
-        onDetailToggle?: (event: EventOf<Table, 'detail-toggle'>) => void
-        onRowToggle?: (event: EventOf<Table, 'row-toggle'>) => void
-        onChildrenError?: (event: EventOf<Table, 'children-error'>) => void
-        onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<Table, 'detail-toggle'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
         onRowActivate?: (event: EventOf<Table, 'row-activate'>) => void
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
         onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
         onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<Table, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<Table, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<Table, 'rows-change'>) => void
       }
     >
     'c2-table-column': DefineComponent<
@@ -71,9 +208,57 @@ declare module 'vue' {
         'cell-class'?: unknown
         'cell-slot'?: unknown
         'summary-label'?: unknown
+        'summary-target'?: unknown
         'summary-align'?: unknown
         'summary-span'?: unknown
         'group-column'?: unknown
+        'variance-threshold'?: unknown
+        'reference-range'?: unknown
+        'critical-range'?: unknown
+        'count-value'?: unknown
+      }
+    >
+    'c2-tree-table': DefineComponent<
+      C2Props<TreeTable> & {
+        'children-field'?: unknown
+        'expanded-rows'?: unknown
+        'tree-expanded'?: unknown
+        'aria-label'?: unknown
+        'aria-labelledby'?: unknown
+        'row-key'?: unknown
+        'checkbox-selection'?: unknown
+        sort?: unknown
+        'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
+        'row-height'?: unknown
+        'virtual-threshold'?: unknown
+        'block-size'?: unknown
+        'empty-message'?: unknown
+        'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
+        'detail-height'?: unknown
+        'expanded-details'?: unknown
+        'detail-label'?: unknown
+        'bulk-select'?: unknown
+        'selection-scope'?: unknown
+        onRowToggle?: (event: EventOf<TreeTable, 'row-toggle'>) => void
+        onChildrenError?: (event: EventOf<TreeTable, 'children-error'>) => void
+        onPageChange?: (event: EventOf<TreeTable, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<TreeTable, 'range-change'>) => void
+        onSortChange?: (event: EventOf<TreeTable, 'sort-change'>) => void
+        onDetailToggle?: (event: EventOf<TreeTable, 'detail-toggle'>) => void
+        onRowClick?: (event: EventOf<TreeTable, 'row-click'>) => void
+        onRowActivate?: (event: EventOf<TreeTable, 'row-activate'>) => void
+        onCellClick?: (event: EventOf<TreeTable, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<TreeTable, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<TreeTable, 'column-resize'>) => void
+        onCellChange?: (event: EventOf<TreeTable, 'cell-change'>) => void
+        onFilterChange?: (event: EventOf<TreeTable, 'filter-change'>) => void
+        onRowsChange?: (event: EventOf<TreeTable, 'rows-change'>) => void
       }
     >
   }

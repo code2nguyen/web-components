@@ -1,0 +1,21 @@
+---
+/**
+ * Plays the application's part in the tabs gallery: the French of the card under `lang="fr"`, whose "More" trigger
+ * reads "Plus" and is announced as "3 onglets de plus".
+ */
+---
+
+<script>
+  import '@c2n/components/tabs'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      tabs: {
+        more: 'Plus',
+        moreTabs: { one: '{0} onglet de plus', other: '{0} onglets de plus' },
+        moreMenu: 'Autres onglets',
+      },
+    },
+  })
+</script>

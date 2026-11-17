@@ -78,6 +78,9 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * @event {Event} clear - Fired when the clear button or Escape emptied the field, before `input`, `change` and `search`.
  * @event {CustomEvent<SearchFieldRecentChangeDetail>} recent-change - Fired when the field changed `recent` itself: a search recorded under `history-key`, or the Clear button. Does not bubble.
  *
+ * @cssproperty {length} --c2-search-field--width - Width of the field. Unset, it keeps its natural width; `100%` fills its container (a toolbar, a form column).
+ * @cssproperty {length} --c2-search-field--min-width
+ * @cssproperty {length} --c2-search-field--max-width
  * @cssproperty {pixel} [--c2-search-field--min-height=36px]
  * @cssproperty {padding} [--c2-search-field--padding=6px 10px]
  * @cssproperty {pixel} [--c2-search-field--gap=8px] - Space between the icons, the text and the hint.

@@ -1,0 +1,15 @@
+// Hover feedback only where a pointer can hover. On a touch screen `:hover` is sticky: the browser leaves it on the
+// last element a finger touched (a tap that stops a list mid-scroll, say) until the next tap elsewhere, so a hover
+// tint reads as a selection or a pressed state that never ends. Include this inside the rule of the element that
+// shows hover; `$suffix` is appended to `&:hover` (`':not(:disabled)'`). Touch feedback, if wanted, belongs on
+// `:active`, which ends with the touch.
+//
+//   .row { @include pointer.hover { background: … } }
+//   .button { @include pointer.hover(':not(:disabled)') { background: … } }
+@mixin hover($suffix: '') {
+  @media (hover: hover) {
+    &:hover#{$suffix} {
+      @content;
+    }
+  }
+}

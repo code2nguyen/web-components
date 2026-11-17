@@ -2,6 +2,447 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.27",
+      "date": "2026-11-17",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["table"],
+              "text": "C2-tree-table variant split from c2-group-table [table-11]",
+              "hash": "8a01995"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Move groups and trees to c2-group-table, keep c2-table flat [table-split-1]",
+              "hash": "0eea1b4"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["tabs"],
+              "text": "Add overflow=\"menu\", folding the tabs that do not fit into a More menu",
+              "hash": "2ca9eaf"
+            },
+            {
+              "scopes": ["tabs"],
+              "text": "Add overflow=\"scroll\" for strips wider than their container",
+              "hash": "13cdd8c"
+            },
+            {
+              "scopes": ["dashboard"],
+              "text": "Read layouts from a JSON attribute",
+              "hash": "1d7eb10"
+            },
+            {
+              "scopes": ["search-field"],
+              "text": "Let the field fill its container",
+              "hash": "ff9dc9c"
+            },
+            {
+              "scopes": ["overflow-list"],
+              "text": "Add --c2-overflow-list--justify-content",
+              "hash": "1f3ab77"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Add a lazy password generator [password-field-1]",
+              "hash": "aa429c9"
+            },
+            {
+              "scopes": ["citation"],
+              "text": "Add c2-citation-list, the sources line under an answer",
+              "hash": "d22ee51"
+            },
+            {
+              "scopes": ["shortcut"],
+              "text": "Add c2-shortcut-sheet, the keyboard shortcuts sheet [shortcut-1]",
+              "hash": "20ea98a"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Add a comparison range and a footer slot to c2-date-selector",
+              "hash": "d6e102b"
+            },
+            {
+              "scopes": ["json-viewer"],
+              "text": "Add c2-schema-tree, a JSON Schema / OpenAPI property tree [json-viewer-1]",
+              "hash": "d391be6"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "Add an inline agent-question mode",
+              "hash": "eb5b470"
+            },
+            {
+              "scopes": ["progress"],
+              "text": "Milestone marks and c2-navigation-progress companion [progress-1]",
+              "hash": "409f880"
+            },
+            {
+              "scopes": ["tour"],
+              "text": "Add c2-beacon, pulsing hotspots that open a tip [tour-1]",
+              "hash": "7304c69"
+            },
+            {
+              "scopes": ["page-header"],
+              "text": "Add large-title, a mobile navigation bar that collapses on scroll",
+              "hash": "0073acf"
+            },
+            {
+              "scopes": ["table-of-contents"],
+              "text": "Add c2-index-bar, an A to Z rail with drag scrubbing",
+              "hash": "f426933"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Ranking with rank badges and form association",
+              "hash": "72b955c"
+            },
+            {
+              "scopes": ["checkbox"],
+              "text": "Min and max selections on c2-checkbox-group and a trailing slot on c2-checkbox",
+              "hash": "4e64ca7"
+            },
+            {
+              "scopes": ["slider"],
+              "text": "Event markers on the track and seekMarker() for time scrubbers",
+              "hash": "737e5fe"
+            },
+            {
+              "scopes": ["format-number"],
+              "text": "Add c2-delta, a change with an arrow and good or bad colour",
+              "hash": "1e907f2"
+            },
+            {
+              "scopes": ["scroll-area"],
+              "text": "Add row scroller controls and mouse drag",
+              "hash": "4c13e4c"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Group progress, a locked status and a reason line for lesson lists [steps-2]",
+              "hash": "a0f2416"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Add the control slot for settings rows [list-item-2]",
+              "hash": "bf34d44"
+            },
+            {
+              "scopes": ["sticky"],
+              "text": "Add show-when-hidden for a sticky call to action [sticky-1]",
+              "hash": "ec249a4"
+            },
+            {
+              "scopes": ["button"],
+              "text": "Forward invoker commands and aria state to the inner button",
+              "hash": "ef62dcd"
+            },
+            {
+              "scopes": ["tabs"],
+              "text": "C2-tab-nav link tabs and sync-key code tabs [tabs-1]",
+              "hash": "8596ccd"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "Floating toolbar with open and hide-on-scroll [action-bar-1]",
+              "hash": "5792a05"
+            },
+            {
+              "scopes": ["details"],
+              "text": "Add headless collapse mode driven by invoker commands [details-1]",
+              "hash": "fbf5de7"
+            },
+            {
+              "scopes": ["key-value-editor"],
+              "text": "C2-tier-editor, contiguous tiers with a live pricing preview [key-value-editor-1]",
+              "hash": "dfec7c9"
+            },
+            {
+              "scopes": ["meter"],
+              "text": "Seat meter overage and c2-range-indicator companion [meter-1]",
+              "hash": "57f097b"
+            },
+            {
+              "scopes": ["number-input"],
+              "text": "Unit input companion [number-input-1]",
+              "hash": "6215f9a"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Task list links, summary header and stage path chevrons [steps-1]",
+              "hash": "69370b6"
+            },
+            {
+              "scopes": ["upload"],
+              "text": "Document checklist and image uploader companions [upload-1]",
+              "hash": "d99d764"
+            },
+            {
+              "scopes": ["pivot-table"],
+              "text": "C2-aging-table, receivables and payables aging by bucket of days past due [pivot-table-3]",
+              "hash": "6373224"
+            },
+            {
+              "scopes": ["select"],
+              "text": "Add c2-native-select, a field around the browser's select [select-2]",
+              "hash": "14a8d30"
+            },
+            {
+              "scopes": ["confirm-dialog"],
+              "text": "Typed confirmation and prompt dialog [confirm-dialog-1]",
+              "hash": "7646d90"
+            },
+            {
+              "scopes": ["select"],
+              "text": "Search, option groups, create row and footer actions [select-1]",
+              "hash": "18bb2ae"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Add c2-matrix-board, a kanban laid out in rows by columns [kanban-1]",
+              "hash": "0585c16"
+            },
+            {
+              "scopes": ["autocomplete"],
+              "text": "Record picker with multiple picks, a create row and recent items [autocomplete-1]",
+              "hash": "fda9695"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Sections, calculation lines and editable properties [description-list-2]",
+              "hash": "baa5a2c"
+            },
+            {
+              "scopes": ["choice-matrix"],
+              "text": "Add c2-scorecard and row details [choice-matrix-2]",
+              "hash": "9d85fe0"
+            },
+            {
+              "scopes": ["choice-matrix"],
+              "text": "Add c2-input-matrix and c2-record-merge [choice-matrix-1]",
+              "hash": "e80c421"
+            },
+            {
+              "scopes": ["virtual-list"],
+              "text": "Infinite scroll [virtual-list-1]",
+              "hash": "e650e37"
+            },
+            {
+              "scopes": ["view-options"],
+              "text": "Saved views [view-options-1]",
+              "hash": "7eb7fce"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Flowsheet now column, dose grid and requirement tree examples [table-10]",
+              "hash": "091c2a3"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Bulk select menu, selection scope and page-aware selection [table-9]",
+              "hash": "82a4cf7"
+            },
+            {
+              "scopes": ["table"],
+              "text": "C2-allocation-grid variant, cellPart, goal tree and gradebook examples [table-8]",
+              "hash": "860e320"
+            },
+            {
+              "scopes": ["table"],
+              "text": "C2-flowsheet variant; table variants audit and rule",
+              "hash": "f220904"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Flowsheet series columns and reference-range flags [table-7]",
+              "hash": "4b28fcf"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Column filters and baseline comparisons [table-6]",
+              "hash": "9d88c4e"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Summary-target, and line items and allocation examples [table-5]",
+              "hash": "8078c61"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Status columns, tally counts and running balances [table-4]",
+              "hash": "3564184"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Edit cells in place with editable, loaded on the first edit [table-3]",
+              "hash": "2154879"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["tabs"],
+              "text": "Scroll the selected tab into view instantly, as c2-tab-nav does",
+              "hash": "8167ab1"
+            },
+            {
+              "scopes": ["tabs"],
+              "text": "Harden the overflow modes after review",
+              "hash": "5a81511"
+            },
+            {
+              "scopes": ["list"],
+              "text": "No focus entry without an enabled row; cover rows slotted from c2-select",
+              "hash": "d45e31d"
+            },
+            {
+              "scopes": ["master-detail"],
+              "text": "Fire layout-change once with the initial layout",
+              "hash": "2ac8667"
+            },
+            {
+              "scopes": ["sass"],
+              "text": "Show hover feedback only where a pointer can hover",
+              "hash": "2bd1396"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Defer the roving tabindex until the list is first used",
+              "hash": "527b440"
+            },
+            {
+              "scopes": ["citation"],
+              "text": "Clear a card's highlight in Firefox when the pointer or focus leaves [citation-1]",
+              "hash": "61b8ed6"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Reflect name so a list named as a property is submitted [reorder-list-1]",
+              "hash": "c293ebc"
+            },
+            {
+              "scopes": ["scroll-area"],
+              "text": "Record the control icon slots in the slot styling audit [scroll-area-1]",
+              "hash": "9c4a85d"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Record the reason slot in the slot styling audit [steps-2]",
+              "hash": "9ecce51"
+            },
+            {
+              "scopes": ["details"],
+              "text": "Close same-name panels without a c2-accordion parent",
+              "hash": "1a542b7"
+            },
+            {
+              "scopes": ["code-viewer"],
+              "text": "Let color-scheme auto follow the page's color-scheme",
+              "hash": "1ace0a1"
+            },
+            {
+              "scopes": ["action-bar"],
+              "text": "Bring a hide-on-scroll bar back even without a scrollend",
+              "hash": "a53e445"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Re-render localized text after hydration with the client locale",
+              "hash": "7c20b51"
+            },
+            {
+              "scopes": ["number-input"],
+              "text": "Unit input review fixes [number-input-1]",
+              "hash": "7b79b77"
+            },
+            {
+              "scopes": ["meter"],
+              "text": "Review fixes for c2-range-indicator and the meter header [meter-1]",
+              "hash": "77f88d1"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Wrap header actions and shorten stage path cards after screenshot review [steps-1]",
+              "hash": "f866a2c"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Widen the selection column for the bulk select caret",
+              "hash": "7f6c2f9"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Flowsheet docs frontmatter, card heights and sizes",
+              "hash": "9ab2fe8"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Review fixes for series columns and flags",
+              "hash": "55e5258"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Focus the filter without scrolling the page",
+              "hash": "a10f12e"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Readable variance mark and deltas in both themes",
+              "hash": "e1fd043"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["list-item"],
+              "text": "Load the settings-row behaviour lazily [list-item-2]",
+              "hash": "9871622"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Parse the installed umbrella manifest once",
+              "hash": "d3264be"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Load the realtime update code only with animate-updates",
+              "hash": "258496d"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": ["tab-nav"],
+              "text": "Revert \"fix(tabs): scroll the selected tab into view instantly, as c2-tab-nav does\"",
+              "hash": "85e1e3c"
+            },
+            {
+              "scopes": [],
+              "text": "Revert \"build: give @lit-labs/ssr the root @types/node\"",
+              "hash": "c676ba6"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.26",
       "date": "2026-11-12",
       "sections": [

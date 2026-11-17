@@ -9,6 +9,18 @@
       "types": "./types/src/choice-matrix.d.ts",
       "default": "./dist/choice-matrix.js"
     },
+    "./input-matrix.js": {
+      "types": "./types/src/input-matrix.d.ts",
+      "default": "./dist/input-matrix.js"
+    },
+    "./record-merge.js": {
+      "types": "./types/src/record-merge.d.ts",
+      "default": "./dist/record-merge.js"
+    },
+    "./scorecard.js": {
+      "types": "./types/src/scorecard.d.ts",
+      "default": "./dist/scorecard.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -66,5 +78,12 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./input-matrix.js",
+      "./record-merge.js",
+      "./scorecard.js"
+    ]
+  }
 }

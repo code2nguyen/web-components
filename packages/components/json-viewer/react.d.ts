@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { JsonViewer } from '@c2n/json-viewer'
+import type { SchemaTree } from '@c2n/json-viewer/schema-tree.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -24,6 +25,12 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-json-viewer': C2Props<JsonViewer> & {
+        'expand-depth'?: Attribute
+        'sort-keys'?: Attribute
+        'path-format'?: Attribute
+        'page-size'?: Attribute
+      }
+      'c2-schema-tree': C2Props<SchemaTree> & {
         'expand-depth'?: Attribute
         'sort-keys'?: Attribute
         'path-format'?: Attribute

@@ -1,0 +1,13 @@
+---
+/**
+ * Plays the application's part in the number input gallery: the French of the step controls in the card under
+ * `lang="fr"`.
+ */
+---
+
+<script>
+  import '@c2n/components/number-input'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { 'number-input': { decrease: 'Diminuer la valeur', increase: 'Augmenter la valeur' } } })
+</script>

@@ -9,4 +9,10 @@ const fr: typeof citationMessages.en = {
   named: (source, title) => `${source} : ${title}`,
 }
 
-addTranslations({ fr: { citation: fr } })
+addTranslations({
+  fr: {
+    citation: fr,
+    // As JSON would hold it: a plural choice and `{0}` placeholders.
+    'citation-list': { summary: { one: '{0} source utilisée', other: '{0} sources utilisées' }, label: 'Sources', card: 'Source {0} : {1}' },
+  },
+})
