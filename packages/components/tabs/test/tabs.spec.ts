@@ -450,3 +450,42 @@ test('overflow="menu": a vetoed tab-change keeps the current tab when a folded o
   await page.locator('c2-menu-item', { hasText: 'Section E' }).click()
   await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'a')
 })
+
+test('overflow="menu": the trigger follows the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${crowded('overflow="menu"', 420)}</div>`)
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await expect(more(page)).toHaveAttribute('aria-label', '3 onglets de plus')
+  await expect(more(page)).toContainText('Plus')
+})
+
+// Review fixes: switching modes after the first render keeps every tab; a stretched tab look still unfolds.
+test('switching overflow after the first render keeps the tabs in the strip', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('', 1200))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  for (const overflow of ['menu', 'visible', 'scroll', 'menu']) {
+    await props(page.locator('c2-tabs'), { overflow })
+    await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  }
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '420px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await props(page.locator('c2-tabs'), { overflow: 'visible' })
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+})
+
+test('overflow="menu" with stretched tabs folds and unfolds as the strip changes width', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu" style="--c2-tabs__tab--flex: 1 1 0"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '1200px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+})
+
+test('overflow="scroll" keeps a scroll the user made when a tab resizes', async ({ page, renderScenario }) => {
+  await renderScenario(crowded())
+  await strip(page).evaluate((header) => header.scrollTo({ left: header.scrollWidth, behavior: 'instant' }))
+  const scrolled = await strip(page).evaluate((header) => header.scrollLeft)
+  expect(scrolled).toBeGreaterThan(100)
+  // A tab growing is not a reason to jump back to the selected (first) tab.
+  await page.locator('c2-tab[for="c"]').evaluate((tab) => (tab.textContent = 'Section C, renamed'))
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await strip(page).evaluate((header) => header.scrollLeft)).toBe(scrolled)
+})

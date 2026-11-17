@@ -227,6 +227,12 @@
   .c2-tabs-header.folding {
     overflow-x: clip;
     overflow-clip-margin: 4px;
+
+    // The fit adds up the tabs' natural widths: a tab stretched by `--c2-tabs__tab--flex` would report more than it
+    // needs, and the folded tabs would never come back.
+    ::slotted(c2-tab) {
+      flex: none;
+    }
   }
 }
 

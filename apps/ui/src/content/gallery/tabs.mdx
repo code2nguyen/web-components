@@ -3,6 +3,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Tabs } from '@c2n/components/tabs'
 import { CodeViewer } from '@c2n/components/code-viewer'
+import TabsExamplesRuntime from '../../components/TabsExamplesRuntime.astro'
 import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
 import { FeatherBookOpenIcon as FeatherBookOpen } from '@c2n/feather-icons/icons/book-open.js'
 import { FeatherEditIcon as FeatherEdit } from '@c2n/feather-icons/icons/edit.js'
@@ -14,6 +15,8 @@ import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons
 ## Presets
 
 Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every look is CSS variables only: the rail (`--c2-tabs--*`), the tabs (`--c2-tabs__tab--*` and their `hover` / `selected` / `focus` / `disabled` states) and the indicator (`--c2-tabs__indicator--*`). Give the indicator a full height and a `bottom` offset and it becomes a pill sliding behind the labels.
+
+<TabsExamplesRuntime />
 
 <GalleryGrid>
 
@@ -70,6 +73,27 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
   <div id="t5"></div>
   <div id="t6"></div
 ></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=More menu in French
+<style>
+  .menu-tabs-fr {
+    width: 300px;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
+  }
+</style>
+<div lang="fr">
+  <c2-tabs overflow="menu" selected-tab="t1" class="menu-tabs-fr" aria-label="Commande" client:only="lit"
+    ><c2-tab label="Résumé" for="t1"></c2-tab><c2-tab label="Articles" for="t2"></c2-tab><c2-tab label="Paiements" for="t3"></c2-tab
+    ><c2-tab label="Livraison" for="t4"></c2-tab><c2-tab label="Retours" for="t5"></c2-tab>
+    <div id="t1"></div>
+    <div id="t2"></div>
+    <div id="t3"></div>
+    <div id="t4"></div>
+    <div id="t5"></div
+  ></c2-tabs>
+</div>
 ```
 
 ```html tag=MdxCodeBlock,label=Brand indicator

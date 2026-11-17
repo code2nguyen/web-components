@@ -92,7 +92,8 @@ export interface Tabs {
  * `overflow="menu"` folds instead: the tabs that do not fit, from the end, go into a "More" menu after the strip, and
  * the selected tab never folds. Picking a tab from the menu selects it (through the same cancelable `tab-change` as a
  * click) and brings it back into the strip in place of another; the arrow keys, Home and End move onto folded tabs the
- * same way. Style the trigger through `--c2-tabs__more--*` or its `more` part. A server-rendered strip, which cannot
+ * same way. Tabs keep their natural width in this mode (`--c2-tabs__tab--flex` does not stretch them). Style the
+ * trigger through `--c2-tabs__more--*` or its `more` part. If `c2-menu` cannot be loaded, the strip scrolls instead. A server-rendered strip, which cannot
  * move its tabs between slots, scrolls instead.
  *
  * Strips that share a `sync-key` move together: picking a tab in one selects the tab with the same label in every
@@ -226,6 +227,12 @@ export class Tabs extends LitElement {
   /** Whether `c2-menu` has been loaded; the trigger is drawn from then on. */
   @state() private menuReady = false
 
+  /** `c2-menu` could not be loaded (offline, a blocked chunk): the strip scrolls instead of folding. */
+  @state() private menuFailed = false
+
+  /** Tabs, the strip and the trigger being measured: observing one again would report it again. */
+  private observed = new Set<Element>()
+
   private readonly msg = new LocalizeController(this, tabsMessages)
   private widths = new WeakMap<Element, number>()
   private fitQueued = false
@@ -256,10 +263,16 @@ export class Tabs extends LitElement {
     super.connectedCallback()
     if (!isServer && typeof ResizeObserver !== 'undefined' && !this.resizeObserver) {
       this.resizeObserver = new ResizeObserver((records) => {
-        for (const record of records) this.widths.set(record.target, record.borderBoxSize?.[0]?.inlineSize ?? record.contentRect.width)
+        let stripResized = false
+        for (const record of records) {
+          const width = record.borderBoxSize?.[0]?.inlineSize ?? record.contentRect.width
+          if (record.target === this.header && width !== this.widths.get(record.target)) stripResized = true
+          this.widths.set(record.target, width)
+        }
         if (this.folding) this.queueFit()
         this.updateIndicator()
-        this.revealSelected(false)
+        // Only when the strip itself changed width: a tab or font settling must not undo a scroll the user made.
+        if (stripResized) this.revealSelected(false)
         this.updateScrollEdges()
       })
     }
@@ -282,6 +295,7 @@ export class Tabs extends LitElement {
     super.disconnectedCallback()
     if (!isServer) window.removeEventListener(SYNC_EVENT, this.handleSync)
     this.resizeObserver?.disconnect()
+    this.observed.clear()
     this.childObserver?.disconnect()
   }
 
@@ -294,7 +308,7 @@ export class Tabs extends LitElement {
    * (server rendering), which is always in named mode; the strip then falls back to `slot` attributes.
    */
   private get manualSlots(): boolean {
-    return (this.renderRoot as ShadowRoot).slotAssignment === 'manual'
+    return (this.renderRoot as ShadowRoot | undefined)?.slotAssignment === 'manual'
   }
 
   /** Puts every `<c2-tab>` child in the `tab` slot, then re-resolves the visible panel. */
@@ -331,12 +345,12 @@ export class Tabs extends LitElement {
 
   /** Whether this strip folds tabs into a menu: `overflow="menu"` with manual slot assignment (not server-rendered). */
   private get folding(): boolean {
-    return this.overflow === 'menu' && this.manualSlots
+    return this.overflow === 'menu' && this.manualSlots && !this.menuFailed
   }
 
   /** Whether the tab list scrolls: `overflow="scroll"`, or `menu` in a server-rendered strip, which cannot fold. */
   private get scrolling(): boolean {
-    return this.overflow === 'scroll' || (this.overflow === 'menu' && this.hasUpdated && !this.manualSlots)
+    return this.overflow === 'scroll' || (this.overflow === 'menu' && (!this.manualSlots || this.menuFailed))
   }
 
   /** Refits on the next frame: refitting inside a resize observer callback would resize what it observes. */
@@ -381,7 +395,17 @@ export class Tabs extends LitElement {
 
   private setFolded(folded: Tab[]) {
     if (folded.length === this.folded.length && folded.every((tab, index) => tab === this.folded[index])) return
-    if (folded.length) void loadMenu().then(() => (this.menuReady = true))
+    if (folded.length && !this.menuReady) {
+      loadMenu().then(
+        () => (this.menuReady = true),
+        () => {
+          // Folded tabs would be out of reach without the menu: give them back and scroll instead. A later fold retries.
+          menuModule = undefined
+          this.menuFailed = true
+          this.setFolded([])
+        },
+      )
+    }
     this.folded = folded
     this.assignTabs()
     this.updateIndicator()
@@ -497,12 +521,8 @@ export class Tabs extends LitElement {
     const tabs = this.tabs
     await Promise.all(tabs.map((tab) => tab.updateComplete))
 
-    this.resizeObserver?.disconnect()
-    if (this.resizeObserver) {
-      this.resizeObserver.observe(this.header)
-      this.observeBar()
-      for (const tab of tabs) this.resizeObserver.observe(tab)
-    }
+    this.observe([this.header, ...tabs])
+    this.observeBar()
 
     this.restoreSync(tabs)
     // No (valid) selection given: adopt the first enabled tab silently.
@@ -637,6 +657,9 @@ export class Tabs extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>) {
+    // A newly selected tab may be folded: refit before rendering, so it is in the strip before anything focuses it,
+    // and the change of `folded` joins this update rather than scheduling another.
+    if (changed.has('selectedTab') && this.folding && this.hasUpdated) this.fit()
     // Collected before rendering, not in `updated`: a state change there would schedule a second update every time.
     if (!isServer && this.manualSlots) this.collectPanels()
     // Selection cleared (attribute removed, `selectedTab = ''`): fall back to the first enabled tab instead of showing nothing.
@@ -646,21 +669,38 @@ export class Tabs extends LitElement {
     }
   }
 
+  /**
+   * Measures `targets` from now on, and stops measuring the observed elements no longer in the strip, the bar or the
+   * tabs. An element already observed is left alone: observing it again would report it again, and every report runs a fit.
+   */
+  private observe(targets: (Element | null | undefined)[], replace = true) {
+    const observer = this.resizeObserver
+    if (!observer) return
+    const wanted = new Set(targets.filter((target): target is Element => !!target))
+    for (const target of wanted) if (!this.observed.has(target)) observer.observe(target)
+    if (replace) {
+      const keep = new Set([...wanted, ...this.renderRoot.querySelectorAll('.c2-tabs-bar, .more')])
+      for (const target of this.observed) if (!keep.has(target)) observer.unobserve(target)
+      this.observed = new Set([...this.observed].filter((target) => keep.has(target)))
+    }
+    for (const target of wanted) this.observed.add(target)
+  }
+
   /** The room of a folding strip and the trigger's width, both re-measured when they change. */
   private observeBar() {
-    const bar = this.renderRoot.querySelector('.c2-tabs-bar')
-    if (bar) this.resizeObserver?.observe(bar)
-    if (this.trigger) this.resizeObserver?.observe(this.trigger)
+    this.observe([this.renderRoot.querySelector('.c2-tabs-bar'), this.trigger], false)
   }
 
   override updated(changed: PropertyValues<this>) {
-    if (changed.has('overflow') || (changed as PropertyValues).has('menuReady')) {
-      if (changed.has('overflow') && this.resizeObserver && this.header) this.resizeObserver.observe(this.header)
+    const values = changed as PropertyValues
+    if (changed.has('overflow') || values.has('menuReady') || values.has('menuFailed')) {
+      // Entering or leaving `menu` rebuilds the strip, whose new slot has nothing assigned yet, and a new indicator.
+      if (this.manualSlots) this.assignTabs()
+      if (changed.has('overflow') && changed.get('overflow') !== undefined) this.measured = false
+      this.observe([this.header, ...this.tabs])
       this.observeBar()
-      this.fit()
+      this.queueFit()
     }
-    // A newly selected tab may be folded: refit at once so it is in the strip before anything focuses it.
-    if (changed.has('selectedTab') && this.folding) this.fit()
     if (changed.has('selectedTab')) {
       this.syncTabs()
       this.updateIndicator()
