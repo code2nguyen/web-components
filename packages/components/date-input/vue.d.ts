@@ -9,6 +9,7 @@
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { DateFields } from '@c2n/date-input/date-fields.js'
 import type { DateInput } from '@c2n/date-input'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -18,6 +19,15 @@ type EventOf<T extends EventTarget, Name extends string> = Name extends keyof Ev
 
 declare module 'vue' {
   interface GlobalComponents {
+    'c2-date-fields': DefineComponent<
+      C2Props<DateFields> & {
+        readonly?: unknown
+        'error-text'?: unknown
+        'aria-label'?: unknown
+        onInput?: (event: EventOf<DateFields, 'input'>) => void
+        onChange?: (event: EventOf<DateFields, 'change'>) => void
+      }
+    >
     'c2-date-input': DefineComponent<
       C2Props<DateInput> & {
         readonly?: unknown
