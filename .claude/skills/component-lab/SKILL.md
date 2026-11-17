@@ -21,14 +21,17 @@ more detail, do this, in order, and stop when the session's budget is spent; wha
 
 1. `git pull` the default branch into a new branch `lab/<yyyy-mm-dd>`; build what the targets serve
    (`npm run build -w packages/umbrella`, plus `npm run build -w apps/examples/support-inbox-vue`).
-2. **Regressions first:** run every target in `lab/targets/` (`node lab/scripts/lab.mjs run <target> --repeat 2`). A
-   new reproducible finding is triaged before anything else (step 3 below), and a known finding that no longer
-   appears means a component was fixed: remove its key from `known.json` and move its `COMPONENT-FEEDBACK.md` entry
-   to Fixed.
+2. **Regressions first:** `node lab/scripts/lab.mjs replay`. It reruns every target in `lab/targets/` twice, writes a
+   run record per target to `lab/runs/`, and compares each with the target's previous full run: findings that
+   appeared, findings that are gone, journeys now passing or failing. A new reproducible finding is triaged before
+   anything else (step 3 below). A known finding the summary lists as no longer seen means a component was fixed:
+   confirm it, remove its key from `known.json` and move its `COMPONENT-FEEDBACK.md` entry to Fixed.
 3. **One new build:** pick the first spec that `lab/GAPS.md` lists as "not built" (scenarios before features before
-   apps), build one direction of it (step 0), write its journeys and its report.
+   apps), build one direction of it (step 0), write its journeys and its report, then record its first run with
+   `node lab/scripts/lab.mjs run <target> --repeat 2 --record`.
 4. `node lab/scripts/gaps.mjs --check`, then open a pull request against `develop` titled
-   `chore(lab): weekly run <yyyy-mm-dd>` whose description lists: targets run and their result, findings by verdict,
+   `chore(lab): weekly run <yyyy-mm-dd>` with the new run records committed. Its description lists: the replay
+   summary (`test-results/lab/replay-summary.md`), targets run and their result, findings by verdict,
    what was filed in `COMPONENT-FEEDBACK.md`, the spec built and its outcome counts, and the top of the gap matrix.
 
 ## 0. Build from a spec (when asked to build, or when a spec has no build)

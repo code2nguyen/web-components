@@ -93,11 +93,21 @@ export async function settleAnimations(page) {
     .catch(() => {})
 }
 
-/** axe-core over the whole page, shadow roots included. Each violated rule is reported once per component. */
+/** axe-core over the whole page, shadow roots included, settled. Each violated rule is reported once per component. */
 export async function checkAxe(page, report) {
+  // Two passes half a second apart, keeping only what both saw: a frame of a closing popup or a fading toast is not
+  // what a person reads, and measured mid-transition its colours fail contrast that the settled page passes.
   await settleAnimations(page)
-  const results = await new AxeBuilder({ page }).analyze()
-  for (const violation of results.violations) {
+  const first = await new AxeBuilder({ page }).analyze()
+  await page.waitForTimeout(500)
+  await settleAnimations(page)
+  const second = await new AxeBuilder({ page }).analyze()
+  const nodeKey = (rule, node) => `${rule}|${JSON.stringify(node.target)}`
+  const seenFirst = new Set(first.violations.flatMap((violation) => violation.nodes.map((node) => nodeKey(violation.id, node))))
+  const stable = second.violations
+    .map((violation) => ({ ...violation, nodes: violation.nodes.filter((node) => seenFirst.has(nodeKey(violation.id, node))) }))
+    .filter((violation) => violation.nodes.length)
+  for (const violation of stable) {
     const byComponent = new Map()
     for (const node of violation.nodes) {
       const path = JSON.stringify(node.target)
