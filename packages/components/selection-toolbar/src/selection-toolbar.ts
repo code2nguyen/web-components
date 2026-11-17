@@ -31,7 +31,8 @@ export interface SelectionToolbar {
 }
 
 /** Elements that take focus in the toolbar, in order. */
-const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-toggle-button'
+const FOCUSABLE =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-toggle-button, c2-text-field, c2-textarea, c2-chat-input'
 
 /** How long a keyboard selection has to stay still before the toolbar shows. */
 const KEYBOARD_SETTLE = 300
@@ -53,16 +54,24 @@ const KEYBOARD_SETTLE = 300
  * once per selection. Selections inside other components' shadow roots and inside form fields are theirs, not this
  * toolbar's.
  *
+ * `prompting` (or pressing a control with `data-prompt`) turns it into an inline prompt at the same anchor: the
+ * `prompt` and `result` slots replace the controls, focus moves to the first field, and the selection, or the caret
+ * when nothing is selected, stays frozen until Escape or `prompting = false`.
+ *
  * @tag c2-selection-toolbar
  *
  * @slot - The content whose selections the toolbar acts on.
  * @slot toolbar - The toolbar's controls: `c2-button`, `c2-icon-button` or any focusable element. Give one `data-action` to have it fire `selection-action`.
+ * @slot prompt - Shown while `prompting`: the field and quick actions.
+ * @slot result - Shown while `prompting`: the answer and its actions (Replace, Retry…).
  *
  * @event {CustomEvent<{ text: string }>} selection-change - Fired when the toolbar shows for a selection or its selection changes. Does not bubble.
  * @event {CustomEvent<{ action: string; text: string }>} selection-action - Fired when a toolbar control with `data-action` is pressed, with the action and the selected text.
  * @event {CustomEvent<{ open: boolean }>} toggle - Fired when the toolbar opens or closes.
  *
  * @csspart toolbar - The floating toolbar.
+ * @csspart prompt - Wrapper of the `prompt` slot.
+ * @csspart result - Wrapper of the `result` slot.
  *
  * @cssproperty {color} [--c2-selection-toolbar--background=#ffffff]
  * @cssproperty {border} [--c2-selection-toolbar--border=1px solid #e4e4e7]
@@ -71,6 +80,9 @@ const KEYBOARD_SETTLE = 300
  * @cssproperty {padding} [--c2-selection-toolbar--padding=4px]
  * @cssproperty {pixel} [--c2-selection-toolbar--gap=2px] - Space between the controls.
  * @cssproperty {pixel} [--c2-selection-toolbar--offset=8px] - Distance from the selection.
+ * @cssproperty {pixel} [--c2-selection-toolbar__prompt--width=360px]
+ * @cssproperty {pixel} [--c2-selection-toolbar__prompt--gap=8px]
+ * @cssproperty {pixel} [--c2-selection-toolbar__result--max-height=240px]
  */
 @customElement('c2-selection-toolbar')
 export class SelectionToolbar extends LitElement {
@@ -88,8 +100,12 @@ export class SelectionToolbar extends LitElement {
   /** The toolbar's accessible name. */
   @property() label = ''
 
+  /** Shows the inline prompt, anchored to the selection or the caret. Escape sets it back to false. */
+  @property({ type: Boolean, reflect: true }) prompting = false
+
   @state() private open = false
   @state() private hint = ''
+  @state() private hasResult = false
 
   private readonly msg = new LocalizeController(this, selectionToolbarMessages)
   private range: Range | null = null
@@ -126,26 +142,43 @@ export class SelectionToolbar extends LitElement {
     this.hide()
   }
 
+  protected override willUpdate(changed: PropertyValues<this>): void {
+    if (!changed.has('prompting')) return
+    if (!this.prompting || this.disabled) {
+      if (changed.get('prompting') || this.prompting) this.hide()
+      return
+    }
+    if (!this.inToolbar(document.activeElement)) this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (this.open) return
+    // Opened without a toolbar: anchor to the selection or the caret in the content, else to the content itself.
+    const selection = document.getSelection()
+    const owned = !!selection && this.ownsSelection(selection)
+    this.range = owned ? selection.getRangeAt(0).cloneRange() : null
+    this.text = owned ? selection.toString() : ''
+  }
+
   protected override updated(changed: PropertyValues<this>): void {
     if (changed.has('disabled') && this.disabled) this.hide()
+    else if (changed.has('prompting') && this.prompting) void this.show().then(() => this.controls('prompt')[0]?.focus())
   }
 
   private get panel(): HTMLElement | null {
     return this.renderRoot?.querySelector<HTMLElement>('.toolbar') ?? null
   }
 
-  /** The toolbar's controls, in order. */
-  private controls(): HTMLElement[] {
-    const slot = this.renderRoot?.querySelector<HTMLSlotElement>('slot[name="toolbar"]')
+  /** The controls of a slot, in order. */
+  private controls(name = this.prompting ? 'prompt' : 'toolbar'): HTMLElement[] {
+    const slot = this.renderRoot?.querySelector<HTMLSlotElement>(`slot[name="${name}"]`)
     const assigned = (slot?.assignedElements({ flatten: true }) ?? []) as HTMLElement[]
     return assigned
       .flatMap((element) => (element.matches(FOCUSABLE) ? [element] : [...element.querySelectorAll<HTMLElement>(FOCUSABLE)]))
       .filter((element) => !element.hasAttribute('disabled'))
   }
 
+  /** Whether a node is in one of the floating panel's slots. */
   private inToolbar(node: Node | null): boolean {
-    const slot = this.renderRoot?.querySelector<HTMLSlotElement>('slot[name="toolbar"]')
-    return !!node && (slot?.assignedElements() ?? []).some((element) => element.contains(node))
+    const slots = [...(this.renderRoot?.querySelectorAll<HTMLSlotElement>('.toolbar slot') ?? [])]
+    return !!node && slots.some((slot) => slot.assignedElements().some((element) => element.contains(node)))
   }
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -161,7 +194,8 @@ export class SelectionToolbar extends LitElement {
   }
 
   private readonly handleSelectionChange = () => {
-    if (this.pointerDown) return
+    // A prompt keeps its anchor while focus and the selection move into its field.
+    if (this.pointerDown || this.prompting) return
     clearTimeout(this.settleTimer)
     const selection = document.getSelection()
     // A collapsed selection, or one that left the content, hides at once; a growing one waits to settle.
@@ -209,6 +243,7 @@ export class SelectionToolbar extends LitElement {
 
   /** Shows, moves or hides the toolbar for the current selection. */
   private refresh(): void {
+    if (this.prompting) return
     const selection = document.getSelection()
     if (this.disabled || !selection || selection.isCollapsed || !this.ownsSelection(selection)) {
       this.hide()
@@ -240,17 +275,14 @@ export class SelectionToolbar extends LitElement {
       } catch {
         // Already shown, or popovers unsupported: it is still positioned below.
       }
-      this.announce()
+      if (!this.prompting) this.announce()
       this.dispatchEvent(new CustomEvent('toggle', { detail: { open: true } }))
     }
     this.cleanupPosition?.()
     const range = this.range
-    if (!range) return
-    const anchor: VirtualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-      contextElement: this,
-    }
+    const anchor: VirtualElement | HTMLElement = range
+      ? { getBoundingClientRect: () => range.getBoundingClientRect(), getClientRects: () => range.getClientRects(), contextElement: this }
+      : this
     // The offset is resolved by the stylesheet onto scroll-margin-top, which computes to pixels whatever its unit.
     const resolved = parseFloat(getComputedStyle(panel).scrollMarginTop)
     const distance = Number.isFinite(resolved) ? resolved : 8
@@ -269,7 +301,10 @@ export class SelectionToolbar extends LitElement {
     clearTimeout(this.settleTimer)
     this.cleanupPosition?.()
     this.cleanupPosition = undefined
+    this.prompting = false
     if (!this.open) return
+    // Focus in the panel would be lost once it hides: give it back to where it was.
+    if (this.inToolbar(document.activeElement)) this.returnFocus?.focus()
     this.open = false
     this.range = null
     this.text = ''
@@ -292,12 +327,15 @@ export class SelectionToolbar extends LitElement {
   /** Keeps the selection when a control is pressed: focus moving to a button would otherwise clear it. */
   private handleToolbarPointerDown(event: PointerEvent): void {
     const target = event.target as HTMLElement
-    if (target.closest('input, textarea, select, [contenteditable]')) return
+    if (this.prompting || target.closest('input, textarea, select, [contenteditable]')) return
     event.preventDefault()
   }
 
   private handleToolbarClick(event: Event): void {
-    const control = (event.target as HTMLElement).closest<HTMLElement>('[data-action]')
+    const target = event.target as HTMLElement
+    const opener = target.closest('[data-prompt]')
+    if (opener && this.inToolbar(opener) && this.open) this.prompting = true
+    const control = target.closest<HTMLElement>('[data-action]')
     if (!control || !this.inToolbar(control) || !this.open) return
     this.dispatchEvent(
       new CustomEvent('selection-action', { detail: { action: control.dataset.action ?? '', text: this.text }, bubbles: true, composed: true }),
@@ -305,6 +343,8 @@ export class SelectionToolbar extends LitElement {
   }
 
   private handleToolbarKeydown(event: KeyboardEvent): void {
+    // A prompt holds text fields: the arrows and Home/End are theirs, and Tab moves between its controls.
+    if (this.prompting) return
     const controls = this.controls()
     const at = controls.findIndex((control) => control === document.activeElement || control.contains(document.activeElement))
     let target: HTMLElement | undefined
@@ -331,20 +371,25 @@ export class SelectionToolbar extends LitElement {
   }
 
   override render() {
+    const prompting = this.prompting
     return html`<slot></slot>
       <div
-        class="toolbar ${this.open ? 'toolbar--open' : ''}"
+        class="toolbar ${this.open ? 'toolbar--open' : ''} ${prompting ? 'toolbar--prompt' : ''}"
         part="toolbar"
         popover="manual"
-        role="toolbar"
-        aria-orientation="horizontal"
-        aria-label=${this.label || this.msg.t('label')}
+        role=${prompting ? 'dialog' : 'toolbar'}
+        aria-orientation=${prompting ? nothing : 'horizontal'}
+        aria-label=${prompting ? this.msg.t('prompt') : this.label || this.msg.t('label')}
         @pointerdown=${this.handleToolbarPointerDown}
         @mousedown=${this.handleToolbarPointerDown}
         @click=${this.handleToolbarClick}
         @keydown=${this.handleToolbarKeydown}
       >
         <slot name="toolbar"></slot>
+        <div class="prompt" part="prompt"><slot name="prompt"></slot></div>
+        <div class="result" part="result" ?hidden=${!this.hasResult}>
+          <slot name="result" @slotchange=${(event: Event) => (this.hasResult = (event.target as HTMLSlotElement).assignedNodes().length > 0)}></slot>
+        </div>
       </div>
       <div class="visually-hidden" role="status">${this.hint || nothing}</div>`
   }
