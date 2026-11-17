@@ -1,0 +1,32 @@
+---
+/**
+ * Plays the application's part in the shortcut sheet gallery: the French of the card under `lang="fr"`, and the
+ * `renderItem` of the card marked `data-shortcut-sheet-example="render-item"`, a property no attribute can carry.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import '@c2n/components/shortcut/shortcut-sheet'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      shortcut: {
+        title: 'Raccourcis clavier',
+        search: 'Rechercher un raccourci',
+        general: 'Général',
+        show: 'Afficher les raccourcis clavier',
+        or: 'ou',
+        then: 'puis',
+        results: { one: '{0} raccourci', other: '{0} raccourcis' },
+        noResults: 'Aucun raccourci ne correspond à « {0} »',
+        empty: 'Aucun raccourci clavier',
+      },
+    },
+  })
+
+  for (const sheet of document.querySelectorAll<HTMLElementTagNameMap['c2-shortcut-sheet']>('[data-shortcut-sheet-example="render-item"]')) {
+    sheet.renderItem = ({ entry }) => html`<span part="command">${entry.description}</span><code part="code">${entry.labels.join(' · ')}</code>`
+  }
+</script>

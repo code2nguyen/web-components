@@ -1,0 +1,118 @@
+@use '@c2n/sass/visually-hidden';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-shortcut-sheet,
+  $theme: (
+    width: 'min(720px, calc(100vw - 32px))',
+    groups--column-width: 260px,
+    groups--column-gap: 32px,
+    group--margin-bottom: 20px,
+    group-heading--color: #71717a,
+    group-heading--font-size: 12px,
+    group-heading--font-weight: 600,
+    group-heading--text-transform: uppercase,
+    group-heading--letter-spacing: 0.04em,
+    group-heading--margin-bottom: 4px,
+    item--padding-top: 6px,
+    item--padding-bottom: 6px,
+    item--gap: 16px,
+    item--border-bottom: 1px solid #e4e4e7,
+    description--color: #18181b,
+    description--font-size: 14px,
+    keys--gap: 4px,
+    separator--color: #71717a,
+    separator--font-size: 12px,
+    search--margin-bottom: 16px,
+    empty--color: #71717a,
+    empty--font-size: 14px,
+    empty--padding: 24px 0,
+    footer--padding-top: 12px,
+  )
+);
+
+.modal {
+  --c2-modal--width: #{css.cssVar(width)};
+}
+
+.search {
+  margin-bottom: css.cssVar(search--margin-bottom);
+
+  c2-text-field {
+    display: block;
+    width: 100%;
+  }
+}
+
+.status {
+  @include visually-hidden.visually-hidden;
+}
+
+.groups {
+  column-width: css.cssVar(groups--column-width);
+  column-gap: css.cssVar(groups--column-gap);
+}
+
+.group {
+  break-inside: avoid;
+  margin-bottom: css.cssVar(group--margin-bottom);
+}
+
+.group-heading {
+  margin: 0 0 css.cssVar(group-heading--margin-bottom);
+  color: css.cssVar(group-heading--color);
+  font-size: css.cssVar(group-heading--font-size);
+  font-weight: css.cssVar(group-heading--font-weight);
+  letter-spacing: css.cssVar(group-heading--letter-spacing);
+  line-height: 1.5;
+  text-transform: css.cssVar(group-heading--text-transform);
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: css.cssVar(item--gap);
+  padding-top: css.cssVar(item--padding-top);
+  padding-bottom: css.cssVar(item--padding-bottom);
+  border-bottom: css.cssVar(item--border-bottom);
+}
+
+.description {
+  min-width: 0;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: css.cssVar(keys--gap);
+}
+
+.separator {
+  color: css.cssVar(separator--color);
+  font-size: css.cssVar(separator--font-size);
+}
+
+.empty {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  font-size: css.cssVar(empty--font-size);
+  text-align: center;
+}
+
+.footer[hidden] {
+  display: none;
+}
+
+.inline + .footer {
+  padding-top: css.cssVar(footer--padding-top);
+}

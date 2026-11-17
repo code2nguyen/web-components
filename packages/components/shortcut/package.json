@@ -9,6 +9,10 @@
       "types": "./types/src/shortcut.d.ts",
       "default": "./dist/shortcut.js"
     },
+    "./shortcut-sheet.js": {
+      "types": "./types/src/shortcut-sheet.d.ts",
+      "default": "./dist/shortcut-sheet.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -48,7 +52,10 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../kbd:build",
+        "../modal:build",
+        "../text-field:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -61,10 +68,18 @@
   },
   "dependencies": {
     "@c2n/core": "*",
+    "@c2n/kbd": "*",
+    "@c2n/modal": "*",
+    "@c2n/text-field": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./shortcut-sheet.js"
+    ]
+  }
 }

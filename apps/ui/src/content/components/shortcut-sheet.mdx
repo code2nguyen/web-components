@@ -1,0 +1,68 @@
+---
+title: 'Shortcut Sheet'
+description: 'The keyboard-shortcuts dialog: every shortcut of the page grouped by section, drawn with keys, and searchable, generated from c2-shortcut bindings.'
+category: 'Inputs'
+package: '@c2n/shortcut'
+tag: 'c2-shortcut-sheet'
+apiTags: ['c2-shortcut-sheet']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Shortcut } from '@c2n/components/shortcut'
+import { ShortcutSheet } from '@c2n/components/shortcut/shortcut-sheet'
+import { Button } from '@c2n/components/button'
+
+`c2-shortcut-sheet` is the dialog a "?" key opens on GitHub or Gmail, written for you from the bindings of [`c2-shortcut`](/web-components/components/shortcut): each binding with a `description` is listed under its `group`, its keys drawn with [`c2-kbd`](/web-components/components/kbd) in the reader's platform convention (`⌘K` on a Mac, `Ctrl+K` elsewhere; "then" between the strokes of a sequence, "or" between alternatives). The search field filters by description, section and keys, and announces how many shortcuts match.
+
+The sheet reads every `c2-shortcut` of its document each time it opens, or only those `for` names. `shortcuts` lists keys the page does not bind itself, such as a list's arrow keys, and accepts bare keys (`j`, `?`); `no-bindings` lists them alone. Open it with its own `keys`, a button with `commandfor` and `command="--show"` (`--toggle`, `--hide`), `show()` or the `open` attribute. The dialog, the keys and the search field load the first time it opens, so a page pays only for the element until then; `inline` lists the shortcuts in the page instead, for a help page. The `footer` slot holds the app's own links, and `renderItem` redraws a row.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/shortcut/shortcut-sheet'
+```
+
+## Usage
+
+Press <c2-kbd>alt + /</c2-kbd> (<c2-kbd>⌥ /</c2-kbd> on macOS) or the button to open the sheet.
+
+```html tag=UsageBlock,package=@c2n/shortcut
+<div data-label="Dialog">
+  <c2-shortcut
+    id="sheet-usage-shortcuts"
+    bindings='[{"keys":"mod+k, mod+/","action":"search","description":"Open search"},{"keys":"alt+n","action":"new","description":"New issue","group":"Issues"},{"keys":"alt+g alt+i","action":"issues","description":"Go to issues","group":"Navigation"},{"keys":"alt+g alt+p","action":"pulls","description":"Go to pull requests","group":"Navigation"}]'
+  ></c2-shortcut>
+  <c2-shortcut-sheet id="sheet-usage" for="sheet-usage-shortcuts" keys="alt+/"></c2-shortcut-sheet>
+  <c2-button commandfor="sheet-usage" command="--show">Keyboard shortcuts</c2-button>
+</div>
+<div data-label="Inline">
+  <c2-shortcut-sheet
+    inline
+    no-search
+    no-bindings
+    shortcuts='[{"keys":"j","description":"Next message"},{"keys":"k","description":"Previous message"},{"keys":"g i","description":"Go to inbox"}]'
+  ></c2-shortcut-sheet>
+</div>
+```
+
+## From the bindings
+
+Give each binding a `description` and a `group`; a binding without a description is not listed, nor is a disabled one. Shortcuts with no group are listed first, under "General" when others have one.
+
+```html tag=CodeBlock
+<c2-shortcut
+  bindings='[
+    { "keys": "mod+k", "action": "search", "description": "Open search" },
+    { "keys": "alt+g alt+d", "action": "go-dashboard", "description": "Go to dashboard", "group": "Navigation" },
+    { "keys": "mod+b", "action": "bold", "description": "Bold", "group": "Editing" }
+  ]'
+></c2-shortcut>
+
+<c2-shortcut-sheet keys="mod+/" shortcuts='[{ "keys": "arrowup, arrowdown", "description": "Move in the list", "group": "Navigation" }]'>
+  <a slot="footer" href="/settings/shortcuts">Customize shortcuts</a>
+</c2-shortcut-sheet>
+```
+
+When the bindings change while the sheet is shown, call `refresh()`. The sheet's dialog is a `c2-modal`: its width is `--c2-shortcut-sheet--width`, and the other `--c2-modal…` variables set on the sheet reach it.

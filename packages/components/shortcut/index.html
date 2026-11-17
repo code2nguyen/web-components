@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shortcut</title>
     <script type="module" src="/src/shortcut.ts"></script>
+    <script type="module" src="/src/shortcut-sheet.ts"></script>
     <style>
       body {
         display: grid;
@@ -38,6 +39,12 @@
     <button id="new-item" type="button">New item</button>
     <div class="panel" tabindex="0">Focus this panel and press Escape: the scoped binding wins over the global one.</div>
     <output id="log"></output>
+    <button type="button" aria-haspopup="dialog" commandfor="sheet" command="--toggle">Keyboard shortcuts (alt + /)</button>
+    <c2-shortcut-sheet id="sheet" keys="alt+/" shortcuts='[{"keys":"j, k","description":"Next or previous item","group":"Lists"}]'>
+      <a slot="footer" href="#">Customize shortcuts</a>
+    </c2-shortcut-sheet>
+    <h2>Inline</h2>
+    <c2-shortcut-sheet inline for="shortcuts"></c2-shortcut-sheet>
 
     <script type="module">
       const shortcuts = document.querySelector('#shortcuts')
