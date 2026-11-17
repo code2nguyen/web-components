@@ -310,6 +310,11 @@ pre {
   }
 }
 
+// A chip in bold text reads bold, as its token will.
+strong .merge-field {
+  font-weight: inherit;
+}
+
 // The text a link is being edited for keeps its highlight while focus is in the link popover.
 .link-target {
   background: css.cssVar(selection--background);

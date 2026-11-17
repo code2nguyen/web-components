@@ -55,7 +55,7 @@
     })
   }
 
-  /** Each chip shows its label and, dimmed, the fallback it falls back to. */
+  /** Each chip shows its label and, in italics, the fallback it falls back to. */
   function setupChipRenderer(editor: RichTextEditor) {
     editor.renderMergeField = ({ label, fallback }) => html`${label}${fallback ? html`<span part="merge-field-fallback"> · ${fallback}</span>` : nothing}`
   }

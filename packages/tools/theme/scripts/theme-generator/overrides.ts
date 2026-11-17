@@ -1173,6 +1173,8 @@ export const overrides: Record<string, Override> = {
   '--c2-rich-text-editor__quote--border-left': { token: 'color-outline', value: '3px solid var(--c2-theme--color-outline, #d4d4d8)' },
   '--c2-rich-text-editor__inline-code--background': { exclude: 'translucent tint, reads on any surface' },
   '--c2-rich-text-editor__code--font-family': { exclude: 'monospace code face' },
+  // A selected merge field chip is ringed like a focused control.
+  '--c2-rich-text-editor__merge-field__selected--outline': { token: 'focus-ring' },
   // Page editor: the floating toolbar and menus are popovers, and the caret's code block and selection follow the accent.
   '--c2-page-editor__popover--box-shadow': { token: 'shadow-md' },
   '--c2-page-editor__selection--background': {
