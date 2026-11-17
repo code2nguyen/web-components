@@ -5,6 +5,9 @@ title: 'Rich Text Editor gallery'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
+import CodeBlock from '../../components/CodeBlock.astro'
+import RichTextEditorExamplesRuntime from '../../components/RichTextEditorExamplesRuntime.astro'
+
 import { RichTextEditor } from '@c2n/components/rich-text-editor'
 import { Button } from '@c2n/components/button'
 
@@ -92,3 +95,139 @@ import { Button } from '@c2n/components/button'
 ```
 
 </GalleryGrid>
+
+## Merge fields
+
+List the fields in `merge-fields` and their `{{tokens}}` in the value become chips the caret steps over; the value keeps the tokens. `{{first_name|there}}` carries a fallback. `--c2-rich-text-editor__merge-field--*` styles the chip.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Merge fields
+<style>
+  .merge-editor { width: 320px; }
+</style>
+<c2-rich-text-editor
+  class="merge-editor"
+  label="Email body"
+  merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"},{"name":"plan","label":"Plan"}]'
+  value="Hi {{first_name|there}}, welcome to **{{company}}**. Your {{plan}} trial starts today."
+></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Pill fields
+<style>
+  .pill-fields {
+    width: 320px;
+    --c2-rich-text-editor__merge-field--background: light-dark(#f3e8ff, #26153c);
+    --c2-rich-text-editor__merge-field--color: light-dark(#7e22ce, #a76cdc);
+    --c2-rich-text-editor__merge-field--border: 1px solid light-dark(#e9d5ff, #3b2257);
+    --c2-rich-text-editor__merge-field--border-radius: 999px;
+    --c2-rich-text-editor__merge-field--padding: 0 8px;
+    --c2-rich-text-editor__merge-field__selected--outline: 2px solid #a855f7;
+  }
+</style>
+<c2-rich-text-editor
+  class="pill-fields"
+  label="SMS"
+  formats="bold italic"
+  merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"},{"name":"plan","label":"Plan"}]'
+  value="{{first_name|there}}, your {{plan}} renews tomorrow."
+></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Token look
+<style>
+  .token-fields {
+    width: 320px;
+    --c2-rich-text-editor__merge-field--background: transparent;
+    --c2-rich-text-editor__merge-field--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-rich-text-editor__merge-field--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+    --c2-rich-text-editor__merge-field--font-weight: 400;
+  }
+</style>
+<c2-rich-text-editor
+  class="token-fields"
+  label="Subject"
+  formats="bold"
+  merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"},{"name":"plan","label":"Plan"}]'
+  value="{{company}} × you: next steps"
+></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Field menu
+<style>
+  .menu-fields {
+    width: 340px;
+  }
+  .menu-fields c2-button {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-rich-text-editor
+  class="menu-fields"
+  label="Email body"
+  formats="bold italic | link"
+  merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"},{"name":"plan","label":"Plan"}]'
+  value="Hi {{first_name}}, thanks for joining {{company}}."
+  data-rich-text-editor-example="field-menu"
+  client:only="lit"
+>
+  <c2-menu slot="toolbar-end" placement="bottom-end" aria-label="Insert a field">
+    <c2-button slot="trigger">Insert field</c2-button>
+    <c2-menu-item value="first_name">First name</c2-menu-item>
+    <c2-menu-item value="company">Company</c2-menu-item>
+    <c2-menu-item value="plan">Plan</c2-menu-item>
+  </c2-menu>
+</c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=Chip renderer
+<style>
+  .renderer-fields { width: 320px; }
+  .renderer-fields::part(merge-field-fallback) { font-weight: 400; opacity: 0.75; }
+</style>
+<c2-rich-text-editor
+  class="renderer-fields"
+  label="Greeting"
+  formats="bold italic"
+  merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"},{"name":"plan","label":"Plan"}]'
+  value="Hello {{first_name|there}} from {{company|our team}}!"
+  data-rich-text-editor-example="chip-renderer"
+></c2-rich-text-editor>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .french-fields { width: 320px; }
+</style>
+<c2-rich-text-editor
+  class="french-fields"
+  lang="fr"
+  label="Courriel"
+  merge-fields='[{"name":"first_name","label":"Prénom","fallback":"toi"},{"name":"company","label":"Entreprise"}]'
+  value="Bonjour {{first_name|toi}}, bienvenue chez {{company}}."
+></c2-rich-text-editor>
+```
+
+</GalleryGrid>
+
+<RichTextEditorExamplesRuntime />
+
+The field menu is the app's: put it in `toolbar-end` (or open it on a `trigger` such as `{{`), and insert the chosen field with `insertMergeField()`. Clicking a chip, or Enter on a selected one, fires `merge-field-activate`; `insertMergeField()` then replaces that chip, which is how an app edits its fallback. `renderMergeField` draws a chip's content, and a `part` in it can be styled from the page.
+
+```ts tag=CodeBlock
+import { html, nothing } from 'lit'
+
+menu.addEventListener('menu-select', ({ detail }) => setTimeout(() => editor.insertMergeField(detail.value)))
+
+editor.addEventListener('merge-field-activate', async ({ detail }) => {
+  const fallback = await askForFallback(detail.field.label, detail.fallback, detail.rect)
+  editor.insertMergeField(detail.field.name, { fallback })
+})
+
+editor.renderMergeField = ({ label, fallback }) =>
+  html`${label}${fallback ? html`<span part="merge-field-fallback"> · ${fallback}</span>` : nothing}`
+```

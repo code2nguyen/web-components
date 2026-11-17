@@ -1,0 +1,76 @@
+---
+/**
+ * Plays the application's part in the rich text editor's merge field examples: the field menu in `toolbar-end`, which
+ * calls `insertMergeField()`, the `renderMergeField` card, and the French the language card needs.
+ */
+---
+
+<script>
+  import { html, nothing } from 'lit'
+  import type { Menu } from '@c2n/components/menu'
+  import type { RichTextEditor } from '@c2n/components/rich-text-editor'
+  import '@c2n/components/rich-text-editor'
+  import '@c2n/components/menu'
+  import '@c2n/components/button'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French an app would add for the gallery's French card: the library ships English only.
+  addTranslations({
+    fr: {
+      'rich-text-editor': {
+        formatting: 'Mise en forme',
+        moreFormatting: 'Plus de mise en forme',
+        bold: 'Gras',
+        italic: 'Italique',
+        underline: 'Souligné',
+        strike: 'Barré',
+        code: 'Code en ligne',
+        link: 'Lien',
+        bullet: 'Liste à puces',
+        ordered: 'Liste numérotée',
+        quote: 'Citation',
+        codeBlock: 'Bloc de code',
+        withShortcut: '{0} ({1})',
+        linkAddress: 'Adresse du lien',
+        linkSave: 'Enregistrer',
+        linkRemove: 'Supprimer le lien',
+        counter: '{0} / {1}',
+        valueMissing: 'Veuillez remplir ce champ.',
+        tooLong: 'Utilisez {0} caractères au maximum.',
+        mergeField: 'Champ de fusion : {0}',
+        mergeFieldFallback: 'Champ de fusion : {0} (si vide : {1})',
+      },
+    },
+  })
+
+  const initialized = new WeakSet<Element>()
+
+  /** The menu in `toolbar-end` inserts the field it names; the editor keeps its caret while the menu is open. */
+  function setupFieldMenu(editor: RichTextEditor) {
+    const menu = editor.querySelector<Menu>('c2-menu')
+    menu?.addEventListener('menu-select', (event) => {
+      const name = (event as CustomEvent<{ value: string }>).detail.value
+      // The menu gives focus back to its trigger as it closes; the text takes it after that.
+      setTimeout(() => editor.insertMergeField(name))
+    })
+  }
+
+  /** Each chip shows its label and, dimmed, the fallback it falls back to. */
+  function setupChipRenderer(editor: RichTextEditor) {
+    editor.renderMergeField = ({ label, fallback }) => html`${label}${fallback ? html`<span part="merge-field-fallback"> · ${fallback}</span>` : nothing}`
+  }
+
+  function setup() {
+    document.querySelectorAll<RichTextEditor>('[data-rich-text-editor-example]').forEach((editor) => {
+      if (initialized.has(editor)) return
+      initialized.add(editor)
+      if (editor.dataset.richTextEditorExample === 'field-menu') setupFieldMenu(editor)
+      else if (editor.dataset.richTextEditorExample === 'chip-renderer') setupChipRenderer(editor)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>
