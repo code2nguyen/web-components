@@ -1,0 +1,62 @@
+---
+title: 'Text Annotator'
+description: 'Labels spans of a text: select words and press a key to tag them, with overlapping spans and a tag per span, or show entities and retrieved passages read-only.'
+category: 'Data display'
+package: '@c2n/highlight'
+tag: 'c2-text-annotator'
+apiTags: ['c2-text-annotator']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TextAnnotator } from '@c2n/components/highlight/text-annotator'
+
+`c2-text-annotator` labels spans of its text, the way Label Studio, Prodigy or a named-entity widget does. It is a [`c2-highlight`](/web-components/components/highlight) that also draws `ranges`: each span is tinted in its label's colour and followed by a tag naming the label, and overlapping spans nest, so a word inside a longer span reads darker. Select text and press a label's `key` to add a span; do it again inside a span with that label to remove it. `readonly` shows the spans only, for entities found by a model or the passages a search retrieved.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/highlight/text-annotator'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/highlight
+<style>
+  .text-annotator-usage {
+    max-width: 520px;
+    font-size: 15px;
+    line-height: 1.9;
+  }
+</style>
+<div data-label="Entities, read-only">
+  <p class="text-annotator-usage"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"date","label":"Date"},{"value":"org","label":"Organization"},{"value":"award","label":"Award"}]' ranges='[{"start":0,"end":11,"label":"person"},{"start":21,"end":26,"label":"place"},{"start":30,"end":34,"label":"date"},{"start":50,"end":69,"label":"org"},{"start":64,"end":69,"label":"place"},{"start":92,"end":96,"label":"date"},{"start":97,"end":119,"label":"award"}]'>Marie Curie moved to Paris in 1891 and joined the University of Paris, where she shared the 1903 Nobel Prize in Physics.</c2-text-annotator></p>
+</div>
+<div data-label="Select text, then press P, L or T">
+  <p class="text-annotator-usage"><c2-text-annotator labels='[{"value":"person","label":"Person","key":"p"},{"value":"place","label":"Place","key":"l"},{"value":"thing","label":"Thing","key":"t"}]' ranges='[{"start":0,"end":12,"label":"person"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator></p>
+</div>
+```
+
+### Ranges and labels
+
+`ranges` is a list of `{ start, end, label }`: UTF-16 offsets into the element's text, so `text.slice(start, end)` is the span, and the `value` of one of the `labels`. `labels` is a list of `{ value, label, key }`: `label` is the name in the tag (the value when empty) and `key` the key that applies it. Both are JSON attributes or properties; a span outside the text is skipped.
+
+```ts tag=CodeBlock
+import type { TextAnnotator } from '@c2n/components/highlight/text-annotator'
+
+const annotator = document.querySelector<TextAnnotator>('c2-text-annotator')!
+annotator.labels = [{ value: 'person', label: 'Person', key: 'p' }]
+annotator.ranges = [{ start: 0, end: 12, label: 'person' }]
+annotator.addEventListener('ranges-change', ({ detail }) => save(detail))
+```
+
+`ranges-change` fires when the user adds or removes a span, with the new list; the offsets follow the text, so change both together. A list of the spans by label, or a legend that applies a label, is the application's: `annotate(label)` labels the current selection (a button that does it calls `preventDefault()` on `mousedown`, so pressing it keeps the selection). It loads the selection code on first use, so a read-only annotator never downloads it.
+
+### Look
+
+Labels take six tone colours in order, `--c2-text-annotator__tone-1--color` to `-6`; translucent defaults read on light and dark pages and add up where spans overlap. The `span` and `tag` parts style the rest, and `--c2-text-annotator__tag--display: none` hides the tags. Without tags only the colour tells the labels apart, so show a legend beside the text. A `query` still marks its matches, as on `c2-highlight`.
+
+### Accessibility
+
+The tags are text, so a screen reader reads each label after its span ("Marie Curie Person"). Labelling needs a selection, which a pointer or caret browsing makes; offer the same actions on buttons for other keyboards. The element draws no text of its own: tags show the `label` the application gives, in its language.

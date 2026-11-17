@@ -1,0 +1,188 @@
+---
+title: 'Text annotator gallery'
+description: 'Labelled spans of a text: keys that label a selection, entities, overlapping spans, a label bar, spans listed by label, retrieved passages, custom tones and tags, search and French labels.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import TextAnnotatorExamplesRuntime from '../../components/TextAnnotatorExamplesRuntime.astro'
+
+import { Button } from '@c2n/components/button'
+import { TextAnnotator } from '@c2n/components/highlight/text-annotator'
+
+Select words in a card that takes keys and press a label's key: the span appears with its tag, and the same key inside the span removes it.
+
+<TextAnnotatorExamplesRuntime />
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-text-annotator labels='[{"value":"person","label":"Person","key":"p"},{"value":"place","label":"Place","key":"l"},{"value":"thing","label":"Thing","key":"t"}]' ranges='[{"start":0,"end":12,"label":"person"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator>
+```
+
+```html tag=MdxCodeBlock,label=Entities
+<style>
+  .annotator-entities {
+    max-width: 420px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2;
+  }
+</style>
+<p class="annotator-entities"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"date","label":"Date"},{"value":"org","label":"Organization"},{"value":"award","label":"Award"}]' ranges='[{"start":0,"end":11,"label":"person"},{"start":21,"end":26,"label":"place"},{"start":30,"end":34,"label":"date"},{"start":50,"end":69,"label":"org"},{"start":64,"end":69,"label":"place"},{"start":92,"end":96,"label":"date"},{"start":97,"end":119,"label":"award"}]'>Marie Curie moved to Paris in 1891 and joined the University of Paris, where she shared the 1903 Nobel Prize in Physics.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Overlapping spans
+<style>
+  .annotator-review {
+    max-width: 400px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2;
+    --c2-text-annotator__tone-1--color: rgba(34, 197, 94, 0.26);
+    --c2-text-annotator__tone-2--color: rgba(239, 68, 68, 0.22);
+    --c2-text-annotator__tone-3--color: rgba(59, 130, 246, 0.3);
+  }
+</style>
+<p class="annotator-review"><c2-text-annotator labels='[{"value":"positive","label":"Positive","key":"g"},{"value":"negative","label":"Negative","key":"b"},{"value":"aspect","label":"Aspect","key":"a"}]' ranges='[{"start":0,"end":18,"label":"positive"},{"start":6,"end":18,"label":"aspect"},{"start":24,"end":51,"label":"negative"},{"start":28,"end":34,"label":"aspect"},{"start":56,"end":88,"label":"negative"},{"start":56,"end":63,"label":"aspect"}]'>Great battery life, but the screen scratches easily and support never answered my emails.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Label bar
+<style>
+  .annotator-bar {
+    display: grid;
+    gap: 12px;
+    max-width: 420px;
+    font-size: 15px;
+    line-height: 2;
+  }
+  .annotator-bar-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .annotator-bar c2-button {
+    --c2-button__container--height: 28px;
+    --c2-button__container--font-size: 13px;
+  }
+</style>
+<div class="annotator-bar" data-text-annotator-example="bar">
+  <div class="annotator-bar-buttons" role="group" aria-label="Label the selection">
+    <c2-button data-label="person">Person</c2-button>
+    <c2-button data-label="place">Place</c2-button>
+    <c2-button data-label="thing">Thing</c2-button>
+  </div>
+  <c2-text-annotator labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"thing","label":"Thing"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Spans by label
+<style>
+  .annotator-list {
+    display: grid;
+    gap: 10px;
+    max-width: 420px;
+    font-size: 15px;
+    line-height: 2;
+  }
+  .annotator-list ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="annotator-list" data-text-annotator-example="list">
+  <c2-text-annotator labels='[{"value":"symptom","label":"Symptom","key":"s"},{"value":"duration","label":"Duration","key":"d"},{"value":"modifier","label":"Modifier","key":"m"},{"value":"condition","label":"Condition","key":"c"}]' ranges='[{"start":20,"end":30,"label":"symptom"},{"start":35,"end":43,"label":"duration"},{"start":75,"end":80,"label":"symptom"},{"start":93,"end":108,"label":"condition"}]'>The patient reports chest pain for two days, worse on exertion, and denies fever. History of type 2 diabetes.</c2-text-annotator>
+  <ul data-annotation-list aria-label="Spans by label"></ul>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Retrieved passages
+<style>
+  .annotator-passages {
+    max-width: 420px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    --c2-text-annotator__tag--display: none;
+    --c2-text-annotator__tone-1--color: rgba(14, 165, 233, 0.18);
+    --c2-text-annotator__tone-2--color: rgba(14, 165, 233, 0.18);
+    --c2-text-annotator__span--text-decoration: underline 2px rgba(14, 165, 233, 0.8);
+  }
+</style>
+<p class="annotator-passages"><c2-text-annotator readonly labels='[{"value":"chunk-1","label":"Passage 1"},{"value":"chunk-2","label":"Passage 2"}]' ranges='[{"start":25,"end":54,"label":"chunk-1"},{"start":68,"end":105,"label":"chunk-2"}]'>The refund policy covers orders shipped within 30 days. Refunds are issued to the original payment method within 5 business days.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Tags as pills
+<style>
+  .annotator-pills {
+    max-width: 400px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2.1;
+    --c2-text-annotator__span--border-radius: 6px;
+    --c2-text-annotator__tag--font-size: 10px;
+    --c2-text-annotator__tag--font-weight: 700;
+  }
+  .annotator-pills c2-text-annotator::part(tag) {
+    margin-inline-start: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    vertical-align: 0.15em;
+  }
+</style>
+<p class="annotator-pills"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"thing","label":"Thing"}]' ranges='[{"start":0,"end":12,"label":"person"},{"start":25,"end":40,"label":"person"},{"start":44,"end":50,"label":"place"},{"start":58,"end":75,"label":"thing"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Search in the spans
+<style>
+  .annotator-search {
+    max-width: 420px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2;
+  }
+</style>
+<p class="annotator-search"><c2-text-annotator query="paris" readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"date","label":"Date"},{"value":"org","label":"Organization"},{"value":"award","label":"Award"}]' ranges='[{"start":0,"end":11,"label":"person"},{"start":50,"end":69,"label":"org"},{"start":97,"end":119,"label":"award"}]'>Marie Curie moved to Paris in 1891 and joined the University of Paris, where she shared the 1903 Nobel Prize in Physics.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Labels in French
+<style>
+  .annotator-french {
+    max-width: 400px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2;
+  }
+</style>
+<p class="annotator-french" lang="fr"><c2-text-annotator labels='[{"value":"person","label":"Personne","key":"p"},{"value":"place","label":"Lieu","key":"l"}]' ranges='[{"start":0,"end":12,"label":"person"},{"start":30,"end":45,"label":"person"},{"start":48,"end":55,"label":"place"}]'>Ada Lovelace a travaillé avec Charles Babbage à Londres sur la machine analytique.</c2-text-annotator></p>
+```
+
+</GalleryGrid>
+
+The label bar and the list are the application's. A button applies its label to the selection with `annotate()`, and the list is redrawn from `ranges` on `ranges-change`:
+
+```ts tag=CodeBlock
+import type { TextAnnotator } from '@c2n/components/highlight/text-annotator'
+
+const annotator = document.querySelector<TextAnnotator>('c2-text-annotator')!
+const bar = document.querySelector('.label-bar')!
+
+// Pressing a button must not move focus, which would clear the selection it labels.
+bar.addEventListener('mousedown', (event) => event.preventDefault())
+bar.addEventListener('click', (event) => {
+  const label = (event.target as HTMLElement).closest<HTMLElement>('[data-label]')?.dataset.label
+  if (label) void annotator.annotate(label)
+})
+
+annotator.addEventListener('ranges-change', ({ detail }) => {
+  const text = annotator.textContent ?? ''
+  const people = detail.filter((range) => range.label === 'person').map((range) => text.slice(range.start, range.end))
+  console.log(people)
+})
+```

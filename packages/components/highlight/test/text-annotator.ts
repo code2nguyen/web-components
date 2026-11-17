@@ -33,7 +33,7 @@ const markup: Record<string, string> = {
 }
 
 // Test markup, built from constants above.
-main.innerHTML = `${markup[scenario] ?? markup.default}<output aria-label="Events"></output>` // modern-web-ignore: no-html-sink test scenario markup
+main.innerHTML = `${markup[scenario] ?? markup.default}<output aria-label="Events"></output>`
 
 const output = main.querySelector('output')!
 const log: string[] = []

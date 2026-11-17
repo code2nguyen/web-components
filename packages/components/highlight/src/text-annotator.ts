@@ -41,6 +41,9 @@ export interface TextAnnotator {
  *
  * @event {CustomEvent<TextAnnotation[]>} ranges-change - Fired when the user adds or removes a span; `detail` is the new `ranges`. Does not bubble.
  *
+ * @csspart text - Wrapper drawing the text with its spans and tags; it wraps the default slot in a server render.
+ * @csspart mark - A match of `query`.
+ * @csspart active - The match at `active-index`, also a `mark`.
  * @csspart span - A labelled span; overlapping spans nest.
  * @csspart tag - The label's name after a span.
  *
