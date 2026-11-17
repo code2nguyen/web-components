@@ -23,6 +23,7 @@ import type { ChordChart } from '@c2n/chart/chord-chart.js'
 import type { DepthChart } from '@c2n/chart/depth-chart.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { HeatmapChart } from '@c2n/chart/heatmap-chart.js'
+import type { HistogramChart } from '@c2n/chart/histogram-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { MapChart } from '@c2n/chart/map-chart.js'
 import type { MapLayer } from '@c2n/chart/map-layer.js'
@@ -355,6 +356,36 @@ declare module 'vue' {
         onPointHover?: (event: EventOf<HeatmapChart, 'point-hover'>) => void
         onAnnotationClick?: (event: EventOf<HeatmapChart, 'annotation-click'>) => void
         onPointClick?: (event: EventOf<HeatmapChart, 'point-click'>) => void
+      }
+    >
+    'c2-histogram-chart': DefineComponent<
+      C2Props<HistogramChart> & {
+        'bin-count'?: unknown
+        'bin-width'?: unknown
+        'bin-start'?: unknown
+        'bin-end'?: unknown
+        'bar-width'?: unknown
+        'bar-gap'?: unknown
+        'value-labels'?: unknown
+        'y-min'?: unknown
+        'y-max'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onChartError?: (event: EventOf<HistogramChart, 'chart-error'>) => void
+        onTooltipChange?: (event: EventOf<HistogramChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<HistogramChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<HistogramChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<HistogramChart, 'legend-change'>) => void
+        onChartReady?: (event: EventOf<HistogramChart, 'chart-ready'>) => void
+        onRangeChange?: (event: EventOf<HistogramChart, 'range-change'>) => void
+        onPointHover?: (event: EventOf<HistogramChart, 'point-hover'>) => void
+        onAnnotationClick?: (event: EventOf<HistogramChart, 'annotation-click'>) => void
+        onPointClick?: (event: EventOf<HistogramChart, 'point-click'>) => void
       }
     >
     'c2-line-chart': DefineComponent<

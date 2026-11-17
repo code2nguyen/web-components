@@ -257,6 +257,10 @@
       "types": "./dist/chart/heatmap-chart.d.ts",
       "default": "./dist/chart/heatmap-chart.js"
     },
+    "./chart/histogram-chart": {
+      "types": "./dist/chart/histogram-chart.d.ts",
+      "default": "./dist/chart/histogram-chart.js"
+    },
     "./chart/line-chart": {
       "types": "./dist/chart/line-chart.d.ts",
       "default": "./dist/chart/line-chart.js"
