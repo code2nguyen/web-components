@@ -194,3 +194,11 @@ test('a row may sit inside a wrapper, with whitespace around it or a wrapper ins
   await page.keyboard.press('Enter')
   await expect(outer).toHaveJSProperty('value', ['b'])
 })
+test('a list with no enabled row is not a tab stop', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<button>Before</button><c2-list aria-label="Fruit"><c2-list-item value="a" disabled>Apple</c2-list-item></c2-list><c2-list aria-label="Empty"></c2-list><button>After</button>`,
+  )
+  await page.getByRole('button', { name: 'Before' }).focus()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
+})

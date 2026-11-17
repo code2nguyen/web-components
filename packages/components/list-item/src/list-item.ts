@@ -367,9 +367,24 @@ export class ListItem extends LitElement {
     else this.internals.states.delete(name)
   }
 
+  /**
+   * Whether a `c2-list` owns this row, before it has said so through `applyContext`: the row is inside one, or is
+   * slotted into one in another component's shadow root (`c2-select` slots its options that way), or sits in a
+   * `c2-select`, whose list may not have rendered yet.
+   */
+  private belongsToList(): boolean {
+    if (this.closest('c2-list, c2-select')) return true
+    for (let slot = this.assignedSlot; slot; slot = slot.assignedSlot) {
+      if (slot.closest('c2-list')) return true
+      const host = (slot.getRootNode() as ShadowRoot).host
+      if (host?.localName === 'c2-list') return true
+    }
+    return false
+  }
+
   /** In a list that has not written its roving tabindex yet, asks it to first, so the row can take focus. */
   override focus(options?: FocusOptions): void {
-    if (!this.hasAttribute('tabindex') && (this.applyContext || this.closest('c2-list'))) {
+    if (!this.hasAttribute('tabindex') && (this.applyContext || this.belongsToList())) {
       this.dispatchEvent(new Event(LIST_ITEM_FOCUS_REQUEST_EVENT, { bubbles: true }))
     }
     super.focus(options)
@@ -389,7 +404,7 @@ export class ListItem extends LitElement {
     // row leaves the focus to its control (a tabindex on a row with no role of its own would be a stray tab stop).
     // A row inside a `c2-list` may update before the list has adopted it: it is still the list's, which writes the
     // tabindex only once it is used (a tabindex written while the page upgrades breaks a framework's hydration).
-    if (!inList && !this.closest('c2-list')) {
+    if (!inList && !this.belongsToList()) {
       if (hasControl) this.removeAttribute('tabindex')
       else this.tabIndex = this.disabled ? -1 : 0
     } else if (this.disabled && this.hasAttribute('tabindex')) this.tabIndex = -1

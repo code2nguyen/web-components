@@ -167,7 +167,11 @@ export class List extends LitElement {
     return this.items.filter((item) => !item.disabled)
   }
 
+  /** Whether any row can take focus: the focus entry is a tab stop only then, as a row would be. */
+  @state() private hasEnabledRows = false
+
   private handleSlotChange() {
+    this.hasEnabledRows = this.enabledItems.length > 0
     for (const listItem of this.items) {
       if (!listItem.applyContext) {
         listItem.applyContext = true
@@ -256,8 +260,11 @@ export class List extends LitElement {
 
   /** Tab reached the focus entry: the list hands focus to its current row and the entry goes away. */
   private handleEntryFocus() {
+    // The rows may have changed (one disabled) since the list last chose its current row.
+    this.syncRows()
+    if (!this.focusedItem || this.focusedItem.disabled) return
     this.activateRoving()
-    this.focusedItem?.focus()
+    this.focusedItem.focus()
   }
 
   private setFocusedItem(item: ListItem, focus = true) {
@@ -397,7 +404,8 @@ export class List extends LitElement {
 
   override render() {
     // The focus entry stands in for the roving tab stop until the list is first used (see `rovingActive`).
-    const entry = this.rovingActive || this.disabled ? nothing : html`<div class="focus-entry" tabindex="0" @focus=${this.handleEntryFocus}></div>`
+    const entry =
+      this.rovingActive || this.disabled || !this.hasEnabledRows ? nothing : html`<div class="focus-entry" tabindex="0" @focus=${this.handleEntryFocus}></div>`
     return html`${entry}<slot @slotchange=${this.handleSlotChange} @click=${this.handleListItemClick} @keydown=${this.handleKeydown}></slot>`
   }
 }
