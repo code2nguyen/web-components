@@ -38,8 +38,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-:host .row--group:hover {
-  background: css.cssVar(group-row__hover--background);
+@media (hover: hover) {
+  :host .row--group:hover {
+    background: css.cssVar(group-row__hover--background);
+  }
 }
 
 .row--band {

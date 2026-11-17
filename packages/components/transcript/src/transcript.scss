@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-transcript,
   $theme: (
@@ -109,7 +110,7 @@
   font-variant-numeric: tabular-nums;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(time__hover--color);
     text-decoration: underline;
   }

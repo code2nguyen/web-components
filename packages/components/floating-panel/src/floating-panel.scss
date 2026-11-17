@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-floating-panel,
@@ -249,7 +250,7 @@
     stroke-linejoin: round;
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(button__hover--background);
     color: css.cssVar(button__hover--color);
   }

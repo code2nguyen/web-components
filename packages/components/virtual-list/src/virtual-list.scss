@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
@@ -216,7 +217,7 @@ mark {
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 

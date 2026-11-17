@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-toggletip,
@@ -61,7 +62,7 @@
     color css.cssVar(transition-duration) animation.$standard-easing,
     background-color css.cssVar(transition-duration) animation.$standard-easing;
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(button__hover--color);
     background: css.cssVar(button__hover--background-color);
   }

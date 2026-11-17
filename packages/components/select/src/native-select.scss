@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
@@ -69,7 +70,7 @@
   outline-offset: css.cssVar(focus--outline-offset);
   transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 

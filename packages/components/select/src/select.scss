@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
@@ -162,7 +163,7 @@
   will-change: background, color, border;
   transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
-  &:hover {
+  @include pointer.hover {
     border-top: css.cssVar(button__hover--border-top);
     border-bottom: css.cssVar(button__hover--border-bottom);
     border-right: css.cssVar(button__hover--border-right);

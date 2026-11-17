@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-emoji-picker,
   $theme: (
@@ -112,7 +113,7 @@ button {
   background-color: css.cssVar(search--background-color);
   color: css.cssVar(search--placeholder-color);
 
-  &:hover {
+  @include pointer.hover {
     border-color: css.cssVar(search__hover--border-color);
   }
 
@@ -161,7 +162,7 @@ button {
   border-radius: css.cssVar(emoji--border-radius);
   font-size: 18px;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(category__hover--background-color);
   }
 
@@ -264,7 +265,7 @@ button {
   font-size: css.cssVar(emoji--font-size);
   line-height: 1;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(emoji__hover--background-color);
   }
 

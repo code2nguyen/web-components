@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-notification-center,
   $theme: (
@@ -106,7 +107,7 @@ button {
   font-size: css.cssVar(time--font-size);
   font-weight: 500;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     text-decoration: underline;
   }
 }
@@ -164,7 +165,7 @@ button {
   column-gap: css.cssVar(item--gap);
   padding: css.cssVar(item--padding);
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(item__hover--background-color);
   }
 }
@@ -172,7 +173,7 @@ button {
 .item--unread {
   background-color: css.cssVar(item__unread--background-color);
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(item__unread--background-color);
   }
 
@@ -267,7 +268,7 @@ button {
     stroke-width: 1.5;
   }
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(filter__selected--background-color);
   }
 }

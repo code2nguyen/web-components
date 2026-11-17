@@ -98,9 +98,11 @@
   --_c2-tab-focus-outline-offset: #{css.cssVar(tab__focus--outline-offset)};
 }
 
-::slotted(c2-tab:hover) {
-  color: css.cssVar(tab__hover--color, tab--color);
-  background-color: css.cssVar(tab__hover--background-color, tab--background-color);
+@media (hover: hover) {
+  ::slotted(c2-tab:hover) {
+    color: css.cssVar(tab__hover--color, tab--color);
+    background-color: css.cssVar(tab__hover--background-color, tab--background-color);
+  }
 }
 
 ::slotted(c2-tab[current]) {

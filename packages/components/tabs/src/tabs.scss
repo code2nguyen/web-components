@@ -126,9 +126,11 @@
     transition: animation.standard(background-color), animation.standard(color);
   }
 
-  ::slotted(c2-tab:hover) {
-    color: css.cssVar(tab__hover--color, tab--color);
-    background-color: css.cssVar(tab__hover--background-color, tab--background-color);
+  @media (hover: hover) {
+    ::slotted(c2-tab:hover) {
+      color: css.cssVar(tab__hover--color, tab--color);
+      background-color: css.cssVar(tab__hover--background-color, tab--background-color);
+    }
   }
 
   ::slotted(c2-tab:state(selected)) {

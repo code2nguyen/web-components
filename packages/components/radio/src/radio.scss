@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -85,7 +86,7 @@
     align-items: flex-start;
   }
 
-  &:hover:has(.c2-radio-input:enabled) {
+  @include pointer.hover(':has(.c2-radio-input:enabled)') {
     background: css.cssVar(container__hover--background, container--background);
   }
 

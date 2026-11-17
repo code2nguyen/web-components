@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-find-bar,
   $theme: (
@@ -134,7 +135,7 @@
   border-radius: css.cssVar(button--border-radius);
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background-color: css.cssVar(button__hover--background-color);
   }
 

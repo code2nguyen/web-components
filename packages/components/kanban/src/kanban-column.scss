@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-kanban-column,
   $theme: (
@@ -169,7 +170,7 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 
-  &:hover {
+  @include pointer.hover {
     border-color: css.cssVar(card__hover--border-color);
   }
 }

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-date-strip,
   $theme: (
@@ -85,7 +86,7 @@
     stroke-width: 1.5;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(navigation__hover--background);
   }
 
@@ -125,7 +126,7 @@
   cursor: pointer;
   user-select: none;
 
-  &:hover:not(.day--selected):not(.day--disabled) {
+  @include pointer.hover(':not(.day--selected):not(.day--disabled)') {
     background: css.cssVar(day__hover--background);
   }
 

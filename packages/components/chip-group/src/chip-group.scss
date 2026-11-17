@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-chip-group,
   $theme: (
@@ -100,7 +101,7 @@
 button.indicator {
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(overflow__hover--border);
     color: css.cssVar(overflow__hover--color);
   }

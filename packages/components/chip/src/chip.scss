@@ -75,9 +75,11 @@
     color 120ms ease;
 }
 
-.c2-chip.is-selectable:not(.is-disabled):hover {
-  border: css.cssVar(container__hover--border);
-  background-color: css.cssVar(container__hover--background-color);
+@media (hover: hover) {
+  .c2-chip.is-selectable:not(.is-disabled):hover {
+    border: css.cssVar(container__hover--border);
+    background-color: css.cssVar(container__hover--background-color);
+  }
 }
 
 .c2-chip.is-selected {
@@ -86,9 +88,11 @@
   color: css.cssVar(container__selected--color);
 }
 
-.c2-chip.is-selected:not(.is-disabled):hover {
-  border: css.cssVar(container__selected--border);
-  background-color: css.cssVar(container__selected__hover--background-color, container__selected--background-color);
+@media (hover: hover) {
+  .c2-chip.is-selected:not(.is-disabled):hover {
+    border: css.cssVar(container__selected--border);
+    background-color: css.cssVar(container__selected__hover--background-color, container__selected--background-color);
+  }
 }
 
 // The pill carries the focus ring of its toggle, so the outline follows the rounded shape rather than the label.

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
@@ -87,7 +88,7 @@
   transition: animation.standard(border), animation.standard(outline);
   cursor: text;
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 
@@ -201,7 +202,7 @@
   cursor: pointer;
   transition: animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(clear-icon__hover--color);
   }
 
@@ -272,7 +273,7 @@ c2-overlay {
   font: inherit;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 

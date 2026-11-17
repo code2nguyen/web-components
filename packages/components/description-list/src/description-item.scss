@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-description-item,
   $theme: (
@@ -175,7 +176,7 @@
   color: css.cssVar(edit-button--color);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(edit-button__hover--background-color);
   }
 

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
@@ -86,7 +87,7 @@ $_duration: css.cssVar(transition-duration);
     background-color $_duration animation.$standard-easing,
     color $_duration animation.$standard-easing;
 
-  &:hover:enabled {
+  @include pointer.hover(':enabled') {
     background: css.cssVar(trigger__hover--background);
     color: css.cssVar(trigger__hover--color, trigger--color);
   }

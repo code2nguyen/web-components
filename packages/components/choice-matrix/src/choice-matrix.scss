@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-choice-matrix,
   $theme: (
@@ -61,7 +62,7 @@
   appearance: none;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border-color: css.cssVar(control__hover--border-color);
   }
 
@@ -170,7 +171,7 @@
   white-space: nowrap;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     text-decoration: underline;
   }
 

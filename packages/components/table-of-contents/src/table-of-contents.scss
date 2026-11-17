@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-table-of-contents,
   $theme: (
@@ -141,7 +142,7 @@
     color: css.cssVar(link__passed--color);
   }
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(link__hover--background-color);
     color: css.cssVar(link__hover--color);
   }

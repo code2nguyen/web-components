@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -137,7 +138,7 @@
   border-radius: css.cssVar(mobile-trigger--border-radius);
   transition: animation.standard(background), animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(mobile-trigger__hover--background, mobile-trigger--background);
     color: css.cssVar(mobile-trigger__hover--color, mobile-trigger--color);
   }

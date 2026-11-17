@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -80,7 +81,7 @@
   will-change: background-color, color, border-color;
   transition: animation.standard(background-color), animation.standard(color), animation.standard(border-color), animation.standard(box-shadow);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background-color: css.cssVar(container__hover--background-color, container--background-color);
     color: css.cssVar(container__hover--color, container--color);
     border: css.cssVar(container__hover--border, container--border);

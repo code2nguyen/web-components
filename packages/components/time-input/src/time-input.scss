@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
@@ -93,7 +94,7 @@
   outline-offset: css.cssVar(focus--outline-offset);
   transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 
@@ -156,7 +157,7 @@ input {
   background: transparent;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(clock-icon__hover--color);
   }
 
@@ -278,7 +279,7 @@ input {
   scroll-snap-align: center;
   transition: animation.standard(color), animation.standard(transform);
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(picker-option__hover--color);
   }
 
@@ -331,7 +332,7 @@ input {
   cursor: pointer;
   transition: animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     color: css.cssVar(picker-action__hover--color);
   }
 
@@ -344,7 +345,7 @@ input {
   &.primary {
     color: css.cssVar(picker-action-primary--color);
 
-    &:hover {
+    @include pointer.hover {
       color: css.cssVar(picker-action-primary__hover--color);
     }
   }

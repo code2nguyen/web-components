@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-page-editor,
@@ -565,7 +566,7 @@ mark {
   color: inherit;
   font: inherit;
   cursor: pointer;
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: color-mix(in srgb, currentColor 12%, transparent);
   }
   &:focus-visible {
@@ -917,7 +918,7 @@ kbd {
     height: 14px;
     opacity: 0.5;
   }
-  &:hover {
+  @include pointer.hover {
     filter: brightness(0.96);
   }
   &:focus-visible {
@@ -1026,8 +1027,10 @@ kbd {
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
-  &.active,
-  &:hover {
+  &.active {
+    background: css.cssVar(menu-item__active--background);
+  }
+  @include pointer.hover {
     background: css.cssVar(menu-item__active--background);
   }
   svg {
@@ -1088,7 +1091,7 @@ kbd {
     width: 16px;
     height: 16px;
   }
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(menu-item__active--background);
     color: var(--_ink);
   }

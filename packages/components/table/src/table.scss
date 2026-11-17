@@ -252,8 +252,10 @@
   cursor: pointer;
 }
 
-:host .row--body:hover {
-  background: css.cssVar(row__hover--background);
+@media (hover: hover) {
+  :host .row--body:hover {
+    background: css.cssVar(row__hover--background);
+  }
 }
 
 :host .row--body.row--selected {
@@ -267,8 +269,10 @@
   color: css.cssVar(row__selected--color);
 }
 
-:host .row--selected.row--body:hover {
-  background: css.cssVar(row__selected__hover--background);
+@media (hover: hover) {
+  :host .row--selected.row--body:hover {
+    background: css.cssVar(row__selected__hover--background);
+  }
 }
 
 .row--added {
