@@ -1,5 +1,5 @@
 {
-  "lazy": 407290,
+  "lazy": 412198,
   "entries": {
     "accordion": 6073,
     "action-bar": 4528,
@@ -145,7 +145,8 @@
     "json-form": 144192,
     "json-form/json-field": 1915,
     "json-form/json-form": 143908,
-    "json-viewer": 7135,
+    "json-viewer": 10344,
+    "json-viewer/schema-tree": 12520,
     "kanban": 11006,
     "kanban/kanban-column": 3549,
     "kanban/matrix-board": 14511,

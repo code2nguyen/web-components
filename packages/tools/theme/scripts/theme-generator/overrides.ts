@@ -799,6 +799,25 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
   },
   '--c2-json-viewer__match--background-color': { exclude: 'translucent highlighter hue' },
+  // Schema tree: its type, option, enum and marker hues are the JSON viewer's syntax hues, paired the same way; the
+  // required marker is the error colour.
+  '--c2-schema-tree__type--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__option--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#0550ae, #79c0ff) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__enum--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#116329, #7ee787) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__mark--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, light-dark(#b35900, #ffa657) 85%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  '--c2-schema-tree__required--color': { token: 'color-error' },
   // Query input: the token colours are syntax hues like the JSON viewer's, paired the same way; negations and unknown
   // keys are the error colour, and the selection is a translucent accent wash over either surface.
   '--c2-query-input__key--color': {

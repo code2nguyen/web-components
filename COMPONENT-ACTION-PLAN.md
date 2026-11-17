@@ -118,7 +118,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
 - **shortcut-1** · `c2-shortcut` · shortcut sheet #499 (companion) · 2.5 kB new entry · risk low
 - **comment-thread-1** · `c2-comment-thread` · comment tree #508 · +1.5 kB on 47.8 kB · risk medium
-- **json-viewer-1** · `c2-json-viewer` · schema tree #553 (lazy) · +0.3 kB on 7.0 kB, 4 kB lazy · risk low
 - **json-viewer-2** · `c2-json-viewer` · json editor #554 (lazy) · +0.3 kB on 7.0 kB, 6 kB lazy · risk medium
 - **log-viewer-1** · `c2-log-viewer` · build log #555 (lazy) · +0.4 kB on 16.5 kB, 4 kB lazy · risk medium
 - **citation-1** · `c2-citation` · sources #570 (companion) · 2.5 kB new entry · risk low

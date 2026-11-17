@@ -228,8 +228,14 @@ export interface SearchResult {
   deepest: Map<string, number>
 }
 
+/**
+ * The text a search matches for a node, by its parent value and its key, in place of its key and leaf text; `undefined`
+ * keeps those. A companion element that draws its lines from another value (`c2-schema-tree`) matches what it shows.
+ */
+export type SearchText = (parent: unknown, key: JsonPathSegment) => string | undefined
+
 /** Finds every node whose key or leaf text contains `query`, case-insensitively. */
-export function search(root: unknown, query: string, sortKeys = false): SearchResult {
+export function search(root: unknown, query: string, sortKeys = false, textOf?: SearchText): SearchResult {
   const result: SearchResult = { matches: [], revealed: new Set(), deepest: new Map() }
   const needle = query.toLowerCase()
   if (!needle) return result
@@ -237,11 +243,12 @@ export function search(root: unknown, query: string, sortKeys = false): SearchRe
   // The pointer is built from this stack only for nodes that match or lead to a match, not for every node visited.
   const segments: string[] = []
   const pointer = () => (segments.length ? `/${segments.join('/')}` : '')
-  const visit = (value: unknown, key: JsonPathSegment | undefined): boolean => {
+  const visit = (value: unknown, key: JsonPathSegment | undefined, parent?: unknown): boolean => {
     let kind = kindOf(value)
     if (isBranch(kind) && ancestors.has(value)) kind = 'circular'
-    const keyHit = key !== undefined && String(key).toLowerCase().includes(needle)
-    const valueHit = !isBranch(kind) && value !== undefined && leafText(value, kind).toLowerCase().includes(needle)
+    const text = textOf && key !== undefined ? textOf(parent, key) : undefined
+    const keyHit = text === undefined ? key !== undefined && String(key).toLowerCase().includes(needle) : text.toLowerCase().includes(needle)
+    const valueHit = text === undefined && !isBranch(kind) && value !== undefined && leafText(value, kind).toLowerCase().includes(needle)
     const hit = keyHit || valueHit
     // Pushed before the children are visited, so the matches come out in document order.
     if (hit && (key !== undefined || !isBranch(kind))) result.matches.push(pointer())
@@ -253,7 +260,7 @@ export function search(root: unknown, query: string, sortKeys = false): SearchRe
       for (let index = 0, size = sizeOf(value); index < size; index++) {
         const [childKey, child] = childAt(value, index, keys)
         segments.push(escapePointer(childKey))
-        const childFound = visit(child, childKey)
+        const childFound = visit(child, childKey, value)
         segments.pop()
         if (childFound) {
           found = true

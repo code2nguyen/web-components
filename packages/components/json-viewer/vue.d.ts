@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { JsonViewer } from '@c2n/json-viewer'
+import type { SchemaTree } from '@c2n/json-viewer/schema-tree.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -27,6 +28,17 @@ declare module 'vue' {
         onExpansionChange?: (event: EventOf<JsonViewer, 'expansion-change'>) => void
         onCopyError?: (event: EventOf<JsonViewer, 'copy-error'>) => void
         onCopied?: (event: EventOf<JsonViewer, 'copied'>) => void
+      }
+    >
+    'c2-schema-tree': DefineComponent<
+      C2Props<SchemaTree> & {
+        'expand-depth'?: unknown
+        'sort-keys'?: unknown
+        'path-format'?: unknown
+        'page-size'?: unknown
+        onExpansionChange?: (event: EventOf<SchemaTree, 'expansion-change'>) => void
+        onCopyError?: (event: EventOf<SchemaTree, 'copy-error'>) => void
+        onCopied?: (event: EventOf<SchemaTree, 'copied'>) => void
       }
     >
   }
