@@ -53,6 +53,9 @@ type Text = LocalizeController<(typeof totpCodeMessages)['en']>
 export class TotpCode extends SecretField {
   static override styles = [SecretField.styles, unsafeCSS(styles)]
 
+  /** The current code, set by the element. */
+  @property() override value = ''
+
   /** Base32 secret or `otpauth://totp/` URI. Set the property to keep it out of the DOM. */
   @property() secret = ''
 
