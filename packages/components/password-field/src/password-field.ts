@@ -308,10 +308,7 @@ export class PasswordField extends LitElement {
   /** Replaces {@link scorePassword} as the strength estimate. Returns 0 to 4. */
   @property({ attribute: false }) scorer?: (value: string) => number
 
-  /**
-   * Adds the generate button, which opens the password generator. The generator loads the first time it opens.
-   * Suggestions meet `minlength`, `maxlength` and the requirements; pair it with `autocomplete="new-password"`.
-   */
+  /** Adds the generate button, which opens the password generator (loaded on first use). */
   @property({ type: Boolean }) generator = false
 
   /** Where the generator starts: a {@link PasswordGeneratorOptions} object, as JSON for the attribute. */
@@ -339,7 +336,7 @@ export class PasswordField extends LitElement {
   @state() private capsLock = false
   @state() private disabledByForm = false
   @state() private hasSupportingSlot = false
-  /** The generator popover, once its module has loaded. It reads the private members its module names in `FieldInternals`. */
+  // The generator popover, once loaded. Its module reads the private members `FieldInternals` names.
   private generatorPanel?: GeneratorPanel
   private readonly msg = new LocalizeController(this, passwordFieldMessages)
   private dirty = false
@@ -440,17 +437,12 @@ export class PasswordField extends LitElement {
     this.syncFormState()
   }
 
-  /**
-   * Draws a password with the generator without opening it: `generator-options`, overridden by `options`, bounded by
-   * the field's lengths and requirements. Loads the generator the first time. The value of the field is not changed.
-   * Resolves with an empty string when no suggestion can meet the field's rules (a passphrase longer than `maxlength`,
-   * a requirement of your own the options never satisfy).
-   */
+  /** Draws a suggestion without opening the generator or changing the value; empty when none meets the field's rules. */
   async generate(options?: PasswordGeneratorOptions): Promise<string> {
     return (await import('./password-generator.js')).generateFor(this, options)
   }
 
-  /** Opens the generator popover (`generator`), loading it first if this is the first time. */
+  /** Opens the generator popover. */
   async showGenerator() {
     const { showGenerator } = await import('./generator-panel.js')
     showGenerator(this)
