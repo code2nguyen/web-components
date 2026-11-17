@@ -14,6 +14,23 @@ The lab has two goals. Keep both in view:
 1. **Component bugs**: confirmed by an oracle and reproducible.
 2. **Feedback**: what was awkward, missing or surprising when using the components, even when nothing is broken.
 
+## The weekly run
+
+The lab runs about once a week, in one session, when there is budget for it. Asked to "run the component lab" with no
+more detail, do this, in order, and stop when the session's budget is spent; whatever is left waits for next week.
+
+1. `git pull` the default branch into a new branch `lab/<yyyy-mm-dd>`; build what the targets serve
+   (`npm run build -w packages/umbrella`, plus `npm run build -w apps/examples/support-inbox-vue`).
+2. **Regressions first:** run every target in `lab/targets/` (`node lab/scripts/lab.mjs run <target> --repeat 2`). A
+   new reproducible finding is triaged before anything else (step 3 below), and a known finding that no longer
+   appears means a component was fixed: remove its key from `known.json` and move its `COMPONENT-FEEDBACK.md` entry
+   to Fixed.
+3. **One new build:** pick the first spec that `lab/GAPS.md` lists as "not built" (scenarios before features before
+   apps), build one direction of it (step 0), write its journeys and its report.
+4. `node lab/scripts/gaps.mjs --check`, then open a pull request against `develop` titled
+   `chore(lab): weekly run <yyyy-mm-dd>` whose description lists: targets run and their result, findings by verdict,
+   what was filed in `COMPONENT-FEEDBACK.md`, the spec built and its outcome counts, and the top of the gap matrix.
+
 ## 0. Build from a spec (when asked to build, or when a spec has no build)
 
 1. Read the spec (`lab/specs/**/<id>.md`) and `lab/capabilities.md`. Build each direction into

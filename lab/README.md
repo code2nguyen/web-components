@@ -56,6 +56,12 @@ A lab app is plain files served by Vite from the repository root (`npx vite lab/
 `@c2n/components/*` like any consumer: build the umbrella first (`npm run build -w packages/umbrella`, or any example
 app's build). Pick a port outside the browsers' unsafe-port list (4190 is on it).
 
+## The weekly run
+
+Once a week, when there is budget, start a Claude Code session in this repository and say "run the component lab".
+The `component-lab` skill then reruns every target (regressions first), builds the next unbuilt spec, refreshes
+`GAPS.md` and opens a pull request with what it found. Its "The weekly run" section has the steps.
+
 ## Run it
 
 ```bash
