@@ -145,6 +145,46 @@ test('built-in text follows the language', async ({ page, renderScenario }) => {
   await expect(countdown(page).locator('.sr-only')).toHaveText('Nouveau code toutes les 30 secondes')
 })
 
+test('a hidden code of 8 digits shows none of them', async ({ page, renderScenario }) => {
+  await at(page, 59)
+  await renderScenario(`<c2-totp-code label="Account" secret="${SHA1}" digits="8"></c2-totp-code>`)
+  await expect.poll(() => valueOf(page)).toBe('94287082')
+  await expect(code(page)).not.toContainText('7082')
+  await expect(code(page).locator('.sr-only')).toHaveText('Hidden')
+})
+
+test('the value attribute is not read: the element owns the code', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-totp-code label="Account" value="123456" revealed></c2-totp-code>`)
+  expect(await valueOf(page)).toBe('')
+})
+
+test('a warning-time that is not a number does not spin the timer', async ({ page, renderScenario }) => {
+  await at(page, 31)
+  await renderScenario(`<c2-totp-code label="Account" secret="${SHA1}" warning-time="soon" revealed></c2-totp-code>`)
+  await expect(groups(page)).toHaveCount(2)
+  const host = page.locator('c2-totp-code')
+  await watch(host, 'code-change')
+  // A loop would run thousands of zero-delay timers here; one boundary passes, one event.
+  await page.clock.runFor(30_000)
+  await expect(host).toHaveAttribute('data-events', '[null]')
+})
+
+test('off screen the clock sleeps, and catches up when scrolled back', async ({ page, renderScenario }) => {
+  await at(page, 31)
+  await renderScenario(`<c2-totp-code label="Account" secret="${SHA1}" revealed></c2-totp-code><div style="height: 3000px"></div>`)
+  const host = page.locator('c2-totp-code')
+  await expect.poll(() => valueOf(page)).toMatch(/^\d{6}$/)
+  const first = await valueOf(page)
+  await watch(host, 'code-change')
+  await page.evaluate(() => window.scrollTo(0, 2500))
+  await expect.poll(() => host.evaluate((el) => el.shadowRoot!.querySelector('.ring')!.getAnimations()[0].playState)).toBe('paused')
+  await page.clock.runFor(60_000)
+  await expect(host).toHaveAttribute('data-events', '[]')
+  await host.scrollIntoViewIfNeeded()
+  await expect(host).toHaveAttribute('data-events', '[null]')
+  expect(await valueOf(page)).not.toBe(first)
+})
+
 test('keyboard: Tab reaches show then copy, and Space shows the code', async ({ page, renderScenario, tab }) => {
   await at(page, 59)
   await renderScenario(`<button id="before">Before</button><c2-totp-code label="Account" secret="${SHA1}"></c2-totp-code>`)

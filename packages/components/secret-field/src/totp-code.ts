@@ -38,6 +38,7 @@ type Text = LocalizeController<(typeof totpCodeMessages)['en']>
  * @event {Event} reveal-change - The user showed or hid the code; read `revealed`.
  * @event {Event} copied - The code was copied. It has no detail.
  * @event {Event} copy-error - The clipboard refused the copy.
+ * @event {Event} regenerate - With `regenerable`, the user asked for a new secret.
  *
  * @csspart group - Each half of the shown code.
  * @csspart countdown - The ring showing the time left.
@@ -53,8 +54,11 @@ type Text = LocalizeController<(typeof totpCodeMessages)['en']>
 export class TotpCode extends SecretField {
   static override styles = [SecretField.styles, unsafeCSS(styles)]
 
-  /** The current code, set by the element. */
-  @property() override value = ''
+  /** The current code, set by the element: there is no `value` attribute. */
+  @property({ attribute: false }) override value = ''
+
+  /** Trailing digits left visible in the mask: none, so a hidden code is hidden whole. */
+  @property({ type: Number, attribute: 'reveal-end' }) override revealEnd = 0
 
   /** Base32 secret or `otpauth://totp/` URI. Set the property to keep it out of the DOM. */
   @property() secret = ''
@@ -79,6 +83,8 @@ export class TotpCode extends SecretField {
   private generation = 0
   private timer?: ReturnType<typeof setTimeout>
   private ringPeriod = 0
+  private onScreen = true
+  private observer?: IntersectionObserver
 
   protected override get messages() {
     return totpCodeMessages
@@ -87,12 +93,19 @@ export class TotpCode extends SecretField {
   override connectedCallback() {
     super.connectedCallback()
     document.addEventListener('visibilitychange', this.refresh)
+    // Off screen, the clock and the ring sleep; they catch up when the element scrolls back.
+    this.observer ??= new IntersectionObserver((entries) => {
+      this.onScreen = entries[entries.length - 1].isIntersecting
+      this.refresh()
+    })
+    this.observer.observe(this)
     if (this.hasUpdated) this.refresh()
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     document.removeEventListener('visibilitychange', this.refresh)
+    this.observer?.disconnect()
     clearTimeout(this.timer)
     this.generation++
     this.step = -1
@@ -101,6 +114,8 @@ export class TotpCode extends SecretField {
   protected override willUpdate(changed: PropertyValues<this>) {
     super.willUpdate(changed)
     if (changed.has('secret') || changed.has('digits') || changed.has('period') || changed.has('algorithm')) {
+      // The previous secret's code goes at once, even while the clock sleeps.
+      this.value = ''
       this.key = undefined
       this.step = -1
       this.refresh()
@@ -117,7 +132,12 @@ export class TotpCode extends SecretField {
       return
     }
     // A background tab's timers are throttled; the code is brought up to date when it shows again.
-    if (document.hidden) return
+    const ring = this.renderRoot.querySelector('.ring')?.getAnimations()[0]
+    if (document.hidden || !this.onScreen) return ring?.pause()
+    if (ring) {
+      ring.currentTime = Date.now() % (this.ringPeriod * 1000)
+      ring.play()
+    }
     try {
       // The HMAC code loads on first use: an element without a secret never pays for it.
       const totp = await import('./totp')
@@ -145,6 +165,7 @@ export class TotpCode extends SecretField {
 
   protected override renderValue() {
     const value = this.value
+    // `msg` reads `totpCodeMessages` (the `messages` override); the base class types it with its own keys only.
     const text = this.msg as unknown as Text
     if (this.failed) return html`<code class="value unavailable" part="value">${text.t('unavailable')}</code>`
     if (!value || !this.revealed) return super.renderValue()

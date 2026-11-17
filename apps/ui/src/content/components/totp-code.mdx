@@ -49,7 +49,7 @@ The entry registers `c2-totp-code` and `c2-secret-field`. The HMAC code loads th
 `digits` (6 to 10), `period` (seconds) and `algorithm` (`SHA-1`, the default, `SHA-256` or `SHA-512`) match what the
 service set up; the parameters of an `otpauth` URI win over them. `value` is the current code and `code-change` fires
 with each new one. Nothing runs without a secret, the timer sleeps until the warning moment or the next period, and a
-hidden tab catches up when it shows again. A secret that is not base32, or a page without Web Crypto (an `http:` page
+hidden tab or an element scrolled out of view catches up when it shows again. A secret that is not base32, or a page without Web Crypto (an `http:` page
 other than `localhost`), shows "Code unavailable".
 
 The secret is the key to the account. Set it as a property rather than an attribute, so it stays out of the DOM and of

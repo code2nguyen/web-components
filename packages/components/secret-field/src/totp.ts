@@ -88,7 +88,7 @@ export async function totpTick(key: TotpKey, shown: number, warn: number, now = 
   const ms = key.period * 1000
   const step = Math.floor(now / ms)
   const end = (step + 1) * ms
-  const warnAt = end - Math.max(0, warn) * 1000
+  const warnAt = end - Math.max(0, warn || 0) * 1000
   const warning = now >= warnAt
   return { step, code: step === shown ? '' : await totpCode(key, step), warning, wait: (warning ? end : warnAt) - now }
 }
