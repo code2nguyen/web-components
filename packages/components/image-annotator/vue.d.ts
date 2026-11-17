@@ -20,7 +20,9 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-image-annotator': DefineComponent<
       C2Props<ImageAnnotator> & {
+        'confidence-threshold'?: unknown
         onAnnotatorError?: (event: EventOf<ImageAnnotator, 'annotator-error'>) => void
+        onShapeSelect?: (event: EventOf<ImageAnnotator, 'shape-select'>) => void
         onAnnotationChange?: (event: EventOf<ImageAnnotator, 'annotation-change'>) => void
       }
     >
