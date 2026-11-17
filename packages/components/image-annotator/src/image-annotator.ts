@@ -463,11 +463,13 @@ export class ImageAnnotator extends LitElement {
   }
 
   private move(step: 1 | -1): string | null {
-    const count = this.shapes.length
+    // In drawing order, which is the order Tab reaches the shapes in.
+    const shapes = this.layered()
+    const count = shapes.length
     if (!count) return null
-    const index = this.shapes.findIndex((shape) => shape.id === this.active)
+    const index = shapes.findIndex((shape) => shape.id === this.active)
     const next = index < 0 ? (step > 0 ? 0 : count - 1) : Math.min(count - 1, Math.max(0, index + step))
-    this.choose(this.shapes[next].id, true)
+    this.choose(shapes[next].id, true)
     return this.active
   }
 
@@ -1119,29 +1121,29 @@ export class ImageAnnotator extends LitElement {
             crossorigin=${this.crossorigin ?? nothing}
             draggable="false"
             @load=${(event: Event) => {
-            const image = event.target as HTMLImageElement
-            this.natural = { width: image.naturalWidth, height: image.naturalHeight }
-          }}
+              const image = event.target as HTMLImageElement
+              this.natural = { width: image.naturalWidth, height: image.naturalHeight }
+            }}
           />
           ${
-          width
-            ? html`<svg
-                class="overlay ${this.active ? 'has-active' : ''}"
-                viewBox="0 0 ${width} ${height}"
-                preserveAspectRatio="none"
-                @pointerdown=${this.onPointerDown}
-                @pointermove=${this.onPointerMove}
-                @pointerup=${this.onPointerUp}
-                @pointercancel=${this.onPointerUp}
-              >
-                <defs>
-                  <filter id="blur"><feGaussianBlur stdDeviation=${Math.max(4, width / 120)}></feGaussianBlur></filter>
-                </defs>
-                ${this.layered().map((shape) => this.renderShape(shape, this.shapes.indexOf(shape), count))}
-                ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing} ${this.renderSelection()}
-              </svg>`
-            : nothing
-        }
+            width
+              ? html`<svg
+                  class="overlay ${this.active ? 'has-active' : ''}"
+                  viewBox="0 0 ${width} ${height}"
+                  preserveAspectRatio="none"
+                  @pointerdown=${this.onPointerDown}
+                  @pointermove=${this.onPointerMove}
+                  @pointerup=${this.onPointerUp}
+                  @pointercancel=${this.onPointerUp}
+                >
+                  <defs>
+                    <filter id="blur"><feGaussianBlur stdDeviation=${Math.max(4, width / 120)}></feGaussianBlur></filter>
+                  </defs>
+                  ${this.layered().map((shape) => this.renderShape(shape, this.shapes.indexOf(shape), count))}
+                  ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing} ${this.renderSelection()}
+                </svg>`
+              : nothing
+          }
           ${this.renderEditor()}
         </div>
         ${this.renderCard()}
