@@ -48,7 +48,14 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../button:build",
+        "../button-group:build",
+        "../checkbox:build",
+        "../copy-button:build",
+        "../icon-button:build",
+        "../overlay:build",
+        "../slider:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -60,7 +67,14 @@
     }
   },
   "dependencies": {
+    "@c2n/button": "*",
+    "@c2n/button-group": "*",
+    "@c2n/checkbox": "*",
+    "@c2n/copy-button": "*",
     "@c2n/core": "*",
+    "@c2n/icon-button": "*",
+    "@c2n/overlay": "*",
+    "@c2n/slider": "*",
     "lit": "3.3.3"
   },
   "devDependencies": {
