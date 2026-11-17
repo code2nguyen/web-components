@@ -1,7 +1,7 @@
 ---
 /**
- * Plays the application's part in the text annotator examples: buttons that apply a label to the selection, and a list
- * of the spans by label kept in step with `ranges-change`. Both are the application's, not the element's.
+ * Plays the application's part in the text annotator examples: buttons that apply a label to the selection, a list of
+ * the spans by label kept in step with `ranges-change`, and a `renderTag` that adds the score stored on each range.
  */
 ---
 
@@ -20,6 +20,10 @@
       const value = (event.target as Element).closest<HTMLElement>('[data-label]')?.dataset.label
       if (value) void annotator.annotate(value)
     })
+
+    if (example.dataset.textAnnotatorExample === 'score') {
+      annotator.renderTag = ({ range, label }) => `${label?.label ?? range.label} ${(range as { score?: number }).score?.toFixed(2) ?? ''}`
+    }
 
     const list = example.querySelector<HTMLElement>('[data-annotation-list]')
     if (!list) continue

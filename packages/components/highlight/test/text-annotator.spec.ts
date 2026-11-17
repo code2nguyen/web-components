@@ -67,7 +67,7 @@ test('draws each range as a span followed by its label tag', async ({ page, scen
 test('nests overlapping spans, shortest inside, and colours each by its label', async ({ page, scenario }) => {
   await scenario('overlap')
   const host = page.locator('c2-text-annotator')
-  expect(await drawn(host)).toBe('Ada Lovelace worked with Charles [Babbage]{Person} in London on the [Analytical ][[Engine]]{Person}{Thing}.')
+  expect(await drawn(host)).toBe('Ada Lovelace worked with Charles [Babbage]{Person} in London on the [Analytical ][[Engine]{Person}]{Thing}.')
   const tones = await host.evaluate((element) => Array.from(element.shadowRoot!.querySelectorAll('[part~="span"]'), (span) => span.getAttribute('data-tone')))
   expect(tones).toEqual(['0', '2', '2', '0'])
   // Nested tints add up, so the overlap reads darker than either span alone.
@@ -115,7 +115,25 @@ test('a different label on the same text adds an overlapping span', async ({ pag
   const host = page.locator('c2-text-annotator')
   await select(page, host, 'Lovelace')
   await page.keyboard.press('t')
-  await expect.poll(() => drawn(host)).toBe('[Ada ][[Lovelace]]{Thing}{Person} worked with Charles Babbage in London on the Analytical Engine.')
+  await expect.poll(() => drawn(host)).toBe('[Ada ][[Lovelace]{Thing}]{Person} worked with Charles Babbage in London on the Analytical Engine.')
+})
+
+test('a selection overlapping spans of its label merges them into one', async ({ page, scenario }) => {
+  await scenario()
+  const host = page.locator('c2-text-annotator')
+  await select(page, host, 'Lovelace worked')
+  await page.keyboard.press('p')
+  await expect.poll(() => drawn(host)).toBe('[Ada Lovelace worked]{Person} with Charles Babbage in London on the Analytical Engine.')
+  await expect(host).toHaveJSProperty('ranges', [{ start: 0, end: 19, label: 'person' }])
+})
+
+test('renderTag draws the content of each tag', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const host = page.locator('c2-text-annotator')
+  await host.evaluate((element: TextAnnotator) => {
+    element.renderTag = ({ range, label }) => `${label?.key ?? '?'}:${range.end - range.start}`
+  })
+  await expect.poll(() => drawn(host)).toBe('Ada Lovelace worked with Charles [Babbage]{p:7} in London on the [Analytical ][[Engine]{p:6}]{t:17}.')
 })
 
 test('keys do nothing without a selection, with a modifier, in a field or for an unknown key', async ({ page, scenario }) => {

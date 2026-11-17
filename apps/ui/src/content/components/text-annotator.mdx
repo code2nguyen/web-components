@@ -12,7 +12,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { TextAnnotator } from '@c2n/components/highlight/text-annotator'
 
-`c2-text-annotator` labels spans of its text, the way Label Studio, Prodigy or a named-entity widget does. It is a [`c2-highlight`](/web-components/components/highlight) that also draws `ranges`: each span is tinted in its label's colour and followed by a tag naming the label, and overlapping spans nest, so a word inside a longer span reads darker. Select text and press a label's `key` to add a span; do it again inside a span with that label to remove it. `readonly` shows the spans only, for entities found by a model or the passages a search retrieved.
+`c2-text-annotator` labels spans of its text, the way Label Studio, Prodigy or a named-entity widget does. It is a [`c2-highlight`](/web-components/components/highlight) that also draws `ranges`: each span is tinted in its label's colour and followed by a tag naming the label, and overlapping spans nest, so a word inside a longer span reads darker. Select text and press a label's `key` to add a span (merged with the spans of that label it overlaps); do it again inside a span with that label to remove it. `readonly` shows the spans only, for entities found by a model or the passages a search retrieved.
 
 ## Import
 
@@ -55,7 +55,7 @@ annotator.addEventListener('ranges-change', ({ detail }) => save(detail))
 
 ### Look
 
-Labels take six tone colours in order, `--c2-text-annotator__tone-1--color` to `-6`; translucent defaults read on light and dark pages and add up where spans overlap. The `span` and `tag` parts style the rest, and `--c2-text-annotator__tag--display: none` hides the tags. Without tags only the colour tells the labels apart, so show a legend beside the text. A `query` still marks its matches, as on `c2-highlight`.
+Labels take six tone colours in order, `--c2-text-annotator__tone-1--color` to `-6`; translucent defaults read on light and dark pages and add up where spans overlap. The `--c2-text-annotator__span--*` and `__tag--*` variables and the `span` and `tag` parts style the rest, and `--c2-text-annotator__tag--display: none` hides the tags. `renderTag` draws a tag's content from its `{ range, label }`, a score the application stored on the range, say. A tag sits inside the spans around its own, so their tint runs on under it. Without tags only the colour tells the labels apart, so show a legend beside the text. A `query` still marks its matches, as on `c2-highlight`.
 
 ### Accessibility
 

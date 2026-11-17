@@ -1,6 +1,6 @@
 ---
 title: 'Text annotator gallery'
-description: 'Labelled spans of a text: keys that label a selection, entities, overlapping spans, a label bar, spans listed by label, retrieved passages, custom tones and tags, search and French labels.'
+description: 'Labelled spans of a text: keys that label a selection, entities, overlapping spans, a label bar, spans listed by label, retrieved passages, custom tones and tags, tags with a score, search and French labels.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -126,17 +126,30 @@ Select words in a card that takes keys and press a label's key: the span appears
     --c2-text-annotator__span--border-radius: 6px;
     --c2-text-annotator__tag--font-size: 10px;
     --c2-text-annotator__tag--font-weight: 700;
+    --c2-text-annotator__tag--padding: 0 6px;
+    --c2-text-annotator__tag--margin: 0 2px 0 4px;
+    --c2-text-annotator__tag--border-radius: 999px;
   }
   .annotator-pills c2-text-annotator::part(tag) {
-    margin-inline-start: 4px;
-    padding: 0 6px;
-    border-radius: 999px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     vertical-align: 0.15em;
   }
 </style>
 <p class="annotator-pills"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"thing","label":"Thing"}]' ranges='[{"start":0,"end":12,"label":"person"},{"start":25,"end":40,"label":"person"},{"start":44,"end":50,"label":"place"},{"start":58,"end":75,"label":"thing"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator></p>
+```
+
+```html tag=MdxCodeBlock,label=Tags with a score
+<style>
+  .annotator-score {
+    max-width: 420px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 2;
+    --c2-text-annotator__tag--font-weight: 500;
+  }
+</style>
+<p class="annotator-score" data-text-annotator-example="score"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"date","label":"Date"}]' ranges='[{"start":0,"end":11,"label":"person","score":0.98},{"start":21,"end":26,"label":"place","score":0.91},{"start":30,"end":34,"label":"date","score":0.64}]'>Marie Curie moved to Paris in 1891.</c2-text-annotator></p>
 ```
 
 ```html tag=MdxCodeBlock,label=Search in the spans
@@ -165,7 +178,7 @@ Select words in a card that takes keys and press a label's key: the span appears
 
 </GalleryGrid>
 
-The label bar and the list are the application's. A button applies its label to the selection with `annotate()`, and the list is redrawn from `ranges` on `ranges-change`:
+The label bar, the list and the scores are the application's. A button applies its label to the selection with `annotate()`, the list is redrawn from `ranges` on `ranges-change`, and `renderTag` draws each tag from its range, which keeps any field the application stored on it:
 
 ```ts tag=CodeBlock
 import type { TextAnnotator } from '@c2n/components/highlight/text-annotator'
@@ -179,6 +192,8 @@ bar.addEventListener('click', (event) => {
   const label = (event.target as HTMLElement).closest<HTMLElement>('[data-label]')?.dataset.label
   if (label) void annotator.annotate(label)
 })
+
+annotator.renderTag = ({ range, label }) => `${label?.label ?? range.label} ${(range as { score?: number }).score?.toFixed(2) ?? ''}`
 
 annotator.addEventListener('ranges-change', ({ detail }) => {
   const text = annotator.textContent ?? ''

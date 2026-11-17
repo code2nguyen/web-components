@@ -22,6 +22,9 @@ export interface TextAnnotatorLabel {
   key?: string
 }
 
+/** Draws a span's tag; the default is the label's name. */
+export type TextAnnotatorTagRenderer = (context: { range: TextAnnotation; label?: TextAnnotatorLabel }) => unknown
+
 /** Events fired by {@link TextAnnotator}, keyed for `addEventListener`. */
 export interface TextAnnotatorEventMap extends HighlightEventMap {
   'ranges-change': CustomEvent<TextAnnotation[]>
@@ -58,6 +61,10 @@ export interface TextAnnotator {
  * @cssproperty {display} [--c2-text-annotator__tag--display=inline-block] - `none` leaves colour alone to tell labels apart.
  * @cssproperty {font-size} [--c2-text-annotator__tag--font-size=0.7em]
  * @cssproperty {font-weight} [--c2-text-annotator__tag--font-weight=600]
+ * @cssproperty {color} [--c2-text-annotator__tag--color=inherit]
+ * @cssproperty {padding} [--c2-text-annotator__tag--padding=0 4px]
+ * @cssproperty {margin} [--c2-text-annotator__tag--margin=0 2px]
+ * @cssproperty {border-radius} [--c2-text-annotator__tag--border-radius=4px]
  */
 @customElement('c2-text-annotator')
 export class TextAnnotator extends Highlight {
@@ -71,6 +78,9 @@ export class TextAnnotator extends Highlight {
 
   /** Shows the spans only: no keys, and `annotate` does nothing. */
   @property({ type: Boolean, reflect: true, attribute: 'readonly' }) readOnly = false
+
+  /** Draws each tag's content in place of the label's name. */
+  @property({ attribute: false }) renderTag?: TextAnnotatorTagRenderer
 
   override connectedCallback(): void {
     super.connectedCallback()
@@ -89,8 +99,9 @@ export class TextAnnotator extends Highlight {
   }
 
   private readonly onKey = (event: KeyboardEvent) => {
-    const target = event.composedPath()[0] as Element
-    if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing || target.closest?.('input,textarea,[contenteditable]')) return
+    const target = event.composedPath()[0]
+    const typing = target instanceof HTMLElement && (target.isContentEditable || target.matches('input,textarea,select'))
+    if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing || event.keyCode === 229 || typing || !getSelection()?.toString().trim()) return
     const label = this.labels?.find((l) => l.key?.toLowerCase() === event.key.toLowerCase())
     if (label) void this.annotate(label.value)
   }
@@ -99,11 +110,6 @@ export class TextAnnotator extends Highlight {
     const text = this.text
     if (text === null || (this.serverRendered && !this.hasUpdated)) return super.render()
     const labels = this.labels ?? []
-    const tone = (r: TextAnnotation) =>
-      Math.max(
-        0,
-        labels.findIndex((l) => l.value === r.label),
-      ) % 6
     // Shortest innermost, so overlapping spans nest the same way in every segment.
     const ranges = (this.ranges ?? [])
       .filter((r) => r.start >= 0 && r.start < r.end && r.end <= text.length)
@@ -116,14 +122,21 @@ export class TextAnnotator extends Highlight {
       const match = this.found.findIndex((m) => m.start <= start && m.end >= end)
       const active = match === this.activeIndex
       if (match >= 0)
-        part = html`<mark class="c2-highlight__mark ${active ? 'c2-highlight__mark--active' : ''}" part="mark ${active ? 'active' : ''}">${part}</mark>`
-      for (const r of ranges) if (r.start <= start && r.end >= end) part = html`<span class="span" part="span" data-tone=${tone(r)}>${part}</span>`
-      parts.push(
-        part,
-        ranges
-          .filter((r) => r.end === end)
-          .map((r) => html`<span class="tag" part="tag" data-tone=${tone(r)}>${labels.find((l) => l.value === r.label)?.label || r.label}</span>`),
-      )
+        part = html`<mark class="c2-highlight__mark ${active ? 'c2-highlight__mark--active' : ''}" part=${active ? 'mark active' : 'mark'}>${part}</mark>`
+      for (const range of ranges) {
+        if (range.start > start || range.end < end) continue
+        const index = labels.findIndex((l) => l.value === range.label)
+        const label = labels[index]
+        const tone = Math.max(0, index) % 6
+        part = html`<span class="span" part="span" data-tone=${tone}>${part}</span>`
+        // The tag stays inside the spans around this one, so their tint runs on under it.
+        if (range.end === end)
+          part = [
+            part,
+            html`<span class="tag" part="tag" data-tone=${tone}>${this.renderTag ? this.renderTag({ range, label }) : label?.label || range.label}</span>`,
+          ]
+      }
+      parts.push(part)
     }
     return html`<span class="c2-highlight" part="text">${parts}</span>`
   }

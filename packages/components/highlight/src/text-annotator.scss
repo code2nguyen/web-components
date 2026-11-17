@@ -12,6 +12,10 @@
     tag--display: inline-block,
     tag--font-size: 0.7em,
     tag--font-weight: 600,
+    tag--color: inherit,
+    tag--padding: 0 4px,
+    tag--margin: 0 2px,
+    tag--border-radius: 4px,
   )
 );
 
@@ -31,10 +35,11 @@
 
 .tag {
   display: css.cssVar(tag--display);
-  margin-inline: 2px;
-  padding: 0 4px;
-  border-radius: 4px;
+  margin: css.cssVar(tag--margin);
+  padding: css.cssVar(tag--padding);
+  border-radius: css.cssVar(tag--border-radius);
   background-color: var(--_c);
+  color: css.cssVar(tag--color);
   font-size: css.cssVar(tag--font-size);
   font-weight: css.cssVar(tag--font-weight);
   line-height: 1.4;
