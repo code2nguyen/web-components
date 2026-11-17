@@ -1,0 +1,416 @@
+{
+  "name": "catalog-filter",
+  "spec": "lab/specs/scenarios/catalog-filter.md",
+  "title": "catalog-filter (default direction): an online shop's filter sidebar, built from its spec.",
+  "app": "lab/apps/catalog-filter/default",
+  "url": "http://127.0.0.1:4192/",
+  "server": {
+    "command": "npx vite lab/apps/catalog-filter/default --host 127.0.0.1 --port 4192 --strictPort",
+    "cwd": "."
+  },
+  "journeys": [
+    {
+      "id": "t1-search",
+      "title": "T1 · Search by name",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "fill": {
+            "ax": "searchbox",
+            "name": "Search products"
+          },
+          "text": "tent"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "3 products"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": ".grid c2-card"
+            },
+            "equals": 3
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": ".grid c2-highlight:state(matched)"
+            },
+            "equals": 3
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t2-two-categories",
+      "title": "T2 · Pick two categories",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Tents"
+          }
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Stoves"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "5 products"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "checkbox",
+              "name": "Alpenfox, 2"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "checkbox",
+              "name": "Northwind, 2"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "checkbox",
+              "name": "Kestrel, 1"
+            }
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t3-max-price",
+      "title": "T3 · Cap the price",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "fill": {
+            "ax": "spinbutton",
+            "name": "Maximum price"
+          },
+          "text": "150"
+        },
+        {
+          "press": "Tab"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "5 products"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "Synthetic 5° Bag"
+            }
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "text": "Down 0° Bag"
+            }
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t4-backpacks-in-stock",
+      "title": "T4 · Backpacks in stock",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Backpacks"
+          }
+        },
+        {
+          "click": {
+            "ax": "switch",
+            "name": "In stock only"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "3 products"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "Daypack 22"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "Thru-hiker 55"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "Rolltop 30"
+            }
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t5-remove-chip",
+      "title": "T5 · Remove a filter from its chip",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Tents"
+          }
+        },
+        {
+          "click": {
+            "ax": "switch",
+            "name": "In stock only"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "button",
+              "name": "Remove Tents"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "button",
+              "name": "Remove In stock"
+            }
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Remove Tents"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "9 products"
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "ax": "button",
+              "name": "Remove Tents"
+            }
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t6-empty-then-clear",
+      "title": "T6 · Nothing matches, start over",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Stoves"
+          }
+        },
+        {
+          "fill": {
+            "ax": "spinbutton",
+            "name": "Maximum price"
+          },
+          "text": "50"
+        },
+        {
+          "press": "Tab"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "0 products"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "heading",
+              "name": "No products match"
+            }
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Clear filters",
+            "nth": 1
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "12 products"
+          }
+        }
+      ],
+      "personas": ["mouse", "keyboard", "dark", "fr"]
+    },
+    {
+      "id": "t7-sort-price",
+      "title": "T7 · Sort by price",
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Sort by"
+          }
+        },
+        {
+          "click": {
+            "ax": "option",
+            "name": "Price: low to high",
+            "exact": true
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".grid c2-card:first-child"
+            },
+            "contains": "Canister Stove"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".grid c2-card:last-child"
+            },
+            "contains": "Summit 3 Tent"
+          }
+        }
+      ]
+    },
+    {
+      "id": "t8-phone-drawer",
+      "title": "T8 · Filter on a phone",
+      "personas": ["mobile"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Filters"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "dialog",
+              "name": "Filters"
+            }
+          }
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Backpacks"
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Show results"
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "ax": "dialog",
+              "name": "Filters"
+            }
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "4 products"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "button",
+              "name": "Filters (1)"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

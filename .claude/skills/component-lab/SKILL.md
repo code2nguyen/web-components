@@ -14,6 +14,24 @@ The lab has two goals. Keep both in view:
 1. **Component bugs**: confirmed by an oracle and reproducible.
 2. **Feedback**: what was awkward, missing or surprising when using the components, even when nothing is broken.
 
+## 0. Build from a spec (when asked to build, or when a spec has no build)
+
+1. Read the spec (`lab/specs/**/<id>.md`) and `lab/capabilities.md`. Build each direction into
+   `lab/apps/<id>/<direction>/` following the spec's builder rules: find every component with the c2n MCP server
+   (`search_components`, then `get_component` in **json** for exact attribute types), check the docs gallery for a
+   look, and run `validate_markup` on what you wrote.
+2. Keep notes while building, not after: every search that did not find what exists, every `::part` override, every
+   line of glue between two components, every plain HTML element. They are the report.
+3. Write `lab/targets/<id>.json` with one journey per spec task (`t1-…`), targets taken from the build's accessibility
+   tree (`--aria`). A task that only applies to a phone, or only to a desktop, lists its `personas`.
+4. Run the lab (step 1 below) until every journey passes, fixing the build, not the journey, unless the journey is wrong.
+5. Write `lab/reports/<id>/<direction>.md` from `lab/reports/TEMPLATE.md`: one row per requirement, the component the
+   note is about listed first. Then run `node lab/scripts/gaps.mjs --check` and read the coverage section: a component
+   it lists as unused may be the one you should have found (that is how `c2-chip-group` turned up).
+6. File what the report found (step 3 below): `workaround`, `hand-rolled` and `failed` rows on an existing component
+   go to `COMPONENT-FEEDBACK.md`; a missing component goes in the report's "Missing components" for review against
+   `COMPONENT-ROADMAP.md`.
+
 ## 1. Run the scripted journeys
 
 ```bash

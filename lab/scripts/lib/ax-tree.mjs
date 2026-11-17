@@ -56,7 +56,8 @@ export function formatAxTree(flat) {
 /**
  * Checks a person with a screen reader would notice, read from that tree:
  * - a name read twice in a row ("Mireille DufortMireille Dufort"), the sign of text exposed from two places;
- * - an invisible, disabled control nobody can see or use, announced as if it were part of the interface.
+ * - an invisible, disabled control nobody can see or use, announced as if it were part of the interface;
+ * - a component's own header exposed as a second banner landmark.
  * The DOM node behind each is resolved back to its `c2-*` host so the finding names a component.
  */
 export async function checkAxTree(page, report) {
@@ -87,6 +88,22 @@ export async function checkAxTree(page, report) {
     }
   }
   try {
+    // A page has one banner. A component's own <header> exposed as a second one adds a stray landmark to the list a
+    // screen reader user jumps through.
+    const banners = flat.filter((node) => node.role === 'banner')
+    if (banners.length > 1) {
+      for (const node of banners) {
+        const found = await hostOf(node.backendId)
+        if (!found?.host) continue
+        report({
+          kind: 'a11y-tree',
+          severity: 'warn',
+          component: found.host,
+          rule: 'extra-banner',
+          message: `${found.host} exposes a banner landmark; the page already has one (${banners.length} in all).`,
+        })
+      }
+    }
     for (const node of flat) {
       const half = node.name.length / 2
       if (node.name.length >= 6 && Number.isInteger(half) && node.name.slice(0, half) === node.name.slice(half)) {

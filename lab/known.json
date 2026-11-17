@@ -1,7 +1,9 @@
 {
+  "catalog-filter/axe/-/landmark-no-duplicate-banner": "axe false positive: it counts c2-sheet's shadow <header>. With the modal sheet open Chrome hides the page banner, closed it hides the sheet's; there is never more than one (a11y-tree extra-banner check).",
+  "catalog-filter/axe/-/landmark-unique": "Same axe false positive as catalog-filter landmark-no-duplicate-banner.",
   "support-inbox-vue/a11y-tree/c2-avatar/hidden-disabled-button": "c2-avatar renders its file input when not editable; COMPONENT-FEEDBACK.md (c2-avatar, bug).",
   "support-inbox-vue/axe/-/color-contrast": "App: the agent bubble is blue but the c2-chat-message title keeps the dark text colour (3.28:1). The app should set the title colour with the bubble.",
-  "support-inbox-vue/axe/-/landmark-no-duplicate-banner": "axe false positive: it counts c2-chat-message's shadow <header> as a banner; Chrome's accessibility tree has one banner and reads those headers as sectionheader.",
+  "support-inbox-vue/axe/-/landmark-no-duplicate-banner": "axe false positive: it counts a component's shadow <header> (c2-chat-message, the closed c2-sheet) that Chrome does not expose as a banner. The a11y-tree extra-banner check is the reliable one.",
   "support-inbox-vue/axe/-/landmark-unique": "Same axe false positive as landmark-no-duplicate-banner.",
   "support-inbox-vue/axe/-/scrollable-region-focusable": "App: on a phone the .thread__messages list scrolls but is not focusable, so keyboard users cannot scroll it.",
   "support-inbox-vue/axe/c2-format-date/color-contrast": "@c2n/theme on-surface-variant on surface-variant (4.39:1), plus the app's blue agent bubble; COMPONENT-FEEDBACK.md (@c2n/theme).",

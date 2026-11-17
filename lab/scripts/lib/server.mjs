@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 
 async function answers(url) {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(2000) })
+    const response = await fetch(url, { signal: AbortSignal.timeout(15_000) })
     return response.ok
   } catch {
     return false
@@ -26,7 +26,7 @@ export async function ensureServer(target, repoRoot) {
   child.stdout.on('data', (chunk) => (output += chunk))
   child.stderr.on('data', (chunk) => (output += chunk))
 
-  const deadline = Date.now() + (target.server.timeout ?? 60_000)
+  const deadline = Date.now() + (target.server.timeout ?? 120_000)
   while (Date.now() < deadline) {
     if (child.exitCode !== null) throw new Error(`Server exited (${child.exitCode}):\n${output.slice(-2000)}`)
     if (await answers(target.url)) {
