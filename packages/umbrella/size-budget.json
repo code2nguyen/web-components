@@ -232,6 +232,7 @@
     "scroll-progress": 2557,
     "search-field": 9783,
     "secret-field": 16521,
+    "secret-field/totp-code": 19016,
     "select": 22202,
     "select/native-select": 4933,
     "selection-toolbar": 3904,

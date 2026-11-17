@@ -627,6 +627,7 @@ Type help for commands.</span></c2-terminal>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   toggletip: `<div class="preview-row" style="flex-direction:column;align-items:flex-start;gap:12px"><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">VAT number <c2-toggletip label="About the VAT number">Your EU VAT number, starting with the country code.</c2-toggletip></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">Billing period <c2-toggletip label="About billing periods">Yearly plans cost two months less.</c2-toggletip></span></div>`,
   tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  'totp-code': `<c2-totp-code label="GitHub" secret="JBSWY3DPEHPK3PXP" revealed hide-reveal style="width:220px"></c2-totp-code>`,
   tour: `<div class="preview-row">
   <c2-button id="preview-tour-target">Share</c2-button>
   <c2-tour>

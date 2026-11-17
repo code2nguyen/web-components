@@ -1,0 +1,45 @@
+---
+/**
+ * Plays the application's part in the TOTP code gallery: the French of the card under `lang="fr"`, the secret of the
+ * card marked `data-totp-code-example="property"`, set as a property so it never reaches the DOM, and the
+ * `code-change` log of the card marked `data-totp-code-example="events"`.
+ */
+---
+
+<script>
+  import type { TotpCode } from '@c2n/components/secret-field/totp-code'
+  import '@c2n/components/secret-field/totp-code'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'totp-code': {
+        show: 'Afficher le code',
+        copy: 'Copier le code',
+        copied: 'Copié',
+        hidden: 'Masqué',
+        empty: 'Aucun code',
+        unavailable: 'Code indisponible',
+        period: 'Nouveau code toutes les {0} secondes',
+      },
+    },
+  })
+
+  // A demo secret: in an app it comes from the user's vault, never from the page source.
+  const DEMO_SECRET = 'MFRGGZDFMZTWQ2LKNNWG23TPOBYXE43UOV3HO6DZPI'
+  const wired = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-totp-code-example]').forEach((card) => {
+      const code = card.querySelector<TotpCode>('c2-totp-code')
+      if (!code || wired.has(card)) return
+      wired.add(card)
+      if (card.dataset.totpCodeExample === 'property') code.secret = DEMO_SECRET
+      const output = card.querySelector('output')
+      if (output) code.addEventListener('code-change', () => (output.textContent = `code-change at ${new Date().toLocaleTimeString()}`))
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+</script>

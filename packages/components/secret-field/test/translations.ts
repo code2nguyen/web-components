@@ -1,5 +1,6 @@
 import { addTranslations } from '@c2n/core/localize.js'
 import { secretFieldMessages } from '../src/messages.js'
+import { totpCodeMessages } from '../src/totp-code-messages.js'
 
 // The French an app would add: the library ships its text in English only.
 
@@ -15,4 +16,13 @@ const fr: typeof secretFieldMessages.en = {
   empty: 'Aucun secret',
 }
 
-addTranslations({ fr: { 'secret-field': fr } })
+const frCode: typeof totpCodeMessages.en = {
+  ...fr,
+  show: 'Afficher le code',
+  copy: 'Copier le code',
+  empty: 'Aucun code',
+  unavailable: 'Code indisponible',
+  period: (seconds) => `Nouveau code toutes les ${seconds} secondes`,
+}
+
+addTranslations({ fr: { 'secret-field': fr, 'totp-code': frCode } })

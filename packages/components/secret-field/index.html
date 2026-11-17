@@ -22,6 +22,9 @@
     </c2-secret-field>
     <c2-secret-field label="Recovery code" value="8F2K-Q7MX-4LZP-9RTD" reveal-end="0" hide-reveal></c2-secret-field>
     <div lang="fr"><c2-secret-field label="Clé secrète" value="acme_live_51HxQ8vLkT2bR9wJmN4pZc7aYe0gDf3s4242" reveal-start="10"></c2-secret-field></div>
+    <c2-totp-code label="GitHub · ada@example.com" secret="JBSWY3DPEHPK3PXP" revealed></c2-totp-code>
+    <c2-totp-code label="AWS console" secret="otpauth://totp/AWS:ada?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&amp;digits=8&amp;period=60"></c2-totp-code>
+    <script type="module" src="/src/totp-code.ts"></script>
     <script type="module">
       const field = document.querySelector('#regen')
       field.addEventListener('regenerate', () => {
