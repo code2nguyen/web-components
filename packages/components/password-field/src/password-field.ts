@@ -167,9 +167,9 @@ export function scorePassword(value: string): PasswordStrength {
  * @slot generate-icon - Replaces the wand of the generate button (`generator`).
  * @slot generator-actions - Buttons of your own in the generator popover, before Use password: save to a vault, for example.
  *
- * @csspart generate - The generate button at the end of the field (`generator`), beside the show/hide toggle.
+ * @csspart generate - The generate button at the end of the field (`generator`), beside the show/hide toggle. It wraps the `generate-icon` slot: the built-in wand shows as the slot's fallback, and an assigned icon replaces it in the same button.
  * @csspart generator - The generator popover's surface: the suggestion, its strength, the options and the actions.
- * @csspart generator-actions - The row at the bottom of the generator popover that wraps the `generator-actions` slot and Use password.
+ * @csspart generator-actions - The row at the bottom of the generator popover. It wraps the `generator-actions` slot, whose assigned buttons sit before the built-in Use password button in the same row.
  *
  * @event {InputEvent} input - Re-dispatched from the inner input on every keystroke; `value` is already updated.
  * @event {Event} change - Re-dispatched from the inner input when the value is committed (blur or Enter).

@@ -3178,6 +3178,20 @@
     },
     {
       "tag": "c2-password-field",
+      "slot": "generate-icon",
+      "decision": "part",
+      "parts": ["generate"],
+      "reason": "The generate button wraps the slotted icon and its wand fallback; it sizes the icon through the icon size and is styled as a whole through its part."
+    },
+    {
+      "tag": "c2-password-field",
+      "slot": "generator-actions",
+      "decision": "part",
+      "parts": ["generator-actions"],
+      "reason": "The row at the bottom of the generator popover owns the layout and spacing of the generator-actions slot beside Use password."
+    },
+    {
+      "tag": "c2-password-field",
       "slot": "hide-icon",
       "decision": "variables",
       "variables": ["--c2-password-field__icon--size", "--c2-password-field__toggle--color", "--c2-password-field__toggle__hover--color"],

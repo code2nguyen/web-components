@@ -196,7 +196,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Native Select** — `c2-native-select` · `@c2n/components/select/native-select` — A field around the browser's own select, themed like the text field: the phone's own picker, the platform's keyboard and typeahead, and no popover code.
 - **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
-- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist and a Caps Lock warning.
+- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist, a Caps Lock warning and a password generator.
 - **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
 - **Promo Code Field** — `c2-promo-code-field` · `@c2n/components/promo-code-field` — Apply a promo code with checking and refusal states; applied codes stay as removable tokens with their saving.
 - **Quantity Picker** — `c2-quantity-picker, c2-quantity` · `@c2n/components/quantity-picker` — Several labelled counters behind one summary ("2 adults, 1 child"), with limits per counter and in total. Children: `c2-quantity`.
