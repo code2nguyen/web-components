@@ -3,7 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
-import { isComposingKey } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/icon-button'
 import { imageAnnotatorMessages } from './messages.js'
@@ -33,6 +33,10 @@ export interface AnnotatorShape {
   color: string
   /** Line width, in image pixels. */
   stroke: number
+  /** What the shape marks (an extracted field's name, a pin's title): read after the shape's kind. */
+  label?: string
+  /** How sure an extraction is of this region, from 0 to 1; below `confidence-threshold` the shape is flagged. */
+  confidence?: number
 }
 
 export interface AnnotationChangeEventDetail {
@@ -43,10 +47,27 @@ export interface AnnotatorErrorEventDetail {
   error: Error
 }
 
+export interface ShapeSelectEventDetail {
+  /** The chosen shape's id, or `null` when the choice was cleared. */
+  id: string | null
+  shape: AnnotatorShape | null
+}
+
+/** What {@link ImageAnnotator.renderDetail} is given: the active shape and its position. */
+export interface ImageAnnotatorDetailContext {
+  shape: AnnotatorShape
+  index: number
+  count: number
+}
+
+/** Draws the card beside the active shape: anything Lit can render. */
+export type ImageAnnotatorDetailRenderer = (context: ImageAnnotatorDetailContext) => unknown
+
 /** Events fired by {@link ImageAnnotator}, keyed for `addEventListener`. */
 export interface ImageAnnotatorEventMap {
   'annotation-change': CustomEvent<AnnotationChangeEventDetail>
   'annotator-error': CustomEvent<AnnotatorErrorEventDetail>
+  'shape-select': CustomEvent<ShapeSelectEventDetail>
 }
 
 export interface ImageAnnotator {
@@ -68,6 +89,8 @@ const SHAPE_NAME = {
   redact: 'shapeRedact',
 } as const
 const REDACT_COLOR = '#000000'
+/** The shapes drawn as an outline, which a low confidence dashes. */
+const STROKED: AnnotatorShapeType[] = ['rect', 'ellipse', 'line', 'arrow', 'pen']
 
 const ICONS: Record<AnnotatorTool | 'undo' | 'redo' | 'delete', SVGTemplateResult> = {
   select: svg`<path d="m5 4 6 15 2-6 6-2z" />`,
@@ -138,14 +161,25 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * `select`, Tab reaches each shape, the arrow keys nudge it (Shift for 10 px) and Delete removes it. `readonly` shows
  * the shapes with no toolbar.
  *
+ * `active` is the chosen shape, the same one `select` picks: highlighted, scrolled into view when it changes, and
+ * reported by `shape-select` whenever the person (or `next()`/`previous()`) changes it. Beside it the `detail` slot,
+ * or `renderDetail`, shows the app's card for that shape: a comment thread on a pin, the field of an extracted region.
+ * With `readonly selectable`, shapes are still chosen by click, Tab and the arrow keys, but not edited: the review
+ * mode of OCR extraction or of a pinned plan. A shape's `label` names it, and a `confidence` under
+ * `confidence-threshold` flags it for review.
+ *
  * @tag c2-image-annotator
  *
  * @event {CustomEvent<AnnotationChangeEventDetail>} annotation-change - The shapes changed: drawn, moved, resized, edited, deleted, undone or redone.
  * @event {CustomEvent<AnnotatorErrorEventDetail>} annotator-error - An export failed, for example on a cross-origin image without CORS.
+ * @event {CustomEvent<ShapeSelectEventDetail>} shape-select - The active shape changed by click, keyboard, drawing, deleting, `next()` or `previous()`; not when `active` is set. Does not bubble.
+ *
+ * @slot detail - The app's card for the active shape (a comment thread, an extracted field), shown beside it. Replaces what `renderDetail` draws.
  *
  * @csspart toolbar - The toolbar.
  * @csspart stage - The image and its shapes.
  * @csspart image - The image.
+ * @csspart detail - The card container beside the active shape, wrapping the `detail` slot; with nothing assigned, it holds what `renderDetail` draws as the slot's fallback.
  *
  * @cssproperty {color} [--c2-image-annotator__toolbar--background-color=#ffffff]
  * @cssproperty {border} [--c2-image-annotator__toolbar--border=1px solid #e4e4e7]
@@ -156,6 +190,17 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @cssproperty {color} [--c2-image-annotator__swatch__selected--outline-color=rgb(2, 101, 220)]
  * @cssproperty {font-family} [--c2-image-annotator__text--font-family=system-ui, sans-serif] - Text shapes, on screen and in the export.
  * @cssproperty {color} [--c2-image-annotator__number--color=#ffffff] - The digit in a number badge.
+ * @cssproperty {number} [--c2-image-annotator__shape__inactive--opacity=1] - The other shapes while one is active; lower it to spotlight the active one.
+ * @cssproperty {color} [--c2-image-annotator__low-confidence--color=#d97706] - The outline of a box, ellipse, line, arrow or drawing whose `confidence` is under `confidence-threshold`.
+ * @cssproperty {string} [--c2-image-annotator__low-confidence--stroke-dasharray=8 5] - The dash of a low-confidence outline, in image pixels.
+ * @cssproperty {color} [--c2-image-annotator__detail--background-color=#ffffff]
+ * @cssproperty {color} [--c2-image-annotator__detail--color=#18181b]
+ * @cssproperty {border} [--c2-image-annotator__detail--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-image-annotator__detail--border-radius=8px]
+ * @cssproperty {shadow} [--c2-image-annotator__detail--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {pixel} [--c2-image-annotator__detail--padding=12px]
+ * @cssproperty {pixel} [--c2-image-annotator__detail--width=260px] - The card's width, never wider than the room beside its shape.
+ * @cssproperty {pixel} [--c2-image-annotator__detail--offset=8px] - The gap between the card and its shape.
  */
 @customElement('c2-image-annotator')
 export class ImageAnnotator extends LitElement {
@@ -182,9 +227,25 @@ export class ImageAnnotator extends LitElement {
   /** The image's accessible description, read before its shapes. */
   @property() alt = ''
 
+  /**
+   * The id of the chosen shape: highlighted, scrolled into view when it changes, with the `detail` card beside it. It
+   * is the selection of the `select` tool, so choosing a shape sets it; set it from the app to follow a focused form
+   * field.
+   */
+  @property() active: string | null = null
+
+  /** With `readonly`, shapes can still be chosen (click, Tab, the arrow keys) and report `shape-select`. */
+  @property({ type: Boolean }) selectable = false
+
+  /** A shape whose `confidence` is under this value (0 to 1) is flagged for review. */
+  @property({ type: Number, attribute: 'confidence-threshold' }) confidenceThreshold = 0.8
+
+  /** Draws the card beside the active shape when the `detail` slot is empty. */
+  @property({ attribute: false }) renderDetail?: ImageAnnotatorDetailRenderer
+
   @state() private color = ''
   @state() private stroke = 4
-  @state() private selected: string | null = null
+  @state() private slotted = false
   @state() private natural = { width: 0, height: 0 }
   @state() private draft: AnnotatorShape | null = null
   @state() private editing: string | null = null
@@ -196,6 +257,10 @@ export class ImageAnnotator extends LitElement {
   private readonly msg = new LocalizeController(this, imageAnnotatorMessages)
   /** The shapes before the text being edited was added or changed: the edit commits against them. */
   private editOrigin: AnnotatorShape[] | null = null
+  /** The id the person last chose (a click, Tab): that `active` is not scrolled into view; one the app sets is. */
+  private chosen: string | null | undefined = undefined
+  /** The first render is done: an `active` the page loads with does not scroll the page. */
+  private ready = false
   private gesture: { kind: 'draw' | 'move' | 'handle'; startX: number; startY: number; origin: AnnotatorShape; handle?: number; moved: boolean } | null = null
 
   constructor() {
@@ -217,7 +282,7 @@ export class ImageAnnotator extends LitElement {
     this.future = [...this.future, this.shapes]
     this.history = this.history.slice(0, -1)
     this.shapes = previous
-    this.selected = null
+    this.choose(null)
     this.changed()
   }
 
@@ -227,8 +292,18 @@ export class ImageAnnotator extends LitElement {
     this.history = [...this.history, this.shapes]
     this.future = this.future.slice(0, -1)
     this.shapes = next
-    this.selected = null
+    this.choose(null)
     this.changed()
+  }
+
+  /** Makes the shape after the active one active (the first when none is), reports it and scrolls it into view. */
+  next(): string | null {
+    return this.move(1)
+  }
+
+  /** Makes the shape before the active one active (the last when none is), reports it and scrolls it into view. */
+  previous(): string | null {
+    return this.move(-1)
   }
 
   /** The image at its natural size with the shapes drawn on it, redactions and blurs flattened into the pixels. */
@@ -373,10 +448,36 @@ export class ImageAnnotator extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     this.internals.ariaLabel = this.msg.t('stage')
+    // A server-rendered slot already holds its children when the element hydrates, so `slotchange` never fires for them.
+    if (!this.hasUpdated) this.slotted = hasSlottedContent(this, 'detail')
     if (!Array.isArray(this.shapes)) this.shapes = []
     if (changed.has('colors') && (!this.color || !this.colors.includes(this.color))) this.color = this.colors[0] ?? '#e11d48'
     if (changed.has('src')) this.natural = { width: 0, height: 0 }
-    if (changed.has('readonly') && this.readonly) this.selected = null
+    // Turning readonly on drops an editing selection, unless shapes stay selectable.
+    if (changed.get('readonly') === false && this.readonly && !this.selectable) this.choose(null)
+    // New shapes without the active one (the next document, an undo): the choice is gone, and said so.
+    const before = changed.get('shapes') as AnnotatorShape[] | undefined
+    if (this.active && before?.some((shape) => shape.id === this.active) && !this.shapes.some((shape) => shape.id === this.active)) this.choose(null)
+  }
+
+  /** Changes the active shape from inside: reported by `shape-select`, and scrolled into view only when `reveal`. */
+  private choose(id: string | null, reveal = false): void {
+    if (id === this.active) return
+    this.active = id
+    this.chosen = reveal ? undefined : id
+    const shape = this.shapes.find((candidate) => candidate.id === id)
+    this.dispatchEvent(new CustomEvent<ShapeSelectEventDetail>('shape-select', { detail: { id, shape: shape ? { ...shape } : null } }))
+  }
+
+  private move(step: 1 | -1): string | null {
+    // In drawing order, which is the order Tab reaches the shapes in.
+    const shapes = this.layered()
+    const count = shapes.length
+    if (!count) return null
+    const index = shapes.findIndex((shape) => shape.id === this.active)
+    const next = index < 0 ? (step > 0 ? 0 : count - 1) : Math.min(count - 1, Math.max(0, index + step))
+    this.choose(shapes[next].id, true)
+    return this.active
   }
 
   private commit(next: AnnotatorShape[], announce?: string): void {
@@ -423,15 +524,15 @@ export class ImageAnnotator extends LitElement {
   }
 
   private add(shape: AnnotatorShape): void {
-    this.selected = shape.id
     if (shape.type === 'text') {
       // A text joins the history when it is finished, as one entry, and not at all if it is left empty.
       this.editOrigin = this.shapes
       this.shapes = [...this.shapes, shape]
       this.editing = shape.id
-      return
+    } else {
+      this.commit([...this.shapes, shape], this.msg.t('added', this.kind(shape)))
     }
-    this.commit([...this.shapes, shape], this.msg.t('added', this.kind(shape)))
+    this.choose(shape.id)
   }
 
   /** Starts editing a text shape. */
@@ -447,7 +548,7 @@ export class ImageAnnotator extends LitElement {
       this.shapes.filter((candidate) => candidate.id !== id),
       this.msg.t('deleted', this.kind(shape)),
     )
-    if (this.selected === id) this.selected = null
+    if (this.active === id) this.choose(null)
   }
 
   private patch(id: string, change: Partial<AnnotatorShape>, record = true): void {
@@ -469,27 +570,35 @@ export class ImageAnnotator extends LitElement {
   }
 
   private onPointerDown(event: PointerEvent): void {
-    if (this.readonly || event.button !== 0 || !this.natural.width) return
+    if (event.button !== 0 || !this.natural.width) return
+    const target = (event.composedPath() as Element[]).find((node) => node instanceof Element && (node as Element).getAttribute?.('data-id'))
+    if (this.readonly) {
+      // Review mode: a click chooses a shape (and focuses it, so the arrow keys go on from there) or clears the choice.
+      if (!this.selectable) return
+      event.preventDefault()
+      this.choose(target?.getAttribute('data-id') ?? null)
+      ;(target as SVGGElement | undefined)?.focus({ preventScroll: true })
+      return
+    }
     if (this.editing) this.finishText()
     // The pointer default is prevented (no text selection, no image drag), so focus the stage by hand: the keys that
     // follow (Delete, the arrows, undo) are for it.
     this.stageElement?.focus({ preventScroll: true })
     const [x, y] = this.point(event)
-    const target = (event.composedPath() as Element[]).find((node) => node instanceof Element && (node as Element).getAttribute?.('data-id'))
     const handle = (event.composedPath() as Element[]).find((node) => node instanceof Element && node.getAttribute?.('data-handle'))
     const overlay = event.currentTarget as Element
     if (this.tool === 'select') {
-      if (handle && this.selected) {
-        const origin = this.shapes.find((shape) => shape.id === this.selected)
+      if (handle && this.active) {
+        const origin = this.shapes.find((shape) => shape.id === this.active)
         if (origin)
           this.gesture = { kind: 'handle', startX: x, startY: y, origin: { ...origin }, handle: Number(handle.getAttribute('data-handle')), moved: false }
       } else if (target) {
         const id = target.getAttribute('data-id')!
-        this.selected = id
+        this.choose(id)
         const origin = this.shapes.find((shape) => shape.id === id)
         if (origin) this.gesture = { kind: 'move', startX: x, startY: y, origin: { ...origin }, moved: false }
       } else {
-        this.selected = null
+        this.choose(null)
       }
     } else if (this.tool === 'number' || this.tool === 'text') {
       this.add(this.create(this.tool, x, y))
@@ -601,7 +710,17 @@ export class ImageAnnotator extends LitElement {
   // ---------------------------------------------------------------------------------------------------- keyboard
 
   private onKeydown(event: KeyboardEvent): void {
-    if (this.readonly || this.editing) return
+    if (this.editing || event.defaultPrevented) return
+    const path = event.composedPath() as EventTarget[]
+    // Keys typed in the app's card (a comment being written) are its own; Escape goes back to the shape.
+    if (path.includes(this.detailElement as EventTarget)) {
+      if (event.key === 'Escape') this.focusActive()
+      return
+    }
+    if (this.readonly) {
+      if (this.selectable) this.onReviewKey(event, path)
+      return
+    }
     const meta = event.ctrlKey || event.metaKey
     if (meta && event.key.toLowerCase() === 'z') {
       event.preventDefault()
@@ -615,8 +734,8 @@ export class ImageAnnotator extends LitElement {
       return
     }
     // The rest is for the image and its shapes, not for a key pressed on the toolbar.
-    if (!(event.composedPath() as EventTarget[]).includes(this.stageElement as EventTarget)) return
-    const selected = this.shapes.find((shape) => shape.id === this.selected)
+    if (!path.includes(this.stageElement as EventTarget)) return
+    const selected = this.shapes.find((shape) => shape.id === this.active)
     if (selected) {
       const step = event.shiftKey ? 10 : 1
       const nudge = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[event.key]
@@ -637,8 +756,9 @@ export class ImageAnnotator extends LitElement {
         this.edit(selected.id)
         return
       }
+      if (event.key === 'Enter' && this.openDetail(event)) return
       if (event.key === 'Escape') {
-        this.selected = null
+        this.choose(null)
         this.stageElement?.focus()
         return
       }
@@ -668,8 +788,45 @@ export class ImageAnnotator extends LitElement {
     }
   }
 
+  /** Review mode: the arrow keys walk the shapes, Enter opens the card, Escape clears the choice. */
+  private onReviewKey(event: KeyboardEvent, path: EventTarget[]): void {
+    if (!path.includes(this.stageElement as EventTarget)) return
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key] as 1 | -1 | undefined
+    if (step) {
+      event.preventDefault()
+      this.move(step)
+      this.focusActive()
+    } else if (event.key === 'Escape' && this.active) {
+      this.choose(null)
+    } else if (event.key === 'Enter' && this.active) {
+      this.openDetail(event)
+    }
+  }
+
+  /** Moves the keyboard into the card beside the active shape, when there is one. */
+  private openDetail(event: KeyboardEvent): boolean {
+    const detail = this.detailElement
+    if (!detail || detail.hidden) return false
+    event.preventDefault()
+    detail.focus()
+    return true
+  }
+
+  private focusActive(): void {
+    this.updateComplete.then(() => this.renderRoot.querySelector<SVGGElement>('g.shape.selected')?.focus())
+  }
+
+  /** Whether shapes can be chosen: the `select` tool, or `readonly selectable`. */
+  private get pickable(): boolean {
+    return this.readonly ? this.selectable : this.tool === 'select'
+  }
+
   private get stageElement(): HTMLElement | null {
     return this.renderRoot?.querySelector<HTMLElement>('.stage') ?? null
+  }
+
+  private get detailElement(): HTMLElement | null {
+    return this.renderRoot?.querySelector<HTMLElement>('.detail') ?? null
   }
 
   // ------------------------------------------------------------------------------------------------------- text
@@ -691,7 +848,7 @@ export class ImageAnnotator extends LitElement {
     let next: AnnotatorShape[]
     if (!text) {
       next = this.shapes.filter((candidate) => candidate.id !== id)
-      this.selected = null
+      this.choose(null)
     } else {
       next = this.shapes.map((candidate) =>
         candidate.id === id ? { ...candidate, text, w: text.length * textSize(shape) * 0.6, h: textSize(shape) * 1.2 } : candidate,
@@ -732,9 +889,16 @@ export class ImageAnnotator extends LitElement {
     if (image?.complete && image.naturalWidth) this.natural = { width: image.naturalWidth, height: image.naturalHeight }
   }
 
-  protected override updated(): void {
+  protected override updated(changed: PropertyValues<this>): void {
     const editor = this.renderRoot.querySelector<HTMLInputElement>('.text-editor')
     if (editor && this.shadowRoot?.activeElement !== editor) editor.focus()
+    // An active shape set by the app (a form field took focus) or by next()/previous() is brought into view; not one
+    // the person just clicked or tabbed to, nor the one the page loads with.
+    if (changed.has('active') && this.ready && this.active !== this.chosen) {
+      this.renderRoot.querySelector('g.shape.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    }
+    this.chosen = undefined
+    this.ready = true
   }
 
   // ------------------------------------------------------------------------------------------------------ render
@@ -779,15 +943,15 @@ export class ImageAnnotator extends LitElement {
       }
     }
     if (draft) return svg`<g class="draft">${body}</g>`
-    const selectable = !this.readonly && this.tool === 'select'
+    const pickable = this.pickable
     return svg`<g
-      class="shape ${this.selected === shape.id ? 'selected' : ''}"
+      class="shape ${this.active === shape.id ? 'selected' : ''} ${this.low(shape) && STROKED.includes(shape.type) ? 'low' : ''}"
       data-id=${shape.id}
       role="img"
-      aria-label=${this.msg.t('shapeOf', this.kind(shape), index + 1, count) + (shape.type === 'text' && shape.text ? `: ${shape.text}` : '')}
-      tabindex=${selectable ? 0 : -1}
+      aria-label=${this.shapeName(shape, index, count)}
+      tabindex=${pickable ? 0 : -1}
       @focus=${() => {
-        if (selectable) this.selected = shape.id
+        if (pickable) this.choose(shape.id)
       }}
     >
       ${body}
@@ -795,9 +959,22 @@ export class ImageAnnotator extends LitElement {
     </g>`
   }
 
+  private low(shape: AnnotatorShape): boolean {
+    return typeof shape.confidence === 'number' && shape.confidence < this.confidenceThreshold
+  }
+
+  /** "Rectangle 2 of 5: Invoice total: 62% confidence", for assistive technology. */
+  private shapeName(shape: AnnotatorShape, index: number, count = this.shapes.length): string {
+    return [
+      shape.label,
+      shape.type === 'text' ? shape.text : '',
+      this.low(shape) ? this.msg.t('lowConfidence', Math.round(shape.confidence! * 100)) : '',
+    ].reduce<string>((name, part) => (part ? this.msg.t('nameAnd', name, part) : name), this.msg.t('shapeOf', this.kind(shape), index + 1, count))
+  }
+
   private renderSelection() {
-    const shape = this.shapes.find((candidate) => candidate.id === this.selected)
-    if (!shape || this.readonly) return nothing
+    const shape = this.shapes.find((candidate) => candidate.id === this.active)
+    if (!shape) return nothing
     const box = bounds(shape)
     const size = Math.max(6, this.natural.width / 120)
     const points: [number, number][] =
@@ -812,11 +989,53 @@ export class ImageAnnotator extends LitElement {
             [box.x, box.y + box.h],
             [box.x + box.w, box.y + box.h],
           ]
-    const resizable = shape.type !== 'number' && shape.type !== 'text'
+    const resizable = !this.readonly && shape.type !== 'number' && shape.type !== 'text'
     return svg`<g class="selection">
       <rect class="outline" x=${box.x - 2} y=${box.y - 2} width=${box.w + 4} height=${box.h + 4}></rect>
       ${resizable ? points.map(([x, y], index) => svg`<rect class="handle" data-handle=${index} x=${x - size / 2} y=${y - size / 2} width=${size} height=${size}></rect>`) : nothing}
     </g>`
+  }
+
+  /** The card beside the active shape: the `detail` slot, else what `renderDetail` draws; hidden when neither has content. */
+  private renderCard() {
+    const { width, height } = this.natural
+    const index = this.shapes.findIndex((shape) => shape.id === this.active)
+    const shape = this.shapes[index]
+    const show = !!shape && !!width && (this.slotted || !!this.renderDetail)
+    let place = ''
+    let side = ''
+    if (show) {
+      const box = bounds(shape)
+      const x = (value: number) => `${Math.max(0, (value / width) * 100)}%`
+      const y = (value: number) => `${Math.max(0, (value / height) * 100)}%`
+      const before = box.x
+      const after = width - box.x - box.w
+      // --_room is the width the card may take, --_tall the height when it grows upward (toward the toolbar).
+      if (Math.max(before, after) >= width * 0.3) {
+        // Beside the shape, on the side with more room, level with its top (its bottom in the lower half).
+        side = after >= before ? '' : 'end'
+        place = side ? `right: ${x(width - box.x)}; --_room: ${x(before)}` : `left: ${x(box.x + box.w)}; --_room: ${x(after)}`
+        place += box.y + box.h / 2 > height / 2 ? `; bottom: ${y(height - box.y - box.h)}; --_tall: ${y(box.y + box.h)}` : `; top: ${y(box.y)}`
+      } else {
+        // A shape as wide as the image: below it, or above it when there is more room there.
+        side = box.y >= height - box.y - box.h ? 'above' : 'below'
+        place = `left: ${x(box.x)}; --_room: ${x(width - box.x)}; `
+        place += side === 'above' ? `bottom: ${y(height - box.y)}; --_tall: ${y(box.y)}` : `top: ${y(box.y + box.h)}`
+      }
+    }
+    return html`<div
+      class="detail ${side}"
+      part="detail"
+      role="group"
+      tabindex="-1"
+      aria-label=${shape ? this.shapeName(shape, index) : nothing}
+      ?hidden=${!show}
+      style=${place}
+    >
+      <slot name="detail" @slotchange=${(event: Event) => (this.slotted = (event.target as HTMLSlotElement).assignedElements().length > 0)}
+        >${shape && this.renderDetail ? this.renderDetail({ shape: { ...shape }, index, count: this.shapes.length }) : nothing}</slot
+      >
+    </div>`
   }
 
   private renderToolbar() {
@@ -837,7 +1056,7 @@ export class ImageAnnotator extends LitElement {
             data-tool=${tool}
             @click=${() => {
               this.tool = tool
-              if (tool !== 'select') this.selected = null
+              if (tool !== 'select') this.choose(null)
             }}
             >${icon(tool)}</c2-icon-button
           >`,
@@ -855,7 +1074,7 @@ export class ImageAnnotator extends LitElement {
               style="--_swatch: ${color}"
               @click=${() => {
                 this.color = color
-                const selected = this.shapes.find((shape) => shape.id === this.selected)
+                const selected = this.shapes.find((shape) => shape.id === this.active)
                 if (selected && selected.type !== 'redact' && selected.type !== 'blur') this.patch(selected.id, { color })
               }}
             ></button>`,
@@ -874,7 +1093,7 @@ export class ImageAnnotator extends LitElement {
               style="--_width: ${Math.min(6, width)}px"
               @click=${() => {
                 this.stroke = width
-                const selected = this.shapes.find((shape) => shape.id === this.selected)
+                const selected = this.shapes.find((shape) => shape.id === this.active)
                 if (selected) this.patch(selected.id, { stroke: width })
               }}
             ></button>`,
@@ -882,11 +1101,8 @@ export class ImageAnnotator extends LitElement {
       </span>
       <span class="grow"></span>
       ${
-        this.selected
-          ? html`<c2-icon-button
-              aria-label=${this.msg.t('delete')}
-              tooltip=${this.msg.t('delete')}
-              @click=${() => this.selected && this.removeShape(this.selected)}
+        this.active
+          ? html`<c2-icon-button aria-label=${this.msg.t('delete')} tooltip=${this.msg.t('delete')} @click=${() => this.active && this.removeShape(this.active)}
               >${icon('delete')}</c2-icon-button
             >`
           : nothing
@@ -905,38 +1121,47 @@ export class ImageAnnotator extends LitElement {
     const count = this.shapes.length
     return html`<div class="frame" @keydown=${this.onKeydown}>
       ${this.readonly ? nothing : this.renderToolbar()}
-      <div class="stage tool-${this.tool}" part="stage" role="group" tabindex=${this.readonly ? -1 : 0} aria-label=${this.alt || this.msg.t('stage')}>
-        <img
-          part="image"
-          src=${this.src}
-          alt=""
-          crossorigin=${this.crossorigin ?? nothing}
-          draggable="false"
-          @load=${(event: Event) => {
-            const image = event.target as HTMLImageElement
-            this.natural = { width: image.naturalWidth, height: image.naturalHeight }
-          }}
-        />
-        ${
-          width
-            ? html`<svg
-                class="overlay"
-                viewBox="0 0 ${width} ${height}"
-                preserveAspectRatio="none"
-                @pointerdown=${this.onPointerDown}
-                @pointermove=${this.onPointerMove}
-                @pointerup=${this.onPointerUp}
-                @pointercancel=${this.onPointerUp}
-              >
-                <defs>
-                  <filter id="blur"><feGaussianBlur stdDeviation=${Math.max(4, width / 120)}></feGaussianBlur></filter>
-                </defs>
-                ${this.layered().map((shape) => this.renderShape(shape, this.shapes.indexOf(shape), count))}
-                ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing} ${this.renderSelection()}
-              </svg>`
-            : nothing
-        }
-        ${this.renderEditor()}
+      <div class="canvas">
+        <div
+          class="stage tool-${this.tool} ${this.pickable ? 'pickable' : ''}"
+          part="stage"
+          role="group"
+          tabindex=${this.readonly ? -1 : 0}
+          aria-label=${this.alt || this.msg.t('stage')}
+        >
+          <img
+            part="image"
+            src=${this.src}
+            alt=""
+            crossorigin=${this.crossorigin ?? nothing}
+            draggable="false"
+            @load=${(event: Event) => {
+              const image = event.target as HTMLImageElement
+              this.natural = { width: image.naturalWidth, height: image.naturalHeight }
+            }}
+          />
+          ${
+            width
+              ? html`<svg
+                  class="overlay ${this.active ? 'has-active' : ''}"
+                  viewBox="0 0 ${width} ${height}"
+                  preserveAspectRatio="none"
+                  @pointerdown=${this.onPointerDown}
+                  @pointermove=${this.onPointerMove}
+                  @pointerup=${this.onPointerUp}
+                  @pointercancel=${this.onPointerUp}
+                >
+                  <defs>
+                    <filter id="blur"><feGaussianBlur stdDeviation=${Math.max(4, width / 120)}></feGaussianBlur></filter>
+                  </defs>
+                  ${this.layered().map((shape) => this.renderShape(shape, this.shapes.indexOf(shape), count))}
+                  ${this.draft ? this.renderShape(this.draft, 0, 0, true) : nothing} ${this.renderSelection()}
+                </svg>`
+              : nothing
+          }
+          ${this.renderEditor()}
+        </div>
+        ${this.renderCard()}
       </div>
       <div class="live" role="status">${this.announcement}</div>
     </div>`

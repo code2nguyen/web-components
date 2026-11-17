@@ -40,9 +40,13 @@ const en = {
   shapeRedact: 'Redaction',
   /** A shape's name: `{0}` is its kind, `{1}` its position, `{2}` how many shapes there are. */
   shapeOf: (kind: string, index: number, count: number) => `${kind} ${index} of ${count}`,
+  /** A shape's name followed by one more detail (its label, its text, a review flag): `{0}` is the name so far. */
+  nameAnd: (name: string, detail: string) => `${name}: ${detail}`,
   /** Announced after an edit: `{0}` is the shape's kind. */
   added: (kind: string) => `${kind} added`,
   deleted: (kind: string) => `${kind} deleted`,
+  /** Read after a shape whose `confidence` is under the threshold: `{0}` is the confidence in percent. */
+  lowConfidence: (percent: number) => `${percent}% confidence, needs review`,
   /** The text editor's accessible name. */
   textInput: 'Annotation text',
 }

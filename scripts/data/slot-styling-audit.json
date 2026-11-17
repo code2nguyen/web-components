@@ -5090,6 +5090,13 @@
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
     },
     {
+      "tag": "c2-image-annotator",
+      "slot": "detail",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The card beside the active shape (width, padding, border, radius, surface, shadow, offset) owns the detail slot's component-side presentation; the slotted card content is the app's."
+    },
+    {
       "tag": "c2-image-compare",
       "slot": "before",
       "decision": "variables",

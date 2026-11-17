@@ -90,7 +90,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
-- **image-annotator-1** · `c2-image-annotator` · extraction review #275, pinned comments #276, example: image pins #368 · +1.4 kB on 26.1 kB · risk low
 - **core-1** · `@c2n/core` · drop zone #284 (core), sync status #384 (core)
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
 - **month-planner-1** · `c2-month-planner` · agenda view #298, change calendar #303 · +2.3 kB on 10.9 kB · risk low
