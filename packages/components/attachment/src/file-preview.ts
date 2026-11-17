@@ -395,7 +395,8 @@ export class FilePreview extends LitElement {
   }
 
   private get stage() {
-    return this.renderRoot.querySelector<HTMLElement>('.stage')
+    // Read while rendering, which a server render does with no root.
+    return isServer ? null : this.renderRoot.querySelector<HTMLElement>('.stage')
   }
 
   private async setZoom(zoom: number) {
