@@ -3,12 +3,57 @@
  * Resolves relative date bounds for date-selector documentation examples. `data-min-days` / `data-max-days` are day
  * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates.
  * `data-render-day-example="fares"` gets a `renderDay` that draws a made-up fare under each day.
+ * `data-compare-example="toggle"` wires the `c2-select` in its footer to `compare` and writes the comparison range
+ * into the footer's `output`. The French date-selector messages are registered here, as an app would.
  */
 ---
 
 <script>
   import type { DateSelector } from '@c2n/components/date-selector'
   import '@c2n/components/date-selector'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'date-selector': {
+        chooseRange: 'Choisir une période',
+        chooseDate: 'Choisir une date',
+        chooseDates: 'Choisir des dates',
+        previousMonth: 'Mois précédent',
+        nextMonth: 'Mois suivant',
+        missingRange: 'Choisissez une date de début et de fin',
+        missingDate: 'Choisissez une date',
+        missingDates: 'Choisissez au moins une date',
+        inComparison: 'Dans la période de comparaison',
+      },
+    },
+  })
+
+  /** The footer's select sets `compare`; its output shows the comparison range, which may fall outside the months shown. */
+  function setupCompareToggle(selector: DateSelector) {
+    const format = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    const parse = (date: string) => new Date(`${date}T12:00:00`)
+    const summarize = () => {
+      const output = selector.querySelector('output')
+      if (!output) return
+      output.textContent =
+        selector.compareFrom && selector.compareTo
+          ? `vs ${format.formatRange(parse(selector.compareFrom), parse(selector.compareTo))}`
+          : selector.compare
+            ? 'Pick a range to compare'
+            : 'No comparison'
+    }
+    selector.addEventListener('change', summarize)
+    // The footer select's own `change` stops at the footer, so it is heard on the select itself.
+    selector.querySelector('c2-select')?.addEventListener('change', (event) => {
+      const compare = (event.currentTarget as HTMLElement & { value?: string[] }).value?.[0]
+      // Turning the comparison off also clears the range the preset derived.
+      if (compare === 'previous-period' || compare === 'previous-year') selector.compare = compare
+      else Object.assign(selector, { compare: '', compareFrom: '', compareTo: '' })
+      void selector.updateComplete.then(summarize)
+    })
+    void selector.updateComplete.then(summarize)
+  }
 
   const initialized = new WeakSet<DateSelector>()
 
@@ -23,16 +68,19 @@
   function setup(selector: DateSelector) {
     if (initialized.has(selector)) return
     initialized.add(selector)
-    const { minDays, maxDays, renderDayExample } = selector.dataset
+    const { minDays, maxDays, renderDayExample, compareExample } = selector.dataset
     if (minDays !== undefined) selector.min = isoDaysFromToday(Number(minDays))
     if (maxDays !== undefined) selector.max = isoDaysFromToday(Number(maxDays))
     // A made-up but deterministic fare per day of the month, so the card reads like a fare calendar.
     if (renderDayExample === 'fares') selector.renderDay = ({ day, disabled }) => (disabled ? undefined : `$${80 + ((day * 37) % 90)}`)
+    if (compareExample === 'toggle') setupCompareToggle(selector)
   }
 
   function setupAll() {
     document
-      .querySelectorAll<DateSelector>('c2-date-selector[data-min-days], c2-date-selector[data-max-days], c2-date-selector[data-render-day-example]')
+      .querySelectorAll<DateSelector>(
+        'c2-date-selector[data-min-days], c2-date-selector[data-max-days], c2-date-selector[data-render-day-example], c2-date-selector[data-compare-example]',
+      )
       .forEach(setup)
   }
 

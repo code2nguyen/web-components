@@ -31,6 +31,9 @@
       <c2-date-selector months="1" disabled locale="en-US"></c2-date-selector>
       <c2-date-selector id="from-two-days-ago" months="1" locale="en-US" aria-label="From two days ago"></c2-date-selector>
       <c2-date-selector id="past-only" months="1" locale="en-US" aria-label="Past dates only"></c2-date-selector>
+      <c2-date-selector from="2026-09-14" to="2026-09-20" compare="previous-period" locale="en-US" aria-label="Report period">
+        <span slot="footer">Compared with the previous seven days</span>
+      </c2-date-selector>
     </main>
     <script type="module">
       // Local-calendar YYYY-MM-DD for today + offset days (toISOString() is UTC and can be off by one).

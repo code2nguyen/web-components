@@ -1290,6 +1290,13 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-date-selector",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's component-side presentation; its spacing, gap and border are also --c2-date-selector__footer--* variables."
+    },
+    {
       "tag": "c2-date-time-picker",
       "slot": "calendar-icon",
       "decision": "assigned-content",

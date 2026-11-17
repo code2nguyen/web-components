@@ -36,6 +36,12 @@
     marker--size: 4px,
     day-content--font-size: 10px,
     day-content--color: #71717a,
+    compare--background: #ea580c,
+    compare--height: 4px,
+    footer--margin-top: 16px,
+    footer--padding: 12px 0 0,
+    footer--border-top: 1px solid #e4e4e7,
+    footer--gap: 8px,
   )
 );
 
@@ -258,6 +264,36 @@ h2 {
     color: inherit;
   }
 
+  // The comparison range: a band along the bottom of its days, with rounded ends on its first and last day.
+  &.compare::after {
+    position: absolute;
+    right: 0;
+    bottom: 1px;
+    left: 0;
+    z-index: 1;
+    height: css.cssVar(compare--height);
+    content: '';
+    background: css.cssVar(compare--background);
+  }
+  &.compare-start::after {
+    left: 15%;
+    border-radius: 999px 0 0 999px;
+  }
+  &.compare-end::after {
+    right: 15%;
+    border-radius: 0 999px 999px 0;
+  }
+  &.compare-start.compare-end::after {
+    border-radius: 999px;
+  }
+  // renderDay content moves up above the band, and the number with it.
+  &.compare .day-content {
+    bottom: calc(#{css.cssVar(compare--height)} + 3px);
+  }
+  &.compare.has-content span {
+    padding-bottom: calc(#{css.cssVar(day-content--font-size)} * 1.2 + #{css.cssVar(compare--height)} + 1px);
+  }
+
   &:focus-visible {
     z-index: 2;
     outline: css.cssVar(focus--outline);
@@ -268,6 +304,22 @@ h2 {
   &:disabled {
     cursor: default;
     opacity: css.cssVar(day__disabled--opacity);
+  }
+}
+
+// The app's controls under the months, across every column; the grid's row gap is taken back so the margin is exact.
+.footer {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(footer--gap);
+  margin-top: calc(#{css.cssVar(footer--margin-top)} - #{css.cssVar(month-gap)});
+  padding: css.cssVar(footer--padding);
+  border-top: css.cssVar(footer--border-top);
+
+  &[hidden] {
+    display: none;
   }
 }
 

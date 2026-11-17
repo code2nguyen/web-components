@@ -226,6 +226,18 @@ test('c2-date-selector reflects end-name and submits the end of the range under 
   expect(outcome).toEqual({ attribute: 'end', data: { start: '2026-10-17', end: '2026-10-24' } })
 })
 
+test('c2-date-selector submits a comparison range under name-compare and name-compare-end', async ({ page, renderScenario }) => {
+  await renderScenario('<form></form>')
+  const data = await page.evaluate(async () => {
+    const element = document.createElement('c2-date-selector') as HTMLElement & Record<string, unknown> & { updateComplete: Promise<unknown> }
+    Object.assign(element, { name: 'period', from: '2026-10-17', to: '2026-10-23', compare: 'previous-period' })
+    document.querySelector('form')!.append(element)
+    await element.updateComplete
+    return Object.fromEntries(new FormData(document.querySelector('form')!))
+  })
+  expect(data).toEqual({ period: '2026-10-17', 'period-end': '2026-10-23', 'period-compare': '2026-10-10', 'period-compare-end': '2026-10-16' })
+})
+
 test('a multiple c2-autocomplete submits one entry per pick under the name set as a property', async ({ page, renderScenario }) => {
   await renderScenario('<form></form>')
   const outcome = await page.evaluate(async () => {

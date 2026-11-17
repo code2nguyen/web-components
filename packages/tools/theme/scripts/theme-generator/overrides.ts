@@ -370,6 +370,8 @@ export const overrides: Record<string, Override> = {
   '--c2-questionnaire__primary-action--color': onPrimary,
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
+  // The comparison band is the second series of the report it filters, so it follows the chart palette's second slot.
+  '--c2-date-selector__compare--background': { token: 'chart-series-2' },
   // The calendar's month picker floats over the grid like any popover.
   '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The date-time popup floats over the page like any popover.
