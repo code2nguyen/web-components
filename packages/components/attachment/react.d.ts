@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Attachment } from '@c2n/attachment'
 import type { AttachmentGroup } from '@c2n/attachment/attachment-group.js'
+import type { FilePreview } from '@c2n/attachment/file-preview.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -27,6 +28,9 @@ declare module 'react' {
       'c2-attachment': C2Props<Attachment>
       'c2-attachment-group': C2Props<AttachmentGroup> & {
         'aria-label'?: Attribute
+      }
+      'c2-file-preview': Omit<C2Props<FilePreview>, 'items'> & {
+        items?: FilePreview['items'] | string
       }
     }
   }

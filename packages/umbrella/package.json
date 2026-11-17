@@ -101,6 +101,10 @@
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
+    "./attachment/file-preview": {
+      "types": "./dist/attachment/file-preview.d.ts",
+      "default": "./dist/attachment/file-preview.js"
+    },
     "./audio-player": {
       "types": "./dist/audio-player.d.ts",
       "default": "./dist/audio-player.js"
