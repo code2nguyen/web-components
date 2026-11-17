@@ -1,0 +1,413 @@
+---
+import Main from '../../layouts/Main.astro'
+import { loadLab, REPOSITORY, SIZE_LABELS, SIZE_ORDER, formatDate, passSummary, repoFile } from '../../data/lab'
+import { escapeHtml, rawElement } from '../../utils/raw-element'
+
+// The component lab's overview: the latest run of every target, where the components fall short of what the specs
+// ask (the gap matrix), the findings still open, and the specs. Read from lab/ at build time (data/lab.ts).
+const base = import.meta.env.BASE_URL
+const lab = await loadLab()
+const latestRuns = [...lab.latestByTarget.values()].sort((a, b) => a.target.localeCompare(b.target))
+const builtSpecs = lab.specs.filter((spec) => spec.builds.some((build) => build.report))
+const journeysTotal = latestRuns.reduce((total, run) => total + run.summary.journeys, 0)
+const journeysPassed = latestRuns.reduce((total, run) => total + run.summary.passed, 0)
+const newFindings = lab.openFindings.filter((finding) => finding.status === 'new').length
+const specOf = (id: string | null) => lab.specs.find((spec) => spec.id === id)
+
+// Raw markup rather than JSX: `@astrojs/lit` would server-render every registered c2 tag with `defer-hydration`,
+// which nothing removes outside an island (see utils/raw-element.ts). The page script upgrades the plain tags.
+const stats = [
+  { value: `${lab.specs.length}`, label: 'Specs', description: `${builtSpecs.length} built, ${lab.specs.length - builtSpecs.length} waiting for a build` },
+  { value: `${latestRuns.length}`, label: 'Apps under test', description: 'Each one replayed by 5 personas' },
+  {
+    value: `${journeysPassed}/${journeysTotal}`,
+    label: 'Journeys passing',
+    description: 'In the latest run of every app',
+    tone: journeysPassed === journeysTotal ? 'positive' : 'negative',
+  },
+  {
+    value: `${lab.openFindings.length}`,
+    label: 'Open findings',
+    description: newFindings ? `${newFindings} new since triage` : 'All triaged',
+    tone: newFindings ? 'warning' : 'neutral',
+  },
+]
+  .map(({ value, label, description, tone }) =>
+    rawElement('c2-stat', { class: 'lab-stat', value, label, tone }, `<span slot="description">${escapeHtml(description)}</span>`),
+  )
+  .join('')
+
+const runCards = latestRuns
+  .map((run) => {
+    const spec = specOf(run.spec)
+    const title = spec ? `<a href="${base}/lab/specs/${spec.id}/">${escapeHtml(spec.title)}</a>` : escapeHtml(run.target)
+    const kind = spec ? `${SIZE_LABELS[spec.size]} · ${escapeHtml(run.direction ?? '')} direction` : 'Example app'
+    const passed = run.summary.passed === run.summary.journeys
+    const badges = [
+      rawElement('c2-badge', { tone: passed ? 'success' : 'danger' }, `${passSummary(run)} journeys`),
+      run.summary.findings.new ? rawElement('c2-badge', { tone: 'warning' }, `${run.summary.findings.new} new`) : '',
+      rawElement('c2-badge', { tone: 'neutral' }, `${run.summary.findings.known} known`),
+      run.summary.findings.flaky ? rawElement('c2-badge', { tone: 'info' }, `${run.summary.findings.flaky} flaky`) : '',
+    ].join('')
+    const commit = run.library.commit ? `<a href="${REPOSITORY}/commit/${run.library.commit}">${run.library.commit.slice(0, 8)}</a>` : 'unknown commit'
+    const change = run.change
+      ? `<p class="lab-run__change">Since the previous run: ${run.change.gone.length} gone, ${run.change.appeared.length} appeared.</p>`
+      : `<p class="lab-run__change">First recorded run.</p>`
+    return rawElement(
+      'c2-card',
+      { class: 'lab-run' },
+      `<span slot="header" class="lab-run__title">${title}</span>` +
+        `<p class="lab-run__kind">${kind} · <code>${escapeHtml(run.target)}</code></p>` +
+        `<div class="lab-run__badges">${badges}</div>` +
+        change +
+        `<p class="lab-run__meta">${rawElement('c2-relative-time', { date: run.startedAt }, formatDate(run.startedAt))} · v${escapeHtml(run.library.version)} @ ${commit} · ${run.runner.repeat}× each</p>`,
+    )
+  })
+  .join('')
+
+const gapTable = lab.gapRows.length
+  ? rawElement(
+      'c2-table',
+      {
+        class: 'lab-table',
+        'aria-label': 'Capabilities by shortfall',
+        rows: lab.gapRows,
+        'row-key': 'capability',
+        wrap: true,
+        virtual: 'never',
+        sortable: true,
+      },
+      [
+        rawElement('c2-table-column', { field: 'capability', header: 'Capability', width: 'minmax(170px, 1.2fr)' }, ''),
+        rawElement('c2-table-column', { field: 'specs', header: 'Specs', width: '90px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'met', header: 'Met', width: '80px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'workaround', header: 'Workaround', width: '136px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'handRolled', header: 'Hand-rolled', width: '136px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'failed', header: 'Failed', width: '96px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'components', header: 'Components', width: 'minmax(180px, 1.4fr)' }, ''),
+        rawElement('c2-table-column', { field: 'short', header: 'Fell short in', width: 'minmax(140px, 1fr)' }, ''),
+      ].join(''),
+    )
+  : ''
+
+const findingsByComponent = new Map<string, typeof lab.openFindings>()
+for (const finding of lab.openFindings) {
+  const key = finding.component ?? 'App or page'
+  findingsByComponent.set(key, [...(findingsByComponent.get(key) ?? []), finding])
+}
+const findingList = [...findingsByComponent]
+  .map(([component, findings]) => {
+    const page = lab.docPages.get(component)
+    const name = page ? `<a href="${base}/components/${page}/"><code>${escapeHtml(component)}</code></a>` : `<code>${escapeHtml(component)}</code>`
+    const items = findings
+      .map(
+        (finding) =>
+          `<li>${rawElement('c2-badge', { tone: finding.status === 'new' ? 'warning' : finding.severity === 'error' ? 'danger' : 'neutral' }, finding.status === 'new' ? 'New' : finding.severity === 'error' ? 'Error' : 'Warning')}` +
+          `<span class="lab-finding__text">${escapeHtml(finding.message)}</span>` +
+          `<span class="lab-finding__where">${escapeHtml(finding.kind)} · ${escapeHtml(finding.target)}</span></li>`,
+      )
+      .join('')
+    return `<section class="lab-finding"><h3>${name}</h3><ul>${items}</ul></section>`
+  })
+  .join('')
+
+const specGroups = SIZE_ORDER.map((size) => ({ size, specs: lab.specs.filter((spec) => spec.size === size) }))
+  .filter((group) => group.specs.length)
+  .map(({ size, specs }) => {
+    const cards = specs
+      .map((spec) => {
+        const built = spec.builds.filter((build) => build.report).length
+        const status = built
+          ? rawElement('c2-badge', { tone: 'success' }, `${built}/${spec.builds.length} built`)
+          : rawElement('c2-badge', { tone: 'neutral' }, 'Not built yet')
+        return rawElement(
+          'c2-card',
+          { class: 'lab-spec', href: `${base}/lab/specs/${spec.id}/` },
+          `<span slot="header" class="lab-spec__title">${escapeHtml(spec.title)}</span>` +
+            `<span class="lab-spec__meta"><code>${escapeHtml(spec.id)}</code> · ${spec.requirements.length} requirements · ${spec.tasks.length} tasks</span>` +
+            `<span class="lab-spec__status">${status}</span>`,
+        )
+      })
+      .join('')
+    return `<h3 class="lab-spec-group">${SIZE_LABELS[size]}s</h3><div class="lab-specs">${cards}</div>`
+  })
+  .join('')
+
+const unbuilt = lab.coverage.unbuilt.map((tag) => rawElement('c2-chip', { class: 'lab-chip' }, escapeHtml(tag))).join('')
+---
+
+<Main
+  title="Component lab · c2n web components"
+  description="Every c2n component is tested inside real apps built from specs, by keyboard, phone, screen-reader, dark-mode and French personas. Results of the latest runs."
+>
+  <div class="lab">
+    <header class="lab__header">
+      <h1>Component lab</h1>
+      <p>
+        The lab builds real apps from written specs using only c2n components, then tests them the way people use them: with a mouse, with the keyboard alone,
+        on a phone, in dark mode and in French, while checks read Chrome's accessibility tree, contrast, focus rings and the console. What it finds becomes
+        component fixes; where an app had to work around a component, it becomes the gap matrix below.
+      </p>
+      <p class="lab__links">
+        <a href={repoFile('lab/README.md')}>How the lab works</a>
+        <a href={repoFile('lab/specs/README.md')}>All specs</a>
+        <a href={repoFile('COMPONENT-FEEDBACK.md')}>Component feedback</a>
+      </p>
+    </header>
+
+    <div class="lab__stats"><Fragment set:html={stats} /></div>
+
+    <section>
+      <h2>Latest runs</h2>
+      <p class="lab__lead">
+        The newest recorded run of each app. A replay drives the same app against the current components, so a fix or a regression shows up here.
+      </p>
+      <div class="lab__runs"><Fragment set:html={runCards} /></div>
+    </section>
+
+    <section>
+      <h2>Where components fall short</h2>
+      <p class="lab__lead">
+        Each build reports, requirement by requirement, whether a component met it as documented, needed a workaround, or had to be written by hand. Ranked by
+        how far the components fall short (failed ×3, hand-rolled ×2, workaround ×1). {lab.coverage.built} of the {lab.coverage.required} capabilities the specs require
+        have been built so far.
+      </p>
+      <Fragment set:html={gapTable} />
+      {
+        lab.coverage.unbuilt.length > 0 && (
+          <div class="lab__unbuilt">
+            <span>Required by a spec, not built yet:</span>
+            <Fragment set:html={unbuilt} />
+          </div>
+        )
+      }
+    </section>
+
+    <section>
+      <h2>Open findings</h2>
+      <p class="lab__lead">What the latest runs still see. Known findings are triaged and recorded in the component feedback; a new one waits for triage.</p>
+      <div class="lab__findings"><Fragment set:html={findingList} /></div>
+    </section>
+
+    <section>
+      <h2>Specs</h2>
+      <p class="lab__lead">Apps are disposable; specs are what the lab keeps. A scenario is one screen, a feature one flow, an app a whole product.</p>
+      <Fragment set:html={specGroups} />
+    </section>
+  </div>
+</Main>
+
+<script>
+  // Plain tags upgraded here rather than islands, as on the changelog page.
+  import '@c2n/components/stat'
+  import '@c2n/components/card'
+  import '@c2n/components/badge'
+  import '@c2n/components/chip'
+  import '@c2n/components/relative-time'
+  import '@c2n/components/table'
+</script>
+
+<style lang="scss">
+  .lab {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px var(--site-gutter) 96px;
+
+    &__header {
+      max-width: 760px;
+      margin-bottom: 32px;
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 4vw, 2.6rem);
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--site-color-on-surface-variant);
+      }
+    }
+
+    &__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      a {
+        color: var(--site-color-primary);
+      }
+    }
+
+    section {
+      margin-top: 48px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+    }
+
+    &__lead {
+      max-width: 760px;
+      margin: 0 0 16px;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    &__unbuilt {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+</style>
+
+<!-- Raw markup (set:html) is not reached by scoped styles: these rules are global, under .lab. -->
+<style lang="scss" is:global>
+  .lab {
+    .lab__stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      gap: 12px;
+    }
+
+    .lab-stat {
+      --c2-stat--background: var(--site-color-surface);
+      --c2-stat--border: 1px solid var(--site-color-outline-variant);
+      --c2-stat--border-radius: var(--site-radius-lg);
+    }
+
+    .lab__runs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+      gap: 12px;
+    }
+
+    .lab-run,
+    .lab-spec {
+      --c2-card--background: var(--site-color-surface);
+      --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+      --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+      --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+      --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+      --c2-card--border-top-left-radius: var(--site-radius-lg);
+      --c2-card--border-top-right-radius: var(--site-radius-lg);
+      --c2-card--border-bottom-left-radius: var(--site-radius-lg);
+      --c2-card--border-bottom-right-radius: var(--site-radius-lg);
+      min-width: 0;
+    }
+
+    .lab-spec {
+      --c2-card__hover--background: var(--site-color-surface-container-1);
+      --c2-card__hover--box-shadow: none;
+    }
+
+    .lab-run__title,
+    .lab-spec__title {
+      font-weight: 600;
+      a {
+        color: inherit;
+        text-decoration: none;
+        &:hover {
+          color: var(--site-color-primary);
+        }
+      }
+    }
+
+    .lab-run p {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    .lab-run__badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .lab-run__meta {
+      font-variant-numeric: tabular-nums;
+      a {
+        color: var(--site-color-primary);
+      }
+    }
+
+    .lab-table {
+      display: block;
+      --c2-table--background: var(--site-color-surface);
+    }
+
+    .lab-chip {
+      --c2-chip__container--height: 22px;
+      --c2-chip__container--font-size: 12px;
+    }
+
+    .lab__findings {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+      gap: 12px 24px;
+    }
+
+    .lab-finding {
+      margin: 0;
+      h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+        a {
+          color: var(--site-color-primary);
+        }
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      li {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 2px 8px;
+        align-items: baseline;
+        font-size: 13px;
+      }
+    }
+
+    .lab-finding__where {
+      grid-column: 2;
+      font-size: 12px;
+      color: var(--site-color-on-surface-muted);
+    }
+
+    .lab-spec-group {
+      margin: 20px 0 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    .lab-specs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      gap: 12px;
+    }
+
+    .lab-spec__meta {
+      display: block;
+      margin: 4px 0 10px;
+      font-size: 12px;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    code {
+      font-size: 0.9em;
+    }
+  }
+</style>

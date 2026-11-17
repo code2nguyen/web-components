@@ -1,0 +1,365 @@
+---
+import { getCollection } from 'astro:content'
+import Main from '../../../layouts/Main.astro'
+import { capabilities, loadLab, OUTCOME_OPTIONS, REPOSITORY, SIZE_LABELS, formatDate, passSummary, repoFile } from '../../../data/lab'
+import { escapeHtml, rawElement } from '../../../utils/raw-element'
+
+// One spec of the component lab: its requirements with each build's outcome, the journeys of its latest run by
+// persona, and its run history. Read from lab/ at build time (data/lab.ts).
+export async function getStaticPaths() {
+  const specs = await getCollection('labSpecs')
+  return specs.map((spec) => ({ params: { specId: spec.data.id } }))
+}
+
+const base = import.meta.env.BASE_URL
+const { specId } = Astro.params
+const lab = await loadLab()
+const spec = lab.specs.find((candidate) => candidate.id === specId)!
+const builds = spec.builds
+const latest = builds.map((build) => build.latestRun).find(Boolean)
+const purpose = spec.purpose.replaceAll('`', '')
+const hasBuild = builds.some((build) => build.report)
+
+// Requirements: one outcome column per design direction, "not built" where there is no report yet.
+const requirementRows = spec.requirements.map((requirement) => {
+  const row: Record<string, string> = {
+    id: requirement.id,
+    capabilities: requirement.tags.join(', '),
+    requirement: requirement.text.replaceAll('`', ''),
+  }
+  for (const build of builds) {
+    const reportRow = build.report?.rows.get(requirement.id)
+    row[`outcome_${build.direction}`] = reportRow?.outcome ?? 'not-built'
+    if (build === builds[0]) {
+      row.components = reportRow?.components.join(', ') ?? ''
+      row.notes = reportRow?.notes ?? ''
+    }
+  }
+  return row
+})
+const hasReport = builds.some((build) => build.report)
+const requirementTable = rawElement(
+  'c2-table',
+  { class: 'lab-table', 'aria-label': 'Requirements', rows: requirementRows, 'row-key': 'id', wrap: true, virtual: 'never' },
+  [
+    rawElement('c2-table-column', { field: 'id', header: 'Req', width: '60px' }, ''),
+    rawElement('c2-table-column', { field: 'requirement', header: 'Requirement', width: 'minmax(260px, 3fr)' }, ''),
+    rawElement('c2-table-column', { field: 'capabilities', header: 'Capabilities', width: 'minmax(150px, 1fr)' }, ''),
+    ...builds.map((build) =>
+      rawElement(
+        'c2-table-column',
+        {
+          field: `outcome_${build.direction}`,
+          header: builds.length > 1 ? build.direction : 'Outcome',
+          width: '130px',
+          format: 'status',
+          options: OUTCOME_OPTIONS,
+        },
+        '',
+      ),
+    ),
+    ...(hasReport
+      ? [
+          rawElement('c2-table-column', { field: 'components', header: 'Components', width: 'minmax(140px, 1fr)' }, ''),
+          rawElement('c2-table-column', { field: 'notes', header: 'Notes', width: 'minmax(260px, 3fr)' }, ''),
+        ]
+      : []),
+  ].join(''),
+)
+
+// Journeys × personas of the latest run.
+const JOURNEY_OPTIONS = [
+  { value: 'pass', label: 'Passed', color: '#16a34a', glyph: '✓' },
+  { value: 'flaky', label: 'Flaky', color: '#d97706', glyph: '~' },
+  { value: 'fail', label: 'Failed', color: '#dc2626', glyph: '✕' },
+  { value: 'na', label: 'Not run', color: '#a1a1aa', glyph: '–' },
+]
+const journeyTable = latest
+  ? (() => {
+      const personas = latest.runner.personas
+      const rows = latest.runner.journeys.map((journey) => {
+        const row: Record<string, string> = { journey }
+        for (const persona of personas) {
+          const entry = latest.journeys.find((candidate) => candidate.journey === journey && candidate.persona === persona)
+          row[persona] = !entry ? 'na' : entry.passed === entry.runs ? 'pass' : entry.passed === 0 ? 'fail' : 'flaky'
+        }
+        return row
+      })
+      return rawElement(
+        'c2-table',
+        { class: 'lab-table', 'aria-label': 'Journeys by persona', rows, 'row-key': 'journey', virtual: 'never' },
+        [
+          rawElement('c2-table-column', { field: 'journey', header: 'Journey', width: 'minmax(200px, 2fr)' }, ''),
+          ...personas.map((persona) =>
+            rawElement('c2-table-column', { field: persona, header: persona, width: 'minmax(96px, 1fr)', format: 'status', options: JOURNEY_OPTIONS }, ''),
+          ),
+        ].join(''),
+      )
+    })()
+  : ''
+
+// Run history, newest first.
+const historyRows = [...spec.runs].reverse().map((run) => ({
+  id: run.id,
+  date: formatDate(run.startedAt),
+  mode: run.mode,
+  direction: run.direction ?? '',
+  library: `${run.library.version} @ ${(run.library.commit ?? '').slice(0, 8)}${run.library.dirty ? ' (edited)' : ''}`,
+  journeys: passSummary(run),
+  newFindings: run.summary.findings.new,
+  known: run.summary.findings.known,
+  flaky: run.summary.findings.flaky,
+  change: run.change ? `${run.change.gone.length} gone, ${run.change.appeared.length} appeared` : 'first run',
+}))
+const historyTable = historyRows.length
+  ? rawElement(
+      'c2-table',
+      { class: 'lab-table', 'aria-label': 'Run history', rows: historyRows, 'row-key': 'id', virtual: 'never' },
+      [
+        rawElement('c2-table-column', { field: 'date', header: 'Date', width: '120px' }, ''),
+        rawElement('c2-table-column', { field: 'mode', header: 'Mode', width: '90px' }, ''),
+        ...(builds.length > 1 ? [rawElement('c2-table-column', { field: 'direction', header: 'Direction', width: '120px' }, '')] : []),
+        rawElement('c2-table-column', { field: 'library', header: 'Library', width: 'minmax(150px, 1fr)' }, ''),
+        rawElement('c2-table-column', { field: 'journeys', header: 'Journeys', width: '100px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'newFindings', header: 'New', width: '70px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'known', header: 'Known', width: '80px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'flaky', header: 'Flaky', width: '70px', align: 'end' }, ''),
+        rawElement('c2-table-column', { field: 'change', header: 'Since previous', width: 'minmax(150px, 1fr)' }, ''),
+      ].join(''),
+    )
+  : ''
+
+const focus = spec.focus
+  .map((tag) => {
+    const page = lab.docPages.get(tag)
+    const chip = rawElement('c2-chip', { class: 'lab-chip' }, escapeHtml(tag))
+    return page ? `<a class="lab-chip-link" href="${base}/components/${page}/">${chip}</a>` : chip
+  })
+  .join('')
+
+const buildSummary = builds
+  .map((build) => {
+    const status = build.report ? rawElement('c2-badge', { tone: 'success' }, 'Built') : rawElement('c2-badge', { tone: 'neutral' }, 'Not built yet')
+    const counts = build.report
+      ? (() => {
+          const outcomes = [...build.report.rows.values()].map((row) => row.outcome)
+          return OUTCOME_OPTIONS.filter((option) => outcomes.includes(option.value))
+            .map((option) => `${outcomes.filter((outcome) => outcome === option.value).length} ${option.label.toLowerCase()}`)
+            .join(' · ')
+        })()
+      : 'Waiting for a lab session to build it.'
+    const run = build.latestRun ? ` · latest run ${passSummary(build.latestRun)} journeys, ${formatDate(build.latestRun.startedAt)}` : ''
+    const report = build.report ? ` · <a href="${repoFile(`lab/reports/${build.report.id}.md`)}">build report</a>` : ''
+    return `<li><strong>${escapeHtml(build.direction)}</strong> ${status} <span>${escapeHtml(counts)}${escapeHtml(run)}</span>${report}</li>`
+  })
+  .join('')
+---
+
+<Main title={`${spec.title} · Component lab · c2n web components`} description={spec.purpose.slice(0, 160)}>
+  <div class="lab">
+    <p class="lab__back"><a href={`${base}/lab/`}>← Component lab</a></p>
+    <header class="lab__header">
+      <p class="lab__kind">{SIZE_LABELS[spec.size]} spec · <code>{spec.id}</code></p>
+      <h1>{spec.title}</h1>
+      <p>{purpose}</p>
+      {
+        spec.focus.length > 0 && (
+          <div class="lab__focus">
+            <>
+              <span>Focus:</span>
+              <Fragment set:html={focus} />
+            </>
+          </div>
+        )
+      }
+      <p class="lab__links">
+        <a href={repoFile(spec.path)}>Read the spec</a>
+        {hasBuild && <a href={`${REPOSITORY}/tree/develop/lab/apps/${spec.id}`}>Build source</a>}
+      </p>
+    </header>
+
+    <section>
+      <h2>Builds</h2>
+      <ul class="lab__builds"><Fragment set:html={buildSummary} /></ul>
+    </section>
+
+    <section>
+      <h2>Requirements</h2>
+      <p class="lab__lead">
+        Each requirement carries the capabilities it needs. A build's report says how it was met: by a component as documented, with a workaround, or by hand.
+      </p>
+      <Fragment set:html={requirementTable} />
+    </section>
+
+    {
+      latest && (
+        <section>
+          <h2>Journeys in the latest run</h2>
+          <p class="lab__lead">
+            One journey per task of the spec, run {latest.runner.repeat} times by each persona on v{latest.library.version}, {formatDate(latest.startedAt)}.
+          </p>
+          <Fragment set:html={journeyTable} />
+        </section>
+      )
+    }
+
+    {
+      historyRows.length > 0 && (
+        <section>
+          <h2>Run history</h2>
+          <Fragment set:html={historyTable} />
+        </section>
+      )
+    }
+
+    <section>
+      <h2>Tasks</h2>
+      <ol class="lab__tasks">
+        {
+          spec.tasks.map((task) => (
+            <li>
+              <strong>{task.id}</strong> {task.title}
+              {task.requirements.length > 0 && <span class="lab__task-reqs"> · {task.requirements.join(', ')}</span>}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <p class="lab__note">
+      Capabilities are the lab's shared vocabulary ({capabilities.size} in all), so outcomes from every spec add up in the overview's gap matrix.
+    </p>
+  </div>
+</Main>
+
+<script>
+  import '@c2n/components/card'
+  import '@c2n/components/badge'
+  import '@c2n/components/chip'
+  import '@c2n/components/table'
+</script>
+
+<style lang="scss">
+  .lab {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px var(--site-gutter) 96px;
+
+    &__back {
+      margin: 0 0 16px;
+      font-size: 14px;
+      a {
+        color: var(--site-color-primary);
+        text-decoration: none;
+      }
+    }
+
+    &__kind {
+      margin: 0 0 4px;
+      font-size: 13px;
+      color: var(--site-color-on-surface-muted);
+    }
+
+    &__header {
+      max-width: 800px;
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--site-color-on-surface-variant);
+      }
+    }
+
+    &__focus {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    &__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      a {
+        color: var(--site-color-primary);
+      }
+    }
+
+    section {
+      margin-top: 40px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+    }
+
+    &__lead {
+      max-width: 760px;
+      margin: 0 0 14px;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    &__builds {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    &__tasks {
+      margin: 0;
+      padding-left: 20px;
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    &__task-reqs {
+      color: var(--site-color-on-surface-muted);
+    }
+
+    &__note {
+      margin-top: 40px;
+      font-size: 13px;
+      color: var(--site-color-on-surface-muted);
+    }
+  }
+</style>
+
+<!-- Raw markup (set:html) is not reached by scoped styles: these rules are global, under .lab. -->
+<style lang="scss" is:global>
+  .lab {
+    .lab-table {
+      display: block;
+      --c2-table--background: var(--site-color-surface);
+    }
+
+    .lab__builds {
+      span {
+        color: var(--site-color-on-surface-variant);
+      }
+      a {
+        color: var(--site-color-primary);
+      }
+    }
+
+    .lab-chip {
+      --c2-chip__container--height: 22px;
+      --c2-chip__container--font-size: 12px;
+    }
+
+    .lab-chip-link {
+      text-decoration: none;
+    }
+  }
+</style>
