@@ -1,0 +1,163 @@
+---
+title: 'Histogram chart gallery'
+description: 'Latency, order values, exam scores and build times binned into histograms, with density and cumulative lines, percentile markers, several series and a live feed.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import HistogramExamplesRuntime from '../../components/HistogramExamplesRuntime.astro'
+
+import { HistogramChart } from '@c2n/components/chart/histogram-chart'
+import { ChartSeries } from '@c2n/components/chart/chart-series'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-histogram-chart data="[302,326,275,319,351,323,386,251,304,261,257,290,312,323,328,423,347,212,311,266,272,372,288,193,317,284,235,249,266,299,277,304,401,256,256,286,360,261,379,228,243,297,253,266,325,340,306,285,374,322,287,367,250,309,336,299,268,319,270,267,244,372,270,364,321,286,337,315,307,224,304,349,327,355,382,323,409,217,287,161,345,305,393,280,189,370,226,230,290,335,272,310,197,395,296,307,332,309,311,249,294,324,357,293,305,319,331,311,286,272,362,316,301,491,349,347,308,244,363,295,303,356,356,313,301,415,332,244,341,308,302,338,313,410,311,314,364,269,356,297,365,253,323,212,276,301,327,409,401,226,258,369,324,225,327,238,253,231,286,424,826,459,875,842,582,455,725,466,865,582,457,472,571,551,615,765,480,450,757,452]">
+  <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Bin width and range
+<style>
+  .histogram-range { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #0d9488; }
+</style>
+<c2-histogram-chart class="histogram-range" bin-width="10" bin-start="30" bin-end="100" data="[47,75,74,84,67,89,95,65,68,83,86,71,85,53,83,77,82,77,79,66,88,46,74,64,95,58,73,71,81,71,58,70,85,80,63,56,56,70,69,67,65,74,87,83,66,81,68,87,84,83,98,84,82,88,59,67,67,82,72,56,62,69,66,66,54,73,56,67,64,68,89,66,66,41,61,74,68,81,68,81,75,84,68,82,66,62,85,55,60,91,73,76,74,71,95,72,89,71,63,68,72,100,64,77,53,78,70,76,72,66,72,71,84,70,70,56,82,69,60,86]">
+  <c2-chart-series field="value" label="Exam score"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Density curve
+<style>
+  .histogram-density { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: light-dark(#bfdbfe, #1e3a5f); --c2-chart__overlay--color: #2563eb; --c2-chart__overlay--width: 2.5px; }
+</style>
+<c2-histogram-chart class="histogram-density" bin-count="16" overlay="density" data="[140.78,80.91,57.26,46.61,34.58,43.57,88.07,21.44,62.13,39.1,54.25,22.43,14.02,77.15,23.61,48.41,57.25,11.7,25.46,25.56,36.3,55.24,24.77,35.0,36.01,20.51,56.1,25.76,9.17,73.65,34.34,54.65,43.66,52.17,66.94,40.87,41.5,8.66,15.27,28.97,42.83,112.45,12.97,70.07,70.75,29.34,28.98,23.61,31.28,55.6,33.63,19.13,58.76,42.0,42.2,21.77,23.68,53.33,65.86,37.61,30.05,74.39,44.02,58.65,36.7,68.71,58.87,26.51,60.83,30.41,24.81,20.77,33.85,17.36,78.49,13.83,64.01,140.8,40.37,43.26,99.4,43.75,60.09,45.1,74.51,36.45,41.39,45.16,36.92,86.61,41.16,35.72,10.98,130.73,26.8,40.54,19.81,92.06,34.07,64.25,54.99,78.34,23.47,22.85,20.04,156.78,36.57,27.76,23.49,186.81,12.5,25.05,19.11,42.88,100.58,22.95,19.0,40.24,22.04,25.85,39.9,43.79,23.56,36.5,19.08,32.54,29.41,28.63,99.46,33.55,23.65,75.07,94.16,16.75,46.32,27.17,24.08,33.47,42.64,23.35,100.82,63.73,26.14,39.08,56.04,35.49,89.48,59.99,45.43,28.87]">
+  <c2-chart-series field="value" label="Order value ($)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Cumulative share
+<style>
+  .histogram-cumulative { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #a78bfa; --c2-chart__overlay--color: #6d28d9; }
+</style>
+<c2-histogram-chart class="histogram-cumulative" bin-width="5" overlay="cumulative" data="[8.9,23.7,15.9,8.1,32.1,8.2,13.6,9.7,18.4,7.0,14.7,45.1,13.4,30.6,42.8,11.2,28.2,66.1,20.0,15.0,24.8,8.0,8.6,8.7,26.2,8.3,29.1,11.6,19.5,38.8,34.0,14.9,14.7,15.5,18.6,37.7,14.6,6.1,7.7,20.4,4.6,30.1,35.3,0.8,19.8,7.3,42.6,22.4,45.1,26.7,34.4,2.5,11.1,4.4,16.9,6.1,6.0,11.8,6.9,39.1,17.7,8.2,20.4,14.2,26.6,20.6,52.9,12.4,30.7,15.4,36.6,13.4,15.0,14.1,25.2,16.7,27.8,24.0,53.0,40.7,6.1,8.0,25.0,15.8,20.2,8.1,14.6,22.4,18.4,25.2,6.9,16.2,7.1,12.5,44.7,23.2,10.2,17.3,8.0,10.6,7.9,20.3,17.3,34.1,8.4,34.9,5.7,7.3,4.9,30.0,27.1,7.7,19.8,24.4,28.0,1.1,28.8,31.8,4.5,16.4,22.3,19.4,20.6,23.6,12.0,14.3,11.6,9.8,14.8,34.1,10.7,17.6,6.6,28.4,5.1,7.6,10.3,22.6,11.4,11.3]">
+  <c2-chart-series field="value" label="Build time (s)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Percentile markers
+<style>
+  .histogram-percentiles { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #f97316; --c2-chart__percentile--color: #dc2626; --c2-chart__percentile--width: 1.5px; }
+</style>
+<c2-histogram-chart class="histogram-percentiles" bin-width="50" percentiles="[50, 90, 99]" data="[302,326,275,319,351,323,386,251,304,261,257,290,312,323,328,423,347,212,311,266,272,372,288,193,317,284,235,249,266,299,277,304,401,256,256,286,360,261,379,228,243,297,253,266,325,340,306,285,374,322,287,367,250,309,336,299,268,319,270,267,244,372,270,364,321,286,337,315,307,224,304,349,327,355,382,323,409,217,287,161,345,305,393,280,189,370,226,230,290,335,272,310,197,395,296,307,332,309,311,249,294,324,357,293,305,319,331,311,286,272,362,316,301,491,349,347,308,244,363,295,303,356,356,313,301,415,332,244,341,308,302,338,313,410,311,314,364,269,356,297,365,253,323,212,276,301,327,409,401,226,258,369,324,225,327,238,253,231,286,424,826,459,875,842,582,455,725,466,865,582,457,472,571,551,615,765,480,450,757,452]">
+  <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Two series side by side
+<style>
+  .histogram-ab { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #64748b; --c2-chart__series-2--color: #0ea5e9; }
+</style>
+<c2-histogram-chart class="histogram-ab" bin-width="4" legend="top" percentiles="[50]" data='[{"control":[48,42,42,34,28,43,33,46,40,44,39,45,47,43,47,47,41,32,46,38,36,31,31,50,53,50,54,31,47,34,33,46,48,37,32,33,41,47,54,45,36,35,42,46,30,44,38,47,32,48,51,50,51,43,43,35,42,37,46,46,41,51,34,39,52,40,46,27,51,38,38,48,42,31,50,36,40,38,39,39,40,39,57,44,45,38,53,45,42,39],"variant":[56,39,46,48,53,52,41,55,48,47,52,49,48,48,56,51,52,46,59,52,46,58,41,46,56,48,49,48,51,54,55,46,47,37,47,54,51,59,49,53,57,43,60,41,49,38,49,44,58,37,54,53,55,58,57,45,55,46,46,49,47,47,58,51,38,45,47,67,53,47,54,35,61,48,44,57,45,43,56,64,48,50,50,54,48,52,45,50,57,40]}]'>
+  <c2-chart-series field="control" label="Control"></c2-chart-series>
+  <c2-chart-series field="variant" label="Variant"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Stacked series
+<style>
+  .histogram-stacked { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #16a34a; --c2-chart__series-2--color: #facc15; --c2-chart__bin--gap: 2px; }
+</style>
+<c2-histogram-chart class="histogram-stacked" bin-width="4" stack="normal" legend="bottom" data='[{"control":[48,42,42,34,28,43,33,46,40,44,39,45,47,43,47,47,41,32,46,38,36,31,31,50,53,50,54,31,47,34,33,46,48,37,32,33,41,47,54,45,36,35,42,46,30,44,38,47,32,48,51,50,51,43,43,35,42,37,46,46,41,51,34,39,52,40,46,27,51,38,38,48,42,31,50,36,40,38,39,39,40,39,57,44,45,38,53,45,42,39],"variant":[56,39,46,48,53,52,41,55,48,47,52,49,48,48,56,51,52,46,59,52,46,58,41,46,56,48,49,48,51,54,55,46,47,37,47,54,51,59,49,53,57,43,60,41,49,38,49,44,58,37,54,53,55,58,57,45,55,46,46,49,47,47,58,51,38,45,47,67,53,47,54,35,61,48,44,57,45,43,56,64,48,50,50,54,48,52,45,50,57,40]}]'>
+  <c2-chart-series field="control" label="Control"></c2-chart-series>
+  <c2-chart-series field="variant" label="Variant"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=One row per sample
+<style>
+  .histogram-rows { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #db2777; }
+</style>
+<c2-histogram-chart class="histogram-rows" bin-width="25" value-labels data='[{"ms":191},{"ms":130},{"ms":210},{"ms":105},{"ms":197},{"ms":176},{"ms":146},{"ms":207},{"ms":162},{"ms":258},{"ms":108},{"ms":237},{"ms":219},{"ms":199},{"ms":131},{"ms":129},{"ms":95},{"ms":189},{"ms":169},{"ms":216},{"ms":189},{"ms":204},{"ms":115},{"ms":186},{"ms":196},{"ms":223},{"ms":76},{"ms":227},{"ms":107},{"ms":183},{"ms":188},{"ms":265},{"ms":203},{"ms":183},{"ms":147},{"ms":143},{"ms":125},{"ms":171},{"ms":146},{"ms":228}]'>
+  <c2-chart-series field="ms" label="Query time (ms)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Horizontal
+<style>
+  .histogram-horizontal { width: 100%; --c2-chart--height: 320px; --c2-chart__series-1--color: #0891b2; --c2-chart__bar--border-radius: 0.2; }
+</style>
+<c2-histogram-chart class="histogram-horizontal" orientation="horizontal" bin-width="10" data="[47,75,74,84,67,89,95,65,68,83,86,71,85,53,83,77,82,77,79,66,88,46,74,64,95,58,73,71,81,71,58,70,85,80,63,56,56,70,69,67,65,74,87,83,66,81,68,87,84,83,98,84,82,88,59,67,67,82,72,56,62,69,66,66,54,73,56,67,64,68,89,66,66,41,61,74,68,81,68,81,75,84,68,82,66,62,85,55,60,91,73,76,74,71,95,72,89,71,63,68,72,100,64,77,53,78,70,76,72,66,72,71,84,70,70,56,82,69,60,86]">
+  <c2-chart-series field="value" label="Exam score"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Joined bars
+<style>
+  .histogram-joined {
+    width: 100%;
+    --c2-chart--height: 300px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart__grid--color: transparent;
+    --c2-chart__bin--gap: 0;
+    --c2-chart__series-1--color: #7c3aed;
+    --c2-chart__overlay--color: #f59e0b;
+  }
+</style>
+<c2-histogram-chart class="histogram-joined" bin-count="24" overlay="density" data="[302,326,275,319,351,323,386,251,304,261,257,290,312,323,328,423,347,212,311,266,272,372,288,193,317,284,235,249,266,299,277,304,401,256,256,286,360,261,379,228,243,297,253,266,325,340,306,285,374,322,287,367,250,309,336,299,268,319,270,267,244,372,270,364,321,286,337,315,307,224,304,349,327,355,382,323,409,217,287,161,345,305,393,280,189,370,226,230,290,335,272,310,197,395,296,307,332,309,311,249,294,324,357,293,305,319,331,311,286,272,362,316,301,491,349,347,308,244,363,295,303,356,356,313,301,415,332,244,341,308,302,338,313,410,311,314,364,269,356,297,365,253,323,212,276,301,327,409,401,226,258,369,324,225,327,238,253,231,286,424,826,459,875,842,582,455,725,466,865,582,457,472,571,551,615,765,480,450,757,452]">
+  <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .histogram-fr { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #2563eb; }
+</style>
+<div lang="fr">
+  <c2-histogram-chart class="histogram-fr" bin-width="50" percentiles="[50, 90]" data="[242,344,289,254,307,198,320,299,271,315,331,354,305,272,330,198,391,281,322,385,261,280,313,252,361,204,276,318,313,271,382,377,303,343,231,355,316,345,339,317,298,222,205,231,344,309,266,261,339,294,386,278,242,182,254,320,217,335,334,230]">
+    <c2-chart-series field="value" label="Latence (ms)"></c2-chart-series>
+  </c2-histogram-chart>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Live data source
+<style>
+  .histogram-live { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #0d9488; }
+</style>
+<c2-histogram-chart class="histogram-live" data-histogram-example="source" bin-width="25" max-points="400" percentiles="[50, 95]" animation="none">
+  <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+</c2-histogram-chart>
+```
+
+</GalleryGrid>
+
+<HistogramExamplesRuntime />
+
+The French card's text comes from translations the app adds; the live card's samples from a data source whose first
+window arrives after a short delay and which then pushes one request every half second:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'histogram-chart': {
+      bin: 'Classe',
+      range: 'de {0} à {1}',
+      summary: 'Histogramme de {0}, {1} classes',
+      summaryPercentiles: '{0}. {1} : {2}',
+      percentileValue: '{0} : {1}',
+    },
+  },
+})
+
+chart.dataSource = {
+  getWindow: async () => ({ data: await fetchLatencies() }),
+  // Each pushed point adds one sample per series; `max-points` keeps the latest 400.
+  subscribe: (push) => onRequest((ms) => push(Date.now(), [ms])),
+}
+```

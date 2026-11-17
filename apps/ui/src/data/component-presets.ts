@@ -336,6 +336,36 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-histogram-chart': {
+    html: `<c2-histogram-chart style="width:420px;height:220px" bin-width="50" percentiles="[50, 90]" data="[242,344,289,254,307,198,320,299,271,315,331,354,305,272,330,198,391,281,322,385,261,280,313,252,361,204,276,318,313,271,382,377,303,343,231,355,316,345,339,317,298,222,205,231,344,309,266,261,339,294,386,278,242,182,254,320,217,335,334,230]"><c2-chart-series field="value" label="Latency (ms)"></c2-chart-series></c2-histogram-chart>`,
+    presets: [
+      {
+        name: 'Density',
+        description: 'Pale bars under a strong density curve, for the shape of a distribution at a glance.',
+        css: { '--c2-chart__series-1--color': '#93c5fd', '--c2-chart__overlay--color': '#1d4ed8', '--c2-chart__overlay--width': '2.5px' },
+        attributes: { overlay: 'density' },
+      },
+      {
+        name: 'Solid block',
+        description: 'Joined bars with no grid or frame, so the histogram reads as one silhouette.',
+        css: {
+          '--c2-chart--border-top': 'none',
+          '--c2-chart--border-right': 'none',
+          '--c2-chart--border-bottom': 'none',
+          '--c2-chart--border-left': 'none',
+          '--c2-chart__grid--color': 'transparent',
+          '--c2-chart__bin--gap': '0',
+          '--c2-chart__series-1--color': '#7c3aed',
+        },
+      },
+      {
+        name: 'SLO view',
+        description: 'Red percentile markers and the cumulative share, for checking a latency target.',
+        css: { '--c2-chart__percentile--color': '#dc2626', '--c2-chart__percentile--width': '1.5px', '--c2-chart__overlay--color': '#0f766e' },
+        attributes: { overlay: 'cumulative', percentiles: '[50, 95, 99]' },
+      },
+    ],
+  },
   'c2-pie-chart': {
     html: `<c2-pie-chart style="width:420px;height:240px" label-field="channel" legend="end" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
     presets: [
