@@ -5,6 +5,9 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-text-field,
   $theme: (
+    width: null,
+    min-width: null,
+    max-width: null,
     min-height: 36px,
     gap: 8px,
 
@@ -89,6 +92,9 @@
 
 :host {
   display: inline-flex;
+  width: css.cssVar(width);
+  min-width: css.cssVar(min-width);
+  max-width: css.cssVar(max-width);
   flex-direction: column;
   gap: css.cssVar(supporting-text--gap);
   vertical-align: middle;

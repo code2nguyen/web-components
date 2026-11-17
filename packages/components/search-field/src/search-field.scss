@@ -5,6 +5,9 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-search-field,
   $theme: (
+    width: null,
+    min-width: null,
+    max-width: null,
     min-height: 36px,
     padding: 6px 10px,
     gap: 8px,
@@ -64,6 +67,9 @@
 
 :host {
   display: inline-block;
+  width: css.cssVar(width);
+  min-width: css.cssVar(min-width);
+  max-width: css.cssVar(max-width);
   vertical-align: middle;
 }
 
