@@ -1,6 +1,10 @@
 import '../src/date-selector'
 import type { DateRangeChangeDetail } from '../src/date-selector'
 import './translations'
+import { addTranslations } from '@c2n/core/localize.js'
+
+// Lets a test add a language after the first render, as an app loading its translations lazily does.
+Object.assign(window, { addTranslations })
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -45,9 +49,21 @@ if (scenario === 'footer') {
   select.type = 'button'
   select.slot = 'footer'
   select.textContent = 'Compare to'
-  subject.append(select)
+  const toggle = document.createElement('label')
+  toggle.slot = 'footer'
+  const checkbox = document.createElement('input')
+  checkbox.type = 'checkbox'
+  toggle.append(checkbox, ' Compare')
+  subject.append(select, toggle)
+  // A control in the footer reports its own change; the selector's listeners never hear it.
+  toggle.querySelector('input')!.addEventListener('change', () => (output.value = 'footer change'))
 }
-if (scenario === 'compare-lang') main.setAttribute('lang', 'fr')
+if (scenario === 'compare-lang') {
+  // No `locale`: the built-in text follows the nearest `lang`, as the dates follow the document's.
+  subject.locale = ''
+  main.setAttribute('lang', 'fr')
+}
+if (scenario === 'no-locale') subject.locale = ''
 subject.addEventListener('change', (event) => {
   const { from, to, value, compareFrom, compareTo } = (event as CustomEvent<DateRangeChangeDetail>).detail
   output.value = value === undefined ? `${from}/${to}` : `value:${value}`

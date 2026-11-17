@@ -43,12 +43,10 @@
             ? 'Pick a range to compare'
             : 'No comparison'
     }
-    // The footer select's `change` bubbles through the selector, beside the selector's own: tell them apart by target.
-    selector.addEventListener('change', (event) => {
-      const target = event.target as HTMLElement & { value?: string[] }
-      if (target === selector) return summarize()
-      if (target.localName !== 'c2-select') return
-      const compare = target.value?.[0]
+    selector.addEventListener('change', summarize)
+    // The footer select's own `change` stops at the footer, so it is heard on the select itself.
+    selector.querySelector('c2-select')?.addEventListener('change', (event) => {
+      const compare = (event.currentTarget as HTMLElement & { value?: string[] }).value?.[0]
       // Turning the comparison off also clears the range the preset derived.
       if (compare === 'previous-period' || compare === 'previous-year') selector.compare = compare
       else Object.assign(selector, { compare: '', compareFrom: '', compareTo: '' })

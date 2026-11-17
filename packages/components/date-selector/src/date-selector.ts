@@ -96,6 +96,13 @@ function shiftMonths(date: Date, amount: number): Date {
   return new Date(year, month, Math.min(date.getDate(), new Date(year, month + 1, 0).getDate()), 12)
 }
 
+/**
+ * Keeps a footer control's own `input`/`change` inside the selector, so the selector's events are always its own: a
+ * `change` listener on it gets a `DateRangeChangeDetail`, and an enclosing field or form binding is not dirtied by a
+ * "Compare to" select. Listeners on the control itself still run.
+ */
+const stopPropagation = (event: Event) => event.stopPropagation()
+
 /** The pair after a click on `value`: a first click starts a range, a later date completes it, any other click restarts it. */
 function nextRange(from: string, to: string, value: string): [string, string] {
   return !from || to || value <= from ? [value, ''] : [from, value]
@@ -122,8 +129,8 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  *
  * @tag c2-date-selector
  * @slot footer - Row under the months for the app's controls: a "Compare to" select, presets, Apply. Hidden when empty, and
- * inert while the selector is disabled. A control there fires its own `input`/`change` through the selector: tell them
- * apart by `event.target`.
+ * inert while the selector is disabled. A control's own `input`/`change` stop at the footer, so the selector's events
+ * stay its own: listen on the control itself.
  * @event {Event} input - Fired after either endpoint changes, with `from` and `to` already updated.
  * @event {CustomEvent<DateRangeChangeDetail>} change - Fired with `input`; `detail` contains the ISO `from` and `to` values.
  * @cssproperty {color} [--c2-date-selector--background=#ffffff]
@@ -183,14 +190,13 @@ export class DateSelector extends LitElement {
   private defaultCompare: DateSelectorCompare = ''
   private defaultCompareFrom = ''
   private defaultCompareTo = ''
-  private validityLocale = ''
   private markedDates = new Set<string>()
   @state() private disabledByForm = false
   @state() private visibleMonth = beginningOfMonth(new Date())
   @state() private focusDate = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
-  private readonly msg = new LocalizeController(this, dateSelectorMessages)
+  private readonly msg = new LocalizeController(this, dateSelectorMessages, () => this.locale)
   private readonly slotPresence = new SlotPresenceController(this, ['footer'])
   @queryAll('.day:not(:disabled)') private readonly dayButtons!: NodeListOf<HTMLButtonElement>
 
@@ -202,7 +208,10 @@ export class DateSelector extends LitElement {
   @property({ type: String }) min = ''
   /** Latest selectable date as `YYYY-MM-DD`. */
   @property({ type: String }) max = ''
-  /** Locale used for month, weekday and accessible date labels. Defaults to the document language. */
+  /**
+   * Locale used for month, weekday and accessible date labels, and the language of the built-in text. Defaults to the
+   * document language for dates and to the nearest `lang` for the text.
+   */
   @property({ type: String }) locale = ''
   /** First day of each calendar week. */
   @property({ attribute: 'week-start', reflect: true }) weekStart: DateSelectorWeekStart = 'monday'
@@ -221,9 +230,12 @@ export class DateSelector extends LitElement {
    * Start of the comparison range as `YYYY-MM-DD`, drawn as a band under its days in `range` mode. Derived from the
    * range while `compare` is `previous-period` or `previous-year`, which then wins over a value set here.
    */
-  @property({ attribute: 'compare-from', reflect: true }) compareFrom = ''
-  /** End of the comparison range as `YYYY-MM-DD`; empty while it is incomplete. */
-  @property({ attribute: 'compare-to', reflect: true }) compareTo = ''
+  @property({ attribute: 'compare-from' }) compareFrom = ''
+  /**
+   * End of the comparison range as `YYYY-MM-DD`; empty while it is incomplete. Neither end is reflected: a preset derives
+   * them as the element upgrades, which would write attributes a server render never had.
+   */
+  @property({ attribute: 'compare-to' }) compareTo = ''
   /**
    * Derives the comparison range from the range: `previous-period` (as many days, ending the day before `from`) or
    * `previous-year` (the same dates a year earlier). `custom`, or no value, leaves `compare-from`/`compare-to` as set;
@@ -274,8 +286,6 @@ export class DateSelector extends LitElement {
     this.compare = this.defaultCompare
     this.compareFrom = this.defaultCompareFrom
     this.compareTo = this.defaultCompareTo
-    // A preset derived its range after the defaults were captured: derive it again from the restored range.
-    this.deriveCompare()
     this.visibleMonth = beginningOfMonth(fromIso(this.isRange ? this.from : (this.selectedDates[0] ?? '')) ?? new Date())
   }
 
@@ -285,14 +295,16 @@ export class DateSelector extends LitElement {
 
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state !== 'string') return
-    // A range state always holds a `/` (`from/`, `from/to`, then `/compareFrom/compareTo`); a `value` state never does.
+    // A range state always holds a `/` (`from/`, `from/to`, then `/compareFrom/compareTo/compare`); a `value` state never does.
     if (!state.includes('/')) {
       this.value = state
       return
     }
-    const [from, to = '', compareFrom = '', compareTo = ''] = state.split('/')
+    const [from, to = '', compareFrom = '', compareTo = '', compare] = state.split('/')
     this.from = from
     this.to = to
+    // A comparison range picked by hand turned the preset to `custom`: restore that too, or the preset derives over it.
+    if (compare !== undefined) this.compare = compare as DateSelectorCompare
     this.compareFrom = compareFrom
     this.compareTo = compareTo
   }
@@ -330,8 +342,8 @@ export class DateSelector extends LitElement {
       changed.has('endName') ||
       changed.has('required') ||
       changed.has('disabled') ||
-      // The validation message is translated: a new language writes it again.
-      this.msg.locale !== this.validityLocale
+      // The validation message is translated: a new language, or translations added later, write it again.
+      (!this.internals.validity.valid && this.internals.validationMessage !== this.missingMessage())
     )
       this.syncFormState()
   }
@@ -386,8 +398,11 @@ export class DateSelector extends LitElement {
     if (value !== this.value) this.value = value
   }
 
+  private missingMessage() {
+    return this.msg.t(missingMessages[this.isRange ? 'range' : this.mode])
+  }
+
   private syncFormState() {
-    this.validityLocale = this.msg.locale
     if (!this.isRange) {
       const dates = this.selectedDates
       if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null)
@@ -396,7 +411,7 @@ export class DateSelector extends LitElement {
         for (const date of dates) data.append(this.name, date)
         this.internals.setFormValue(data, this.value)
       }
-      if (this.required && dates.length === 0) this.internals.setValidity({ valueMissing: true }, this.msg.t(missingMessages[this.mode]))
+      if (this.required && dates.length === 0) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
       else this.internals.setValidity({})
       return
     }
@@ -410,11 +425,11 @@ export class DateSelector extends LitElement {
       if (compared) {
         data.append(`${this.name}-compare`, this.compareFrom)
         data.append(`${this.name}-compare-end`, this.compareTo)
-        state += `/${this.compareFrom}/${this.compareTo}`
+        state += `/${this.compareFrom}/${this.compareTo}/${this.compare}`
       }
       this.internals.setFormValue(data, state)
     } else this.internals.setFormValue(this.from, `${this.from}/`)
-    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, this.msg.t(missingMessages.range))
+    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
     else this.internals.setValidity({})
   }
 
@@ -595,7 +610,14 @@ export class DateSelector extends LitElement {
       >
         ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, anchor))}
         ${!selection && this.compareFrom ? html`<span id="compare-note" hidden>${this.msg.t('inComparison')}</span>` : nothing}
-        <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')} ?inert=${this.effectiveDisabled}>
+        <div
+          class="footer"
+          part="footer"
+          ?hidden=${this.slotPresence.state('footer') !== 'present'}
+          ?inert=${this.effectiveDisabled}
+          @input=${stopPropagation}
+          @change=${stopPropagation}
+        >
           <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
       </div>

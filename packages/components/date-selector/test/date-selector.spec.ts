@@ -194,8 +194,8 @@ test('previous-period draws the comparison band before the range and follows it'
   await scenario('compare-period')
   const selector = page.locator('c2-date-selector')
   // Six days, September 10 to 15, compare with the six days before: September 4 to 9.
-  await expect(selector).toHaveAttribute('compare-from', '2026-09-04')
-  await expect(selector).toHaveAttribute('compare-to', '2026-09-09')
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-04')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-09')
   await expect(page.locator('c2-date-selector .day.compare')).toHaveCount(6)
   await expect(page.getByRole('gridcell', { name: /September 4, 2026/ })).toHaveClass(/compare-start/)
   await expect(page.getByRole('gridcell', { name: /September 9, 2026/ })).toHaveClass(/compare-end/)
@@ -211,16 +211,16 @@ test('previous-period draws the comparison band before the range and follows it'
   await expect(selector).toHaveJSProperty('compareFrom', '')
   await expect(page.getByRole('status')).toHaveText('2026-09-20/ vs /')
   await page.getByRole('gridcell', { name: /September 22, 2026/ }).click()
-  await expect(selector).toHaveAttribute('compare-from', '2026-09-17')
-  await expect(selector).toHaveAttribute('compare-to', '2026-09-19')
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-17')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-19')
   await expect(page.getByRole('status')).toHaveText('2026-09-20/2026-09-22 vs 2026-09-17/2026-09-19')
 })
 
 test('previous-year shifts the range by a year, February 29 included', async ({ page, scenario }) => {
   await scenario('compare-year')
   const selector = page.locator('c2-date-selector')
-  await expect(selector).toHaveAttribute('compare-from', '2025-09-10')
-  await expect(selector).toHaveAttribute('compare-to', '2025-09-15')
+  await expect(selector).toHaveJSProperty('compareFrom', '2025-09-10')
+  await expect(selector).toHaveJSProperty('compareTo', '2025-09-15')
   const leap = await selector.evaluate(async (element: HTMLElementTagNameMap['c2-date-selector']) => {
     element.from = '2028-02-29'
     element.to = '2028-03-02'
@@ -235,13 +235,13 @@ test('editing="compare" picks the comparison range by click and keyboard, and en
   const selector = page.locator('c2-date-selector')
   await page.getByRole('gridcell', { name: /September 21, 2026/ }).click()
   await expect(selector).toHaveAttribute('compare', 'custom')
-  await expect(selector).toHaveAttribute('compare-from', '2026-09-21')
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-21')
   await expect(selector).toHaveJSProperty('compareTo', '')
   // A lone start is a one-day band while the end is picked.
   await expect(page.getByRole('gridcell', { name: /September 21, 2026/ })).toHaveClass(/compare-start compare-end/)
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
-  await expect(selector).toHaveAttribute('compare-to', '2026-09-28')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-28')
   // The range itself is untouched, and the comparison no longer follows it: it is custom now.
   await expect(selector).toHaveAttribute('from', '2026-09-10')
   await expect(selector).toHaveAttribute('to', '2026-09-15')
@@ -249,8 +249,8 @@ test('editing="compare" picks the comparison range by click and keyboard, and en
   await selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => (element.editing = 'range'))
   await page.getByRole('gridcell', { name: /September 2, 2026/ }).click()
   await expect(selector).toHaveAttribute('from', '2026-09-02')
-  await expect(selector).toHaveAttribute('compare-from', '2026-09-21')
-  await expect(selector).toHaveAttribute('compare-to', '2026-09-28')
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-21')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-28')
 })
 
 test('submits the comparison range beside the range and resets both', async ({ page, scenario }) => {
@@ -260,7 +260,7 @@ test('submits the comparison range beside the range and resets both', async ({ p
   await page.getByRole('gridcell', { name: /September 20, 2026/ }).click()
   await page.getByRole('button', { name: 'Reset' }).click()
   await expect(page.locator('c2-date-selector')).toHaveAttribute('to', '2026-09-15')
-  await expect(page.locator('c2-date-selector')).toHaveAttribute('compare-from', '2026-09-04')
+  await expect(page.locator('c2-date-selector')).toHaveJSProperty('compareFrom', '2026-09-04')
 })
 
 test('a preset keeps its comparison range through a reset and over a range set by hand', async ({ page, scenario }) => {
@@ -268,8 +268,8 @@ test('a preset keeps its comparison range through a reset and over a range set b
   const selector = page.locator('c2-date-selector')
   // Reset with the range untouched: the derived comparison range is derived again, not emptied.
   await page.getByRole('button', { name: 'Reset' }).click()
-  await expect(selector).toHaveAttribute('compare-from', '2026-09-04')
-  await expect(selector).toHaveAttribute('compare-to', '2026-09-09')
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-04')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-09')
   const kept = await selector.evaluate(async (element: HTMLElementTagNameMap['c2-date-selector']) => {
     element.compareFrom = '2026-01-01'
     element.compareTo = '2026-01-05'
@@ -309,14 +309,14 @@ test('the footer slot shows the app controls under the months', async ({ page, s
   expect(focused).toBe(false)
 })
 
-test('the comparison note and the navigation follow the nearest lang', async ({ page, scenario }) => {
+test('without locale, the comparison note and the navigation follow the nearest lang', async ({ page, scenario }) => {
   await scenario('compare-lang')
-  await expect(page.getByRole('gridcell', { name: /September 5, 2026/ })).toHaveAccessibleDescription('Dans la période de comparaison')
+  await expect(page.locator('c2-date-selector [data-date="2026-09-05"]')).toHaveAccessibleDescription('Dans la période de comparaison')
   await expect(page.getByRole('button', { name: 'Mois précédent' })).toBeVisible()
 })
 
 test('the validation message follows a change of language', async ({ page, scenario }) => {
-  await scenario()
+  await scenario('no-locale')
   const selector = page.locator('c2-date-selector')
   const message = () => selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => element.validationMessage)
   await expect.poll(message).toBe('Choose a start and end date')
@@ -328,4 +328,74 @@ test('a comparison range has no axe violations', async ({ page, scenario }) => {
   await scenario('compare-period')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
+})
+
+test("a footer control's input and change stay inside the selector", async ({ page, scenario }) => {
+  await scenario('footer')
+  const heard = page.locator('c2-date-selector').evaluate((element) => {
+    const events: string[] = []
+    for (const type of ['input', 'change']) element.addEventListener(type, (event) => events.push(`${type}:${(event.target as Element).localName}`))
+    ;(window as unknown as { heard: string[] }).heard = events
+  })
+  await heard
+  await page.getByRole('checkbox', { name: 'Compare' }).click()
+  await expect(page.getByRole('status')).toHaveText('footer change')
+  await page.getByRole('gridcell', { name: /September 15, 2026/ }).click()
+  // Only the selector's own pair reached its listeners.
+  expect(await page.evaluate(() => (window as unknown as { heard: string[] }).heard)).toEqual(['input:c2-date-selector', 'change:c2-date-selector'])
+})
+
+test('a preset derives the comparison range without writing attributes on the host', async ({ page, scenario }) => {
+  await scenario()
+  const outcome = await page.evaluate(async () => {
+    const element = document.createElement('c2-date-selector')
+    for (const [name, value] of Object.entries({ from: '2026-09-10', to: '2026-09-15', compare: 'previous-period', locale: 'en-US' }))
+      element.setAttribute(name, value)
+    document.querySelector('main')!.append(element)
+    await element.updateComplete
+    return { compareFrom: element.compareFrom, attributes: element.getAttributeNames().sort() }
+  })
+  expect(outcome).toEqual({ compareFrom: '2026-09-04', attributes: ['compare', 'from', 'locale', 'to'] })
+})
+
+test('restoring the form state keeps a comparison range picked by hand', async ({ page, scenario }) => {
+  await scenario('compare-editing')
+  await page.getByRole('gridcell', { name: /September 21, 2026/ }).click()
+  await page.getByRole('gridcell', { name: /September 24, 2026/ }).click()
+  const restored = await page.evaluate(async () => {
+    const element = document.createElement('c2-date-selector')
+    Object.assign(element, { from: '2026-09-10', to: '2026-09-15', compare: 'previous-period' })
+    document.querySelector('main')!.append(element)
+    await element.updateComplete
+    element.formStateRestoreCallback('2026-09-10/2026-09-15/2026-09-21/2026-09-24/custom')
+    await element.updateComplete
+    return [element.compare, element.compareFrom, element.compareTo]
+  })
+  expect(restored).toEqual(['custom', '2026-09-21', '2026-09-24'])
+})
+
+test('the locale property also picks the language of the built-in text', async ({ page, scenario }) => {
+  await scenario()
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => (element.locale = 'fr-FR'))
+  await expect(page.getByRole('button', { name: 'Mois précédent' })).toBeVisible()
+  await expect
+    .poll(() => selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => element.validationMessage))
+    .toBe('Choisissez une date de début et de fin')
+})
+
+test('translations added after the first render rewrite the validation message', async ({ page, scenario }) => {
+  await scenario('no-locale')
+  const selector = page.locator('c2-date-selector')
+  await page.locator('main').evaluate((main) => main.setAttribute('lang', 'de'))
+  await expect
+    .poll(() => selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => element.validationMessage))
+    .toBe('Choose a start and end date')
+  await page.evaluate(() => {
+    const { addTranslations } = window as unknown as { addTranslations: (catalogs: Record<string, Record<string, Record<string, string>>>) => void }
+    addTranslations({ de: { 'date-selector': { missingRange: 'Wählen Sie ein Start- und Enddatum' } } })
+  })
+  await expect
+    .poll(() => selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => element.validationMessage))
+    .toBe('Wählen Sie ein Start- und Enddatum')
 })

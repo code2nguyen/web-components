@@ -79,10 +79,13 @@ from the range, as many days ending the day before `from`; `compare="previous-ye
 earlier (February 29 becomes February 28). A preset follows every new range and clears the band while the range is
 incomplete. To let the user pick the comparison range, set `editing="compare"`: clicks and the keyboard then set
 `compare-from` and `compare-to` instead, and a preset becomes `compare="custom"` so a later range does not overwrite it.
+Read the comparison range from the `compareFrom` and `compareTo` properties: unlike `from` and `to`, they are not
+reflected to attributes, because a preset derives them as the element upgrades.
 
 The `change` detail adds `compareFrom` and `compareTo` while a comparison is in use, and with `name="period"` a complete
 comparison range is submitted as `period-compare` and `period-compare-end`. The toggle that switches the comparison
-belongs to the app: put a `c2-select` or a `c2-switch` in the `footer` slot and set `compare` from it. Turning the
+belongs to the app: put a `c2-select` or a `c2-switch` in the `footer` slot and set `compare` from it, listening on
+the control itself (its `input` and `change` stop at the footer, so the selector's own events stay its own). Turning the
 comparison off is `compare = ''` with `compareFrom` and `compareTo` emptied. The
 [gallery](/web-components/components/date-selector/gallery) has a working toggle.
 
