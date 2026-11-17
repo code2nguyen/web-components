@@ -271,6 +271,7 @@ price: .price
   <c2-highlight query="apple">Apple pie and pineapple crumble</c2-highlight>
   <c2-highlight query="the" active-index="1">The fox jumps over the lazy dog</c2-highlight>
 </div>`,
+  'histogram-chart': `<c2-histogram-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart--font-size:10px;--c2-chart__axis--font-size:9px" aria-label="Latency histogram" bin-width="50" overlay="density" data="[242,344,289,254,307,198,320,299,271,315,331,354,305,272,330,198,391,281,322,385,261,280,313,252,361,204,276,318,313,271,382,377,303,343,231,355,316,345,339,317,298,222,205,231,344,309,266,261,339,294,386,278,242,182,254,320,217,335,334,230]"><c2-chart-series field="value" label="Latency (ms)"></c2-chart-series></c2-histogram-chart>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:var(--c2-theme--color-on-surface-variant, #71717a)">Wrote the first published algorithm.</div></c2-hover-card>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">

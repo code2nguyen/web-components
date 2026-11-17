@@ -1409,6 +1409,11 @@ export abstract class ChartBase extends LitElement {
     if (name === 'aria-label' && old !== value) this.requestUpdate()
   }
 
+  /** The heading of the hidden table's first column, which names each row: the label or x field, else "Item". */
+  protected get accessibleRowHeading(): string {
+    return this.labelField || this.xField || this.chartMsg.t('item')
+  }
+
   /** The plot's accessible name: the author's `aria-label` on the host, else a summary of the chart type, series and size. */
   protected accessibleSummary(resolved: ChartSeriesConfig[] = this.resolvedSeries): string {
     const authored = this.getAttribute('aria-label')?.trim()
@@ -1464,7 +1469,7 @@ export abstract class ChartBase extends LitElement {
           </caption>
           <thead>
             <tr>
-              <th scope="col">${this.labelField || this.xField || this.chartMsg.t('item')}</th>
+              <th scope="col">${this.accessibleRowHeading}</th>
               ${series.map((item) => html`<th scope="col">${item.label || item.field}</th>`)}
             </tr>
           </thead>

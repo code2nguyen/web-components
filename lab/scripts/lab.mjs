@@ -4,7 +4,8 @@
 //
 //   node lab/scripts/lab.mjs list
 //   node lab/scripts/lab.mjs run <target> [--personas mouse,keyboard] [--journeys id,…] [--repeat N]
-//                                         [--steps file.json] [--aria] [--no-axe]
+//                                         [--steps file.json] [--aria] [--no-axe] [--record]
+//   node lab/scripts/lab.mjs replay [--targets a,b] [--repeat N]   every target, recorded in lab/runs/ and compared
 import { chromium } from '@playwright/test'
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -14,6 +15,7 @@ import { checkAxe, checkOverflow, componentIn, createFocusChecker, watchConsole 
 import { axTree, checkAxTree, formatAxTree } from './lib/ax-tree.mjs'
 import { describeStep, locate, runStep } from './lib/steps.mjs'
 import { ensureServer } from './lib/server.mjs'
+import { buildRecord, comparable, compare, loadRecords, writeRecord } from './lib/record.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = resolve(LAB, '..')
@@ -21,20 +23,34 @@ const TARGETS = join(LAB, 'targets')
 const KNOWN = join(LAB, 'known.json')
 
 function parseArgs(argv) {
-  const [command, targetName, ...rest] = argv
-  const options = { command, targetName, repeat: 1, axe: true, aria: false }
+  const [command, ...rest] = argv
+  const options = { command, axe: true, aria: false, record: false, mode: command === 'replay' ? 'replay' : 'run' }
+  if (command === 'run') options.targetName = rest.shift()
   for (let i = 0; i < rest.length; i++) {
     const arg = rest[i]
     if (arg === '--personas') options.personas = rest[++i].split(',')
     else if (arg === '--journeys') options.journeys = rest[++i].split(',')
+    else if (arg === '--targets') options.targets = rest[++i].split(',')
     else if (arg === '--repeat') {
       options.repeat = Number(rest[++i])
       if (!Number.isInteger(options.repeat) || options.repeat < 1) throw new Error(`--repeat takes a whole number from 1, not "${rest[i]}"`)
     } else if (arg === '--steps') options.steps = rest[++i]
     else if (arg === '--aria') options.aria = true
     else if (arg === '--no-axe') options.axe = false
+    else if (arg === '--record') options.record = true
     else throw new Error(`Unknown option ${arg}`)
   }
+  // A replay is the lab's regression check: every target, every persona and journey, every oracle, recorded. Options
+  // that would make it partial, or that only mean something for one target, belong to `run`.
+  if (command === 'replay') {
+    const partial = ['personas', 'journeys', 'steps', 'aria'].filter((key) => options[key])
+    if (partial.length) throw new Error(`replay runs every persona and journey; --${partial.join(', --')} belong to \`run <target>\``)
+    if (options.axe === false) throw new Error('replay runs every oracle; --no-axe belongs to `run <target>`')
+    options.record = true
+  } else if (options.targets) {
+    throw new Error('--targets belongs to `replay`; `run` takes one target')
+  }
+  options.repeat ??= command === 'replay' ? 2 : 1
   return options
 }
 
@@ -236,6 +252,7 @@ async function run(options) {
   mkdirSync(join(out, 'shots'), { recursive: true })
   mkdirSync(join(out, 'snapshots'), { recursive: true })
 
+  const startedAt = new Date()
   const server = await ensureServer(target, ROOT)
   const results = []
   const raw = []
@@ -266,8 +283,86 @@ async function run(options) {
   const findings = aggregate(target.name, raw, options.repeat, loadKnown())
   console.log('\n' + writeReport(out, target, results, findings, options))
   console.log(`\nWrote ${join('test-results', 'lab', target.name)}/{report.md,findings.json,shots/,snapshots/}`)
+
+  let record = null
+  if (options.record && !options.steps) {
+    record = buildRecord({ root: ROOT, target, mode: options.mode, options, personas: personaNames, results, findings, startedAt, finishedAt: new Date() })
+    record.change = compare(
+      loadRecords(ROOT, target.name)
+        .filter((previous) => comparable(previous, record))
+        .at(-1),
+      record,
+    )
+    const file = writeRecord(ROOT, record)
+    console.log(`Recorded ${file}`)
+    if (record.change) printChange(record.change)
+  }
   // A flaky finding (not seen on every repeat) is reported but does not fail the run: it needs a closer look, not a filing.
-  return findings.some((finding) => finding.status === 'new' && finding.reproducible) ? 1 : 0
+  return { code: findings.some((finding) => finding.status === 'new' && finding.reproducible) ? 1 : 0, record }
+}
+
+function printChange(change) {
+  const line = (label, items) => console.log(`  ${label}: ${items.length ? items.join(', ') : 'none'}`)
+  console.log(`Since ${change.previous} (library ${change.previousLibrary.version} @ ${String(change.previousLibrary.commit).slice(0, 8)}):`)
+  line('findings that appeared', change.appeared)
+  line('findings that are gone', change.gone)
+  line('findings not reached (a journey they need failed)', change.unverified)
+  line('journeys now passing', change.nowPassing)
+  line('journeys now failing', change.nowFailing)
+}
+
+/** Every target (or the ones named), recorded and compared with its previous full run, then a summary. */
+async function replay(options) {
+  const names = options.targets ?? listTargets()
+  const unknown = names.filter((name) => !listTargets().includes(name))
+  if (unknown.length) throw new Error(`Unknown target ${unknown.join(', ')}. Known: ${listTargets().join(', ')}`)
+  const outcomes = []
+  for (const name of names) {
+    console.log(`\n═══ ${name} ═══`)
+    // One target failing to start (a server that does not answer, a broken target file) must not hide the others.
+    try {
+      outcomes.push({ name, ...(await run({ ...options, targetName: name })) })
+    } catch (error) {
+      console.error(`${name}: ${error.message}`)
+      outcomes.push({ name, code: 1, record: null, error: error.message.split('\n')[0] })
+    }
+  }
+
+  const library = outcomes.find(({ record }) => record)?.record.library
+  const summary = [
+    `## Component lab replay`,
+    '',
+    library
+      ? `Library ${library.version} @ \`${String(library.commit).slice(0, 8)}\`${library.dirty ? ' (with local component edits)' : ''}.`
+      : 'No target ran.',
+    '',
+    '| Target | Journeys passed | New | Known | Flaky | Gone since last run | Appeared since last run |',
+    '| --- | --- | --- | --- | --- | --- | --- |',
+    ...outcomes.map(({ name, record, error }) => {
+      if (!record) return `| ${name} | **error:** ${error} | | | | | |`
+      const sum = record.summary
+      return `| ${name} | ${sum.passed}/${sum.journeys} | ${sum.findings.new} | ${sum.findings.known} | ${sum.findings.flaky} | ${record.change?.gone.length ?? '–'} | ${record.change?.appeared.length ?? '–'} |`
+    }),
+  ]
+  // A known finding that a full run no longer sees is a component fix to confirm: then drop it from known.json and
+  // move its COMPONENT-FEEDBACK.md entry to Fixed. Only a run whose every journey passed on every repeat reached all
+  // the states the known findings were seen in; otherwise their absence proves nothing.
+  const known = loadKnown()
+  const conclusive = ({ record }) => record?.runner.full && record.summary.failed === 0 && record.summary.flakyJourneys === 0
+  const stale = outcomes
+    .filter(conclusive)
+    .flatMap(({ name, record }) => Object.keys(known).filter((key) => key.startsWith(`${name}/`) && !record.findings.some((finding) => finding.key === key)))
+  if (stale.length)
+    summary.push('', 'Known findings no longer seen (confirm the fix, then remove them from `lab/known.json`):', '', ...stale.map((key) => `- \`${key}\``))
+  const skipped = outcomes.filter((outcome) => outcome.record && !conclusive(outcome)).map(({ name }) => name)
+  if (skipped.length) summary.push('', `Not checked for fixed findings, since a journey failed: ${skipped.join(', ')}.`)
+  const appeared = outcomes.flatMap(({ record }) => record?.change?.appeared ?? [])
+  if (appeared.length) summary.push('', 'Findings that appeared since the last run:', '', ...appeared.map((key) => `- \`${key}\``))
+  const text = summary.join('\n') + '\n'
+  mkdirSync(join(ROOT, 'test-results', 'lab'), { recursive: true })
+  writeFileSync(join(ROOT, 'test-results', 'lab', 'replay-summary.md'), text)
+  console.log('\n' + text)
+  return outcomes.some(({ code }) => code !== 0) ? 1 : 0
 }
 
 function list() {
@@ -283,8 +378,15 @@ function list() {
 
 const options = parseArgs(process.argv.slice(2))
 if (options.command === 'list') list()
-else if (options.command === 'run' && options.targetName) process.exitCode = await run(options)
+else if (options.command === 'run' && options.targetName) process.exitCode = (await run(options)).code
+else if (options.command === 'replay') process.exitCode = await replay(options)
 else {
-  console.error('Usage: node lab/scripts/lab.mjs list | run <target> [--personas a,b] [--journeys id,…] [--repeat N] [--steps file.json] [--aria] [--no-axe]')
+  console.error(
+    [
+      'Usage: node lab/scripts/lab.mjs list',
+      '       node lab/scripts/lab.mjs run <target> [--personas a,b] [--journeys id,…] [--repeat N] [--steps file.json] [--aria] [--no-axe] [--record]',
+      '       node lab/scripts/lab.mjs replay [--targets a,b] [--repeat N]     every target, recorded in lab/runs/ (repeat defaults to 2)',
+    ].join('\n'),
+  )
   process.exitCode = 2
 }

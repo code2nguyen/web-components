@@ -105,7 +105,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
 - **chart-1** · `@c2n/chart` · spc chart #366 · +0.2 kB on 34.0 kB, 2 kB lazy · risk low
 - **chart-2** · `@c2n/chart` · combo chart #524 · +1 kB on 37.2 kB · risk medium
-- **chart-3** · `@c2n/chart` · histogram chart #525 · +0.8 kB on 37.2 kB · risk low
 - **chart-4** · `@c2n/chart` · small multiples #526 (companion) · 3 kB new entry · risk medium
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium

@@ -7,10 +7,10 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { OUTCOMES, frontMatter, reportRows } from './lib/markdown.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = resolve(LAB, '..')
-const OUTCOMES = ['met', 'workaround', 'hand-rolled', 'failed']
 const warnings = []
 
 function walk(dir) {
@@ -19,26 +19,6 @@ function walk(dir) {
     const path = join(dir, name)
     return statSync(path).isDirectory() ? walk(path) : name.endsWith('.md') && name !== 'TEMPLATE.md' && name !== 'README.md' ? [path] : []
   })
-}
-
-/** A deliberately small front-matter reader: `key: value` and `key: [a, b]` lines between `---` fences. */
-function frontMatter(text) {
-  const match = /^---\n([\s\S]*?)\n---\n/.exec(text)
-  const data = {}
-  if (!match) return { data, body: text }
-  for (const line of match[1].split('\n')) {
-    const field = /^([\w-]+):\s*(.*)$/.exec(line)
-    if (!field) continue
-    const value = field[2].trim()
-    data[field[1]] = value.startsWith('[')
-      ? value
-          .slice(1, -1)
-          .split(',')
-          .map((item) => item.trim())
-          .filter(Boolean)
-      : value
-  }
-  return { data, body: text.slice(match[0].length) }
 }
 
 function loadCapabilities() {
@@ -81,15 +61,10 @@ function loadReports(specs) {
       warnings.push(`${relative(ROOT, file)}: unknown spec \`${data.spec}\``)
       continue
     }
-    const rows = new Map()
-    for (const line of body.split('\n')) {
-      const cells = line.split('|').map((cell) => cell.trim())
-      if (cells.length < 5 || !/^R\d+$/.test(cells[1])) continue
-      const outcome = cells[2].replace(/[^a-z-]/g, '')
-      if (!OUTCOMES.includes(outcome)) warnings.push(`${relative(ROOT, file)} ${cells[1]}: outcome "${cells[2]}" is not one of ${OUTCOMES.join(', ')}`)
-      if (!spec.requirements.has(cells[1])) warnings.push(`${relative(ROOT, file)}: ${cells[1]} is not a requirement of ${spec.id}`)
-      const components = [...cells[3].matchAll(/c2-[a-z0-9-]+|@c2n\/[a-z0-9-]+/g)].map((m) => m[0])
-      rows.set(cells[1], { outcome, components, notes: cells[4] })
+    const rows = reportRows(body)
+    for (const [id, row] of rows) {
+      if (!OUTCOMES.includes(row.outcome)) warnings.push(`${relative(ROOT, file)} ${id}: outcome "${row.rawOutcome}" is not one of ${OUTCOMES.join(', ')}`)
+      if (!spec.requirements.has(id)) warnings.push(`${relative(ROOT, file)}: ${id} is not a requirement of ${spec.id}`)
     }
     for (const id of spec.requirements.keys()) if (!rows.has(id)) warnings.push(`${relative(ROOT, file)}: no row for ${id}`)
     reports.push({ ...data, file: relative(ROOT, file), spec, rows })

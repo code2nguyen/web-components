@@ -1,0 +1,594 @@
+{
+  "schema": 1,
+  "id": "2026-11-17T1759-support-inbox-vue",
+  "startedAt": "2026-11-17T17:59:34.071Z",
+  "durationSeconds": 225,
+  "mode": "replay",
+  "target": "support-inbox-vue",
+  "spec": null,
+  "direction": "example",
+  "library": {
+    "version": "1.0.27",
+    "commit": "4022bfdc254aafce186f540146423c05942ddc29",
+    "branch": "claude/brave-allen-ngsefw",
+    "dirty": false
+  },
+  "runner": {
+    "personas": ["mouse", "keyboard", "mobile", "dark", "fr"],
+    "repeat": 2,
+    "journeys": ["search", "filter", "open-conversation", "reply", "blank-reply", "customer-details", "archive-undo", "resolve"],
+    "axe": true,
+    "full": true
+  },
+  "build": null,
+  "summary": {
+    "journeys": 40,
+    "passed": 40,
+    "flakyJourneys": 0,
+    "failed": 0,
+    "findings": {
+      "new": 0,
+      "known": 7,
+      "flaky": 0
+    }
+  },
+  "journeys": [
+    {
+      "persona": "mouse",
+      "journey": "search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "filter",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "open-conversation",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "blank-reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "customer-details",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "archive-undo",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "resolve",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "filter",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "open-conversation",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "blank-reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "customer-details",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "archive-undo",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "resolve",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "filter",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "open-conversation",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "blank-reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "customer-details",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "archive-undo",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "resolve",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "filter",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "open-conversation",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "blank-reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "customer-details",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "archive-undo",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "resolve",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "filter",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "open-conversation",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "blank-reply",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "customer-details",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "archive-undo",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "resolve",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    }
+  ],
+  "findings": [
+    {
+      "key": "support-inbox-vue/axe/-/color-contrast",
+      "kind": "axe",
+      "severity": "error",
+      "component": null,
+      "rule": "color-contrast",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/search": 2,
+        "mouse/filter": 2,
+        "mouse/open-conversation": 2,
+        "mouse/reply": 2,
+        "mouse/blank-reply": 2,
+        "mouse/customer-details": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/search": 2,
+        "keyboard/filter": 2,
+        "keyboard/open-conversation": 2,
+        "keyboard/reply": 2,
+        "keyboard/blank-reply": 2,
+        "keyboard/customer-details": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/search": 2,
+        "mobile/filter": 2,
+        "mobile/open-conversation": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "dark/search": 2,
+        "dark/filter": 2,
+        "dark/open-conversation": 2,
+        "dark/reply": 2,
+        "dark/blank-reply": 2,
+        "dark/customer-details": 2,
+        "dark/archive-undo": 2,
+        "dark/resolve": 2,
+        "fr/search": 2,
+        "fr/filter": 2,
+        "fr/open-conversation": 2,
+        "fr/reply": 2,
+        "fr/blank-reply": 2,
+        "fr/customer-details": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "Elements must meet minimum color contrast ratio thresholds (serious) — 1 node(s)"
+    },
+    {
+      "key": "support-inbox-vue/axe/-/scrollable-region-focusable",
+      "kind": "axe",
+      "severity": "error",
+      "component": null,
+      "rule": "scrollable-region-focusable",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mobile/search": 2,
+        "mobile/filter": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2
+      },
+      "message": "Scrollable region must have keyboard access (serious) — 1 node(s)"
+    },
+    {
+      "key": "support-inbox-vue/axe/c2-format-date/color-contrast",
+      "kind": "axe",
+      "severity": "error",
+      "component": "c2-format-date",
+      "rule": "color-contrast",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/search": 2,
+        "mouse/filter": 2,
+        "mouse/open-conversation": 2,
+        "mouse/reply": 2,
+        "mouse/blank-reply": 2,
+        "mouse/customer-details": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/search": 2,
+        "keyboard/filter": 2,
+        "keyboard/open-conversation": 2,
+        "keyboard/reply": 2,
+        "keyboard/blank-reply": 2,
+        "keyboard/customer-details": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/search": 2,
+        "mobile/filter": 2,
+        "mobile/open-conversation": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "fr/search": 2,
+        "fr/filter": 2,
+        "fr/open-conversation": 2,
+        "fr/reply": 2,
+        "fr/blank-reply": 2,
+        "fr/customer-details": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "Elements must meet minimum color contrast ratio thresholds (serious) — 3 node(s)"
+    },
+    {
+      "key": "support-inbox-vue/axe/c2-highlight/color-contrast",
+      "kind": "axe",
+      "severity": "error",
+      "component": "c2-highlight",
+      "rule": "color-contrast",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/search": 2,
+        "mouse/open-conversation": 2,
+        "mouse/reply": 2,
+        "mouse/blank-reply": 2,
+        "mouse/customer-details": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/search": 2,
+        "keyboard/open-conversation": 2,
+        "keyboard/reply": 2,
+        "keyboard/blank-reply": 2,
+        "keyboard/customer-details": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/search": 2,
+        "mobile/open-conversation": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "fr/search": 2,
+        "fr/open-conversation": 2,
+        "fr/reply": 2,
+        "fr/blank-reply": 2,
+        "fr/customer-details": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "Elements must meet minimum color contrast ratio thresholds (serious) — 1 node(s)"
+    },
+    {
+      "key": "support-inbox-vue/axe/c2-relative-time/color-contrast",
+      "kind": "axe",
+      "severity": "error",
+      "component": "c2-relative-time",
+      "rule": "color-contrast",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/search": 2,
+        "mouse/open-conversation": 2,
+        "mouse/reply": 2,
+        "mouse/blank-reply": 2,
+        "mouse/customer-details": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/search": 2,
+        "keyboard/open-conversation": 2,
+        "keyboard/reply": 2,
+        "keyboard/blank-reply": 2,
+        "keyboard/customer-details": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/search": 2,
+        "mobile/open-conversation": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "fr/search": 2,
+        "fr/open-conversation": 2,
+        "fr/reply": 2,
+        "fr/blank-reply": 2,
+        "fr/customer-details": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "Elements must meet minimum color contrast ratio thresholds (serious) — 1 node(s)"
+    },
+    {
+      "key": "support-inbox-vue/a11y-tree/c2-avatar/hidden-disabled-button",
+      "kind": "a11y-tree",
+      "severity": "warn",
+      "component": "c2-avatar",
+      "rule": "hidden-disabled-button",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/search": 2,
+        "mouse/filter": 2,
+        "mouse/open-conversation": 2,
+        "mouse/reply": 2,
+        "mouse/blank-reply": 2,
+        "mouse/customer-details": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/search": 2,
+        "keyboard/filter": 2,
+        "keyboard/open-conversation": 2,
+        "keyboard/reply": 2,
+        "keyboard/blank-reply": 2,
+        "keyboard/customer-details": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/search": 2,
+        "mobile/filter": 2,
+        "mobile/open-conversation": 2,
+        "mobile/reply": 2,
+        "mobile/blank-reply": 2,
+        "mobile/customer-details": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "dark/search": 2,
+        "dark/filter": 2,
+        "dark/open-conversation": 2,
+        "dark/reply": 2,
+        "dark/blank-reply": 2,
+        "dark/customer-details": 2,
+        "dark/archive-undo": 2,
+        "dark/resolve": 2,
+        "fr/search": 2,
+        "fr/filter": 2,
+        "fr/open-conversation": 2,
+        "fr/reply": 2,
+        "fr/blank-reply": 2,
+        "fr/customer-details": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "An invisible, disabled button \"Mireille Dufort avatar image file\" inside c2-avatar is announced to screen readers."
+    },
+    {
+      "key": "support-inbox-vue/console-warning/c2-toast-region/Element c2-toast-region scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inef",
+      "kind": "console-warning",
+      "severity": "warn",
+      "component": "c2-toast-region",
+      "rule": "Element c2-toast-region scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inef",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/reply": 2,
+        "mouse/archive-undo": 2,
+        "mouse/resolve": 2,
+        "keyboard/reply": 2,
+        "keyboard/archive-undo": 2,
+        "keyboard/resolve": 2,
+        "mobile/reply": 2,
+        "mobile/archive-undo": 2,
+        "mobile/resolve": 2,
+        "dark/reply": 2,
+        "dark/archive-undo": 2,
+        "dark/resolve": 2,
+        "fr/reply": 2,
+        "fr/archive-undo": 2,
+        "fr/resolve": 2
+      },
+      "message": "Element c2-toast-region scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inefficient and should be avoided unless the next update can only be scheduled as a side effect of the previous update. See https://lit.dev/msg/"
+    }
+  ],
+  "change": null
+}

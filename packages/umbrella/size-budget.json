@@ -49,6 +49,7 @@
     "chart/depth-chart": 45701,
     "chart/gauge-chart": 34194,
     "chart/heatmap-chart": 59526,
+    "chart/histogram-chart": 47235,
     "chart/line-chart": 37303,
     "chart/map-chart": 52820,
     "chart/map-layer": 1654,
