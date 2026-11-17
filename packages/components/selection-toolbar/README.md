@@ -22,4 +22,5 @@ A toolbar over the text a reader selects in the wrapped content, like the select
 - Shows once a selection is complete, above it (or below with `placement="bottom"`), in the top layer.
 - Pressing a control keeps the selection; a control with `data-action` fires `selection-action` with the text.
 - Alt+F10 moves focus into it, the arrow keys move between controls, Escape returns focus.
+- `prompting` (or a control with `data-prompt`) turns it into an inline prompt at the same anchor: `prompt` and `result` slots, the selection or caret kept while the reader types.
 - Themed through `--c2-selection-toolbar*` custom properties; see the API page of the docs site.

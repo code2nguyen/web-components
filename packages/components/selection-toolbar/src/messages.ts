@@ -5,6 +5,8 @@ const en = {
   label: 'Selection actions',
   /** Announced when the toolbar appears for a selection. */
   hint: 'Actions available, press Alt+F10',
+  /** Accessible name of the inline prompt. */
+  prompt: 'Ask about the selection',
 }
 
 /** The selection toolbar's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
