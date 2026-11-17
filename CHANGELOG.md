@@ -3,6 +3,104 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.27](https://github.com/code2nguyen/web-components/releases/tag/v1.0.27) — 2026-11-17
+
+### Breaking changes
+
+- **table:** C2-tree-table variant split from c2-group-table [table-11] ([8a01995](https://github.com/code2nguyen/web-components/commit/8a01995))
+- **table:** Move groups and trees to c2-group-table, keep c2-table flat [table-split-1] ([0eea1b4](https://github.com/code2nguyen/web-components/commit/0eea1b4))
+
+### Features
+
+- **tabs:** Add overflow="menu", folding the tabs that do not fit into a More menu ([2ca9eaf](https://github.com/code2nguyen/web-components/commit/2ca9eaf))
+- **tabs:** Add overflow="scroll" for strips wider than their container ([13cdd8c](https://github.com/code2nguyen/web-components/commit/13cdd8c))
+- **dashboard:** Read layouts from a JSON attribute ([1d7eb10](https://github.com/code2nguyen/web-components/commit/1d7eb10))
+- **search-field:** Let the field fill its container ([ff9dc9c](https://github.com/code2nguyen/web-components/commit/ff9dc9c))
+- **overflow-list:** Add --c2-overflow-list--justify-content ([1f3ab77](https://github.com/code2nguyen/web-components/commit/1f3ab77))
+- **password-field:** Add a lazy password generator [password-field-1] ([aa429c9](https://github.com/code2nguyen/web-components/commit/aa429c9))
+- **citation:** Add c2-citation-list, the sources line under an answer ([d22ee51](https://github.com/code2nguyen/web-components/commit/d22ee51))
+- **shortcut:** Add c2-shortcut-sheet, the keyboard shortcuts sheet [shortcut-1] ([20ea98a](https://github.com/code2nguyen/web-components/commit/20ea98a))
+- **date-selector:** Add a comparison range and a footer slot to c2-date-selector ([d6e102b](https://github.com/code2nguyen/web-components/commit/d6e102b))
+- **json-viewer:** Add c2-schema-tree, a JSON Schema / OpenAPI property tree [json-viewer-1] ([d391be6](https://github.com/code2nguyen/web-components/commit/d391be6))
+- **questionnaire:** Add an inline agent-question mode ([eb5b470](https://github.com/code2nguyen/web-components/commit/eb5b470))
+- **progress:** Milestone marks and c2-navigation-progress companion [progress-1] ([409f880](https://github.com/code2nguyen/web-components/commit/409f880))
+- **tour:** Add c2-beacon, pulsing hotspots that open a tip [tour-1] ([7304c69](https://github.com/code2nguyen/web-components/commit/7304c69))
+- **page-header:** Add large-title, a mobile navigation bar that collapses on scroll ([0073acf](https://github.com/code2nguyen/web-components/commit/0073acf))
+- **table-of-contents:** Add c2-index-bar, an A to Z rail with drag scrubbing ([f426933](https://github.com/code2nguyen/web-components/commit/f426933))
+- **reorder-list:** Ranking with rank badges and form association ([72b955c](https://github.com/code2nguyen/web-components/commit/72b955c))
+- **checkbox:** Min and max selections on c2-checkbox-group and a trailing slot on c2-checkbox ([4e64ca7](https://github.com/code2nguyen/web-components/commit/4e64ca7))
+- **slider:** Event markers on the track and seekMarker() for time scrubbers ([737e5fe](https://github.com/code2nguyen/web-components/commit/737e5fe))
+- **format-number:** Add c2-delta, a change with an arrow and good or bad colour ([1e907f2](https://github.com/code2nguyen/web-components/commit/1e907f2))
+- **scroll-area:** Add row scroller controls and mouse drag ([4c13e4c](https://github.com/code2nguyen/web-components/commit/4c13e4c))
+- **steps:** Group progress, a locked status and a reason line for lesson lists [steps-2] ([a0f2416](https://github.com/code2nguyen/web-components/commit/a0f2416))
+- **list-item:** Add the control slot for settings rows [list-item-2] ([bf34d44](https://github.com/code2nguyen/web-components/commit/bf34d44))
+- **sticky:** Add show-when-hidden for a sticky call to action [sticky-1] ([ec249a4](https://github.com/code2nguyen/web-components/commit/ec249a4))
+- **button:** Forward invoker commands and aria state to the inner button ([ef62dcd](https://github.com/code2nguyen/web-components/commit/ef62dcd))
+- **tabs:** C2-tab-nav link tabs and sync-key code tabs [tabs-1] ([8596ccd](https://github.com/code2nguyen/web-components/commit/8596ccd))
+- **action-bar:** Floating toolbar with open and hide-on-scroll [action-bar-1] ([5792a05](https://github.com/code2nguyen/web-components/commit/5792a05))
+- **details:** Add headless collapse mode driven by invoker commands [details-1] ([fbf5de7](https://github.com/code2nguyen/web-components/commit/fbf5de7))
+- **key-value-editor:** C2-tier-editor, contiguous tiers with a live pricing preview [key-value-editor-1] ([dfec7c9](https://github.com/code2nguyen/web-components/commit/dfec7c9))
+- **meter:** Seat meter overage and c2-range-indicator companion [meter-1] ([57f097b](https://github.com/code2nguyen/web-components/commit/57f097b))
+- **number-input:** Unit input companion [number-input-1] ([6215f9a](https://github.com/code2nguyen/web-components/commit/6215f9a))
+- **steps:** Task list links, summary header and stage path chevrons [steps-1] ([69370b6](https://github.com/code2nguyen/web-components/commit/69370b6))
+- **upload:** Document checklist and image uploader companions [upload-1] ([d99d764](https://github.com/code2nguyen/web-components/commit/d99d764))
+- **pivot-table:** C2-aging-table, receivables and payables aging by bucket of days past due [pivot-table-3] ([6373224](https://github.com/code2nguyen/web-components/commit/6373224))
+- **select:** Add c2-native-select, a field around the browser's select [select-2] ([14a8d30](https://github.com/code2nguyen/web-components/commit/14a8d30))
+- **confirm-dialog:** Typed confirmation and prompt dialog [confirm-dialog-1] ([7646d90](https://github.com/code2nguyen/web-components/commit/7646d90))
+- **select:** Search, option groups, create row and footer actions [select-1] ([18bb2ae](https://github.com/code2nguyen/web-components/commit/18bb2ae))
+- **kanban:** Add c2-matrix-board, a kanban laid out in rows by columns [kanban-1] ([0585c16](https://github.com/code2nguyen/web-components/commit/0585c16))
+- **autocomplete:** Record picker with multiple picks, a create row and recent items [autocomplete-1] ([fda9695](https://github.com/code2nguyen/web-components/commit/fda9695))
+- **description-list:** Sections, calculation lines and editable properties [description-list-2] ([baa5a2c](https://github.com/code2nguyen/web-components/commit/baa5a2c))
+- **choice-matrix:** Add c2-scorecard and row details [choice-matrix-2] ([9d85fe0](https://github.com/code2nguyen/web-components/commit/9d85fe0))
+- **choice-matrix:** Add c2-input-matrix and c2-record-merge [choice-matrix-1] ([e80c421](https://github.com/code2nguyen/web-components/commit/e80c421))
+- **virtual-list:** Infinite scroll [virtual-list-1] ([e650e37](https://github.com/code2nguyen/web-components/commit/e650e37))
+- **view-options:** Saved views [view-options-1] ([7eb7fce](https://github.com/code2nguyen/web-components/commit/7eb7fce))
+- **table:** Flowsheet now column, dose grid and requirement tree examples [table-10] ([091c2a3](https://github.com/code2nguyen/web-components/commit/091c2a3))
+- **table:** Bulk select menu, selection scope and page-aware selection [table-9] ([82a4cf7](https://github.com/code2nguyen/web-components/commit/82a4cf7))
+- **table:** C2-allocation-grid variant, cellPart, goal tree and gradebook examples [table-8] ([860e320](https://github.com/code2nguyen/web-components/commit/860e320))
+- **table:** C2-flowsheet variant; table variants audit and rule ([f220904](https://github.com/code2nguyen/web-components/commit/f220904))
+- **table:** Flowsheet series columns and reference-range flags [table-7] ([4b28fcf](https://github.com/code2nguyen/web-components/commit/4b28fcf))
+- **table:** Column filters and baseline comparisons [table-6] ([9d88c4e](https://github.com/code2nguyen/web-components/commit/9d88c4e))
+- **table:** Summary-target, and line items and allocation examples [table-5] ([8078c61](https://github.com/code2nguyen/web-components/commit/8078c61))
+- **table:** Status columns, tally counts and running balances [table-4] ([3564184](https://github.com/code2nguyen/web-components/commit/3564184))
+- **table:** Edit cells in place with editable, loaded on the first edit [table-3] ([2154879](https://github.com/code2nguyen/web-components/commit/2154879))
+
+### Fixes
+
+- **tabs:** Scroll the selected tab into view instantly, as c2-tab-nav does ([8167ab1](https://github.com/code2nguyen/web-components/commit/8167ab1))
+- **tabs:** Harden the overflow modes after review ([5a81511](https://github.com/code2nguyen/web-components/commit/5a81511))
+- **list:** No focus entry without an enabled row; cover rows slotted from c2-select ([d45e31d](https://github.com/code2nguyen/web-components/commit/d45e31d))
+- **master-detail:** Fire layout-change once with the initial layout ([2ac8667](https://github.com/code2nguyen/web-components/commit/2ac8667))
+- **sass:** Show hover feedback only where a pointer can hover ([2bd1396](https://github.com/code2nguyen/web-components/commit/2bd1396))
+- **list:** Defer the roving tabindex until the list is first used ([527b440](https://github.com/code2nguyen/web-components/commit/527b440))
+- **citation:** Clear a card's highlight in Firefox when the pointer or focus leaves [citation-1] ([61b8ed6](https://github.com/code2nguyen/web-components/commit/61b8ed6))
+- **reorder-list:** Reflect name so a list named as a property is submitted [reorder-list-1] ([c293ebc](https://github.com/code2nguyen/web-components/commit/c293ebc))
+- **scroll-area:** Record the control icon slots in the slot styling audit [scroll-area-1] ([9c4a85d](https://github.com/code2nguyen/web-components/commit/9c4a85d))
+- **steps:** Record the reason slot in the slot styling audit [steps-2] ([9ecce51](https://github.com/code2nguyen/web-components/commit/9ecce51))
+- **details:** Close same-name panels without a c2-accordion parent ([1a542b7](https://github.com/code2nguyen/web-components/commit/1a542b7))
+- **code-viewer:** Let color-scheme auto follow the page's color-scheme ([1ace0a1](https://github.com/code2nguyen/web-components/commit/1ace0a1))
+- **action-bar:** Bring a hide-on-scroll bar back even without a scrollend ([a53e445](https://github.com/code2nguyen/web-components/commit/a53e445))
+- **core:** Re-render localized text after hydration with the client locale ([7c20b51](https://github.com/code2nguyen/web-components/commit/7c20b51))
+- **number-input:** Unit input review fixes [number-input-1] ([7b79b77](https://github.com/code2nguyen/web-components/commit/7b79b77))
+- **meter:** Review fixes for c2-range-indicator and the meter header [meter-1] ([77f88d1](https://github.com/code2nguyen/web-components/commit/77f88d1))
+- **steps:** Wrap header actions and shorten stage path cards after screenshot review [steps-1] ([f866a2c](https://github.com/code2nguyen/web-components/commit/f866a2c))
+- **table:** Widen the selection column for the bulk select caret ([7f6c2f9](https://github.com/code2nguyen/web-components/commit/7f6c2f9))
+- **table:** Flowsheet docs frontmatter, card heights and sizes ([9ab2fe8](https://github.com/code2nguyen/web-components/commit/9ab2fe8))
+- **table:** Review fixes for series columns and flags ([55e5258](https://github.com/code2nguyen/web-components/commit/55e5258))
+- **table:** Focus the filter without scrolling the page ([a10f12e](https://github.com/code2nguyen/web-components/commit/a10f12e))
+- **table:** Readable variance mark and deltas in both themes ([e1fd043](https://github.com/code2nguyen/web-components/commit/e1fd043))
+
+### Performance
+
+- **list-item:** Load the settings-row behaviour lazily [list-item-2] ([9871622](https://github.com/code2nguyen/web-components/commit/9871622))
+- **mcp:** Parse the installed umbrella manifest once ([d3264be](https://github.com/code2nguyen/web-components/commit/d3264be))
+- **table:** Load the realtime update code only with animate-updates ([258496d](https://github.com/code2nguyen/web-components/commit/258496d))
+
+### Improvements
+
+- **tab-nav:** Revert "fix(tabs): scroll the selected tab into view instantly, as c2-tab-nav does" ([85e1e3c](https://github.com/code2nguyen/web-components/commit/85e1e3c))
+- Revert "build: give @lit-labs/ssr the root @types/node" ([c676ba6](https://github.com/code2nguyen/web-components/commit/c676ba6))
+
 ## [1.0.26](https://github.com/code2nguyen/web-components/releases/tag/v1.0.26) — 2026-11-12
 
 ### Features
