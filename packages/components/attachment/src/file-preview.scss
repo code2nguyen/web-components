@@ -80,8 +80,9 @@
 .header {
   display: flex;
   flex: none;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 4px 12px;
   min-width: 0;
   padding: css.cssVar(header--padding);
   border-bottom: css.cssVar(header--border);
@@ -89,7 +90,8 @@
 
 .heading {
   display: flex;
-  flex: 1;
+  // A narrow frame moves the toolbar under the name rather than squeezing the name to nothing.
+  flex: 1 1 8rem;
   flex-direction: column;
   min-width: 0;
 }
@@ -104,7 +106,10 @@
 }
 
 .metadata {
+  overflow: hidden;
   color: css.cssVar(metadata--color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: css.cssVar(metadata--font-size);
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
@@ -116,6 +121,10 @@
   flex: none;
   align-items: center;
   gap: 4px;
+}
+
+.toolbar {
+  margin-inline-start: auto;
 }
 
 .zoom {

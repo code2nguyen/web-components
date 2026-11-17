@@ -58,26 +58,32 @@
     return table
   }
 
+  const LOCAL_FILES = () => [
+    { name: 'launch-notes.md', file: new File([NOTES], 'launch-notes.md', { type: 'text/markdown' }), size: '1 KB' },
+    { name: 'swatch.svg', file: new File([SWATCH], 'swatch.svg', { type: 'image/svg+xml' }), size: '1 KB' },
+  ]
+
+  /** Gives each card its data once its island has hydrated, so the first client render matches the server's. */
   function setUp() {
     for (const preview of document.querySelectorAll<FilePreview>('c2-file-preview[data-file-preview-example="files"]')) {
-      if (preview.items?.length) continue
-      preview.items = [
-        { name: 'launch-notes.md', file: new File([NOTES], 'launch-notes.md', { type: 'text/markdown' }), size: '1 KB' },
-        { name: 'swatch.svg', file: new File([SWATCH], 'swatch.svg', { type: 'image/svg+xml' }), size: '1 KB' },
-      ]
+      void preview.updateComplete.then(() => {
+        if (!preview.items?.length) preview.items = LOCAL_FILES()
+      })
     }
     for (const preview of document.querySelectorAll<FilePreview>('c2-file-preview[data-file-preview-example="render"]')) {
-      if (preview.renderViewer) continue
-      preview.renderViewer = ({ item }) => (item.name.endsWith('.csv') ? csvTable(item.text ?? '') : undefined)
-      preview.items = [
-        { name: 'expenses.csv', text: CSV, size: '1 KB' },
-        { name: 'mountains.svg', src: '/web-components/images/image-mountains.svg', size: '3 KB' },
-      ]
+      void preview.updateComplete.then(() => {
+        if (preview.renderViewer) return
+        preview.renderViewer = ({ item }) => (item.name.endsWith('.csv') ? csvTable(item.text ?? '') : undefined)
+        preview.items = [
+          { name: 'expenses.csv', text: CSV, size: '1 KB' },
+          { name: 'mountains.svg', src: '/web-components/images/image-mountains.svg', size: '3 KB' },
+        ]
+      })
     }
   }
 
-  setUp()
-  // The previews are islands: one that upgrades after this script ran gets its data when it is defined.
+  // The previews are islands: their properties are set once the element is defined and has hydrated, never before,
+  // or the hydrating render would differ from the server's.
   customElements.whenDefined('c2-file-preview').then(setUp)
 
   document.addEventListener('click', (event) => {

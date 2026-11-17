@@ -59,7 +59,14 @@ async function open(theme, path) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } })
   page.on('pageerror', (error) => errors.push(`${theme} ${path}: ${error.message}`))
   page.on('console', (message) => message.type() === 'error' && errors.push(`${theme} ${path} console: ${message.text()}`))
-  await page.addInitScript((value) => localStorage.setItem('c2n-theme', value), theme)
+  // The init script also runs in every frame, and a frame of a PDF or a sandbox has no storage: not a page error.
+  await page.addInitScript((value) => {
+    try {
+      localStorage.setItem('c2n-theme', value)
+    } catch {
+      // no storage in this frame
+    }
+  }, theme)
   await page.goto(`${base}${path}`, { waitUntil: 'networkidle' })
   // Islands hydrate and gallery cards upgrade after network idle.
   await page.waitForTimeout(800)
