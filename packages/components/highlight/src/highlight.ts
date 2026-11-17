@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues, type CSSResultGroup } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -55,7 +55,7 @@ export interface Highlight {
  */
 @customElement('c2-highlight')
 export class Highlight extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   private readonly internals = this.attachInternals()
 
@@ -84,12 +84,12 @@ export class Highlight extends LitElement {
   @property({ type: Number, attribute: 'active-index' }) activeIndex = -1
 
   /** Text read from the light DOM; `null` until the element is connected, so a server render keeps the slot. */
-  private text: string | null = null
-  private found: TextMatch[] = []
+  protected text: string | null = null
+  protected found: TextMatch[] = []
   private mutationObserver?: MutationObserver
   private reportedCount = 0
   /** A declarative shadow root from a server render: the first client render has to match its slot before marking. */
-  private readonly serverRendered = !isServer && this.shadowRoot !== null
+  protected readonly serverRendered = !isServer && this.shadowRoot !== null
 
   /** Number of matches in the current text. */
   get matchCount(): number {
