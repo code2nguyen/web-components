@@ -2331,6 +2331,20 @@
     },
     {
       "tag": "c2-selection-toolbar",
+      "slot": "prompt",
+      "decision": "part",
+      "parts": ["prompt"],
+      "reason": "The prompt wrapper owns the field row's layout and spacing inside the floating panel; the assigned field and buttons keep their own variables."
+    },
+    {
+      "tag": "c2-selection-toolbar",
+      "slot": "result",
+      "decision": "part",
+      "parts": ["result"],
+      "reason": "The result wrapper owns the answer block's layout and its scrolling past --c2-selection-toolbar__result--max-height; the assigned answer and actions are app-styled."
+    },
+    {
+      "tag": "c2-selection-toolbar",
       "slot": "toolbar",
       "decision": "assigned-content",
       "reason": "The toolbar slot takes the app's controls (c2-button, c2-icon-button), styled through their own variables."
