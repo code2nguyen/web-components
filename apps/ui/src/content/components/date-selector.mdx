@@ -70,6 +70,28 @@ stay the component's. The [gallery](/web-components/components/date-selector/gal
 </div>
 ```
 
+## Comparing two periods
+
+Analytics reports compare a range with another one. In `range` mode, `compare-from` and `compare-to` hold that
+comparison range, drawn as a band under its days (`--c2-date-selector__compare--background`, `--…__compare--height`)
+while the range keeps its own fill, and announced as each day's description. `compare="previous-period"` derives it
+from the range, as many days ending the day before `from`; `compare="previous-year"` takes the same dates a year
+earlier (February 29 becomes February 28). A preset follows every new range and clears the band while the range is
+incomplete. To let the user pick the comparison range, set `editing="compare"`: clicks and the keyboard then set
+`compare-from` and `compare-to` instead, and a preset becomes `compare="custom"` so a later range does not overwrite it.
+
+The `change` detail adds `compareFrom` and `compareTo` while a comparison is in use, and with `name="period"` a complete
+comparison range is submitted as `period-compare` and `period-compare-end`. The toggle that switches the comparison
+belongs to the app: put a `c2-select` or a `c2-switch` in the `footer` slot and set `compare` from it. Turning the
+comparison off is `compare = ''` with `compareFrom` and `compareTo` emptied. The
+[gallery](/web-components/components/date-selector/gallery) has a working toggle.
+
+```html tag=UsageBlock,package=@c2n/date-selector
+<div data-label="Compared with the previous period">
+  <c2-date-selector months="1" from="2026-09-14" to="2026-09-20" compare="previous-period" locale="en-US" aria-label="Report period"></c2-date-selector>
+</div>
+```
+
 ## Limiting the date range
 
 `min` and `max` are inclusive `YYYY-MM-DD` bounds. Days outside them are greyed out (`--c2-date-selector__day__disabled--opacity`) and cannot be clicked or reached with the keyboard, and the previous/next month buttons are disabled once the next month would hold no selectable day. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:

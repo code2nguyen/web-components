@@ -1,4 +1,6 @@
 import '../src/date-selector'
+import type { DateRangeChangeDetail } from '../src/date-selector'
+import './translations'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -33,9 +35,23 @@ if (scenario === 'render-day') {
   subject.marked = ['2026-09-14']
   subject.renderDay = ({ day, marked }) => (day % 5 === 0 ? `$${day * 10}` : marked ? 'event' : undefined)
 }
+if (scenario.startsWith('compare-')) {
+  subject.to = '2026-09-15'
+  subject.compare = scenario === 'compare-year' ? 'previous-year' : 'previous-period'
+}
+if (scenario === 'compare-editing') subject.editing = 'compare'
+if (scenario === 'footer') {
+  const select = document.createElement('button')
+  select.type = 'button'
+  select.slot = 'footer'
+  select.textContent = 'Compare to'
+  subject.append(select)
+}
+if (scenario === 'compare-lang') main.setAttribute('lang', 'fr')
 subject.addEventListener('change', (event) => {
-  const { from, to, value } = (event as CustomEvent<{ from: string; to: string; value?: string }>).detail
+  const { from, to, value, compareFrom, compareTo } = (event as CustomEvent<DateRangeChangeDetail>).detail
   output.value = value === undefined ? `${from}/${to}` : `value:${value}`
+  if (compareFrom !== undefined) output.value += ` vs ${compareFrom}/${compareTo}`
 })
 document.querySelector('form')!.addEventListener('submit', (event) => {
   event.preventDefault()
