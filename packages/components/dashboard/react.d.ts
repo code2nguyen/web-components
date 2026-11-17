@@ -34,12 +34,13 @@ declare module 'react' {
         'expand-height'?: Attribute
         'expand-full'?: Attribute
       }
-      'c2-dashboard': Omit<C2Props<Dashboard>, 'columns' | 'rows' | 'sizes'> & {
+      'c2-dashboard': Omit<C2Props<Dashboard>, 'columns' | 'rows' | 'layouts' | 'sizes'> & {
         'min-column-width'?: Attribute
         'min-row-height'?: Attribute
         'storage-key'?: Attribute
         columns?: Dashboard['columns'] | string
         rows?: Dashboard['rows'] | string
+        layouts?: Dashboard['layouts'] | string
         sizes?: Dashboard['sizes'] | string
       }
     }
