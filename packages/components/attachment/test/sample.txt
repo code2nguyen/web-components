@@ -1,0 +1,4 @@
+Release notes
+
+- Preview files by type
+- <b>not bold</b> stays text

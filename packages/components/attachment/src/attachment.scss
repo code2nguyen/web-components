@@ -257,3 +257,27 @@ button {
 ::slotted([slot='actions']) {
   flex: none;
 }
+
+// `preview`: the name opens the file. A text button, not an icon action.
+.name .preview-trigger {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 4px;
+
+  @include pointer.hover(':not(:disabled)') {
+    background: transparent;
+    text-decoration: underline;
+  }
+}
+
+:host([preview]:not([disabled])) .media {
+  cursor: pointer;
+}

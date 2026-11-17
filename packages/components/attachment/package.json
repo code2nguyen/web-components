@@ -13,6 +13,10 @@
       "types": "./types/src/attachment-group.d.ts",
       "default": "./dist/attachment-group.js"
     },
+    "./file-preview.js": {
+      "types": "./types/src/file-preview.d.ts",
+      "default": "./dist/file-preview.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

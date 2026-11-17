@@ -31,8 +31,10 @@ import '@c2n/phosphor-icons/icons/file-vue.js'
 import '@c2n/phosphor-icons/icons/file-xls.js'
 import '@c2n/phosphor-icons/icons/file-zip.js'
 import styles from './attachment.scss?inline'
+import type { FilePreview, FilePreviewItem } from './file-preview.js'
 
 export { AttachmentGroup, type AttachmentGroupLayout } from './attachment-group.js'
+export type { FilePreview, FilePreviewItem, FilePreviewKind, FilePreviewViewerContext, FilePreviewViewerRenderer } from './file-preview.js'
 
 export type AttachmentStatus = 'ready' | 'uploading' | 'complete' | 'error'
 export type AttachmentLayout = 'auto' | 'row' | 'tile'
@@ -41,6 +43,7 @@ export type AttachmentLayout = 'auto' | 'row' | 'tile'
 export interface AttachmentEventMap {
   'attachment-remove': CustomEvent<{ name: string }>
   'attachment-retry': CustomEvent<{ name: string }>
+  'attachment-preview': CustomEvent<{ name: string }>
   'media-error': Event
 }
 
@@ -51,6 +54,9 @@ export interface Attachment {
 
 /**
  * Displays a file or image attachment with a preview, metadata, upload state and optional actions.
+ *
+ * With `preview`, the name (and the thumbnail) opens the file in a `c2-file-preview` dialog, with previous and next
+ * across the previewable attachments of its `c2-attachment-group`. The viewer loads on first use.
  *
  * @tag c2-attachment
  *
@@ -66,6 +72,7 @@ export interface Attachment {
  *
  * @event {CustomEvent<{ name: string }>} attachment-remove - Fired when the remove or cancel action is pressed.
  * @event {CustomEvent<{ name: string }>} attachment-retry - Fired when retry is pressed for a failed upload.
+ * @event {CustomEvent<{ name: string }>} attachment-preview - Fired before the preview opens; cancel it to show your own viewer.
  * @event {Event} media-error - Fired when the image preview cannot be loaded; the file fallback is shown.
  *
  * @cssproperty {pixel} [--c2-attachment--min-height=76px]
@@ -97,6 +104,7 @@ export interface Attachment {
  * @cssproperty {color} [--c2-attachment__action__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-attachment__action__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-attachment__disabled--opacity=0.38]
+ * @csspart preview - The `c2-file-preview` dialog; style it through its `--c2-file-preview*` variables.
  */
 @customElement('c2-attachment')
 export class Attachment extends LitElement {
@@ -132,7 +140,41 @@ export class Attachment extends LitElement {
   /** Disable built-in actions and dim the attachment. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
+  /** URL of the file itself, which the preview opens. Defaults to `src`. */
+  @property() href: string | undefined = undefined
+
+  /** The file's content (a `File` from an input), which the preview reads in place of `href`. */
+  @property({ attribute: false }) file: Blob | undefined = undefined
+
+  /** Make the name and thumbnail open a preview of the file. */
+  @property({ type: Boolean, reflect: true }) preview = false
+
   @state() private imageFailed = false
+  @state() private previewItems: FilePreviewItem[] | undefined = undefined
+  private previewIndex = 0
+
+  /** What the preview shows for this attachment. */
+  private get previewItem(): FilePreviewItem {
+    return { name: this.name, src: this.href ?? this.src, file: this.file, type: this.type, size: this.size, alt: this.alt }
+  }
+
+  /** Opens the preview, with the previewable attachments of the same group as its set. */
+  async openPreview() {
+    if (this.disabled || this.previewItems) return
+    const group = this.closest('c2-attachment-group')
+    const set = group ? [...group.querySelectorAll('c2-attachment')].filter((item) => item.preview && item.closest('c2-attachment-group') === group) : [this]
+    if (!set.includes(this)) set.push(this)
+    if (!this.dispatchEvent(new CustomEvent('attachment-preview', { detail: { name: this.name }, bubbles: true, composed: true, cancelable: true }))) return
+    await import('./file-preview.js')
+    this.previewIndex = set.indexOf(this)
+    this.previewItems = set.map((item) => item.previewItem)
+    await this.updateComplete
+    await this.renderRoot.querySelector<FilePreview>('c2-file-preview')?.showModal()
+  }
+
+  private readonly closePreview = () => {
+    this.previewItems = undefined
+  }
 
   override willUpdate(changed: PropertyValues<this>) {
     if (changed.has('src')) this.imageFailed = false
@@ -302,15 +344,24 @@ export class Attachment extends LitElement {
   override render() {
     const showImage = !!this.src && !this.imageFailed
     const tile = this.layout === 'tile' || (this.layout === 'auto' && !!this.src)
+    const nameSlot = html`<slot name="name">${this.name || 'Untitled attachment'}</slot>`
     return html`
       <article class=${classMap({ attachment: true, 'has-image': showImage, tile })} aria-label=${this.name || nothing}>
-        <div part="media" class="media">
+        <div part="media" class="media" @click=${this.preview && !this.disabled ? this.openPreview : nothing}>
           <slot name="media">
             ${showImage ? html`<img src=${this.src!} alt=${this.alt ?? this.name} loading="lazy" @error=${this.handleImageError} />` : this.renderMediaFallback()}
           </slot>
         </div>
         <div part="content" class="content">
-          <div part="name" class="name"><slot name="name">${this.name || 'Untitled attachment'}</slot></div>
+          <div part="name" class="name">
+            ${
+              this.preview
+                ? html`<button type="button" class="preview-trigger" aria-haspopup="dialog" ?disabled=${this.disabled} @click=${this.openPreview}>
+                    ${nameSlot}
+                  </button>`
+                : nameSlot
+            }
+          </div>
           ${
             this.status !== 'uploading' && (this.type || this.size)
               ? html`<div part="metadata" class="metadata">
@@ -324,6 +375,7 @@ export class Attachment extends LitElement {
         </div>
         <div part="actions" class="actions"><slot name="actions">${this.renderActions()}</slot></div>
       </article>
+      ${this.previewItems ? html`<c2-file-preview part="preview" modal .items=${this.previewItems} .index=${this.previewIndex} @close=${this.closePreview}></c2-file-preview>` : nothing}
     `
   }
 }
