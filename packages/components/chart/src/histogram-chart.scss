@@ -1,0 +1,12 @@
+// The histogram's own variables. The canvas reads them when the options are built; nothing in the shadow root uses
+// them, so the map only records the defaults the JSDoc mirrors.
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    bin--gap: 1px,
+    overlay--color: #18181b,
+    overlay--width: 2px,
+    percentile--color: #18181b,
+    percentile--width: 1px,
+  )
+);

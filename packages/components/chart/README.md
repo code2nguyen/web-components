@@ -30,6 +30,7 @@ import '@c2n/components/chart' // all of them
 | `c2-line-chart`        | uPlot   | Time or numeric trends                          |
 | `c2-area-chart`        | uPlot   | The same, with the region under the line filled |
 | `c2-bar-chart`         | uPlot   | Categorical or time-bucketed values             |
+| `c2-histogram-chart`   | uPlot   | Raw samples binned into a distribution          |
 | `c2-sparkline`         | uPlot   | A chromeless trend for a table cell or KPI row  |
 | `c2-pie-chart`         | ECharts | Parts of a whole, with a donut mode             |
 | `c2-gauge-chart`       | ECharts | A bounded current value or target               |
