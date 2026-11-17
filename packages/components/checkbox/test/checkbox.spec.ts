@@ -360,24 +360,41 @@ test('default marks are drawn the first time their state is reached, and kept af
 })
 
 test('a slotted mark replaces the default one, drawn or not', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-checkbox aria-label="Star" checked><span slot="checkmark" id="star">★</span></c2-checkbox>')
-  const shown = await page.locator('c2-checkbox').evaluate((el) => {
-    const slot = el.shadowRoot!.querySelector<HTMLSlotElement>('slot[name="checkmark"]')!
-    return slot.assignedElements().map((node) => node.id)
-  })
-  expect(shown).toEqual(['star'])
+  await renderScenario('<c2-checkbox aria-label="Star"><span slot="checkmark" id="star">★</span></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const state = () =>
+    host.evaluate((el) => {
+      const slot = el.shadowRoot!.querySelector<HTMLSlotElement>('slot[name="checkmark"]')!
+      return { assigned: slot.assignedElements().map((node) => node.id), defaults: slot.querySelectorAll('svg').length }
+    })
+  expect(await state()).toEqual({ assigned: ['star'], defaults: 0 })
+  await page.getByRole('checkbox').check()
+  // The default is drawn as fallback content of the slot, so the author's mark still wins.
+  expect((await state()).assigned).toEqual(['star'])
+  await expect(host.locator('#star')).toBeVisible()
 })
 
-test('the hover layer still paints behind the box', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-checkbox aria-label="Accept" style="--c2-checkbox__state-layer__hover__unselected--color: rgb(255, 0, 0)"></c2-checkbox>')
+test('the hover layer fills the touch target behind the box, and stays behind it once disabled', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept" checked style="--c2-checkbox__state-layer__hover__selected--color: rgb(255, 0, 0)"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
   const layer = () =>
-    page.locator('c2-checkbox').evaluate((el) => {
-      const style = getComputedStyle(el.shadowRoot!.querySelector('.c2-checkbox__background')!, '::before')
-      return { color: style.backgroundColor, width: style.width, opacity: Number(style.opacity) }
+    host.evaluate((el) => {
+      const target = el.shadowRoot!.querySelector('.c2-checkbox')!
+      const style = getComputedStyle(target, '::before')
+      return {
+        color: style.backgroundColor,
+        opacity: Number(style.opacity),
+        width: style.width,
+        zIndex: style.zIndex,
+        // The layer's stacking context: the touch target, which positions it and sits above nothing else.
+        context: getComputedStyle(target).zIndex,
+      }
     })
-  expect((await layer()).opacity).toBe(0)
+  expect(await layer()).toMatchObject({ opacity: 0, width: '32px', zIndex: '-1', context: '0' })
   await page.getByRole('checkbox').hover()
   await expect.poll(async () => (await layer()).color).toBe('rgb(255, 0, 0)')
   await expect.poll(async () => (await layer()).opacity).toBeGreaterThan(0)
-  expect((await layer()).width).toBe('32px')
+  // Disabled while hovered: the layer leaves, and the box above it is never covered.
+  await props(host, { disabled: true })
+  await expect.poll(async () => (await layer()).opacity).toBe(0)
 })
