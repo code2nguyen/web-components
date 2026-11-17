@@ -22,6 +22,8 @@ import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons
 
 When there are more tabs than room (six tabs on a phone), set `overflow="scroll"`: the tab list scrolls sideways instead of running past the page, the selected tab is scrolled into view whenever it changes, the arrow keys still reach every tab, and an edge with hidden tabs fades out (`--c2-tabs__fade--width`). The scrollbar is hidden; set `--c2-tabs--scrollbar-width: thin` to show one for mouse users without a horizontal wheel.
 
+Or set `overflow="menu"` to fold instead of scroll: the tabs that do not fit, from the end, go into a "More" menu after the strip, and the selected tab never folds. Picking a tab from the menu selects it (through the same cancelable `tab-change` as a click) and brings it back into the strip in place of another, and the arrow keys, Home and End move onto folded tabs the same way. Restyle the trigger through `--c2-tabs__more--*` or its `more` part.
+
 Strips that share a `sync-key` switch together, which is how a page of install commands keeps one package-manager (or language) switcher: picking `pnpm` in one strip selects the tab labelled `pnpm` in every other strip with that key, and the choice is remembered in `localStorage` (`c2n-tabs:<sync-key>`) so the page opens on it next time. Tabs are matched by their label, so the panel ids stay unique per strip. For tabs that are links between pages, use [`c2-tab-nav`](/web-components/components/tab-nav).
 
 ## Import

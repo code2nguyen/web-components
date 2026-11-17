@@ -389,3 +389,64 @@ test('overflow="scroll" in a right-to-left strip reveals the selected tab and fa
   await expect.poll(() => inView(page, 'f')).toBe(true)
   await expect.poll(() => edges(page)).toEqual(['overflow-start'])
 })
+
+// #501, `overflow="menu"`: the tabs that do not fit fold into a "More" menu; the selected one never does.
+const shownTabs = (page: Page) =>
+  page
+    .locator('c2-tabs')
+    .evaluate((element) => [...element.querySelectorAll('c2-tab')].filter((tab) => tab.assignedSlot?.name === 'tab').map((tab) => tab.getAttribute('for')))
+const more = (page: Page) => page.locator('c2-tabs').locator('.more')
+
+test('overflow="menu" folds the tabs that do not fit, from the end, behind a More trigger', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await expect(more(page)).toBeVisible()
+  await expect(more(page)).toHaveAttribute('aria-label', '3 more tabs')
+  // Shown tabs and the trigger stay inside the strip.
+  const right = await page.locator('c2-tabs').evaluate((element) => element.getBoundingClientRect().right)
+  expect((await more(page).boundingBox())!.x + (await more(page).boundingBox())!.width).toBeLessThanOrEqual(right + 0.5)
+  // Folding writes no `slot` on the tabs: they are routed between slots by hand.
+  expect(await page.locator('c2-tab').evaluateAll((tabs) => tabs.filter((tab) => tab.hasAttribute('slot')).length)).toBe(0)
+
+  await more(page).click()
+  await expect
+    .poll(() => page.locator('c2-menu-item').evaluateAll((rows) => rows.filter((row) => row.checkVisibility()).map((row) => row.textContent?.trim())))
+    .toEqual(['Section D', 'Section E', 'Section F'])
+  await page.locator('c2-menu-item', { hasText: 'Section F' }).click()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'f')
+  await expect.poll(() => shownTabs(page)).toContain('f')
+  await expect(page.locator('c2-tab[for="f"]')).toBeFocused()
+  await expect(page.locator('#f')).toBeVisible()
+  await accessible(page)
+})
+
+test('overflow="menu" keeps the selected tab, unfolds as the strip widens, and shows no trigger when all fit', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420, 'e'))
+  await expect.poll(() => shownTabs(page)).toContain('e')
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '1200px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  await expect(more(page)).toBeHidden()
+})
+
+test('overflow="menu": the arrow keys reach folded tabs and bring them into the strip', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await page.locator('c2-tab[for="c"]').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('c2-tab[for="d"]')).toBeFocused()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'd')
+  await expect.poll(() => shownTabs(page)).toContain('d')
+  await page.keyboard.press('End')
+  await expect(page.locator('c2-tab[for="f"]')).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(page.locator('c2-tab[for="a"]')).toBeFocused()
+})
+
+test('overflow="menu": a vetoed tab-change keeps the current tab when a folded one is picked', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await page.locator('c2-tabs').evaluate((element) => element.addEventListener('tab-change', (event) => event.preventDefault()))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await more(page).click()
+  await page.locator('c2-menu-item', { hasText: 'Section E' }).click()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'a')
+})

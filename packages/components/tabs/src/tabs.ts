@@ -4,6 +4,9 @@ import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { repeat } from 'lit/directives/repeat.js'
+import { classMap } from 'lit/directives/class-map.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { tabsMessages } from './messages'
 import { provide } from '@lit/context'
 import styles from './tabs.scss?inline'
 import { selectedTabContext } from './tab-context'
@@ -12,6 +15,13 @@ import './tab'
 import type { Tab } from './tab'
 
 const TAB_TAG = 'c2-tab'
+
+/** Slot of the tabs folded into the menu (`overflow="menu"`), laid out invisibly so they keep reporting their width. */
+const FOLDED_SLOT = 'c2-tabs-folded'
+
+/** The menu is loaded the first time a strip folds tabs, so a strip that never does pays nothing for it. */
+let menuModule: Promise<unknown> | undefined
+const loadMenu = () => (menuModule ??= import('@c2n/menu'))
 
 /** Window event a strip with a `sync-key` fires when the user picks a tab, so the other strips of its group follow. */
 const SYNC_EVENT = 'c2-tabs-sync'
@@ -36,9 +46,9 @@ const canReferenceElements = typeof Element !== 'undefined' && 'ariaLabelledByEl
 
 /**
  * What the strip does when its tabs are wider than it: `visible` (default) lets them run past its edge, `scroll` scrolls
- * the tab list sideways.
+ * the tab list sideways, `menu` folds the tabs that do not fit into a "More" menu.
  */
-export type TabsOverflow = 'visible' | 'scroll'
+export type TabsOverflow = 'visible' | 'scroll' | 'menu'
 
 /** Detail of the `selection-change` event of {@link Tabs}. */
 export interface TabsSelectionChangeEventDetail {
@@ -79,6 +89,12 @@ export interface Tabs {
  * side where tabs are hidden (`--c2-tabs__fade--width`), as in `c2-tab-nav`. The scrollbar is hidden unless `--c2-tabs--scrollbar-width`
  * says otherwise.
  *
+ * `overflow="menu"` folds instead: the tabs that do not fit, from the end, go into a "More" menu after the strip, and
+ * the selected tab never folds. Picking a tab from the menu selects it (through the same cancelable `tab-change` as a
+ * click) and brings it back into the strip in place of another; the arrow keys, Home and End move onto folded tabs the
+ * same way. Style the trigger through `--c2-tabs__more--*` or its `more` part. A server-rendered strip, which cannot
+ * move its tabs between slots, scrolls instead.
+ *
  * Strips that share a `sync-key` move together: picking a tab in one selects the tab with the same label in every
  * other strip of the page with that key (a package manager, a language), and the choice is remembered in
  * `localStorage` and restored when the page loads again. That is how a set of code blocks keeps one switcher.
@@ -90,6 +106,8 @@ export interface Tabs {
  * @tag c2-tabs
  *
  * @slotcomponent c2-tab
+ *
+ * @csspart more - The trigger of the menu of folded tabs (`overflow="menu"`), a native button.
  *
  * @slot tab - The `<c2-tab>` children (assigned by the strip; no `slot` attribute needed).
  * @slot tab-content - The panel of the selected tab, in a server-rendered shadow root only (assigned from the child whose `id` matches `selected-tab`). Otherwise each panel is assigned to a wrapper of its own; no `slot` attribute is needed either way.
@@ -105,6 +123,11 @@ export interface Tabs {
  * @cssproperty {pixel} --c2-tabs--height
  * @cssproperty {pixel} --c2-tabs--gap
  * @cssproperty {scrollbar-width} [--c2-tabs--scrollbar-width=none] - Scrollbar of a strip with `overflow="scroll"`: `thin` or `auto` shows one, which a mouse without a horizontal wheel can drag.
+ * @cssproperty {pixel} [--c2-tabs__more--gap=4px] - Space between the trigger's text and its chevron.
+ * @cssproperty {color} --c2-tabs__more--color - Text of the "More" trigger; the tabs' colour by default.
+ * @cssproperty {color} --c2-tabs__more__hover--color
+ * @cssproperty {color} --c2-tabs__more__hover--background-color
+ * @cssproperty {outline} [--c2-tabs__more__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-tabs__fade--width=32px] - Width of the fade at an edge of a scrolling strip where tabs are hidden; a scrolled-to tab stays this far from the edge.
  * @cssproperty {border-radius} --c2-tabs--border-radius
  * @cssproperty {padding} --c2-tabs--padding-top
@@ -177,7 +200,8 @@ export class Tabs extends LitElement {
 
   /**
    * What happens when the tabs are wider than the strip. `visible` (default): they run past its edge. `scroll`: the
-   * tab list scrolls sideways, keeps the selected tab in view and fades the edges where tabs are hidden.
+   * tab list scrolls sideways, keeps the selected tab in view and fades the edges where tabs are hidden. `menu`: the
+   * tabs that do not fit fold into a "More" menu after the strip; the selected tab stays.
    */
   @property({ reflect: true }) overflow: TabsOverflow = 'visible'
 
@@ -189,6 +213,22 @@ export class Tabs extends LitElement {
 
   @query('slot[name="tab"]')
   private tabsSlot!: HTMLSlotElement
+
+  @query(`slot[name="${FOLDED_SLOT}"]`)
+  private foldedSlot?: HTMLSlotElement
+
+  @query('.more')
+  private trigger?: HTMLButtonElement
+
+  /** Tabs folded into the menu (`overflow="menu"`), in document order. */
+  @state() private folded: Tab[] = []
+
+  /** Whether `c2-menu` has been loaded; the trigger is drawn from then on. */
+  @state() private menuReady = false
+
+  private readonly msg = new LocalizeController(this, tabsMessages)
+  private widths = new WeakMap<Element, number>()
+  private fitQueued = false
 
   @query('slot[name="tab-content"]')
   private contentSlot!: HTMLSlotElement
@@ -215,7 +255,9 @@ export class Tabs extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer && typeof ResizeObserver !== 'undefined' && !this.resizeObserver) {
-      this.resizeObserver = new ResizeObserver(() => {
+      this.resizeObserver = new ResizeObserver((records) => {
+        for (const record of records) this.widths.set(record.target, record.borderBoxSize?.[0]?.inlineSize ?? record.contentRect.width)
+        if (this.folding) this.queueFit()
         this.updateIndicator()
         this.revealSelected(false)
         this.updateScrollEdges()
@@ -228,6 +270,12 @@ export class Tabs extends LitElement {
       if (this.hasUpdated) this.assignSlots()
       window.addEventListener(SYNC_EVENT, this.handleSync)
     }
+  }
+
+  constructor() {
+    super()
+    // On the host rather than the strip: a folded tab sits outside the strip, and the menu fires its `tab-change` too.
+    this.addEventListener('tab-change', this.handleTabChange)
   }
 
   override disconnectedCallback() {
@@ -255,16 +303,88 @@ export class Tabs extends LitElement {
     const tabs = [...this.children].filter((child) => child.localName === TAB_TAG)
     if (this.manualSlots) {
       // `assign()` fires `slotchange` when the set changes, which runs `handleTabSlotChange`.
-      this.tabsSlot.assign(...tabs)
+      this.assignTabs(tabs)
+      if (this.folding) this.queueFit()
     } else {
       for (const tab of tabs) if (tab.getAttribute('slot') !== 'tab') tab.setAttribute('slot', 'tab')
     }
     this.syncPanels()
   }
 
-  /** Slotted `<c2-tab>` elements, in DOM order. */
+  /** Puts the shown tabs in the strip and the folded ones in the measuring slot. */
+  private assignTabs(tabs: Element[] = [...this.children].filter((child) => child.localName === TAB_TAG)) {
+    const folded = new Set<Element>(this.folded)
+    const shown = tabs.filter((tab) => !folded.has(tab))
+    const same = (slot: HTMLSlotElement | undefined, list: Element[]) => {
+      const current = slot?.assignedElements() ?? []
+      return current.length === list.length && current.every((element, index) => element === list[index])
+    }
+    if (!same(this.tabsSlot, shown)) this.tabsSlot.assign(...shown)
+    if (this.foldedSlot && !same(this.foldedSlot, [...folded])) this.foldedSlot.assign(...tabs.filter((tab) => folded.has(tab)))
+  }
+
+  /** The `<c2-tab>` children, in DOM order, whether shown in the strip or folded into the menu. */
   get tabs(): Tab[] {
-    return (this.tabsSlot?.assignedElements() ?? []).filter((el): el is Tab => el.localName === TAB_TAG)
+    if (!this.tabsSlot) return []
+    return [...this.children].filter((el): el is Tab => el.localName === TAB_TAG && (el.assignedSlot !== null || el.getAttribute('slot') === 'tab'))
+  }
+
+  /** Whether this strip folds tabs into a menu: `overflow="menu"` with manual slot assignment (not server-rendered). */
+  private get folding(): boolean {
+    return this.overflow === 'menu' && this.manualSlots
+  }
+
+  /** Whether the tab list scrolls: `overflow="scroll"`, or `menu` in a server-rendered strip, which cannot fold. */
+  private get scrolling(): boolean {
+    return this.overflow === 'scroll' || (this.overflow === 'menu' && this.hasUpdated && !this.manualSlots)
+  }
+
+  /** Refits on the next frame: refitting inside a resize observer callback would resize what it observes. */
+  private queueFit() {
+    if (this.fitQueued) return
+    this.fitQueued = true
+    requestAnimationFrame(() => {
+      this.fitQueued = false
+      this.fit()
+    })
+  }
+
+  /**
+   * Folds the fewest tabs, from the end, so the rest and the trigger fit the strip. The selected tab never folds.
+   * Widths come from the resize observer (folded tabs keep their natural width in the measuring slot).
+   */
+  private fit() {
+    const bar = this.renderRoot.querySelector<HTMLElement>('.c2-tabs-bar')
+    const header = this.header
+    if (!this.folding || !bar || !header || !this.isConnected || bar.clientWidth === 0) {
+      if (!this.folding && this.folded.length) this.setFolded([])
+      return
+    }
+    const style = getComputedStyle(header)
+    const gap = parseFloat(style.columnGap) || 0
+    const available = bar.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0) + 0.5
+    const width = (element: Element) => this.widths.get(element) ?? element.getBoundingClientRect().width
+    const tabs = [...this.children].filter((child): child is Tab => child.localName === TAB_TAG)
+    const trigger = this.trigger ? width(this.trigger) : 0
+    const folded = new Set<Tab>()
+    const occupied = () => {
+      const shown = tabs.filter((tab) => !folded.has(tab))
+      const total = shown.reduce((sum, tab) => sum + width(tab), 0) + gap * Math.max(0, shown.length - 1)
+      return folded.size ? total + trigger : total
+    }
+    for (const tab of [...tabs].reverse()) {
+      if (occupied() <= available) break
+      if (tab.for !== this.selectedTab) folded.add(tab)
+    }
+    this.setFolded(tabs.filter((tab) => folded.has(tab)))
+  }
+
+  private setFolded(folded: Tab[]) {
+    if (folded.length === this.folded.length && folded.every((tab, index) => tab === this.folded[index])) return
+    if (folded.length) void loadMenu().then(() => (this.menuReady = true))
+    this.folded = folded
+    this.assignTabs()
+    this.updateIndicator()
   }
 
   /** Selects a tab and notifies listeners. Ignores unknown or disabled tabs. */
@@ -312,8 +432,10 @@ export class Tabs extends LitElement {
     if (tab) this.selectedTab = tab.for
   }
 
-  private handleTabChange(event: CustomEvent<string>) {
-    const value = event.detail
+  private handleTabChange = (event: Event) => {
+    // Only this strip's own tabs: a strip nested in a panel reports its tabs through the same bubbling event.
+    if ((event.target as Element).parentElement !== this || (event.target as Element).localName !== TAB_TAG) return
+    const value = (event as CustomEvent<string>).detail
     // Let every `tab-change` listener up the tree run first so `preventDefault()` can veto the switch.
     queueMicrotask(() => {
       if (!event.defaultPrevented) this.select(value)
@@ -346,8 +468,27 @@ export class Tabs extends LitElement {
     }
     event.preventDefault()
     const tab = tabs[(next + tabs.length) % tabs.length]
+    if (this.folded.includes(tab)) {
+      // A folded tab comes back into the strip once selected; focus it there.
+      this.select(tab.for)
+      void this.updateComplete.then(() => tab.focus())
+      return
+    }
     tab.focus()
     this.select(tab.for)
+  }
+
+  /** A tab picked from the menu: the same cancelable `tab-change` as a click on it, then focus on it in the strip. */
+  private handleMenuSelect = (event: Event) => {
+    event.stopPropagation()
+    const value = (event as CustomEvent<{ value: string }>).detail.value
+    const tab = this.folded.find((t) => t.for === value)
+    if (!tab || tab.disabled) return
+    tab.dispatchEvent(new CustomEvent('tab-change', { bubbles: true, cancelable: true, detail: tab.for }))
+    // After the menu has closed (and handed focus back to its trigger) and the strip has refitted.
+    setTimeout(() => {
+      if (this.selectedTab === tab.for) void this.updateComplete.then(() => tab.focus())
+    })
   }
 
   private async handleTabSlotChange() {
@@ -359,6 +500,7 @@ export class Tabs extends LitElement {
     this.resizeObserver?.disconnect()
     if (this.resizeObserver) {
       this.resizeObserver.observe(this.header)
+      this.observeBar()
       for (const tab of tabs) this.resizeObserver.observe(tab)
     }
 
@@ -504,7 +646,21 @@ export class Tabs extends LitElement {
     }
   }
 
+  /** The room of a folding strip and the trigger's width, both re-measured when they change. */
+  private observeBar() {
+    const bar = this.renderRoot.querySelector('.c2-tabs-bar')
+    if (bar) this.resizeObserver?.observe(bar)
+    if (this.trigger) this.resizeObserver?.observe(this.trigger)
+  }
+
   override updated(changed: PropertyValues<this>) {
+    if (changed.has('overflow') || (changed as PropertyValues).has('menuReady')) {
+      if (changed.has('overflow') && this.resizeObserver && this.header) this.resizeObserver.observe(this.header)
+      this.observeBar()
+      this.fit()
+    }
+    // A newly selected tab may be folded: refit at once so it is in the strip before anything focuses it.
+    if (changed.has('selectedTab') && this.folding) this.fit()
     if (changed.has('selectedTab')) {
       this.syncTabs()
       this.updateIndicator()
@@ -523,7 +679,7 @@ export class Tabs extends LitElement {
    */
   private revealSelected(smooth: boolean) {
     const header = this.header
-    if (this.overflow !== 'scroll' || !header) return
+    if (!this.scrolling || !header) return
     const tab = this.tabs.find((t) => t.for === this.selectedTab)
     if (!tab) return
     const strip = header.getBoundingClientRect()
@@ -546,7 +702,7 @@ export class Tabs extends LitElement {
   private updateScrollEdges = () => {
     const header = this.header
     if (!header) return
-    const scrolling = this.overflow === 'scroll'
+    const scrolling = this.scrolling
     // In a right-to-left strip `scrollLeft` runs from 0 down to negative values, so its magnitude is the distance from the start.
     const fromStart = Math.abs(header.scrollLeft)
     const room = header.scrollWidth - header.clientWidth
@@ -554,20 +710,64 @@ export class Tabs extends LitElement {
     header.classList.toggle('overflow-end', scrolling && room - fromStart > 1)
   }
 
+  private renderHeader() {
+    return html`<div
+      class=${classMap({ 'c2-tabs-header': true, scrolling: this.scrolling, folding: this.overflow === 'menu' && !this.scrolling })}
+      role="tablist"
+      aria-label=${this.ariaLabel || nothing}
+      @keydown=${this.handleKeydown}
+      @scroll=${this.updateScrollEdges}
+    >
+      <slot name="tab" @slotchange=${this.handleTabSlotChange}></slot>
+      <div class="selection-indicator first-position"></div>
+    </div>`
+  }
+
+  /**
+   * The trigger and menu of the folded tabs, after the tab list (a `tablist` owns only tabs), and the measuring slot
+   * that keeps the folded tabs laid out at their natural width while they are out of the strip.
+   */
+  private renderMore() {
+    const count = this.folded.length
+    const idle = count === 0 || !this.menuReady
+    return html`<c2-menu
+        class=${classMap({ 'more-menu': true, idle })}
+        placement="bottom-end"
+        aria-label=${this.msg.t('moreMenu')}
+        ?disabled=${idle}
+        @menu-select=${this.handleMenuSelect}
+      >
+        <button slot="trigger" class="more" part="more" type="button" aria-label=${this.msg.t('moreTabs', count)} tabindex=${idle ? '-1' : nothing}>
+          <span>${this.msg.t('more')}</span>
+          <svg
+            class="more-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        ${repeat(
+          this.folded,
+          (tab) => tab,
+          (tab) => html`<c2-menu-item value=${tab.for} ?disabled=${tab.disabled}>${syncLabel(tab)}</c2-menu-item>`,
+        )}
+      </c2-menu>
+      <div class="measure" aria-hidden="true" inert>
+        <div class="measure-row"><slot name=${FOLDED_SLOT} @slotchange=${this.handleTabSlotChange}></slot></div>
+      </div>`
+  }
+
   override render() {
     return html`
       <div class="c2-tabs">
-        <div
-          class="c2-tabs-header"
-          role="tablist"
-          aria-label=${this.ariaLabel || nothing}
-          @tab-change=${this.handleTabChange}
-          @keydown=${this.handleKeydown}
-          @scroll=${this.updateScrollEdges}
-        >
-          <slot name="tab" @slotchange=${this.handleTabSlotChange}></slot>
-          <div class="selection-indicator first-position"></div>
-        </div>
+        ${this.overflow === 'menu' ? html`<div class="c2-tabs-bar">${this.renderHeader()}${this.renderMore()}</div>` : this.renderHeader()}
         <slot name="tab-content"></slot>
         ${repeat(
           this.panels,

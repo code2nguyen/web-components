@@ -1,3 +1,4 @@
+@use '@c2n/sass/focus';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -15,6 +16,12 @@
     padding-left: null,
     scrollbar-width: none,
     fade--width: 32px,
+
+    more--gap: 4px,
+    more--color: null,
+    more__hover--color: null,
+    more__hover--background-color: null,
+    more__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
 
     indicator--color: variables.$color-border-dark,
     indicator--border-radius: null,
@@ -152,14 +159,15 @@
 }
 
 // A scrolling strip in a flex row may shrink below its tabs' width: that is what makes it scroll.
-:host([overflow='scroll']) {
+:host([overflow='scroll']),
+:host([overflow='menu']) {
   min-width: 0;
 }
 
 // `overflow="scroll"`: the tab list scrolls sideways, as `c2-tab-nav` always does. The indicator is positioned inside
 // the strip, so it scrolls with the tabs. An edge with tabs hidden beyond it fades out (the `overflow-start` /
 // `overflow-end` classes), and the scroll padding keeps a scrolled-to tab clear of the fade.
-:host([overflow='scroll']) .c2-tabs-header {
+.c2-tabs-header.scrolling {
   --_fade-start: 0px;
   --_fade-end: 0px;
   --_fade-direction: to right;
@@ -189,12 +197,117 @@
 }
 
 // Safari before 18.2 ignores `scrollbar-width`; browsers that support it ignore this rule once it is set.
-:host([overflow='scroll']) .c2-tabs-header::-webkit-scrollbar {
+.c2-tabs-header.scrolling::-webkit-scrollbar {
   display: none;
 }
 
-:host([overflow='scroll']:dir(rtl)) .c2-tabs-header {
+:host(:dir(rtl)) .c2-tabs-header.scrolling {
   --_fade-direction: to left;
+}
+
+// `overflow="menu"`: the strip and, after it, the trigger of the folded tabs share one row and one underline. The
+// tabs that do not fit sit in `.measure`, laid out at their natural width so they keep reporting it.
+.c2-tabs-bar {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  box-shadow: css.cssVar(box-shadow);
+  background-color: css.cssVar(background-color);
+  border-radius: css.cssVar(border-radius);
+
+  .c2-tabs-header {
+    flex: 1;
+    min-width: 0;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  // Before the first fit (or a server-rendered first paint) whatever does not fit is clipped, not spilled.
+  .c2-tabs-header.folding {
+    overflow-x: clip;
+    overflow-clip-margin: 4px;
+  }
+}
+
+.more-menu {
+  flex: none;
+}
+
+// Nothing folded: the trigger leaves the row but stays laid out, so its width is known the moment it is needed.
+.more-menu.idle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(more--gap);
+  box-sizing: border-box;
+  margin: 0 0 css.cssVar(padding-bottom, indicator--height);
+  padding: css.cssVar(tab--padding-top) css.cssVar(tab--padding-right) css.cssVar(tab--padding-bottom) css.cssVar(tab--padding-left);
+  border: 0;
+  border-radius: css.cssVar(tab--border-top-left-radius);
+  background: transparent;
+  color: css.cssVar(more--color, tab--color);
+  font: inherit;
+  font-weight: css.cssVar(tab--font-weight);
+  font-size: css.cssVar(tab--font-size);
+  font-family: css.cssVar(tab--font-family);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: animation.standard(background-color), animation.standard(color);
+
+  @media (hover: hover) {
+    &:hover {
+      color: css.cssVar(more__hover--color, tab__hover--color, tab--color);
+      background-color: css.cssVar(more__hover--background-color, tab__hover--background-color);
+    }
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(more__focus--outline);
+    outline-offset: -2px;
+    @include focus.forced-colors-ring(2px, -2px);
+  }
+}
+
+.more-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.measure-row {
+  display: flex;
+  width: max-content;
+
+  ::slotted(c2-tab) {
+    flex: none;
+    gap: css.cssVar(tab--gap);
+    padding-top: css.cssVar(tab--padding-top);
+    padding-right: css.cssVar(tab--padding-right);
+    padding-bottom: css.cssVar(tab--padding-bottom);
+    padding-left: css.cssVar(tab--padding-left);
+    font-weight: css.cssVar(tab--font-weight);
+    font-size: css.cssVar(tab--font-size);
+    font-style: css.cssVar(tab--font-style);
+    font-family: css.cssVar(tab--font-family);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
