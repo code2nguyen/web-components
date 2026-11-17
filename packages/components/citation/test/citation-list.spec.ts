@@ -40,13 +40,10 @@ test('collects the markers of its answer, one card per source in the order of th
 })
 
 test('the keyboard opens the list, and focusing a card highlights the markers that cite it', async ({ page, renderScenario }) => {
-  await renderScenario(`<p><a href="#before">Before</a></p>${ANSWER}`)
-  await page.getByRole('link', { name: 'Before' }).focus()
-  // The markers are links too: Tab walks past them to the toggle.
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
+  // A link after the answer gives the last Tab a target in the page: tabbing out of the document is not the same in
+  // every browser.
+  await renderScenario(`${ANSWER}<p><a href="#after">After</a></p>`)
+  await summary(page).focus()
   await expect(summary(page)).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(cards(page).first()).toBeVisible()
@@ -57,6 +54,7 @@ test('the keyboard opens the list, and focusing a card highlights the markers th
   await page.keyboard.press('Tab')
   await expect.poll(() => highlighted(page)).toEqual(['m2'])
   await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'After' })).toBeFocused()
   await expect.poll(() => highlighted(page)).toEqual([])
 })
 
