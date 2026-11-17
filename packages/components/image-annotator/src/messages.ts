@@ -43,6 +43,8 @@ const en = {
   /** Announced after an edit: `{0}` is the shape's kind. */
   added: (kind: string) => `${kind} added`,
   deleted: (kind: string) => `${kind} deleted`,
+  /** Read after a shape whose `confidence` is under the threshold: `{0}` is the confidence in percent. */
+  lowConfidence: (percent: number) => `${percent}% confidence, needs review`,
   /** The text editor's accessible name. */
   textInput: 'Annotation text',
 }

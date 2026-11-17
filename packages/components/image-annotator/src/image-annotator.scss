@@ -13,6 +13,17 @@
       sans-serif,
     ),
     number--color: #ffffff,
+    shape__inactive--opacity: 1,
+    low-confidence--color: #d97706,
+    low-confidence--stroke-dasharray: 8 5,
+    detail--background-color: #ffffff,
+    detail--color: #18181b,
+    detail--border: 1px solid #e4e4e7,
+    detail--border-radius: 8px,
+    detail--box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12),
+    detail--padding: 12px,
+    detail--width: 260px,
+    detail--offset: 8px,
   )
 );
 
@@ -161,6 +172,10 @@ img {
   outline: none;
 }
 
+.pickable .shape {
+  cursor: pointer;
+}
+
 .tool-select .shape {
   cursor: move;
 }
@@ -170,8 +185,46 @@ img {
   pointer-events: none;
 }
 
-.tool-select .hit {
+.pickable .hit {
   pointer-events: all;
+}
+
+.has-active .shape:not(.selected) {
+  opacity: css.cssVar(shape__inactive--opacity);
+}
+
+// A region the extraction is unsure of: its outline turns to the review colour and dashes.
+.low > :first-child {
+  stroke: css.cssVar(low-confidence--color);
+  stroke-dasharray: css.cssVar(low-confidence--stroke-dasharray);
+}
+
+.canvas {
+  position: relative;
+}
+
+.detail {
+  position: absolute;
+  box-sizing: border-box;
+  width: min(#{css.cssVar(detail--width)}, 100%);
+  margin-left: css.cssVar(detail--offset);
+  padding: css.cssVar(detail--padding);
+  border: css.cssVar(detail--border);
+  border-radius: css.cssVar(detail--border-radius);
+  background-color: css.cssVar(detail--background-color);
+  box-shadow: css.cssVar(detail--box-shadow);
+  color: css.cssVar(detail--color);
+  line-height: normal;
+
+  &.end {
+    margin-right: css.cssVar(detail--offset);
+    margin-left: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid css.cssVar(selection--color);
+    outline-offset: 2px;
+  }
 }
 
 .label {

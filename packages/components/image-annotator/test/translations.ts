@@ -37,6 +37,7 @@ const fr: typeof imageAnnotatorMessages.en = {
   shapeOf: (kind, index, count) => `${kind} ${index} sur ${count}`,
   added: (kind) => `${kind} ajouté`,
   deleted: (kind) => `${kind} supprimé`,
+  lowConfidence: (percent) => `confiance ${percent} %, à vérifier`,
   textInput: "Texte de l'annotation",
 }
 
