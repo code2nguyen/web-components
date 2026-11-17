@@ -188,6 +188,8 @@ test('off screen the clock sleeps, and catches up when scrolled back', async ({ 
 test('keyboard: Tab reaches show then copy, and Space shows the code', async ({ page, renderScenario, tab }) => {
   await at(page, 59)
   await renderScenario(`<button id="before">Before</button><c2-totp-code label="Account" secret="${SHA1}"></c2-totp-code>`)
+  // The code is computed asynchronously (Web Crypto): wait for it, as the other tests do, before driving the keys.
+  await expect.poll(() => valueOf(page)).toMatch(/^\d{6}$/)
   await page.locator('#before').focus()
   await tab()
   await page.keyboard.press('Space')
