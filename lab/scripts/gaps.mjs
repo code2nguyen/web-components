@@ -1,0 +1,217 @@
+#!/usr/bin/env node
+// Adds up the build reports of every spec into the gap matrix: which capabilities real requirements need, how often the
+// components meet them as documented, with a workaround, or not at all, and what nothing tests yet. Writes lab/GAPS.md.
+//
+//   node lab/scripts/gaps.mjs           write lab/GAPS.md and print it
+//   node lab/scripts/gaps.mjs --check   also exit 1 on a warning (unknown tag, missing report row, unknown outcome)
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { dirname, join, relative, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(LAB, '..')
+const OUTCOMES = ['met', 'workaround', 'hand-rolled', 'failed']
+const warnings = []
+
+function walk(dir) {
+  if (!existsSync(dir)) return []
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name)
+    return statSync(path).isDirectory() ? walk(path) : name.endsWith('.md') && name !== 'TEMPLATE.md' && name !== 'README.md' ? [path] : []
+  })
+}
+
+/** A deliberately small front-matter reader: `key: value` and `key: [a, b]` lines between `---` fences. */
+function frontMatter(text) {
+  const match = /^---\n([\s\S]*?)\n---\n/.exec(text)
+  const data = {}
+  if (!match) return { data, body: text }
+  for (const line of match[1].split('\n')) {
+    const field = /^([\w-]+):\s*(.*)$/.exec(line)
+    if (!field) continue
+    const value = field[2].trim()
+    data[field[1]] = value.startsWith('[')
+      ? value
+          .slice(1, -1)
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : value
+  }
+  return { data, body: text.slice(match[0].length) }
+}
+
+function loadCapabilities() {
+  const text = readFileSync(join(LAB, 'capabilities.md'), 'utf8')
+  const capabilities = new Map()
+  let group = ''
+  for (const line of text.split('\n')) {
+    if (line.startsWith('## ')) group = line.slice(3).trim()
+    const entry = /^- `([a-z0-9.-]+)`:\s*(.*)$/.exec(line)
+    if (entry) capabilities.set(entry[1], { group, description: entry[2] })
+  }
+  return capabilities
+}
+
+function loadSpecs(capabilities) {
+  const specs = new Map()
+  for (const file of walk(join(LAB, 'specs'))) {
+    const { data, body } = frontMatter(readFileSync(file, 'utf8'))
+    if (!data.id) {
+      warnings.push(`${relative(ROOT, file)}: no id in front matter`)
+      continue
+    }
+    const requirements = new Map()
+    for (const match of body.matchAll(/^- (R\d+) \[([^\]]+)\] ([^\n]*)/gm)) {
+      const tags = match[2].split(',').map((tag) => tag.trim())
+      for (const tag of tags) if (!capabilities.has(tag)) warnings.push(`${relative(ROOT, file)} ${match[1]}: unknown capability \`${tag}\``)
+      requirements.set(match[1], { id: match[1], tags, text: match[3].trim() })
+    }
+    specs.set(data.id, { ...data, file: relative(ROOT, file), requirements, directions: data.directions ?? ['default'] })
+  }
+  return specs
+}
+
+function loadReports(specs) {
+  const reports = []
+  for (const file of walk(join(LAB, 'reports'))) {
+    const { data, body } = frontMatter(readFileSync(file, 'utf8'))
+    const spec = specs.get(data.spec)
+    if (!spec) {
+      warnings.push(`${relative(ROOT, file)}: unknown spec \`${data.spec}\``)
+      continue
+    }
+    const rows = new Map()
+    for (const line of body.split('\n')) {
+      const cells = line.split('|').map((cell) => cell.trim())
+      if (cells.length < 5 || !/^R\d+$/.test(cells[1])) continue
+      const outcome = cells[2].replace(/[^a-z-]/g, '')
+      if (!OUTCOMES.includes(outcome)) warnings.push(`${relative(ROOT, file)} ${cells[1]}: outcome "${cells[2]}" is not one of ${OUTCOMES.join(', ')}`)
+      if (!spec.requirements.has(cells[1])) warnings.push(`${relative(ROOT, file)}: ${cells[1]} is not a requirement of ${spec.id}`)
+      const components = [...cells[3].matchAll(/c2-[a-z0-9-]+|@c2n\/[a-z0-9-]+/g)].map((m) => m[0])
+      rows.set(cells[1], { outcome, components, notes: cells[4] })
+    }
+    for (const id of spec.requirements.keys()) if (!rows.has(id)) warnings.push(`${relative(ROOT, file)}: no row for ${id}`)
+    reports.push({ ...data, file: relative(ROOT, file), spec, rows })
+  }
+  return reports
+}
+
+function loadRegistry() {
+  const file = join(ROOT, 'packages/tools/mcp/data/registry.json')
+  if (!existsSync(file)) return null
+  const registry = JSON.parse(readFileSync(file, 'utf8'))
+  return Object.values(registry.components)
+    .filter((component) => component.category !== 'Icons')
+    .map((component) => ({ id: component.id, category: component.category, tags: component.elements?.map((element) => element.tag ?? element) ?? [] }))
+}
+
+const cell = (text) => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ')
+
+function render(capabilities, specs, reports, registry) {
+  const lines = [
+    '# Gap matrix',
+    '',
+    'Generated by `node lab/scripts/gaps.mjs` from `lab/specs/` and `lab/reports/`. Do not edit by hand.',
+    '',
+    'Outcomes: **met** (a component does it as documented), **workaround** (met with extra code or a hack),',
+    '**hand-rolled** (no component fits), **failed** (could not be done).',
+    '',
+    '## Builds',
+    '',
+    '| Spec | Size | Direction | Requirements | Met | Workaround | Hand-rolled | Failed | Report |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
+  ]
+  for (const spec of specs.values()) {
+    for (const direction of spec.directions) {
+      const report = reports.find((candidate) => candidate.spec.id === spec.id && (candidate.direction ?? 'default') === direction)
+      if (!report) {
+        lines.push(`| ${spec.id} | ${spec.size} | ${direction} | ${spec.requirements.size} | | | | | not built |`)
+        continue
+      }
+      const count = (outcome) => [...report.rows.values()].filter((row) => row.outcome === outcome).length
+      lines.push(
+        `| ${spec.id} | ${spec.size} | ${direction} | ${spec.requirements.size} | ${count('met')} | ${count('workaround')} | ${count('hand-rolled')} | ${count('failed')} | [${report.file.replace(/^lab\//, '')}](${relative(LAB, join(ROOT, report.file))}) |`,
+      )
+    }
+  }
+
+  // Capability rows: every requirement that carries the tag, across every built report.
+  const byCapability = new Map()
+  for (const report of reports) {
+    for (const [id, row] of report.rows) {
+      const requirement = report.spec.requirements.get(id)
+      for (const tag of requirement?.tags ?? []) {
+        const entry = byCapability.get(tag) ?? { specs: new Set(), counts: Object.fromEntries(OUTCOMES.map((o) => [o, 0])), components: new Set(), issues: [] }
+        entry.specs.add(report.spec.id)
+        if (entry.counts[row.outcome] !== undefined) entry.counts[row.outcome]++
+        row.components.forEach((component) => entry.components.add(component))
+        if (row.outcome !== 'met') entry.issues.push(`${report.spec.id}/${id}`)
+        byCapability.set(tag, entry)
+      }
+    }
+  }
+  const score = (entry) => entry.counts.failed * 3 + entry.counts['hand-rolled'] * 2 + entry.counts.workaround
+  lines.push(
+    '',
+    '## By capability',
+    '',
+    'Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workaround ×1).',
+    '',
+    '| Capability | Specs | Met | Workaround | Hand-rolled | Failed | Components | Where it fell short |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- |',
+  )
+  for (const [tag, entry] of [...byCapability].sort((a, b) => score(b[1]) - score(a[1]) || a[0].localeCompare(b[0]))) {
+    lines.push(
+      `| \`${tag}\` | ${entry.specs.size} | ${entry.counts.met} | ${entry.counts.workaround} | ${entry.counts['hand-rolled']} | ${entry.counts.failed} | ${[...entry.components].join(', ')} | ${entry.issues.join(', ')} |`,
+    )
+  }
+
+  // Component rows: what each component was asked to do and where it needed help.
+  const byComponent = new Map()
+  for (const report of reports) {
+    for (const [id, row] of report.rows) {
+      // The first component of a row is the one its note is about; the others only took part.
+      row.components.forEach((component, index) => {
+        const entry = byComponent.get(component) ?? { uses: 0, short: [] }
+        entry.uses++
+        if (row.outcome !== 'met' && index === 0) entry.short.push(`**${report.spec.id}/${id}** ${row.outcome}: ${row.notes}`)
+        byComponent.set(component, entry)
+      })
+    }
+  }
+  lines.push('', '## By component', '', '| Component | Requirements served | Short of the need |', '| --- | --- | --- |')
+  for (const [component, entry] of [...byComponent].sort((a, b) => b[1].short.length - a[1].short.length || a[0].localeCompare(b[0]))) {
+    lines.push(`| \`${component}\` | ${entry.uses} | ${entry.short.map(cell).join('<br>') || ''} |`)
+  }
+
+  // Coverage: what no spec asks for, and what no build used.
+  const required = new Set([...specs.values()].flatMap((spec) => [...spec.requirements.values()].flatMap((requirement) => requirement.tags)))
+  const untested = [...capabilities.keys()].filter((tag) => !required.has(tag))
+  const unbuilt = [...required].filter((tag) => !byCapability.has(tag))
+  lines.push('', '## Coverage', '')
+  lines.push(`**Capabilities no spec requires** (${untested.length}): ${untested.map((tag) => `\`${tag}\``).join(', ') || 'none'}`, '')
+  lines.push(`**Capabilities required but not built yet** (${unbuilt.length}): ${unbuilt.map((tag) => `\`${tag}\``).join(', ') || 'none'}`, '')
+  if (registry) {
+    const used = new Set(byComponent.keys())
+    const unused = registry.filter((component) => !component.tags.some((tag) => used.has(tag)) && !used.has(`@c2n/${component.id}`))
+    const byCategory = new Map()
+    for (const component of unused) byCategory.set(component.category, [...(byCategory.get(component.category) ?? []), component.id])
+    lines.push(`**Components no build report names** (${unused.length} of ${registry.length}):`, '')
+    for (const [category, ids] of [...byCategory].sort()) lines.push(`- ${category}: ${ids.join(', ')}`)
+    lines.push('')
+  } else {
+    lines.push('_Component coverage needs the MCP registry: run `npm run build:tools`._', '')
+  }
+
+  if (warnings.length) lines.push('## Warnings', '', ...warnings.map((warning) => `- ${warning}`), '')
+  return lines.join('\n')
+}
+
+const capabilities = loadCapabilities()
+const specs = loadSpecs(capabilities)
+const reports = loadReports(specs)
+const markdown = render(capabilities, specs, reports, loadRegistry())
+writeFileSync(join(LAB, 'GAPS.md'), markdown)
+console.log(markdown)
+if (process.argv.includes('--check') && warnings.length) process.exitCode = 1
