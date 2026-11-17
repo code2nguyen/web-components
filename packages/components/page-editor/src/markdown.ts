@@ -96,7 +96,8 @@ function serializeInline(block: ProseNode): string {
       segments.push({ text: '', marks: marks.filter((mark) => mark.type.name === 'link' || isTagMark(mark)), code: false, br: true })
       return
     }
-    const text = child.text ?? ''
+    // A leaf such as a merge field is written as its text (its token).
+    const text = child.text ?? child.type.spec.leafText?.(child) ?? ''
     const previous = segments[segments.length - 1]?.marks ?? []
     const nextChild = children[index + 1]
     const next = nextChild ? nextChild.marks : []

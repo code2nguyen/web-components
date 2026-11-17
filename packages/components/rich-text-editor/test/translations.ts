@@ -23,6 +23,8 @@ const fr: typeof richTextEditorMessages.en = {
   counter: (count, max) => `${count} / ${max}`,
   valueMissing: 'Veuillez remplir ce champ.',
   tooLong: (max) => `Utilisez ${max} caractères au maximum.`,
+  mergeField: (label) => `Champ de fusion : ${label}`,
+  mergeFieldFallback: (label, fallback) => `Champ de fusion : ${label} (si vide : ${fallback})`,
 }
 
 addTranslations({ fr: { 'rich-text-editor': fr } })

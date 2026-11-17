@@ -57,6 +57,18 @@
       <p id="mention-hint"></p>
     </section>
     <section>
+      <h2>Merge fields: chips, a field button and a {{ trigger</h2>
+      <c2-rich-text-editor
+        id="merge"
+        label="Email body"
+        triggers="{{"
+        merge-fields='[{"name":"first_name","label":"First name","fallback":"there"},{"name":"company","label":"Company"}]'
+        value="Hi {{first_name|there}}, welcome to **{{company}}**."
+      >
+        <button slot="toolbar-end" id="insert-company">+ Company</button>
+      </c2-rich-text-editor>
+    </section>
+    <section>
       <h2>Floating toolbar</h2>
       <c2-rich-text-editor label="Note" toolbar-position="floating" value="Select some of this text to format it."></c2-rich-text-editor>
     </section>
@@ -85,6 +97,12 @@
         { capture: true },
       )
       composer.addEventListener('submit', () => console.log('submit', composer.value))
+      const merge = document.querySelector('#merge')
+      document.querySelector('#insert-company').addEventListener('click', () => merge.insertMergeField('company'))
+      merge.addEventListener('trigger', (event) => {
+        if (event.detail.active && event.detail.query === 'first') merge.insertMergeField('first_name')
+      })
+      merge.addEventListener('merge-field-activate', (event) => console.log('merge-field-activate', event.detail))
     </script>
   </body>
 </html>
