@@ -31,7 +31,6 @@ import '@c2n/phosphor-icons/icons/file-vue.js'
 import '@c2n/phosphor-icons/icons/file-xls.js'
 import '@c2n/phosphor-icons/icons/file-zip.js'
 import styles from './attachment.scss?inline'
-import type { FilePreview, FilePreviewItem } from './file-preview.js'
 
 export { AttachmentGroup, type AttachmentGroupLayout } from './attachment-group.js'
 export type { FilePreview, FilePreviewItem, FilePreviewKind, FilePreviewViewerContext, FilePreviewViewerRenderer } from './file-preview.js'
@@ -150,40 +149,21 @@ export class Attachment extends LitElement {
   @property({ type: Boolean, reflect: true }) preview = false
 
   @state() private imageFailed = false
-  @state() private previewItems: FilePreviewItem[] | undefined = undefined
-  private previewIndex = 0
-  private previewPending = false
-
-  /** What the preview shows for this attachment. */
-  private get previewItem(): FilePreviewItem {
-    return { name: this.name, src: this.href ?? this.src, file: this.file, type: this.type, size: this.size, alt: this.alt }
-  }
+  /** Set from opening the preview until its dialog closes. */
+  private previewing = false
 
   /** Opens the preview, with the previewable attachments of the same group as its set. */
   async openPreview() {
-    if (this.disabled || this.previewItems || this.previewPending) return
+    if (this.disabled || this.previewing) return
     if (!this.dispatchEvent(new CustomEvent('attachment-preview', { detail: { name: this.name }, bubbles: true, composed: true, cancelable: true }))) return
-    const group = this.closest('c2-attachment-group')
-    // In document order: this attachment, and the group's other enabled ones that have `preview`.
-    const set = group
-      ? [...group.querySelectorAll('c2-attachment')].filter(
-          (item) => item === this || (item.preview && !item.disabled && item.closest('c2-attachment-group') === group),
-        )
-      : [this]
-    this.previewPending = true
+    this.previewing = true
     try {
-      await import('./file-preview.js')
-    } finally {
-      this.previewPending = false
+      const { openAttachmentPreview } = await import('./attachment-preview.js')
+      await openAttachmentPreview(this, this.renderRoot, () => (this.previewing = false))
+    } catch (error) {
+      this.previewing = false
+      throw error
     }
-    this.previewIndex = set.indexOf(this)
-    this.previewItems = set.map((item) => item.previewItem)
-    await this.updateComplete
-    await this.renderRoot.querySelector<FilePreview>('c2-file-preview')?.showModal()
-  }
-
-  private readonly closePreview = () => {
-    this.previewItems = undefined
   }
 
   override willUpdate(changed: PropertyValues<this>) {
@@ -385,7 +365,6 @@ export class Attachment extends LitElement {
         </div>
         <div part="actions" class="actions"><slot name="actions">${this.renderActions()}</slot></div>
       </article>
-      ${this.previewItems ? html`<c2-file-preview part="preview" modal .items=${this.previewItems} .index=${this.previewIndex} @close=${this.closePreview}></c2-file-preview>` : nothing}
     `
   }
 }
