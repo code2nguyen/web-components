@@ -86,6 +86,16 @@ artifact. Records are committed by the lab session that triages them, not by CI.
 `node lab/scripts/lab.mjs run <target> --record` records a single run, for a new build's first run. Ad-hoc `--steps`
 runs are never recorded.
 
+## The lab on the docs site
+
+The docs site shows the lab at `/lab` (`apps/ui/src/pages/lab/`), linked from the footer: the latest run of every
+target, the gap matrix, the open findings by component (linked to their docs pages) and the specs; each spec has a page
+at `/lab/specs/<id>` with its requirements and each build's outcome, the journeys × personas of its latest run, and its
+run history. The site reads `lab/runs/*.json`, `lab/specs/**/*.md`, `lab/reports/*/*.md` and `lab/capabilities.md` at
+build time through content collections (`apps/ui/src/content.config.ts`, `src/data/lab.ts`) and never runs the lab, so a
+merged lab PR shows up with the next deploy. A malformed run record fails the site build on its schema
+(`labRunSchema` in `apps/ui/src/schemas/index.ts`): change the two together.
+
 ## Run it
 
 ```bash

@@ -37,3 +37,36 @@ export function reportRows(body) {
   }
   return rows
 }
+
+/**
+ * A spec's requirements: `- R1 [tag, tag] text` lines, with the indented lines that continue them. Returns
+ * `{ id, tags, text }` objects in order.
+ */
+export function specRequirements(body) {
+  const requirements = []
+  let current
+  for (const line of body.split('\n')) {
+    const start = /^- (R\d+) \[([^\]]+)\] (.*)$/.exec(line)
+    if (start) {
+      current = { id: start[1], tags: start[2].split(',').map((tag) => tag.trim()), text: start[3].trim() }
+      requirements.push(current)
+    } else if (current && /^\s{2,}\S/.test(line)) {
+      current.text += ` ${line.trim()}`
+    } else {
+      current = undefined
+    }
+  }
+  return requirements
+}
+
+/** The capability vocabulary of lab/capabilities.md: a Map of tag → `{ group, description }`. */
+export function capabilityVocabulary(text) {
+  const capabilities = new Map()
+  let group = ''
+  for (const line of text.split('\n')) {
+    if (line.startsWith('## ')) group = line.slice(3).trim()
+    const entry = /^- `([a-z0-9.-]+)`:\s*(.*)$/.exec(line)
+    if (entry) capabilities.set(entry[1], { group, description: entry[2] })
+  }
+  return capabilities
+}

@@ -1,6 +1,6 @@
 import { defineCollection } from 'astro:content'
 import { glob } from 'astro/loaders'
-import { blogSchema, componentSchema, exampleSchema, gallerySchema, guideSchema, iconSetSchema } from './schemas'
+import { blogSchema, componentSchema, exampleSchema, gallerySchema, guideSchema, iconSetSchema, labReportSchema, labRunSchema, labSpecSchema } from './schemas'
 
 // Content Layer collections. `id` is derived from the file path (e.g. checkbox.mdx -> "checkbox").
 export const componentCollection = defineCollection({
@@ -43,6 +43,30 @@ export const exampleCollection = defineCollection({
   schema: exampleSchema,
 })
 
+// The component lab (lab/ at the repository root): run records, specs and build reports, read by the /lab pages. The
+// site reads this data and nothing else of the lab; the lab's own scripts write it.
+export const labRunCollection = defineCollection({
+  loader: glob({ pattern: '*.json', base: '../../lab/runs' }),
+  schema: labRunSchema,
+})
+
+// Specs are identified by the `id` in their front matter (the key the pages, the run records and gaps.mjs use), not by
+// their file name, so two size folders can never collide on one id. README and TEMPLATE are not specs.
+export const labSpecCollection = defineCollection({
+  loader: glob({
+    pattern: ['**/*.md', '!README.md', '!TEMPLATE.md'],
+    base: '../../lab/specs',
+    generateId: ({ entry, data }) => (typeof data.id === 'string' ? data.id : entry.replace(/\.md$/, '')),
+  }),
+  schema: labSpecSchema,
+})
+
+// Build reports, one per spec and direction: lab/reports/<spec>/<direction>.md, id `<spec>/<direction>`.
+export const labReportCollection = defineCollection({
+  loader: glob({ pattern: '*/*.md', base: '../../lab/reports', generateId: ({ entry }) => entry.replace(/\.md$/, '') }),
+  schema: labReportSchema,
+})
+
 export const collections = {
   components: componentCollection,
   icons: iconCollection,
@@ -50,4 +74,7 @@ export const collections = {
   guides: guideCollection,
   blogs: blogCollection,
   examples: exampleCollection,
+  labRuns: labRunCollection,
+  labSpecs: labSpecCollection,
+  labReports: labReportCollection,
 }

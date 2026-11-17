@@ -105,3 +105,78 @@ export const exampleSchema = z.object({
   /** Card order, ascending. */
   order: z.number().default(100),
 })
+
+// ── Component lab (lab/ at the repository root, read by the /lab pages) ──────────────────────────────────────────
+
+/** A requirement's outcome in a build report (lab/reports/TEMPLATE.md). */
+export const LAB_OUTCOMES = ['met', 'workaround', 'hand-rolled', 'failed'] as const
+
+/** One run record, as `lab/scripts/lib/record.mjs` writes it (schema 1). Unknown fields are kept, so a newer record still loads. */
+export const labRunSchema = z
+  .object({
+    schema: z.literal(1),
+    id: z.string(),
+    startedAt: z.string(),
+    durationSeconds: z.number(),
+    mode: z.enum(['run', 'replay']),
+    target: z.string(),
+    spec: z.string().nullable(),
+    direction: z.string().nullable(),
+    library: z.object({ version: z.string(), commit: z.string().nullable(), branch: z.string().nullable().optional(), dirty: z.boolean() }),
+    runner: z.object({ personas: z.array(z.string()), repeat: z.number(), journeys: z.array(z.string()), full: z.boolean() }).passthrough(),
+    build: z
+      .object({
+        report: z.string(),
+        builder: z.string().nullable(),
+        date: z.string().nullable(),
+        outcomes: z.record(z.string(), z.object({ outcome: z.string(), components: z.array(z.string()).optional() }).passthrough()),
+      })
+      .nullable(),
+    summary: z.object({
+      journeys: z.number(),
+      passed: z.number(),
+      flakyJourneys: z.number(),
+      failed: z.number(),
+      findings: z.object({ new: z.number(), known: z.number(), flaky: z.number() }),
+    }),
+    journeys: z.array(z.object({ persona: z.string(), journey: z.string(), runs: z.number(), passed: z.number(), failedStep: z.number().nullable() })),
+    findings: z.array(
+      z.object({
+        key: z.string(),
+        kind: z.string(),
+        severity: z.string(),
+        component: z.string().nullable(),
+        rule: z.string().nullable(),
+        status: z.enum(['new', 'known']),
+        reproducible: z.boolean(),
+        seen: z.record(z.string(), z.number()),
+        message: z.string(),
+      }),
+    ),
+    change: z
+      .object({ previous: z.string(), appeared: z.array(z.string()), gone: z.array(z.string()), unverified: z.array(z.string()).default([]) })
+      .passthrough()
+      .nullable()
+      .optional(),
+  })
+  .passthrough()
+
+/** A spec's front matter (lab/specs/TEMPLATE.md); the requirements and tasks are read from its body. */
+export const labSpecSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  size: z.enum(['scenario', 'feature', 'app']),
+  focus: z.array(z.string()).default([]),
+  directions: z.array(z.string()).default(['default']),
+})
+
+/** A build report's front matter (lab/reports/TEMPLATE.md); the outcomes are read from its table. */
+export const labReportSchema = z.object({
+  spec: z.string(),
+  direction: z.string().default('default'),
+  build: z.string().optional(),
+  target: z.string().optional(),
+  builder: z.string().optional(),
+  // A YAML date (2026-11-17) arrives as a Date; keep the day as written.
+  date: z.preprocess((value) => (value instanceof Date ? value.toISOString().slice(0, 10) : value), z.string()).optional(),
+})
