@@ -75,6 +75,14 @@
   display: none;
 }
 
+// The list's tab stop until it is first used: focus moves straight on to a row, so it has no box and no ring.
+.focus-entry {
+  display: block;
+  height: 0;
+  overflow: hidden;
+  outline: none;
+}
+
 // modern-web-ignore: bare-focus-style removes the UA outline only; the rows hold the roving focus and draw their own :focus-visible ring
 :host(:focus) {
   outline: none;
