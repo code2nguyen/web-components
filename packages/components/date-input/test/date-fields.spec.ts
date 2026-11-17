@@ -26,7 +26,8 @@ test('publishes an ISO date through events and form data once the three parts ma
   await expect(host).toHaveJSProperty('value', '')
   await field(host, 'Year').pressSequentially('1984')
   await expect(host).toHaveJSProperty('value', '1984-03-07')
-  await expect(host).toHaveAttribute('value', '1984-03-07')
+  // Not reflected: the attribute stays the authored default, as on a native input.
+  await expect(host).not.toHaveAttribute('value')
   await expect(host).toHaveAttribute('data-events', JSON.stringify(Array(6).fill(null)))
   await expect.poll(() => formValue(page, 'birthday')).toBe('1984-03-07')
 })
@@ -41,6 +42,18 @@ test('fills the fields from value and clears a value that is not a real date', a
   await expect(host).toHaveJSProperty('value', '')
   await props(host, { value: 'soon' })
   await expect(field(host, 'Day')).toHaveValue('')
+})
+
+test('keeps an authored date that is not a real one in the fields and its attribute, and names the day', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-date-fields order="dmy" value="2026-02-30" error aria-label="Start date"></c2-date-fields>')
+  const host = page.locator('c2-date-fields')
+  await expect(field(host, 'Day')).toHaveValue('30')
+  await expect(field(host, 'Month')).toHaveValue('2')
+  await expect(field(host, 'Year')).toHaveValue('2026')
+  await expect(host).toHaveJSProperty('value', '')
+  await expect(host).toHaveAttribute('value', '2026-02-30')
+  await expect(host.locator('.supporting-text')).toHaveText('Date must be a real date')
+  await expect(field(host, 'Day')).toHaveAttribute('aria-invalid', 'true')
 })
 
 test('names the wrong part once focus leaves the group', async ({ page, renderScenario }) => {

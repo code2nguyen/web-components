@@ -98,8 +98,11 @@ export class DateFields extends LitElement {
   private customValidityMessage = ''
   private defaultValue?: string
 
-  /** The date as `YYYY-MM-DD`, or empty while the fields do not make one. */
-  @property({ type: String, reflect: true }) value = ''
+  /**
+   * The date as `YYYY-MM-DD`, or empty while the fields do not make one. The attribute is the initial (and reset) date
+   * and is never rewritten, as on a native input, so a server render keeps an authored date that is not a real one.
+   */
+  @property({ type: String }) value = ''
   /** Earliest valid date as `YYYY-MM-DD`. */
   @property({ type: String }) min = ''
   /** Latest valid date as `YYYY-MM-DD`. */
