@@ -129,14 +129,14 @@ export function renderSheet(sheet: ShortcutSheet, { msg, query, setQuery }: Shor
       entries.length
         ? html`<div class="groups" part="groups">
             ${[...groups].map(
-            ([name, list]) =>
-              html`<section class="group" part="group">
-                ${name ? html`<h3 class="group-heading" part="group-heading">${name}</h3>` : nothing}
-                <ul class="items" role="list">
-                  ${list.map(row)}
-                </ul>
-              </section>`,
-          )}
+              ([name, list]) =>
+                html`<section class="group" part="group">
+                  ${name ? html`<h3 class="group-heading" part="group-heading">${name}</h3>` : nothing}
+                  <ul class="items" role="list">
+                    ${list.map(row)}
+                  </ul>
+                </section>`,
+            )}
           </div>`
         : html`<div class="empty" part="empty"><slot name="empty">${terms.length ? msg.t('noResults', search) : msg.t('empty')}</slot></div>`
     }`

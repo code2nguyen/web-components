@@ -27,7 +27,6 @@
   })
 
   for (const sheet of document.querySelectorAll<HTMLElementTagNameMap['c2-shortcut-sheet']>('[data-shortcut-sheet-example="render-item"]')) {
-    sheet.renderItem = ({ entry }) =>
-      html`<span part="command">${entry.description}</span><code part="code">${entry.labels.join(' · ')}</code>`
+    sheet.renderItem = ({ entry }) => html`<span part="command">${entry.description}</span><code part="code">${entry.labels.join(' · ')}</code>`
   }
 </script>

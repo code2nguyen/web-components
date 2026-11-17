@@ -81,9 +81,11 @@ Shortcut sheets for help pages and "?" dialogs. The inline cards show the list a
   .shortcut-sheet-rows::part(command) {
     flex: 1;
     font-size: 14px;
+    white-space: nowrap;
     color: var(--c2-theme--color-on-surface, #18181b);
   }
   .shortcut-sheet-rows::part(code) {
+    text-align: end;
     font-size: 12px;
     color: var(--c2-theme--color-primary, rgb(2, 101, 220));
   }

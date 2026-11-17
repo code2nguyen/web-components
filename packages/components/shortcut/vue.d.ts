@@ -10,6 +10,7 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { Shortcut } from '@c2n/shortcut'
+import type { ShortcutSheet } from '@c2n/shortcut/shortcut-sheet.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -21,6 +22,14 @@ declare module 'vue' {
     'c2-shortcut': DefineComponent<
       C2Props<Shortcut> & {
         onShortcut?: (event: EventOf<Shortcut, 'shortcut'>) => void
+      }
+    >
+    'c2-shortcut-sheet': DefineComponent<
+      C2Props<ShortcutSheet> & {
+        'no-bindings'?: unknown
+        'no-search'?: unknown
+        onOpen?: (event: EventOf<ShortcutSheet, 'open'>) => void
+        onClose?: (event: EventOf<ShortcutSheet, 'close'>) => void
       }
     >
   }
