@@ -1,4 +1,5 @@
 ---
+import '../../assets/lab.scss'
 import Main from '../../layouts/Main.astro'
 import { loadLab, REPOSITORY, SIZE_LABELS, SIZE_ORDER, formatDate, passSummary, repoFile } from '../../data/lab'
 import { escapeHtml, rawElement } from '../../utils/raw-element'
@@ -18,7 +19,7 @@ const specOf = (id: string | null) => lab.specs.find((spec) => spec.id === id)
 // which nothing removes outside an island (see utils/raw-element.ts). The page script upgrades the plain tags.
 const stats = [
   { value: `${lab.specs.length}`, label: 'Specs', description: `${builtSpecs.length} built, ${lab.specs.length - builtSpecs.length} waiting for a build` },
-  { value: `${latestRuns.length}`, label: 'Apps under test', description: 'Each one replayed by 5 personas' },
+  { value: `${latestRuns.length}`, label: 'Apps under test', description: `Replayed by ${lab.personas.size} personas: ${[...lab.personas].join(', ')}` },
   {
     value: `${journeysPassed}/${journeysTotal}`,
     label: 'Journeys passing',
@@ -228,15 +229,6 @@ const unbuilt = lab.coverage.unbuilt.map((tag) => rawElement('c2-chip', { class:
       }
     }
 
-    &__links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      a {
-        color: var(--site-color-primary);
-      }
-    }
-
     section {
       margin-top: 48px;
     }
@@ -245,12 +237,6 @@ const unbuilt = lab.coverage.unbuilt.map((tag) => rawElement('c2-chip', { class:
       margin: 0 0 6px;
       font-size: 1.35rem;
       letter-spacing: -0.01em;
-    }
-
-    &__lead {
-      max-width: 760px;
-      margin: 0 0 16px;
-      color: var(--site-color-on-surface-variant);
     }
 
     &__unbuilt {
@@ -335,16 +321,6 @@ const unbuilt = lab.coverage.unbuilt.map((tag) => rawElement('c2-chip', { class:
       a {
         color: var(--site-color-primary);
       }
-    }
-
-    .lab-table {
-      display: block;
-      --c2-table--background: var(--site-color-surface);
-    }
-
-    .lab-chip {
-      --c2-chip__container--height: 22px;
-      --c2-chip__container--font-size: 12px;
     }
 
     .lab__findings {

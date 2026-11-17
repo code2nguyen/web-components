@@ -50,12 +50,13 @@ export const labRunCollection = defineCollection({
   schema: labRunSchema,
 })
 
-// Specs are identified by the `id` in their front matter (lab/specs/<size>/<id>.md); README and TEMPLATE are not specs.
+// Specs are identified by the `id` in their front matter (the key the pages, the run records and gaps.mjs use), not by
+// their file name, so two size folders can never collide on one id. README and TEMPLATE are not specs.
 export const labSpecCollection = defineCollection({
   loader: glob({
     pattern: ['**/*.md', '!README.md', '!TEMPLATE.md'],
     base: '../../lab/specs',
-    generateId: ({ entry }) => entry.replace(/^.*\//, '').replace(/\.md$/, ''),
+    generateId: ({ entry, data }) => (typeof data.id === 'string' ? data.id : entry.replace(/\.md$/, '')),
   }),
   schema: labSpecSchema,
 })

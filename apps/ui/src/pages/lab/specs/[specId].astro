@@ -1,4 +1,5 @@
 ---
+import '../../../assets/lab.scss'
 import { getCollection } from 'astro:content'
 import Main from '../../../layouts/Main.astro'
 import { capabilities, loadLab, OUTCOME_OPTIONS, REPOSITORY, SIZE_LABELS, formatDate, passSummary, repoFile } from '../../../data/lab'
@@ -16,9 +17,11 @@ const { specId } = Astro.params
 const lab = await loadLab()
 const spec = lab.specs.find((candidate) => candidate.id === specId)!
 const builds = spec.builds
-const latest = builds.map((build) => build.latestRun).find(Boolean)
+const latest = spec.latest
 const purpose = spec.purpose.replaceAll('`', '')
-const hasBuild = builds.some((build) => build.report)
+const hasBuild = Boolean(spec.firstReported)
+// The report says where its build lives; default to the lab's layout.
+const buildSource = spec.firstReported?.report?.build ?? `lab/apps/${spec.id}`
 
 // Requirements: one outcome column per design direction, "not built" where there is no report yet.
 const requirementRows = spec.requirements.map((requirement) => {
@@ -30,14 +33,13 @@ const requirementRows = spec.requirements.map((requirement) => {
   for (const build of builds) {
     const reportRow = build.report?.rows.get(requirement.id)
     row[`outcome_${build.direction}`] = reportRow?.outcome ?? 'not-built'
-    if (build === builds[0]) {
+    if (build === spec.firstReported) {
       row.components = reportRow?.components.join(', ') ?? ''
       row.notes = reportRow?.notes ?? ''
     }
   }
   return row
 })
-const hasReport = builds.some((build) => build.report)
 const requirementTable = rawElement(
   'c2-table',
   { class: 'lab-table', 'aria-label': 'Requirements', rows: requirementRows, 'row-key': 'id', wrap: true, virtual: 'never' },
@@ -58,7 +60,7 @@ const requirementTable = rawElement(
         '',
       ),
     ),
-    ...(hasReport
+    ...(hasBuild
       ? [
           rawElement('c2-table-column', { field: 'components', header: 'Components', width: 'minmax(140px, 1fr)' }, ''),
           rawElement('c2-table-column', { field: 'notes', header: 'Notes', width: 'minmax(260px, 3fr)' }, ''),
@@ -174,7 +176,7 @@ const buildSummary = builds
       }
       <p class="lab__links">
         <a href={repoFile(spec.path)}>Read the spec</a>
-        {hasBuild && <a href={`${REPOSITORY}/tree/develop/lab/apps/${spec.id}`}>Build source</a>}
+        {hasBuild && <a href={`${REPOSITORY}/tree/develop/${buildSource}`}>Build source</a>}
       </p>
     </header>
 
@@ -194,7 +196,7 @@ const buildSummary = builds
     {
       latest && (
         <section>
-          <h2>Journeys in the latest run</h2>
+          <h2>Journeys in the latest run{builds.length > 1 && latest.direction ? ` (${latest.direction})` : ''}</h2>
           <p class="lab__lead">
             One journey per task of the spec, run {latest.runner.repeat} times by each persona on v{latest.library.version}, {formatDate(latest.startedAt)}.
           </p>
@@ -283,15 +285,6 @@ const buildSummary = builds
       color: var(--site-color-on-surface-variant);
     }
 
-    &__links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      a {
-        color: var(--site-color-primary);
-      }
-    }
-
     section {
       margin-top: 40px;
     }
@@ -299,12 +292,6 @@ const buildSummary = builds
     h2 {
       margin: 0 0 8px;
       font-size: 1.25rem;
-    }
-
-    &__lead {
-      max-width: 760px;
-      margin: 0 0 14px;
-      color: var(--site-color-on-surface-variant);
     }
 
     &__builds {
@@ -339,11 +326,6 @@ const buildSummary = builds
 <!-- Raw markup (set:html) is not reached by scoped styles: these rules are global, under .lab. -->
 <style lang="scss" is:global>
   .lab {
-    .lab-table {
-      display: block;
-      --c2-table--background: var(--site-color-surface);
-    }
-
     .lab__builds {
       span {
         color: var(--site-color-on-surface-variant);
@@ -351,15 +333,6 @@ const buildSummary = builds
       a {
         color: var(--site-color-primary);
       }
-    }
-
-    .lab-chip {
-      --c2-chip__container--height: 22px;
-      --c2-chip__container--font-size: 12px;
-    }
-
-    .lab-chip-link {
-      text-decoration: none;
     }
   }
 </style>
