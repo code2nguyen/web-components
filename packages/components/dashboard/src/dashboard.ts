@@ -138,7 +138,9 @@ function toTracks(input: number | string | string[]): string[] {
  * the cards' `col`/`row`/`col-span`/`row-span` or hand the grid a `layout` record — both are applied in place.
  *
  * The grid is the sizing authority: a card never sets its own width. Give the element a height (or place it in a
- * flex/grid parent that does) whenever the rows use `fr`, since the row tracks divide the host's height.
+ * flex/grid parent that does) whenever the rows use `fr`, since the row tracks divide the host's height. A
+ * `min-height` also works: `fr` rows share it, and a `layouts` entry whose rows are all fixed lengths then sizes the
+ * host from its own tracks.
  *
  * @tag c2-dashboard
  *
@@ -186,9 +188,10 @@ export class Dashboard extends LitElement {
   /**
    * Responsive variants, in priority order: the first entry whose `media` matches supplies the tracks and the card
    * placements, and the grid switches as the viewport crosses a breakpoint. Nothing is stored across entries — each
-   * one keeps its own sizes under `<storage-key>@<media>`.
+   * one keeps its own sizes under `<storage-key>@<media>`. Settable as a JSON attribute, so a responsive grid can be
+   * written in plain markup or a server render.
    */
-  @property({ attribute: false }) layouts: DashboardResponsiveLayout[] | undefined = undefined
+  @property({ converter: jsonPropertyConverter }) layouts: DashboardResponsiveLayout[] | undefined = undefined
 
   /**
    * Named whole-panel sizes, each a column and/or row span: `{ small: { colSpan: 1 }, wide: { colSpan: 2 } }`. A

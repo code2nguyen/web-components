@@ -463,3 +463,30 @@ test('a stored layout of another version is discarded; one from before sizes sti
   expect(await page.locator('#subject').evaluate((node) => (node as Dashboard).columnSizes)).toEqual(['200px', '1fr'])
   await page.evaluate(() => localStorage.removeItem('c2n-dashboard-test'))
 })
+
+// #502: a responsive grid written in plain markup, whose fixed-row entry carries its own height.
+test('layouts is read from a JSON attribute, and a min-height host follows fixed rows', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1000, height: 600 })
+  await scenario('json-layouts')
+  const subject = page.locator('#subject')
+  const height = () => subject.evaluate((node) => Math.round(node.getBoundingClientRect().height))
+  expect(await subject.evaluate((node) => (node as Dashboard).layouts?.[0].media)).toBe('(max-width: 600px)')
+  await expect.poll(height).toBe(300)
+  // The fr row shares the min-height: the card fills the host, less its padding.
+  const inner = await subject.evaluate((node) => {
+    const style = getComputedStyle(node)
+    return Math.round(
+      300 - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth),
+    )
+  })
+  await expect.poll(() => page.locator('#one').evaluate((node) => Math.round(node.getBoundingClientRect().height))).toBe(inner)
+
+  await page.setViewportSize({ width: 500, height: 600 })
+  await expect.poll(() => subject.evaluate((node) => (node as Dashboard).rowSizes)).toEqual(['120px', '200px'])
+  const expected = await subject.evaluate((node) => {
+    const style = getComputedStyle(node)
+    return Math.round(120 + 200 + parseFloat(style.rowGap) + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom))
+  })
+  expect(expected).toBeGreaterThan(300)
+  await expect.poll(height).toBe(expected)
+})
