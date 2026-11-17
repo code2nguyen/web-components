@@ -212,7 +212,6 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   border-style: solid;
   background-color: css.cssVar(container--background-color);
   pointer-events: none;
-  will-change: background-color, border-color;
 
   transition: animation.standard(background-color), animation.standard(border-color);
 
@@ -274,10 +273,18 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   --c2-mat-icon--font-size: #{css.cssVar(uncheckmark--size)};
 }
 
-// Hover layer behind the box. Transparent unless a `state-layer__hover__*--color` is set.
-.c2-checkbox-state-layer {
+// Hover layer behind the box. Transparent unless a `state-layer__hover__*--color` is set. A pseudo-element of the box
+// rather than an element of its own: one fewer node per checkbox, and still a sibling of the input, so the hover rules
+// below reach it. Centred on the box and as large as the touch target. No `will-change`: on `opacity` it gave every
+// checkbox its own compositing layer.
+.c2-checkbox__background::before {
+  content: '';
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  width: css.cssVar(state-layer--size);
+  height: css.cssVar(state-layer--size);
+  translate: -50% -50%;
   z-index: -1;
 
   border-top-left-radius: css.cssVar(state-layer--border-top-left-radius);
@@ -288,7 +295,6 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   background-color: transparent;
   opacity: 0;
   pointer-events: none;
-  will-change: background-color, opacity;
   transition: animation.standard(background-color), animation.standard(opacity);
 }
 
@@ -388,7 +394,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
 // Hover: quiet by default. The selected fill can shift (`container__selected__hover--background-color`) and the
 // layer behind the box can tint (`state-layer__hover__*--color`); neither is set out of the box.
 #{$_unselected-enabled-selector}:hover ~ {
-  .c2-checkbox-state-layer {
+  .c2-checkbox__background::before {
     background-color: css.cssVar(state-layer__hover__unselected--color);
     opacity: variables.$state-layer-hover-opacity;
   }
@@ -399,7 +405,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   .c2-checkbox__background {
     background-color: css.cssVar(container__selected__hover--background-color, container__selected--background-color);
   }
-  .c2-checkbox-state-layer {
+  .c2-checkbox__background::before {
     background-color: css.cssVar(state-layer__hover__selected--color);
     opacity: variables.$state-layer-hover-opacity;
   }

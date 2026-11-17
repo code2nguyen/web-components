@@ -339,3 +339,45 @@ test('an option added inside a wrapper after the group is full cannot pass max, 
   await page.evaluate(() => document.querySelector('#outside')!.append(document.querySelector('c2-checkbox[value="b"]')!))
   await expect(page.getByRole('checkbox', { name: 'B' })).toBeEnabled()
 })
+
+test('default marks are drawn the first time their state is reached, and kept after', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const marks = () =>
+    host.evaluate((el) => ({
+      check: el.shadowRoot!.querySelectorAll('slot[name="checkmark"] svg').length,
+      mixed: el.shadowRoot!.querySelectorAll('slot[name="mixedmark"] svg').length,
+    }))
+  // A box that was never checked carries no SVG: most boxes on a page.
+  expect(await marks()).toEqual({ check: 0, mixed: 0 })
+  await page.getByRole('checkbox').check()
+  expect(await marks()).toEqual({ check: 1, mixed: 0 })
+  // Unchecking keeps the mark, so it can fade out instead of vanishing.
+  await page.getByRole('checkbox').uncheck()
+  expect(await marks()).toEqual({ check: 1, mixed: 0 })
+  await props(host, { indeterminate: true })
+  expect(await marks()).toEqual({ check: 1, mixed: 1 })
+})
+
+test('a slotted mark replaces the default one, drawn or not', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Star" checked><span slot="checkmark" id="star">★</span></c2-checkbox>')
+  const shown = await page.locator('c2-checkbox').evaluate((el) => {
+    const slot = el.shadowRoot!.querySelector<HTMLSlotElement>('slot[name="checkmark"]')!
+    return slot.assignedElements().map((node) => node.id)
+  })
+  expect(shown).toEqual(['star'])
+})
+
+test('the hover layer still paints behind the box', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept" style="--c2-checkbox__state-layer__hover__unselected--color: rgb(255, 0, 0)"></c2-checkbox>')
+  const layer = () =>
+    page.locator('c2-checkbox').evaluate((el) => {
+      const style = getComputedStyle(el.shadowRoot!.querySelector('.c2-checkbox__background')!, '::before')
+      return { color: style.backgroundColor, width: style.width, opacity: Number(style.opacity) }
+    })
+  expect((await layer()).opacity).toBe(0)
+  await page.getByRole('checkbox').hover()
+  await expect.poll(async () => (await layer()).color).toBe('rgb(255, 0, 0)')
+  await expect.poll(async () => (await layer()).opacity).toBeGreaterThan(0)
+  expect((await layer()).width).toBe('32px')
+})
