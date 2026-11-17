@@ -1,0 +1,56 @@
+---
+/**
+ * Plays the application's part in the attachment gallery's preview cards: the French of the preview under
+ * `lang="fr"`, the `File` of the Uploaded file card (a property, so it cannot be written in the fence) and the
+ * Preview button of the Own preview action card, which calls `openPreview()`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { Attachment } from '@c2n/components/attachment'
+
+  addTranslations({
+    fr: {
+      'file-preview': {
+        label: 'Aperçu de {0}',
+        counter: '{0} sur {1}',
+        previous: 'Fichier précédent',
+        next: 'Fichier suivant',
+        zoomIn: 'Zoom avant',
+        zoomOut: 'Zoom arrière',
+        fit: 'Ajuster à la vue',
+        download: 'Télécharger {0}',
+        close: "Fermer l'aperçu",
+        loading: "Chargement de l'aperçu…",
+        unsupported: "Aucun aperçu n'est disponible pour ce fichier.",
+        error: "Ce fichier n'a pas pu être affiché.",
+        empty: 'Aucun fichier à afficher.',
+        truncated: 'Seul le début du fichier est affiché.',
+        image: 'Image',
+        video: 'Vidéo',
+        audio: 'Audio',
+        pdf: 'PDF',
+        text: 'Texte',
+        file: 'Fichier',
+      },
+    },
+  })
+
+  const CSV = 'date,category,amount\n2026-11-02,Travel,412.50\n2026-11-04,Meals,38.20\n2026-11-09,Software,99.00\n'
+
+  function setUp() {
+    for (const attachment of document.querySelectorAll<Attachment>('c2-attachment[data-attachment-example="file"]')) {
+      attachment.file ??= new File([CSV], 'expenses.csv', { type: 'text/csv' })
+    }
+  }
+
+  setUp()
+  // The attachments are islands: one that upgrades after this script ran gets its file when it is defined.
+  customElements.whenDefined('c2-attachment').then(setUp)
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-attachment-example="open"]')
+    void button?.closest<Attachment>('c2-attachment')?.openPreview()
+  })
+</script>

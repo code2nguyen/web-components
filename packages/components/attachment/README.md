@@ -16,3 +16,5 @@ File and image attachments with metadata, upload progress, failure states, actio
 Importing the package root registers both `c2-attachment` and `c2-attachment-group`.
 
 Assigned media, name, metadata, and action nodes remain directly styleable. Use `::part(media)`, `::part(content)`, `::part(name)`, `::part(metadata)`, or `::part(actions)` for attachment-owned regions, and `c2-attachment-group::part(list)` for the group wrapper.
+
+Add `preview` (and `href`, the file's own URL) to open the file in a `c2-file-preview` dialog: an image with zoom, video, audio, a PDF in the browser's viewer, text, or a download, with previous and next across the group. The viewer loads on first use; `import '@c2n/components/attachment/file-preview'` registers it on its own for use in a page.

@@ -1,0 +1,76 @@
+---
+title: 'File Preview'
+description: 'Previews any file by type in one frame: an image with zoom, video, audio, a PDF, text, or a download, with previous and next across a set.'
+category: 'Editors & viewers'
+package: '@c2n/attachment'
+tag: 'c2-file-preview'
+apiTags: ['c2-file-preview']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { FilePreview } from '@c2n/components/attachment/file-preview'
+
+`c2-file-preview` shows a file the way Quick Look or a mail attachment preview does: an image with zoom, a video or an audio track with the browser's controls, a PDF in the browser's own viewer, a text file as text, and a download for anything else. A header names the file and its type, and previous and next move through a set of files. It belongs to the same package as [`c2-attachment`](/web-components/components/attachment), whose `preview` attribute opens it in a dialog and loads it on first use; it also sits in a page by itself.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/attachment/file-preview'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/attachment
+<style>
+  .file-preview-usage {
+    width: min(100%, 560px);
+    --c2-file-preview--height: 340px;
+  }
+</style>
+<div data-label="Image">
+  <c2-file-preview class="file-preview-usage" name="mountains.svg" size="3 KB" src="/web-components/images/image-mountains.svg"></c2-file-preview>
+</div>
+<div data-label="PDF">
+  <c2-file-preview class="file-preview-usage" name="quarterly-report.pdf" size="1 KB" src="/web-components/media/quarterly-report.pdf"></c2-file-preview>
+</div>
+<div data-label="A set of files">
+  <c2-file-preview
+    class="file-preview-usage"
+    items='[{"name":"tour.webm","src":"/web-components/media/tour.webm","size":"1.1 MB"},{"name":"voice-note.webm","type":"audio/webm","src":"/web-components/media/voice-note.webm","size":"96 KB"},{"name":"tour.en.vtt","src":"/web-components/media/tour.en.vtt","size":"1 KB"},{"name":"brand-assets.zip","src":"/web-components/media/brand-assets.zip","size":"12 MB"}]'
+  ></c2-file-preview>
+</div>
+```
+
+### Files
+
+Give one file with `src`, `name`, `type` and `size`, or a set as `items`, a JSON attribute or the property; `items` wins. `index` is the file shown. An item is `{ name, src?, file?, type?, size?, alt?, text? }`: `file` is local content such as a `File` from an input, read in place of `src`, and `text` is the content of a text file. The kind of viewer comes from the MIME type or type word in `type` (`application/pdf`, `PDF`, `Markdown`), else from the extension of the name or URL.
+
+```ts tag=CodeBlock
+import type { FilePreview } from '@c2n/components/attachment/file-preview'
+
+const preview = document.querySelector<FilePreview>('c2-file-preview')!
+input.addEventListener('change', () => {
+  preview.items = [...input.files!].map((file) => ({ name: file.name, file, size: `${Math.ceil(file.size / 1024)} KB` }))
+})
+```
+
+### Safety
+
+Nothing in a file is run. Text is shown as text, never as HTML. Only `http:`, `https:`, `blob:` and `data:` URLs load. The preview reads a URL itself (a text file, a PDF) only on the page's own origin, never another site. A PDF from a `file` or from the page's origin is handed to the browser as a PDF and shown by its viewer. A PDF from another site might serve anything, so it is framed in a sandbox with scripts off; some browsers then show no PDF, in which case fetch it yourself and pass it as `file`. Object URLs made for `file` items are revoked when the items change or the element leaves the page.
+
+### Viewers
+
+An image fits the viewer and zooms from the toolbar or with `+`, `-` and `0`; once zoomed it scrolls, and drags with the mouse. `renderViewer` draws a file's viewer in place of the built-in one, for example PDF.js pages with search for PDFs, and returns `undefined` for the files it leaves to the built-in viewers:
+
+```ts tag=CodeBlock
+preview.renderViewer = ({ kind, src }) => (kind === 'pdf' ? renderPdfPages(src) : undefined)
+```
+
+### Dialog and actions
+
+With `modal`, the frame is drawn in a native dialog that `showModal()` opens, with a close button; Escape and a click on the backdrop close it, and `close` fires. The `actions` slot is the header's action zone, before the download link. `next()` and `previous()` move through the set, as the arrow keys do, and `preview-change` reports the new `index`.
+
+### Accessibility
+
+The frame is a region named "Preview of" the file, and the dialog carries the same name. The file name and the counter ("2 of 4") are announced when they change. The previous and next buttons stay focusable at either end of the set. Every string is a message an app translates under `file-preview`.

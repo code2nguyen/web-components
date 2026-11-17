@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -97,7 +97,8 @@ const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'blob:', 'data:'])
 function safeUrl(src: string | undefined): URL | undefined {
   if (!src) return undefined
   try {
-    const url = new URL(src, document.baseURI)
+    // The server has no page to resolve against; any base gives the same scheme.
+    const url = new URL(src, isServer ? 'http://localhost/' : document.baseURI)
     return SAFE_PROTOCOLS.has(url.protocol) ? url : undefined
   } catch {
     return undefined
@@ -310,7 +311,7 @@ export class FilePreview extends LitElement {
     const kind = filePreviewKind(item)
     if (kind === 'text' || (kind === 'pdf' && !item.file)) {
       this.status = 'loading'
-      void this.load(item, kind, token)
+      if (!isServer) void this.load(item, kind, token)
     } else {
       this.status = 'ready'
     }
@@ -372,7 +373,8 @@ export class FilePreview extends LitElement {
       }
       return url
     }
-    return safeUrl(item.src)?.href
+    // As written, so a server render and the browser's agree; the browser resolves it exactly as `safeUrl` did.
+    return safeUrl(item.src) ? item.src : undefined
   }
 
   private go(step: number) {

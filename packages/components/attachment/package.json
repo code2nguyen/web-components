@@ -76,5 +76,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./file-preview.js"
+    ]
+  }
 }
