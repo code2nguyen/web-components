@@ -1,12 +1,12 @@
-import { LitElement, html, svg, nothing, unsafeCSS, type SVGTemplateResult } from 'lit'
+import { LitElement, html, svg, nothing, unsafeCSS, type CSSResultGroup, type SVGTemplateResult } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
-import { LocalizeController } from '@c2n/core/localize.js'
+import { LocalizeController, type MessageCatalog } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/copy-button'
 import '@c2n/icon-button'
-import { secretFieldMessages } from './messages'
+import { secretFieldMessages, type SecretFieldMessages } from './messages'
 import styles from './secret-field.scss?inline'
 
 /** Events fired by {@link SecretField}, keyed for `addEventListener`. */
@@ -92,7 +92,7 @@ const MASK_LENGTH = 12
  */
 @customElement('c2-secret-field')
 export class SecretField extends LitElement {
-  static override styles = unsafeCSS(styles)
+  static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The secret. Copy always copies all of it. */
   @property() value = ''
@@ -115,7 +115,12 @@ export class SecretField extends LitElement {
   /** Leaves out the show button, for a secret that should only ever be copied. */
   @property({ type: Boolean, attribute: 'hide-reveal' }) hideReveal = false
 
-  private readonly msg = new LocalizeController(this, secretFieldMessages)
+  /** The catalog of the built-in text; a companion element swaps in its own, with the same keys. */
+  protected get messages(): MessageCatalog<SecretFieldMessages> {
+    return secretFieldMessages
+  }
+
+  protected readonly msg = new LocalizeController(this, this.messages)
   private readonly slotPresence = new SlotPresenceController(this, ['label', 'help'])
 
   /**
@@ -153,7 +158,7 @@ export class SecretField extends LitElement {
     this.dispatchEvent(new Event('regenerate'))
   }
 
-  private renderValue() {
+  protected renderValue(): unknown {
     if (!this.value) return html`<code class="value" part="value"><span class="sr-only">${this.msg.t('empty')}</span></code>`
     if (this.revealed) return html`<code class="value" part="value">${this.value}</code>`
     const [start, end] = this.maskEnds()

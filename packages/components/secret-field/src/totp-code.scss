@@ -1,0 +1,53 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-totp-code,
+  $theme: (
+    group--gap: 8px,
+    countdown--size: 18px,
+    countdown--stroke-width: 3px,
+    countdown--color: rgb(2, 101, 220),
+    countdown__track--color: #e4e4e7,
+    countdown__warning--color: #dc2626,
+  )
+);
+
+.code {
+  display: flex;
+  gap: css.cssVar(group--gap);
+  font-variant-numeric: tabular-nums;
+}
+
+.unavailable {
+  color: var(--c2-secret-field__mask--color, #71717a);
+}
+
+.countdown {
+  display: inline-flex;
+  flex: none;
+  width: css.cssVar(countdown--size);
+  height: css.cssVar(countdown--size);
+}
+
+.countdown svg {
+  width: 100%;
+  // Starts at twelve o'clock and drains clockwise.
+  transform: rotate(-90deg) scaleY(-1);
+}
+
+.countdown circle {
+  fill: none;
+  stroke: css.cssVar(countdown__track--color);
+  stroke-width: css.cssVar(countdown--stroke-width);
+}
+
+.countdown .ring {
+  stroke: css.cssVar(countdown--color);
+  stroke-dasharray: 100;
+}
+
+.is-warning {
+  color: css.cssVar(countdown__warning--color);
+
+  .ring {
+    stroke: currentColor;
+  }
+}
