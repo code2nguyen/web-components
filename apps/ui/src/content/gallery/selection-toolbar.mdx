@@ -3,6 +3,12 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { SelectionToolbar } from '@c2n/components/selection-toolbar'
 import { Button } from '@c2n/components/button'
+import { ChatInput } from '@c2n/components/chat-input'
+import { TextField } from '@c2n/components/text-field'
+import CodeBlock from '../../components/CodeBlock.astro'
+import SelectionToolbarExamplesRuntime from '../../components/SelectionToolbarExamplesRuntime.astro'
+
+<SelectionToolbarExamplesRuntime />
 
 ## Presets
 
@@ -56,3 +62,141 @@ Looks for `c2-selection-toolbar`. Select text in a card to see its toolbar. The 
 ```
 
 </GalleryGrid>
+
+## Inline prompt
+
+A control with `data-prompt` turns the toolbar into a prompt at the same anchor: the `prompt` slot holds the field and the quick actions, the `result` slot the answer and what to do with it. The selection stays frozen while the reader types. Escape closes it.
+
+<GalleryGrid min={360}>
+
+```html tag=MdxCodeBlock,label=Ask AI
+<style>
+  .prompt-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .prompt-quick c2-button {
+    --c2-button__container--height: 28px;
+    --c2-button__container--font-size: 12px;
+  }
+</style>
+<c2-selection-toolbar>
+  <p>Select a few words of this sentence, then press Ask AI to write an instruction about them.</p>
+  <c2-button slot="toolbar" data-prompt>Ask AI</c2-button>
+  <c2-button slot="toolbar" data-action="comment">Comment</c2-button>
+  <c2-text-field slot="prompt" aria-label="Instruction" placeholder="Ask AI to edit or explain…"></c2-text-field>
+  <div slot="prompt" class="prompt-quick">
+    <c2-button data-action="improve">Improve</c2-button>
+    <c2-button data-action="shorten">Shorten</c2-button>
+    <c2-button data-action="translate">Translate</c2-button>
+  </div>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=Streaming answer
+<style>
+  .prompt-stream {
+    --c2-selection-toolbar__result--max-height: 200px;
+  }
+  .prompt-stream::part(result) {
+    padding: 8px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .prompt-stream .prompt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .prompt-stream .prompt-actions c2-button,
+  .prompt-stream .prompt-quick c2-button {
+    --c2-button__container--height: 28px;
+    --c2-button__container--font-size: 12px;
+  }
+  .prompt-stream .prompt-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+</style>
+<c2-selection-toolbar class="prompt-stream" data-selection-toolbar-example="stream">
+  <p>Select this rather long and really quite wordy sentence, then ask to make it shorter, and watch the answer stream in.</p>
+  <c2-button slot="toolbar" data-prompt>Ask AI</c2-button>
+  <c2-chat-input slot="prompt" aria-label="Instruction" placeholder="Make it shorter…" send-label="Ask"></c2-chat-input>
+  <div slot="prompt" class="prompt-quick">
+    <c2-button data-action="improve">Improve</c2-button>
+    <c2-button data-action="shorten">Shorten</c2-button>
+    <c2-button data-action="translate">Translate</c2-button>
+  </div>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=At the caret
+<style>
+  .prompt-caret .editor {
+    min-height: 72px;
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 6px;
+  }
+  .prompt-caret .prompt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .prompt-caret .prompt-open {
+    margin-top: 8px;
+  }
+</style>
+<c2-selection-toolbar class="prompt-caret" placement="bottom" data-selection-toolbar-example="caret">
+  <div class="editor" contenteditable="true">Put the caret anywhere in this note, then press Ctrl+J (⌘J) or the button below.</div>
+  <c2-button class="prompt-open" data-open-prompt>Ask AI at the caret</c2-button>
+  <c2-chat-input slot="prompt" aria-label="Instruction" placeholder="Write a sentence about…" send-label="Ask"></c2-chat-input>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=En français
+<style>
+  .prompt-wide {
+    --c2-selection-toolbar__prompt--width: 420px;
+    --c2-selection-toolbar__prompt--gap: 6px;
+    --c2-selection-toolbar--padding: 8px;
+    --c2-selection-toolbar--border-radius: 14px;
+  }
+  .prompt-wide .prompt-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+</style>
+<div lang="fr">
+  <c2-selection-toolbar class="prompt-wide">
+    <p>Sélectionnez quelques mots de cette phrase, puis appuyez sur « Demander à l’IA ».</p>
+    <c2-button slot="toolbar" data-prompt>Demander à l’IA</c2-button>
+    <c2-text-field slot="prompt" aria-label="Consigne" placeholder="Demandez une modification…"></c2-text-field>
+    <div slot="prompt" class="prompt-quick">
+      <c2-button data-action="improve">Améliorer</c2-button>
+      <c2-button data-action="shorten">Raccourcir</c2-button>
+    </div>
+  </c2-selection-toolbar>
+</div>
+```
+
+</GalleryGrid>
+
+The streaming card's application code: the toolbar keeps the selection while the reader types, so the answer replaces exactly what was selected.
+
+```ts tag=CodeBlock
+toolbar.addEventListener('selection-action', async ({ detail }) => {
+  const range = toolbar.selection?.range
+  if (detail.action === 'replace' && range) {
+    range.deleteContents()
+    range.insertNode(document.createTextNode(answer.textContent ?? ''))
+  }
+  if (detail.action === 'replace' || detail.action === 'discard') toolbar.prompting = false
+  if (detail.action === 'shorten') streamInto(answer, await ask('Make it shorter', detail.text))
+})
+// Escape, or disabling the toolbar, closes the prompt: stop the request.
+toolbar.addEventListener('toggle', ({ detail }) => detail.open || controller.abort())
+```

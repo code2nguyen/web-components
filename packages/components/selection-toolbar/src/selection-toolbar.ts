@@ -66,7 +66,7 @@ const KEYBOARD_SETTLE = 300
  * @slot result - Shown while `prompting`: the answer and its actions (Replace, Retry…).
  *
  * @event {CustomEvent<{ text: string }>} selection-change - Fired when the toolbar shows for a selection or its selection changes. Does not bubble.
- * @event {CustomEvent<{ action: string; text: string }>} selection-action - Fired when a toolbar control with `data-action` is pressed, with the action and the selected text.
+ * @event {CustomEvent<{ action: string; text: string }>} selection-action - Fired when a control with `data-action` (toolbar, prompt or result) is pressed, with the action and the selected text.
  * @event {CustomEvent<{ open: boolean }>} toggle - Fired when the toolbar opens or closes.
  *
  * @csspart toolbar - The floating toolbar.
@@ -144,10 +144,7 @@ export class SelectionToolbar extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (!changed.has('prompting')) return
-    if (!this.prompting || this.disabled) {
-      if (changed.get('prompting') || this.prompting) this.hide()
-      return
-    }
+    if (!this.prompting || this.disabled) return this.hide()
     if (!this.inToolbar(document.activeElement)) this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
     if (this.open) return
     // Opened without a toolbar: anchor to the selection or the caret in the content, else to the content itself.

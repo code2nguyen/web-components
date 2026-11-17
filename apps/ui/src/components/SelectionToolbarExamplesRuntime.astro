@@ -1,0 +1,128 @@
+---
+/**
+ * Plays the application's part in the selection toolbar's inline prompt examples: a fake model that streams a
+ * rewrite of the selection into the `result` slot, then Replace, Insert below, Retry and Discard on it. Nothing leaves
+ * the page. It also registers the French text the translated card shows, as an application adds its languages.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { SelectionToolbar } from '@c2n/components/selection-toolbar'
+  import type { StreamingText } from '@c2n/components/streaming-text'
+  import '@c2n/components/selection-toolbar'
+  import '@c2n/components/streaming-text'
+  import '@c2n/components/button'
+
+  addTranslations({
+    fr: {
+      'selection-toolbar': {
+        label: 'Actions sur la sélection',
+        hint: 'Actions disponibles, appuyez sur Alt+F10',
+        prompt: 'Demander à propos de la sélection',
+      },
+    },
+  })
+
+  const FILLER = /\b(very|really|just|quite|actually|basically|that)\s+/gi
+
+  /** The fake model: a deterministic rewrite of the text for each quick action or typed instruction. */
+  const rewrite = (text: string, instruction: string) => {
+    const clean = text.replace(/\s+/g, ' ').trim()
+    // At a caret there is nothing to rewrite: the model writes something new.
+    if (!clean) return `A sentence the model wrote for “${instruction}”, ready to insert at the caret.`
+    if (/short|brief|concise/i.test(instruction)) {
+      const words = clean.replace(FILLER, '').split(' ')
+      return words.length > 8 ? `${words.slice(0, 8).join(' ')}…` : words.join(' ')
+    }
+    if (/translat|french/i.test(instruction)) return `« ${clean} » — traduit en français, comme le ferait un modèle.`
+    const sentence = clean.replace(FILLER, '').replace(/^./, (first) => first.toUpperCase())
+    return /[.!?…]$/.test(sentence) ? sentence : `${sentence}.`
+  }
+
+  const button = (action: string, label: string) => {
+    const element = document.createElement('c2-button')
+    element.dataset.action = action
+    element.textContent = label
+    return element
+  }
+
+  /** Per toolbar: the answer shown in its `result` slot and the instruction it answers, for Retry. */
+  const states = new WeakMap<SelectionToolbar, { answer: StreamingText; instruction: string; timer?: ReturnType<typeof setTimeout> }>()
+
+  const stop = (toolbar: SelectionToolbar) => {
+    const state = states.get(toolbar)
+    clearTimeout(state?.timer)
+    for (const element of toolbar.querySelectorAll('[slot="result"]')) element.remove()
+    states.delete(toolbar)
+  }
+
+  /** Streams the rewrite word by word into the result slot, as a model's answer arrives. */
+  const ask = (toolbar: SelectionToolbar, instruction: string) => {
+    const text = toolbar.selection?.text ?? ''
+    stop(toolbar)
+    const answer = document.createElement('c2-streaming-text') as StreamingText
+    answer.className = 'prompt-answer'
+    answer.slot = 'result'
+    answer.setAttribute('aria-live', 'polite')
+    const actions = document.createElement('div')
+    actions.className = 'prompt-actions'
+    actions.slot = 'result'
+    actions.append(button('replace', 'Replace'), button('insert', 'Insert below'), button('retry', 'Retry'), button('discard', 'Discard'))
+    toolbar.append(answer, actions)
+    const state = { answer, instruction, timer: undefined as ReturnType<typeof setTimeout> | undefined }
+    states.set(toolbar, state)
+    answer.streaming = true
+    const words = rewrite(text, instruction).split(/(?<= )/)
+    const next = () => {
+      const word = words.shift()
+      if (word === undefined) {
+        answer.streaming = false
+        return
+      }
+      answer.appendText(word)
+      state.timer = setTimeout(next, 70)
+    }
+    next()
+  }
+
+  for (const toolbar of document.querySelectorAll<SelectionToolbar>('c2-selection-toolbar[data-selection-toolbar-example]')) {
+    toolbar.addEventListener('submit-message', (event) => {
+      event.preventDefault()
+      ask(toolbar, (event as CustomEvent<string>).detail)
+    })
+    toolbar.addEventListener('selection-action', (event) => {
+      const { action } = event.detail
+      const state = states.get(toolbar)
+      const range = toolbar.selection?.range
+      if (action === 'retry' && state) return ask(toolbar, state.instruction)
+      if ((action === 'replace' || action === 'insert') && state && range) {
+        const result = state.answer.textContent ?? ''
+        if (action === 'replace') {
+          range.deleteContents()
+          range.insertNode(document.createTextNode(result))
+        } else {
+          const block = (range.endContainer instanceof Element ? range.endContainer : range.endContainer.parentElement)?.closest('p, [contenteditable]')
+          block?.after(Object.assign(document.createElement('p'), { textContent: result }))
+        }
+      }
+      if (action === 'replace' || action === 'insert' || action === 'discard') toolbar.prompting = false
+      else if (action !== 'retry' && action !== 'comment') ask(toolbar, action)
+    })
+    // Closed by Escape, by the app, or by disabling it: the answer stops streaming.
+    toolbar.addEventListener('toggle', (event) => {
+      if (!event.detail.open) stop(toolbar)
+    })
+  }
+
+  // The caret card: Ctrl+J or ⌘J in the editor, or its button, opens the prompt at the caret.
+  for (const toolbar of document.querySelectorAll<SelectionToolbar>('[data-selection-toolbar-example="caret"]')) {
+    toolbar.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'j' && (event.ctrlKey || event.metaKey) && (event.target as Element).closest('[contenteditable]')) {
+        event.preventDefault()
+        toolbar.prompting = true
+      }
+    })
+    toolbar.querySelector('[data-open-prompt]')?.addEventListener('click', () => (toolbar.prompting = true))
+  }
+</script>

@@ -57,21 +57,20 @@
   display: none;
 }
 
-/* The inline prompt: a column of the field and the answer, at the same anchor. */
 .toolbar.toolbar--prompt {
   box-sizing: border-box;
-  flex-direction: column;
+  width: min(css.cssVar(prompt--width), calc(100vw - 16px));
   align-items: stretch;
-  gap: css.cssVar(prompt--gap);
-  width: css.cssVar(prompt--width);
-  max-width: calc(100vw - 16px);
 }
 
-.toolbar--prompt .prompt,
-.toolbar--prompt .result:not([hidden]) {
-  display: flex;
+.toolbar.toolbar--prompt,
+.toolbar--prompt :is(.prompt, .result:not([hidden])) {
   flex-direction: column;
   gap: css.cssVar(prompt--gap);
+}
+
+.toolbar--prompt :is(.prompt, .result:not([hidden])) {
+  display: flex;
 }
 
 .result {
