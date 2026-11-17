@@ -189,3 +189,11 @@ test('clicking the trigger of an open dropdown closes it', async ({ page, render
   await expect(listbox(page)).not.toBeVisible()
   await expect(page.locator('c2-select')).toHaveJSProperty('open', false)
 })
+
+// #289: the options are the author's light DOM; a tabindex written on them while the page upgrades breaks hydration.
+test('writes no tabindex on its options while the page upgrades', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-select aria-label="Fruit"><c2-list-item value="a">Apple</c2-list-item><c2-list-item value="b">Banana</c2-list-item></c2-select>')
+  await expect(page.locator('c2-select c2-list')).toHaveCount(1)
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await page.locator('c2-select > c2-list-item').evaluateAll((items) => items.map((item) => item.getAttribute('tabindex')))).toEqual([null, null])
+})

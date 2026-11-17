@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-popconfirm,
@@ -234,7 +235,7 @@
   background: css.cssVar(cancel--background-color);
   color: css.cssVar(cancel--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(cancel__hover--background-color);
   }
 }
@@ -244,7 +245,7 @@
   background: css.cssVar(confirm--background-color);
   color: css.cssVar(confirm--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(confirm__hover--background-color);
   }
 

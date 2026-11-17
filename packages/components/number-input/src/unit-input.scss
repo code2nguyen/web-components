@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-unit-input,
@@ -69,7 +70,7 @@ select {
   outline: none;
   transition: animation.standard(background);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(picker__hover--background);
   }
 

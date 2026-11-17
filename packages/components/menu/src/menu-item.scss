@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
@@ -102,7 +103,7 @@
   will-change: background, color;
   transition: animation.standard(background), animation.standard(color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(hover--background, background);
     color: css.cssVar(hover--color, color);
   }
@@ -195,7 +196,7 @@
   .c2-menu-item {
     color: css.cssVar(destructive--color);
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(destructive__hover--background);
       color: css.cssVar(destructive--color);
     }
@@ -253,9 +254,14 @@
 }
 
 // The checked choice still shows where the keyboard is: its ring, over the focus highlight.
-:host(:state(compact)[checked]:focus-visible) .c2-menu-item,
-:host(:state(compact)[checked]) .c2-menu-item:hover {
+:host(:state(compact)[checked]:focus-visible) .c2-menu-item {
   background: css.cssVar(hover--background, background);
+}
+
+@media (hover: hover) {
+  :host(:state(compact)[checked]) .c2-menu-item:hover {
+    background: css.cssVar(hover--background, background);
+  }
 }
 
 .text[data-hidden] {

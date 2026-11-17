@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -210,7 +211,7 @@
         display: flex;
         align-items: center;
 
-        &:hover {
+        @include pointer.hover {
           --c2-text-field--border-top: 1px solid #{variables.$color-border};
           --c2-text-field--border-right: 1px solid #{variables.$color-border};
           --c2-text-field--border-bottom: 1px solid #{variables.$color-border};

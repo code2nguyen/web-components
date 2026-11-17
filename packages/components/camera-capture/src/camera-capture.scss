@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-camera-capture,
   $theme: (
@@ -380,7 +381,7 @@
   white-space: nowrap;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(button__hover--background);
   }
 }
@@ -390,7 +391,7 @@
   background: css.cssVar(accept--background);
   color: css.cssVar(accept--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(accept__hover--background);
   }
 }
@@ -413,7 +414,7 @@
   background: conic-gradient(css.cssVar(shutter__progress--color) calc(var(--_progress, 0) * 360deg), css.cssVar(shutter--background) 0);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: conic-gradient(css.cssVar(shutter__progress--color) calc(var(--_progress, 0) * 360deg), css.cssVar(shutter__hover--background) 0);
   }
 
@@ -443,7 +444,7 @@
   color: css.cssVar(button--color);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(button__hover--background);
   }
 

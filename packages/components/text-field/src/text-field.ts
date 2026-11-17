@@ -48,6 +48,9 @@ export interface TextField {
  * @event {Event} change - Re-dispatched from the inner input when the value is committed (blur or Enter).
  * @event {Event} clear - Fired after the clear button emptied the field (an `input` and a `change` event follow).
  *
+ * @cssproperty {length} --c2-text-field--width - Width of the field. Unset, it keeps its natural width; `100%` fills its container (a toolbar, a form column).
+ * @cssproperty {length} --c2-text-field--min-width
+ * @cssproperty {length} --c2-text-field--max-width
  * @cssproperty {pixel} [--c2-text-field--min-height=36px]
  * @cssproperty {pixel} [--c2-text-field--gap=8px] - Space between the icons and the text.
  *

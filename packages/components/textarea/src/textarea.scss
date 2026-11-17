@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-textarea,
@@ -56,7 +57,7 @@ textarea {
     color: css.cssVar(placeholder--color);
     opacity: 1;
   }
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border: css.cssVar(container__hover--border);
   }
   // A textarea matches :focus-visible on every focus, pointer included.

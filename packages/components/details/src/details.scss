@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -110,7 +111,7 @@ summary {
     content: '';
   }
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(header__hover--background, header--background);
     color: css.cssVar(header__hover--color, header--color);
   }
@@ -208,7 +209,7 @@ summary {
     background: css.cssVar(header__open--background, header--background);
     color: css.cssVar(header__open--color, header--color);
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(header__hover--background, header__open--background, header--background);
     }
   }

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-facet-list,
   $theme: (
@@ -94,7 +95,7 @@ button {
   font-size: css.cssVar(count--font-size);
   font-weight: 500;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 }
@@ -216,7 +217,7 @@ button {
     stroke-width: 1.5;
   }
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(action__hover--background-color);
   }
 }

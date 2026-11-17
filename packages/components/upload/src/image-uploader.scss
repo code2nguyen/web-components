@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use 'sass:string';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/focus';
@@ -210,7 +211,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: rgba(250, 250, 250, 0.16);
   }
 }
@@ -229,7 +230,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(action__hover--background);
   }
 
@@ -294,7 +295,7 @@
   cursor: pointer;
   transition: animation.standard(background), animation.standard(border);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border: css.cssVar(add__hover--border);
     background: css.cssVar(add__hover--background);
   }

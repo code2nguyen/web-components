@@ -105,6 +105,27 @@ When several c2 components and some logic repeat, compose them into one componen
 
 Set the children's variables on the composed component's class (`--c2-text-field--border-top: none` on `.search-palette__field`), forward the attributes you want configurable, and re-emit child events you want callers to see.
 
+## Making an existing header responsive
+
+A header with a dozen navigation links does not fit a 390px phone. There are two routes, and the right one depends on how much of the page you are willing to touch.
+
+**Keep the header, fold the links.** Put the links in a `c2-overflow-list` inside your existing header. The links that do not fit fold into a "More" menu, `data-overflow-priority` keeps a link in the row, and the trigger names the current page when it is folded. Nothing else on the page changes: pages sized with `calc(100vh - <header height>)` keep working, because the header stays one row tall. `--c2-overflow-list--justify-content: flex-end` pushes the row to the end of the header, and the `--c2-overflow-list__more--*` variables give the trigger the look of your links (the [overflow-list gallery](/web-components/components/overflow-list/gallery) has a header nav card).
+
+```html tag=CodeBlock
+<header class="app-header">
+  <a href="/" class="brand">Acme</a>
+  <c2-overflow-list aria-label="Primary" style="flex: 1; --c2-overflow-list--justify-content: flex-end">
+    <c2-link-button href="/projects" selected aria-current="page">Projects</c2-link-button>
+    <c2-link-button href="/billing">Billing</c2-link-button>
+    <c2-link-button href="/team" data-overflow-priority="1">Team</c2-link-button>
+  </c2-overflow-list>
+</header>
+```
+
+**Move to an app frame.** `c2-app-shell` puts a `c2-header` in its `header` slot and the navigation in its `navigation` slot: a side navigation on desktop, a rail on a tablet and a drawer below 600px, opened by a `c2-app-shell-toggle` in the header. It is the better end state for an application with many sections, but it owns the page's height: with `scrolling="main"` the shell takes `--c2-app-shell--height` and only main scrolls, so every page that computes its own height from the header's (`calc(100vh - 64px)`) has to drop that and fill main instead, and sticky content reads `--c2-app-shell--sticky-offset`. Budget that page-by-page change before choosing it.
+
+In short: an overflow list is a change to one component, the app shell a change to every page. Start with the overflow list when you are retrofitting, and move to the app shell when you are restructuring the pages anyway.
+
 ## 5. Gaps stay in the application
 
 When no c2 component fits (a keyboard hint, a count pill), write a plain application component styled with the same `--c2-theme--*` tokens so it follows the theme. Do not fork or patch a `@c2n/*` package; if the pattern is general, propose a component instead.

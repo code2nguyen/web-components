@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-week-planner,
@@ -185,7 +186,7 @@
     stroke-linejoin: round;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(navigation__hover--background);
   }
 
@@ -357,7 +358,7 @@
   box-shadow: 0 0 0 1px css.cssVar(background);
 
   // A covered block comes to the front while it is pointed at.
-  &:hover {
+  @include pointer.hover {
     z-index: 2;
     opacity: css.cssVar(event__hover--opacity);
   }

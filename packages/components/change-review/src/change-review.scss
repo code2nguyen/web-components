@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-change-review,
   $theme: (
@@ -239,7 +240,7 @@ button:focus-visible {
   font-weight: 500;
   white-space: nowrap;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(button__hover--background-color);
   }
 }
@@ -249,7 +250,7 @@ button:focus-visible {
   background-color: css.cssVar(button__primary--background-color);
   color: css.cssVar(button__primary--color);
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(button__primary__hover--background-color);
   }
 }
@@ -265,7 +266,7 @@ button:focus-visible {
   background: none;
   color: inherit;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background-color: css.cssVar(button__hover--background-color);
   }
 
@@ -293,7 +294,7 @@ button:focus-visible {
   color: css.cssVar(link--color);
   font-size: 12px;
 
-  &:hover {
+  @include pointer.hover {
     text-decoration: underline;
   }
 }

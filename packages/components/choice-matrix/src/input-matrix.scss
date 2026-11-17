@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-input-matrix,
   $theme: (
@@ -61,7 +62,7 @@ th {
   font-size: css.cssVar(input--font-size);
   color-scheme: inherit;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border-color: css.cssVar(input__hover--border-color);
   }
 

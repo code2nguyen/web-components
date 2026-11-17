@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/variables';
@@ -127,7 +128,7 @@
   font-family: css.cssVar(control--font-family);
   transition: animation.standard(border), animation.standard(background);
 
-  &:hover:not(:has(:disabled:hover)) {
+  @include pointer.hover(':not(:has(:disabled:hover))') {
     border: css.cssVar(control__hover--border);
   }
 
@@ -185,7 +186,7 @@ select {
   color: css.cssVar(icon--color);
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(control__hover--background);
   }
 
@@ -458,7 +459,7 @@ c2-date-selector {
   font-weight: css.cssVar(apply--font-weight);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(apply__hover--background);
   }
 }
@@ -487,7 +488,7 @@ c2-date-selector {
   text-align: start;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(preset__hover--background);
   }
 

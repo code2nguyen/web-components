@@ -1,11 +1,12 @@
 ---
-description: 'Ready-made looks for c2-search-field: a header command bar, a pill, an underlined field and a filled toolbar search. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-search-field: a header command bar, a pill, an underlined field and a filled toolbar search and a field that fills its row. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { SearchField } from '@c2n/components/search-field'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -66,7 +67,7 @@ The box is one set of variables (`--c2-search-field--border`, `--c2-search-field
 ```html tag=MdxCodeBlock,label=Toolbar
 <style>
   .toolbar-search {
-    width: 220px;
+    --c2-search-field--width: 220px;
     --c2-search-field--min-height: 28px;
     --c2-search-field--padding: 2px 8px;
     --c2-search-field--gap: 6px;
@@ -79,6 +80,26 @@ The box is one set of variables (`--c2-search-field--border`, `--c2-search-field
   }
 </style>
 <c2-search-field class="toolbar-search" placeholder="Filter rows" shortcut="/"></c2-search-field>
+```
+
+```html tag=MdxCodeBlock,label=Fills the toolbar
+<style>
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .filter-row .grow {
+    flex: 1;
+    min-width: 0;
+    --c2-search-field--width: 100%;
+  }
+</style>
+<div class="filter-row">
+  <c2-search-field class="grow" placeholder="Search orders"></c2-search-field>
+  <c2-button>Filters</c2-button>
+</div>
 ```
 
 </GalleryGrid>

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-scroll-area,
   $theme: (
@@ -50,7 +51,7 @@
   overflow: hidden;
   border-radius: css.cssVar(border-radius);
 
-  &:hover {
+  @include pointer.hover {
     --_thumb: #{css.cssVar(thumb__hover--color)};
   }
 }
@@ -255,7 +256,7 @@
     opacity 150ms ease,
     visibility 150ms;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(control__hover--background-color);
   }
 

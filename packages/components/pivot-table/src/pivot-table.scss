@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-pivot-table,
   $theme: (
@@ -267,7 +268,7 @@ td.hot {
   color: css.cssVar(muted--color);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(subtotal--background-color);
   }
 

@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-barcode-scanner,
   $theme: (
@@ -327,7 +328,7 @@
   white-space: nowrap;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(button__hover--background);
   }
 }
@@ -337,7 +338,7 @@
   background: css.cssVar(accept--background);
   color: css.cssVar(accept--color);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(accept__hover--background);
   }
 }
@@ -354,7 +355,7 @@
   color: css.cssVar(button--color);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(button__hover--background);
   }
 

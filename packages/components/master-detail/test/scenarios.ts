@@ -71,4 +71,7 @@ await subject.updateComplete
 // The first measurement lands on the next resize observation.
 await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
 document.querySelector('#done')?.addEventListener('click', () => subject.close())
+// The initial layout-change is kept apart, so each test reads only the events its own actions caused.
+main.dataset.initialEvents = output.textContent ?? ''
+output.textContent = ''
 main.dataset.ready = 'true'

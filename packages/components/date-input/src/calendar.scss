@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-date-input,
   $theme: (
@@ -71,7 +72,7 @@
   font-weight: css.cssVar(calendar-action--font-weight);
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(calendar-action__hover--background);
   }
 

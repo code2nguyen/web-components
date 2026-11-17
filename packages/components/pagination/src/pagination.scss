@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-pagination,
   $theme: (
@@ -141,7 +142,7 @@
   font-size: css.cssVar(item--font-size);
   font-weight: css.cssVar(item--font-weight);
 
-  &:hover:not(:disabled):not([aria-current]) {
+  @include pointer.hover(':not(:disabled):not([aria-current])') {
     color: css.cssVar(item__hover--color);
     background-color: css.cssVar(item__hover--background-color);
     border: css.cssVar(item__hover--border);
@@ -168,7 +169,7 @@
   font-size: css.cssVar(nav--font-size);
   font-weight: css.cssVar(nav--font-weight);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     color: css.cssVar(nav__hover--color);
     background-color: css.cssVar(nav__hover--background-color);
     border: css.cssVar(nav__hover--border);

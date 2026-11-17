@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
@@ -82,7 +83,7 @@
   transition: animation.standard(border), animation.standard(outline);
   cursor: text;
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(hover--border);
   }
 

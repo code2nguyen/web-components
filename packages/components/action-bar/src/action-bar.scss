@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-action-bar,
   $theme: (
@@ -183,7 +184,7 @@
   font: inherit;
   cursor: pointer;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(clear__hover--background);
     color: css.cssVar(clear__hover--color);
   }

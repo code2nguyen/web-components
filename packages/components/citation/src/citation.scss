@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-citation,
   $theme: (
@@ -78,7 +79,7 @@
     background-color 150ms ease,
     color 150ms ease;
 
-  &:hover {
+  @include pointer.hover {
     background-color: css.cssVar(marker__hover--background-color);
     color: css.cssVar(marker__hover--color);
   }

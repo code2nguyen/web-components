@@ -71,7 +71,7 @@ export const MASTER_DETAIL_BACK_ATTRIBUTE = 'master-detail-back'
  * @slot back-icon - Replaces the chevron of the Back button. Mirrored in a right-to-left context.
  *
  * @event {CustomEvent<{ reason: 'back' | 'escape' | 'backdrop' }>} close-request - Fired when the user asks to close the open detail, before `open` turns false. Cancelable: `preventDefault()` keeps it open (unsaved changes). Not fired by `close()` or by setting `open`. Does not bubble.
- * @event {CustomEvent<{ layout: 'split' | 'stack' | 'overlay' }>} layout-change - Fired when the element's width crosses `breakpoint` or `collapse` changes, after the first measurement. Does not bubble.
+ * @event {CustomEvent<{ layout: 'split' | 'stack' | 'overlay' }>} layout-change - Fired once with the initial layout when the element is first measured, then whenever its width crosses `breakpoint` or `collapse` changes the layout. A binding can follow the layout from this event alone. Does not bubble.
  *
  * @csspart layout - Grid holding the panes.
  * @csspart master - Pane wrapping the `master` slot; scrolls its content.
@@ -234,11 +234,10 @@ export class MasterDetail extends LitElement {
       for (const name of ['split', 'stack', 'overlay'] as const) this.toggleState(name, layout === name)
       this.toggleState('measured', layout !== undefined)
       const previous = changed.get('measuredLayout') as MasterDetailLayout | undefined
-      if (previous !== undefined && layout !== undefined) {
-        this.dispatchEvent(new CustomEvent('layout-change', { detail: { layout } }))
-        // The master went inert under the focus: carry it to the detail the user is now looking at.
-        if (layout !== 'split' && this.open && this.masterHadFocus) this.focusDetail()
-      }
+      // The first measurement is reported too, so a binding can follow the layout from the event alone.
+      if (layout !== undefined) this.dispatchEvent(new CustomEvent('layout-change', { detail: { layout } }))
+      // The master went inert under the focus: carry it to the detail the user is now looking at.
+      if (previous !== undefined && layout !== undefined && layout !== 'split' && this.open && this.masterHadFocus) this.focusDetail()
     }
     // The initial value of `open` moves no focus.
     const firstUpdate = changed.get('open') === undefined

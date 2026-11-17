@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use 'sass:string';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
@@ -83,7 +84,7 @@
     border-color 150ms ease,
     box-shadow 150ms ease;
 
-  &:hover {
+  @include pointer.hover {
     border: css.cssVar(container__hover--border);
   }
   &:focus-within {
@@ -171,7 +172,7 @@
     width: 18px;
     height: 18px;
   }
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(tool__hover--background);
   }
   &[aria-pressed='true'] {
@@ -448,7 +449,7 @@ pre {
     width: 16px;
     height: 16px;
   }
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(tool__hover--background);
   }
   &:focus-visible {

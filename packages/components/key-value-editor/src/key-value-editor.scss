@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/focus';
 @use '@c2n/sass/css-variable' as css with (
@@ -140,7 +141,7 @@ input {
     opacity: 1;
   }
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     border: css.cssVar(field__hover--border);
   }
 
@@ -199,7 +200,7 @@ input {
   font: inherit;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     background: css.cssVar(button__hover--background);
     color: css.cssVar(button__hover--color);
   }
@@ -253,7 +254,7 @@ input {
   color: css.cssVar(add--color);
   font-weight: css.cssVar(add--font-weight);
 
-  &:hover:not(:disabled) {
+  @include pointer.hover(':not(:disabled)') {
     color: css.cssVar(add--color);
   }
 }

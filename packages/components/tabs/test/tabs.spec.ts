@@ -324,3 +324,175 @@ test('without a sync-key nothing is shared or stored', async ({ page, renderScen
   await expect(page.locator('c2-tab[for="one-b"]')).toHaveHostAria('aria-selected', 'true')
   expect(await page.evaluate(() => localStorage.length)).toBe(0)
 })
+
+// #501: six tabs in a phone-width strip.
+const crowded = (attributes = 'overflow="scroll"', width = 240, selected = 'a') =>
+  `<div style="width: ${width}px"><c2-tabs ${attributes} selected-tab="${selected}" aria-label="Sections">${['a', 'b', 'c', 'd', 'e', 'f']
+    .map((id) => `<c2-tab for="${id}">Section ${id.toUpperCase()}</c2-tab>`)
+    .join('')}${['a', 'b', 'c', 'd', 'e', 'f'].map((id) => `<div id="${id}">Panel ${id}</div>`).join('')}</c2-tabs></div>`
+
+const strip = (page: Page) => page.locator('c2-tabs').locator('.c2-tabs-header')
+const edges = (page: Page) => strip(page).evaluate((header) => ['overflow-start', 'overflow-end'].filter((name) => header.classList.contains(name)))
+/**
+ * Whether the tab lies wholly inside the strip's visible box, give or take a pixel: the scroll range is whole pixels,
+ * so with a font that gives the tabs fractional widths the last tab of a right-to-left strip stops up to a pixel short
+ * of the edge (as `c2-tab-nav`'s 1px root margin allows for).
+ */
+const inView = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    const header = document.querySelector('c2-tabs')!.shadowRoot!.querySelector('.c2-tabs-header')!.getBoundingClientRect()
+    const tab = document.querySelector(`c2-tab[for="${id}"]`)!.getBoundingClientRect()
+    return tab.left >= header.left - 1 && tab.right <= header.right + 1
+  }, id)
+
+test('overflow="scroll" keeps the strip inside its container and fades the edge where tabs are hidden', async ({ page, renderScenario }) => {
+  await renderScenario(crowded())
+  const host = page.locator('c2-tabs')
+  expect(await host.evaluate((element) => Math.round(element.getBoundingClientRect().width))).toBe(240)
+  await expect.poll(() => strip(page).evaluate((header) => header.scrollWidth > header.clientWidth)).toBe(true)
+  await expect.poll(() => edges(page)).toEqual(['overflow-end'])
+  await strip(page).evaluate((header) => header.scrollTo({ left: header.scrollWidth, behavior: 'instant' }))
+  await expect.poll(() => edges(page)).toEqual(['overflow-start'])
+  await strip(page).evaluate((header) => header.scrollTo({ left: 200, behavior: 'instant' }))
+  await expect.poll(() => edges(page)).toEqual(['overflow-start', 'overflow-end'])
+  await accessible(page)
+})
+
+test('overflow="scroll" scrolls the selected tab into view, on load, on a pick and from the keyboard', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="scroll"', 240, 'e'))
+  await expect.poll(() => inView(page, 'e')).toBe(true)
+  await expect.poll(() => inView(page, 'a')).toBe(false)
+
+  await props(page.locator('c2-tabs'), { selectedTab: 'a' })
+  await expect.poll(() => inView(page, 'a')).toBe(true)
+
+  // The arrow keys reach every tab, each scrolled into view as it is selected.
+  await page.locator('c2-tab[for="a"]').focus()
+  for (const id of ['b', 'c', 'd', 'e', 'f']) {
+    await page.keyboard.press('ArrowRight')
+    await expect(page.locator(`c2-tab[for="${id}"]`)).toBeFocused()
+    await expect.poll(() => inView(page, id)).toBe(true)
+  }
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'f')
+  // Only the strip scrolled: the page did not.
+  expect(await page.evaluate(() => window.scrollX)).toBe(0)
+})
+
+test('without overflow="scroll" the strip does not scroll and draws no fade', async ({ page, renderScenario }) => {
+  await renderScenario(crowded(''))
+  await expect.poll(() => strip(page).evaluate((header) => getComputedStyle(header).overflowX)).toBe('visible')
+  await expect.poll(() => edges(page)).toEqual([])
+  expect(await page.locator('c2-tabs').evaluate((element) => element.getAttributeNames())).toEqual(['selected-tab', 'aria-label'])
+})
+
+for (const font of ['inherit', 'DejaVu Sans']) {
+  test(`overflow="scroll" in a right-to-left strip reveals the selected tab and fades the far edge (font: ${font})`, async ({ page, renderScenario }) => {
+    // DejaVu Sans, the Linux CI runner's font, gives the tabs fractional widths, which the scroll range rounds.
+    await renderScenario(`<div dir="rtl" style="font-family: ${font}">${crowded()}</div>`)
+    await expect.poll(() => inView(page, 'a')).toBe(true)
+    await expect.poll(() => edges(page)).toEqual(['overflow-end'])
+    await props(page.locator('c2-tabs'), { selectedTab: 'f' })
+    await expect.poll(() => inView(page, 'f')).toBe(true)
+    await expect.poll(() => edges(page)).toEqual(['overflow-start'])
+  })
+}
+
+// #501, `overflow="menu"`: the tabs that do not fit fold into a "More" menu; the selected one never does.
+const shownTabs = (page: Page) =>
+  page
+    .locator('c2-tabs')
+    .evaluate((element) => [...element.querySelectorAll('c2-tab')].filter((tab) => tab.assignedSlot?.name === 'tab').map((tab) => tab.getAttribute('for')))
+const more = (page: Page) => page.locator('c2-tabs').locator('.more')
+
+test('overflow="menu" folds the tabs that do not fit, from the end, behind a More trigger', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await expect(more(page)).toBeVisible()
+  await expect(more(page)).toHaveAttribute('aria-label', '3 more tabs')
+  // Shown tabs and the trigger stay inside the strip.
+  const right = await page.locator('c2-tabs').evaluate((element) => element.getBoundingClientRect().right)
+  expect((await more(page).boundingBox())!.x + (await more(page).boundingBox())!.width).toBeLessThanOrEqual(right + 0.5)
+  // Folding writes no `slot` on the tabs: they are routed between slots by hand.
+  expect(await page.locator('c2-tab').evaluateAll((tabs) => tabs.filter((tab) => tab.hasAttribute('slot')).length)).toBe(0)
+
+  await more(page).click()
+  await expect
+    .poll(() => page.locator('c2-menu-item').evaluateAll((rows) => rows.filter((row) => row.checkVisibility()).map((row) => row.textContent?.trim())))
+    .toEqual(['Section D', 'Section E', 'Section F'])
+  await page.locator('c2-menu-item', { hasText: 'Section F' }).click()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'f')
+  await expect.poll(() => shownTabs(page)).toContain('f')
+  await expect(page.locator('c2-tab[for="f"]')).toBeFocused()
+  await expect(page.locator('#f')).toBeVisible()
+  await accessible(page)
+})
+
+test('overflow="menu" keeps the selected tab, unfolds as the strip widens, and shows no trigger when all fit', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420, 'e'))
+  await expect.poll(() => shownTabs(page)).toContain('e')
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '1200px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  await expect(more(page)).toBeHidden()
+})
+
+test('overflow="menu": the arrow keys reach folded tabs and bring them into the strip', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await page.locator('c2-tab[for="c"]').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('c2-tab[for="d"]')).toBeFocused()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'd')
+  await expect.poll(() => shownTabs(page)).toContain('d')
+  await page.keyboard.press('End')
+  await expect(page.locator('c2-tab[for="f"]')).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(page.locator('c2-tab[for="a"]')).toBeFocused()
+})
+
+test('overflow="menu": a vetoed tab-change keeps the current tab when a folded one is picked', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu"', 420))
+  await page.locator('c2-tabs').evaluate((element) => element.addEventListener('tab-change', (event) => event.preventDefault()))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await more(page).click()
+  await page.locator('c2-menu-item', { hasText: 'Section E' }).click()
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'a')
+})
+
+test('overflow="menu": the trigger follows the nearest lang', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${crowded('overflow="menu"', 420)}</div>`)
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await expect(more(page)).toHaveAttribute('aria-label', '3 onglets de plus')
+  await expect(more(page)).toContainText('Plus')
+})
+
+// Review fixes: switching modes after the first render keeps every tab; a stretched tab look still unfolds.
+test('switching overflow after the first render keeps the tabs in the strip', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('', 1200))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  for (const overflow of ['menu', 'visible', 'scroll', 'menu']) {
+    await props(page.locator('c2-tabs'), { overflow })
+    await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+  }
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '420px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await props(page.locator('c2-tabs'), { overflow: 'visible' })
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+})
+
+test('overflow="menu" with stretched tabs folds and unfolds as the strip changes width', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="menu" style="--c2-tabs__tab--flex: 1 1 0"', 420))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c'])
+  await page.locator('c2-tabs').evaluate((element) => ((element.parentElement as HTMLElement).style.width = '1200px'))
+  await expect.poll(() => shownTabs(page)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+})
+
+test('overflow="scroll" keeps a scroll the user made when a tab resizes', async ({ page, renderScenario }) => {
+  await renderScenario(crowded())
+  await strip(page).evaluate((header) => header.scrollTo({ left: header.scrollWidth, behavior: 'instant' }))
+  const scrolled = await strip(page).evaluate((header) => header.scrollLeft)
+  expect(scrolled).toBeGreaterThan(100)
+  // A tab growing is not a reason to jump back to the selected (first) tab.
+  await page.locator('c2-tab[for="c"]').evaluate((tab) => (tab.textContent = 'Section C, renamed'))
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await strip(page).evaluate((header) => header.scrollLeft)).toBe(scrolled)
+})

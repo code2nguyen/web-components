@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use 'sass:string';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
@@ -170,7 +171,7 @@ $_duration: css.cssVar(transition-duration);
   clip-path: css.cssVar(row--clip-path);
   transition: background-color $_duration animation.$standard-easing;
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(row__hover--background, row--background);
   }
 }
@@ -253,7 +254,7 @@ button.c2-step__row {
     cursor: default;
     opacity: css.cssVar(row__disabled--opacity);
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(row--background);
     }
   }
@@ -288,7 +289,7 @@ a.c2-step__row {
   background: css.cssVar(row__selected--background, row--background);
   box-shadow: css.cssVar(row__selected--box-shadow);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(row__selected--background, row__hover--background, row--background);
   }
 

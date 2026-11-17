@@ -1,3 +1,4 @@
+@use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
@@ -115,7 +116,7 @@
   will-change: background, color, border;
   transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
-  &:hover {
+  @include pointer.hover {
     border-top: css.cssVar(hover--border-top, border-top);
     border-bottom: css.cssVar(hover--border-bottom, border-bottom);
     border-right: css.cssVar(hover--border-right, border-right);
@@ -188,7 +189,7 @@
     background: css.cssVar(selected--background, background);
     color: css.cssVar(selected--color, color);
 
-    &:hover {
+    @include pointer.hover {
       background: css.cssVar(selected__hover--background, selected--background);
     }
   }
@@ -208,7 +209,7 @@
   color: css.cssVar(current--color, selected--color, color);
   font-weight: css.cssVar(current--font-weight, font-weight);
 
-  &:hover {
+  @include pointer.hover {
     background: css.cssVar(current__hover--background, current--background, selected__hover--background, selected--background);
   }
 }
