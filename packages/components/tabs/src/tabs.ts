@@ -272,7 +272,7 @@ export class Tabs extends LitElement {
         if (this.folding) this.queueFit()
         this.updateIndicator()
         // Only when the strip itself changed width: a tab or font settling must not undo a scroll the user made.
-        if (stripResized) this.revealSelected()
+        if (stripResized) this.revealSelected(false)
         this.updateScrollEdges()
       })
     }
@@ -704,21 +704,20 @@ export class Tabs extends LitElement {
     if (changed.has('selectedTab')) {
       this.syncTabs()
       this.updateIndicator()
-      this.revealSelected()
+      // The first selection is placed at once; a later one glides into view.
+      this.revealSelected(changed.get('selectedTab') !== undefined && this.hasUpdated)
     }
     if (changed.has('overflow')) {
-      this.revealSelected()
+      this.revealSelected(false)
       this.updateScrollEdges()
     }
   }
 
   /**
    * Scrolls a scrolling strip so the selected tab is wholly in view, `--c2-tabs__fade--width` (the scroll padding) away
-   * from either edge. Only the tab list moves: unlike `scrollIntoView`, the page never scrolls. The scroll is instant,
-   * as in `c2-tab-nav`: a smooth programmatic scroll is an animation the browser may cut short (it did in a
-   * right-to-left strip in CI), and nothing would finish it.
+   * from either edge. Only the tab list moves: unlike `scrollIntoView`, the page never scrolls.
    */
-  private revealSelected() {
+  private revealSelected(smooth: boolean) {
     const header = this.header
     if (!this.scrolling || !header) return
     const tab = this.tabs.find((t) => t.for === this.selectedTab)
@@ -732,7 +731,8 @@ export class Tabs extends LitElement {
     if (box.left < strip.left + padStart) delta = box.left - strip.left - padStart
     else if (box.right > strip.right - padEnd) delta = Math.min(box.right - strip.right + padEnd, box.left - strip.left - padStart)
     if (Math.abs(delta) < 1) return
-    header.scrollLeft += delta
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    header.scrollBy({ left: delta, behavior: smooth && !reduced ? 'smooth' : 'instant' })
   }
 
   /**
