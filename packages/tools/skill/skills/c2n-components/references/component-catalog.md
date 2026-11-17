@@ -117,7 +117,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
 - **Pan Zoom** — `c2-pan-zoom` · `@c2n/components/pan-zoom` — A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.
 - **Schema Tree** — `c2-schema-tree` · `@c2n/components/json-viewer/schema-tree` — A JSON Schema or OpenAPI schema as a tree of its properties: types, required and deprecated marks, constraints, allowed values and options.
-- **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
+- **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in, and an inline prompt at the same spot.
 - **Terminal** — `c2-terminal` · `@c2n/components/terminal` — An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.
 
 ## Feedback
