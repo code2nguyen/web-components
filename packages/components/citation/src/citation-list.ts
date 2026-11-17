@@ -243,9 +243,14 @@ export class CitationList extends LitElement {
           ${source.snippet ? html`<span class="snippet" part="snippet" id=${`snippet-${position}`}>${source.snippet}</span>` : nothing}`
     // A card points at its markers while the pointer is on it or focus is in it, whichever ends last.
     const point = () => this.highlight(source)
+    // Read from the event, not from :hover / :focus-within: Firefox updates those only after the event runs.
     const leave = (event: Event) => {
       const card = event.currentTarget as Element
-      if (!card.matches(':hover, :focus-within')) this.highlight()
+      const still =
+        event.type === 'focusout'
+          ? card.contains((event as FocusEvent).relatedTarget as Node | null) || card.matches(':hover')
+          : card.contains(this.shadowRoot?.activeElement ?? null)
+      if (!still) this.highlight()
     }
     return html`<li>
       ${
