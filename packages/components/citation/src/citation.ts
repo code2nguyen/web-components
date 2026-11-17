@@ -4,52 +4,13 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import '@c2n/hover-card'
 import { citationMessages } from './messages'
+import { opensElsewhere, safeIconUrl, safeSourceUrl, sourceHost } from './source-url'
 import styles from './citation.scss?inline'
+
+export { safeIconUrl, safeSourceUrl, sourceHost } from './source-url'
 
 /** Where the preview opens beside the marker; it flips when there is no room. */
 export type CitationPlacement = 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'
-
-/**
- * A link address the marker may follow: http(s), or relative to the page. Anything else (`javascript:`, `data:`) is
- * dropped, so a source taken from a model's output cannot run script when clicked.
- */
-export function safeSourceUrl(value: string): string {
-  const url = cleanUrl(value)
-  if (!url) return ''
-  const scheme = /^([a-z][a-z\d+.-]*):/i.exec(url)?.[1]?.toLowerCase()
-  if (scheme === undefined) return url
-  return scheme === 'http' || scheme === 'https' ? url : ''
-}
-
-/** An icon address the preview may load: what {@link safeSourceUrl} allows, plus inline `data:image/` icons. */
-export function safeIconUrl(value: string): string {
-  const url = cleanUrl(value)
-  return /^data:image\//i.test(url) ? url : safeSourceUrl(url)
-}
-
-/**
- * An address as the browser's URL parser reads it: without the leading and trailing control characters and spaces it
- * strips, and without the tabs and line breaks it drops anywhere, so `java\tscript:` is seen for the `javascript:` it is.
- */
-function cleanUrl(value: string): string {
-  // eslint-disable-next-line no-control-regex
-  return value.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, '').replace(/[\t\n\r]/g, '')
-}
-
-/** Whether a link `target` opens another browsing context, which must not get a handle on this page. */
-function opensElsewhere(target: string): boolean {
-  const name = target.trim().toLowerCase()
-  return name !== '' && name !== '_self' && name !== '_parent' && name !== '_top'
-}
-
-/** The site an address belongs to, without `www.`: `https://www.nytimes.com/…` gives `nytimes.com`. */
-export function sourceHost(value: string): string {
-  try {
-    return new URL(value).hostname.replace(/^www\./, '')
-  } catch {
-    return ''
-  }
-}
 
 /**
  * A numbered marker in generated text that names its source, like the inline citations of Perplexity and ChatGPT
@@ -90,6 +51,8 @@ export function sourceHost(value: string): string {
  * @cssproperty {color} [--c2-citation__marker__hover--background-color=#e4e4e7]
  * @cssproperty {color} [--c2-citation__marker__hover--color=#18181b]
  * @cssproperty {outline} [--c2-citation__marker__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {color} [--c2-citation__marker__highlighted--background-color=#edf1fe] - While `highlighted`: a list of sources points at this marker.
+ * @cssproperty {color} [--c2-citation__marker__highlighted--color=rgb(2, 101, 220)] - While `highlighted`.
  *
  * @cssproperty {pixel} [--c2-citation__card--width=300px]
  * @cssproperty {padding} [--c2-citation__card--padding=12px] - Space inside the card.
@@ -138,6 +101,12 @@ export class Citation extends LitElement {
   /** Milliseconds the pointer rests on the marker before the card opens. */
   @property({ type: Number, attribute: 'open-delay' }) openDelay = 300
 
+  /**
+   * Marks the marker as the one a reader is pointing at elsewhere: a `c2-citation-list` sets it while its card for this
+   * source is hovered or focused. Styled through the `__highlighted` variables.
+   */
+  @property({ type: Boolean, attribute: false }) highlighted = false
+
   private readonly msg = new LocalizeController(this, citationMessages)
 
   /** What a screen reader hears for the marker: "Source 1: <title>". */
@@ -154,7 +123,7 @@ export class Citation extends LitElement {
     const marker = href
       ? html`<a
           slot="trigger"
-          class="marker"
+          class=${this.highlighted ? 'marker highlighted' : 'marker'}
           part="marker"
           href=${href}
           target=${this.target || nothing}
@@ -162,7 +131,9 @@ export class Citation extends LitElement {
           aria-label=${name}
           ><slot>${text}</slot></a
         >`
-      : html`<button slot="trigger" type="button" class="marker" part="marker" aria-label=${name}><slot>${text}</slot></button>`
+      : html`<button slot="trigger" type="button" class=${this.highlighted ? 'marker highlighted' : 'marker'} part="marker" aria-label=${name}>
+          <slot>${text}</slot>
+        </button>`
     return html`<c2-hover-card class="card" part="card" placement=${this.placement} open-delay=${String(this.openDelay)}>
       ${marker}
       <div class="preview">

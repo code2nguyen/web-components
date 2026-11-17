@@ -13,6 +13,8 @@
     marker__hover--background-color: #e4e4e7,
     marker__hover--color: #18181b,
     marker__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    marker__highlighted--background-color: #edf1fe,
+    marker__highlighted--color: rgb(2, 101, 220),
     card--width: 300px,
     card--padding: 12px,
     card--gap: 6px,
@@ -79,6 +81,11 @@
   &:hover {
     background-color: css.cssVar(marker__hover--background-color);
     color: css.cssVar(marker__hover--color);
+  }
+
+  &.highlighted {
+    background-color: css.cssVar(marker__highlighted--background-color);
+    color: css.cssVar(marker__highlighted--color);
   }
 
   &:focus-visible {
