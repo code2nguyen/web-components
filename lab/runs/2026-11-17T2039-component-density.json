@@ -1,0 +1,664 @@
+{
+  "schema": 1,
+  "id": "2026-11-17T2039-component-density",
+  "startedAt": "2026-11-17T20:39:16.264Z",
+  "durationSeconds": 151,
+  "mode": "run",
+  "target": "component-density",
+  "spec": "component-density",
+  "direction": "default",
+  "library": {
+    "version": "1.0.27",
+    "commit": "3f518882b06f8ba24614ca0a664353f5cdda3490",
+    "branch": "claude/brave-allen-ngsefw",
+    "dirty": false
+  },
+  "runner": {
+    "personas": [
+      "mouse"
+    ],
+    "repeat": 3,
+    "journeys": [
+      "d-plain",
+      "d-c2-avatar",
+      "d-c2-badge",
+      "d-c2-button",
+      "d-c2-card",
+      "d-c2-checkbox",
+      "d-c2-chip",
+      "d-c2-feather-check",
+      "d-c2-format-number",
+      "d-c2-highlight",
+      "d-c2-icon-button",
+      "d-c2-list-item",
+      "d-c2-progress",
+      "d-c2-radio",
+      "d-c2-relative-time",
+      "d-c2-select",
+      "d-c2-switch",
+      "d-c2-text-field"
+    ],
+    "axe": false,
+    "full": false
+  },
+  "build": null,
+  "summary": {
+    "journeys": 18,
+    "passed": 18,
+    "flakyJourneys": 0,
+    "failed": 0,
+    "findings": {
+      "new": 9,
+      "known": 0,
+      "flaky": 0
+    }
+  },
+  "journeys": [
+    {
+      "persona": "mouse",
+      "journey": "d-plain",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "plain.until",
+          "median": 73,
+          "budget": 100,
+          "samples": 3
+        },
+        {
+          "name": "plain.heapGrowthMB",
+          "median": 0.17,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "plain.nodesGrowth",
+          "median": 2000,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-avatar",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-avatar.until",
+          "median": 677,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-avatar.heapGrowthMB",
+          "median": 2.43,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-avatar.nodesGrowth",
+          "median": 31027,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-badge",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-badge.until",
+          "median": 336,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-badge.heapGrowthMB",
+          "median": 2.1,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-badge.nodesGrowth",
+          "median": 16019,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-button",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-button.until",
+          "median": 351,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-button.heapGrowthMB",
+          "median": 1.78,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-button.nodesGrowth",
+          "median": 16017,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-card",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-card.until",
+          "median": 445,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-card.heapGrowthMB",
+          "median": 2.82,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-card.nodesGrowth",
+          "median": 31034,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-checkbox",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-checkbox.until",
+          "median": 1050,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-checkbox.heapGrowthMB",
+          "median": 3.54,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-checkbox.nodesGrowth",
+          "median": 65064,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-chip",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-chip.until",
+          "median": 437,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-chip.heapGrowthMB",
+          "median": 2.83,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-chip.nodesGrowth",
+          "median": 23026,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-feather-check",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-feather-check.until",
+          "median": 191,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-feather-check.heapGrowthMB",
+          "median": 1,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-feather-check.nodesGrowth",
+          "median": 8010,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-format-number",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-format-number.until",
+          "median": 420,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-format-number.heapGrowthMB",
+          "median": 2.1,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-format-number.nodesGrowth",
+          "median": 22006,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-highlight",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-highlight.until",
+          "median": 360,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-highlight.heapGrowthMB",
+          "median": 1.96,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-highlight.nodesGrowth",
+          "median": 18009,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-icon-button",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-icon-button.until",
+          "median": 224,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-icon-button.heapGrowthMB",
+          "median": 1.17,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-icon-button.nodesGrowth",
+          "median": 12011,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-list-item",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-list-item.until",
+          "median": 468,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-list-item.heapGrowthMB",
+          "median": 2.43,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-list-item.nodesGrowth",
+          "median": 25026,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-progress",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-progress.until",
+          "median": 421,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-progress.heapGrowthMB",
+          "median": 2.99,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-progress.nodesGrowth",
+          "median": 32031,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-radio",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-radio.until",
+          "median": 743,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-radio.heapGrowthMB",
+          "median": 2.89,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-radio.nodesGrowth",
+          "median": 39038,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-relative-time",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-relative-time.until",
+          "median": 564,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-relative-time.heapGrowthMB",
+          "median": 1.35,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-relative-time.nodesGrowth",
+          "median": 7005,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-select",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-select.until",
+          "median": 5096,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-select.heapGrowthMB",
+          "median": 14.22,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-select.nodesGrowth",
+          "median": 143092,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-switch",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-switch.until",
+          "median": 697,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-switch.heapGrowthMB",
+          "median": 2.83,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-switch.nodesGrowth",
+          "median": 39038,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    },
+    {
+      "persona": "mouse",
+      "journey": "d-c2-text-field",
+      "runs": 3,
+      "passed": 3,
+      "failedStep": null,
+      "metrics": [
+        {
+          "name": "c2-text-field.until",
+          "median": 623,
+          "budget": 500,
+          "samples": 3
+        },
+        {
+          "name": "c2-text-field.heapGrowthMB",
+          "median": 4.13,
+          "budget": 5,
+          "samples": 3
+        },
+        {
+          "name": "c2-text-field.nodesGrowth",
+          "median": 29034,
+          "budget": 10000000,
+          "samples": 3
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "key": "component-density/perf/c2-avatar/c2-avatar.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-avatar",
+      "rule": "c2-avatar.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-avatar": 3
+      },
+      "message": "until 677 ms is over its budget of 500 (c2-avatar)."
+    },
+    {
+      "key": "component-density/perf/c2-checkbox/c2-checkbox.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-checkbox",
+      "rule": "c2-checkbox.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-checkbox": 3
+      },
+      "message": "until 947 ms is over its budget of 500 (c2-checkbox)."
+    },
+    {
+      "key": "component-density/perf/c2-radio/c2-radio.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-radio",
+      "rule": "c2-radio.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-radio": 3
+      },
+      "message": "until 743 ms is over its budget of 500 (c2-radio)."
+    },
+    {
+      "key": "component-density/perf/c2-relative-time/c2-relative-time.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-relative-time",
+      "rule": "c2-relative-time.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-relative-time": 3
+      },
+      "message": "until 587 ms is over its budget of 500 (c2-relative-time)."
+    },
+    {
+      "key": "component-density/perf/c2-select/c2-select.heapGrowthMB",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-select",
+      "rule": "c2-select.heapGrowthMB",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-select": 3
+      },
+      "message": "heapGrowthMB 14.23 is over its budget of 5 (c2-select)."
+    },
+    {
+      "key": "component-density/perf/c2-select/c2-select.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-select",
+      "rule": "c2-select.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-select": 3
+      },
+      "message": "until 5096 ms is over its budget of 500 (c2-select)."
+    },
+    {
+      "key": "component-density/perf/c2-switch/c2-switch.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-switch",
+      "rule": "c2-switch.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-switch": 3
+      },
+      "message": "until 701 ms is over its budget of 500 (c2-switch)."
+    },
+    {
+      "key": "component-density/perf/c2-text-field/c2-text-field.until",
+      "kind": "perf",
+      "severity": "error",
+      "component": "c2-text-field",
+      "rule": "c2-text-field.until",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-text-field": 3
+      },
+      "message": "until 703 ms is over its budget of 500 (c2-text-field)."
+    },
+    {
+      "key": "component-density/a11y-tree/c2-avatar/hidden-disabled-button",
+      "kind": "a11y-tree",
+      "severity": "warn",
+      "component": "c2-avatar",
+      "rule": "hidden-disabled-button",
+      "status": "new",
+      "reproducible": true,
+      "seen": {
+        "mouse/d-c2-avatar": 3
+      },
+      "message": "An invisible, disabled button \"Ada Moreau avatar image file\" inside c2-avatar is announced to screen readers."
+    }
+  ],
+  "change": null
+}

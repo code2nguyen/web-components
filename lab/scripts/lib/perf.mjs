@@ -275,7 +275,13 @@ export async function runPerfStep(page, step, ctx, runStep) {
       ctx.metric?.({ name: `${label}.${key}`, value, budget: limit })
       if (value === undefined || value === null) {
         const why = key === 'until' ? `the watched text never appeared within its budget` : `${key} could not be measured`
-        ctx.report?.({ kind: 'perf', severity: key === 'until' ? 'error' : 'warn', component: component ?? null, rule: `${label}.${key}`, message: `${why} (${label}).` })
+        ctx.report?.({
+          kind: 'perf',
+          severity: key === 'until' ? 'error' : 'warn',
+          component: component ?? null,
+          rule: `${label}.${key}`,
+          message: `${why} (${label}).`,
+        })
       } else if (value > limit) {
         ctx.report?.({
           kind: 'perf',

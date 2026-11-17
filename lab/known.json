@@ -1,4 +1,13 @@
 {
+  "component-density/a11y-tree/c2-avatar/hidden-disabled-button": "c2-avatar renders its file input when not editable; COMPONENT-FEEDBACK.md (c2-avatar, bug).",
+  "component-density/perf/c2-avatar/c2-avatar.until": "COMPONENT-FEEDBACK.md (radio, switch, avatar, text field, relative time over budget).",
+  "component-density/perf/c2-checkbox/c2-checkbox.until": "COMPONENT-FEEDBACK.md (c2-checkbox, papercut): profiled, fixes measured.",
+  "component-density/perf/c2-radio/c2-radio.until": "COMPONENT-FEEDBACK.md (radio, switch, avatar, text field, relative time over budget).",
+  "component-density/perf/c2-relative-time/c2-relative-time.until": "COMPONENT-FEEDBACK.md (radio, switch, avatar, text field, relative time over budget).",
+  "component-density/perf/c2-select/c2-select.heapGrowthMB": "COMPONENT-FEEDBACK.md (c2-select, bug): 14 KB per select, same cause.",
+  "component-density/perf/c2-select/c2-select.until": "COMPONENT-FEEDBACK.md (c2-select, bug): six components per select, popup built while closed.",
+  "component-density/perf/c2-switch/c2-switch.until": "COMPONENT-FEEDBACK.md (radio, switch, avatar, text field, relative time over budget).",
+  "component-density/perf/c2-text-field/c2-text-field.until": "COMPONENT-FEEDBACK.md (radio, switch, avatar, text field, relative time over budget).",
   "support-inbox-vue/a11y-tree/c2-avatar/hidden-disabled-button": "c2-avatar renders its file input when not editable; COMPONENT-FEEDBACK.md (c2-avatar, bug).",
   "support-inbox-vue/axe/-/color-contrast": "App: the agent bubble is blue but the c2-chat-message title keeps the dark text colour (3.28:1). The app should set the title colour with the bubble.",
   "support-inbox-vue/axe/-/scrollable-region-focusable": "App: on a phone the .thread__messages list scrolls but is not focusable, so keyboard users cannot scroll it.",

@@ -21,6 +21,7 @@ Outcomes: **met** (a component does it as documented), **workaround** (met with 
 | project-board | feature | default | 11 | | | | | not built |
 | appointment-booking | scenario | default | 9 | | | | | not built |
 | catalog-filter | scenario | default | 13 | 8 | 4 | 1 | 0 | [reports/catalog-filter/default.md](reports/catalog-filter/default.md) |
+| component-density | scenario | default | 3 | 1 | 0 | 0 | 2 | [reports/component-density/default.md](reports/component-density/default.md) |
 | document-upload | scenario | default | 8 | | | | | not built |
 | hundred-thousand-rows | scenario | default | 7 | | | | | not built |
 | live-market-board | scenario | default | 7 | | | | | not built |
@@ -36,6 +37,8 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 
 | Capability | Specs | Met | Workaround | Hand-rolled | Failed | Components | Where it fell short |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| `perf.load` | 1 | 1 | 0 | 0 | 1 | c2-select, c2-checkbox, c2-radio, c2-switch, c2-avatar, c2-text-field, c2-relative-time | component-density/R1 |
+| `perf.memory` | 1 | 0 | 0 | 0 | 1 | c2-select | component-density/R2 |
 | `feedback.live-announce` | 1 | 0 | 0 | 1 | 0 |  | catalog-filter/R10 |
 | `filter.counts` | 1 | 1 | 1 | 0 | 0 | c2-facet-list | catalog-filter/R2 |
 | `filter.multi-value` | 1 | 1 | 1 | 0 | 0 | c2-facet-list | catalog-filter/R2 |
@@ -57,36 +60,41 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 
 | Component | Requirements served | Short of the need |
 | --- | --- | --- |
+| `c2-select` | 3 | **component-density/R1** failed: Seven of the 17 components take more than 0.5 ms per instance; c2-select takes 5–6 ms (it is six components: its closed popup's overlay and list are built anyway). Profiles and measured fixes for c2-select and c2-checkbox are in COMPONENT-FEEDBACK.md.<br>**component-density/R2** failed: 14.2 KB per select, three times any other component; every other component stays under 4.2 KB. |
 | `c2-facet-list` | 3 | **catalog-filter/R2** workaround: Every value carries Only and Exclude buttons (a Datadog log-search idiom) and there is no attribute to turn them off; a shop offers neither. Hidden with the documented `::part(action) { display: none }`. The app also has to handle `exclude` in case a value arrives excluded. |
 | `c2-search-field` | 1 | **catalog-filter/R1** workaround: Searches on `input` with the app's own 150ms debounce instead of the field's `search` event: once the app sets `value` (a chip or "Clear filters" empties the field), the field still remembers the last query, so typing the same query again fires no `search` (journey `t1b-search-again`). `findMatches` (exported next to `c2-highlight`) filters with the same matcher the highlight marks with, accents ignored on both. |
 | `c2-sheet` | 1 | **catalog-filter/R11** workaround: No component is a sidebar on a wide screen and a drawer on a phone. The app moves the one filter panel between the `<aside>` and a `c2-sheet` on a `matchMedia` change, so there is still a single set of controls and one state. |
 | `c2-slider` | 2 | **catalog-filter/R4** workaround: `c2-slider mode="range"` drags and steps but cannot be typed into, so two `c2-number-input`s sit under it and the app keeps the three in step (about 20 lines). The number inputs' stepper buttons are all named "Increase value" / "Decrease value", without the field's name. |
+| `c2-avatar` | 1 |  |
 | `c2-button` | 3 |  |
+| `c2-checkbox` | 1 |  |
 | `c2-chip` | 2 |  |
 | `c2-chip-group` | 1 |  |
 | `c2-format-number` | 1 |  |
 | `c2-highlight` | 1 |  |
 | `c2-list-item` | 1 |  |
 | `c2-number-input` | 1 |  |
-| `c2-select` | 1 |  |
+| `c2-radio` | 1 |  |
+| `c2-relative-time` | 1 |  |
 | `c2-status-panel` | 1 |  |
-| `c2-switch` | 2 |  |
+| `c2-switch` | 3 |  |
+| `c2-text-field` | 1 |  |
 
 ## Coverage
 
 **Capabilities no spec requires** (0): none
 
-**Capabilities required but not built yet** (51): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `theme.dark`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `form.validation`, `input.phone`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `theme.brand`, `list.selection`, `feedback.toast`, `perf.load`, `perf.bundle`, `perf.layout-shift`, `perf.interaction`, `perf.scroll`, `form.error-summary`, `form.async-submit`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.choice`, `input.payment-card`, `layout.disclosure`, `perf.memory`, `planning.board`, `list.reorder`, `input.date`, `input.time-slot`, `input.file-upload`, `perf.update`, `perf.background`
+**Capabilities required but not built yet** (49): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `theme.dark`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `form.validation`, `input.phone`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `theme.brand`, `list.selection`, `feedback.toast`, `perf.bundle`, `perf.layout-shift`, `perf.interaction`, `perf.scroll`, `form.error-summary`, `form.async-submit`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.choice`, `input.payment-card`, `layout.disclosure`, `planning.board`, `list.reorder`, `input.date`, `input.time-slot`, `input.file-upload`, `perf.update`, `perf.background`
 
-**Components no build report names** (249 of 263):
+**Components no build report names** (243 of 263):
 
 - Buttons: button-group, copy-button, float-button, icon-button, split-button
 - Chart: area-chart, bar-chart, boxplot-chart, bubble-chart, bullet-chart, butterfly-chart, candlestick-chart, chord-chart, depth-chart, gauge-chart, heatmap-chart, histogram-chart, line-chart, map-chart, overlap-chart, pie-chart, pyramid-chart, radar-chart, radial-bar-chart, sankey-chart, scatter-chart, sparkline, state-timeline, sunburst-chart, treemap-chart, waterfall-chart
 - Chat: chat-input, chat-message, chat-message-list, citation, citation-list, comment-thread, markdown, reaction-bar, streaming-text
-- Data display: attachment, audio-player, audio-visualizer, avatar, badge, bar-list, barcode, comparison-bar, countdown, delta, description-list, distribution-bar, file-browser, format-date, google-map, image, image-compare, indicator, kbd, list, marker, math, mermaid, meter, order-book, org-chart, payment-card, qr-code, range-indicator, relative-time, reorder-list, stat, status-light, steps, text-annotator, text-effect, timeline, trace-waterfall, transcript, tree, truncate, video-player, video-tile, virtual-list
+- Data display: attachment, audio-player, audio-visualizer, badge, bar-list, barcode, comparison-bar, countdown, delta, description-list, distribution-bar, file-browser, format-date, google-map, image, image-compare, indicator, kbd, list, marker, math, mermaid, meter, order-book, org-chart, payment-card, qr-code, range-indicator, reorder-list, stat, status-light, steps, text-annotator, text-effect, timeline, trace-waterfall, transcript, tree, truncate, video-player, video-tile, virtual-list
 - Editors & viewers: change-review, code-editor, code-viewer, diff-viewer, flow, image-annotator, image-cropper, json-viewer, log-viewer, mind-map, page-editor, pan-zoom, schema-tree, selection-toolbar, terminal
 - Feedback: banner, beacon, celebration, confirm-dialog, hover-card, loading-overlay, modal, navigation-progress, notification-center, overlay, popconfirm, progress, scroll-progress, share-sheet, skeleton, spinner, toast, toggletip, tooltip, tour, working-indicator
-- Inputs: address-field, angle-slider, autocomplete, barcode-scanner, camera-capture, card-input, cascader, checkbox, checkbox-group, choice-matrix, color-area, color-select, color-slider, date-fields, date-input, date-selector, date-strip, date-time-picker, document-checklist, duration-input, emoji-picker, fieldset, filter-builder, form, form-field, fx-converter, image-uploader, import-mapper, inline-edit, input-matrix, json-form, key-value-editor, keypad, label, mask-input, money-input, month-picker, native-select, otp-input, password-field, phone-input, promo-code-field, quantity-picker, query-input, questionnaire, quick-time-menu, radio, rate, record-merge, recurrence-editor, rich-text-editor, scorecard, secret-field, shortcut, shortcut-sheet, signature-pad, tag-input, text-field, textarea, theme-select, tier-editor, time-input, time-range-picker, time-slot-picker, totp-code, tree-select, unit-input, upload, view-options, wheel-picker
+- Inputs: address-field, angle-slider, autocomplete, barcode-scanner, camera-capture, card-input, cascader, choice-matrix, color-area, color-select, color-slider, date-fields, date-input, date-selector, date-strip, date-time-picker, document-checklist, duration-input, emoji-picker, fieldset, filter-builder, form, form-field, fx-converter, image-uploader, import-mapper, inline-edit, input-matrix, json-form, key-value-editor, keypad, label, mask-input, money-input, month-picker, native-select, otp-input, password-field, phone-input, promo-code-field, quantity-picker, query-input, questionnaire, quick-time-menu, rate, record-merge, recurrence-editor, rich-text-editor, scorecard, secret-field, shortcut, shortcut-sheet, signature-pad, tag-input, textarea, theme-select, tier-editor, time-input, time-range-picker, time-slot-picker, totp-code, tree-select, unit-input, upload, view-options, wheel-picker
 - Layout: accordion, action-bar, app-shell, backdrop, beam, border-beam, card, carousel, chatbot, dashboard, details, device-frame, floating-panel, header, in-view, marquee, masonry, master-detail, overflow-list, page-header, save-bar, scroll-area, separator, split-panel, sticky, swipe-action, video-grid, visually-hidden
 - Navigation: bottom-nav, breadcrumb, command, context-menu, index-bar, link-button, menu, menubar, navigation-menu, pagination, side-nav, skip-link, tab-nav, table-of-contents, tabs
 - Planning: gantt, kanban, matrix-board, month-planner, notepad, scheduler, todo-list, week-planner

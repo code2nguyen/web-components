@@ -1,0 +1,931 @@
+{
+  "name": "component-density",
+  "spec": "lab/specs/scenarios/component-density.md",
+  "title": "component-density (default direction): the cost of 1,000 instances of each component, from a production build.",
+  "app": "lab/apps/component-density/default",
+  "url": "http://127.0.0.1:4197/",
+  "server": {
+    "command": "npx vite build lab/apps/component-density/default --outDir ../../../../test-results/lab-builds/component-density-default --emptyOutDir && npx vite preview lab/apps/component-density/default --outDir ../../../../test-results/lab-builds/component-density-default --host 127.0.0.1 --port 4197 --strictPort",
+    "cwd": ".",
+    "timeout": 180000
+  },
+  "journeys": [
+    {
+      "id": "d-plain",
+      "title": "T1 \u00b7 1,000 \u00d7 plain",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=plain&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: plain"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "plain",
+            "until": 100,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-avatar",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-avatar",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-avatar&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-avatar"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-avatar",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-avatar"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-badge",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-badge",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-badge&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-badge"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-badge",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-badge"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-button",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-button",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-button&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-button"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-button",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-button"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-card",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-card",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-card&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-card"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-card",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-card"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-checkbox",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-checkbox",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-checkbox&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-checkbox"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-checkbox",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-checkbox"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-chip",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-chip",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-chip&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-chip"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-chip",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-chip"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-feather-check",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-feather-check",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-feather-check&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-feather-check"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-feather-check",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-feather-check"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-format-number",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-format-number",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-format-number&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-format-number"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-format-number",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-format-number"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-highlight",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-highlight",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-highlight&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-highlight"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-highlight",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-highlight"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-icon-button",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-icon-button",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-icon-button&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-icon-button"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-icon-button",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-icon-button"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-list-item",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-list-item",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-list-item&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-list-item"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-list-item",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-list-item"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-progress",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-progress",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-progress&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-progress"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-progress",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-progress"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-radio",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-radio",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-radio&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-radio"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-radio",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-radio"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-relative-time",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-relative-time",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-relative-time&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-relative-time"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-relative-time",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-relative-time"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-select",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-select",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-select&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-select"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-select",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-select"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-switch",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-switch",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-switch&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-switch"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-switch",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-switch"
+          }
+        }
+      ]
+    },
+    {
+      "id": "d-c2-text-field",
+      "title": "T1 \u00b7 1,000 \u00d7 c2-text-field",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./?tag=c2-text-field&n=1000"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Ready: c2-text-field"
+          }
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "mark": "mount",
+          "watch": {
+            "css": "#status",
+            "text": "Mounted"
+          }
+        },
+        {
+          "press": "m"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#status"
+            },
+            "contains": "Mounted 1000"
+          },
+          "timeout": 15000
+        },
+        {
+          "budget": {
+            "since": "mount",
+            "label": "c2-text-field",
+            "until": 500,
+            "heapGrowthMB": 5,
+            "nodesGrowth": 10000000,
+            "component": "c2-text-field"
+          }
+        }
+      ]
+    }
+  ]
+}

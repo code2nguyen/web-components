@@ -11,6 +11,7 @@ the spec whenever you like. Start a new spec from [`TEMPLATE.md`](TEMPLATE.md).
 | scenario | [appointment-booking](scenarios/appointment-booking.md)     | a date with closed days, time slots, a phone number                                    |
 | scenario | [pricing-page](scenarios/pricing-page.md)                   | a strong brand, dark mode, a billing-period switch, an FAQ (three directions)          |
 | scenario | [document-upload](scenarios/document-upload.md)             | a checklist of documents, upload progress, refusal and retry                           |
+| scenario | [component-density](scenarios/component-density.md)         | **performance:** the cost of 1,000 instances of 17 components, next to plain HTML      |
 | scenario | [hundred-thousand-rows](scenarios/hundred-thousand-rows.md) | **performance:** 100,000 rows in memory: load, scroll, sort, filter, keyboard, memory  |
 | scenario | [live-market-board](scenarios/live-market-board.md)         | **performance:** 300 prices ticking 5× a second: smoothness, input, pausing off-screen |
 | scenario | [overlay-churn](scenarios/overlay-churn.md)                 | **performance:** every overlay opened and closed 30 times: leaks and opening speed     |

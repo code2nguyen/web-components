@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Component density · lab build</title>
+    <script type="module" src="./main.js"></script>
+    <style>
+      /* Instances wrap like a page of content, not one unbreakable line. */
+      #root {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- dogfood-exempt: a measuring page; the status line is the one thing the lab reads -->
+    <p id="status" role="status">Loading</p>
+    <div id="root"></div>
+  </body>
+</html>
