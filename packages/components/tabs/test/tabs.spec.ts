@@ -333,12 +333,16 @@ const crowded = (attributes = 'overflow="scroll"', width = 240, selected = 'a') 
 
 const strip = (page: Page) => page.locator('c2-tabs').locator('.c2-tabs-header')
 const edges = (page: Page) => strip(page).evaluate((header) => ['overflow-start', 'overflow-end'].filter((name) => header.classList.contains(name)))
-/** Whether the tab lies wholly inside the strip's visible box. */
+/**
+ * Whether the tab lies wholly inside the strip's visible box, give or take a pixel: the scroll range is whole pixels,
+ * so with a font that gives the tabs fractional widths the last tab of a right-to-left strip stops up to a pixel short
+ * of the edge (as `c2-tab-nav`'s 1px root margin allows for).
+ */
 const inView = (page: Page, id: string) =>
   page.evaluate((id) => {
     const header = document.querySelector('c2-tabs')!.shadowRoot!.querySelector('.c2-tabs-header')!.getBoundingClientRect()
     const tab = document.querySelector(`c2-tab[for="${id}"]`)!.getBoundingClientRect()
-    return tab.left >= header.left - 0.5 && tab.right <= header.right + 0.5
+    return tab.left >= header.left - 1 && tab.right <= header.right + 1
   }, id)
 
 test('overflow="scroll" keeps the strip inside its container and fades the edge where tabs are hidden', async ({ page, renderScenario }) => {
@@ -381,14 +385,17 @@ test('without overflow="scroll" the strip does not scroll and draws no fade', as
   expect(await page.locator('c2-tabs').evaluate((element) => element.getAttributeNames())).toEqual(['selected-tab', 'aria-label'])
 })
 
-test('overflow="scroll" in a right-to-left strip reveals the selected tab and fades the far edge', async ({ page, renderScenario }) => {
-  await renderScenario(`<div dir="rtl">${crowded()}</div>`)
-  await expect.poll(() => inView(page, 'a')).toBe(true)
-  await expect.poll(() => edges(page)).toEqual(['overflow-end'])
-  await props(page.locator('c2-tabs'), { selectedTab: 'f' })
-  await expect.poll(() => inView(page, 'f')).toBe(true)
-  await expect.poll(() => edges(page)).toEqual(['overflow-start'])
-})
+for (const font of ['inherit', 'DejaVu Sans']) {
+  test(`overflow="scroll" in a right-to-left strip reveals the selected tab and fades the far edge (font: ${font})`, async ({ page, renderScenario }) => {
+    // DejaVu Sans, the Linux CI runner's font, gives the tabs fractional widths, which the scroll range rounds.
+    await renderScenario(`<div dir="rtl" style="font-family: ${font}">${crowded()}</div>`)
+    await expect.poll(() => inView(page, 'a')).toBe(true)
+    await expect.poll(() => edges(page)).toEqual(['overflow-end'])
+    await props(page.locator('c2-tabs'), { selectedTab: 'f' })
+    await expect.poll(() => inView(page, 'f')).toBe(true)
+    await expect.poll(() => edges(page)).toEqual(['overflow-start'])
+  })
+}
 
 // #501, `overflow="menu"`: the tabs that do not fit fold into a "More" menu; the selected one never does.
 const shownTabs = (page: Page) =>
