@@ -169,3 +169,13 @@ input {
   font-size: css.cssVar(error--font-size);
   line-height: 1.4;
 }
+
+// The live region a drop or paste is announced in: read by screen readers, never drawn.
+.announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
