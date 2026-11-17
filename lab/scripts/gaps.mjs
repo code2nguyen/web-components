@@ -7,7 +7,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { OUTCOMES, frontMatter, reportRows } from './lib/markdown.mjs'
+import { OUTCOMES, capabilityVocabulary, frontMatter, reportRows, specRequirements } from './lib/markdown.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = resolve(LAB, '..')
@@ -22,15 +22,7 @@ function walk(dir) {
 }
 
 function loadCapabilities() {
-  const text = readFileSync(join(LAB, 'capabilities.md'), 'utf8')
-  const capabilities = new Map()
-  let group = ''
-  for (const line of text.split('\n')) {
-    if (line.startsWith('## ')) group = line.slice(3).trim()
-    const entry = /^- `([a-z0-9.-]+)`:\s*(.*)$/.exec(line)
-    if (entry) capabilities.set(entry[1], { group, description: entry[2] })
-  }
-  return capabilities
+  return capabilityVocabulary(readFileSync(join(LAB, 'capabilities.md'), 'utf8'))
 }
 
 function loadSpecs(capabilities) {
@@ -42,10 +34,9 @@ function loadSpecs(capabilities) {
       continue
     }
     const requirements = new Map()
-    for (const match of body.matchAll(/^- (R\d+) \[([^\]]+)\] ([^\n]*)/gm)) {
-      const tags = match[2].split(',').map((tag) => tag.trim())
-      for (const tag of tags) if (!capabilities.has(tag)) warnings.push(`${relative(ROOT, file)} ${match[1]}: unknown capability \`${tag}\``)
-      requirements.set(match[1], { id: match[1], tags, text: match[3].trim() })
+    for (const requirement of specRequirements(body)) {
+      for (const tag of requirement.tags) if (!capabilities.has(tag)) warnings.push(`${relative(ROOT, file)} ${requirement.id}: unknown capability \`${tag}\``)
+      requirements.set(requirement.id, requirement)
     }
     specs.set(data.id, { ...data, file: relative(ROOT, file), requirements, directions: data.directions ?? ['default'] })
   }
