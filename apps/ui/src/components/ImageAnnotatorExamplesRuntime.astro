@@ -1,0 +1,136 @@
+---
+/**
+ * Plays the application's part in the image annotator gallery: the form beside the Extraction review card, the thread
+ * of each pin in the Pinned comments card, the `renderDetail` card of the Image pins card (properties and app state, so
+ * they cannot be written in the fence), and the French of the card under `lang="fr"`.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { AnnotatorShape, ImageAnnotator } from '@c2n/components/image-annotator'
+  import type { CommentThread, ThreadComment } from '@c2n/components/comment-thread'
+  import type { TextField } from '@c2n/components/text-field'
+  import '@c2n/components/badge'
+
+  addTranslations({
+    fr: {
+      'image-annotator': {
+        stage: 'Image annotée',
+        toolbar: "Outils d'annotation",
+        select: 'Sélection',
+        arrow: 'Flèche',
+        line: 'Ligne',
+        rect: 'Rectangle',
+        ellipse: 'Ellipse',
+        pen: 'Crayon',
+        text: 'Texte',
+        number: 'Numéro',
+        blur: 'Flou',
+        redact: 'Masquer',
+        undo: 'Annuler',
+        redo: 'Rétablir',
+        delete: 'Supprimer',
+        color: 'Couleur',
+        colorN: 'Couleur {0}',
+        stroke: 'Épaisseur',
+        thin: 'Fine',
+        medium: 'Moyenne',
+        thick: 'Épaisse',
+        shapeArrow: 'Flèche',
+        shapeLine: 'Ligne',
+        shapeRect: 'Rectangle',
+        shapeEllipse: 'Ellipse',
+        shapePen: 'Dessin',
+        shapeText: 'Texte',
+        shapeNumber: 'Numéro',
+        shapeBlur: 'Flou',
+        shapeRedact: 'Masque',
+        shapeOf: '{0} {1} sur {2}',
+        added: '{0} ajouté',
+        deleted: '{0} supprimé',
+        lowConfidence: 'confiance {0} %, à vérifier',
+        textInput: "Texte de l'annotation",
+      },
+    },
+  })
+
+  const percent = (shape: AnnotatorShape) => `${Math.round((shape.confidence ?? 1) * 100)}%`
+
+  /** Extraction review: the form is the app's. A focused field makes its region active; a corrected or accepted one turns green. */
+  function setUpExtraction(annotator: ImageAnnotator) {
+    const review = annotator.closest('[data-image-annotator-review]')
+    if (!review) return
+    const field = (id: string | null) => review.querySelector<TextField>(`c2-text-field[data-field="${id}"]`)
+    annotator.renderDetail = ({ shape }) =>
+      html`<strong>${shape.label}</strong><br />${field(shape.id)?.value ?? ''} · ${shape.confidence === 1 ? 'reviewed' : `${percent(shape)} sure`}`
+    review.addEventListener('focusin', (event) => {
+      const id = (event.target as Element).closest('c2-text-field')?.getAttribute('data-field')
+      if (id) annotator.active = id
+    })
+    const accept = (id: string | null) => {
+      annotator.shapes = annotator.shapes.map((shape) => (shape.id === id ? { ...shape, color: '#16a34a', confidence: 1 } : shape))
+    }
+    review.addEventListener('change', (event) => accept((event.target as Element).closest('c2-text-field')?.getAttribute('data-field') ?? null))
+    review.addEventListener('click', (event) => {
+      const action = (event.target as Element).closest('[data-review-action]')?.getAttribute('data-review-action')
+      if (action === 'accept') accept(annotator.active)
+      if (action === 'accept' || action === 'next') field(annotator.next())?.focus()
+    })
+  }
+
+  const THREADS: Record<string, ThreadComment[]> = {
+    p1: [
+      { id: 1, author: { id: 'ana', name: 'Ana Diaz' }, body: 'The total should include VAT.', time: '2026-11-12T09:00:00Z' },
+      { id: 2, author: { id: 'ben', name: 'Ben Ito' }, body: 'Agreed, fixing the formula.', time: '2026-11-12T09:20:00Z' },
+    ],
+    p2: [{ id: 3, author: { id: 'ben', name: 'Ben Ito' }, body: 'Pay now is hard to read on blue.', time: '2026-11-12T10:05:00Z' }],
+  }
+
+  /** Pinned comments: each pin has its thread; the annotator shows the active one's in its detail slot. */
+  function setUpComments(annotator: ImageAnnotator) {
+    const thread = annotator.querySelector<CommentThread>('c2-comment-thread')
+    if (!thread) return
+    const show = (id: string | null) => {
+      if (id) thread.comments = THREADS[id] ??= []
+    }
+    show(annotator.active)
+    annotator.addEventListener('shape-select', (event) => show(event.detail.id))
+    // The thread keeps the comment it adds; this keeps it with its pin too.
+    thread.addEventListener('comment-add', () => thread.updateComplete.then(() => annotator.active && (THREADS[annotator.active] = thread.comments)))
+  }
+
+  const STATUS: Record<string, { text: string; tone: string }> = {
+    '#16a34a': { text: 'Done', tone: 'success' },
+    '#d97706': { text: 'Open', tone: 'warning' },
+    '#dc2626': { text: 'Blocked', tone: 'danger' },
+  }
+
+  /** Image pins: a read-only punch list whose card is drawn from the pin. */
+  function setUpPins(annotator: ImageAnnotator) {
+    annotator.renderDetail = ({ shape, index, count }) => {
+      const status = STATUS[shape.color] ?? STATUS['#d97706']
+      return html`<div style="display: grid; gap: 6px">
+        <span style="display: flex; justify-content: space-between; gap: 8px">
+          <strong>${shape.label}</strong><c2-badge tone=${status.tone}>${status.text}</c2-badge>
+        </span>
+        <span style="opacity: 0.7">Pin ${index + 1} of ${count}</span>
+      </div>`
+    }
+  }
+
+  const SETUP: Record<string, (annotator: ImageAnnotator) => void> = { extraction: setUpExtraction, comments: setUpComments, pins: setUpPins }
+  const done = new WeakSet<ImageAnnotator>()
+
+  /** Gives each card its app part once its island has hydrated, so the first client render matches the server's. */
+  function setUp() {
+    for (const annotator of document.querySelectorAll<ImageAnnotator>('c2-image-annotator[data-image-annotator-example]')) {
+      if (done.has(annotator)) continue
+      done.add(annotator)
+      void annotator.updateComplete.then(() => SETUP[annotator.getAttribute('data-image-annotator-example') ?? '']?.(annotator))
+    }
+  }
+
+  Promise.all(['c2-image-annotator', 'c2-comment-thread', 'c2-text-field'].map((tag) => customElements.whenDefined(tag))).then(setUp)
+</script>

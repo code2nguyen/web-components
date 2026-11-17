@@ -206,7 +206,7 @@ img {
 .detail {
   position: absolute;
   box-sizing: border-box;
-  width: min(#{css.cssVar(detail--width)}, 100%);
+  width: min(#{css.cssVar(detail--width)}, calc(var(--_room, 100%) - #{css.cssVar(detail--offset)}));
   margin-left: css.cssVar(detail--offset);
   padding: css.cssVar(detail--padding);
   border: css.cssVar(detail--border);

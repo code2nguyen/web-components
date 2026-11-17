@@ -177,7 +177,7 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @csspart toolbar - The toolbar.
  * @csspart stage - The image and its shapes.
  * @csspart image - The image.
- * @csspart detail - The card beside the active shape that holds the `detail` slot or the `renderDetail` output.
+ * @csspart detail - The card container beside the active shape, wrapping the `detail` slot; with nothing assigned, it holds what `renderDetail` draws as the slot's fallback.
  *
  * @cssproperty {color} [--c2-image-annotator__toolbar--background-color=#ffffff]
  * @cssproperty {border} [--c2-image-annotator__toolbar--border=1px solid #e4e4e7]
@@ -197,7 +197,7 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @cssproperty {border-radius} [--c2-image-annotator__detail--border-radius=8px]
  * @cssproperty {shadow} [--c2-image-annotator__detail--box-shadow=0 4px 16px rgba(0, 0, 0, 0.12)]
  * @cssproperty {pixel} [--c2-image-annotator__detail--padding=12px]
- * @cssproperty {pixel} [--c2-image-annotator__detail--width=260px] - The card's width, never wider than the image.
+ * @cssproperty {pixel} [--c2-image-annotator__detail--width=260px] - The card's width, never wider than the room beside its shape.
  * @cssproperty {pixel} [--c2-image-annotator__detail--offset=8px] - The gap between the card and its shape.
  */
 @customElement('c2-image-annotator')
@@ -1004,7 +1004,8 @@ export class ImageAnnotator extends LitElement {
       const box = bounds(shape)
       end = box.x + box.w / 2 > width / 2
       const percent = (value: number, of: number) => `${(value / of) * 100}%`
-      place = `${end ? `right: ${percent(width - box.x, width)}` : `left: ${percent(box.x + box.w, width)}`}; ${
+      // --_room is the width left on that side, which the card does not pass.
+      place = `${end ? `right: ${percent(width - box.x, width)}; --_room: ${percent(box.x, width)}` : `left: ${percent(box.x + box.w, width)}; --_room: ${percent(width - box.x - box.w, width)}`}; ${
         box.y + box.h / 2 > height / 2 ? `bottom: ${percent(height - box.y - box.h, height)}` : `top: ${percent(box.y, height)}`
       }`
     }

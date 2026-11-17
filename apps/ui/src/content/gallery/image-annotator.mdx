@@ -1,7 +1,13 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import ImageAnnotatorExamplesRuntime from '../../components/ImageAnnotatorExamplesRuntime.astro'
 
 import { ImageAnnotator } from '@c2n/components/image-annotator'
+import { Button } from '@c2n/components/button'
+import { CommentThread } from '@c2n/components/comment-thread'
+import { FormField } from '@c2n/components/form-field'
+import { TextField } from '@c2n/components/text-field'
 
 ## Presets
 
@@ -52,3 +58,147 @@ A bug report, a review in the brand colours, and a compact read-only view. The c
 ```
 
 </GalleryGrid>
+
+## Review and pins
+
+The same shapes, chosen rather than edited. `active` is the chosen shape; with `readonly selectable` a reviewer still picks shapes by click, Tab and the arrow keys, and `shape-select` reports each choice. A `label` names a shape, a `confidence` under `confidence-threshold` dashes it in the review colour, and the `detail` slot or `renderDetail` puts the app's card beside the active shape.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Extraction review
+<style>
+  .review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(180px, 2fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .review-annotator {
+    --c2-image-annotator__shape__inactive--opacity: 0.6;
+  }
+  .review-form {
+    display: grid;
+    gap: 12px;
+  }
+  .review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+<div class="review-layout" data-image-annotator-review>
+  <c2-image-annotator
+    class="review-annotator"
+    data-image-annotator-example="extraction"
+    readonly
+    selectable
+    active="total"
+    src="/web-components/images/image-invoice-screen.svg"
+    shapes='[{"id":"number","type":"rect","x":190,"y":74,"w":140,"h":20,"color":"#2563eb","stroke":2,"label":"Invoice number","confidence":0.98},{"id":"email","type":"rect","x":252,"y":95,"w":152,"h":18,"color":"#2563eb","stroke":2,"label":"Customer email","confidence":0.91},{"id":"total","type":"rect","x":190,"y":166,"w":116,"h":27,"color":"#2563eb","stroke":2,"label":"Total","confidence":0.58},{"id":"due","type":"rect","x":190,"y":196,"w":114,"h":17,"color":"#2563eb","stroke":2,"label":"Due date","confidence":0.74}]'
+  ></c2-image-annotator>
+  <div class="review-form">
+    <c2-form-field label="Invoice number"><c2-text-field data-field="number" value="2026-0417"></c2-text-field></c2-form-field>
+    <c2-form-field label="Customer email"><c2-text-field data-field="email" value="ana.ruiz@example.com"></c2-text-field></c2-form-field>
+    <c2-form-field label="Total" warning-text="58% sure: check it"><c2-text-field data-field="total" value="€1,240.00"></c2-text-field></c2-form-field>
+    <c2-form-field label="Due date" warning-text="74% sure: check it"><c2-text-field data-field="due" value="Nov 30, 2026"></c2-text-field></c2-form-field>
+    <div class="review-actions">
+      <c2-button data-review-action="accept">Accept and next</c2-button>
+      <c2-button data-review-action="next">Skip</c2-button>
+    </div>
+  </div>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pinned comments
+<style>
+  .comments-annotator {
+    --c2-image-annotator__detail--width: 300px;
+    --c2-image-annotator__detail--padding: 0;
+  }
+</style>
+<c2-image-annotator
+  class="comments-annotator"
+  data-image-annotator-example="comments"
+  tool="select"
+  active="p1"
+  src="/web-components/images/image-invoice-screen.svg"
+  shapes='[{"id":"p1","type":"number","x":318,"y":180,"w":0,"h":0,"n":1,"color":"#e11d48","stroke":4,"label":"Total"},{"id":"p2","type":"number","x":270,"y":246,"w":0,"h":0,"n":2,"color":"#e11d48","stroke":4,"label":"Pay now"}]'
+>
+  <c2-comment-thread
+    slot="detail"
+    no-resolve
+    current-user='{"id":"ben","name":"Ben Ito"}'
+    comments='[{"id":1,"author":{"id":"ana","name":"Ana Diaz"},"body":"The total should include VAT.","time":"2026-11-12T09:00:00Z"},{"id":2,"author":{"id":"ben","name":"Ben Ito"},"body":"Agreed, fixing the formula.","time":"2026-11-12T09:20:00Z"}]'
+  ></c2-comment-thread>
+</c2-image-annotator>
+```
+
+```html tag=MdxCodeBlock,label=Image pins
+<style>
+  .pins-annotator {
+    --c2-image-annotator__shape__inactive--opacity: 0.55;
+    --c2-image-annotator__selection--color: #0f766e;
+  }
+</style>
+<c2-image-annotator
+  class="pins-annotator"
+  data-image-annotator-example="pins"
+  readonly
+  selectable
+  active="s1"
+  alt="Office desk with its punch list"
+  src="/web-components/images/image-workspace.svg"
+  shapes='[{"id":"s1","type":"number","x":400,"y":270,"w":0,"h":0,"n":1,"color":"#dc2626","stroke":6,"label":"Screen flickers"},{"id":"s2","type":"number","x":640,"y":290,"w":0,"h":0,"n":2,"color":"#16a34a","stroke":6,"label":"Water the plant"},{"id":"s3","type":"number","x":140,"y":370,"w":0,"h":0,"n":3,"color":"#d97706","stroke":6,"label":"Mug left on the shelf"},{"id":"s4","type":"number","x":470,"y":425,"w":0,"h":0,"n":4,"color":"#d97706","stroke":6,"label":"Tidy the cables"}]'
+></c2-image-annotator>
+```
+
+```html tag=MdxCodeBlock,label=Spotlight
+<style>
+  .spotlight-annotator {
+    --c2-image-annotator__shape__inactive--opacity: 0.3;
+    --c2-image-annotator__selection--color: #c026d3;
+    --c2-image-annotator__low-confidence--color: #c026d3;
+    --c2-image-annotator__low-confidence--stroke-dasharray: 3 3;
+  }
+</style>
+<c2-image-annotator
+  class="spotlight-annotator"
+  readonly
+  active="total"
+  confidence-threshold="0.9"
+  src="/web-components/images/image-invoice-screen.svg"
+  shapes='[{"id":"number","type":"rect","x":190,"y":74,"w":140,"h":20,"color":"#2563eb","stroke":2,"label":"Invoice number","confidence":0.98},{"id":"email","type":"rect","x":252,"y":95,"w":152,"h":18,"color":"#2563eb","stroke":2,"label":"Customer email","confidence":0.91},{"id":"total","type":"rect","x":190,"y":166,"w":116,"h":27,"color":"#2563eb","stroke":2,"label":"Total","confidence":0.58},{"id":"due","type":"rect","x":190,"y":196,"w":114,"h":17,"color":"#2563eb","stroke":2,"label":"Due date","confidence":0.74}]'
+></c2-image-annotator>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<div lang="fr">
+  <c2-image-annotator
+    tool="select"
+    src="/web-components/images/image-invoice-screen.svg"
+    shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#e11d48","stroke":4,"label":"Total","confidence":0.6}]'
+  ></c2-image-annotator>
+</div>
+```
+
+</GalleryGrid>
+
+<ImageAnnotatorExamplesRuntime />
+
+The form, the threads and the pin cards are the app's. A focused field makes its region active; `shape-select` swaps the thread; `renderDetail` draws a card from the active shape:
+
+```ts tag=CodeBlock
+const annotator = document.querySelector('c2-image-annotator')!
+
+// Extraction review: the focused form field drives the highlight, a button steps through the regions.
+form.addEventListener('focusin', (event) => (annotator.active = (event.target as HTMLElement).dataset.field ?? null))
+nextButton.addEventListener('click', () => fieldFor(annotator.next())?.focus())
+
+// Pinned comments: the thread in the detail slot follows the chosen pin.
+annotator.addEventListener('shape-select', (event) => {
+  if (event.detail.id) thread.comments = threads[event.detail.id] ?? []
+})
+
+// Image pins: a card drawn from the pin.
+annotator.renderDetail = ({ shape, index, count }) => html`<strong>${shape.label}</strong> · pin ${index + 1} of ${count}`
+```

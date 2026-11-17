@@ -42,6 +42,16 @@ import '@c2n/components/image-annotator'
     shapes='[{"id":"a","type":"rect","x":186,"y":138,"w":176,"h":76,"color":"#2563eb","stroke":4},{"id":"f","type":"number","x":200,"y":130,"w":0,"h":0,"n":1,"color":"#2563eb","stroke":4}]'
   ></c2-image-annotator>
 </div>
+<div data-label="Review">
+  <c2-image-annotator
+    class="annotator-demo"
+    readonly
+    selectable
+    active="total"
+    src="/web-components/images/image-invoice-screen.svg"
+    shapes='[{"id":"number","type":"rect","x":190,"y":74,"w":140,"h":20,"color":"#2563eb","stroke":2,"label":"Invoice number","confidence":0.98},{"id":"total","type":"rect","x":190,"y":166,"w":116,"h":27,"color":"#2563eb","stroke":2,"label":"Total","confidence":0.58},{"id":"due","type":"rect","x":190,"y":196,"w":114,"h":17,"color":"#2563eb","stroke":2,"label":"Due date","confidence":0.74}]'
+  ></c2-image-annotator>
+</div>
 ```
 
 ### Tools
@@ -63,3 +73,23 @@ const blob = await annotator.toBlob() // PNG at the image's natural size
 ### Keyboard
 
 With a drawing tool chosen, Enter on the image adds a shape in the middle. With Select, Tab reaches each shape (named "Rectangle 1 of 3"), the arrow keys nudge it (Shift for 10 pixels), Enter edits a text, and Delete removes it. Additions and deletions are announced. `readonly` shows the shapes with no toolbar, for the ticket view.
+
+### Review, pins and comments
+
+`active` is the chosen shape, the same selection the Select tool makes: it is outlined, brought into view when the app changes it, and `shape-select` reports every choice the person makes (a click, Tab, the arrow keys, a new shape) with the shape itself. `readonly selectable` keeps the shapes choosable without editing them: the arrow keys walk them, Escape clears the choice. That is the review mode of an extraction and of a pinned plan, and `--c2-image-annotator__shape__inactive--opacity` dims the other shapes around the active one.
+
+Every shape can carry a `label` (what it marks, read after its kind) and a `confidence` from 0 to 1. Below `confidence-threshold` (0.8) the outline turns to `--c2-image-annotator__low-confidence--color` and dashes, and the shape is announced as needing review. The form that corrects the values is the app's: make the focused field's region active, and step with `next()` and `previous()`.
+
+```typescript tag=CodeBlock
+form.addEventListener('focusin', (event) => (annotator.active = event.target.dataset.field ?? null))
+acceptButton.addEventListener('click', () => fieldFor(annotator.next())?.focus())
+```
+
+Beside the active shape sits a card (`part="detail"`) holding the `detail` slot: put a `c2-comment-thread` there and swap its comments on `shape-select` for pinned comments, where the Number tool drops each pin. With nothing slotted, `renderDetail` draws the card from `{ shape, index, count }` instead. Enter on the active shape moves the keyboard into the card and Escape brings it back; keys typed in the card (Delete, Ctrl/⌘+Z) are left to it.
+
+```typescript tag=CodeBlock
+annotator.addEventListener('shape-select', (event) => {
+  if (event.detail.id) thread.comments = threads[event.detail.id] ?? []
+})
+annotator.renderDetail = ({ shape }) => html`<strong>${shape.label}</strong>`
+```
