@@ -26,6 +26,10 @@ const en = {
   counter: (count: number, max: number) => `${count} / ${max}`,
   valueMissing: 'Please fill in this field.',
   tooLong: (max: number) => `Use ${max} characters or fewer.`,
+
+  // A merge field chip's tooltip: the field's label, and its fallback when it has one.
+  mergeField: (label: string) => `Merge field: ${label}`,
+  mergeFieldFallback: (label: string, fallback: string) => `Merge field: ${label} (if empty: ${fallback})`,
 }
 
 export type RichTextEditorMessages = typeof en

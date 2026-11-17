@@ -116,6 +116,12 @@ const listDepth = (dom: HTMLElement) => {
   return Math.min(depth, MAX_INDENT)
 }
 
+/** A merge field's token: `{{name}}`, or `{{name|fallback}}` with the text to use where the field has no value. */
+export const mergeFieldToken = (name: string, fallback = '') => `{{${name}${fallback ? `|${fallback}` : ''}}}`
+
+/** A merge field token in text: its name, then its fallback. Whitespace around either is not part of it. */
+export const MERGE_FIELD_PATTERN = /\{\{\s*([^{}|]*?)\s*(?:\|\s*([^{}]*?)\s*)?\}\}/g
+
 /**
  * A page is a flat list of blocks. List items are not nested nodes: each carries its kind and indent, which keeps
  * Enter, Backspace and Tab to one rule each and lets a bullet turn into a to-do or a heading without restructuring.
@@ -273,6 +279,17 @@ export const schema = new Schema({
       selectable: false,
       parseDOM: [{ tag: 'br' }],
       toDOM: () => ['br'],
+    },
+    // A merge field (`{{first_name}}`, `{{first_name|there}}`): a template token `c2-rich-text-editor` draws as a chip
+    // the caret steps over. Its text and its Markdown are the token, its HTML the token in a `<span data-merge-field>`.
+    // Nothing parses one from HTML: a pasted token comes in as text, which the editor turns back into a chip.
+    merge_field: {
+      group: 'inline',
+      inline: true,
+      atom: true,
+      attrs: { name: {}, fallback: { default: '' } },
+      leafText: (node) => mergeFieldToken(node.attrs.name, node.attrs.fallback),
+      toDOM: (node) => ['span', { 'data-merge-field': node.attrs.name }, mergeFieldToken(node.attrs.name, node.attrs.fallback)],
     },
   },
   marks: {

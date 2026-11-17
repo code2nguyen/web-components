@@ -58,6 +58,13 @@
     link-input--border: 1px solid #bcbcc6,
     button--background: #0265dc,
     button--color: #ffffff,
+    merge-field--background: #edf1fe,
+    merge-field--color: #0265dc,
+    merge-field--border: none,
+    merge-field--border-radius: 4px,
+    merge-field--padding: 0 4px,
+    merge-field--font-weight: 500,
+    merge-field__selected--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
 
@@ -288,6 +295,21 @@ pre {
   white-space: pre-wrap;
 }
 
+// A merge field: a chip the caret steps over.
+.merge-field {
+  padding: css.cssVar(merge-field--padding);
+  border: css.cssVar(merge-field--border);
+  border-radius: css.cssVar(merge-field--border-radius);
+  background: css.cssVar(merge-field--background);
+  color: css.cssVar(merge-field--color);
+  font-weight: css.cssVar(merge-field--font-weight);
+  white-space: nowrap;
+  cursor: default;
+  &.ProseMirror-selectednode {
+    outline: css.cssVar(merge-field__selected--outline);
+  }
+}
+
 // The text a link is being edited for keeps its highlight while focus is in the link popover.
 .link-target {
   background: css.cssVar(selection--background);
@@ -465,5 +487,12 @@ pre {
 @media (forced-colors: active) {
   .tool[aria-pressed='true'] {
     outline: 1px solid ButtonText;
+  }
+  // The chip's background is repainted away: a border keeps it a chip, and the selected one is outlined.
+  .merge-field {
+    border: 1px solid CanvasText;
+  }
+  .merge-field.ProseMirror-selectednode {
+    outline: 2px solid Highlight;
   }
 }
