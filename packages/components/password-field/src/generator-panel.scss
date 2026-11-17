@@ -9,6 +9,8 @@
     generator--border: 1px solid #e4e4e7,
     generator--border-radius: 8px,
     generator--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    generator--font-size: 14px,
+    generator--line-height: 20px,
     generator-label--color: #71717a,
     generator-label--font-size: 12px,
     generator-preview--padding: 4px 4px 4px 10px,
@@ -33,8 +35,8 @@
   border: css.cssVar(generator--border);
   border-radius: css.cssVar(generator--border-radius);
   box-shadow: css.cssVar(generator--box-shadow);
-  font-size: 14px;
-  line-height: 20px;
+  font-size: css.cssVar(generator--font-size);
+  line-height: css.cssVar(generator--line-height);
 }
 
 .generator-suggestion {

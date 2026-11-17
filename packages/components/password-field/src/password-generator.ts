@@ -1,4 +1,4 @@
-import type { PasswordField, PasswordGeneratorOptions, PasswordRequirement, PasswordRequirementState, PasswordStrength } from './password-field.js'
+import type { PasswordField, PasswordGeneratorOptions, PasswordRequirement } from './password-field.js'
 
 /**
  * The password generator of `c2-password-field`, loaded with `import()` the first time a password is generated. Every
@@ -21,6 +21,8 @@ const REQUIREMENT_OF: Record<CharacterClass, string> = { lowercase: 'lowercase',
 
 /** Shortest password the generator draws, and the most words, so a slip in the options never yields a trivial or huge result. */
 const MIN_LENGTH = 4
+/** What the built-in `length` requirement asks for when the field sets no `minlength`, as in `password-field.ts`. */
+const DEFAULT_REQUIRED_LENGTH = 8
 const MAX_LENGTH = 256
 const MIN_WORDS = 3
 const MAX_WORDS = 20
@@ -31,9 +33,15 @@ export interface GeneratorSettings extends Required<Omit<PasswordGeneratorOption
   /** Lower and upper bound of `length`: the field's `minlength` and `maxlength`. */
   minLength: number
   maxLength: number
-  /** Classes a requirement of the field asks for: they stay on. */
-  locked: CharacterClass[]
+  /** Bounds of `words`: enough for `minlength`, few enough for `maxlength`, with words of usual length. */
+  minWords: number
+  maxWords: number
+  /** Options a requirement of the field asks for: they stay on. */
+  locked: Lockable[]
 }
+
+/** The options a requirement can lock: a character class, or a passphrase's capitals and digit. */
+export type Lockable = CharacterClass | 'capitalize' | 'includeNumber'
 
 /** The fields of `c2-password-field` the generator reads. */
 export interface GeneratorField {
@@ -43,26 +51,31 @@ export interface GeneratorField {
 }
 
 /**
- * The private members of `c2-password-field` its lazy modules use, so the entry carries no glue for them. Renaming
- * one of them in `password-field.ts` means renaming it here.
+ * The private members of `c2-password-field` its lazy modules use, so the entry carries no glue for them. The types
+ * are read from the class (an indexed access reaches a private member), so renaming one breaks this build.
  */
 export interface FieldInternals {
-  strengthOf(value: string): PasswordStrength
-  requirementsOf(value: string): PasswordRequirementState[]
-  strengthLabel(score: PasswordStrength): string
-  readonly effectiveDisabled: boolean
-  dirty: boolean
-  readonly input?: HTMLInputElement | null
+  strengthOf: PasswordField['strengthOf']
+  requirementsOf: PasswordField['requirementsOf']
+  strengthLabel: PasswordField['strengthLabel']
+  readonly effectiveDisabled: PasswordField['effectiveDisabled']
+  dirty: PasswordField['dirty']
+  readonly input: PasswordField['input']
 }
 
 export const internals = (field: PasswordField) => field as unknown as FieldInternals
 
-/** Whether the field takes `value` as it is: within `maxlength`, and meeting every requirement. */
-export const acceptsFor = (field: PasswordField) => (value: string) =>
-  (field.maxLength < 0 || [...value].length <= field.maxLength) &&
-  internals(field)
-    .requirementsOf(value)
-    .every((requirement) => requirement.met)
+/** Whether the field takes `value` as it is: within `minlength` and `maxlength`, and meeting every requirement. */
+export const acceptsFor = (field: PasswordField) => (value: string) => {
+  const length = [...value].length
+  return (
+    length >= field.minLength &&
+    (field.maxLength < 0 || length <= field.maxLength) &&
+    internals(field)
+      .requirementsOf(value)
+      .every((requirement) => requirement.met)
+  )
+}
 
 /** A uniformly random integer in `[0, n)`, from `crypto.getRandomValues` with rejection sampling (no modulo bias). */
 export function randomIndex(n: number): number {
@@ -86,10 +99,13 @@ export function resolveSettings(options: PasswordGeneratorOptions | null | undef
   const ids = new Set(
     (Array.isArray(field.requirements) ? field.requirements : []).map((entry) => (typeof entry === 'string' ? entry.trim() : entry?.id)).filter(Boolean),
   )
-  const locked = CHARACTER_CLASSES.filter((name) => ids.has(REQUIREMENT_OF[name]))
-  const minLength = Math.max(MIN_LENGTH, field.minLength > 0 ? field.minLength : 0, locked.length)
+  const locked: Lockable[] = CHARACTER_CLASSES.filter((name) => ids.has(REQUIREMENT_OF[name]))
+  if (ids.has('uppercase')) locked.push('capitalize')
+  if (ids.has('number')) locked.push('includeNumber')
+  const required = field.minLength > 0 ? field.minLength : ids.has('length') ? DEFAULT_REQUIRED_LENGTH : 0
+  const minLength = Math.max(MIN_LENGTH, required, locked.length)
   const maxLength = Math.max(minLength, field.maxLength > 0 ? Math.min(field.maxLength, MAX_LENGTH) : MAX_LENGTH)
-  const settings: GeneratorSettings = {
+  return fit({
     kind: given.kind === 'passphrase' ? 'passphrase' : 'password',
     length: clamp(given.length, minLength, maxLength, Math.max(minLength, Math.min(16, maxLength))),
     lowercase: given.lowercase ?? true,
@@ -98,15 +114,30 @@ export function resolveSettings(options: PasswordGeneratorOptions | null | undef
     symbols: given.symbols ?? true,
     words: clamp(given.words, MIN_WORDS, MAX_WORDS, 5),
     separator: typeof given.separator === 'string' ? given.separator : '-',
-    capitalize: (given.capitalize ?? false) || ids.has('uppercase'),
-    includeNumber: (given.includeNumber ?? false) || ids.has('number'),
+    capitalize: given.capitalize ?? false,
+    includeNumber: given.includeNumber ?? false,
     wordList: Array.isArray(given.wordList) ? given.wordList : undefined,
     minLength,
     maxLength,
+    minWords: MIN_WORDS,
+    maxWords: MAX_WORDS,
     locked,
-  }
-  for (const name of locked) settings[name] = true
+  })
+}
+
+/**
+ * Keeps settings within what the field accepts after a change: locked options on, at least one character class, and
+ * a word count whose usual length (words of 5 to 6 letters) fits `minlength` and `maxlength`. Rejection does the rest.
+ */
+export function fit(settings: GeneratorSettings): GeneratorSettings {
+  for (const name of settings.locked) settings[name] = true
   if (!CHARACTER_CLASSES.some((name) => settings[name])) settings.lowercase = true
+  const separator = [...settings.separator].length
+  settings.maxWords =
+    settings.maxLength < MAX_LENGTH ? clamp(Math.floor((settings.maxLength + separator) / (6 + separator)), MIN_WORDS, MAX_WORDS, MIN_WORDS) : MAX_WORDS
+  settings.minWords = clamp(Math.ceil((settings.minLength + separator) / (5 + separator)), MIN_WORDS, settings.maxWords, MIN_WORDS)
+  settings.words = clamp(settings.words, settings.minWords, settings.maxWords, settings.minWords)
+  settings.length = clamp(settings.length, settings.minLength, settings.maxLength, settings.minLength)
   return settings
 }
 
@@ -164,13 +195,15 @@ export async function prepare(settings: GeneratorSettings): Promise<Generator> {
 }
 
 /**
- * A suggestion the field accepts: drawn again while `accepts` refuses it (a requirement of the app's own), a bounded
- * number of times, after which the last one is returned and the field reports what it misses.
+ * A suggestion the field accepts: drawn again while `accepts` refuses it (a passphrase too long for `maxlength`, a
+ * requirement of the app's own). An empty string when 100 draws found none: the options cannot meet the field's rules.
  */
 export function suggest(generator: Generator, accepts: (value: string) => boolean): string {
-  let value = generator.next()
-  for (let attempt = 0; attempt < 100 && !accepts(value); attempt++) value = generator.next()
-  return value
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const value = generator.next()
+    if (accepts(value)) return value
+  }
+  return ''
 }
 
 /** `generate()` of `c2-password-field`: one suggestion for the field's options, overridden by `options`. */

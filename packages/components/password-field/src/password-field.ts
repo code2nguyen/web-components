@@ -147,7 +147,7 @@ export function scorePassword(value: string): PasswordStrength {
  * classes, or a passphrase of random words with a separator. Use password puts it in the field and fires `input` and
  * `change`. The popover, its word list and the components it is made of load the first time it opens.
  * `generator-options` sets where it starts (a {@link PasswordGeneratorOptions} object); `minlength`, `maxlength` and
- * the built-in requirements bound it, so a suggestion always meets them. `generate()` draws one from script.
+ * the built-in requirements bound it: a suggestion that misses them is drawn again. `generate()` draws one from script.
  *
  * The element is form-associated (`name`), so it submits with its form, and validates like an input: `required`,
  * `minlength`, `maxlength`, and every requirement once something is typed. `input` and `change` are re-dispatched
@@ -235,6 +235,8 @@ export function scorePassword(value: string): PasswordStrength {
  * @cssproperty {border} [--c2-password-field__generator--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-password-field__generator--border-radius=8px]
  * @cssproperty {box-shadow} [--c2-password-field__generator--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {font-size} [--c2-password-field__generator--font-size=14px] - Text of the generator's options and actions.
+ * @cssproperty {pixel} [--c2-password-field__generator--line-height=20px]
  * @cssproperty {color} [--c2-password-field__generator-label--color=#71717a] - Labels of the generator's options, and its copy and regenerate icons.
  * @cssproperty {font-size} [--c2-password-field__generator-label--font-size=12px]
  * @cssproperty {padding} [--c2-password-field__generator-preview--padding=4px 4px 4px 10px] - The box that shows the suggestion.
@@ -442,6 +444,8 @@ export class PasswordField extends LitElement {
   /**
    * Draws a password with the generator without opening it: `generator-options`, overridden by `options`, bounded by
    * the field's lengths and requirements. Loads the generator the first time. The value of the field is not changed.
+   * Resolves with an empty string when no suggestion can meet the field's rules (a passphrase longer than `maxlength`,
+   * a requirement of your own the options never satisfy).
    */
   async generate(options?: PasswordGeneratorOptions): Promise<string> {
     return (await import('./password-generator.js')).generateFor(this, options)

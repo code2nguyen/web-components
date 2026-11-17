@@ -22,6 +22,7 @@ const fr: { [K in keyof typeof passwordFieldMessages.en]: string } = {
   includeNumber: 'Ajouter un chiffre',
   strength: 'Robustesse de la suggestion',
   entropy: 'environ {0} bits',
+  noSuggestion: 'Aucune suggestion ne respecte les règles de ce champ.',
 }
 
 addTranslations({ fr: { 'password-field': fr } })

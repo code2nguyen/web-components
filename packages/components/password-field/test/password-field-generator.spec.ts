@@ -146,6 +146,63 @@ test('suggestions meet minlength, maxlength and the requirements', async ({ page
   expect(await host.evaluate((el) => el.matches(':state(requirements-met)'))).toBe(true)
 })
 
+test('the length requirement bounds the slider without minlength, and a passphrase fits maxlength', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field generator requirements="length;uppercase;number" maxlength="24"></c2-password-field>')
+  const host = page.locator('c2-password-field')
+  expect(await host.evaluate(async (el) => (await (el as Field).generate({ length: 4 })).length)).toBe(8)
+  const phrases = await host.evaluate(async (el) => Promise.all(Array.from({ length: 10 }, () => (el as Field).generate({ kind: 'passphrase', words: 8 }))))
+  for (const phrase of phrases) {
+    expect(phrase.length).toBeGreaterThanOrEqual(8)
+    expect(phrase.length).toBeLessThanOrEqual(24)
+    expect(phrase).toMatch(/[A-Z]/)
+    expect(phrase).toMatch(/\d/)
+  }
+
+  await page.getByRole('button', { name: 'Generate password' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Generate password' })
+  await expect(dialog.getByRole('slider', { name: 'Length' })).toHaveAttribute('min', '8')
+  await dialog.getByRole('button', { name: 'Passphrase' }).click()
+  // The capitals and the digit the requirements ask for stay on.
+  await expect(dialog.getByRole('checkbox', { name: 'Capitalize words' })).toBeDisabled()
+  await expect(dialog.getByRole('checkbox', { name: 'Include a number' })).toBeChecked()
+  await expect(dialog.getByRole('slider', { name: 'Words' })).toHaveAttribute('max', '3')
+})
+
+test('a rule the options can never meet shows no suggestion', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field generator></c2-password-field>')
+  const host = page.locator('c2-password-field')
+  await host.evaluate(
+    (el) =>
+      ((el as HTMLElement & { requirements: unknown[] }).requirements = [{ label: 'Contains “zz”', test: (value: string) => value.includes('zzzzzzzz') }]),
+  )
+  expect(await host.evaluate((el) => (el as Field).generate())).toBe('')
+  await page.getByRole('button', { name: 'Generate password' }).click()
+  await expect(suggestion(page)).toHaveText('No suggestion fits the rules of this field.')
+  await page.getByRole('button', { name: 'Use password' }).click()
+  expect(await host.evaluate((el) => (el as Field).value)).toBe('')
+})
+
+test('the popover controls do not fire input or change on the field', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field generator></c2-password-field>')
+  const host = page.locator('c2-password-field')
+  await host.evaluate((el) => {
+    const seen: string[] = []
+    for (const type of ['input', 'change', 'copied'])
+      document.addEventListener(type, () => {
+        seen.push(type)
+        el.setAttribute('data-events', JSON.stringify(seen))
+      })
+  })
+  await page.getByRole('button', { name: 'Generate password' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Generate password' })
+  await dialog.getByRole('checkbox', { name: 'Symbols (!@#)' }).click()
+  await dialog.getByRole('slider', { name: 'Length' }).focus()
+  await page.keyboard.press('ArrowRight')
+  await dialog.getByRole('button', { name: 'Passphrase' }).click()
+  await expect(dialog.getByRole('slider', { name: 'Words' })).toBeVisible()
+  expect(await events(page)).toEqual([])
+})
+
 test('generator-options sets where the generator starts, and an own word list replaces the built-in one', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-password-field generator generator-options='{"kind":"passphrase","words":3,"separator":"+"}'></c2-password-field>`)
   const host = page.locator('c2-password-field')
@@ -154,6 +211,9 @@ test('generator-options sets where the generator starts, and an own word list re
   await expect(suggestion(page)).toHaveText(/^[a-z]+(\+[a-z]+){2}$/)
   // A separator of the app's own is offered beside the built-in ones, pressed.
   await expect(page.getByRole('button', { name: '+', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: '-', exact: true }).click()
+  await expect(suggestion(page)).toHaveText(/^[a-z]+(-[a-z]+){2}$/)
+  await expect(page.getByRole('button', { name: '+', exact: true })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('every draw comes from crypto.getRandomValues, never Math.random', async ({ page, renderScenario }) => {

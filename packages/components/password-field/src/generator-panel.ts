@@ -7,11 +7,12 @@ import '@c2n/checkbox'
 import '@c2n/copy-button'
 import '@c2n/icon-button'
 import '@c2n/slider'
-import type { PasswordField } from './password-field.js'
+import type { PasswordField, PasswordStrength } from './password-field.js'
 import { passwordFieldMessages } from './messages.js'
 import {
   acceptsFor,
   CHARACTER_CLASSES,
+  fit,
   internals,
   prepare,
   resolveSettings,
@@ -66,8 +67,12 @@ export function createGeneratorPanel(field: PasswordField) {
   root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
 
   let settings: GeneratorSettings | undefined
+  /** The separators offered: the built-in ones, and the one `generator-options` starts from. */
+  let separators = SEPARATORS
   let generator: Generator | undefined
   let suggestion = ''
+  /** The suggestion's strength, scored once per draw: the app's `scorer` may be expensive. */
+  let score: PasswordStrength = 0
   /** Counts the draws, so a slow word-list load never overwrites a newer suggestion. */
   let draw = 0
   let open = false
@@ -76,21 +81,28 @@ export function createGeneratorPanel(field: PasswordField) {
   let focusAfterUse = false
 
   const toggle = (next: boolean) => {
+    const overlay = root.querySelector('c2-overlay')
+    // Taken out of the page while open, the popover closed without a toggle event: show it again.
+    if (open === next && next && overlay && !overlay.matches(':popover-open')) overlay.showPopover()
     if (open === next) return
     open = next
     field.requestUpdate()
   }
 
   const regenerate = async (changes?: Partial<GeneratorSettings>) => {
-    const current = (settings = { ...(settings ?? resolveSettings(field.generatorOptions, field)), ...changes })
-    // The last enabled character class cannot be switched off: a password needs at least one.
-    if (!CHARACTER_CLASSES.some((name) => current[name])) current.lowercase = true
+    if (!settings) {
+      settings = resolveSettings(field.generatorOptions, field)
+      separators = SEPARATORS.includes(settings.separator) ? SEPARATORS : [...SEPARATORS, settings.separator]
+    }
+    const current = (settings = fit({ ...settings, ...changes }))
     const ticket = ++draw
+    field.requestUpdate()
     try {
       const next = await prepare(current)
       if (ticket !== draw) return
       generator = next
       suggestion = suggest(next, accepts)
+      score = suggestion ? internal.strengthOf(suggestion) : 0
     } catch (error) {
       // The word list could not be loaded (offline, a stale deploy): the next change tries again.
       if (ticket === draw) console.warn('[c2-password-field] the passphrase word list could not be loaded', error)
@@ -130,8 +142,15 @@ export function createGeneratorPanel(field: PasswordField) {
     field.dispatchEvent(new Event('change', { bubbles: true }))
   }
 
+  /**
+   * The popover's own controls fire `input` and `change` (and the copy button `copied`, with the password) that must
+   * not reach the page as the field's: the field's value has not changed. Buttons the app slots in keep theirs.
+   */
+  const keepInside = (event: Event) => {
+    if (!field.contains(event.target as Node)) event.stopPropagation()
+  }
+
   const renderStrength = () => {
-    const score = suggestion ? internal.strengthOf(suggestion) : 0
     const label = suggestion ? internal.strengthLabel(score) : ''
     const level = ['', 'weak', 'fair', 'good', 'strong'][score]
     return html`<div class="meter-row generator-strength">
@@ -159,11 +178,7 @@ export function createGeneratorPanel(field: PasswordField) {
           min=${current.minLength}
           max=${current.maxLength >= MAX_SLIDER ? Math.max(64, current.length) : current.maxLength}
           .value=${current.length}
-          @input=${(event: Event) => {
-            event.stopPropagation()
-            void regenerate({ length: Number((event.target as HTMLElement & { value: number }).value) })
-          }}
-          @change=${(event: Event) => event.stopPropagation()}
+          @input=${(event: Event) => regenerate({ length: Number((event.target as HTMLElement & { value: number }).value) })}
         ></c2-slider>
         <span class="generator-value" aria-hidden="true">${current.length}</span>
       </div>
@@ -174,10 +189,7 @@ export function createGeneratorPanel(field: PasswordField) {
               data-class=${name}
               ?checked=${current[name]}
               ?disabled=${current.locked.includes(name) || (current[name] && enabled.length === 1)}
-              @change=${(event: Event) => {
-                event.stopPropagation()
-                void regenerate({ [name]: (event.target as HTMLInputElement).checked })
-              }}
+              @change=${(event: Event) => regenerate({ [name]: (event.target as HTMLInputElement).checked })}
               >${msg.t(MESSAGE_OF[name])}</c2-checkbox
             >`,
         )}
@@ -185,19 +197,14 @@ export function createGeneratorPanel(field: PasswordField) {
   }
 
   const renderPassphraseOptions = (current: GeneratorSettings) => {
-    const separators = SEPARATORS.includes(current.separator) ? SEPARATORS : [...SEPARATORS, current.separator]
     return html`<div class="generator-option">
         <span class="generator-label">${msg.t('words')}</span>
         <c2-slider
           aria-label=${msg.t('words')}
-          min="3"
-          max=${Math.max(10, current.words)}
+          min=${current.minWords}
+          max=${Math.min(current.maxWords, Math.max(10, current.words))}
           .value=${current.words}
-          @input=${(event: Event) => {
-            event.stopPropagation()
-            void regenerate({ words: Number((event.target as HTMLElement & { value: number }).value) })
-          }}
-          @change=${(event: Event) => event.stopPropagation()}
+          @input=${(event: Event) => regenerate({ words: Number((event.target as HTMLElement & { value: number }).value) })}
         ></c2-slider>
         <span class="generator-value" aria-hidden="true">${current.words}</span>
       </div>
@@ -209,9 +216,7 @@ export function createGeneratorPanel(field: PasswordField) {
           selection="single"
           aria-label=${msg.t('separator')}
           .value=${String(separators.indexOf(current.separator))}
-          @input=${(event: Event) => event.stopPropagation()}
           @change=${(event: CustomEvent<{ value: string }>) => {
-            event.stopPropagation()
             const picked = separators[Number(event.detail.value)]
             if (picked !== undefined) void regenerate({ separator: picked })
           }}
@@ -223,19 +228,15 @@ export function createGeneratorPanel(field: PasswordField) {
         <c2-checkbox
           data-option="capitalize"
           ?checked=${current.capitalize}
-          @change=${(event: Event) => {
-            event.stopPropagation()
-            void regenerate({ capitalize: (event.target as HTMLInputElement).checked })
-          }}
+          ?disabled=${current.locked.includes('capitalize')}
+          @change=${(event: Event) => regenerate({ capitalize: (event.target as HTMLInputElement).checked })}
           >${msg.t('capitalize')}</c2-checkbox
         >
         <c2-checkbox
           data-option="include-number"
           ?checked=${current.includeNumber}
-          @change=${(event: Event) => {
-            event.stopPropagation()
-            void regenerate({ includeNumber: (event.target as HTMLInputElement).checked })
-          }}
+          ?disabled=${current.locked.includes('includeNumber')}
+          @change=${(event: Event) => regenerate({ includeNumber: (event.target as HTMLInputElement).checked })}
           >${msg.t('includeNumber')}</c2-checkbox
         >
       </div>`
@@ -268,11 +269,20 @@ export function createGeneratorPanel(field: PasswordField) {
         @beforetoggle=${handleBeforeToggle}
         @toggle=${handleToggle}
       >
-        <div class="generator" part="generator" role="dialog" aria-label=${msg.t('generate')}>
+        <div
+          class="generator"
+          part="generator"
+          role="dialog"
+          aria-label=${msg.t('generate')}
+          @input=${keepInside}
+          @change=${keepInside}
+          @copied=${keepInside}
+          @copy-error=${keepInside}
+        >
           <div class="generator-suggestion">
             <span class="generator-label">${msg.t('suggestion')}</span>
             <div class="generator-preview">
-              <span class="generator-text">${suggestion}</span>
+              <span class="generator-text">${suggestion || (generator ? msg.t('noSuggestion') : nothing)}</span>
               <c2-icon-button class="generator-regenerate" aria-label=${msg.t('regenerate')} @click=${() => regenerate()}>${refreshIcon}</c2-icon-button>
               <c2-copy-button class="generator-copy" reveal="always" .value=${suggestion} label=${msg.t('copy')}></c2-copy-button>
             </div>
@@ -287,9 +297,7 @@ export function createGeneratorPanel(field: PasswordField) {
                     stretched
                     aria-label=${msg.t('kind')}
                     .value=${current.kind}
-                    @input=${(event: Event) => event.stopPropagation()}
                     @change=${(event: CustomEvent<{ value: string }>) => {
-                      event.stopPropagation()
                       void regenerate({ kind: event.detail.value === 'passphrase' ? 'passphrase' : 'password' })
                     }}
                   >

@@ -23,6 +23,8 @@ const en = {
   separator: 'Separator',
   capitalize: 'Capitalize words',
   includeNumber: 'Include a number',
+  /** Shown in place of a suggestion when the options cannot meet the field's length limits or requirements. */
+  noSuggestion: 'No suggestion fits the rules of this field.',
   /** Accessible name of the strength meter of the suggestion. */
   strength: 'Strength of the suggestion',
   /** The suggestion's entropy, after its strength label. */
