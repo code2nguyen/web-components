@@ -387,6 +387,8 @@ export const overrides: Record<string, Override> = {
   '--c2-time-range-picker__input--font-family': { exclude: 'monospace for typed expressions' },
   // The phrase a typed confirmation asks for is an identifier (a repository's name), set in a monospace face.
   '--c2-confirm-dialog__phrase--font-family': { exclude: 'monospace for the phrase to type' },
+  // A suggested password is read character by character (l, 1, I, O, 0), so it stays in a monospace face.
+  '--c2-password-field__generator-preview--font-family': { exclude: 'monospace for the suggested password' },
   // The zone chip sits on a muted fill, where the muted text role drops below 4.5:1; a deeper mix of the ink keeps it.
   '--c2-time-range-picker__time-zone--color': {
     token: 'color-on-surface',

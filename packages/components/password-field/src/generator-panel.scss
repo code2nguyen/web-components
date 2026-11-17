@@ -1,7 +1,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-password-field,
   $theme: (
-    generator--width: 320px,
+    generator--width: 340px,
     generator--padding: 12px,
     generator--gap: 12px,
     generator--background: #ffffff,
@@ -90,7 +90,7 @@
 .generator-classes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 12px;
+  gap: 4px 8px;
 }
 
 .generator-separators {

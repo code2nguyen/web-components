@@ -227,7 +227,7 @@ export function scorePassword(value: string): PasswordStrength {
  * @cssproperty {color} [--c2-password-field__requirement-icon__met--color=#16a34a] - Tick of a met requirement.
  * @cssproperty {pixel} [--c2-password-field__requirement-icon--size=14px]
  *
- * @cssproperty {pixel} [--c2-password-field__generator--width=320px] - Width of the generator popover (`generator`).
+ * @cssproperty {pixel} [--c2-password-field__generator--width=340px] - Width of the generator popover (`generator`).
  * @cssproperty {padding} [--c2-password-field__generator--padding=12px]
  * @cssproperty {pixel} [--c2-password-field__generator--gap=12px] - Space between the suggestion, the options and the actions.
  * @cssproperty {color} [--c2-password-field__generator--background=#ffffff]
