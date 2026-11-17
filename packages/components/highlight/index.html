@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>c2-highlight</title>
     <script type="module" src="/src/highlight.ts"></script>
+    <script type="module" src="/src/text-annotator.ts"></script>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -28,6 +29,12 @@
     <c2-highlight query="cafe" ignore-accents>Ignore accents: café, cafe and Café.</c2-highlight>
     <div><button id="next">Next match</button> <span id="count"></span></div>
     <c2-highlight id="find" query="the" active-index="0">The quick fox jumps over the lazy dog and then the cat.</c2-highlight>
+    <p>Select text, then press P or L:</p>
+    <c2-text-annotator
+      labels='[{"value":"person","label":"Person","key":"p"},{"value":"place","label":"Place","key":"l"}]'
+      ranges='[{"start":0,"end":12,"label":"person"}]'
+      >Ada Lovelace worked with Charles Babbage in London.</c2-text-annotator
+    >
     <script type="module">
       const search = document.querySelector('#search')
       search.addEventListener('input', () => document.querySelectorAll('.live').forEach((el) => (el.query = search.value)))

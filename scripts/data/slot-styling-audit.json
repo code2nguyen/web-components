@@ -2449,6 +2449,13 @@
       "reason": "The start actions box spaces and aligns the slotted actions; each action is styled through its own public contract."
     },
     {
+      "tag": "c2-text-annotator",
+      "slot": "",
+      "decision": "part",
+      "parts": ["text"],
+      "reason": "The slot only supplies the text; it is drawn in the text part, and the span and tag parts and the tone variables style each labelled span."
+    },
+    {
       "tag": "c2-text-effect",
       "slot": "",
       "decision": "assigned-content",
