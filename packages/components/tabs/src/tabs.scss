@@ -13,6 +13,8 @@
     padding-right: null,
     padding-bottom: null,
     padding-left: null,
+    scrollbar-width: none,
+    fade--width: 32px,
 
     indicator--color: variables.$color-border-dark,
     indicator--border-radius: null,
@@ -147,6 +149,52 @@
     opacity: css.cssVar(tab__disabled--opacity);
     pointer-events: none;
   }
+}
+
+// A scrolling strip in a flex row may shrink below its tabs' width: that is what makes it scroll.
+:host([overflow='scroll']) {
+  min-width: 0;
+}
+
+// `overflow="scroll"`: the tab list scrolls sideways, as `c2-tab-nav` always does. The indicator is positioned inside
+// the strip, so it scrolls with the tabs. An edge with tabs hidden beyond it fades out (the `overflow-start` /
+// `overflow-end` classes), and the scroll padding keeps a scrolled-to tab clear of the fade.
+:host([overflow='scroll']) .c2-tabs-header {
+  --_fade-start: 0px;
+  --_fade-end: 0px;
+  --_fade-direction: to right;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: css.cssVar(scrollbar-width);
+  scroll-padding-inline: css.cssVar(fade--width);
+
+  &.overflow-start {
+    --_fade-start: #{css.cssVar(fade--width)};
+  }
+
+  &.overflow-end {
+    --_fade-end: #{css.cssVar(fade--width)};
+  }
+
+  &.overflow-start,
+  &.overflow-end {
+    mask-image: linear-gradient(var(--_fade-direction), transparent, #000 var(--_fade-start), #000 calc(100% - var(--_fade-end)), transparent);
+  }
+
+  ::slotted(c2-tab) {
+    flex-shrink: 0;
+  }
+}
+
+// Safari before 18.2 ignores `scrollbar-width`; browsers that support it ignore this rule once it is set.
+:host([overflow='scroll']) .c2-tabs-header::-webkit-scrollbar {
+  display: none;
+}
+
+:host([overflow='scroll']:dir(rtl)) .c2-tabs-header {
+  --_fade-direction: to left;
 }
 
 @media (prefers-reduced-motion: reduce) {

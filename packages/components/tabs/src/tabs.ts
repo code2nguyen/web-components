@@ -34,6 +34,12 @@ const syncLabel = (tab: Tab) => tab.label || tab.getAttribute('aria-label') || t
 /** Element reflection lets a panel wrapper in the shadow root be labelled by its tab in the light DOM. */
 const canReferenceElements = typeof Element !== 'undefined' && 'ariaLabelledByElements' in Element.prototype
 
+/**
+ * What the strip does when its tabs are wider than it: `visible` (default) lets them run past its edge, `scroll` scrolls
+ * the tab list sideways.
+ */
+export type TabsOverflow = 'visible' | 'scroll'
+
 /** Detail of the `selection-change` event of {@link Tabs}. */
 export interface TabsSelectionChangeEventDetail {
   /** `for` value of the tab that is now selected — the new `selected-tab`. */
@@ -68,6 +74,11 @@ export interface Tabs {
  * (`ariaLabelledByElements`), the selected panel gets `role="tabpanel"` and `aria-labelledby` itself (and the
  * tab an `id` for it), unless the author wrote them.
  *
+ * A strip with more tabs than room (six tabs on a phone) sets `overflow="scroll"`: the tab list scrolls sideways, the
+ * selected tab is scrolled into view whenever it changes, the arrow keys reach every tab, and an edge fades out on a
+ * side where tabs are hidden (`--c2-tabs__fade--width`), as in `c2-tab-nav`. The scrollbar is hidden unless `--c2-tabs--scrollbar-width`
+ * says otherwise.
+ *
  * Strips that share a `sync-key` move together: picking a tab in one selects the tab with the same label in every
  * other strip of the page with that key (a package manager, a language), and the choice is remembered in
  * `localStorage` and restored when the page loads again. That is how a set of code blocks keeps one switcher.
@@ -93,6 +104,8 @@ export interface Tabs {
  * @cssproperty {background-color} --c2-tabs--background-color
  * @cssproperty {pixel} --c2-tabs--height
  * @cssproperty {pixel} --c2-tabs--gap
+ * @cssproperty {scrollbar-width} [--c2-tabs--scrollbar-width=none] - Scrollbar of a strip with `overflow="scroll"`: `thin` or `auto` shows one, which a mouse without a horizontal wheel can drag.
+ * @cssproperty {pixel} [--c2-tabs__fade--width=32px] - Width of the fade at an edge of a scrolling strip where tabs are hidden; a scrolled-to tab stays this far from the edge.
  * @cssproperty {border-radius} --c2-tabs--border-radius
  * @cssproperty {padding} --c2-tabs--padding-top
  * @cssproperty {padding} --c2-tabs--padding-right
@@ -162,6 +175,12 @@ export class Tabs extends LitElement {
   @property({ type: String, attribute: 'sync-key' })
   syncKey = ''
 
+  /**
+   * What happens when the tabs are wider than the strip. `visible` (default): they run past its edge. `scroll`: the
+   * tab list scrolls sideways, keeps the selected tab in view and fades the edges where tabs are hidden.
+   */
+  @property({ reflect: true }) overflow: TabsOverflow = 'visible'
+
   /** Whether the remembered `sync-key` choice has been looked up. */
   private restored = false
 
@@ -196,7 +215,11 @@ export class Tabs extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer && typeof ResizeObserver !== 'undefined' && !this.resizeObserver) {
-      this.resizeObserver = new ResizeObserver(() => this.updateIndicator())
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateIndicator()
+        this.revealSelected(false)
+        this.updateScrollEdges()
+      })
     }
     if (!isServer) {
       this.childObserver ??= new MutationObserver(() => this.assignSlots())
@@ -485,13 +508,63 @@ export class Tabs extends LitElement {
     if (changed.has('selectedTab')) {
       this.syncTabs()
       this.updateIndicator()
+      // The first selection is placed at once; a later one glides into view.
+      this.revealSelected(changed.get('selectedTab') !== undefined && this.hasUpdated)
     }
+    if (changed.has('overflow')) {
+      this.revealSelected(false)
+      this.updateScrollEdges()
+    }
+  }
+
+  /**
+   * Scrolls a scrolling strip so the selected tab is wholly in view, `--c2-tabs__fade--width` (the scroll padding) away
+   * from either edge. Only the tab list moves: unlike `scrollIntoView`, the page never scrolls.
+   */
+  private revealSelected(smooth: boolean) {
+    const header = this.header
+    if (this.overflow !== 'scroll' || !header) return
+    const tab = this.tabs.find((t) => t.for === this.selectedTab)
+    if (!tab) return
+    const strip = header.getBoundingClientRect()
+    const box = tab.getBoundingClientRect()
+    const style = getComputedStyle(header)
+    const padStart = parseFloat(style.scrollPaddingLeft) || 0
+    const padEnd = parseFloat(style.scrollPaddingRight) || 0
+    let delta = 0
+    if (box.left < strip.left + padStart) delta = box.left - strip.left - padStart
+    else if (box.right > strip.right - padEnd) delta = Math.min(box.right - strip.right + padEnd, box.left - strip.left - padStart)
+    if (Math.abs(delta) < 1) return
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    header.scrollBy({ left: delta, behavior: smooth && !reduced ? 'smooth' : 'instant' })
+  }
+
+  /**
+   * Marks the edges of a scrolling strip behind which tabs are hidden, for the fades. Classes on the strip inside the
+   * shadow root, written directly: this runs on every scroll frame and must not schedule a render.
+   */
+  private updateScrollEdges = () => {
+    const header = this.header
+    if (!header) return
+    const scrolling = this.overflow === 'scroll'
+    // In a right-to-left strip `scrollLeft` runs from 0 down to negative values, so its magnitude is the distance from the start.
+    const fromStart = Math.abs(header.scrollLeft)
+    const room = header.scrollWidth - header.clientWidth
+    header.classList.toggle('overflow-start', scrolling && fromStart > 1)
+    header.classList.toggle('overflow-end', scrolling && room - fromStart > 1)
   }
 
   override render() {
     return html`
       <div class="c2-tabs">
-        <div class="c2-tabs-header" role="tablist" aria-label=${this.ariaLabel || nothing} @tab-change=${this.handleTabChange} @keydown=${this.handleKeydown}>
+        <div
+          class="c2-tabs-header"
+          role="tablist"
+          aria-label=${this.ariaLabel || nothing}
+          @tab-change=${this.handleTabChange}
+          @keydown=${this.handleKeydown}
+          @scroll=${this.updateScrollEdges}
+        >
           <slot name="tab" @slotchange=${this.handleTabSlotChange}></slot>
           <div class="selection-indicator first-position"></div>
         </div>

@@ -324,3 +324,68 @@ test('without a sync-key nothing is shared or stored', async ({ page, renderScen
   await expect(page.locator('c2-tab[for="one-b"]')).toHaveHostAria('aria-selected', 'true')
   expect(await page.evaluate(() => localStorage.length)).toBe(0)
 })
+
+// #501: six tabs in a phone-width strip.
+const crowded = (attributes = 'overflow="scroll"', width = 240, selected = 'a') =>
+  `<div style="width: ${width}px"><c2-tabs ${attributes} selected-tab="${selected}" aria-label="Sections">${['a', 'b', 'c', 'd', 'e', 'f']
+    .map((id) => `<c2-tab for="${id}">Section ${id.toUpperCase()}</c2-tab>`)
+    .join('')}${['a', 'b', 'c', 'd', 'e', 'f'].map((id) => `<div id="${id}">Panel ${id}</div>`).join('')}</c2-tabs></div>`
+
+const strip = (page: Page) => page.locator('c2-tabs').locator('.c2-tabs-header')
+const edges = (page: Page) => strip(page).evaluate((header) => ['overflow-start', 'overflow-end'].filter((name) => header.classList.contains(name)))
+/** Whether the tab lies wholly inside the strip's visible box. */
+const inView = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    const header = document.querySelector('c2-tabs')!.shadowRoot!.querySelector('.c2-tabs-header')!.getBoundingClientRect()
+    const tab = document.querySelector(`c2-tab[for="${id}"]`)!.getBoundingClientRect()
+    return tab.left >= header.left - 0.5 && tab.right <= header.right + 0.5
+  }, id)
+
+test('overflow="scroll" keeps the strip inside its container and fades the edge where tabs are hidden', async ({ page, renderScenario }) => {
+  await renderScenario(crowded())
+  const host = page.locator('c2-tabs')
+  expect(await host.evaluate((element) => Math.round(element.getBoundingClientRect().width))).toBe(240)
+  await expect.poll(() => strip(page).evaluate((header) => header.scrollWidth > header.clientWidth)).toBe(true)
+  await expect.poll(() => edges(page)).toEqual(['overflow-end'])
+  await strip(page).evaluate((header) => header.scrollTo({ left: header.scrollWidth, behavior: 'instant' }))
+  await expect.poll(() => edges(page)).toEqual(['overflow-start'])
+  await strip(page).evaluate((header) => header.scrollTo({ left: 200, behavior: 'instant' }))
+  await expect.poll(() => edges(page)).toEqual(['overflow-start', 'overflow-end'])
+  await accessible(page)
+})
+
+test('overflow="scroll" scrolls the selected tab into view, on load, on a pick and from the keyboard', async ({ page, renderScenario }) => {
+  await renderScenario(crowded('overflow="scroll"', 240, 'e'))
+  await expect.poll(() => inView(page, 'e')).toBe(true)
+  await expect.poll(() => inView(page, 'a')).toBe(false)
+
+  await props(page.locator('c2-tabs'), { selectedTab: 'a' })
+  await expect.poll(() => inView(page, 'a')).toBe(true)
+
+  // The arrow keys reach every tab, each scrolled into view as it is selected.
+  await page.locator('c2-tab[for="a"]').focus()
+  for (const id of ['b', 'c', 'd', 'e', 'f']) {
+    await page.keyboard.press('ArrowRight')
+    await expect(page.locator(`c2-tab[for="${id}"]`)).toBeFocused()
+    await expect.poll(() => inView(page, id)).toBe(true)
+  }
+  await expect(page.locator('c2-tabs')).toHaveJSProperty('selectedTab', 'f')
+  // Only the strip scrolled: the page did not.
+  expect(await page.evaluate(() => window.scrollX)).toBe(0)
+})
+
+test('without overflow="scroll" the strip does not scroll and draws no fade', async ({ page, renderScenario }) => {
+  await renderScenario(crowded(''))
+  await expect.poll(() => strip(page).evaluate((header) => getComputedStyle(header).overflowX)).toBe('visible')
+  await expect.poll(() => edges(page)).toEqual([])
+  expect(await page.locator('c2-tabs').evaluate((element) => element.getAttributeNames())).toEqual(['selected-tab', 'aria-label'])
+})
+
+test('overflow="scroll" in a right-to-left strip reveals the selected tab and fades the far edge', async ({ page, renderScenario }) => {
+  await renderScenario(`<div dir="rtl">${crowded()}</div>`)
+  await expect.poll(() => inView(page, 'a')).toBe(true)
+  await expect.poll(() => edges(page)).toEqual(['overflow-end'])
+  await props(page.locator('c2-tabs'), { selectedTab: 'f' })
+  await expect.poll(() => inView(page, 'f')).toBe(true)
+  await expect.poll(() => edges(page)).toEqual(['overflow-start'])
+})

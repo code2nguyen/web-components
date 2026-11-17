@@ -31,6 +31,26 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ></c2-tabs>
 ```
 
+```html tag=MdxCodeBlock,label=Scrolling strip
+<style>
+  .scroll-tabs {
+    width: 280px;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
+  }
+</style>
+<c2-tabs overflow="scroll" selected-tab="t5" class="scroll-tabs" aria-label="Order sections" client:only="lit"
+  ><c2-tab label="Summary" for="t1"></c2-tab><c2-tab label="Items" for="t2"></c2-tab><c2-tab label="Payments" for="t3"></c2-tab
+  ><c2-tab label="Shipping" for="t4"></c2-tab><c2-tab label="Returns" for="t5"></c2-tab><c2-tab label="History" for="t6"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div>
+  <div id="t4"></div>
+  <div id="t5"></div>
+  <div id="t6"></div
+></c2-tabs>
+```
+
 ```html tag=MdxCodeBlock,label=Brand indicator
 <style>
   .brand-indicator {
