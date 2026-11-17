@@ -981,6 +981,10 @@
       "types": "./dist/secret-field.d.ts",
       "default": "./dist/secret-field.js"
     },
+    "./secret-field/totp-code": {
+      "types": "./dist/secret-field/totp-code.d.ts",
+      "default": "./dist/secret-field/totp-code.js"
+    },
     "./select": {
       "types": "./dist/select.d.ts",
       "default": "./dist/select.js"

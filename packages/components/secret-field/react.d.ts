@@ -14,6 +14,7 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { SecretField } from '@c2n/secret-field'
+import type { TotpCode } from '@c2n/secret-field/totp-code.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -26,6 +27,12 @@ declare module 'react' {
       'c2-secret-field': C2Props<SecretField> & {
         'reveal-start'?: Attribute
         'reveal-end'?: Attribute
+        'hide-reveal'?: Attribute
+      }
+      'c2-totp-code': C2Props<TotpCode> & {
+        'reveal-end'?: Attribute
+        'warning-time'?: Attribute
+        'reveal-start'?: Attribute
         'hide-reveal'?: Attribute
       }
     }

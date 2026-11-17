@@ -9,6 +9,10 @@
       "types": "./types/src/secret-field.d.ts",
       "default": "./dist/secret-field.js"
     },
+    "./totp-code.js": {
+      "types": "./types/src/totp-code.d.ts",
+      "default": "./dist/totp-code.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -70,5 +74,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./totp-code.js"
+    ]
+  }
 }

@@ -89,6 +89,16 @@ for (const theme of ['light', 'dark']) {
 
   if (hasGallery) {
     const gallery = await open(theme, `/components/${id}/gallery/`)
+    // A full-page shot does not scroll, so a card that draws only once on screen (an IntersectionObserver, a live
+    // feed paused off-screen) would show empty below the fold. Scroll through the page once first.
+    await gallery.evaluate(async () => {
+      for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight / 2) {
+        scrollTo(0, y)
+        await new Promise((resolve) => setTimeout(resolve, 150))
+      }
+      scrollTo(0, 0)
+    })
+    await gallery.waitForTimeout(400)
     await shot(gallery, `gallery-${theme}.png`, { fullPage: true })
     await gallery.close()
   }
