@@ -144,6 +144,8 @@ export class SyncStatus extends EventTarget {
       return undefined
     }
     const covered = this._pending
+    // A new save replaces the failed one: while it runs the state is saving, and it ends saved or failed again.
+    this._failed = false
     this._saving += 1
     this.notify()
     try {
@@ -231,6 +233,11 @@ export class SyncStatus extends EventTarget {
     this.connectedTo?.removeEventListener('offline', this.handleOffline)
     this.connectedTo = undefined
     clearTimeout(this.backOnlineTimer)
+    // With its timer gone, a notice left on would never end.
+    if (this._backOnline) {
+      this._backOnline = false
+      this.notify()
+    }
   }
 
   private readonly handleOnline = (): void => this.setOnline(true)

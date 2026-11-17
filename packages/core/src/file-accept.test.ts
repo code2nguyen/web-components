@@ -48,5 +48,15 @@ test('takes one file only where multiple is off, and none when one is there', ()
     ['multiple'],
   )
   assert.equal(filterFiles(files, { multiple: false, existing: 1 }).accepted.length, 0)
+  // A first file refused for its type does not use up the one place.
+  const mixed = filterFiles([file('notes.txt', 'text/plain'), file('plan.pdf', 'application/pdf')], { accept: '.pdf', multiple: false })
+  assert.deepEqual(
+    mixed.accepted.map((f) => f.name),
+    ['plan.pdf'],
+  )
+  assert.deepEqual(
+    mixed.rejected.map((r) => r.reason),
+    ['type'],
+  )
   assert.equal(filterFiles(files).accepted.length, 2)
 })

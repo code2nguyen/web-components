@@ -70,3 +70,27 @@ test('maps each state to a status-light tone', () => {
   assert.equal(syncStatusTone('offline'), 'warning')
   assert.equal(syncStatusTone('error'), 'danger')
 })
+
+test('a new save after a failure shows saving, not the old error', async () => {
+  const status = new SyncStatus({ online: true })
+  status.change()
+  await assert.rejects(
+    status.save(async () => {
+      throw new Error('500')
+    }),
+  )
+  let finish!: () => void
+  const saving = status.save(() => new Promise<void>((resolve) => (finish = resolve)))
+  assert.equal(status.state, 'saving')
+  finish()
+  await saving
+  assert.equal(status.state, 'saved')
+})
+
+test('disconnecting ends a back online notice whose timer it stops', () => {
+  const status = new SyncStatus({ online: false, backOnlineDuration: 60_000, retryWhenOnline: false })
+  status.setOnline(true)
+  assert.equal(status.backOnline, true)
+  status.disconnect()
+  assert.equal(status.backOnline, false)
+})

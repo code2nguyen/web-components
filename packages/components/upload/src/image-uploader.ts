@@ -172,6 +172,12 @@ export class ImageUploader extends Upload {
     super.browse()
   }
 
+  /** A drop or a paste adds images: a Replace whose file dialog was cancelled must not swallow them. */
+  protected override addDroppedFiles(files: File[]): UploadItem[] {
+    if (this.multiple) this.replacing = undefined
+    return super.addDroppedFiles(files)
+  }
+
   /** Adds images; without `multiple`, a valid image replaces the one there. */
   override addFiles(files: Iterable<File>): UploadItem[] {
     const replacing = this.uploadItems.find((item) => item.id === this.replacing)

@@ -164,7 +164,9 @@ export class Upload extends LitElement {
     disabled: () => this.pickerDisabled,
     paste: () => this.paste,
     onActivate: () => this.browse(),
-    onFiles: ({ files }) => this.addFiles(files).map((item) => item.file),
+    // Each refused file already has its message in the errors status region.
+    announce: 'added',
+    onFiles: ({ files }) => this.addDroppedFiles(files).map((item) => item.file),
   })
   @state() protected uploadItems: UploadItem[] = []
   @state() protected rejections: UploadRejection[] = []
@@ -302,6 +304,11 @@ export class Upload extends LitElement {
   /** Opens the native file browser. */
   browse(): void {
     if (!this.pickerDisabled) this.input.click()
+  }
+
+  /** Adds the files of a drop or a paste. Companions that also add files another way (a tile being replaced) reset that here. */
+  protected addDroppedFiles(files: File[]): UploadItem[] {
+    return this.addFiles(files)
   }
 
   /** Validates and adds files supplied by the browser, drag-and-drop or application code. */

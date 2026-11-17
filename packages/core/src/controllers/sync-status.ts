@@ -1,5 +1,5 @@
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element'
-import { defineMessages, formatMessage, LocalizeController } from '../localize.js'
+import { defineMessages, formatMessage, LocalizeController, type MessageArgs } from '../localize.js'
 import { SyncStatus, syncStatusTone, type SyncSnapshot, type SyncState, type SyncStatusOptions } from '../sync-status.js'
 
 export { SyncStatus, syncStatusTone } from '../sync-status.js'
@@ -44,19 +44,25 @@ function formatTime(date: Date, locale: string): string {
  * For code without a Lit host (a page script); a component reads `SyncStatusController.text`.
  */
 export function formatSyncStatus(snapshot: SyncSnapshot, locale = 'en'): string {
-  const catalog = syncStatusMessages
+  return describe(snapshot, locale, (key, ...args) => formatMessage(syncStatusMessages, locale, key, ...args))
+}
+
+type SyncMessages = typeof en
+type Translate = <K extends keyof SyncMessages & string>(key: K, ...args: MessageArgs<SyncMessages[K]>) => string
+
+function describe(snapshot: SyncSnapshot, locale: string, t: Translate): string {
   switch (snapshot.state) {
     case 'error':
-      return formatMessage(catalog, locale, 'error')
+      return t('error')
     case 'offline':
-      return snapshot.pending > 0 ? formatMessage(catalog, locale, 'offlinePending', snapshot.pending) : formatMessage(catalog, locale, 'offline')
+      return snapshot.pending > 0 ? t('offlinePending', snapshot.pending) : t('offline')
     case 'saving':
-      return formatMessage(catalog, locale, 'saving')
+      return t('saving')
     case 'pending':
-      return formatMessage(catalog, locale, 'pending', snapshot.pending)
+      return t('pending', snapshot.pending)
     default:
-      if (snapshot.backOnline) return formatMessage(catalog, locale, 'backOnline')
-      return snapshot.lastSaved ? formatMessage(catalog, locale, 'savedAt', formatTime(snapshot.lastSaved, locale)) : formatMessage(catalog, locale, 'saved')
+      if (snapshot.backOnline) return t('backOnline')
+      return snapshot.lastSaved ? t('savedAt', formatTime(snapshot.lastSaved, locale)) : t('saved')
   }
 }
 
@@ -123,7 +129,8 @@ export class SyncStatusController implements ReactiveController {
 
   /** The state as one line in the host's language. */
   get text(): string {
-    return formatSyncStatus(this.model.snapshot, this.msg.locale)
+    // Through the controller's `t`, which draws the server's text while a server-rendered host hydrates.
+    return describe(this.model.snapshot, this.msg.locale, (key, ...args) => this.msg.t(key, ...args))
   }
 
   /** The `c2-status-light` tone of the state. */

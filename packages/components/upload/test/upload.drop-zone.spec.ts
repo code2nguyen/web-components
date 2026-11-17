@@ -70,7 +70,7 @@ test('a drop adds what the rules take and announces what was added and refused',
   await drag(upload.locator('.dropzone'), 'dragover', [pdf('plan.pdf')])
   expect(await drag(upload.locator('.dropzone'), 'drop', [pdf('plan.pdf'), { name: 'notes.txt', type: 'text/plain' }, pdf('brief.pdf')])).toBe(true)
   await expect.poll(() => names(upload)).toEqual(['plan.pdf', 'brief.pdf'])
-  await expect(announcer(upload)).toHaveText('2 files added. 1 file not added')
+  await expect(announcer(upload)).toHaveText('2 files added')
   await expect(upload.locator('[part="errors"]')).toContainText('notes.txt is not an accepted file type.')
   await expect(upload.locator('.dropzone')).not.toHaveClass(/dropzone--dragging/)
   await accessible(page)
@@ -97,6 +97,15 @@ test('a disabled zone takes no drag state, drop or paste', async ({ page, render
   const zone = upload.locator('.dropzone')
   await drag(zone, 'dragenter', [pdf('a.pdf')])
   await expect(zone).not.toHaveClass(/dropzone--dragging/)
+  // The dragover is cancelled with no drop effect: the drop is refused rather than left to the browser.
+  const effect = await zone.evaluate((element) => {
+    const transfer = new DataTransfer()
+    transfer.items.add(new File(['x'], 'a.pdf', { type: 'application/pdf' }))
+    const event = new DragEvent('dragover', { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true })
+    element.dispatchEvent(event)
+    return `${event.defaultPrevented}:${transfer.dropEffect}`
+  })
+  expect(effect).toBe('true:none')
   // The drop is still cancelled, so the browser does not open the file in place of the page.
   expect(await drag(zone, 'drop', [pdf('a.pdf')])).toBe(true)
   expect(await paste(zone, [pdf('a.pdf')])).toBe(false)
@@ -132,4 +141,21 @@ test('c2-image-uploader takes pasted images on its add tile', async ({ page, ren
   await paste(uploader.locator('[part="add"]'), [{ name: 'shot.png', type: 'image/png' }])
   await expect.poll(() => names(uploader)).toEqual(['shot.png'])
   await expect(uploader.locator('.announcer')).toHaveText('1 file added')
+})
+
+test('a drop or paste on c2-image-uploader adds images even after a Replace whose dialog was cancelled', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-image-uploader multiple paste auto-upload="false" aria-label="Photos"></c2-image-uploader>')
+  const uploader = page.locator('c2-image-uploader')
+  await paste(uploader.locator('[part="add"]'), [
+    { name: 'a.png', type: 'image/png' },
+    { name: 'b.png', type: 'image/png' },
+  ])
+  await expect.poll(() => names(uploader)).toEqual(['a.png', 'b.png'])
+  // What a Replace leaves behind when its file dialog is cancelled: the tile it was opened for.
+  await uploader.evaluate((element) => {
+    const host = element as unknown as { replacing?: string; items: readonly { id: string }[] }
+    host.replacing = host.items[0].id
+  })
+  await paste(uploader.locator('[part="add"]'), [{ name: 'c.png', type: 'image/png' }])
+  await expect.poll(() => names(uploader)).toEqual(['a.png', 'b.png', 'c.png'])
 })

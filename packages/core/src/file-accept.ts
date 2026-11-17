@@ -77,8 +77,8 @@ export function mayAcceptType(type: string, accept: string | undefined): boolean
 
 /**
  * Splits incoming files into those the rules take and those they turn away, in order. A file is checked against, in
- * turn: a second file where only one is allowed, the count limit, the type, then the size; the first rule it breaks
- * is its reason.
+ * turn: a second file where only one is allowed (one already there or already taken from this batch), the count
+ * limit, the type, then the size; the first rule it breaks is its reason.
  */
 export function filterFiles(files: Iterable<File>, rules: FileRules = {}): FileFilterResult {
   const accepted: File[] = []
@@ -86,16 +86,15 @@ export function filterFiles(files: Iterable<File>, rules: FileRules = {}): FileF
   const single = rules.multiple === false
   const existing = rules.existing ?? 0
   const available = rules.maxFiles && rules.maxFiles > 0 ? Math.max(0, rules.maxFiles - existing) : Number.POSITIVE_INFINITY
-  let index = 0
   for (const file of files) {
     let reason: FileRejectionReason | undefined
-    if (single && (existing > 0 || index > 0)) reason = 'multiple'
+    // A file refused for its type or size leaves the one place free for a later file.
+    if (single && existing + accepted.length > 0) reason = 'multiple'
     else if (accepted.length >= available) reason = 'limit'
     else if (!matchesAccept(file, rules.accept)) reason = 'type'
     else if (rules.maxSize && rules.maxSize > 0 && file.size > rules.maxSize) reason = 'size'
     if (reason) rejected.push({ file, reason })
     else accepted.push(file)
-    index += 1
   }
   return { accepted, rejected }
 }

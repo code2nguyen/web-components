@@ -59,8 +59,12 @@ export interface DropZoneOptions {
    * `handleDrop`, `handlePaste` and `handleKeydown` in the template.
    */
   target?: () => EventTarget | null | undefined
-  /** Whether each drop or paste is put into `announcement`. On by default. */
-  announce?: boolean
+  /**
+   * What each drop or paste puts into `announcement`: how many files were added and how many refused (`true`, the
+   * default), only how many were added (`'added'`, for a host that already shows and announces each refusal), or
+   * nothing (`false`).
+   */
+  announce?: boolean | 'added'
 }
 
 /**
@@ -189,7 +193,13 @@ export class DropZoneController implements ReactiveController {
   }
 
   readonly handleDragOver = (event: DragEvent): void => {
-    if (this.disabled || !hasFiles(event.dataTransfer)) return
+    if (!hasFiles(event.dataTransfer)) return
+    if (this.disabled) {
+      // Refuse the drop rather than ignore it: an ignored dragover lets the browser open the file in place of the page.
+      event.preventDefault()
+      event.dataTransfer!.dropEffect = 'none'
+      return
+    }
     // Cancelling dragover is what makes the zone a drop target.
     event.preventDefault()
     event.dataTransfer!.dropEffect = 'copy'
@@ -232,7 +242,8 @@ export class DropZoneController implements ReactiveController {
     if (!this.options.onActivate || this.disabled || isComposingKey(event)) return
     if (event.key !== 'Enter' && event.key !== ' ') return
     // A key pressed in a control inside the zone (a link in a slotted prompt) belongs to that control.
-    if (event.target !== event.currentTarget && event.currentTarget !== null) return
+    // The path's first node, not `target`, which a shadow root retargets to its host.
+    if (event.currentTarget !== null && event.composedPath()[0] !== event.currentTarget) return
     event.preventDefault()
     this.options.onActivate()
   }
@@ -244,7 +255,7 @@ export class DropZoneController implements ReactiveController {
     const taken = this.options.onFiles({ source, files, accepted, rejected })
     if (this.options.announce === false) return
     const added = typeof taken === 'number' ? taken : taken ? taken.length : accepted.length
-    this.announce(added, files.length - added)
+    this.announce(added, this.options.announce === 'added' ? 0 : files.length - added)
   }
 
   private announce(added: number, refused: number): void {
