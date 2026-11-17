@@ -106,11 +106,19 @@ test('for names the answer elsewhere on the page, and sources win over the marke
   await expect(list(page, '#later').locator('details')).toHaveCount(0)
   await page.locator('#answer').evaluate((answer) => {
     const late = document.createElement('div')
-    late.id = 'missing'
-    late.innerHTML =
-      '<c2-citation index="1" href="https://example.com/late"></c2-citation><c2-citation index="2" href="https://example.com/later"></c2-citation>'
+    for (const [index, href] of [
+      ['1', 'https://example.com/late'],
+      ['2', 'https://example.com/later'],
+    ]) {
+      const marker = late.appendChild(document.createElement('c2-citation'))
+      marker.setAttribute('index', index)
+      marker.setAttribute('href', href)
+    }
     answer.after(late)
   })
+  await expect(list(page, '#later').locator('details')).toHaveCount(0)
+  // Inserted first, then given the id the list waits for.
+  await page.locator('#answer + div').evaluate((late) => (late.id = 'missing'))
   await expect(count(page, '#later')).toHaveText('Used 2 sources')
 })
 
@@ -174,4 +182,59 @@ test('a wrapper that holds nothing but the list, such as an island element, is p
     `<div><p>One<c2-citation index="1" href="https://example.com/one"></c2-citation> two<c2-citation index="2" href="https://example.com/two"></c2-citation></p><astro-island><c2-citation-list></c2-citation-list></astro-island></div>`,
   )
   await expect(count(page)).toHaveText('Used 2 sources')
+})
+
+test('an answer with text but no markers yet is not a wrapper: the list does not reach the answers above it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<section><div>Earlier<c2-citation index="1" href="https://example.com/old"></c2-citation></div><div id="new">Generating… <c2-citation-list></c2-citation-list></div></section>`,
+  )
+  await expect(list(page).locator('details')).toHaveCount(0)
+  await page.locator('#new').evaluate((answer) => {
+    const marker = document.createElement('c2-citation')
+    marker.setAttribute('index', '1')
+    marker.setAttribute('href', 'https://example.com/new')
+    answer.prepend(marker)
+  })
+  await expect(count(page)).toHaveText('Used 1 source')
+})
+
+test('a repeat marker that comes first lends its source the details a later marker carries', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div><p>First<c2-citation index="2" href="https://example.com/a"></c2-citation> then<c2-citation index="2" href="https://example.com/a" source-title="Full title" snippet="The passage."></c2-citation></p><c2-citation-list open></c2-citation-list></div>`,
+  )
+  await expect(list(page).locator('[part="title"]')).toHaveText('Full title')
+  await expect(list(page).locator('[part="snippet"]')).toHaveText('The passage.')
+})
+
+test('the stack shows one icon per site, the site’s favicon wherever it appears, up to max-icons', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div><p>A<c2-citation index="1" href="https://mdn.dev/a"></c2-citation> B<c2-citation index="2" href="https://mdn.dev/b" favicon="${ICON}"></c2-citation> C<c2-citation index="3" href="https://example.com/c"></c2-citation></p><c2-citation-list></c2-citation-list></div>`,
+  )
+  const icons = list(page).locator('[part="icon"]')
+  await expect(icons).toHaveCount(2)
+  await expect(icons.first().locator('img')).toHaveCount(1)
+  await list(page).evaluate((element: CitationList) => (element.maxIcons = 0))
+  await expect(icons).toHaveCount(0)
+  await expect(count(page)).toHaveText('Used 3 sources')
+})
+
+test('a card without an address highlights its markers on focus inside it, and keeps them while focused', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div><p>Note<c2-citation id="n1" index="1" source-title="Internal memo"></c2-citation></p><c2-citation-list open></c2-citation-list></div>`,
+  )
+  await list(page).evaluate((element: CitationList) => {
+    element.renderSource = ({ source }) => {
+      const button = document.createElement('button')
+      button.textContent = `Open ${source.title}`
+      return button
+    }
+  })
+  const open = list(page).getByRole('button', { name: 'Open Internal memo' })
+  await open.focus()
+  await expect.poll(() => highlighted(page)).toEqual(['n1'])
+  await cards(page).hover()
+  await page.mouse.move(5, 5)
+  await expect.poll(() => highlighted(page)).toEqual(['n1'])
+  await open.blur()
+  await expect.poll(() => highlighted(page)).toEqual([])
 })

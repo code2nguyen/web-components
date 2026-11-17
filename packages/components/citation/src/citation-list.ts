@@ -51,6 +51,23 @@ export interface CitationList {
 /** Attributes of a marker that change what the list shows. */
 const WATCHED = ['index', 'href', 'source-title', 'snippet', 'site', 'favicon']
 
+/** The details of a source a later marker can fill in when the first one left them out. */
+const FIELDS = ['title', 'snippet', 'site', 'favicon'] as const
+
+/**
+ * Whether `parent` holds nothing but the one element the list is in: no other element (a `template`, as an island keeps
+ * for its slots, aside) and no text. Such a wrapper is not the answer, so the list looks past it.
+ */
+function isWrapper(parent: Element): boolean {
+  let elements = 0
+  for (const node of parent.childNodes) {
+    if (node instanceof HTMLTemplateElement) continue
+    if (node.nodeType === Node.ELEMENT_NODE) elements++
+    else if (node.nodeType === Node.TEXT_NODE && node.textContent!.trim()) return false
+  }
+  return elements === 1
+}
+
 /** What makes two markers the same source: the address, else the number. */
 const keyOf = (source: CitationSource) => source.href || (source.index === undefined ? '' : `#${source.index}`)
 
@@ -169,6 +186,9 @@ export class CitationList extends LitElement {
   private readonly msg = new LocalizeController(this, citationListMessages)
   private readonly slots = new SlotPresenceController(this, ['footer'])
   private observer?: MutationObserver
+  /** Where the markers are read: what `scope()` found when the list last started watching. */
+  private scopeNode: ParentNode | null = null
+  private collectQueued = false
   private highlightedMarkers: Citation[] = []
 
   override connectedCallback() {
@@ -181,6 +201,7 @@ export class CitationList extends LitElement {
     super.disconnectedCallback()
     this.observer?.disconnect()
     this.observer = undefined
+    this.scopeNode = null
     this.highlight()
   }
 
@@ -190,41 +211,71 @@ export class CitationList extends LitElement {
 
   override updated(changed: PropertyValues<this>) {
     if (changed.has('for') && changed.get('for') !== undefined) this.watch()
+    else if (changed.has('sources') && changed.get('sources') !== undefined) this.collect()
   }
 
-  /** The element whose markers are listed: the one `for` names, else the parent. */
-  private scope(): Element | null {
+  /**
+   * The node whose markers are listed: the element `for` names, else the parent (an element or a shadow root), past
+   * any wrapper that holds nothing but the list.
+   */
+  private scope(): ParentNode | null {
     if (this.for) return (this.getRootNode() as Document | ShadowRoot).getElementById?.(this.for) ?? null
-    // Past wrappers that hold nothing but the list, such as a framework's island element.
-    let scope = this.parentElement
-    while (scope?.parentElement && scope.childElementCount === 1) scope = scope.parentElement
+    let scope = this.parentNode
+    while (scope instanceof Element && scope.parentNode && isWrapper(scope)) scope = scope.parentNode
     return scope
   }
 
-  /** Observes the scope for markers coming, going and changing; until a `for` target exists, the whole root. */
+  /**
+   * Observes the scope for markers coming, going and changing. While the element `for` names does not exist, it
+   * observes the root for that element to appear (inserted, or given the `id`) and starts over then.
+   */
   private watch() {
     this.observer?.disconnect()
+    this.observer = undefined
+    this.scopeNode = this.isConnected ? this.scope() : null
     if (!this.isConnected) return
-    const scope = this.scope()
-    this.observer = new MutationObserver(() => (scope && scope.isConnected ? this.collect() : this.watch()))
-    this.observer.observe(
-      scope ?? this.getRootNode(),
-      scope ? { childList: true, subtree: true, attributes: true, attributeFilter: WATCHED } : { childList: true, subtree: true },
-    )
+    const scope = this.scopeNode
+    if (scope) {
+      this.observer = new MutationObserver(() => this.queueCollect())
+      this.observer.observe(scope as Node, { childList: true, subtree: true, attributes: true, attributeFilter: WATCHED })
+    } else {
+      this.observer = new MutationObserver(() => {
+        if (this.scope()) this.watch()
+      })
+      this.observer.observe(this.getRootNode(), { childList: true, subtree: true, attributes: true, attributeFilter: ['id'] })
+    }
     this.collect()
   }
 
   private markers(): Citation[] {
-    return [...(this.scope()?.querySelectorAll('c2-citation') ?? [])]
+    return [...(this.scopeNode?.querySelectorAll('c2-citation') ?? [])]
   }
 
-  /** One source per address (or number), the first marker's details winning, in the order of their numbers. */
+  /** Collects once per task, however many changes a streaming answer makes in it. */
+  private queueCollect() {
+    if (this.collectQueued) return
+    this.collectQueued = true
+    queueMicrotask(() => {
+      this.collectQueued = false
+      this.collect()
+    })
+  }
+
+  /**
+   * One source per address (or number), in the order of their numbers. A detail the first marker of a source leaves
+   * out (a repeat marker often carries only the number and the address) is taken from the next one that has it.
+   */
   private collect() {
+    // Given sources win: the markers are not shown, so not read.
+    if (this.sources?.length) return
     const byKey = new Map<string, CitationSource>()
     for (const marker of this.markers()) {
       const source = readMarker(marker)
       const key = keyOf(source)
-      if (key && !byKey.has(key)) byKey.set(key, source)
+      if (!key) continue
+      const known = byKey.get(key)
+      if (!known) byKey.set(key, source)
+      else for (const field of FIELDS) known[field] ||= source[field]
     }
     const next = [...byKey.values()].sort((a, b) => (a.index ?? Infinity) - (b.index ?? Infinity))
     if (JSON.stringify(next) !== JSON.stringify(this.collected)) this.collected = next
@@ -265,24 +316,23 @@ export class CitationList extends LitElement {
     </details>`
   }
 
-  /** One icon per site, the first `maxIcons` of them. */
+  /** One icon per site, the first `maxIcons` sites: the site's first favicon, else its first letter. */
   private renderIcons(sources: CitationSource[]) {
-    const seen = new Set<string>()
-    const icons = []
+    const max = Number.isFinite(this.maxIcons) ? this.maxIcons : 3
+    const sites = new Map<string, string>()
     for (const source of sources) {
       const site = source.site || sourceHost(safeSourceUrl(source.href ?? ''))
       const icon = safeIconUrl(source.favicon ?? '')
-      const key = icon || site
-      if (!key || seen.has(key)) continue
-      seen.add(key)
-      icons.push(
-        html`<span class="icon" part="icon"
-          >${icon ? html`<img src=${icon} alt="" width="20" height="20" loading="lazy" referrerpolicy="no-referrer" />` : site.charAt(0).toUpperCase()}</span
-        >`,
-      )
-      if (icons.length >= this.maxIcons) break
+      if (site || icon) sites.set(site || icon, sites.get(site || icon) || icon)
     }
-    return icons
+    return [...sites]
+      .slice(0, Math.max(0, max))
+      .map(
+        ([site, icon]) =>
+          html`<span class="icon" part="icon"
+            >${icon ? html`<img src=${icon} alt="" width="20" height="20" loading="lazy" referrerpolicy="no-referrer" />` : site.charAt(0).toUpperCase()}</span
+          >`,
+      )
   }
 
   private renderCard(source: CitationSource, position: number) {
@@ -297,9 +347,12 @@ export class CitationList extends LitElement {
           >
           ${source.title ? html`<span class="title" part="title">${source.title}</span>` : nothing}
           ${source.snippet ? html`<span class="snippet" part="snippet" id=${`snippet-${position}`}>${source.snippet}</span>` : nothing}`
-    const name = this.msg.t('card', String(number), title)
+    // A card points at its markers while the pointer is on it or focus is in it, whichever ends last.
     const point = () => this.highlight(source)
-    const leave = () => this.highlight()
+    const leave = (event: Event) => {
+      const card = event.currentTarget as Element
+      if (!card.matches(':hover, :focus-within')) this.highlight()
+    }
     return html`<li>
       ${
         href
@@ -309,15 +362,15 @@ export class CitationList extends LitElement {
               href=${href}
               target=${this.target || nothing}
               rel=${opensElsewhere(this.target) ? 'noopener noreferrer' : nothing}
-              aria-label=${name}
+              aria-label=${this.msg.t('card', String(number), title)}
               aria-describedby=${!this.renderSource && source.snippet ? `snippet-${position}` : nothing}
               @pointerenter=${point}
               @pointerleave=${leave}
-              @focus=${point}
-              @blur=${leave}
+              @focusin=${point}
+              @focusout=${leave}
               >${content}</a
             >`
-          : html`<div class="source" part="source" @pointerenter=${point} @pointerleave=${leave}>${content}</div>`
+          : html`<div class="source" part="source" @pointerenter=${point} @pointerleave=${leave} @focusin=${point} @focusout=${leave}>${content}</div>`
       }
     </li>`
   }

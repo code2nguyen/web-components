@@ -119,11 +119,12 @@ export class Citation extends LitElement {
   override render() {
     const href = safeSourceUrl(this.href)
     const name = this.markerName()
+    const markerClass = this.highlighted ? 'marker highlighted' : 'marker'
     const text = typeof this.index === 'number' && Number.isFinite(this.index) ? String(this.index) : ''
     const marker = href
       ? html`<a
           slot="trigger"
-          class=${this.highlighted ? 'marker highlighted' : 'marker'}
+          class=${markerClass}
           part="marker"
           href=${href}
           target=${this.target || nothing}
@@ -131,9 +132,7 @@ export class Citation extends LitElement {
           aria-label=${name}
           ><slot>${text}</slot></a
         >`
-      : html`<button slot="trigger" type="button" class=${this.highlighted ? 'marker highlighted' : 'marker'} part="marker" aria-label=${name}>
-          <slot>${text}</slot>
-        </button>`
+      : html`<button slot="trigger" type="button" class=${markerClass} part="marker" aria-label=${name}><slot>${text}</slot></button>`
     return html`<c2-hover-card class="card" part="card" placement=${this.placement} open-delay=${String(this.openDelay)}>
       ${marker}
       <div class="preview">
