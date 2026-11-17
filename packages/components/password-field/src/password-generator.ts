@@ -61,6 +61,7 @@ export interface FieldInternals {
   readonly effectiveDisabled: PasswordField['effectiveDisabled']
   dirty: PasswordField['dirty']
   readonly input: PasswordField['input']
+  generatorPanel: PasswordField['generatorPanel']
 }
 
 export const internals = (field: PasswordField) => field as unknown as FieldInternals

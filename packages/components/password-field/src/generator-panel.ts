@@ -318,3 +318,11 @@ export function createGeneratorPanel(field: PasswordField) {
 }
 
 export type GeneratorPanel = ReturnType<typeof createGeneratorPanel>
+
+/** `showGenerator()` of `c2-password-field`: creates the field's popover the first time, then opens it. */
+export function showGenerator(field: PasswordField) {
+  const internal = internals(field)
+  if (!field.generator || internal.effectiveDisabled) return
+  internal.generatorPanel ??= createGeneratorPanel(field)
+  internal.generatorPanel.toggle(true)
+}

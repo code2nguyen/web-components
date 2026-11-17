@@ -343,7 +343,6 @@ export class PasswordField extends LitElement {
   private generatorPanel?: GeneratorPanel
   private readonly msg = new LocalizeController(this, passwordFieldMessages)
   private dirty = false
-  private generatorLoad?: Promise<unknown>
   private customValidityMessage = ''
   private lastScore: PasswordStrength | undefined
 
@@ -453,16 +452,8 @@ export class PasswordField extends LitElement {
 
   /** Opens the generator popover (`generator`), loading it first if this is the first time. */
   async showGenerator() {
-    if (!this.generator || this.effectiveDisabled) return
-    try {
-      await (this.generatorLoad ??= import('./generator-panel.js').then((module) => (this.generatorPanel = module.createGeneratorPanel(this))))
-    } catch (error) {
-      // Offline, or a deploy that replaced its file: the next press tries again.
-      this.generatorLoad = undefined
-      console.warn('[c2-password-field] the password generator could not be loaded', error)
-      return
-    }
-    this.generatorPanel?.toggle(true)
+    const { showGenerator } = await import('./generator-panel.js')
+    showGenerator(this)
   }
 
   /** Closes the generator popover. */
