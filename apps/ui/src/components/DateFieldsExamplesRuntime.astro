@@ -1,0 +1,48 @@
+---
+/**
+ * Plays the application's part in the date fields gallery: the French of the card under `lang="fr"`, and the value of
+ * the card marked `data-date-fields-example="value"`, read on every edit.
+ */
+---
+
+<script>
+  import type { DateFields } from '@c2n/components/date-input/date-fields'
+  import '@c2n/components/date-input/date-fields'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'date-fields': {
+        day: 'Jour',
+        month: 'Mois',
+        year: 'Année',
+        required: 'Saisissez une date',
+        incomplete: 'Saisissez une date complète',
+        missingDay: 'La date doit comporter un jour',
+        missingMonth: 'La date doit comporter un mois',
+        missingYear: 'La date doit comporter une année',
+        badDay: 'Le jour doit être un nombre de 1 à 31',
+        badMonth: 'Le mois doit être un nombre de 1 à 12',
+        badYear: "L'année doit comporter 4 chiffres",
+        notReal: 'La date doit exister',
+        min: 'La date doit être le {0} ou après',
+        max: 'La date doit être le {0} ou avant',
+      },
+    },
+  })
+
+  const wired = new WeakSet<Element>()
+
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-date-fields-example="value"]').forEach((card) => {
+      const fields = card.querySelector<DateFields>('c2-date-fields')
+      const output = card.querySelector('output')
+      if (!fields || !output || wired.has(card)) return
+      wired.add(card)
+      fields.addEventListener('input', () => (output.textContent = `value: "${fields.value}"`))
+    })
+  }
+
+  setup()
+  document.addEventListener('astro:page-load', setup)
+</script>

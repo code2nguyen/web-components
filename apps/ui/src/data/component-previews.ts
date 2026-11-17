@@ -195,6 +195,7 @@ greet('world')"></c2-code-editor>`,
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
   <c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card>
 </c2-dashboard>`,
+  'date-fields': `<c2-date-fields value="1984-03-07" aria-label="Date of birth"></c2-date-fields>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
   'date-strip': `<c2-date-strip value="2026-10-14" start="2026-10-12" markers='["2026-10-13","2026-10-16"]' style="width:250px;--c2-date-strip__day--min-width:30px;--c2-date-strip__date--font-size:14px"></c2-date-strip>`,

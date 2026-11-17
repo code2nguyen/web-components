@@ -1,0 +1,116 @@
+@use '@c2n/sass/pointer';
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/focus';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-fields,
+  $theme: (
+    gap: 12px,
+    label--gap: 4px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    input--width: 3.5em,
+    year--width: 5em,
+    input--min-height: 36px,
+    input--padding: 6px 8px,
+    input--border: 1px solid #bcbcc6,
+    input--border-radius: 6px,
+    input--color: #18181b,
+    input--background: #ffffff,
+    input--font-size: 14px,
+    input--font-family: inherit,
+    input__hover--border: 1px solid #a1a1aa,
+    input__focus--border: 1px solid #0265dc,
+    input__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    input__error--border: 1px solid #dc2626,
+    input__read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(gap);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+
+  &.disabled {
+    opacity: css.cssVar(disabled--opacity);
+  }
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(label--gap);
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+
+input {
+  box-sizing: border-box;
+  width: css.cssVar(input--width);
+  min-height: css.cssVar(input--min-height);
+  margin: 0;
+  padding: css.cssVar(input--padding);
+  border: css.cssVar(input--border);
+  border-radius: css.cssVar(input--border-radius);
+  color: css.cssVar(input--color);
+  background: css.cssVar(input--background);
+  font-size: css.cssVar(input--font-size);
+  font-family: css.cssVar(input--font-family);
+  font-variant-numeric: tabular-nums;
+  outline: 0 solid transparent;
+  transition: animation.standard(border), animation.standard(outline-color);
+
+  @include pointer.hover {
+    border: css.cssVar(input__hover--border);
+  }
+
+  &:focus-visible {
+    border: css.cssVar(input__focus--border);
+    outline: css.cssVar(input__focus--outline);
+    @include focus.forced-colors-ring;
+  }
+
+  &[aria-invalid='true'] {
+    border: css.cssVar(input__error--border);
+  }
+
+  &:read-only {
+    background: css.cssVar(input__read-only--background);
+  }
+}
+
+.y input {
+  width: css.cssVar(year--width);
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}
