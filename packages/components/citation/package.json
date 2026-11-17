@@ -9,6 +9,10 @@
       "types": "./types/src/citation.d.ts",
       "default": "./dist/citation.js"
     },
+    "./citation-list.js": {
+      "types": "./types/src/citation-list.d.ts",
+      "default": "./dist/citation-list.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -68,5 +72,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./citation-list.js"
+    ]
+  }
 }

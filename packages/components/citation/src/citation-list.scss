@@ -1,0 +1,251 @@
+@use '@c2n/sass/focus';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-citation-list,
+  $theme: (
+    summary--padding: 4px 10px 4px 4px,
+    summary--border: 1px solid #e4e4e7,
+    summary--border-radius: 999px,
+    summary--background-color: #ffffff,
+    summary--color: #52525b,
+    summary--font-size: 12px,
+    summary--font-weight: 500,
+    summary__hover--background-color: #f4f4f5,
+    summary__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    icon--size: 20px,
+    icon--overlap: 6px,
+    icon--background-color: #f4f4f5,
+    icon--border-color: #ffffff,
+    list--margin-top: 8px,
+    list--gap: 8px,
+    source--min-width: 200px,
+    source--padding: 10px 12px,
+    source--border: 1px solid #e4e4e7,
+    source--border-radius: 8px,
+    source--background-color: #ffffff,
+    source__hover--background-color: #f4f4f5,
+    number--background-color: #f4f4f5,
+    number--color: #52525b,
+    site--color: #71717a,
+    site--font-size: 12px,
+    title--color: #18181b,
+    title--font-size: 14px,
+    title--font-weight: 500,
+    snippet--color: #52525b,
+    snippet--font-size: 12px,
+    snippet--line-clamp: 2,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+details {
+  display: block;
+}
+
+summary {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: css.cssVar(summary--padding);
+  border: css.cssVar(summary--border);
+  border-radius: css.cssVar(summary--border-radius);
+  background-color: css.cssVar(summary--background-color);
+  color: css.cssVar(summary--color);
+  font-size: css.cssVar(summary--font-size);
+  font-weight: css.cssVar(summary--font-weight);
+  line-height: 1.4;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 150ms ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    background-color: css.cssVar(summary__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(summary__focus--outline);
+    outline-offset: 2px;
+  }
+
+  @include focus.forced-colors-ring;
+}
+
+.icons {
+  display: inline-flex;
+  flex: none;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.icon {
+  display: inline-grid;
+  box-sizing: border-box;
+  place-items: center;
+  overflow: hidden;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  border: 2px solid css.cssVar(icon--border-color);
+  border-radius: 999px;
+  background-color: css.cssVar(icon--background-color);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+
+  & + & {
+    margin-inline-start: calc(-1 * #{css.cssVar(icon--overlap)});
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.count {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  transition: rotate 150ms ease;
+
+  [open] > summary & {
+    rotate: 180deg;
+  }
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, #{css.cssVar(source--min-width)}), 1fr));
+  gap: css.cssVar(list--gap);
+  margin: css.cssVar(list--margin-top) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  min-width: 0;
+}
+
+.source {
+  display: flex;
+  box-sizing: border-box;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: css.cssVar(source--padding);
+  border: css.cssVar(source--border);
+  border-radius: css.cssVar(source--border-radius);
+  background-color: css.cssVar(source--background-color);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: css.cssVar(source__hover--background-color);
+  }
+
+  &:focus-visible {
+    background-color: css.cssVar(source__hover--background-color);
+    outline: css.cssVar(summary__focus--outline);
+    outline-offset: 2px;
+  }
+
+  @include focus.forced-colors-ring;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.number {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  background-color: css.cssVar(number--background-color);
+  color: css.cssVar(number--color);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.site {
+  overflow: hidden;
+  color: css.cssVar(site--color);
+  font-size: css.cssVar(site--font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title,
+.snippet {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.title {
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.snippet {
+  color: css.cssVar(snippet--color);
+  font-size: css.cssVar(snippet--font-size);
+  line-height: 1.45;
+  -webkit-line-clamp: css.cssVar(snippet--line-clamp);
+}
+
+.footer {
+  margin-top: css.cssVar(list--gap);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  summary,
+  .chevron,
+  .source {
+    transition: none;
+  }
+}
