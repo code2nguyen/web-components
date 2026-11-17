@@ -169,7 +169,9 @@ test('a data-prompt control turns the toolbar into a prompt at the same anchor, 
   await expect(toolbar(page)).toBeVisible()
   await page.getByRole('button', { name: 'Ask AI' }).click()
   await expect(prompt(page)).toBeVisible()
-  await expect(host(page)).toHaveAttribute('prompting', '')
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.prompting)).toBe(true)
+  // The component writes no attribute on its host.
+  await expect(host(page)).not.toHaveAttribute('prompting')
   await expect(page.getByRole('button', { name: 'Comment' })).toBeHidden()
   await expect(page.getByRole('textbox', { name: 'Instruction' })).toBeFocused()
   above((await prompt(page).boundingBox())!, await rangeRect(page))
@@ -185,8 +187,8 @@ test('a data-prompt control turns the toolbar into a prompt at the same anchor, 
   await accessible(page)
   await page.keyboard.press('Escape')
   await expect(prompt(page)).toBeHidden()
-  await expect(host(page)).not.toHaveAttribute('prompting')
   await expect(page.locator('#before')).toBeFocused()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.prompting)).toBe(false)
   expect(await events(page)).toEqual([{ open: true }, { open: false }])
 })
 
@@ -251,7 +253,7 @@ test('prompting with a caret anchors to the caret, and with no selection to the 
   await host(page).evaluate((element: SelectionToolbar) => (element.prompting = true))
   await page.waitForTimeout(100)
   await expect(prompt(page)).toBeHidden()
-  await expect(host(page)).not.toHaveAttribute('prompting')
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.prompting)).toBe(false)
 })
 
 test('Alt+F10 then Enter on a data-prompt control opens the prompt from the keyboard; its name follows the language', async ({ page, renderScenario }) => {
@@ -265,4 +267,50 @@ test('Alt+F10 then Enter on a data-prompt control opens the prompt from the keyb
   await expect(page.getByRole('textbox', { name: 'Instruction' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('button', { name: 'Improve' })).toBeFocused()
+})
+
+test('in the prompt, Escape during an IME composition stays, and Alt+F10 keeps where focus returns to', async ({ page, renderScenario }) => {
+  await renderScenario(`<button id="before">Before</button>${PROMPT}`)
+  await page.locator('#before').focus()
+  await select(page, 'text', 'lazy')
+  await page.getByRole('button', { name: 'Ask AI' }).click()
+  await expect(page.getByRole('textbox', { name: 'Instruction' })).toBeFocused()
+  await page
+    .getByRole('textbox', { name: 'Instruction' })
+    .evaluate((field) => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', isComposing: true, bubbles: true, composed: true })))
+  await expect(prompt(page)).toBeVisible()
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Alt+F10')
+  await expect(page.getByRole('textbox', { name: 'Instruction' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(prompt(page)).toBeHidden()
+  await expect(page.locator('#before')).toBeFocused()
+})
+
+test('a caret survives focus moving to a form-associated control in the content before prompting', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="padding-top: 160px"><c2-selection-toolbar>
+    <div id="editor" contenteditable="true">Write here and ask for help.</div>
+    <fa-control aria-label="Ask AI at the caret" role="button"></fa-control>
+    <input slot="prompt" aria-label="Instruction" />
+  </c2-selection-toolbar></div>`)
+  await page.evaluate(() =>
+    customElements.define(
+      'fa-control',
+      // Like c2-button: form-associated, with its focusable button in its shadow root.
+      class extends HTMLElement {
+        static formAssociated = true
+        connectedCallback() {
+          this.attachShadow({ mode: 'open', delegatesFocus: true }).append(Object.assign(document.createElement('button'), { textContent: 'Ask' }))
+        }
+      },
+    ),
+  )
+  await page.locator('#editor').focus()
+  await page.evaluate(() => document.getSelection()!.collapse(document.getElementById('editor')!.firstChild!, 5))
+  await page.locator('fa-control').focus()
+  await host(page).evaluate((element: SelectionToolbar) => (element.prompting = true))
+  await expect(prompt(page)).toBeVisible()
+  const caret = await rangeRect(page)
+  expect(caret.text).toBe('')
+  above((await prompt(page).boundingBox())!, caret)
 })

@@ -192,7 +192,7 @@ toolbar.addEventListener('selection-action', async ({ detail }) => {
   const range = toolbar.selection?.range
   if (detail.action === 'replace' && range) {
     range.deleteContents()
-    range.insertNode(document.createTextNode(answer.textContent ?? ''))
+    range.insertNode(document.createTextNode(answer.value))
   }
   if (detail.action === 'replace' || detail.action === 'discard') toolbar.prompting = false
   if (detail.action === 'shorten') streamInto(answer, await ask('Make it shorter', detail.text))

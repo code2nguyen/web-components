@@ -97,7 +97,7 @@
       const range = toolbar.selection?.range
       if (action === 'retry' && state) return ask(toolbar, state.instruction)
       if ((action === 'replace' || action === 'insert') && state && range) {
-        const result = state.answer.textContent ?? ''
+        const result = state.answer.value
         if (action === 'replace') {
           range.deleteContents()
           range.insertNode(document.createTextNode(result))

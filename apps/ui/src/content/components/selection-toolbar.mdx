@@ -76,14 +76,14 @@ The toolbar never takes focus on its own. When it appears, a screen reader hears
 
 The prompt is a non-modal dialog: Tab moves between its controls, and the arrow keys stay with its field.
 
-The application owns the model and the answer: it streams into an element it puts in the `result` slot (a `c2-streaming-text`), which shows once it is there, and applies the answer through `selection.range`. Escape closes the prompt and returns focus; `toggle` with `open: false` is the moment to abort the request. The prompt stays open while the reader clicks elsewhere, so a streaming answer is never lost; close it from Discard with `prompting = false`.
+The application owns the model and the answer: it streams into an element it puts in the `result` slot (a `c2-streaming-text`), which shows once it is there, and applies the answer through `selection.range`. Escape closes the prompt and returns focus; `toggle` with `open: false` is the moment to abort the request. The prompt stays open, at its first anchor, while the reader clicks or selects elsewhere, so a streaming answer is never lost; close it from Discard with `prompting = false`.
 
 ```js tag=CodeBlock
 toolbar.addEventListener('selection-action', ({ detail }) => {
   const range = toolbar.selection?.range
   if (detail.action === 'replace' && range) {
     range.deleteContents()
-    range.insertNode(document.createTextNode(answer.textContent))
+    range.insertNode(document.createTextNode(answer.value))
     toolbar.prompting = false
   }
 })

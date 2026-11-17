@@ -1,4 +1,4 @@
-import { LitElement, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, isServer, nothing, html, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { computePosition, autoUpdate, flip, shift, offset, type VirtualElement } from '@floating-ui/dom'
 import { property } from '@c2n/core/lit-helper.js'
@@ -101,7 +101,7 @@ export class SelectionToolbar extends LitElement {
   @property() label = ''
 
   /** Shows the inline prompt, anchored to the selection or the caret. Escape sets it back to false. */
-  @property({ type: Boolean, reflect: true }) prompting = false
+  @property({ type: Boolean }) prompting = false
 
   @state() private open = false
   @state() private hint = ''
@@ -143,20 +143,33 @@ export class SelectionToolbar extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
+    if (isServer) return
+    // A result rendered by the server fired its slotchange before the listener was bound.
+    if (!this.hasUpdated) this.hasResult = !!this.querySelector(':scope > [slot="result"]')
+    if (changed.has('disabled') && this.disabled) this.hide()
     if (!changed.has('prompting')) return
     if (!this.prompting || this.disabled) return this.hide()
-    if (!this.inToolbar(document.activeElement)) this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    this.keepFocus()
     if (this.open) return
     // Opened without a toolbar: anchor to the selection or the caret in the content, else to the content itself.
     const selection = document.getSelection()
-    const owned = !!selection && this.ownsSelection(selection)
+    const owned = !!selection && this.ownsSelection(selection, false)
     this.range = owned ? selection.getRangeAt(0).cloneRange() : null
     this.text = owned ? selection.toString() : ''
   }
 
   protected override updated(changed: PropertyValues<this>): void {
-    if (changed.has('disabled') && this.disabled) this.hide()
-    else if (changed.has('prompting') && this.prompting) void this.show().then(() => this.controls('prompt')[0]?.focus())
+    if (changed.has('prompting') && this.prompting) void this.show().then(() => this.controls('prompt')[0]?.focus())
+  }
+
+  /** Remembers where focus is, to give it back when the panel hides, unless it is already in the panel. */
+  private keepFocus(): void {
+    const active = document.activeElement
+    if (!this.inToolbar(active)) this.returnFocus = active instanceof HTMLElement ? active : null
+  }
+
+  private readonly handleResultChange = (event: Event) => {
+    this.hasResult = (event.target as HTMLSlotElement).assignedNodes().length > 0
   }
 
   private get panel(): HTMLElement | null {
@@ -204,12 +217,13 @@ export class SelectionToolbar extends LitElement {
   }
 
   private readonly handleDocumentKeydown = (event: KeyboardEvent) => {
-    if (!this.open) return
+    // Escape during an IME composition in the prompt's field cancels the composition, not the prompt.
+    if (!this.open || event.isComposing || event.keyCode === 229) return
     if (event.key === 'F10' && event.altKey) {
       event.preventDefault()
       const first = this.controls()[0]
       if (!first) return
-      this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+      this.keepFocus()
       first.focus()
     } else if (event.key === 'Escape') {
       const focusInside = this.inToolbar(document.activeElement)
@@ -223,7 +237,7 @@ export class SelectionToolbar extends LitElement {
   }
 
   /** Whether the selection lies inside the content (and not in the toolbar). */
-  private ownsSelection(selection: Selection): boolean {
+  private ownsSelection(selection: Selection, strict = true): boolean {
     if (selection.rangeCount === 0) return false
     // Text selected in a form field is the field's: some engines report it as a range around the field.
     // Focus may sit inside a component's shadow root (a c2-text-field), so walk down to the innermost element.
@@ -231,7 +245,7 @@ export class SelectionToolbar extends LitElement {
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
     const field = (element: Element | null) =>
       !!element && (element.matches('input, textarea') || (element.constructor as { formAssociated?: boolean }).formAssociated === true)
-    if (document.activeElement && this.contains(document.activeElement) && (field(active) || field(document.activeElement))) return false
+    if (document.activeElement && this.contains(document.activeElement) && (field(active) || (strict && field(document.activeElement)))) return false
     // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
     const range = selection.getRangeAt(0)
     const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
@@ -385,7 +399,7 @@ export class SelectionToolbar extends LitElement {
         <slot name="toolbar"></slot>
         <div class="prompt" part="prompt"><slot name="prompt"></slot></div>
         <div class="result" part="result" ?hidden=${!this.hasResult}>
-          <slot name="result" @slotchange=${(event: Event) => (this.hasResult = (event.target as HTMLSlotElement).assignedNodes().length > 0)}></slot>
+          <slot name="result" @slotchange=${this.handleResultChange}></slot>
         </div>
       </div>
       <div class="visually-hidden" role="status">${this.hint || nothing}</div>`
