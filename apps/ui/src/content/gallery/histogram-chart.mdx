@@ -115,9 +115,10 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 
 ```html tag=MdxCodeBlock,label=In French
 <style>
+  .histogram-fr-wrap { width: 100%; }
   .histogram-fr { width: 100%; --c2-chart--height: 300px; --c2-chart__series-1--color: #2563eb; }
 </style>
-<div lang="fr">
+<div class="histogram-fr-wrap" lang="fr">
   <c2-histogram-chart class="histogram-fr" bin-width="50" percentiles="[50, 90]" data="[242,344,289,254,307,198,320,299,271,315,331,354,305,272,330,198,391,281,322,385,261,280,313,252,361,204,276,318,313,271,382,377,303,343,231,355,316,345,339,317,298,222,205,231,344,309,266,261,339,294,386,278,242,182,254,320,217,335,334,230]">
     <c2-chart-series field="value" label="Latence (ms)"></c2-chart-series>
   </c2-histogram-chart>

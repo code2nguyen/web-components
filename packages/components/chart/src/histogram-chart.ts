@@ -21,6 +21,13 @@ import './chart-series.js'
 export { binHistogram, histogramPercentile } from './histogram-bins.js'
 export type { HistogramBin, HistogramBinOptions, HistogramModel } from './histogram-bins.js'
 
+/** `east_region` -> `East region`: a readable label for an inferred field. */
+function humanize(field: string): string {
+  const last = field.split('.').pop() ?? field
+  const spaced = last.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
 /** The line drawn over the bars, per series. */
 export type HistogramOverlay = 'none' | 'density' | 'cumulative'
 
@@ -197,6 +204,23 @@ export class HistogramChart extends BarChart {
       if (values.length) summary = this.msg.t('summaryPercentiles', summary, name(item), values.join(', '))
     })
     return summary
+  }
+
+  /**
+   * A field holding a sample array is a series too, next to the numeric ones the base infers. That is also what a
+   * server render reads, since it cannot see the `c2-chart-series` children: without it, rows of sample arrays render
+   * the empty state on the server, and hydration keeps it.
+   */
+  protected override inferredSeries(): ChartSeriesConfig[] {
+    const inferred = super.inferredSeries()
+    const rows = this.data
+    const first: unknown = Array.isArray(rows) ? rows[0] : undefined
+    if (!first || typeof first !== 'object' || Array.isArray(first) || ArrayBuffer.isView(first)) return inferred
+    const row = first as Record<string, unknown>
+    const fields = new Set(inferred.map((item) => item.field))
+    return Object.keys(row)
+      .filter((key) => fields.has(key) || (Array.isArray(row[key]) && key !== this.xField && key !== this.labelField))
+      .map((key) => inferred.find((item) => item.field === key) ?? { field: key, label: humanize(key) })
   }
 
   /** One series needs no legend, unless a `legend` slot fills it. */

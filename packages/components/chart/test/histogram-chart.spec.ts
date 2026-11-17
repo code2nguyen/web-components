@@ -267,6 +267,30 @@ test('several series share the bins, grouped with a legend or stacked', async ({
   expect(shared).toBeDefined()
 })
 
+test('infers a series from each field holding a sample array, as a server render must', async ({ page }) => {
+  await open(page, 'empty')
+  await page.evaluate(() => {
+    document.querySelector('main')!.innerHTML =
+      `<c2-histogram-chart animation="none" bin-width="100" data='[{"region":"all","east":[182,210,236,251],"west_eu":[248,276,301,324]}]'></c2-histogram-chart>`
+  })
+  const chart = page.locator('c2-histogram-chart')
+  await expect(chart).toHaveState('ready')
+  const result = await chart.evaluate((element) => ({
+    series: (element as unknown as { resolvedSeries: { field: string; label: string }[] }).resolvedSeries.map((item) => [item.field, item.label]),
+    counts: (element as HistogramElement).bins.map((bin) => bin.counts),
+  }))
+  expect(result.series).toEqual([
+    ['east', 'East'],
+    ['west_eu', 'West eu'],
+  ])
+  expect(result.counts).toEqual([
+    [1, 0],
+    [3, 2],
+    [0, 2],
+  ])
+  await expect(chart.locator('.state')).toHaveCount(0)
+})
+
 test('reads one sample per row, skipping what is not a number', async ({ page }) => {
   const chart = await open(page, 'long')
   await expect(chart).toHaveState('ready')

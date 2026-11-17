@@ -72,8 +72,8 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
 - **Rows**, where each `c2-chart-series` field holds one sample per row (long-format data, one row per request,
   works as it is) or an array of samples. Several series share one set of bins.
 
-A value that is not a number (`null`, `"n/a"`) is skipped. Without a `c2-chart-series`, the numeric fields of the
-first row are the series. A `dataSource` works as on the other charts: its `getWindow` returns the samples, and each
+A value that is not a number (`null`, `"n/a"`) is skipped. Without a `c2-chart-series`, the fields of the first
+row that hold a number or a sample array are the series. A `dataSource` works as on the other charts: its `getWindow` returns the samples, and each
 point its `subscribe` pushes adds one sample per series, so a live histogram fills as requests complete; `max-points`
 keeps only that many pushed samples per series. Replacing `data` drops them.
 

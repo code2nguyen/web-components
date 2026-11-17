@@ -132,9 +132,12 @@ export function drawHistogramOverlay(self: uPlot, request: HistogramOverlayReque
       } else {
         ctx.moveTo(position, top)
         ctx.lineTo(position, top + height)
-        ctx.textAlign = 'left'
+        // A marker near the right edge puts its label on its left, inside the plot, rather than clipped by the canvas.
+        const label = request.label(p)
+        const flip = position + 4 * ratio + ctx.measureText(label).width > left + width
+        ctx.textAlign = flip ? 'right' : 'left'
         ctx.textBaseline = 'top'
-        ctx.fillText(request.label(p), position + 4 * ratio, top + 2 * ratio + offset)
+        ctx.fillText(label, flip ? position - 4 * ratio : position + 4 * ratio, top + 2 * ratio + offset)
       }
       ctx.stroke()
     }
