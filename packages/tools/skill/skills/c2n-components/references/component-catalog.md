@@ -214,6 +214,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Secret Field** — `c2-secret-field` · `@c2n/components/secret-field` — Shows an API key or other secret masked, with buttons to reveal it, copy it and ask for a new one.
 - **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
 - **Shortcut** — `c2-shortcut` · `@c2n/components/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
+- **Shortcut Sheet** — `c2-shortcut-sheet` · `@c2n/components/shortcut/shortcut-sheet` — The keyboard-shortcuts dialog: every shortcut of the page grouped by section, drawn with keys, and searchable, generated from c2-shortcut bindings.
 - **Signature Pad** — `c2-signature-pad` · `@c2n/components/signature-pad` — A box to sign in with a mouse, a pen or a finger, with undo and clear, that exports the signature as SVG or an image.
 - **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/components/switch` — On/off toggle on a native switch input, with label, description and thumb icons.

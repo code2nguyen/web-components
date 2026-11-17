@@ -508,6 +508,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-kbd>G</c2-kbd><c2-kbd>D</c2-kbd>
   <c2-kbd>?</c2-kbd>
 </div>`,
+  'shortcut-sheet': `<c2-shortcut-sheet inline no-search no-bindings style="width:240px;--c2-shortcut-sheet__group--margin-bottom:0" shortcuts='[{"keys":"mod+k","description":"Search"},{"keys":"g i","description":"Go to inbox"},{"keys":"mod+b","description":"Bold"}]'></c2-shortcut-sheet>`,
   'side-nav': `<div style="position:relative;width:240px;height:110px;border:1px solid var(--site-color-outline-variant);border-radius:8px;overflow:hidden">
   <c2-side-nav opened style="height:100%;--c2-side-nav__open--width:88px;--c2-side-nav--padding-top:10px;--c2-side-nav--padding-right:8px;--c2-side-nav--padding-bottom:10px;--c2-side-nav--padding-left:8px;--c2-side-nav--background-color:var(--site-color-surface-container-3);--c2-side-nav__divider--color:var(--site-color-outline-variant)">
     <div slot="side-nav-content" style="font-size:13px;line-height:1.9;padding-left:4px">Inbox<br>Drafts<br>Sent</div>

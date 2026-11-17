@@ -1005,6 +1005,10 @@
       "types": "./dist/shortcut.d.ts",
       "default": "./dist/shortcut.js"
     },
+    "./shortcut/shortcut-sheet": {
+      "types": "./dist/shortcut/shortcut-sheet.d.ts",
+      "default": "./dist/shortcut/shortcut-sheet.js"
+    },
     "./side-nav": {
       "types": "./dist/side-nav.d.ts",
       "default": "./dist/side-nav.js"
