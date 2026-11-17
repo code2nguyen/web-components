@@ -35,6 +35,7 @@ const fr: typeof imageAnnotatorMessages.en = {
   shapeBlur: 'Flou',
   shapeRedact: 'Masque',
   shapeOf: (kind, index, count) => `${kind} ${index} sur ${count}`,
+  nameAnd: (name, detail) => `${name} : ${detail}`,
   added: (kind) => `${kind} ajouté`,
   deleted: (kind) => `${kind} supprimé`,
   lowConfidence: (percent) => `confiance ${percent} %, à vérifier`,

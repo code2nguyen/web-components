@@ -199,5 +199,39 @@ test('looks come from variables; a threshold of 0.5 unflags; existing users see 
 test('the confidence flag follows the language', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr"><c2-image-annotator readonly shapes='${FIELDS}'></c2-image-annotator></div>`)
   await annotator(page).evaluate((element) => ((element as HTMLElement & { src: string }).src = (window as unknown as { testImage(): string }).testImage()))
-  await expect(shape(annotator(page), 'total')).toHaveAttribute('aria-label', 'Rectangle 2 sur 3: Total: confiance 62 %, à vérifier')
+  await expect(shape(annotator(page), 'total')).toHaveAttribute('aria-label', 'Rectangle 2 sur 3 : Total : confiance 62 %, à vérifier')
+})
+
+test('regressions: a choice that disappears is reported, a wide shape gets its card below, a labelled text keeps its text', async ({
+  page,
+  renderScenario,
+}) => {
+  await open(
+    page,
+    renderScenario,
+    `tool="select" active="wide" shapes='[{"id":"wide","type":"rect","x":10,"y":20,"w":380,"h":30,"color":"#2563eb","stroke":2,"label":"Address"},{"id":"t","type":"text","x":20,"y":150,"w":100,"h":20,"text":"Wrong total","label":"Note","color":"#e11d48","stroke":4},{"id":"n","type":"number","x":300,"y":150,"w":0,"h":0,"n":1,"confidence":0.2,"color":"#e11d48","stroke":4}]'`,
+    '<p slot="detail">Card</p>',
+  )
+  const element = annotator(page)
+  await watch(element, 'shape-select')
+  // No room beside a shape as wide as the image: the card goes under it.
+  const wide = (await shape(element, 'wide').locator('rect').first().boundingBox())!
+  const box = (await card(element).boundingBox())!
+  expect(box.y).toBeGreaterThanOrEqual(wide.y + wide.height)
+  expect(box.width).toBeGreaterThan(200)
+  await expect(shape(element, 't')).toHaveAttribute('aria-label', 'Text 2 of 3: Note: Wrong total')
+  // A low-confidence badge is announced but not dashed: only outlines are.
+  await expect(shape(element, 'n')).toHaveAttribute('aria-label', 'Number 3 of 3: 20% confidence, needs review')
+  await expect(shape(element, 'n')).not.toHaveClass(/\blow\b/)
+
+  // The app loads the next document: the active shape is gone, and the choice is cleared out loud.
+  await props(element, { shapes: [{ id: 'other', type: 'rect', x: 10, y: 10, w: 50, h: 50, color: '#2563eb', stroke: 2 }] })
+  await expect.poll(() => active(element)).toBeNull()
+  await expect(card(element)).toBeHidden()
+  await expect(overlay(element)).not.toHaveClass(/has-active/)
+  await props(element, { active: 'other' })
+  // Turning readonly on drops the editing choice, reported too.
+  await props(element, { readonly: true })
+  await expect.poll(() => active(element)).toBeNull()
+  await expect.poll(() => ids(element)).toEqual([null, null])
 })

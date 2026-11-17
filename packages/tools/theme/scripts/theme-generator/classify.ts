@@ -82,6 +82,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-distribution-bar',
   'c2-filter-builder',
   'c2-hover-card',
+  'c2-image-annotator',
   'c2-menu',
   'c2-navigation-menu',
   'c2-navigation-menu-item',

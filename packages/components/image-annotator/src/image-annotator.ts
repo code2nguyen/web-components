@@ -89,6 +89,8 @@ const SHAPE_NAME = {
   redact: 'shapeRedact',
 } as const
 const REDACT_COLOR = '#000000'
+/** The shapes drawn as an outline, which a low confidence dashes. */
+const STROKED: AnnotatorShapeType[] = ['rect', 'ellipse', 'line', 'arrow', 'pen']
 
 const ICONS: Record<AnnotatorTool | 'undo' | 'redo' | 'delete', SVGTemplateResult> = {
   select: svg`<path d="m5 4 6 15 2-6 6-2z" />`,
@@ -189,13 +191,13 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @cssproperty {font-family} [--c2-image-annotator__text--font-family=system-ui, sans-serif] - Text shapes, on screen and in the export.
  * @cssproperty {color} [--c2-image-annotator__number--color=#ffffff] - The digit in a number badge.
  * @cssproperty {number} [--c2-image-annotator__shape__inactive--opacity=1] - The other shapes while one is active; lower it to spotlight the active one.
- * @cssproperty {color} [--c2-image-annotator__low-confidence--color=#d97706] - The outline of a shape whose `confidence` is under `confidence-threshold`.
+ * @cssproperty {color} [--c2-image-annotator__low-confidence--color=#d97706] - The outline of a box, ellipse, line, arrow or drawing whose `confidence` is under `confidence-threshold`.
  * @cssproperty {string} [--c2-image-annotator__low-confidence--stroke-dasharray=8 5] - The dash of a low-confidence outline, in image pixels.
  * @cssproperty {color} [--c2-image-annotator__detail--background-color=#ffffff]
  * @cssproperty {color} [--c2-image-annotator__detail--color=#18181b]
  * @cssproperty {border} [--c2-image-annotator__detail--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-image-annotator__detail--border-radius=8px]
- * @cssproperty {shadow} [--c2-image-annotator__detail--box-shadow=0 4px 16px rgba(0, 0, 0, 0.12)]
+ * @cssproperty {shadow} [--c2-image-annotator__detail--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {pixel} [--c2-image-annotator__detail--padding=12px]
  * @cssproperty {pixel} [--c2-image-annotator__detail--width=260px] - The card's width, never wider than the room beside its shape.
  * @cssproperty {pixel} [--c2-image-annotator__detail--offset=8px] - The gap between the card and its shape.
@@ -255,8 +257,8 @@ export class ImageAnnotator extends LitElement {
   private readonly msg = new LocalizeController(this, imageAnnotatorMessages)
   /** The shapes before the text being edited was added or changed: the edit commits against them. */
   private editOrigin: AnnotatorShape[] | null = null
-  /** The last change of `active` came from the person, so it is not scrolled into view. */
-  private chose = false
+  /** The id the person last chose (a click, Tab): that `active` is not scrolled into view; one the app sets is. */
+  private chosen: string | null | undefined = undefined
   /** The first render is done: an `active` the page loads with does not scroll the page. */
   private ready = false
   private gesture: { kind: 'draw' | 'move' | 'handle'; startX: number; startY: number; origin: AnnotatorShape; handle?: number; moved: boolean } | null = null
@@ -450,14 +452,17 @@ export class ImageAnnotator extends LitElement {
     if (changed.has('colors') && (!this.color || !this.colors.includes(this.color))) this.color = this.colors[0] ?? '#e11d48'
     if (changed.has('src')) this.natural = { width: 0, height: 0 }
     // Turning readonly on drops an editing selection, unless shapes stay selectable.
-    if (changed.get('readonly') === false && this.readonly && !this.selectable) this.active = null
+    if (changed.get('readonly') === false && this.readonly && !this.selectable) this.choose(null)
+    // New shapes without the active one (the next document, an undo): the choice is gone, and said so.
+    const before = changed.get('shapes') as AnnotatorShape[] | undefined
+    if (this.active && before?.some((shape) => shape.id === this.active) && !this.shapes.some((shape) => shape.id === this.active)) this.choose(null)
   }
 
   /** Changes the active shape from inside: reported by `shape-select`, and scrolled into view only when `reveal`. */
   private choose(id: string | null, reveal = false): void {
     if (id === this.active) return
     this.active = id
-    this.chose = !reveal
+    this.chosen = reveal ? undefined : id
     const shape = this.shapes.find((candidate) => candidate.id === id)
     this.dispatchEvent(new CustomEvent<ShapeSelectEventDetail>('shape-select', { detail: { id, shape: shape ? { ...shape } : null } }))
   }
@@ -887,10 +892,10 @@ export class ImageAnnotator extends LitElement {
     if (editor && this.shadowRoot?.activeElement !== editor) editor.focus()
     // An active shape set by the app (a form field took focus) or by next()/previous() is brought into view; not one
     // the person just clicked or tabbed to, nor the one the page loads with.
-    if (changed.has('active') && this.ready && !this.chose) {
+    if (changed.has('active') && this.ready && this.active !== this.chosen) {
       this.renderRoot.querySelector('g.shape.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
     }
-    this.chose = false
+    this.chosen = undefined
     this.ready = true
   }
 
@@ -938,7 +943,7 @@ export class ImageAnnotator extends LitElement {
     if (draft) return svg`<g class="draft">${body}</g>`
     const pickable = this.pickable
     return svg`<g
-      class="shape ${this.active === shape.id ? 'selected' : ''} ${this.low(shape) ? 'low' : ''}"
+      class="shape ${this.active === shape.id ? 'selected' : ''} ${this.low(shape) && STROKED.includes(shape.type) ? 'low' : ''}"
       data-id=${shape.id}
       role="img"
       aria-label=${this.shapeName(shape, index, count)}
@@ -959,12 +964,10 @@ export class ImageAnnotator extends LitElement {
   /** "Rectangle 2 of 5: Invoice total: 62% confidence", for assistive technology. */
   private shapeName(shape: AnnotatorShape, index: number, count = this.shapes.length): string {
     return [
-      this.msg.t('shapeOf', this.kind(shape), index + 1, count),
-      shape.label || (shape.type === 'text' ? shape.text : ''),
+      shape.label,
+      shape.type === 'text' ? shape.text : '',
       this.low(shape) ? this.msg.t('lowConfidence', Math.round(shape.confidence! * 100)) : '',
-    ]
-      .filter(Boolean)
-      .join(': ')
+    ].reduce<string>((name, part) => (part ? this.msg.t('nameAnd', name, part) : name), this.msg.t('shapeOf', this.kind(shape), index + 1, count))
   }
 
   private renderSelection() {
@@ -998,19 +1001,28 @@ export class ImageAnnotator extends LitElement {
     const shape = this.shapes[index]
     const show = !!shape && !!width && (this.slotted || !!this.renderDetail)
     let place = ''
-    let end = false
+    let side = ''
     if (show) {
-      // Beside the shape, on the side with more room, and level with its top (its bottom in the lower half).
       const box = bounds(shape)
-      end = box.x + box.w / 2 > width / 2
-      const percent = (value: number, of: number) => `${(value / of) * 100}%`
-      // --_room is the width left on that side, which the card does not pass.
-      place = `${end ? `right: ${percent(width - box.x, width)}; --_room: ${percent(box.x, width)}` : `left: ${percent(box.x + box.w, width)}; --_room: ${percent(width - box.x - box.w, width)}`}; ${
-        box.y + box.h / 2 > height / 2 ? `bottom: ${percent(height - box.y - box.h, height)}` : `top: ${percent(box.y, height)}`
-      }`
+      const x = (value: number) => `${Math.max(0, (value / width) * 100)}%`
+      const y = (value: number) => `${Math.max(0, (value / height) * 100)}%`
+      const before = box.x
+      const after = width - box.x - box.w
+      // --_room is the width the card may take, --_tall the height when it grows upward (toward the toolbar).
+      if (Math.max(before, after) >= width * 0.3) {
+        // Beside the shape, on the side with more room, level with its top (its bottom in the lower half).
+        side = after >= before ? '' : 'end'
+        place = side ? `right: ${x(width - box.x)}; --_room: ${x(before)}` : `left: ${x(box.x + box.w)}; --_room: ${x(after)}`
+        place += box.y + box.h / 2 > height / 2 ? `; bottom: ${y(height - box.y - box.h)}; --_tall: ${y(box.y + box.h)}` : `; top: ${y(box.y)}`
+      } else {
+        // A shape as wide as the image: below it, or above it when there is more room there.
+        side = box.y >= height - box.y - box.h ? 'above' : 'below'
+        place = `left: ${x(box.x)}; --_room: ${x(width - box.x)}; `
+        place += side === 'above' ? `bottom: ${y(height - box.y)}; --_tall: ${y(box.y)}` : `top: ${y(box.y + box.h)}`
+      }
     }
     return html`<div
-      class="detail ${end ? 'end' : ''}"
+      class="detail ${side}"
       part="detail"
       role="group"
       tabindex="-1"
