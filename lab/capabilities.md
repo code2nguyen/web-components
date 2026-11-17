@@ -92,6 +92,19 @@ Each entry reads `` `tag` `` followed by a description.
 - `i18n.translate`: the components' built-in text in another language
 - `i18n.format`: dates, numbers and money in the reader's locale
 
+## Performance
+
+Budgets are measured by the lab under the conditions the spec states (CPU throttling, network, production build).
+
+- `perf.load`: the page shows its main content and becomes usable within a budget (LCP, longest task while loading)
+- `perf.bundle`: the page downloads only the code it uses, within a budget; heavy parts load when needed
+- `perf.interaction`: an input answers within a budget (input to next paint), even while the page is busy
+- `perf.scroll`: scrolling a long view keeps its frame rate (95th percentile frame time, janky frames)
+- `perf.update`: frequent data updates (a live feed, streaming) keep the page smooth and responsive
+- `perf.background`: work stops when nobody can see it (a hidden tab, a feed scrolled out of view)
+- `perf.layout-shift`: nothing moves after it is shown (CLS), while loading or when data arrives
+- `perf.memory`: repeating an action does not grow memory, DOM nodes or event listeners
+
 ## Accessibility
 
 - `a11y.keyboard`: everything works with the keyboard alone

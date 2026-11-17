@@ -2,6 +2,7 @@
 // shadow root, so journeys survive refactors and an agent can write them from an accessibility snapshot.
 import { expect } from '@playwright/test'
 import { axTree } from './ax-tree.mjs'
+import { runPerfStep } from './perf.mjs'
 
 let tagCounter = 0
 
@@ -134,6 +135,7 @@ export async function runStep(page, step, ctx) {
   if ('wait' in step) return page.waitForTimeout(step.wait)
   if ('snapshot' in step) return ctx.snapshot(step.snapshot)
   if ('expect' in step) return expectState(page, step.expect, timeout)
+  if (await runPerfStep(page, step, ctx, runStep)) return
   throw new Error(`Unknown step ${JSON.stringify(step)}`)
 }
 

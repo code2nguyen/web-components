@@ -15,6 +15,7 @@ import { checkAxe, checkOverflow, componentIn, createFocusChecker, watchConsole 
 import { axTree, checkAxTree, formatAxTree } from './lib/ax-tree.mjs'
 import { describeStep, locate, runStep } from './lib/steps.mjs'
 import { ensureServer } from './lib/server.mjs'
+import { PERF_INIT_SCRIPT, attachPerfSession, startScriptClock, throttleCpu, throttleNetwork } from './lib/perf.mjs'
 import { buildRecord, comparable, compare, loadRecords, writeRecord } from './lib/record.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -84,7 +85,14 @@ async function runJourney(browser, target, persona, personaName, journey, run, o
 
   const context = await browser.newContext({ ...persona.context, baseURL: target.url })
   await context.addInitScript(personaInitScript(persona))
+  await context.addInitScript({ content: PERF_INIT_SCRIPT })
   const page = await context.newPage()
+  // A performance journey runs under Chrome's CPU (and, for load budgets, network) throttling, so its budgets mean the
+  // same on any machine. The session that sets them stays open with the page.
+  await attachPerfSession(page)
+  await throttleCpu(page, journey.cpu)
+  await throttleNetwork(page, journey.network)
+  result.metrics = []
 
   const report = (finding) => {
     const entry = { ...finding, persona: personaName, journey: journey.id, run, step: currentStep }
@@ -105,10 +113,14 @@ async function runJourney(browser, target, persona, personaName, journey, run, o
     persona,
     report,
     onTabStop: persona.checkFocus ? createFocusChecker(page, report) : undefined,
+    metric: (entry) => result.metrics.push(entry),
     snapshot: async (label) => {
       writeFileSync(join(out, 'snapshots', `${tag}-${slug(label)}.txt`), formatAxTree(await axTree(page)))
     },
   }
+
+  // The journey's own "start" mark for script time; page-level entries already count from navigation.
+  await startScriptClock(page, ctx, 'start')
 
   for (const [index, step] of journey.steps.entries()) {
     currentStep = index

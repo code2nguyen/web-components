@@ -148,6 +148,41 @@ Targets, most faithful first:
 
 Any target takes `nth` and `within`. A journey can list `personas` to run for only some of them.
 
+## Performance
+
+A journey measures performance with five more steps, read from the browser's own performance entries (Event Timing,
+Long Tasks, Layout Shift, Largest Contentful Paint, Resource Timing) and Chrome's counters, never from the runner's
+own timing:
+
+```json
+{ "id": "p1-sort", "personas": ["mouse"], "cpu": 4, "network": "fast-4g", "steps": [
+  { "goto": "./" },
+  { "mark": "sort", "watch": { "css": "c2-table", "text": "R-100000" }, "frames": true },
+  { "click": { "ax": "columnheader", "name": "Amount" } },
+  { "budget": { "since": "sort", "component": "c2-table", "interaction": 200, "longestTask": 200, "until": 1000 } },
+  { "memory": "baseline" },
+  { "repeat": 10, "steps": [ … ] },
+  { "budget": { "label": "churn", "nodesGrowth": 200, "listenersGrowth": 0, "heapGrowthMB": 5 } }
+] }
+```
+
+- `cpu` (journey): Chrome's CPU throttling (4 makes a fast machine behave like a mid-range laptop), so budgets mean the
+  same everywhere. `network` (journey): `fast-4g` or `slow-4g`, for load budgets.
+- `mark`: starts a window. `frames: true` samples frame intervals from there; `watch` records when an element (found
+  through shadow roots) first contains a text.
+- `budget`: checks the window since `since` (a mark, or `start` for the page load) against limits: `interaction`
+  (input to next paint, ms), `longestTask`, `blocking` (total blocking time), `layoutShift`, `frameP95`, `jankyFrames`
+  (frames over 50 ms), `until` (ms from the mark to its watch), `lcp`, `jsKB`, `scriptTime`, and after a
+  `{ "memory": "baseline" }`, `heapGrowthMB`, `nodesGrowth`, `listenersGrowth` (taken after a forced garbage
+  collection). `component` names who is responsible; `label` names the window in the report.
+- `scroll`: wheel notches over a target (`by` pixels, 120 at a time, about 60 a second). `repeat`: runs `steps` N times.
+
+Every measured value is kept in the run record (the median of the repeats, with its budget), so a library change shows
+as a number moving, not only as a budget crossed. Over budget is a `perf` finding. Leak budgets are taken after a
+warm-up, so caches filled on first use are not counted. Load budgets (`lcp`, `jsKB`) need a production build
+(`vite build` + `vite preview`): a dev server's unbundled modules are neither what users download nor how they load
+(the catalog build measures 3.2 MB of script and 0.76 layout shift on the dev server, 70 KB and 0.002 built).
+
 ## Oracles
 
 | Kind                                                                          | Fires when                                                                                                   |

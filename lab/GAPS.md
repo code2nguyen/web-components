@@ -13,14 +13,19 @@ Outcomes: **met** (a component does it as documented), **workaround** (met with 
 | crm-contacts | app | default | 13 | | | | | not built |
 | crm-contacts | app | harbor | 13 | | | | | not built |
 | support-inbox | app | default | 12 | | | | | not built |
+| workspace-home | app | default | 7 | | | | | not built |
 | account-settings | feature | default | 13 | | | | | not built |
 | account-settings | feature | dense-admin | 13 | | | | | not built |
 | checkout | feature | default | 11 | | | | | not built |
+| long-claim-form | feature | default | 7 | | | | | not built |
 | project-board | feature | default | 11 | | | | | not built |
 | appointment-booking | scenario | default | 9 | | | | | not built |
 | catalog-filter | scenario | default | 13 | 8 | 4 | 1 | 0 | [reports/catalog-filter/default.md](reports/catalog-filter/default.md) |
 | document-upload | scenario | default | 8 | | | | | not built |
+| hundred-thousand-rows | scenario | default | 7 | | | | | not built |
+| live-market-board | scenario | default | 7 | | | | | not built |
 | orders-table | scenario | default | 9 | | | | | not built |
+| overlay-churn | scenario | default | 7 | | | | | not built |
 | pricing-page | scenario | default | 7 | | | | | not built |
 | pricing-page | scenario | juniper | 7 | | | | | not built |
 | pricing-page | scenario | juniper-dark | 7 | | | | | not built |
@@ -71,7 +76,7 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 
 **Capabilities no spec requires** (0): none
 
-**Capabilities required but not built yet** (43): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `theme.dark`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `form.validation`, `input.phone`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `theme.brand`, `list.selection`, `feedback.toast`, `form.error-summary`, `form.async-submit`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.choice`, `input.payment-card`, `planning.board`, `list.reorder`, `input.date`, `input.time-slot`, `input.file-upload`, `layout.disclosure`
+**Capabilities required but not built yet** (51): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `theme.dark`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `form.validation`, `input.phone`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `theme.brand`, `list.selection`, `feedback.toast`, `perf.load`, `perf.bundle`, `perf.layout-shift`, `perf.interaction`, `perf.scroll`, `form.error-summary`, `form.async-submit`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.choice`, `input.payment-card`, `layout.disclosure`, `perf.memory`, `planning.board`, `list.reorder`, `input.date`, `input.time-slot`, `input.file-upload`, `perf.update`, `perf.background`
 
 **Components no build report names** (249 of 263):
 

@@ -46,13 +46,26 @@ export function buildRecord({ root, target, mode, options, personas, results, fi
   const journeys = new Map()
   for (const result of results) {
     const key = `${result.persona}/${result.journey}`
-    const entry = journeys.get(key) ?? { persona: result.persona, journey: result.journey, runs: 0, passed: 0, failedStep: null }
+    const entry = journeys.get(key) ?? { persona: result.persona, journey: result.journey, runs: 0, passed: 0, failedStep: null, samples: {} }
     entry.runs++
+    for (const metric of result.metrics ?? []) {
+      entry.samples[metric.name] ??= { budget: metric.budget, values: [] }
+      if (typeof metric.value === 'number') entry.samples[metric.name].values.push(metric.value)
+    }
     if (result.status === 'passed') entry.passed++
     else entry.failedStep ??= result.failedStep
     journeys.set(key, entry)
   }
-  const journeyList = [...journeys.values()]
+  // Performance numbers are kept as the median of the repeats, with their budget, so a record can be compared with the
+  // next one and the site can draw them over library versions.
+  const median = (values) => {
+    const sorted = [...values].sort((a, b) => a - b)
+    return sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : null
+  }
+  const journeyList = [...journeys.values()].map(({ samples, ...entry }) => {
+    const metrics = Object.entries(samples).map(([name, { budget, values }]) => ({ name, median: median(values), budget, samples: values.length }))
+    return metrics.length ? { ...entry, metrics } : entry
+  })
   return {
     schema: SCHEMA,
     id: `${startedAt.toISOString().slice(0, 16).replace(':', '')}-${target.name}`,

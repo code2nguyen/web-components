@@ -465,6 +465,105 @@
           }
         }
       ]
+    },
+    {
+      "id": "p1-filter-speed",
+      "title": "Performance · a facet answers fast under 4× CPU throttling",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "12 products"
+          }
+        },
+        {
+          "mark": "filter",
+          "watch": {
+            "css": "#result-count",
+            "text": "3 products"
+          }
+        },
+        {
+          "click": {
+            "ax": "checkbox",
+            "name": "Tents"
+          }
+        },
+        {
+          "budget": {
+            "since": "filter",
+            "component": "c2-facet-list",
+            "interaction": 200,
+            "longestTask": 200,
+            "layoutShift": 0.05,
+            "until": 500
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2-filter-churn",
+      "title": "Performance · toggling a facet does not grow the page",
+      "personas": ["mouse"],
+      "cpu": 4,
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "repeat": 5,
+          "steps": [
+            {
+              "click": {
+                "ax": "checkbox",
+                "name": "Stoves"
+              }
+            },
+            {
+              "click": {
+                "ax": "checkbox",
+                "name": "Stoves"
+              }
+            }
+          ]
+        },
+        {
+          "memory": "baseline"
+        },
+        {
+          "repeat": 20,
+          "steps": [
+            {
+              "click": {
+                "ax": "checkbox",
+                "name": "Stoves"
+              }
+            },
+            {
+              "click": {
+                "ax": "checkbox",
+                "name": "Stoves"
+              }
+            }
+          ]
+        },
+        {
+          "budget": {
+            "label": "churn",
+            "component": "c2-facet-list",
+            "nodesGrowth": 20,
+            "listenersGrowth": 0,
+            "heapGrowthMB": 2
+          }
+        }
+      ]
     }
   ]
 }
