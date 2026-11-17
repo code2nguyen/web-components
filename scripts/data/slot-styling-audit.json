@@ -989,6 +989,20 @@
       "reason": "The preview slot projects consumer-owned card content; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-citation-list",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the action zone's component-side presentation: its spacing under the cards."
+    },
+    {
+      "tag": "c2-citation-list",
+      "slot": "summary",
+      "decision": "part",
+      "parts": ["count"],
+      "reason": "The count region owns the summary slot's component-side presentation: its type, colour and truncation in the toggle."
+    },
+    {
       "tag": "c2-code-editor",
       "slot": "label",
       "decision": "part",

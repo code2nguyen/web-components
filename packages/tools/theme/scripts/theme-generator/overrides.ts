@@ -739,6 +739,8 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
   },
+  // The ring between the icons of a citation list's stack is the surface behind them, like a progress mark's.
+  '--c2-citation-list__icon--border-color': { token: 'color-surface' },
   '--c2-indicator__warning--background': { exclude: 'solid status fill' },
   '--c2-indicator__warning--color': { exclude: 'dark text on a fixed amber fill' },
   '--c2-indicator__danger--background': { exclude: 'solid status fill' },

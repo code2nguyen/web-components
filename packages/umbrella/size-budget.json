@@ -1,5 +1,5 @@
 {
-  "lazy": 427654,
+  "lazy": 429631,
   "entries": {
     "accordion": 6905,
     "action-bar": 4526,
@@ -75,7 +75,8 @@
     "choice-matrix/input-matrix": 8113,
     "choice-matrix/record-merge": 10514,
     "choice-matrix/scorecard": 11560,
-    "citation": 6070,
+    "citation": 6413,
+    "citation/citation-list": 4707,
     "code-editor": 8848,
     "code-viewer": 8136,
     "color-area": 10284,

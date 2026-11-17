@@ -1,0 +1,76 @@
+---
+/**
+ * Plays the application's part in the citation list gallery: the French of the card under `lang="fr"`, the
+ * `renderSource` of the Custom cards card (a property, so it cannot be written in the fence), the button of the
+ * Streaming card, which adds a cited sentence to the answer as a model would, and the Copy all button of the footer card.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+  import type { CitationList } from '@c2n/components/citation/citation-list'
+
+  addTranslations({
+    fr: {
+      citation: { numbered: 'Source {0}', named: '{0} : {1}' },
+      'citation-list': { summary: { one: '{0} source consultée', other: '{0} sources consultées' }, label: 'Sources', card: 'Source {0} : {1}' },
+    },
+  })
+
+  const SENTENCES = [
+    {
+      href: 'https://web.dev/articles/declarative-shadow-dom',
+      title: 'Declarative Shadow DOM – web.dev',
+      text: 'The shadow root is attached while the HTML parses',
+    },
+    {
+      href: 'https://developer.mozilla.org/docs/Web/API/Web_components',
+      title: 'Web Components – MDN',
+      site: 'MDN',
+      text: 'Custom elements upgrade once their definition loads',
+    },
+    { href: 'https://lit.dev/docs/ssr/client-usage/', title: 'Client usage – Lit SSR', text: 'Lit then attaches its templates to the existing DOM' },
+  ]
+
+  function setUp() {
+    for (const list of document.querySelectorAll<CitationList>('c2-citation-list[data-citation-list-example="render"]'))
+      list.renderSource = ({ source, number }) => {
+        const card = document.createElement('span')
+        const badge = document.createElement('strong')
+        badge.textContent = `[${number}]`
+        card.append(badge, ` ${source.title ?? source.href ?? ''}`)
+        return card
+      }
+  }
+
+  setUp()
+  // The lists are islands: one that upgrades after this script ran gets its renderer when it is defined.
+  customElements.whenDefined('c2-citation-list').then(setUp)
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-citation-list-example]')
+    const figure = button?.closest('figure') ?? document
+    if (button?.getAttribute('data-citation-list-example') === 'stream') {
+      const answer = figure.querySelector<HTMLElement>('.citation-list-stream p')
+      if (!answer) return
+      const count = answer.querySelectorAll('c2-citation').length
+      const next = SENTENCES[count - 1]
+      if (!next) return
+      const marker = document.createElement('c2-citation')
+      marker.setAttribute('index', String(count + 1))
+      marker.setAttribute('href', next.href)
+      marker.setAttribute('source-title', next.title)
+      if (next.site) marker.setAttribute('site', next.site)
+      answer.append(` ${next.text}`, marker, '.')
+      if (count >= SENTENCES.length) button.setAttribute('disabled', '')
+    } else if (button?.getAttribute('data-citation-list-example') === 'copy') {
+      const lines = [...figure.querySelectorAll('.citation-list-footer c2-citation')]
+        .map((marker) => `${marker.getAttribute('index')}. ${marker.getAttribute('href')}`)
+        .filter((line, index, all) => all.indexOf(line) === index)
+      navigator.clipboard
+        ?.writeText(lines.join('\n'))
+        .then(() => (button.textContent = 'Copied'))
+        .catch(() => {})
+    }
+  })
+</script>
