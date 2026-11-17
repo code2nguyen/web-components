@@ -8,6 +8,9 @@
     padding: 4px,
     gap: 2px,
     offset: 8px,
+    prompt--width: 360px,
+    prompt--gap: 8px,
+    result--max-height: 240px,
   )
 );
 
@@ -46,6 +49,33 @@
 
 .toolbar:not(.toolbar--open) {
   display: none;
+}
+
+.prompt,
+.result,
+.toolbar--prompt slot[name='toolbar'] {
+  display: none;
+}
+
+.toolbar.toolbar--prompt {
+  box-sizing: border-box;
+  width: min(css.cssVar(prompt--width), calc(100vw - 16px));
+  align-items: stretch;
+}
+
+.toolbar.toolbar--prompt,
+.toolbar--prompt :is(.prompt, .result:not([hidden])) {
+  flex-direction: column;
+  gap: css.cssVar(prompt--gap);
+}
+
+.toolbar--prompt :is(.prompt, .result:not([hidden])) {
+  display: flex;
+}
+
+.result {
+  max-height: css.cssVar(result--max-height);
+  overflow: auto;
 }
 
 .visually-hidden {

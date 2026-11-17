@@ -92,6 +92,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed.
 - **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`.
+- **Text Annotator** — `c2-text-annotator` · `@c2n/components/highlight/text-annotator` — Labels spans of a text: select words and press a key to tag them, with overlapping spans and a tag per span, or show entities and retrieved passages read-only.
 - **Text Effect** — `c2-text-effect` · `@c2n/components/text-effect` — Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
@@ -117,7 +118,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
 - **Pan Zoom** — `c2-pan-zoom` · `@c2n/components/pan-zoom` — A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.
 - **Schema Tree** — `c2-schema-tree` · `@c2n/components/json-viewer/schema-tree` — A JSON Schema or OpenAPI schema as a tree of its properties: types, required and deprecated marks, constraints, allowed values and options.
-- **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.
+- **Selection Toolbar** — `c2-selection-toolbar` · `@c2n/components/selection-toolbar` — A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in, and an inline prompt at the same spot.
 - **Terminal** — `c2-terminal` · `@c2n/components/terminal` — An interactive prompt for commands your app answers: history, Tab completion, streaming output, Ctrl+C, ANSI colours.
 
 ## Feedback
@@ -170,6 +171,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
+- **Date Fields** — `c2-date-fields` · `@c2n/components/date-input/date-fields` — A memorable date typed as three labelled fields, day, month and year, in one form control, with errors that name the wrong part.
 - **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range, one date or several dates.
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
@@ -226,6 +228,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
 - **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.
+- **TOTP Code** — `c2-totp-code` · `@c2n/components/secret-field/totp-code` — The rotating one-time code of an authenticator app, computed in the browser from a TOTP secret, with a countdown ring, show and copy.
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Unit Input** — `c2-unit-input` · `@c2n/components/number-input/unit-input` — A quantity with its unit of measure: a number field with a unit picker that converts the number on a pick and shows the equivalent in the base unit.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.

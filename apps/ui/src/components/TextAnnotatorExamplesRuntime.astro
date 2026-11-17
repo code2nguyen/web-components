@@ -1,0 +1,44 @@
+---
+/**
+ * Plays the application's part in the text annotator examples: buttons that apply a label to the selection, a list of
+ * the spans by label kept in step with `ranges-change`, and a `renderTag` that adds the score stored on each range.
+ */
+---
+
+<script>
+  import type { TextAnnotator } from '@c2n/components/highlight/text-annotator'
+
+  for (const example of document.querySelectorAll<HTMLElement>('[data-text-annotator-example]')) {
+    const annotator = example.querySelector<TextAnnotator>('c2-text-annotator')
+    if (!annotator) continue
+
+    // A label button: pressing it must not move focus, which would clear the selection it labels.
+    example.addEventListener('mousedown', (event) => {
+      if ((event.target as Element).closest('[data-label]')) event.preventDefault()
+    })
+    example.addEventListener('click', (event) => {
+      const value = (event.target as Element).closest<HTMLElement>('[data-label]')?.dataset.label
+      if (value) void annotator.annotate(value)
+    })
+
+    if (example.dataset.textAnnotatorExample === 'score') {
+      annotator.renderTag = ({ range, label }) => `${label?.label ?? range.label} ${(range as { score?: number }).score?.toFixed(2) ?? ''}`
+    }
+
+    const list = example.querySelector<HTMLElement>('[data-annotation-list]')
+    if (!list) continue
+    const draw = () => {
+      const text = annotator.textContent ?? ''
+      list.replaceChildren(
+        ...annotator.labels.map((label) => {
+          const item = document.createElement('li')
+          const spans = annotator.ranges.filter((range) => range.label === label.value).map((range) => text.slice(range.start, range.end))
+          item.textContent = `${label.label ?? label.value} (${spans.length}): ${spans.join(', ') || '–'}`
+          return item
+        }),
+      )
+    }
+    annotator.addEventListener('ranges-change', draw)
+    customElements.whenDefined('c2-text-annotator').then(draw)
+  }
+</script>

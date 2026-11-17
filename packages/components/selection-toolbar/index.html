@@ -20,5 +20,11 @@
       ><p>Select any words in this paragraph to show the toolbar.</p>
       <button slot="toolbar" data-action="ask">Ask AI</button><button slot="toolbar" data-action="comment">Comment</button></c2-selection-toolbar
     >
+    <c2-selection-toolbar>
+      <p>Select some words, then press Ask AI to open the inline prompt; Escape closes it.</p>
+      <button slot="toolbar" data-prompt>Ask AI</button>
+      <input slot="prompt" aria-label="Instruction" placeholder="Make it shorter…" />
+      <button slot="prompt" data-action="shorten">Shorten</button>
+    </c2-selection-toolbar>
   </body>
 </html>

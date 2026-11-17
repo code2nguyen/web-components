@@ -13,6 +13,10 @@
       "types": "./types/src/find-bar.d.ts",
       "default": "./dist/find-bar.js"
     },
+    "./text-annotator.js": {
+      "types": "./types/src/text-annotator.d.ts",
+      "default": "./dist/text-annotator.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -35,6 +39,7 @@
   "keywords": [
     "highlight",
     "find bar",
+    "text annotator",
     "web component",
     "lit"
   ],
@@ -71,5 +76,10 @@
   "devDependencies": {
     "@c2n/config": "*"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "c2n": {
+    "separateEntries": [
+      "./text-annotator.js"
+    ]
+  }
 }

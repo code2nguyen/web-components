@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { FindBar } from '@c2n/highlight/find-bar.js'
 import type { Highlight } from '@c2n/highlight'
+import type { TextAnnotator } from '@c2n/highlight/text-annotator.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -34,6 +35,16 @@ declare module 'react' {
         'whole-word'?: Attribute
         'active-index'?: Attribute
         query?: Highlight['query'] | string
+      }
+      'c2-text-annotator': Omit<C2Props<TextAnnotator>, 'ranges' | 'labels' | 'query'> & {
+        readonly?: Attribute
+        'match-case'?: Attribute
+        'ignore-accents'?: Attribute
+        'whole-word'?: Attribute
+        'active-index'?: Attribute
+        ranges?: TextAnnotator['ranges'] | string
+        labels?: TextAnnotator['labels'] | string
+        query?: TextAnnotator['query'] | string
       }
     }
   }

@@ -88,7 +88,6 @@ Steps on different tracks edit different packages, but a few generated files are
 
 - **pivot-table-2** · `c2-pivot-table` · planning grid #256 (lazy) · +0.5 kB on 32.3 kB, 6 kB lazy · risk high
 - **highlight-2** · `c2-highlight` · annotation layer #277 · +0.7 kB on 2.9 kB · risk medium
-- **highlight-3** · `c2-highlight` · text annotator #279 · +0.3 kB on 2.9 kB · risk low
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-1** · `c2-rich-text-editor` · merge field input #266 · +1 kB on 54.6 kB · risk low
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
@@ -96,7 +95,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **image-annotator-1** · `c2-image-annotator` · extraction review #275, pinned comments #276, example: image pins #368 · +1.4 kB on 26.1 kB · risk low
 - **core-1** · `@c2n/core` · drop zone #284 (core), sync status #384 (core)
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
-- **date-input-2** · `c2-date-input` · memorable date #293 (companion) · 2.5 kB new entry · risk low
 - **month-planner-1** · `c2-month-planner` · agenda view #298, change calendar #303 · +2.3 kB on 10.9 kB · risk low
 - **month-planner-2** · `c2-month-planner` · rate calendar #304 · +0.8 kB on 10.9 kB · risk medium
 - **scheduler-2** · `c2-scheduler` · availability grid #300 · +1 kB on 38.1 kB · risk low
@@ -111,13 +109,11 @@ Steps on different tracks edit different packages, but a few generated files are
 - **chart-3** · `@c2n/chart` · histogram chart #525 · +0.8 kB on 37.2 kB · risk low
 - **chart-4** · `@c2n/chart` · small multiples #526 (companion) · 3 kB new entry · risk medium
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low
-- **secret-field-1** · `c2-secret-field` · totp code #397 · +1 kB on 25.3 kB · risk low
 - **reorder-list-2** · `c2-reorder-list` · sortable grid #474 · +1.5 kB on 12.2 kB · risk medium
 - **emoji-picker-1** · `c2-emoji-picker` · icon picker #445 · +1 kB on 45.2 kB · risk medium
 - **comment-thread-1** · `c2-comment-thread` · comment tree #508 · +1.5 kB on 47.8 kB · risk medium
 - **json-viewer-2** · `c2-json-viewer` · json editor #554 (lazy) · +0.3 kB on 7.0 kB, 6 kB lazy · risk medium
 - **log-viewer-1** · `c2-log-viewer` · build log #555 (lazy) · +0.4 kB on 16.5 kB, 4 kB lazy · risk medium
-- **selection-toolbar-1** · `c2-selection-toolbar` · inline prompt #574 · +1 kB on 13.2 kB · risk low
 
 ### New packages
 

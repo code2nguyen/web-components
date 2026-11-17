@@ -195,6 +195,7 @@ greet('world')"></c2-code-editor>`,
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
   <c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card>
 </c2-dashboard>`,
+  'date-fields': `<c2-date-fields value="1984-03-07" aria-label="Date of birth"></c2-date-fields>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
   'date-strip': `<c2-date-strip value="2026-10-14" start="2026-10-12" markers='["2026-10-13","2026-10-16"]' style="width:250px;--c2-date-strip__day--min-width:30px;--c2-date-strip__date--font-size:14px"></c2-date-strip>`,
@@ -612,6 +613,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
 </div>`,
   terminal: `<c2-terminal heading="acme-cli" style="width:300px;--c2-terminal--font-size:12px;--c2-terminal--line-height:18px"><span slot="banner">Acme CLI 4.2.0
 Type help for commands.</span></c2-terminal>`,
+  'text-annotator': `<p style="margin:0;max-width:250px;font-size:13px;line-height:1.9;color:var(--c2-theme--color-on-surface, #18181b)"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"thing","label":"Thing"}]' ranges='[{"start":0,"end":12,"label":"person"},{"start":25,"end":40,"label":"person"},{"start":44,"end":50,"label":"place"},{"start":58,"end":75,"label":"thing"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator></p>`,
   'text-effect': `<span style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Build <c2-text-effect effect="rotate" words="faster;safer;together" style="--c2-text-effect__text--color:var(--c2-theme--color-primary, #2563eb)"></c2-text-effect></span>`,
   'text-field': `<c2-text-field placeholder="Your email" help="We never share it." style="width:220px"></c2-text-field>`,
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
@@ -625,6 +627,7 @@ Type help for commands.</span></c2-terminal>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   toggletip: `<div class="preview-row" style="flex-direction:column;align-items:flex-start;gap:12px"><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">VAT number <c2-toggletip label="About the VAT number">Your EU VAT number, starting with the country code.</c2-toggletip></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">Billing period <c2-toggletip label="About billing periods">Yearly plans cost two months less.</c2-toggletip></span></div>`,
   tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  'totp-code': `<c2-totp-code label="GitHub" secret="JBSWY3DPEHPK3PXP" revealed hide-reveal style="width:220px"></c2-totp-code>`,
   tour: `<div class="preview-row">
   <c2-button id="preview-tour-target">Share</c2-button>
   <c2-tour>

@@ -13,6 +13,7 @@
 // also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
+import type { DateFields } from '@c2n/date-input/date-fields.js'
 import type { DateInput } from '@c2n/date-input'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,6 +24,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-date-fields': C2Props<DateFields> & {
+        readonly?: Attribute
+        'error-text'?: Attribute
+        'aria-label'?: Attribute
+      }
       'c2-date-input': C2Props<DateInput> & {
         readonly?: Attribute
         'error-text'?: Attribute

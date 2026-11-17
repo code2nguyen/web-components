@@ -1,6 +1,6 @@
 ---
 title: 'Selection Toolbar'
-description: 'A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in.'
+description: 'A toolbar that appears over the text a reader selects: Ask AI, Comment, Bold, or any action the app slots in, and an inline prompt at the same spot.'
 category: 'Editors & viewers'
 ---
 
@@ -9,6 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { SelectionToolbar } from '@c2n/components/selection-toolbar'
 import { Button } from '@c2n/components/button'
+import { TextField } from '@c2n/components/text-field'
 
 `c2-selection-toolbar` wraps content and shows a small toolbar over any text selected in it, like the selection bubbles of Notion and Medium, the "Add comment" button of Google Docs, or "Ask ChatGPT" on a selection. The app slots in the controls; the toolbar positions them, keeps the selection while they are pressed, and makes them reachable from the keyboard.
 
@@ -40,6 +41,13 @@ import '@c2n/components/selection-toolbar'
     <c2-button slot="toolbar" class="selection-demo-button" data-action="comment">Comment</c2-button>
   </c2-selection-toolbar>
 </div>
+<div data-label="Inline prompt">
+  <c2-selection-toolbar class="selection-demo">
+    <p>Select a few words, then press Ask AI: the toolbar turns into a field at the same spot, and the selection waits while you type.</p>
+    <c2-button slot="toolbar" class="selection-demo-button" data-prompt>Ask AI</c2-button>
+    <c2-text-field slot="prompt" aria-label="Instruction" placeholder="Ask AI to edit or explain…"></c2-text-field>
+  </c2-selection-toolbar>
+</div>
 ```
 
 ### When it shows
@@ -61,6 +69,27 @@ toolbar.addEventListener('selection-action', (event) => {
 ### Keyboard
 
 The toolbar never takes focus on its own. When it appears, a screen reader hears "Actions available, press Alt+F10". Alt+F10 moves focus into the toolbar, the convention of TinyMCE, CKEditor and Google Docs. The arrow keys move between its controls, Home and End go to the ends, and Escape returns focus to where it was.
+
+### Inline prompt
+
+`prompting` turns the toolbar into a prompt anchored where it stands, like Notion AI or "Help me write": the `prompt` slot (a field, quick actions) and the `result` slot (the answer, then Replace, Insert below, Retry, Discard) replace the toolbar's controls. A control with `data-prompt` sets it from markup. Focus moves to the first field, and the selection stays frozen while the reader types: `selection` still holds its text and range, and every `data-action` control in the prompt fires `selection-action` with that text. With no selection, `prompting = true` anchors to the caret in the content, so an editor can open it from a shortcut, or to the content itself.
+
+The prompt is a non-modal dialog: Tab moves between its controls, and the arrow keys stay with its field.
+
+The application owns the model and the answer: it streams into an element it puts in the `result` slot (a `c2-streaming-text`), which shows once it is there, and applies the answer through `selection.range`. Escape closes the prompt and returns focus; `toggle` with `open: false` is the moment to abort the request. The prompt stays open, at its first anchor, while the reader clicks or selects elsewhere, so a streaming answer is never lost; close it from Discard with `prompting = false`.
+
+```js tag=CodeBlock
+toolbar.addEventListener('selection-action', ({ detail }) => {
+  const range = toolbar.selection?.range
+  if (detail.action === 'replace' && range) {
+    range.deleteContents()
+    range.insertNode(document.createTextNode(answer.value))
+    toolbar.prompting = false
+  }
+})
+```
+
+The Gallery has a live version with a streaming answer, and one at the caret.
 
 ### Limits
 

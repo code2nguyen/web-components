@@ -445,6 +445,10 @@
       "types": "./dist/date-input.d.ts",
       "default": "./dist/date-input.js"
     },
+    "./date-input/date-fields": {
+      "types": "./dist/date-input/date-fields.d.ts",
+      "default": "./dist/date-input/date-fields.js"
+    },
     "./date-selector": {
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"
@@ -592,6 +596,10 @@
     "./highlight/find-bar": {
       "types": "./dist/highlight/find-bar.d.ts",
       "default": "./dist/highlight/find-bar.js"
+    },
+    "./highlight/text-annotator": {
+      "types": "./dist/highlight/text-annotator.d.ts",
+      "default": "./dist/highlight/text-annotator.js"
     },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
@@ -976,6 +984,10 @@
     "./secret-field": {
       "types": "./dist/secret-field.d.ts",
       "default": "./dist/secret-field.js"
+    },
+    "./secret-field/totp-code": {
+      "types": "./dist/secret-field/totp-code.d.ts",
+      "default": "./dist/secret-field/totp-code.js"
     },
     "./select": {
       "types": "./dist/select.d.ts",

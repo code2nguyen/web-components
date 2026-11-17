@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Date Input</title>
     <script type="module" src="/src/date-input.ts"></script>
+    <script type="module" src="/src/date-fields.ts"></script>
     <style>
       body {
         padding: 24px;
@@ -28,6 +29,9 @@
       <c2-date-input aria-label="Disabled date" value="2026-09-15" disabled></c2-date-input>
       <c2-date-input id="from-two-days-ago" aria-label="From two days ago" help="Two days ago or later (d-2)."></c2-date-input>
       <c2-date-input id="past-only" aria-label="Past dates only" help="Yesterday or earlier (d-1)."></c2-date-input>
+      <c2-date-fields aria-label="Date of birth" lang="en-GB" autocomplete="bday" help="For example, 27 3 2007"></c2-date-fields>
+      <c2-date-fields aria-label="Passport issued" order="ymd" value="2019-06-14" min="2010-01-01"></c2-date-fields>
+      <c2-date-fields aria-label="Start date" value="2026-02-30" error></c2-date-fields>
     </main>
     <script type="module">
       // Local-calendar YYYY-MM-DD for today + offset days (toISOString() is UTC and can be off by one).
