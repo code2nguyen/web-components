@@ -22,7 +22,7 @@ interface Props {
   /** Render the mobile "open navigation" button (docs pages). */
   withSidebar?: boolean
   /** Which top-level nav item is active. */
-  section?: 'overview' | 'getting-started' | 'components' | 'icons' | 'guides' | 'examples' | 'blogs'
+  section?: 'overview' | 'getting-started' | 'components' | 'icons' | 'guides' | 'examples' | 'blogs' | 'lab'
 }
 const {
   title,
@@ -40,6 +40,7 @@ const mobileNavItems = [
   { value: 'guides', label: 'Guides', href: `${base}/guides/`, current: section === 'guides' },
   { value: 'examples', label: 'Examples', href: `${base}/examples/`, current: section === 'examples' },
   { value: 'blogs', label: 'Blogs', href: `${base}/blogs/`, current: section === 'blogs' },
+  { value: 'lab', label: 'Component lab', href: `${base}/lab/`, current: section === 'lab' },
 ]
   .map(({ value, label, href, current }) => rawElement('c2-navigation-menu-item', { value, href, current }, label))
   .join('')
