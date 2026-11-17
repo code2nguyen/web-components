@@ -41,6 +41,12 @@ const examples: Record<string, string> = {
     <c2-attachment name="budget.xlsx" type="Spreadsheet"></c2-attachment>
     <c2-attachment preview name="report.pdf" type="PDF" href="./sample.pdf"></c2-attachment>
   </c2-attachment-group>`,
+  'preview-order': `<c2-attachment-group>
+    <c2-attachment name="a.txt" href="./sample.txt"></c2-attachment>
+    <c2-attachment preview name="b.txt" href="./sample.txt"></c2-attachment>
+    <c2-attachment preview disabled name="c.txt" href="./sample.txt"></c2-attachment>
+    <c2-attachment preview name="d.txt" href="./sample.txt"></c2-attachment>
+  </c2-attachment-group>`,
   'preview-disabled': '<c2-attachment preview disabled name="notes.txt" href="./sample.txt"></c2-attachment>',
   'fp-image': `<c2-file-preview style="width:480px;--c2-file-preview--height:360px" items='${JSON.stringify([
     { name: 'cover.svg', src: image, type: 'image/svg+xml', size: '2 KB' },
@@ -60,6 +66,7 @@ const examples: Record<string, string> = {
     { name: 'b.txt', text: 'deux' },
   ])}'></c2-file-preview></div>`,
   'fp-render': '<c2-file-preview name="report.pdf" src="./sample.pdf"></c2-file-preview>',
+  'fp-edge': '<c2-file-preview><input slot="actions" aria-label="Rename" /></c2-file-preview>',
   'fp-modal': `<c2-file-preview modal name="notes.txt" src="./sample.txt"></c2-file-preview>`,
 }
 
@@ -72,6 +79,9 @@ if (preview && scenario === 'fp-text-file') {
 }
 if (preview && scenario === 'fp-pdf-file') {
   preview.items = [{ name: 'upload.pdf', file: new File([await (await fetch('./sample.pdf')).blob()], 'upload.pdf') }]
+}
+if (preview && scenario === 'fp-edge') {
+  preview.items = [{ name: 'notes', text: 'hello' }, { name: 'build.constructor' }, { name: '', file: new Blob(['<p>page</p>'], { type: 'text/html' }) }]
 }
 if (preview && scenario === 'fp-render') {
   preview.renderViewer = ({ kind, item }) => (kind === 'pdf' ? Object.assign(document.createElement('p'), { textContent: `Custom ${item.name}` }) : undefined)

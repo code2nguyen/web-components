@@ -54,8 +54,9 @@ export interface FilePreview {
   removeEventListener: TypedRemoveEventListener<FilePreview, FilePreviewEventMap>
 }
 
-const KINDS: Record<string, FilePreviewKind> = {}
-const kindsOf = (kind: FilePreviewKind, words: string) => words.split(' ').forEach((word) => (KINDS[word] = kind))
+// A Map, not an object: a name like `x.constructor` must not find `Object.prototype`.
+const KINDS = new Map<string, FilePreviewKind>()
+const kindsOf = (kind: FilePreviewKind, words: string) => words.split(' ').forEach((word) => KINDS.set(word, kind))
 kindsOf('image', 'image png jpg jpeg gif webp avif svg bmp ico')
 kindsOf('video', 'video mp4 m4v mov webm ogv')
 kindsOf('audio', 'audio mp3 wav oga ogg m4a flac aac opus weba')
@@ -79,14 +80,15 @@ function mimeKind(mime: string | undefined): FilePreviewKind | undefined {
   return undefined
 }
 
-/** How `c2-file-preview` shows an item: from its MIME type, then its type word, then the extension of its name or URL. */
+/** How `c2-file-preview` shows an item: text when it has `text`, else from its MIME type, its type word, then the extension of its name or URL. */
 export function filePreviewKind(item: FilePreviewItem): FilePreviewKind {
+  if (item.text !== undefined) return 'text'
   return (
     mimeKind(item.type) ??
     mimeKind(item.file?.type) ??
-    KINDS[item.type?.toLowerCase().trim() ?? ''] ??
-    KINDS[extension(item.name) ?? ''] ??
-    KINDS[extension(item.src) ?? ''] ??
+    KINDS.get(item.type?.toLowerCase().trim() ?? '') ??
+    KINDS.get(extension(item.name) ?? '') ??
+    KINDS.get(extension(item.src) ?? '') ??
     'file'
   )
 }
@@ -278,6 +280,11 @@ export class FilePreview extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>) {
+    // Drawn inline again while open: the dialog goes without a `close`, so hand the page its scroll back here.
+    if (changed.has('modal') && !this.modal && this.releaseScroll) {
+      this.releaseScroll()
+      this.releaseScroll = undefined
+    }
     if (changed.has('items') || changed.has('src') || changed.has('name') || changed.has('type') || changed.has('size')) {
       this.files =
         Array.isArray(this.items) && this.items.length
@@ -368,7 +375,10 @@ export class FilePreview extends LitElement {
     if (item.file) {
       let url = this.urls.get(item.file)
       if (!url) {
-        url = URL.createObjectURL(kind === 'pdf' ? new Blob([item.file], { type: 'application/pdf' }) : item.file)
+        // A PDF is retyped so the browser can only show it as one; a file no viewer draws (text, anything else) is
+        // only ever downloaded, as bytes, so its link cannot open as a page of this origin.
+        const type = kind === 'pdf' ? 'application/pdf' : kind === 'text' || kind === 'file' ? 'application/octet-stream' : undefined
+        url = URL.createObjectURL(type ? new Blob([item.file], { type }) : item.file)
         this.urls.set(item.file, url)
       }
       return url
@@ -413,18 +423,20 @@ export class FilePreview extends LitElement {
 
   private readonly handleKeydown = (event: KeyboardEvent) => {
     if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
-    const target = event.composedPath()[0] as Element
-    // Media controls, the text and a zoomed image use the arrow keys themselves.
-    const owned = target.closest?.('video, audio, iframe, pre') || (this.zoom > 1 && target.closest?.('.stage'))
-    const kind = this.current ? filePreviewKind(this.current) : 'file'
+    const target = event.composedPath()[0] as HTMLElement
+    // A field (in the actions slot, in a custom viewer) keeps every key.
+    if (target.isContentEditable || target.closest?.('input, textarea, select')) return
+    // The viewer's content (media controls, the text, a zoomed image, a custom viewer) uses the arrow keys itself.
+    const owned = target.closest?.('.viewer') && !target.closest('.nav') && !(this.zoom === 1 && target.classList.contains('stage'))
+    const zoomable = !!this.current && filePreviewKind(this.current) === 'image' && !this.renderViewer
     const rtl = this.matches(':dir(rtl)')
     if (!owned && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
       this.go((event.key === 'ArrowRight') !== rtl ? 1 : -1)
-    } else if (kind === 'image' && (event.key === '+' || event.key === '=')) {
+    } else if (zoomable && (event.key === '+' || event.key === '=')) {
       this.zoomIn()
-    } else if (kind === 'image' && event.key === '-') {
+    } else if (zoomable && event.key === '-') {
       this.zoomOut()
-    } else if (kind === 'image' && event.key === '0') {
+    } else if (zoomable && event.key === '0') {
       this.resetZoom()
     } else {
       return
@@ -454,6 +466,8 @@ export class FilePreview extends LitElement {
   private readonly handleDialogClose = () => {
     this.releaseScroll?.()
     this.releaseScroll = undefined
+    // The dialog only hides: a playing video must not go on behind it.
+    for (const media of this.renderRoot.querySelectorAll<HTMLMediaElement>('video, audio')) media.pause()
     this.dispatchEvent(new Event('close'))
   }
 
@@ -519,7 +533,7 @@ export class FilePreview extends LitElement {
     return html`<a
       class=${labelled ? 'download labelled' : 'download'}
       href=${href}
-      download=${item.name || nothing}
+      download=${item.name}
       target="_blank"
       rel="noopener noreferrer"
       aria-label=${labelled ? nothing : label}

@@ -67,6 +67,22 @@ test.describe('c2-attachment preview', () => {
     expect(await viewerDefined(page)).toBe(false)
   })
 
+  test('openPreview() keeps document order, skips disabled files and opens once', async ({ page, scenario }) => {
+    await scenario('preview-order')
+    const first = page.locator('c2-attachment').first()
+    await watch(first, 'attachment-preview')
+    await first.evaluate((element: HTMLElement & { openPreview(): Promise<void> }) => {
+      void element.openPreview()
+      void element.openPreview()
+    })
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.locator('.counter')).toHaveText('1 of 3')
+    await expect(first).toHaveAttribute('data-events', '[{"name":"a.txt"}]')
+    await pointerClick(dialog.getByRole('button', { name: 'Next file' }))
+    await pointerClick(dialog.getByRole('button', { name: 'Next file' }))
+    await expect(dialog.locator('.title')).toHaveText('d.txt')
+  })
+
   test('a disabled attachment cannot open its preview', async ({ page, scenario }) => {
     await scenario('preview-disabled')
     await expect(page.getByRole('button', { name: 'notes.txt', exact: true })).toBeDisabled()
@@ -210,6 +226,29 @@ test.describe('c2-file-preview', () => {
     const preview = page.locator('c2-file-preview')
     await expect(preview.getByText('Custom report.pdf')).toBeVisible()
     await expect(preview.locator('iframe')).toHaveCount(0)
+  })
+
+  test('text implies the text viewer, names never reach Object.prototype, fields keep their keys', async ({ page, scenario }) => {
+    await scenario('fp-edge')
+    const preview = page.locator('c2-file-preview')
+    await expect(preview.locator('pre')).toHaveText('hello')
+    const field = page.getByRole('textbox', { name: 'Rename' })
+    await field.focus()
+    await page.keyboard.type('a-0')
+    await page.keyboard.press('ArrowRight')
+    await expect(field).toHaveValue('a-0')
+    await expect(preview.locator('.title')).toHaveText('notes')
+
+    await pointerClick(preview.getByRole('button', { name: 'Next file' }))
+    await expect(preview.getByText('No preview is available for this file.')).toBeVisible()
+    await expect(preview.locator('.metadata')).toHaveText('File · 2 of 3')
+
+    // A nameless HTML file is only ever downloaded, as bytes.
+    await pointerClick(preview.getByRole('button', { name: 'Next file' }))
+    const link = preview.locator('a.download').first()
+    await expect(link).toHaveAttribute('download', '')
+    const type = await link.evaluate(async (anchor: HTMLAnchorElement) => (await (await fetch(anchor.href)).blob()).type)
+    expect(type).toBe('application/octet-stream')
   })
 
   test('opens as a dialog of its own', async ({ page, scenario }) => {

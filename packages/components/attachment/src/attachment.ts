@@ -152,6 +152,7 @@ export class Attachment extends LitElement {
   @state() private imageFailed = false
   @state() private previewItems: FilePreviewItem[] | undefined = undefined
   private previewIndex = 0
+  private previewPending = false
 
   /** What the preview shows for this attachment. */
   private get previewItem(): FilePreviewItem {
@@ -160,12 +161,21 @@ export class Attachment extends LitElement {
 
   /** Opens the preview, with the previewable attachments of the same group as its set. */
   async openPreview() {
-    if (this.disabled || this.previewItems) return
-    const group = this.closest('c2-attachment-group')
-    const set = group ? [...group.querySelectorAll('c2-attachment')].filter((item) => item.preview && item.closest('c2-attachment-group') === group) : [this]
-    if (!set.includes(this)) set.push(this)
+    if (this.disabled || this.previewItems || this.previewPending) return
     if (!this.dispatchEvent(new CustomEvent('attachment-preview', { detail: { name: this.name }, bubbles: true, composed: true, cancelable: true }))) return
-    await import('./file-preview.js')
+    const group = this.closest('c2-attachment-group')
+    // In document order: this attachment, and the group's other enabled ones that have `preview`.
+    const set = group
+      ? [...group.querySelectorAll('c2-attachment')].filter(
+          (item) => item === this || (item.preview && !item.disabled && item.closest('c2-attachment-group') === group),
+        )
+      : [this]
+    this.previewPending = true
+    try {
+      await import('./file-preview.js')
+    } finally {
+      this.previewPending = false
+    }
     this.previewIndex = set.indexOf(this)
     this.previewItems = set.map((item) => item.previewItem)
     await this.updateComplete
