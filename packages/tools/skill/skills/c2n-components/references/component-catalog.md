@@ -227,6 +227,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
 - **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.
+- **TOTP Code** — `c2-totp-code` · `@c2n/components/secret-field/totp-code` — The rotating one-time code of an authenticator app, computed in the browser from a TOTP secret, with a countdown ring, show and copy.
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Unit Input** — `c2-unit-input` · `@c2n/components/number-input/unit-input` — A quantity with its unit of measure: a number field with a unit picker that converts the number on a pick and shows the equivalent in the base unit.
 - **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
