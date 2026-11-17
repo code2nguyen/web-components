@@ -1,0 +1,126 @@
+{
+  "name": "support-inbox-vue",
+  "title": "Support Inbox (Vue 3): a help-desk inbox in the style of Zendesk, Front or Help Scout.",
+  "app": "apps/examples/support-inbox-vue",
+  "url": "http://127.0.0.1:4176/web-components/demo/support-inbox-vue/",
+  "server": { "command": "npm run dev -- --host 127.0.0.1 --port 4176 --strictPort", "cwd": "apps/examples/support-inbox-vue" },
+  "components": [
+    "c2-avatar",
+    "c2-badge",
+    "c2-button",
+    "c2-chat-message",
+    "c2-description-list",
+    "c2-form",
+    "c2-form-field",
+    "c2-format-date",
+    "c2-highlight",
+    "c2-icon-button",
+    "c2-indicator",
+    "c2-list",
+    "c2-list-item",
+    "c2-markdown",
+    "c2-relative-time",
+    "c2-select",
+    "c2-sheet",
+    "c2-text-field",
+    "c2-textarea",
+    "c2-toast",
+    "c2-tooltip"
+  ],
+  "journeys": [
+    {
+      "id": "search",
+      "title": "Find a customer by name, typed without the accent, then clear the search",
+      "steps": [
+        { "goto": "./" },
+        { "fill": { "role": "searchbox", "name": "Search conversations" }, "text": "bergstrom" },
+        { "expect": { "text": { "css": "header p" }, "contains": "1 of 6 conversations" } },
+        { "expect": { "visible": { "text": "Webhook signatures fail after key rotation" } } },
+        { "fill": { "role": "searchbox", "name": "Search conversations" }, "text": "" },
+        { "expect": { "text": { "css": "header p" }, "contains": "6 of 6 conversations" } }
+      ]
+    },
+    {
+      "id": "filter",
+      "title": "Show only closed conversations with the status filter",
+      "steps": [
+        { "goto": "./" },
+        { "click": { "role": "button", "name": "Filter by status" } },
+        { "click": { "ax": "option", "name": "Closed", "exact": true } },
+        { "expect": { "text": { "css": "header p" }, "contains": "1 of 6 conversations" } },
+        { "expect": { "text": { "role": "button", "name": "Filter by status" }, "contains": "Closed" } }
+      ]
+    },
+    {
+      "id": "open-conversation",
+      "title": "Open another conversation from the list and read it",
+      "steps": [
+        { "goto": "./" },
+        { "click": { "ax": "option", "name": "Export API returns 429 under load" } },
+        { "expect": { "visible": { "role": "heading", "name": "Export API returns 429 under load" } } },
+        { "expect": { "text": { "css": "header p" }, "contains": "5 unread" } },
+        { "expect": { "visible": { "ax": "option", "name": "Export API returns 429 under load" } } }
+      ]
+    },
+    {
+      "id": "reply",
+      "title": "Write a reply and send it with the button",
+      "steps": [
+        { "goto": "./" },
+        { "fill": { "role": "textbox", "name": "Reply" }, "text": "We have reset your session, please try again." },
+        { "click": { "role": "button", "name": "Send reply" } },
+        { "expect": { "visible": { "text": "We have reset your session, please try again." } } },
+        { "expect": { "visible": { "text": "Reply sent." } } },
+        { "expect": { "value": { "role": "textbox", "name": "Reply" }, "equals": "" } }
+      ]
+    },
+    {
+      "id": "blank-reply",
+      "title": "Try to send a reply made of spaces and get told why it was refused",
+      "steps": [
+        { "goto": "./" },
+        { "fill": { "role": "textbox", "name": "Reply" }, "text": "   " },
+        { "click": { "role": "button", "name": "Send reply" } },
+        { "expect": { "visible": { "text": "Write a reply before sending.", "exact": true } } },
+        { "expect": { "focused": { "role": "textbox", "name": "Reply" } } }
+      ]
+    },
+    {
+      "id": "customer-details",
+      "title": "Open the customer drawer, read the plan, close it with Escape",
+      "steps": [
+        { "goto": "./" },
+        { "click": { "role": "button", "name": "Customer details" } },
+        { "expect": { "visible": { "ax": "dialog", "name": "" } } },
+        { "expect": { "visible": { "text": "Enterprise", "within": { "css": "c2-sheet" } } } },
+        { "snapshot": "drawer-open" },
+        { "press": "Escape" },
+        { "expect": { "hidden": { "ax": "dialog", "name": "" } } },
+        { "expect": { "focused": { "role": "button", "name": "Customer details" } } }
+      ]
+    },
+    {
+      "id": "archive-undo",
+      "title": "Archive the open conversation, then undo it from the toast",
+      "steps": [
+        { "goto": "./" },
+        { "click": { "role": "button", "name": "Archive conversation" } },
+        { "expect": { "text": { "css": "header p" }, "contains": "5 of 5 conversations" } },
+        { "expect": { "visible": { "text": "C-4821 archived." } } },
+        { "click": { "role": "button", "name": "Undo" } },
+        { "expect": { "text": { "css": "header p" }, "contains": "6 of 6 conversations" } },
+        { "expect": { "visible": { "role": "heading", "name": "SSO login loops back to the sign-in page" } } }
+      ]
+    },
+    {
+      "id": "resolve",
+      "title": "Resolve the open conversation",
+      "steps": [
+        { "goto": "./" },
+        { "click": { "role": "button", "name": "Resolve" } },
+        { "expect": { "visible": { "text": "Conversation closed." } } },
+        { "expect": { "visible": { "text": "Closed", "within": { "css": ".thread__head" } } } }
+      ]
+    }
+  ]
+}

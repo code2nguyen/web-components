@@ -11,6 +11,7 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { FindBar } from '@c2n/highlight/find-bar.js'
 import type { Highlight } from '@c2n/highlight'
+import type { TextAnnotator } from '@c2n/highlight/text-annotator.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -36,6 +37,17 @@ declare module 'vue' {
         'whole-word'?: unknown
         'active-index'?: unknown
         onMatchChange?: (event: EventOf<Highlight, 'match-change'>) => void
+      }
+    >
+    'c2-text-annotator': DefineComponent<
+      C2Props<TextAnnotator> & {
+        readonly?: unknown
+        'match-case'?: unknown
+        'ignore-accents'?: unknown
+        'whole-word'?: unknown
+        'active-index'?: unknown
+        onRangesChange?: (event: EventOf<TextAnnotator, 'ranges-change'>) => void
+        onMatchChange?: (event: EventOf<TextAnnotator, 'match-change'>) => void
       }
     >
   }

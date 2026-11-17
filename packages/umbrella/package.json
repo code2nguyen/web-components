@@ -601,6 +601,10 @@
       "types": "./dist/highlight/find-bar.d.ts",
       "default": "./dist/highlight/find-bar.js"
     },
+    "./highlight/text-annotator": {
+      "types": "./dist/highlight/text-annotator.d.ts",
+      "default": "./dist/highlight/text-annotator.js"
+    },
     "./hover-card": {
       "types": "./dist/hover-card.d.ts",
       "default": "./dist/hover-card.js"

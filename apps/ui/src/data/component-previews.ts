@@ -614,6 +614,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
 </div>`,
   terminal: `<c2-terminal heading="acme-cli" style="width:300px;--c2-terminal--font-size:12px;--c2-terminal--line-height:18px"><span slot="banner">Acme CLI 4.2.0
 Type help for commands.</span></c2-terminal>`,
+  'text-annotator': `<p style="margin:0;max-width:250px;font-size:13px;line-height:1.9;color:var(--c2-theme--color-on-surface, #18181b)"><c2-text-annotator readonly labels='[{"value":"person","label":"Person"},{"value":"place","label":"Place"},{"value":"thing","label":"Thing"}]' ranges='[{"start":0,"end":12,"label":"person"},{"start":25,"end":40,"label":"person"},{"start":44,"end":50,"label":"place"},{"start":58,"end":75,"label":"thing"}]'>Ada Lovelace worked with Charles Babbage in London on the Analytical Engine.</c2-text-annotator></p>`,
   'text-effect': `<span style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Build <c2-text-effect effect="rotate" words="faster;safer;together" style="--c2-text-effect__text--color:var(--c2-theme--color-primary, #2563eb)"></c2-text-effect></span>`,
   'text-field': `<c2-text-field placeholder="Your email" help="We never share it." style="width:220px"></c2-text-field>`,
   textarea: `<c2-textarea label="Message" placeholder="Write a message…" rows="2" style="width:220px"></c2-textarea>`,
