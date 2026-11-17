@@ -301,6 +301,44 @@ test('re-bins when the bin attributes change', async ({ page }) => {
   await expect.poll(async () => (await runs(chart, 'blue')).length).toBe(4)
 })
 
+test('re-bins data mutated in place once revision is bumped', async ({ page }) => {
+  const chart = await open(page, 'long')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate((element) => {
+    const histogram = element as HistogramElement & { revision: number }
+    ;(histogram.data as { ms: number }[]).push({ ms: 205 })
+    histogram.revision += 1
+  })
+  await expect
+    .poll(() => chart.evaluate((element) => (element as HistogramElement).bins.map((bin) => [bin.from, bin.counts[0]])))
+    .toEqual([
+      [60, 1],
+      [80, 1],
+      [100, 1],
+      [120, 1],
+      [140, 1],
+      [160, 0],
+      [180, 0],
+      [200, 1],
+    ])
+})
+
+test('keeps every bin one width wide and names fine edges with their decimals', async ({ page }) => {
+  const chart = await open(page, 'long')
+  await expect(chart).toHaveState('ready')
+  const edges = await page.evaluate(() => window.histogramScenario.bins.binHistogram([[10, 950]], { start: 0, end: 1000, width: 300 }).edges)
+  // An end between two edges is rounded up, so the last bar is as wide as the others.
+  expect(edges).toEqual([0, 300, 600, 900, 1200])
+
+  await chart.evaluate((element) => {
+    const histogram = element as HistogramElement
+    histogram.binWidth = 0.025
+    histogram.data = [{ ms: 0.01 }, { ms: 0.03 }, { ms: 0.04 }, { ms: 0.12 }]
+  })
+  const table = chart.locator('.a11y-table')
+  await expect(table.locator('tbody th').nth(1)).toHaveText('0.025 to 0.05')
+})
+
 test('a data source supplies the samples and each pushed point adds one', async ({ page }) => {
   const chart = await open(page, 'source')
   await expect(chart).toHaveState('ready')

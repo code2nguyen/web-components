@@ -47,8 +47,8 @@ interface CachedModel {
   revision: number
   key: string
   model: HistogramModel
-  /** Each bin's centre: the x of its bar. */
-  centres: number[]
+  /** Each bin's position by its centre, the x of its bar. */
+  index: Map<number, number>
   frame: ChartFrame | undefined
 }
 
@@ -93,12 +93,12 @@ export class HistogramChart extends BarChart {
   /** Where the first bin starts; samples below it are left out. Defaults to the smallest sample, rounded down. */
   @property({ type: Number, attribute: 'bin-start' }) binStart?: number
 
-  /** Where the last bin ends; samples above it are left out. Defaults to the largest sample, rounded up. */
+  /** Where the last bin ends, rounded up to a whole bin; samples above it are left out. Defaults to the largest sample, rounded up. */
   @property({ type: Number, attribute: 'bin-end' }) binEnd?: number
 
   /**
-   * A line over the bars, per series: `density`, a kernel density estimate in counts (not drawn under
-   * `stack="percent"`), or `cumulative`, the share of samples up to each bin edge on a 0–100% axis.
+   * A line over the bars, per series: `density`, a kernel density estimate in counts (not drawn on stacked bars), or
+   * `cumulative`, the share of samples up to each bin edge on a 0–100% axis.
    */
   @property({ type: String }) overlay: HistogramOverlay = 'none'
 
@@ -159,10 +159,17 @@ export class HistogramChart extends BarChart {
     super.willUpdate(changed)
     if (!this.#overlay && (this.overlay === 'density' || this.overlay === 'cumulative' || this.#marks().length)) {
       overlayModule ??= import('./histogram-overlay.js')
-      void overlayModule.then((module) => {
-        this.#overlay = module
-        this.adapter?.redraw?.()
-      })
+      overlayModule.then(
+        (module) => {
+          this.#overlay = module
+          this.adapter?.redraw?.()
+        },
+        (error: unknown) => {
+          // A chunk that failed to load is asked for again by the next update, not cached as a failure.
+          overlayModule = undefined
+          this.dispatchEvent(new CustomEvent('chart-error', { detail: { error } }))
+        },
+      )
     }
   }
 
@@ -186,7 +193,7 @@ export class HistogramChart extends BarChart {
       const values = this.#marks()
         .map((p) => [p, histogramPercentile(model, index, p)])
         .filter(([, value]) => Number.isFinite(value))
-        .map(([p, value]) => this.msg.t('percentileValue', this.msg.t('percentile', this.formatValue(p)), this.formatValue(value)))
+        .map(([p, value]) => this.msg.t('percentileValue', this.msg.t('percentile', this.formatValue(p)), this.#formatEdge(value)))
       if (values.length) summary = this.msg.t('summaryPercentiles', summary, name(item), values.join(', '))
     })
     return summary
@@ -199,9 +206,9 @@ export class HistogramChart extends BarChart {
 
   /** A bar's x is its bin's centre, named by the bin's range. */
   protected override formatX(value: number): string {
-    const { model, centres } = this.#computeModel()
-    const bin = model.bins[centres.indexOf(value)]
-    return bin ? this.msg.t('range', this.formatValue(bin.from), this.formatValue(bin.to)) : super.formatX(value)
+    const { model, index } = this.#computeModel()
+    const bin = model.bins[index.get(value) ?? -1]
+    return bin ? this.msg.t('range', this.#formatEdge(bin.from), this.#formatEdge(bin.to)) : super.formatX(value)
   }
 
   protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): HistogramTooltipContext {
@@ -221,6 +228,11 @@ export class HistogramChart extends BarChart {
     return width > 0 ? { ...style, stroke: context.theme.surface, width } : style
   }
 
+  /** The highlighted series keeps its gap: a heavier stroke would be a wider gap, thinning its bars. */
+  protected override highlightStyle(style: UplotSeriesStyle, index: number, context: ChartBuildContext): UplotSeriesStyle {
+    return index === context.highlighted ? {} : super.highlightStyle(style, index, context)
+  }
+
   protected override decorateOptions(options: Options, context: ChartBuildContext): Options {
     const decorated = super.decorateOptions(options, context)
     const horizontal = this.orientation === 'horizontal'
@@ -236,7 +248,13 @@ export class HistogramChart extends BarChart {
       },
       ...(horizontal ? { dir: 1 as const } : {}),
     }
-    if (axes[0]) axes[0] = { ...axes[0], splits: (self: uPlot) => this.#edgeSplits(self, context) }
+    if (axes[0]) {
+      axes[0] = {
+        ...axes[0],
+        splits: (self: uPlot) => this.#edgeSplits(self, context),
+        values: (_self: uPlot, splits: number[]) => splits.map((value) => this.#formatEdge(value)),
+      }
+    }
     if (axes[1] && this.stack !== 'percent') axes[1] = { ...axes[1], incrs: COUNT_INCREMENTS }
     if (this.overlay === 'cumulative' && axes[1]) {
       scales[CUMULATIVE_SCALE] = { range: () => [0, 100], ...(horizontal ? { ori: 0 as const } : {}) }
@@ -272,7 +290,8 @@ export class HistogramChart extends BarChart {
   #computeModel(): CachedModel {
     this.#syncPushed()
     const series = this.resolvedSeries
-    const key = JSON.stringify([series.map((item) => item.field), this.binCount, this.binWidth, this.binStart, this.binEnd])
+    // `revision` too: data mutated in place and announced by bumping it is the same array.
+    const key = JSON.stringify([series.map((item) => item.field), this.binCount, this.binWidth, this.binStart, this.binEnd, this.revision])
     const cached = this.#model
     if (cached && cached.data === this.data && cached.revision === this.sampleRevision && cached.key === key) return cached
 
@@ -298,8 +317,15 @@ export class HistogramChart extends BarChart {
             capacity: length,
             revision: this.sampleRevision,
           }
-    this.#model = { data, revision: this.sampleRevision, key, model, centres, frame }
+    this.#model = { data, revision: this.sampleRevision, key, model, index: new Map(centres.map((centre, at) => [centre, at])), frame }
     return this.#model
+  }
+
+  /** A bin edge or a percentile, with as many decimals as the bin width needs (an edge at 0.025 is not "0.03"). */
+  #formatEdge(value: number): string {
+    const step = this.#computeModel().model.step
+    const digits = step > 0 ? Math.min(20, Math.max(2, Math.ceil(-Math.log10(step)) + 1)) : 2
+    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: digits }).format(value)
   }
 
   #marks(): number[] {
@@ -321,7 +347,7 @@ export class HistogramChart extends BarChart {
     const { theme, series } = context
     const several = series.length > 1
     return {
-      density: this.overlay === 'density' && this.stack !== 'percent',
+      density: this.overlay === 'density' && this.stack === 'none',
       cumulative: this.overlay === 'cumulative',
       marks: this.#marks(),
       horizontal: this.orientation === 'horizontal',
@@ -349,7 +375,7 @@ export class HistogramChart extends BarChart {
       const ctx = self.ctx
       ctx.save()
       ctx.font = this.#font(context, context.theme.axisFontSize)
-      need = Math.max(...edges.map((edge) => ctx.measureText(this.formatValue(edge)).width / devicePixelRatio)) + 8
+      need = Math.max(...edges.map((edge) => ctx.measureText(this.#formatEdge(edge)).width / devicePixelRatio)) + 8
       ctx.restore()
     }
     const every = spacing > 0 ? Math.ceil(need / spacing) : 1

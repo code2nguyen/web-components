@@ -8,7 +8,7 @@ export interface HistogramBinOptions {
   width?: number
   /** Where the first bin starts; samples below it are left out. */
   start?: number
-  /** Where the last bin ends; samples above it are left out. */
+  /** Where the last bin ends, rounded up to a whole bin; samples above it are left out. */
   end?: number
 }
 
@@ -74,7 +74,7 @@ export function binHistogram(series: readonly (readonly number[])[], options: Hi
   let count = Math.max(1, Math.ceil(tidy((high - start) / step)))
   if (!hasEnd && tidy(start + count * step) < max) count += 1
   const edges = Array.from({ length: count + 1 }, (_, index) => tidy(start + index * step))
-  if (hasEnd) edges[count] = high
+  // Every bin is one step wide, so an end between two edges is rounded up to the next one.
   const end = edges[count]
 
   const bins = edges.slice(1).map((to, index) => ({ from: edges[index], to, counts: sorted.map(() => 0) }))

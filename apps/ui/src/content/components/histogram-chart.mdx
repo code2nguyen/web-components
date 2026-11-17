@@ -88,7 +88,8 @@ nice width: 1, 2, 2.5 or 5 times a power of ten, so the edges land on round numb
 - `bin-width`: the width of every bin, in the samples' unit.
 - `bin-count`: roughly how many bins, still on a nice width. `bin-width` wins when both are set.
 - `bin-start` and `bin-end`: the range the bins cover. Samples outside it are left out of the counts; without them the
-  range runs from the smallest sample, rounded down, to the largest, rounded up. The last bin includes its upper edge.
+  range runs from the smallest sample, rounded down, to the largest, rounded up. Every bin has the same width, so a
+  `bin-end` between two edges is rounded up to the next one. The last bin includes its upper edge.
 
 The axis ticks sit on the bin edges, only every n-th one when the labels would otherwise collide. Bars touch;
 `--c2-chart__bin--gap` is the thin line between them, drawn in the chart's surface colour (`0` joins them).
@@ -109,8 +110,8 @@ strokes.
 ### Several series and layout
 
 Every series is binned on the same edges, so their bars line up: side by side in each bin by default, or one on top
-of the other with `stack="normal"` (`stack="percent"` shows each bin's split between the series, and leaves the
-density curve out). The legend appears with a second series. `orientation="horizontal"` lays the bins up the left edge,
+of the other with `stack="normal"` (`stack="percent"` shows each bin's split between the series). The density curve
+is drawn on side-by-side bars only, since a series' curve would not follow its segment of a stack. The legend appears with a second series. `orientation="horizontal"` lays the bins up the left edge,
 the lowest at the bottom.
 
 ### Reading it
