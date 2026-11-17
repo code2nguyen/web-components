@@ -139,7 +139,8 @@ export class CitationList extends LitElement {
 
   /**
    * The `id` of the element whose `c2-citation` markers are listed, in the same document or shadow root. Without it,
-   * the markers of the list's parent element. Markers inside another component's shadow root are not found: hand those
+   * the markers of the list's parent element (past any wrapper that holds nothing but the list, such as a framework's
+   * island element). Markers inside another component's shadow root are not found: hand those
    * sources over as `sources`.
    */
   @property() for = ''
@@ -193,8 +194,11 @@ export class CitationList extends LitElement {
 
   /** The element whose markers are listed: the one `for` names, else the parent. */
   private scope(): Element | null {
-    if (!this.for) return this.parentElement
-    return (this.getRootNode() as Document | ShadowRoot).getElementById?.(this.for) ?? null
+    if (this.for) return (this.getRootNode() as Document | ShadowRoot).getElementById?.(this.for) ?? null
+    // Past wrappers that hold nothing but the list, such as a framework's island element.
+    let scope = this.parentElement
+    while (scope?.parentElement && scope.childElementCount === 1) scope = scope.parentElement
+    return scope
   }
 
   /** Observes the scope for markers coming, going and changing; until a `for` target exists, the whole root. */

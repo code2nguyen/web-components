@@ -2,6 +2,7 @@
 title: 'Citation'
 description: 'A numbered inline marker that names its source, with a hover preview of the page it cites.'
 category: 'Chat'
+apiTags: ['c2-citation']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -10,6 +11,8 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Citation } from '@c2n/components/citation'
 
 `c2-citation` is the numbered marker an AI answer puts after a claim to say where it comes from, like the inline citations of Perplexity and ChatGPT search. The marker is a link to the source; hovering or focusing it opens a card with the site, the page's title, the passage quoted and the address, which the pointer can move into and Escape closes.
+
+To list the sources under the answer, the same package has [`c2-citation-list`](/web-components/components/citation-list): the "Used 3 sources" line that collects these markers and expands into a card per source.
 
 ## Import
 

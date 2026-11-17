@@ -1,0 +1,76 @@
+---
+title: 'Citation List'
+description: 'The "Used 12 sources" line under an AI answer: a stack of site icons and a count that expands into a card per source, linked to the answer''s citation markers.'
+category: 'Chat'
+package: '@c2n/citation'
+tag: 'c2-citation-list'
+apiTags: ['c2-citation-list']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Citation } from '@c2n/components/citation'
+import { CitationList } from '@c2n/components/citation/citation-list'
+
+`c2-citation-list` is the line of sources under an AI answer, as Perplexity and ChatGPT search draw it: the icons of the sites it read, stacked, and a count ("Used 3 sources") that expands into a card per source with its number, site, title and the passage quoted. It belongs to the same package as [`c2-citation`](/web-components/components/citation) and collects that element's markers from the answer it sits in, so the list never has to be written twice: one card per address however often it is cited, in the order of the markers' numbers. Pointing at a card, or focusing it, highlights the markers that cite it.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/citation/citation-list'
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/citation
+<style>
+  .citation-list-answer {
+    max-width: 560px;
+  }
+  .citation-list-answer p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+</style>
+<div data-label="Under an answer">
+  <div class="citation-list-answer">
+    <p>
+      Lit renders components to static HTML on the server and hydrates them in the browser<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit" snippet="Lit's SSR renders components to static HTML in Node, then hydrates them in the browser."></c2-citation>. Declarative shadow DOM lets the browser attach a shadow root before any script runs<c2-citation index="2" href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom" source-title="Declarative Shadow DOM" site="Chrome for Developers" snippet="Declarative Shadow DOM lets you define shadow roots in HTML, without JavaScript."></c2-citation>, which is what makes the hydration cheap<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/"></c2-citation><c2-citation index="3" href="https://web.dev/articles/declarative-shadow-dom" source-title="Declarative Shadow DOM – web.dev" snippet="Server-rendered components with no layout shift."></c2-citation>.
+    </p>
+    <c2-citation-list></c2-citation-list>
+  </div>
+</div>
+```
+
+### Where the sources come from
+
+Without anything else, the list reads the `c2-citation` markers of its parent element, past any wrapper that holds nothing but the list. `for` names the answer by `id` instead, in the same document or shadow root, and the list waits for that element when it is not there yet. Markers are followed as they come, change and go, as they do while an answer streams.
+
+When the sources are known without markers, or the markers are inside another component's shadow root (a Markdown renderer's, say), hand them over as `sources`, a JSON attribute or the property. They then win over the markers, which are still highlighted from the cards:
+
+```html tag=CodeBlock
+<c2-citation-list sources='[{"index":1,"href":"https://lit.dev/docs/ssr/overview/","title":"Server-side rendering – Lit","snippet":"Static HTML first.","site":"lit.dev","favicon":"/icons/lit.svg"}]'></c2-citation-list>
+```
+
+As on the marker, only http(s) and relative addresses become links and only those (plus `data:image/`) load as icons: a source taken from a model's output cannot run script. A site without an icon shows its first letter in the stack.
+
+### Opening the list
+
+The cards sit in a native `<details>`: the summary is a keyboard toggle (Enter or Space), find-in-page opens the list when it finds a source, and the `open` property (or attribute) reads and sets the state. `toggle` fires after it opens or closes. `max-icons` caps the stack (3 by default, one icon per site).
+
+### Slots, renderer and footer
+
+The `summary` slot replaces the count's text, the `footer` slot is an action zone under the cards (a button that copies every source, say) and `renderSource` draws each card's content while the list keeps the card, its link and its tie to the markers:
+
+```ts tag=CodeBlock
+import type { CitationList } from '@c2n/components/citation/citation-list'
+
+const list = document.querySelector<CitationList>('c2-citation-list')!
+list.renderSource = ({ source, number }) => `${number}. ${source.title ?? source.href}`
+```
+
+### Accessibility
+
+The summary is read with its count ("Used 3 sources"); the stack of icons is decorative. Each card is a link named `Source 1: <title>` in the page's language and described by its snippet, opening in a new tab by default (`target`). Every string is a message an app translates under `citation-list` (`summary`, `label`, `card`).

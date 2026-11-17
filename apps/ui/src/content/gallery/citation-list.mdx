@@ -1,0 +1,135 @@
+---
+title: 'Citation list gallery'
+description: 'The sources under an answer: collected from its markers, open, handed over as JSON, a single column, an accent highlight, slots and a footer, custom cards, a streaming answer and French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import CitationListExamplesRuntime from '../../components/CitationListExamplesRuntime.astro'
+
+import { Button } from '@c2n/components/button'
+import { Citation } from '@c2n/components/citation'
+import { CitationList } from '@c2n/components/citation/citation-list'
+
+Each card is an answer with its `c2-citation` markers and a `c2-citation-list` that collects them. Open a list and point at a card: the markers that cite it light up.
+
+<CitationListExamplesRuntime />
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<div>
+  <p>Lit renders on the server<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit" snippet="Lit's SSR renders components to static HTML in Node."></c2-citation> and hydrates in the browser<c2-citation index="2" href="https://developer.chrome.com/docs/css-ui/declarative-shadow-dom" source-title="Declarative Shadow DOM" site="Chrome for Developers"></c2-citation>.</p>
+  <c2-citation-list></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Open
+<style>
+  .citation-list-open p {
+    margin: 0 0 8px;
+  }
+</style>
+<div class="citation-list-open">
+  <p>Most teams ship weekly<c2-citation index="1" href="https://survey.stackoverflow.co/2024/" source-title="2024 Developer Survey" snippet="Responses from 65,000 developers."></c2-citation> and review every change<c2-citation index="2" href="https://google.github.io/eng-practices/review/" source-title="Code review developer guide" site="Google Engineering Practices" snippet="The primary purpose of code review is to make sure the overall code health improves over time."></c2-citation>.</p>
+  <c2-citation-list open></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Given as JSON
+<c2-citation-list
+  open
+  sources='[{"index":1,"href":"https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/","title":"Disclosure pattern","site":"W3C WAI","snippet":"A disclosure is a button that controls the visibility of a section of content."},{"index":2,"href":"https://developer.mozilla.org/docs/Web/HTML/Element/details","title":"The details element","site":"MDN","snippet":"Creates a disclosure widget in which information is visible only when it is toggled open."}]'
+></c2-citation-list>
+```
+
+```html tag=MdxCodeBlock,label=Single column
+<style>
+  .citation-list-column {
+    --c2-citation-list__source--min-width: 100%;
+    --c2-citation-list__list--gap: 0;
+    --c2-citation-list__source--border: none;
+    --c2-citation-list__source--border-radius: 0;
+    --c2-citation-list__source--padding: 8px 4px;
+    --c2-citation-list__source--background-color: transparent;
+    --c2-citation-list__summary--border: none;
+    --c2-citation-list__summary--background-color: transparent;
+    --c2-citation-list__snippet--line-clamp: 1;
+  }
+</style>
+<div>
+  <p>Container queries size a component by its container<c2-citation index="1" href="https://developer.mozilla.org/docs/Web/CSS/CSS_containment/Container_queries" source-title="Container queries – MDN" site="MDN" snippet="Apply styles to an element based on the size of its container."></c2-citation>, and they are Baseline<c2-citation index="2" href="https://web.dev/baseline" source-title="Baseline – web.dev" snippet="Features that work across the major browsers."></c2-citation>.</p>
+  <c2-citation-list class="citation-list-column" open></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Accent highlight
+<style>
+  .citation-list-accent c2-citation {
+    --c2-citation__marker__highlighted--background-color: #7c3aed;
+    --c2-citation__marker__highlighted--color: #ffffff;
+  }
+  .citation-list-accent c2-citation-list {
+    --c2-citation-list__summary--border: 1px solid light-dark(#ddd6fe, #3b2a63);
+    --c2-citation-list__summary--color: light-dark(#6d28d9, #b79cf2);
+    --c2-citation-list__summary__hover--background-color: light-dark(#f5f3ff, #221a3a);
+    --c2-citation-list__source__hover--background-color: light-dark(#f5f3ff, #221a3a);
+    --c2-citation-list__number--background-color: #7c3aed;
+    --c2-citation-list__number--color: #ffffff;
+  }
+</style>
+<div class="citation-list-accent">
+  <p>View transitions animate between two states of a page<c2-citation index="1" href="https://developer.chrome.com/docs/web-platform/view-transitions" source-title="View transitions" site="Chrome for Developers"></c2-citation>, across documents too<c2-citation index="2" href="https://developer.mozilla.org/docs/Web/API/View_Transition_API" source-title="View Transition API – MDN" site="MDN"></c2-citation>.</p>
+  <c2-citation-list open></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Summary and footer
+<div class="citation-list-footer">
+  <p>Popovers live in the top layer<c2-citation index="1" href="https://developer.mozilla.org/docs/Web/API/Popover_API" source-title="Popover API – MDN" site="MDN"></c2-citation> and need no z-index<c2-citation index="2" href="https://developer.chrome.com/blog/introducing-popover-api" source-title="Introducing the popover API" site="Chrome for Developers"></c2-citation>.</p>
+  <c2-citation-list open>
+    <span slot="summary">Read 2 pages</span>
+    <c2-button slot="footer" data-citation-list-example="copy">Copy all sources</c2-button>
+  </c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Custom cards
+<div>
+  <p>Anchor positioning tethers a popup to its trigger<c2-citation index="1" href="https://developer.chrome.com/blog/anchor-positioning-api" source-title="Anchor positioning API" site="Chrome for Developers"></c2-citation> in CSS alone<c2-citation index="2" href="https://developer.mozilla.org/docs/Web/CSS/CSS_anchor_positioning" source-title="CSS anchor positioning – MDN" site="MDN"></c2-citation>.</p>
+  <c2-citation-list open data-citation-list-example="render"></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Streaming answer
+<style>
+  .citation-list-stream c2-button {
+    margin-bottom: 8px;
+  }
+</style>
+<div class="citation-list-stream">
+  <c2-button data-citation-list-example="stream">Add a sentence</c2-button>
+  <p>Lit renders on the server<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit"></c2-citation>.</p>
+  <c2-citation-list></c2-citation-list>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=French
+<div lang="fr">
+  <p>Le rendu serveur produit du HTML statique<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Rendu serveur – Lit"></c2-citation>, puis le navigateur l’hydrate<c2-citation index="2" href="https://developer.mozilla.org/fr/docs/Web/API/Web_components" source-title="Web Components – MDN" site="MDN"></c2-citation>.</p>
+  <c2-citation-list></c2-citation-list>
+</div>
+```
+
+</GalleryGrid>
+
+The Custom cards card draws each card's content with `renderSource`, the Streaming card adds a cited sentence as a model would and the list follows it, and the French card's text is the translation an app adds:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { 'citation-list': { summary: { one: '{0} source consultée', other: '{0} sources consultées' }, card: 'Source {0} : {1}' } } })
+
+list.renderSource = ({ source, number }) => `[${number}] ${source.title ?? source.href}`
+```

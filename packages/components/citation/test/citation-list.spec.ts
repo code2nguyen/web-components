@@ -168,3 +168,10 @@ test('the summary is counted in the page language', async ({ page, renderScenari
   await summary(page).click()
   await expect(list(page).getByRole('link', { name: 'Source 2 : Declarative Shadow DOM' })).toBeVisible()
 })
+
+test('a wrapper that holds nothing but the list, such as an island element, is passed on the way to the answer', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div><p>One<c2-citation index="1" href="https://example.com/one"></c2-citation> two<c2-citation index="2" href="https://example.com/two"></c2-citation></p><astro-island><c2-citation-list></c2-citation-list></astro-island></div>`,
+  )
+  await expect(count(page)).toHaveText('Used 2 sources')
+})
