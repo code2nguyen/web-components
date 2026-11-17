@@ -117,7 +117,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **comment-thread-1** · `c2-comment-thread` · comment tree #508 · +1.5 kB on 47.8 kB · risk medium
 - **json-viewer-2** · `c2-json-viewer` · json editor #554 (lazy) · +0.3 kB on 7.0 kB, 6 kB lazy · risk medium
 - **log-viewer-1** · `c2-log-viewer` · build log #555 (lazy) · +0.4 kB on 16.5 kB, 4 kB lazy · risk medium
-- **selection-toolbar-1** · `c2-selection-toolbar` · inline prompt #574 · +1 kB on 13.2 kB · risk low
 
 ### New packages
 
