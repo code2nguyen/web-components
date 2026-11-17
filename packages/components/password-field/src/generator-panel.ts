@@ -98,12 +98,24 @@ export function createGeneratorPanel(field: PasswordField) {
     field.requestUpdate()
   }
 
+  /** Whether focus was in the popover as it started to close: the browser may have moved it by the time it closed. */
+  let hadFocus = false
+  const handleBeforeToggle = (event: ToggleEvent) => {
+    if (event.newState === 'closed') hadFocus = !!root.activeElement && !!root.querySelector('.generator')?.contains(root.activeElement)
+  }
+  /** Focus is still in the closed popover, or nowhere: not on something the user pressed outside it. */
+  const focusLost = () => {
+    const outer = (field.getRootNode() as Document | ShadowRoot).activeElement
+    const inner = root.activeElement
+    return !outer || outer === document.body || (outer === field && (!inner || !!root.querySelector('.generator')?.contains(inner)))
+  }
   const handleToggle = (event: ToggleEvent) => {
     const opened = event.newState === 'open'
     if (opened) void field.updateComplete.then(() => root.querySelector<HTMLElement>('.generator-use')?.focus())
-    // After the browser's own focus return, which goes to the generate button.
     else if (focusAfterUse) internal.input?.focus()
-    focusAfterUse = false
+    // Escape, or a close by code: focus goes back to the generate button, unless the user pressed something outside.
+    else if (hadFocus && focusLost()) root.querySelector<HTMLElement>('.generate')?.focus()
+    focusAfterUse = hadFocus = false
     toggle(opened)
   }
 
@@ -253,6 +265,7 @@ export function createGeneratorPanel(field: PasswordField) {
         free-width
         .anchor=${root.querySelector<HTMLElement>('.field') ?? undefined}
         ?open=${open}
+        @beforetoggle=${handleBeforeToggle}
         @toggle=${handleToggle}
       >
         <div class="generator" part="generator" role="dialog" aria-label=${msg.t('generate')}>
