@@ -1,18 +1,18 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult, svg } from 'lit'
+import { LitElement, html, nothing, render, unsafeCSS, type PropertyValues, type TemplateResult, svg } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { disabledByAncestor, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { Fragment, Slice, type Mark, type Node as ProseNode } from 'prosemirror-model'
-import { EditorState, Plugin, PluginKey, TextSelection, type Command, type Transaction } from 'prosemirror-state'
+import { EditorState, NodeSelection, Plugin, PluginKey, TextSelection, type Command, type Transaction } from 'prosemirror-state'
 import { Decoration, DecorationSet, EditorView, type NodeView } from 'prosemirror-view'
 import { keymap } from 'prosemirror-keymap'
 import { baseKeymap, chainCommands, toggleMark as toggleMarkCommand } from 'prosemirror-commands'
 import { history, redo, undo } from 'prosemirror-history'
-import { inputRules, undoInputRule } from 'prosemirror-inputrules'
+import { InputRule, inputRules, undoInputRule } from 'prosemirror-inputrules'
 import {
   backspaceAtStart,
   buildInputRules,
@@ -27,6 +27,7 @@ import {
   lineBreak,
   listNumbering,
   markExtent,
+  MERGE_FIELD_PATTERN,
   normalize,
   pageToHTML,
   place,
@@ -78,6 +79,37 @@ export interface RichTextTriggerDetail {
   rect: DOMRect | null
 }
 
+/** A field `merge-fields` lists: a template token the writer may insert, drawn as a chip. */
+export interface RichTextMergeField {
+  /** The token's name, without `{`, `}` or `|`: `first_name` is written `{{first_name}}`. */
+  name: string
+  /** What the chip shows. The name when it is not given. */
+  label?: string
+  /** The fallback `insertMergeField()` gives the field unless it is passed one, written `{{first_name|there}}`. */
+  fallback?: string
+}
+
+/** What `renderMergeField` is given for each chip. */
+export interface RichTextMergeFieldContext {
+  /** The listed field. */
+  field: RichTextMergeField
+  /** The label the chip shows by default: the field's `label`, else its name. */
+  label: string
+  /** This token's fallback, `''` when it has none. */
+  fallback: string
+}
+
+/** Draws a chip's content: anything Lit can render. The chip itself, its title and its keyboard behaviour stay the editor's. */
+export type RichTextMergeFieldRenderer = (context: RichTextMergeFieldContext) => unknown
+
+/** The `merge-field-activate` detail: the chip that was clicked, or selected when Enter was pressed. */
+export interface RichTextMergeFieldDetail {
+  field: RichTextMergeField
+  fallback: string
+  /** Where the chip is drawn, in viewport coordinates, to place an editor for its fallback under it. */
+  rect: DOMRect | null
+}
+
 /** Events fired by {@link RichTextEditor}, keyed for `addEventListener`. */
 export interface RichTextEditorEventMap {
   input: Event
@@ -85,6 +117,7 @@ export interface RichTextEditorEventMap {
   'format-change': CustomEvent<RichTextFormat>
   submit: Event
   trigger: CustomEvent<RichTextTriggerDetail>
+  'merge-field-activate': CustomEvent<RichTextMergeFieldDetail>
 }
 
 export interface RichTextEditor {
@@ -233,6 +266,39 @@ class ItemView implements NodeView {
   }
 }
 
+/** A merge field: a chip the caret steps over, drawn by the editor (`draw`), which also keeps the live ones (`views`). */
+class MergeFieldView implements NodeView {
+  readonly dom = document.createElement('span')
+
+  constructor(
+    public node: ProseNode,
+    private readonly views: Set<MergeFieldView>,
+    readonly draw: (view: MergeFieldView) => void,
+  ) {
+    this.dom.className = 'merge-field'
+    this.dom.setAttribute('part', 'merge-field')
+    views.add(this)
+    draw(this)
+  }
+
+  update(node: ProseNode) {
+    if (node.type !== this.node.type) return false
+    this.node = node
+    this.draw(this)
+    return true
+  }
+
+  // The chip's content is the editor's own drawing. A selection inside it is not read either: the chip is an atom,
+  // and ProseMirror keeps the caret on one side of it (or the chip selected).
+  ignoreMutation() {
+    return true
+  }
+
+  destroy() {
+    this.views.delete(this)
+  }
+}
+
 /**
  * A compact formatted-text field for comments, replies, email bodies and short descriptions: bold, italic, underline,
  * strikethrough, inline code, links, bulleted and numbered lists, quotes and code blocks, and nothing more. For long
@@ -259,6 +325,14 @@ class ItemView implements NodeView {
  * While a trigger is active, a capture-phase `keydown` listener on the element that calls `preventDefault()` keeps
  * the key (ArrowDown, Enter) from the text.
  *
+ * Merge fields are template tokens such as `{{first_name}}`. List the fields in `merge-fields` (or `mergeFields`) and
+ * the tokens of those fields in the value are drawn as chips the caret steps over and Backspace removes whole, while
+ * the value, `text` and `toHTML()` keep the token (right after a typed token becomes a chip, Backspace turns it back
+ * into text, as it does for typed Markdown). Insert one with `insertMergeField(name)` from the app's own menu (in
+ * `toolbar-end`, or under a `trigger` such as `{{`), or type the token. `{{first_name|there}}` carries a fallback, the
+ * text to use where the field has no value. Clicking a chip, or Enter on a selected one, fires `merge-field-activate`;
+ * `insertMergeField()` then replaces that chip, to change its fallback.
+ *
  * @tag c2-rich-text-editor
  *
  * @slot toolbar-end - The app's own tools at the end of the toolbar (attach, mention, emoji). Each is a tab stop of its own.
@@ -270,12 +344,14 @@ class ItemView implements NodeView {
  * @csspart content - The editable text.
  * @csspart footer - The row under the text: the `footer-start` slot, then the toolbar when it sits at the bottom, the counter, and the `footer-end` slot. Both slots project assigned content only, without fallback; the row is hidden while it has nothing to show.
  * @csspart link-popover - The popover that edits a link.
+ * @csspart merge-field - Each merge field chip in the text, the box that holds its label (or what `renderMergeField` draws). It carries the `ProseMirror-selectednode` class while the chip is selected.
  *
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the field loses focus after its value changed.
  * @event {CustomEvent<RichTextFormat>} format-change - Fired when the block or the formatting at the selection changes. Does not bubble.
  * @event {Event} submit - ⌘/Ctrl+Enter was pressed. Cancelable: unless it is cancelled, an enclosing form is submitted. Does not bubble.
  * @event {CustomEvent<RichTextTriggerDetail>} trigger - A character listed in `triggers` was typed at the start of a word, the word after it changed, or it ended (`active: false`). Does not bubble.
+ * @event {CustomEvent<RichTextMergeFieldDetail>} merge-field-activate - A merge field chip was clicked, or Enter was pressed while one was selected. The chip is selected, so `insertMergeField()` replaces it. Does not bubble.
  *
  * @cssproperty {border} [--c2-rich-text-editor__container--border=1px solid #bcbcc6]
  * @cssproperty {border} [--c2-rich-text-editor__container__hover--border=1px solid #a1a1aa]
@@ -328,6 +404,13 @@ class ItemView implements NodeView {
  * @cssproperty {border} [--c2-rich-text-editor__link-input--border=1px solid #bcbcc6]
  * @cssproperty {color} [--c2-rich-text-editor__button--background=#0265dc] - The link popover's Save button.
  * @cssproperty {color} [--c2-rich-text-editor__button--color=#ffffff]
+ * @cssproperty {color} [--c2-rich-text-editor__merge-field--background=#edf1fe] - A merge field chip.
+ * @cssproperty {color} [--c2-rich-text-editor__merge-field--color=#0265dc]
+ * @cssproperty {border} [--c2-rich-text-editor__merge-field--border=none]
+ * @cssproperty {border-radius} [--c2-rich-text-editor__merge-field--border-radius=4px]
+ * @cssproperty {padding} [--c2-rich-text-editor__merge-field--padding=0 4px]
+ * @cssproperty {font-weight} [--c2-rich-text-editor__merge-field--font-weight=500]
+ * @cssproperty {outline} [--c2-rich-text-editor__merge-field__selected--outline=2px solid rgba(2, 101, 220, 0.4)] - A chip selected by a click or the arrow keys.
  */
 @customElement('c2-rich-text-editor')
 export class RichTextEditor extends LitElement {
@@ -359,6 +442,14 @@ export class RichTextEditor extends LitElement {
   @property({ attribute: 'toolbar-position' }) toolbarPosition: RichTextToolbarPosition = 'top'
   /** Space-separated characters that start a `trigger` when typed at the start of a word, e.g. `"@ #"`. */
   @property() triggers = ''
+  /**
+   * The merge fields the writer may insert, as JSON in the `merge-fields` attribute or an array: `[{ "name": "first_name",
+   * "label": "First name", "fallback": "there" }]`. Tokens of these fields are drawn as chips; any other `{{token}}`
+   * stays text. Empty turns merge fields off.
+   */
+  @property({ attribute: 'merge-fields', converter: jsonPropertyConverter }) mergeFields: RichTextMergeField[] = []
+  /** Draws the content of each merge field chip. Without it, a chip shows its field's label. */
+  @property({ attribute: false }) renderMergeField?: RichTextMergeFieldRenderer
   /** Not focusable, not editable and left out of the form data; the toolbar is inert. A disabled `<fieldset>` does the same. */
   @property({ type: Boolean, reflect: true }) disabled = false
   /** Selectable and focusable, without a toolbar; the value is still submitted. */
@@ -399,6 +490,15 @@ export class RichTextEditor extends LitElement {
   private resizeObserver?: ResizeObserver
   private appliedSurface = ''
   private parsedFormats: { formats: string; entries: ToolbarEntry[]; allowed: Set<RichTextFormatName> } | null = null
+  private fieldList?: RichTextMergeField[]
+  private fieldMap = new Map<string, RichTextMergeField>()
+  /** The listed fields as a string, so a new array with the same fields changes nothing. */
+  private fieldKey = '[]'
+  /** The fields the document was last read with, and the chips last drawn with. */
+  private appliedFieldKey = '[]'
+  private drawnFieldKey = '[]'
+  private readonly mergeFieldViews = new Set<MergeFieldView>()
+  private chipLocale = ''
 
   get form() {
     return this.internals.form
@@ -433,6 +533,25 @@ export class RichTextEditor extends LitElement {
       this.parsedFormats = { formats: this.formats, entries, allowed }
     }
     return this.parsedFormats
+  }
+
+  /** `mergeFields` by name, read once per value. */
+  private get fields(): Map<string, RichTextMergeField> {
+    if (this.fieldList !== this.mergeFields) {
+      this.fieldList = this.mergeFields
+      const list = Array.isArray(this.mergeFields) ? this.mergeFields : []
+      // A name a token cannot hold (`{`, `}`, `|`, spaces at its ends) could never be read back.
+      const usable = list.filter((field) => typeof field?.name === 'string' && /^[^{}|\s]([^{}|]*[^{}|\s])?$/.test(field.name))
+      this.fieldMap = new Map(usable.map((field) => [field.name, field]))
+      this.fieldKey = JSON.stringify(usable.map(({ name, label, fallback }) => [name, label, fallback]))
+    }
+    return this.fieldMap
+  }
+
+  /** `fieldKey` for the current `mergeFields`. */
+  private get currentFieldKey() {
+    void this.fields
+    return this.fieldKey
   }
 
   private get toolbarEntries(): ToolbarEntry[] {
@@ -578,7 +697,30 @@ export class RichTextEditor extends LitElement {
     return true
   }
 
-  /** The text as HTML (`p`, `strong`, `em`, `u`, `s`, `code`, `pre`, `a`, `ul`, `ol`, `li`, `blockquote`, `br`), for an email body or a page. */
+  /**
+   * Inserts the merge field `name` (one of `mergeFields`) at the caret, in place of the selection, a selected chip or
+   * the active trigger (`{{fir`). `fallback` replaces the field's own. Returns false when the field is not listed or
+   * the caret is in a code block.
+   */
+  insertMergeField(name: string, options: { fallback?: string } = {}): boolean {
+    const view = this.view
+    const field = this.fields.get(name)
+    if (!view || !field || !this.editable) return false
+    const { state } = view
+    const tr = state.tr
+    if (this.trigger) tr.setSelection(TextSelection.create(tr.doc, this.trigger.from, state.selection.head))
+    const { $from } = tr.selection
+    if ($from.parent.type.spec.code) return false
+    tr.replaceSelectionWith(this.mergeFieldNode(name, options.fallback ?? field.fallback, state.storedMarks ?? $from.marks()), false)
+    view.dispatch(tr.scrollIntoView())
+    view.focus()
+    return true
+  }
+
+  /**
+   * The text as HTML (`p`, `strong`, `em`, `u`, `s`, `code`, `pre`, `a`, `ul`, `ol`, `li`, `blockquote`, `br`), for an
+   * email body or a page. A merge field is its token in a `<span data-merge-field>`.
+   */
   toHTML(): string {
     return pageToHTML(this.view?.state.doc ?? this.restrictedDoc(this.value))
   }
@@ -613,8 +755,12 @@ export class RichTextEditor extends LitElement {
         state: this.createState(this.value),
         editable: () => this.editable,
         attributes: () => this.surfaceAttributes(),
-        nodeViews: { item: (node, _view, _getPos, decorations) => new ItemView(node, decorations) },
+        nodeViews: {
+          item: (node, _view, _getPos, decorations) => new ItemView(node, decorations),
+          merge_field: (node) => new MergeFieldView(node, this.mergeFieldViews, (chip) => this.drawMergeField(chip)),
+        },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
+        handleClickOn: (_view, _pos, node, nodePos, _event, direct) => direct && node.type === schema.nodes.merge_field && this.activateMergeField(nodePos),
         handleDOMEvents: {
           keydown: (view, event) => {
             if (event.key !== 'Tab' && event.key !== 'Escape' && event.key !== 'Shift') this.tabReleased = false
@@ -680,6 +826,17 @@ export class RichTextEditor extends LitElement {
       this.endTrigger()
       this.emitFormat()
     }
+    if (this.currentFieldKey !== this.appliedFieldKey) {
+      // Tokens of fields no longer listed become text, and those of new ones chips.
+      view.updateState(this.createState(this.serialized))
+      this.adoptDoc()
+      this.endTrigger()
+    }
+    if (this.msg.locale !== this.chipLocale || changed.has('renderMergeField') || this.fieldKey !== this.drawnFieldKey) {
+      this.chipLocale = this.msg.locale
+      this.drawnFieldKey = this.fieldKey
+      for (const chip of this.mergeFieldViews) chip.draw(chip)
+    }
     if (changed.has('formats') && changed.get('formats') !== undefined) {
       // Text already written in a format no longer allowed loses it.
       view.updateState(this.createState(this.serialized))
@@ -710,6 +867,7 @@ export class RichTextEditor extends LitElement {
   }
 
   private createState(markdown: string) {
+    this.appliedFieldKey = this.currentFieldKey
     return EditorState.create({ schema, doc: this.restrictedDoc(markdown), plugins: this.plugins() })
   }
 
@@ -731,11 +889,15 @@ export class RichTextEditor extends LitElement {
       const name = mark.type.name
       return name === 'link' ? allowed.has('link') : (MARKS as readonly string[]).includes(name) && allowed.has(name as RichTextMark)
     }
+    // A merge field is read again from its token, so one whose field is no longer listed becomes text.
+    const leaf = (node: ProseNode): ProseNode[] => {
+      const text = node.type === schema.nodes.merge_field ? schema.text(node.textContent, node.marks) : node
+      return text.isText ? this.withMergeFields(text.mark(text.marks.filter(markAllowed))) : [text]
+    }
     const inline = (fragment: Fragment): Fragment => {
       const nodes: ProseNode[] = []
       fragment.forEach((node) => {
-        if (node.isText) nodes.push(node.mark(node.marks.filter(markAllowed)))
-        else if (node.isInline) nodes.push(node)
+        if (node.isInline) nodes.push(...leaf(node))
       })
       return Fragment.fromArray(nodes)
     }
@@ -744,7 +906,7 @@ export class RichTextEditor extends LitElement {
     const nodes: ProseNode[] = []
     content.forEach((node) => {
       const type = node.type
-      if (node.isInline) nodes.push(...(node.isText ? [node.mark(node.marks.filter(markAllowed))] : [node]))
+      if (node.isInline) nodes.push(...leaf(node))
       else if (type === schema.nodes.paragraph || type === schema.nodes.heading) nodes.push(paragraph(node.content))
       else if (type === schema.nodes.item) {
         const kind = node.attrs.kind === 'todo' ? 'bullet' : (node.attrs.kind as 'bullet' | 'ordered')
@@ -782,6 +944,30 @@ export class RichTextEditor extends LitElement {
       this.tabReleased = true
       return false
     }
+    // A merge field next to the caret goes whole, the same in every browser.
+    const deleteField =
+      (dir: -1 | 1): Command =>
+      (state, dispatch) => {
+        const { $head, empty } = state.selection
+        const node = empty ? (dir < 0 ? $head.nodeBefore : $head.nodeAfter) : null
+        if (node?.type !== schema.nodes.merge_field) return false
+        const from = dir < 0 ? $head.pos - node.nodeSize : $head.pos
+        dispatch?.(state.tr.delete(from, from + node.nodeSize).scrollIntoView())
+        return true
+      }
+    const activateSelectedField: Command = (state) =>
+      state.selection instanceof NodeSelection && state.selection.node.type === schema.nodes.merge_field && this.activateMergeField(state.selection.from)
+    // Inline code applied over a chip leaves the chip out: in code, its token would read back as text.
+    const chipsOutOfCode = new Plugin({
+      appendTransaction: (transactions, _old, state) => {
+        if (!transactions.some((tr) => tr.steps.some((step) => (step as { mark?: Mark }).mark?.type === schema.marks.code))) return null
+        const tr = state.tr
+        state.doc.descendants((node, pos) => {
+          if (node.type === schema.nodes.merge_field && schema.marks.code.isInSet(node.marks)) tr.removeMark(pos, pos + node.nodeSize, schema.marks.code)
+        })
+        return tr.docChanged ? tr : null
+      },
+    })
     const placeholder = new Plugin({
       props: {
         decorations: (state) => {
@@ -809,7 +995,15 @@ export class RichTextEditor extends LitElement {
     return [
       history(),
       inputRules({
-        rules: buildInputRules(allowedBlock, (mark) => this.editable && (mark === 'link' ? allowed.has('link') : allowed.has(mark as RichTextMark))),
+        rules: [
+          ...buildInputRules(allowedBlock, (mark) => this.editable && (mark === 'link' ? allowed.has('link') : allowed.has(mark as RichTextMark))),
+          // A typed token of a listed field becomes its chip as its last `}` is typed.
+          new InputRule(new RegExp(`${MERGE_FIELD_PATTERN.source}$`), (state, match, start, end) => {
+            const $start = state.doc.resolve(start)
+            if (!this.fields.has(match[1]) || schema.marks.code.isInSet($start.marks())) return null
+            return state.tr.replaceWith(start, end, this.mergeFieldNode(match[1], match[2], $start.marks()))
+          }),
+        ],
       }),
       keymap({
         'Mod-z': undo,
@@ -827,9 +1021,10 @@ export class RichTextEditor extends LitElement {
         'Shift-Mod-9': this.blockCommand('quote'),
         'Mod-Alt-c': this.blockCommand('code-block'),
         'Mod-Enter': () => this.requestSubmit(),
-        Enter: chainCommands(enterInCode, enterInItem, enterInBlock),
+        Enter: chainCommands(activateSelectedField, enterInCode, enterInItem, enterInBlock),
         'Shift-Enter': lineBreak,
-        Backspace: chainCommands(undoInputRule, backspaceAtStart),
+        Backspace: chainCommands(undoInputRule, deleteField(-1), backspaceAtStart),
+        Delete: deleteField(1),
         Tab: ifTabCaptured(chainCommands(indentCode(1), indentItems(1))),
         'Shift-Tab': ifTabCaptured(chainCommands(indentCode(-1), indentItems(-1))),
         'Alt-F10': () => this.focusToolbar(),
@@ -840,6 +1035,7 @@ export class RichTextEditor extends LitElement {
       normalize,
       placeholder,
       linkTargetPlugin,
+      chipsOutOfCode,
     ]
   }
 
@@ -955,6 +1151,54 @@ export class RichTextEditor extends LitElement {
   private requestSubmit(): boolean {
     const event = new Event('submit', { cancelable: true })
     if (this.dispatchEvent(event)) this.internals.form?.requestSubmit()
+    return true
+  }
+
+  // ---- merge fields ------------------------------------------------------------------------------------------------
+
+  private mergeFieldNode(name: string, fallback: string | undefined, marks: readonly Mark[]): ProseNode {
+    // A fallback holding braces would end the token early.
+    const text = typeof fallback === 'string' ? fallback.replace(/[{}]/g, '').trim() : ''
+    // Inline code would make the token literal text the next time the value is read.
+    return schema.nodes.merge_field.create({ name, fallback: text }, null, schema.marks.code.removeFromSet(marks))
+  }
+
+  /** A text node with the tokens of listed fields (outside code) turned into merge field nodes. */
+  private withMergeFields(text: ProseNode): ProseNode[] {
+    const fields = this.fields
+    if (!fields.size || schema.marks.code.isInSet(text.marks)) return [text]
+    const source = text.text!
+    const nodes: ProseNode[] = []
+    let last = 0
+    for (const match of source.matchAll(new RegExp(MERGE_FIELD_PATTERN, 'g'))) {
+      if (!fields.has(match[1])) continue
+      if (match.index! > last) nodes.push(schema.text(source.slice(last, match.index), text.marks))
+      nodes.push(this.mergeFieldNode(match[1], match[2], text.marks))
+      last = match.index! + match[0].length
+    }
+    if (last && last < source.length) nodes.push(schema.text(source.slice(last), text.marks))
+    return last ? nodes : [text]
+  }
+
+  private drawMergeField(chip: MergeFieldView) {
+    const { name, fallback } = chip.node.attrs as { name: string; fallback: string }
+    const field = this.fields.get(name) ?? { name }
+    const label = typeof field.label === 'string' && field.label ? field.label : name
+    chip.dom.title = fallback ? this.msg.t('mergeFieldFallback', label, fallback) : this.msg.t('mergeField', label)
+    render(this.renderMergeField ? this.renderMergeField({ field, label, fallback }) : label, chip.dom)
+  }
+
+  /** Selects the chip at `pos` and fires `merge-field-activate` for it. */
+  private activateMergeField(pos: number): boolean {
+    const view = this.view!
+    const node = view.state.doc.nodeAt(pos)
+    if (!node || !this.editable) return false
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, pos)))
+    const { name, fallback } = node.attrs as { name: string; fallback: string }
+    const rect = (view.nodeDOM(pos) as HTMLElement | null)?.getBoundingClientRect() ?? null
+    this.dispatchEvent(
+      new CustomEvent<RichTextMergeFieldDetail>('merge-field-activate', { detail: { field: this.fields.get(name) ?? { name }, fallback, rect } }),
+    )
     return true
   }
 
@@ -1381,7 +1625,9 @@ export class RichTextEditor extends LitElement {
 /** A document's text, one block per line. */
 function docText(doc: ProseNode): string {
   const lines: string[] = []
-  doc.forEach((block) => lines.push(block.textBetween(0, block.content.size, '\n', '\n')))
+  // A line break is a new line; a merge field its token.
+  const leaf = (node: ProseNode) => (node.type === schema.nodes.hard_break ? '\n' : node.textContent)
+  doc.forEach((block) => lines.push(block.textBetween(0, block.content.size, '\n', leaf)))
   return lines.join('\n').replace(/\n+$/, '')
 }
 

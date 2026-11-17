@@ -63,7 +63,7 @@ function targetOf(block: PageEditorBlock, current: ProseNode): { type: NodeType;
 function plainText(node: ProseNode): string {
   let text = ''
   node.forEach((child) => {
-    text += child.type === hardBreak ? '\n' : (child.text ?? '')
+    text += child.type === hardBreak ? '\n' : (child.text ?? child.type.spec.leafText?.(child) ?? '')
   })
   return text
 }
