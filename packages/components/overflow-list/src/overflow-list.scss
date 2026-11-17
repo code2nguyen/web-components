@@ -3,6 +3,7 @@
   $theme: (
     gap: 8px,
     align-items: center,
+    justify-content: null,
 
     more--height: 36px,
     more--min-width: 36px,
@@ -52,6 +53,7 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: css.cssVar(align-items);
+  justify-content: css.cssVar(justify-content);
   gap: css.cssVar(gap);
   min-width: 0;
   overflow-x: clip;

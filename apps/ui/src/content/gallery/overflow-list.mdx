@@ -1,5 +1,5 @@
 ---
-description: 'Ready-made looks for c2-overflow-list: outlined actions, a text "More" trigger, link tabs that mark a folded current page, and a pill icon toolbar. Open any card in the studio to start from it.'
+description: 'Ready-made looks for c2-overflow-list: outlined actions, a text "More" trigger, link tabs that mark a folded current page, a header nav pushed to the end, and a pill icon toolbar. Open any card in the studio to start from it.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -85,6 +85,55 @@ The list's own look is its trigger and its gap: `--c2-overflow-list__more--*` an
     <c2-link-button href="#insights" aria-current="page" selected>Insights</c2-link-button>
   </c2-overflow-list>
 </nav>
+```
+
+```html tag=MdxCodeBlock,label=Header nav at the end
+<style>
+  .header-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+  .header-nav strong {
+    flex: none;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .header-nav c2-overflow-list {
+    flex: 1;
+    --c2-overflow-list--justify-content: flex-end;
+    --c2-overflow-list--gap: 4px;
+    --c2-overflow-list__more--border: 1px solid transparent;
+    --c2-overflow-list__more__hover--border: 1px solid transparent;
+    --c2-overflow-list__more__current--border: 1px solid transparent;
+    --c2-overflow-list__more--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+    --c2-overflow-list__more__current--color: var(--c2-theme--color-primary, rgb(2, 101, 220));
+  }
+  /* The trigger and the links share one look: padding, muted text, a tint on hover. */
+  .header-nav c2-link-button {
+    --c2-link-button__container--padding-left: 8px;
+    --c2-link-button__container--padding-right: 8px;
+    --c2-link-button__container--padding-top: 8px;
+    --c2-link-button__container--padding-bottom: 8px;
+    --c2-link-button__container--border-radius: 6px;
+    --c2-link-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 70%, var(--c2-theme--color-surface, #ffffff));
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<header class="header-nav">
+  <strong>Acme</strong>
+  <c2-overflow-list aria-label="Primary">
+    <c2-link-button href="#overview">Overview</c2-link-button>
+    <c2-link-button href="#projects" aria-current="page" selected>Projects</c2-link-button>
+    <c2-link-button href="#billing">Billing</c2-link-button>
+    <c2-link-button href="#team">Team</c2-link-button>
+    <span slot="more">More</span>
+    <svg slot="more" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+  </c2-overflow-list>
+</header>
 ```
 
 ```html tag=MdxCodeBlock,label=Pill toolbar

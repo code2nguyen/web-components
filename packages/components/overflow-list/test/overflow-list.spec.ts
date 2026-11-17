@@ -241,3 +241,20 @@ test('in a declarative shadow root (server rendering) it folds by slot attribute
   await expect.poll(() => visibleItems(page)).toHaveLength(8)
   expect(await host(page).evaluate((element) => [...element.children].map((child) => child.getAttribute('slot')))).toEqual(Array(8).fill(null))
 })
+
+// #503: a nav pushed to the end of a header keeps the same fit.
+test('--c2-overflow-list--justify-content aligns the row without changing the fit', async ({ page, renderScenario }) => {
+  await renderScenario(list(720, 'style="--c2-overflow-list--justify-content: flex-end"', items(3)))
+  await expect.poll(() => visibleItems(page)).toHaveLength(3)
+  const edges = () =>
+    host(page).evaluate((element) => ({
+      host: element.getBoundingClientRect().right,
+      last: element.children[element.children.length - 1].getBoundingClientRect().right,
+    }))
+  await expect.poll(async () => Math.round((await edges()).host - (await edges()).last)).toBe(0)
+  await renderScenario(list(400, 'style="--c2-overflow-list--justify-content: flex-end"'))
+  await expect.poll(() => visibleItems(page)).toEqual(['Item 1', 'Item 2', 'Item 3', 'Item 4'])
+  const trigger = await page.locator('c2-overflow-list').locator('.more').boundingBox()
+  const hostBox = await host(page).boundingBox()
+  expect(Math.round(hostBox!.x + hostBox!.width - (trigger!.x + trigger!.width))).toBeLessThanOrEqual(1)
+})
