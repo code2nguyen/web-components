@@ -1,15 +1,15 @@
 {
   "schema": 1,
-  "id": "2026-11-17T1738-support-inbox-vue",
-  "startedAt": "2026-11-17T17:38:06.000Z",
-  "durationSeconds": 241,
+  "id": "2026-11-17T1759-support-inbox-vue",
+  "startedAt": "2026-11-17T17:59:34.071Z",
+  "durationSeconds": 225,
   "mode": "replay",
   "target": "support-inbox-vue",
   "spec": null,
   "direction": "example",
   "library": {
     "version": "1.0.27",
-    "commit": "72609d3db43b068a4192cdf3483bc6d032ff17cd",
+    "commit": "4022bfdc254aafce186f540146423c05942ddc29",
     "branch": "claude/brave-allen-ngsefw",
     "dirty": false
   },
@@ -17,6 +17,7 @@
     "personas": ["mouse", "keyboard", "mobile", "dark", "fr"],
     "repeat": 2,
     "journeys": ["search", "filter", "open-conversation", "reply", "blank-reply", "customer-details", "archive-undo", "resolve"],
+    "axe": true,
     "full": true
   },
   "build": null,

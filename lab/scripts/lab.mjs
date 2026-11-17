@@ -15,7 +15,7 @@ import { checkAxe, checkOverflow, componentIn, createFocusChecker, watchConsole 
 import { axTree, checkAxTree, formatAxTree } from './lib/ax-tree.mjs'
 import { describeStep, locate, runStep } from './lib/steps.mjs'
 import { ensureServer } from './lib/server.mjs'
-import { buildRecord, compare, loadRecords, writeRecord } from './lib/record.mjs'
+import { buildRecord, comparable, compare, loadRecords, writeRecord } from './lib/record.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = resolve(LAB, '..')
@@ -40,9 +40,17 @@ function parseArgs(argv) {
     else if (arg === '--record') options.record = true
     else throw new Error(`Unknown option ${arg}`)
   }
-  // A replay is the lab's regression check: every target, twice, recorded.
+  // A replay is the lab's regression check: every target, every persona and journey, every oracle, recorded. Options
+  // that would make it partial, or that only mean something for one target, belong to `run`.
+  if (command === 'replay') {
+    const partial = ['personas', 'journeys', 'steps', 'aria'].filter((key) => options[key])
+    if (partial.length) throw new Error(`replay runs every persona and journey; --${partial.join(', --')} belong to \`run <target>\``)
+    if (options.axe === false) throw new Error('replay runs every oracle; --no-axe belongs to `run <target>`')
+    options.record = true
+  } else if (options.targets) {
+    throw new Error('--targets belongs to `replay`; `run` takes one target')
+  }
   options.repeat ??= command === 'replay' ? 2 : 1
-  if (command === 'replay') options.record = true
   return options
 }
 
@@ -281,7 +289,7 @@ async function run(options) {
     record = buildRecord({ root: ROOT, target, mode: options.mode, options, personas: personaNames, results, findings, startedAt, finishedAt: new Date() })
     record.change = compare(
       loadRecords(ROOT, target.name)
-        .filter((previous) => previous.runner.full)
+        .filter((previous) => comparable(previous, record))
         .at(-1),
       record,
     )
@@ -298,6 +306,7 @@ function printChange(change) {
   console.log(`Since ${change.previous} (library ${change.previousLibrary.version} @ ${String(change.previousLibrary.commit).slice(0, 8)}):`)
   line('findings that appeared', change.appeared)
   line('findings that are gone', change.gone)
+  line('findings not reached (a journey they need failed)', change.unverified)
   line('journeys now passing', change.nowPassing)
   line('journeys now failing', change.nowFailing)
 }
@@ -310,31 +319,44 @@ async function replay(options) {
   const outcomes = []
   for (const name of names) {
     console.log(`\n═══ ${name} ═══`)
-    outcomes.push({ name, ...(await run({ ...options, targetName: name })) })
+    // One target failing to start (a server that does not answer, a broken target file) must not hide the others.
+    try {
+      outcomes.push({ name, ...(await run({ ...options, targetName: name })) })
+    } catch (error) {
+      console.error(`${name}: ${error.message}`)
+      outcomes.push({ name, code: 1, record: null, error: error.message.split('\n')[0] })
+    }
   }
 
-  const library = outcomes[0]?.record.library
+  const library = outcomes.find(({ record }) => record)?.record.library
   const summary = [
     `## Component lab replay`,
     '',
-    `Library ${library?.version} @ \`${String(library?.commit).slice(0, 8)}\`${library?.dirty ? ' (with local component edits)' : ''}.`,
+    library
+      ? `Library ${library.version} @ \`${String(library.commit).slice(0, 8)}\`${library.dirty ? ' (with local component edits)' : ''}.`
+      : 'No target ran.',
     '',
     '| Target | Journeys passed | New | Known | Flaky | Gone since last run | Appeared since last run |',
     '| --- | --- | --- | --- | --- | --- | --- |',
-    ...outcomes.map(({ name, record }) => {
+    ...outcomes.map(({ name, record, error }) => {
+      if (!record) return `| ${name} | **error:** ${error} | | | | | |`
       const sum = record.summary
       return `| ${name} | ${sum.passed}/${sum.journeys} | ${sum.findings.new} | ${sum.findings.known} | ${sum.findings.flaky} | ${record.change?.gone.length ?? '–'} | ${record.change?.appeared.length ?? '–'} |`
     }),
   ]
   // A known finding that a full run no longer sees is a component fix to confirm: then drop it from known.json and
-  // move its COMPONENT-FEEDBACK.md entry to Fixed.
+  // move its COMPONENT-FEEDBACK.md entry to Fixed. Only a run whose every journey passed on every repeat reached all
+  // the states the known findings were seen in; otherwise their absence proves nothing.
   const known = loadKnown()
+  const conclusive = ({ record }) => record?.runner.full && record.summary.failed === 0 && record.summary.flakyJourneys === 0
   const stale = outcomes
-    .filter(({ record }) => record.runner.full)
+    .filter(conclusive)
     .flatMap(({ name, record }) => Object.keys(known).filter((key) => key.startsWith(`${name}/`) && !record.findings.some((finding) => finding.key === key)))
   if (stale.length)
     summary.push('', 'Known findings no longer seen (confirm the fix, then remove them from `lab/known.json`):', '', ...stale.map((key) => `- \`${key}\``))
-  const appeared = outcomes.flatMap(({ record }) => record.change?.appeared ?? [])
+  const skipped = outcomes.filter((outcome) => outcome.record && !conclusive(outcome)).map(({ name }) => name)
+  if (skipped.length) summary.push('', `Not checked for fixed findings, since a journey failed: ${skipped.join(', ')}.`)
+  const appeared = outcomes.flatMap(({ record }) => record?.change?.appeared ?? [])
   if (appeared.length) summary.push('', 'Findings that appeared since the last run:', '', ...appeared.map((key) => `- \`${key}\``))
   const text = summary.join('\n') + '\n'
   mkdirSync(join(ROOT, 'test-results', 'lab'), { recursive: true })

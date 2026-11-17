@@ -4,7 +4,7 @@
 // with the target's previous one shows what a library change fixed or broke.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import { frontMatter, reportRows } from './markdown.mjs'
 
 export const SCHEMA = 1
@@ -37,7 +37,7 @@ function buildSnapshot(root, spec, direction) {
   const file = join(root, 'lab', 'reports', spec, `${direction}.md`)
   if (!existsSync(file)) return null
   const { data, body } = frontMatter(readFileSync(file, 'utf8'))
-  const outcomes = Object.fromEntries([...reportRows(body)].map(([id, row]) => [id, { outcome: row.outcome, component: row.components[0] ?? null }]))
+  const outcomes = Object.fromEntries([...reportRows(body)].map(([id, row]) => [id, { outcome: row.outcome, components: row.components }]))
   return { report: relative(root, file), builder: data.builder ?? null, date: data.date ?? null, outcomes }
 }
 
@@ -67,8 +67,9 @@ export function buildRecord({ root, target, mode, options, personas, results, fi
       personas,
       repeat: options.repeat,
       journeys: [...new Set(results.map((result) => result.journey))],
-      // Only a full run (every persona, every journey, no ad-hoc steps) can say that a finding is gone.
-      full: !options.personas && !options.journeys && !options.steps,
+      axe: options.axe,
+      // Only a full run (every persona, every journey, every oracle, no ad-hoc steps) can say that a finding is gone.
+      full: !options.personas && !options.journeys && !options.steps && options.axe !== false,
     },
     build: buildSnapshot(root, spec, direction),
     summary: {
@@ -107,24 +108,35 @@ export function loadRecords(root, targetName) {
     .sort((a, b) => a.startedAt.localeCompare(b.startedAt))
 }
 
+/** Two records can be compared when both are full runs with the same repeat count: "reproducible" means "seen on
+ * every repeat", so a finding seen once in a single run is not the same evidence as one seen twice in two. */
+export function comparable(previous, current) {
+  return Boolean(previous?.runner.full && current?.runner.full && previous.runner.repeat === current.runner.repeat)
+}
+
 /**
- * What changed since the target's previous full run: findings that appeared, findings that are gone (fixed, or the
- * check stopped seeing them), and journeys that started or stopped passing. Partial runs are compared with nothing.
+ * What changed since the target's previous comparable run: findings that appeared, findings that are gone, and
+ * journeys that started or stopped passing. A finding counts as gone only when every journey it was seen in passed
+ * this time on every repeat; when one of them broke, the run never reached the state that showed the finding, so the
+ * finding is `unverified`, not gone.
  */
 export function compare(previous, current) {
-  if (!previous || !previous.runner.full || !current.runner.full) return null
-  const keys = (record) => new Set(record.findings.filter((finding) => finding.reproducible).map((finding) => finding.key))
-  const before = keys(previous)
-  const after = keys(current)
+  if (!comparable(previous, current)) return null
+  const reproducible = (record) => new Map(record.findings.filter((finding) => finding.reproducible).map((finding) => [finding.key, finding]))
+  const before = reproducible(previous)
+  const after = reproducible(current)
   const passing = (record) => new Set(record.journeys.filter((entry) => entry.passed === entry.runs).map((entry) => `${entry.persona}/${entry.journey}`))
   const passedBefore = passing(previous)
   const passedAfter = passing(current)
   const journeysNow = new Set(current.journeys.map((entry) => `${entry.persona}/${entry.journey}`))
+  const missing = [...before.keys()].filter((key) => !after.has(key))
+  const reached = (key) => Object.keys(before.get(key).seen ?? {}).every((where) => passedAfter.has(where))
   return {
     previous: previous.id,
     previousLibrary: previous.library,
-    appeared: [...after].filter((key) => !before.has(key)),
-    gone: [...before].filter((key) => !after.has(key)),
+    appeared: [...after.keys()].filter((key) => !before.has(key)),
+    gone: missing.filter(reached),
+    unverified: missing.filter((key) => !reached(key)),
     nowPassing: [...passedAfter].filter((key) => !passedBefore.has(key)),
     nowFailing: [...passedBefore].filter((key) => journeysNow.has(key) && !passedAfter.has(key)),
   }
@@ -135,6 +147,8 @@ export function writeRecord(root, record) {
   mkdirSync(dir, { recursive: true })
   let file = join(dir, `${record.id}.json`)
   for (let n = 2; existsSync(file); n++) file = join(dir, `${record.id}-${n}.json`)
+  // Two runs of a target in the same minute: the id follows the file name, so `change.previous` stays unambiguous.
+  record.id = basename(file, '.json')
   writeFileSync(file, JSON.stringify(record, null, 2) + '\n')
   return relative(root, file)
 }

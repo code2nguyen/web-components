@@ -99,13 +99,21 @@ export async function checkAxe(page, report) {
   // what a person reads, and measured mid-transition its colours fail contrast that the settled page passes.
   await settleAnimations(page)
   const first = await new AxeBuilder({ page }).analyze()
+  if (!first.violations.length) return
+  // The second pass only re-checks the rules the first one broke. A node counts as the same when its selector or its
+  // markup matches, since a list that re-rendered in between gives its rows new `:nth-child` selectors.
   await page.waitForTimeout(500)
   await settleAnimations(page)
-  const second = await new AxeBuilder({ page }).analyze()
-  const nodeKey = (rule, node) => `${rule}|${JSON.stringify(node.target)}`
-  const seenFirst = new Set(first.violations.flatMap((violation) => violation.nodes.map((node) => nodeKey(violation.id, node))))
+  const second = await new AxeBuilder({ page }).withRules([...new Set(first.violations.map((violation) => violation.id))]).analyze()
+  const seenTargets = new Set(first.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id}|${JSON.stringify(node.target)}`)))
+  const seenMarkup = new Set(first.violations.flatMap((violation) => violation.nodes.map((node) => `${violation.id}|${node.html}`)))
   const stable = second.violations
-    .map((violation) => ({ ...violation, nodes: violation.nodes.filter((node) => seenFirst.has(nodeKey(violation.id, node))) }))
+    .map((violation) => ({
+      ...violation,
+      nodes: violation.nodes.filter(
+        (node) => seenTargets.has(`${violation.id}|${JSON.stringify(node.target)}`) || seenMarkup.has(`${violation.id}|${node.html}`),
+      ),
+    }))
     .filter((violation) => violation.nodes.length)
   for (const violation of stable) {
     const byComponent = new Map()

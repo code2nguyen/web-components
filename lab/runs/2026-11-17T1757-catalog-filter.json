@@ -1,15 +1,15 @@
 {
   "schema": 1,
-  "id": "2026-11-17T1734-catalog-filter",
-  "startedAt": "2026-11-17T17:34:37.147Z",
-  "durationSeconds": 209,
+  "id": "2026-11-17T1757-catalog-filter",
+  "startedAt": "2026-11-17T17:57:10.809Z",
+  "durationSeconds": 143,
   "mode": "replay",
   "target": "catalog-filter",
   "spec": "catalog-filter",
   "direction": "default",
   "library": {
     "version": "1.0.27",
-    "commit": "72609d3db43b068a4192cdf3483bc6d032ff17cd",
+    "commit": "4022bfdc254aafce186f540146423c05942ddc29",
     "branch": "claude/brave-allen-ngsefw",
     "dirty": false
   },
@@ -27,6 +27,7 @@
       "t7-sort-price",
       "t8-phone-drawer"
     ],
+    "axe": true,
     "full": true
   },
   "build": {
@@ -36,55 +37,55 @@
     "outcomes": {
       "R1": {
         "outcome": "workaround",
-        "component": "c2-search-field"
+        "components": ["c2-search-field", "c2-highlight"]
       },
       "R2": {
         "outcome": "workaround",
-        "component": "c2-facet-list"
+        "components": ["c2-facet-list"]
       },
       "R3": {
         "outcome": "met",
-        "component": "c2-facet-list"
+        "components": ["c2-facet-list"]
       },
       "R4": {
         "outcome": "workaround",
-        "component": "c2-slider"
+        "components": ["c2-slider", "c2-number-input"]
       },
       "R5": {
         "outcome": "met",
-        "component": "c2-switch"
+        "components": ["c2-switch"]
       },
       "R6": {
         "outcome": "met",
-        "component": "c2-chip"
+        "components": ["c2-chip", "c2-chip-group"]
       },
       "R7": {
         "outcome": "met",
-        "component": "c2-button"
+        "components": ["c2-button"]
       },
       "R8": {
         "outcome": "met",
-        "component": "c2-select"
+        "components": ["c2-select", "c2-list-item"]
       },
       "R9": {
         "outcome": "met",
-        "component": "c2-status-panel"
+        "components": ["c2-status-panel", "c2-button"]
       },
       "R10": {
         "outcome": "hand-rolled",
-        "component": null
+        "components": []
       },
       "R11": {
         "outcome": "workaround",
-        "component": "c2-sheet"
+        "components": ["c2-sheet", "c2-button"]
       },
       "R12": {
         "outcome": "met",
-        "component": "c2-facet-list"
+        "components": ["c2-facet-list", "c2-slider", "c2-switch", "c2-chip"]
       },
       "R13": {
         "outcome": "met",
-        "component": "c2-format-number"
+        "components": ["c2-format-number"]
       }
     }
   },
