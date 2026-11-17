@@ -194,9 +194,14 @@ toolbar.addEventListener('selection-action', async ({ detail }) => {
     range.deleteContents()
     range.insertNode(document.createTextNode(answer.value))
   }
-  if (detail.action === 'replace' || detail.action === 'discard') toolbar.prompting = false
-  if (detail.action === 'shorten') streamInto(answer, await ask('Make it shorter', detail.text))
+  const done = ['replace', 'discard'].includes(detail.action)
+  if (done) toolbar.prompting = false
+  if (detail.action === 'shorten') {
+    streamInto(answer, await ask('Make it shorter', detail.text))
+  }
 })
-// Escape, or disabling the toolbar, closes the prompt: stop the request.
-toolbar.addEventListener('toggle', ({ detail }) => detail.open || controller.abort())
+// Escape, or disabling the toolbar, closes the prompt: stop the call.
+toolbar.addEventListener('toggle', ({ detail }) => {
+  if (!detail.open) controller.abort()
+})
 ```

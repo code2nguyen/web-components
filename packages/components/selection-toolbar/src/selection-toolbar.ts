@@ -80,9 +80,9 @@ const KEYBOARD_SETTLE = 300
  * @cssproperty {padding} [--c2-selection-toolbar--padding=4px]
  * @cssproperty {pixel} [--c2-selection-toolbar--gap=2px] - Space between the controls.
  * @cssproperty {pixel} [--c2-selection-toolbar--offset=8px] - Distance from the selection.
- * @cssproperty {pixel} [--c2-selection-toolbar__prompt--width=360px]
- * @cssproperty {pixel} [--c2-selection-toolbar__prompt--gap=8px]
- * @cssproperty {pixel} [--c2-selection-toolbar__result--max-height=240px]
+ * @cssproperty {pixel} [--c2-selection-toolbar__prompt--width=360px] - Width of the toolbar while it shows the prompt, capped by the viewport.
+ * @cssproperty {pixel} [--c2-selection-toolbar__prompt--gap=8px] - Space between the rows of the prompt and the result, and between the two.
+ * @cssproperty {pixel} [--c2-selection-toolbar__result--max-height=240px] - Height past which the result scrolls.
  */
 @customElement('c2-selection-toolbar')
 export class SelectionToolbar extends LitElement {
