@@ -16,11 +16,37 @@ const fieldsAttribute = JSON.stringify(FIELDS).replaceAll("'", '&#39;')
 const editor = (value: string, extra = '') =>
   `<c2-rich-text-editor label="Email" merge-fields='${fieldsAttribute}' ${extra} value="${value.replaceAll('"', '&quot;')}"></c2-rich-text-editor>`
 
-/** Puts the caret at the end of the text with a real click and End: WebKit drops the caret of a programmatic focus. */
+/**
+ * Puts the caret at the end of the text with a real click and End: WebKit drops the caret of a programmatic focus.
+ * After the mouse is released, ProseMirror writes its selection back to the DOM from a timer, which would undo a key
+ * pressed meanwhile; a timer queued after it has run once that write is done.
+ */
 async function caretAtEnd(page: Page) {
   await text$(page).click()
-  await page.keyboard.press('End')
+  await settle(page)
+  await press(page, 'End')
 }
+
+/** Lets the page run the tasks a key or a click queued (`selectionchange`, ProseMirror's own timers). */
+const settle = (page: Page) => page.evaluate(() => new Promise((resolve) => setTimeout(resolve)))
+
+/**
+ * Presses a caret key and waits for the editor to read the move: ProseMirror takes the caret from `selectionchange`,
+ * and its arrow handling next to a chip starts from the selection it has, so the next key must not come first.
+ */
+async function press(page: Page, key: string, times = 1) {
+  for (let i = 0; i < times; i++) {
+    await page.keyboard.press(key)
+    await settle(page)
+  }
+}
+
+/**
+ * The editor's selection head. The editor reads a caret move from `selectionchange`, which fires after the key press
+ * returns, so a method called straight after an arrow key must first wait for it.
+ */
+const selectionHead = (page: Page) =>
+  host(page).evaluate((element) => (element as unknown as { view: { state: { selection: { head: number } } } }).view.state.selection.head)
 
 test('tokens of listed fields are drawn as chips, while the value, text and HTML keep the token', async ({ page, renderScenario }) => {
   await renderScenario(editor('Hi {{first_name|there}} from **{{ company }}**, see {{unknown}}.'))
@@ -48,7 +74,9 @@ test('insertMergeField puts a chip at the caret with the field fallback, and ref
   await renderScenario(editor('Hi !'))
   await watch(host(page), 'input')
   await caretAtEnd(page)
-  await page.keyboard.press('ArrowLeft')
+  await press(page, 'ArrowLeft')
+  // "Hi !" is positions 1–5 of the paragraph: the caret before "!" is 4.
+  await expect.poll(() => selectionHead(page)).toBe(4)
   expect(await host(page).evaluate((element: RichTextEditor) => element.insertMergeField('nickname'))).toBe(false)
   expect(await host(page).evaluate((element: RichTextEditor) => element.insertMergeField('first_name'))).toBe(true)
   await expect(chips(page)).toHaveText(['First name'])
@@ -64,7 +92,7 @@ test('insertMergeField puts a chip at the caret with the field fallback, and ref
 test('Backspace and Delete remove a chip as one unit', async ({ page, renderScenario }) => {
   await renderScenario(editor('Dear {{first_name}}, hi'))
   await caretAtEnd(page)
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowLeft')
+  await press(page, 'ArrowLeft', 4)
   await page.keyboard.press('Backspace')
   await expect(host(page)).toHaveJSProperty('value', 'Dear , hi')
   await expect(chips(page)).toHaveCount(0)
@@ -72,7 +100,7 @@ test('Backspace and Delete remove a chip as one unit', async ({ page, renderScen
   await props(host(page), { value: 'Dear {{company}}, hi' })
   await caretAtEnd(page)
   // Past ", hi", then a step that selects the chip and one that leaves the caret right before it.
-  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowLeft')
+  await press(page, 'ArrowLeft', 6)
   await expect(chips(page)).not.toHaveClass(/ProseMirror-selectednode/)
   await page.keyboard.press('Delete')
   await expect(host(page)).toHaveJSProperty('value', 'Dear , hi')
@@ -90,9 +118,9 @@ test('the arrow keys select a chip, Enter activates it, and insertMergeField the
   await renderScenario(editor('Dear {{first_name}}, hi'))
   await watch(host(page), 'merge-field-activate')
   await caretAtEnd(page)
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowLeft')
+  await press(page, 'ArrowLeft', 4)
   // One more step selects the chip rather than entering it.
-  await page.keyboard.press('ArrowLeft')
+  await press(page, 'ArrowLeft')
   await expect(chips(page)).toHaveClass(/ProseMirror-selectednode/)
   await page.keyboard.press('Enter')
   await expect
