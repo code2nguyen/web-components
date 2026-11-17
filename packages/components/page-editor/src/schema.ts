@@ -120,7 +120,7 @@ const listDepth = (dom: HTMLElement) => {
 export const mergeFieldToken = (name: string, fallback = '') => `{{${name}${fallback ? `|${fallback}` : ''}}}`
 
 /** A merge field token in text: its name, then its fallback. Whitespace around either is not part of it. */
-export const MERGE_FIELD_PATTERN = /\{\{\s*([^{}|]*?)\s*(?:\|\s*([^{}]*?)\s*)?\}\}/g
+export const MERGE_FIELD_PATTERN = /\{\{\s*([^{}|]*?)\s*(?:\|\s*([^{}]*?)\s*)?\}\}/
 
 /**
  * A page is a flat list of blocks. List items are not nested nodes: each carries its kind and indent, which keeps

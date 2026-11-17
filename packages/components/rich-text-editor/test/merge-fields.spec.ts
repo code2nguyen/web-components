@@ -176,3 +176,37 @@ test('passes an accessibility scan with chips, one of them selected', async ({ p
   await chips(page).first().click()
   await accessible(page)
 })
+
+test('a new array with the same fields keeps the caret and the history', async ({ page, renderScenario }) => {
+  await renderScenario(editor('Hi {{first_name}}'))
+  await caretAtEnd(page)
+  await page.keyboard.type(' there')
+  await props(host(page), { mergeFields: structuredClone(FIELDS) })
+  await page.keyboard.type('!')
+  await expect(host(page)).toHaveJSProperty('value', 'Hi {{first_name}} there!')
+  await page.keyboard.press('ControlOrMeta+z')
+  await expect(host(page)).not.toHaveJSProperty('value', 'Hi {{first_name}} there!')
+})
+
+test('inline code applied over a chip leaves the chip out of it', async ({ page, renderScenario }) => {
+  await renderScenario(editor('a {{company}} b'))
+  await text$(page).click()
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('ControlOrMeta+e')
+  await expect(text$(page).locator('code')).toHaveCount(2)
+  await expect(chips(page)).toHaveCount(1)
+  await expect(host(page)).toHaveJSProperty('value', '`a `{{company}}` b`')
+})
+
+test('a field whose name a token cannot hold, or whose fallback is not text, is handled without throwing', async ({ page, renderScenario }) => {
+  await renderScenario(editor('x'))
+  await props(host(page), { mergeFields: [{ name: 'a|b' }, { name: ' spaced' }, { name: 'count', fallback: 0 }] })
+  await caretAtEnd(page)
+  const results = await host(page).evaluate((element: RichTextEditor) => [
+    element.insertMergeField('a|b'),
+    element.insertMergeField(' spaced'),
+    element.insertMergeField('count'),
+  ])
+  expect(results).toEqual([false, false, true])
+  await expect(host(page)).toHaveJSProperty('value', 'x{{count}}')
+})

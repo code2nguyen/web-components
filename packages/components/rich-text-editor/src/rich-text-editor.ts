@@ -288,6 +288,8 @@ class MergeFieldView implements NodeView {
     return true
   }
 
+  // The chip's content is the editor's own drawing. A selection inside it is not read either: the chip is an atom,
+  // and ProseMirror keeps the caret on one side of it (or the chip selected).
   ignoreMutation() {
     return true
   }
@@ -325,7 +327,8 @@ class MergeFieldView implements NodeView {
  *
  * Merge fields are template tokens such as `{{first_name}}`. List the fields in `merge-fields` (or `mergeFields`) and
  * the tokens of those fields in the value are drawn as chips the caret steps over and Backspace removes whole, while
- * the value, `text` and `toHTML()` keep the token. Insert one with `insertMergeField(name)` from the app's own menu (in
+ * the value, `text` and `toHTML()` keep the token (right after a typed token becomes a chip, Backspace turns it back
+ * into text, as it does for typed Markdown). Insert one with `insertMergeField(name)` from the app's own menu (in
  * `toolbar-end`, or under a `trigger` such as `{{`), or type the token. `{{first_name|there}}` carries a fallback, the
  * text to use where the field has no value. Clicking a chip, or Enter on a selected one, fires `merge-field-activate`;
  * `insertMergeField()` then replaces that chip, to change its fallback.
@@ -489,8 +492,11 @@ export class RichTextEditor extends LitElement {
   private parsedFormats: { formats: string; entries: ToolbarEntry[]; allowed: Set<RichTextFormatName> } | null = null
   private fieldList?: RichTextMergeField[]
   private fieldMap = new Map<string, RichTextMergeField>()
-  /** The fields the document was last read with. */
-  private appliedFields?: RichTextMergeField[]
+  /** The listed fields as a string, so a new array with the same fields changes nothing. */
+  private fieldKey = '[]'
+  /** The fields the document was last read with, and the chips last drawn with. */
+  private appliedFieldKey = '[]'
+  private drawnFieldKey = '[]'
   private readonly mergeFieldViews = new Set<MergeFieldView>()
   private chipLocale = ''
 
@@ -534,9 +540,18 @@ export class RichTextEditor extends LitElement {
     if (this.fieldList !== this.mergeFields) {
       this.fieldList = this.mergeFields
       const list = Array.isArray(this.mergeFields) ? this.mergeFields : []
-      this.fieldMap = new Map(list.filter((field) => typeof field?.name === 'string' && field.name).map((field) => [field.name, field]))
+      // A name a token cannot hold (`{`, `}`, `|`, spaces at its ends) could never be read back.
+      const usable = list.filter((field) => typeof field?.name === 'string' && /^[^{}|\s]([^{}|]*[^{}|\s])?$/.test(field.name))
+      this.fieldMap = new Map(usable.map((field) => [field.name, field]))
+      this.fieldKey = JSON.stringify(usable.map(({ name, label, fallback }) => [name, label, fallback]))
     }
     return this.fieldMap
+  }
+
+  /** `fieldKey` for the current `mergeFields`. */
+  private get currentFieldKey() {
+    void this.fields
+    return this.fieldKey
   }
 
   private get toolbarEntries(): ToolbarEntry[] {
@@ -696,8 +711,7 @@ export class RichTextEditor extends LitElement {
     if (this.trigger) tr.setSelection(TextSelection.create(tr.doc, this.trigger.from, state.selection.head))
     const { $from } = tr.selection
     if ($from.parent.type.spec.code) return false
-    const marks = (state.storedMarks ?? $from.marks()).filter((mark) => mark.type !== schema.marks.code)
-    tr.replaceSelectionWith(this.mergeFieldNode(name, options.fallback ?? field.fallback, marks), false)
+    tr.replaceSelectionWith(this.mergeFieldNode(name, options.fallback ?? field.fallback, state.storedMarks ?? $from.marks()), false)
     view.dispatch(tr.scrollIntoView())
     view.focus()
     return true
@@ -812,13 +826,15 @@ export class RichTextEditor extends LitElement {
       this.endTrigger()
       this.emitFormat()
     }
-    if (this.mergeFields !== this.appliedFields) {
+    if (this.currentFieldKey !== this.appliedFieldKey) {
       // Tokens of fields no longer listed become text, and those of new ones chips.
       view.updateState(this.createState(this.serialized))
       this.adoptDoc()
+      this.endTrigger()
     }
-    if (this.msg.locale !== this.chipLocale || changed.has('renderMergeField') || changed.has('mergeFields')) {
+    if (this.msg.locale !== this.chipLocale || changed.has('renderMergeField') || this.fieldKey !== this.drawnFieldKey) {
       this.chipLocale = this.msg.locale
+      this.drawnFieldKey = this.fieldKey
       for (const chip of this.mergeFieldViews) chip.draw(chip)
     }
     if (changed.has('formats') && changed.get('formats') !== undefined) {
@@ -851,7 +867,7 @@ export class RichTextEditor extends LitElement {
   }
 
   private createState(markdown: string) {
-    this.appliedFields = this.mergeFields
+    this.appliedFieldKey = this.currentFieldKey
     return EditorState.create({ schema, doc: this.restrictedDoc(markdown), plugins: this.plugins() })
   }
 
@@ -941,6 +957,17 @@ export class RichTextEditor extends LitElement {
       }
     const activateSelectedField: Command = (state) =>
       state.selection instanceof NodeSelection && state.selection.node.type === schema.nodes.merge_field && this.activateMergeField(state.selection.from)
+    // Inline code applied over a chip leaves the chip out: in code, its token would read back as text.
+    const chipsOutOfCode = new Plugin({
+      appendTransaction: (transactions, _old, state) => {
+        if (!transactions.some((tr) => tr.steps.some((step) => (step as { mark?: Mark }).mark?.type === schema.marks.code))) return null
+        const tr = state.tr
+        state.doc.descendants((node, pos) => {
+          if (node.type === schema.nodes.merge_field && schema.marks.code.isInSet(node.marks)) tr.removeMark(pos, pos + node.nodeSize, schema.marks.code)
+        })
+        return tr.docChanged ? tr : null
+      },
+    })
     const placeholder = new Plugin({
       props: {
         decorations: (state) => {
@@ -1008,6 +1035,7 @@ export class RichTextEditor extends LitElement {
       normalize,
       placeholder,
       linkTargetPlugin,
+      chipsOutOfCode,
     ]
   }
 
@@ -1130,7 +1158,9 @@ export class RichTextEditor extends LitElement {
 
   private mergeFieldNode(name: string, fallback: string | undefined, marks: readonly Mark[]): ProseNode {
     // A fallback holding braces would end the token early.
-    return schema.nodes.merge_field.create({ name, fallback: (fallback ?? '').replace(/[{}]/g, '').trim() }, null, marks)
+    const text = typeof fallback === 'string' ? fallback.replace(/[{}]/g, '').trim() : ''
+    // Inline code would make the token literal text the next time the value is read.
+    return schema.nodes.merge_field.create({ name, fallback: text }, null, schema.marks.code.removeFromSet(marks))
   }
 
   /** A text node with the tokens of listed fields (outside code) turned into merge field nodes. */
@@ -1140,7 +1170,7 @@ export class RichTextEditor extends LitElement {
     const source = text.text!
     const nodes: ProseNode[] = []
     let last = 0
-    for (const match of source.matchAll(MERGE_FIELD_PATTERN)) {
+    for (const match of source.matchAll(new RegExp(MERGE_FIELD_PATTERN, 'g'))) {
       if (!fields.has(match[1])) continue
       if (match.index! > last) nodes.push(schema.text(source.slice(last, match.index), text.marks))
       nodes.push(this.mergeFieldNode(match[1], match[2], text.marks))
@@ -1153,7 +1183,7 @@ export class RichTextEditor extends LitElement {
   private drawMergeField(chip: MergeFieldView) {
     const { name, fallback } = chip.node.attrs as { name: string; fallback: string }
     const field = this.fields.get(name) ?? { name }
-    const label = field.label || name
+    const label = typeof field.label === 'string' && field.label ? field.label : name
     chip.dom.title = fallback ? this.msg.t('mergeFieldFallback', label, fallback) : this.msg.t('mergeField', label)
     render(this.renderMergeField ? this.renderMergeField({ field, label, fallback }) : label, chip.dom)
   }
