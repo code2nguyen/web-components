@@ -17,7 +17,7 @@ function walk(dir) {
   if (!existsSync(dir)) return []
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name)
-    return statSync(path).isDirectory() ? walk(path) : name.endsWith('.md') && name !== 'TEMPLATE.md' ? [path] : []
+    return statSync(path).isDirectory() ? walk(path) : name.endsWith('.md') && name !== 'TEMPLATE.md' && name !== 'README.md' ? [path] : []
   })
 }
 

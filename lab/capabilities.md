@@ -28,7 +28,22 @@ Each entry reads `` `tag` `` followed by a description.
 - `list.large`: hundreds or thousands of items stay smooth
 - `table.sort`: sort a table by a column
 - `table.inline-edit`: edit a value in place in a row
+- `list.reorder`: move items by drag or keyboard, within a list or between lists
 - `data.async-source`: data comes from a paged or remote source
+
+## Inputs
+
+- `input.choice`: pick one of a few options shown at once (a segmented control, option cards)
+- `input.date`: pick one date, with dates that cannot be picked
+- `input.date-range`: pick a start and an end date, or a preset range
+- `input.time-slot`: pick one of the available times of a day
+- `input.number`: enter a number within limits (a quantity, a percentage), by typing or stepping
+- `input.money`: enter or show an amount of money
+- `input.payment-card`: enter a card number, expiry and security code
+- `input.address`: enter a postal address that follows the country
+- `input.phone`: enter a phone number with its country
+- `input.file-upload`: choose files, see their progress, retry or remove them
+- `input.rich-text`: write formatted text (bold, links, lists)
 
 ## Forms
 
@@ -51,7 +66,23 @@ Each entry reads `` `tag` `` followed by a description.
 
 - `nav.tabs`: sections switched with tabs
 - `nav.sidebar`: a side navigation that collapses on small screens
+- `nav.steps`: a flow of several steps that shows where the user is and lets them go back
+- `nav.breadcrumb`: the path to the current page, each level a link
+- `nav.command-palette`: a keyboard-opened palette to jump anywhere or run a command
+- `layout.disclosure`: sections that expand and collapse (an FAQ, settings groups)
 - `layout.responsive`: the layout changes for a phone, not just shrinks
+
+## Charts
+
+- `chart.kpi`: headline numbers with their change against a previous period
+- `chart.trend`: a value over time
+- `chart.compare`: categories compared with each other, or shares of a whole
+
+## Planning and collaboration
+
+- `planning.board`: items in columns by status, moved between them
+- `collab.comments`: people comment on an item and see each other's comments
+- `collab.activity`: a timeline of what happened to an item, newest first
 
 ## Theming and language
 
