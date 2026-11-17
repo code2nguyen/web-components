@@ -445,6 +445,10 @@
       "types": "./dist/date-input.d.ts",
       "default": "./dist/date-input.js"
     },
+    "./date-input/date-fields": {
+      "types": "./dist/date-input/date-fields.d.ts",
+      "default": "./dist/date-input/date-fields.js"
+    },
     "./date-selector": {
       "types": "./dist/date-selector.d.ts",
       "default": "./dist/date-selector.js"

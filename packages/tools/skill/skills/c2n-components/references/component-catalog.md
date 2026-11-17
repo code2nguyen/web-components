@@ -170,6 +170,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
+- **Date Fields** — `c2-date-fields` · `@c2n/components/date-input/date-fields` — A memorable date typed as three labelled fields, day, month and year, in one form control, with errors that name the wrong part.
 - **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range, one date or several dates.
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.

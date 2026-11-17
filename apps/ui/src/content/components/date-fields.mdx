@@ -1,0 +1,78 @@
+---
+title: 'Date Fields'
+description: 'A memorable date typed as three labelled fields, day, month and year, in one form control, with errors that name the wrong part.'
+category: 'Inputs'
+package: '@c2n/date-input'
+tag: 'c2-date-fields'
+apiTags: ['c2-date-fields']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DateFields } from '@c2n/components/date-input/date-fields'
+
+`c2-date-fields` is the companion of [`c2-date-input`](/web-components/components/date-input) for dates people know by
+heart: a date of birth, the issue date on a passport, the day a policy started. Typing three short numbers is quicker
+there than paging a calendar back forty years, so it draws a day, a month and a year field with their labels, in the
+order of the page's language (month first in American English, day first in British English and French). It is one
+form control: its `value` is the ISO date (`YYYY-MM-DD`) once the three parts make a real one, and empty until then.
+
+## Import
+
+```typescript tag=CodeBlock
+import '@c2n/components/date-input/date-fields'
+```
+
+The entry registers `c2-date-fields` only. It loads none of the date input's picker or calendar code.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/date-input
+<div data-label="Date of birth">
+  <c2-date-fields aria-label="Date of birth" autocomplete="bday" help="For example, 27 3 2007" lang="en-GB"></c2-date-fields>
+</div>
+<div data-label="Order and bounds">
+  <c2-date-fields aria-label="Passport issued" order="ymd" value="2019-06-14" min="2010-01-01" max="2026-12-31"></c2-date-fields>
+</div>
+<div data-label="Errors">
+  <c2-date-fields aria-label="Start date" lang="en-GB" value="2026-02-30" error></c2-date-fields>
+  <c2-date-fields aria-label="Renewal" value="2027-03-01" readonly></c2-date-fields>
+</div>
+```
+
+The fields take digits on a numeric keyboard (`inputmode="numeric"`), never move focus on their own (Tab goes from one
+to the next) and accept a day or month without its leading zero. `order` fixes the order with the letters `d`, `m` and
+`y`; `autocomplete="bday"` gives the fields `bday-day`, `bday-month` and `bday-year`, which browsers fill from a saved
+birth date.
+
+Validation names the part that is wrong and marks that field: "Date must include a month", "Day must be a number from 1
+to 31", "Year must have 4 digits", "Date must be a real date" (31 April), then `min` and `max` written out in the page's
+language. The message replaces `help` once focus leaves a group the user has typed in, or when the form is submitted;
+`error` shows it at once, or `error-text` in its place. The validity is a custom error, so a
+[`c2-form-field`](/web-components/components/form-field) around the fields shows the same message under its own label:
+
+```html tag=CodeBlock
+<c2-form-field label="Date of birth" hint="For example, 27 3 2007" validate-on="blur">
+  <c2-date-fields name="dob" autocomplete="bday" required></c2-date-fields>
+</c2-form-field>
+```
+
+The labels and messages are `date-fields` message tokens and follow the nearest `lang`:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'date-fields': {
+      day: 'Jour',
+      month: 'Mois',
+      year: 'Année',
+      missingMonth: 'La date doit comporter un mois',
+      badMonth: 'Le mois doit être un nombre de 1 à 12',
+      min: 'La date doit être le {0} ou après',
+    },
+  },
+})
+```
