@@ -2,12 +2,15 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { query, state } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
-import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, jsonPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './password-field.scss?inline'
+import { passwordFieldMessages } from './messages.js'
+import type { GeneratorPanel } from './generator-panel.js'
 
 /** Strength of a password, from 0 (too weak, or empty) to 4 (strong). */
 export type PasswordStrength = 0 | 1 | 2 | 3 | 4
@@ -35,6 +38,32 @@ export interface PasswordRequirementState {
   id: string
   label: string
   met: boolean
+}
+
+/**
+ * Options of the password generator (`generator`, `generate()`). Every field is optional; the field's `minlength`,
+ * `maxlength` and built-in requirements bound and complete them (a `number` requirement keeps Numbers on).
+ */
+export interface PasswordGeneratorOptions {
+  /** `password` (default): random characters. `passphrase`: random words joined by `separator`. */
+  kind?: 'password' | 'passphrase'
+  /** Characters of a password, 16 by default. */
+  length?: number
+  /** Character classes of a password, all on by default. */
+  lowercase?: boolean
+  uppercase?: boolean
+  numbers?: boolean
+  symbols?: boolean
+  /** Words of a passphrase, 5 by default (3 to 20). */
+  words?: number
+  /** Between the words of a passphrase, `-` by default. */
+  separator?: string
+  /** Starts each word of a passphrase with a capital. */
+  capitalize?: boolean
+  /** Adds one digit to a random word of a passphrase. */
+  includeNumber?: boolean
+  /** Words a passphrase is drawn from, in place of the built-in list of 1,548 English words (about 10.6 bits each). */
+  wordList?: readonly string[]
 }
 
 export interface PasswordFieldRevealChangeDetail {
@@ -113,6 +142,13 @@ export function scorePassword(value: string): PasswordStrength {
  * `number` and `symbol`, separated by semicolons, or from script any {@link PasswordRequirement} of your own.
  * While Caps Lock is on and the password is hidden, a warning shows under the field.
  *
+ * `generator` adds a generate button beside the toggle. It opens a popover with a suggested password, drawn from
+ * `crypto.getRandomValues`, its strength and entropy, a copy button, and its options: a length and four character
+ * classes, or a passphrase of random words with a separator. Use password puts it in the field and fires `input` and
+ * `change`. The popover, its word list and the components it is made of load the first time it opens.
+ * `generator-options` sets where it starts (a {@link PasswordGeneratorOptions} object); `minlength`, `maxlength` and
+ * the built-in requirements bound it, so a suggestion always meets them. `generate()` draws one from script.
+ *
  * The element is form-associated (`name`), so it submits with its form, and validates like an input: `required`,
  * `minlength`, `maxlength`, and every requirement once something is typed. `input` and `change` are re-dispatched
  * from the inner input. The strength comes from {@link scorePassword} unless `scorer` replaces it; while a requirement
@@ -128,6 +164,12 @@ export function scorePassword(value: string): PasswordStrength {
  * @slot show-icon - Replaces the eye shown while the password is hidden.
  * @slot hide-icon - Replaces the crossed-out eye shown while the password is revealed.
  * @slot supporting-text - Rich helper content below the field. `help` and `error-text` are the plain-text shortcuts.
+ * @slot generate-icon - Replaces the wand of the generate button (`generator`).
+ * @slot generator-actions - Buttons of your own in the generator popover, before Use password: save to a vault, for example.
+ *
+ * @csspart generate - The generate button at the end of the field (`generator`), beside the show/hide toggle.
+ * @csspart generator - The generator popover's surface: the suggestion, its strength, the options and the actions.
+ * @csspart generator-actions - The row at the bottom of the generator popover that wraps the `generator-actions` slot and Use password.
  *
  * @event {InputEvent} input - Re-dispatched from the inner input on every keystroke; `value` is already updated.
  * @event {Event} change - Re-dispatched from the inner input when the value is committed (blur or Enter).
@@ -153,7 +195,7 @@ export function scorePassword(value: string): PasswordStrength {
  *
  * @cssproperty {pixel} [--c2-password-field__icon--size=16px]
  * @cssproperty {color} [--c2-password-field__icon--color=#71717a]
- * @cssproperty {pixel} [--c2-password-field__toggle--size=24px] - Hit area of the show/hide button.
+ * @cssproperty {pixel} [--c2-password-field__toggle--size=24px] - Hit area of the show/hide button, and of the generate button.
  * @cssproperty {color} [--c2-password-field__toggle--color=#71717a]
  * @cssproperty {color} [--c2-password-field__toggle__hover--color=#18181b]
  * @cssproperty {color} [--c2-password-field__toggle__hover--background=#f4f4f5]
@@ -184,6 +226,23 @@ export function scorePassword(value: string): PasswordStrength {
  * @cssproperty {color} [--c2-password-field__requirement__met--color=#18181b] - Text of a met requirement.
  * @cssproperty {color} [--c2-password-field__requirement-icon__met--color=#16a34a] - Tick of a met requirement.
  * @cssproperty {pixel} [--c2-password-field__requirement-icon--size=14px]
+ *
+ * @cssproperty {pixel} [--c2-password-field__generator--width=320px] - Width of the generator popover (`generator`).
+ * @cssproperty {padding} [--c2-password-field__generator--padding=12px]
+ * @cssproperty {pixel} [--c2-password-field__generator--gap=12px] - Space between the suggestion, the options and the actions.
+ * @cssproperty {color} [--c2-password-field__generator--background=#ffffff]
+ * @cssproperty {color} [--c2-password-field__generator--color=#18181b]
+ * @cssproperty {border} [--c2-password-field__generator--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-password-field__generator--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-password-field__generator--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {color} [--c2-password-field__generator-label--color=#71717a] - Labels of the generator's options, and its copy and regenerate icons.
+ * @cssproperty {font-size} [--c2-password-field__generator-label--font-size=12px]
+ * @cssproperty {padding} [--c2-password-field__generator-preview--padding=4px 4px 4px 10px] - The box that shows the suggestion.
+ * @cssproperty {color} [--c2-password-field__generator-preview--color=#18181b]
+ * @cssproperty {color} [--c2-password-field__generator-preview--background=#f4f4f5]
+ * @cssproperty {border-radius} [--c2-password-field__generator-preview--border-radius=6px]
+ * @cssproperty {font-family} [--c2-password-field__generator-preview--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
+ * @cssproperty {font-size} [--c2-password-field__generator-preview--font-size=14px]
  */
 @customElement('c2-password-field')
 export class PasswordField extends LitElement {
@@ -247,6 +306,15 @@ export class PasswordField extends LitElement {
   /** Replaces {@link scorePassword} as the strength estimate. Returns 0 to 4. */
   @property({ attribute: false }) scorer?: (value: string) => number
 
+  /**
+   * Adds the generate button, which opens the password generator. The generator loads the first time it opens.
+   * Suggestions meet `minlength`, `maxlength` and the requirements; pair it with `autocomplete="new-password"`.
+   */
+  @property({ type: Boolean }) generator = false
+
+  /** Where the generator starts: a {@link PasswordGeneratorOptions} object, as JSON for the attribute. */
+  @property({ attribute: 'generator-options', converter: jsonPropertyConverter }) generatorOptions?: PasswordGeneratorOptions
+
   /** Marks the field invalid and shows `error-text` in place of `help`. */
   @property({ type: Boolean, reflect: true }) error = false
 
@@ -269,7 +337,11 @@ export class PasswordField extends LitElement {
   @state() private capsLock = false
   @state() private disabledByForm = false
   @state() private hasSupportingSlot = false
+  /** The generator popover, once its module has loaded. It reads the private members its module names in `FieldInternals`. */
+  private generatorPanel?: GeneratorPanel
+  private readonly msg = new LocalizeController(this, passwordFieldMessages)
   private dirty = false
+  private generatorLoad?: Promise<unknown>
   private customValidityMessage = ''
   private lastScore: PasswordStrength | undefined
 
@@ -299,14 +371,22 @@ export class PasswordField extends LitElement {
 
   /** The current strength, 0 to 4. */
   get strength(): PasswordStrength {
-    if (!this.value) return 0
-    const raw = this.scorer ? this.scorer(this.value) : scorePassword(this.value)
-    const score = Math.max(0, Math.min(4, Math.round(Number(raw) || 0))) as PasswordStrength
-    return this.requirementStates.every((requirement) => requirement.met) ? score : (Math.min(score, 1) as PasswordStrength)
+    return this.strengthOf(this.value)
   }
 
   /** Each requirement with whether the current value meets it. */
   get requirementStates(): PasswordRequirementState[] {
+    return this.requirementsOf(this.value)
+  }
+
+  private strengthOf(value: string): PasswordStrength {
+    if (!value) return 0
+    const raw = this.scorer ? this.scorer(value) : scorePassword(value)
+    const score = Math.max(0, Math.min(4, Math.round(Number(raw) || 0))) as PasswordStrength
+    return this.requirementsOf(value).every((requirement) => requirement.met) ? score : (Math.min(score, 1) as PasswordStrength)
+  }
+
+  private requirementsOf(value: string): PasswordRequirementState[] {
     const list = Array.isArray(this.requirements) ? this.requirements : []
     const minLength = this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
     const states: PasswordRequirementState[] = []
@@ -317,10 +397,10 @@ export class PasswordField extends LitElement {
       const label = requirement.label ?? builtIn?.label(minLength)
       if (!label) return
       let met: boolean
-      if (requirement.test) met = !!requirement.test(this.value)
+      if (requirement.test) met = !!requirement.test(value)
       else if (requirement.pattern !== undefined)
-        met = (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(this.value)
-      else met = builtIn ? builtIn.test(this.value, minLength) : false
+        met = (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(value)
+      else met = builtIn ? builtIn.test(value, minLength) : false
       states.push({ id: requirement.id ?? `requirement-${index}`, label, met })
     })
     return states
@@ -357,6 +437,33 @@ export class PasswordField extends LitElement {
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+  }
+
+  /**
+   * Draws a password with the generator without opening it: `generator-options`, overridden by `options`, bounded by
+   * the field's lengths and requirements. Loads the generator the first time. The value of the field is not changed.
+   */
+  async generate(options?: PasswordGeneratorOptions): Promise<string> {
+    return (await import('./password-generator.js')).generateFor(this, options)
+  }
+
+  /** Opens the generator popover (`generator`), loading it first if this is the first time. */
+  async showGenerator() {
+    if (!this.generator || this.effectiveDisabled) return
+    try {
+      await (this.generatorLoad ??= import('./generator-panel.js').then((module) => (this.generatorPanel = module.createGeneratorPanel(this))))
+    } catch (error) {
+      // Offline, or a deploy that replaced its file: the next press tries again.
+      this.generatorLoad = undefined
+      console.warn('[c2-password-field] the password generator could not be loaded', error)
+      return
+    }
+    this.generatorPanel?.toggle(true)
+  }
+
+  /** Closes the generator popover. */
+  hideGenerator() {
+    this.generatorPanel?.toggle(false)
   }
 
   formResetCallback() {
@@ -481,6 +588,14 @@ export class PasswordField extends LitElement {
     </button>`
   }
 
+  private renderGenerate() {
+    if (!this.generator) return nothing
+    // Once the popover exists, `popovertarget` makes this button its invoker: the browser toggles it, and a press on
+    // the button does not count as a press outside. Before that, the click loads it.
+    // prettier-ignore
+    return html`<button class="toggle generate" part="generate" type="button" popovertarget="generator" aria-label=${this.msg.t('generate')} aria-haspopup="dialog" aria-expanded=${!!this.generatorPanel?.open} ?disabled=${this.effectiveDisabled} @click=${() => this.generatorPanel || this.showGenerator()}><slot name="generate-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 4V2m0 14v-2M8 9h2m10 0h2m-4.2 2.8L19 13m-4-4h.01m2.79-2.8L19 5M3 21l9-9m.2-5.8L11 5"></path></svg></slot></button>`
+  }
+
   private renderMeter() {
     if (!this.meter) return nothing
     const score = this.value ? this.strength : 0
@@ -565,11 +680,11 @@ export class PasswordField extends LitElement {
           @focus=${() => (this.focused = true)}
           @blur=${() => (this.focused = false)}
         />
-        ${this.renderToggle()}
+        ${this.renderGenerate()}${this.renderToggle()}
       </div>
       ${this.renderMeter()} ${this.renderRequirements(requirements)}
       <div class="caps-lock" id="caps-lock" role="status">${this.capsLockShown ? this.capsLockText : nothing}</div>
-      ${this.renderSupportingText()}${this.field.renderDescription()}`
+      ${this.renderSupportingText()}${this.field.renderDescription()}${this.generatorPanel?.render() ?? nothing}`
   }
 }
 
