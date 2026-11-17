@@ -1,0 +1,115 @@
+---
+title: 'File preview gallery'
+description: 'An image with zoom, a PDF, video, audio, text, a set of files, a download fallback, header actions, a dialog, local files, a custom viewer and French.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import FilePreviewExamplesRuntime from '../../components/FilePreviewExamplesRuntime.astro'
+
+import { Button } from '@c2n/components/button'
+import { FilePreview } from '@c2n/components/attachment/file-preview'
+
+Each card is a `c2-file-preview` showing one kind of file, or a set of them. The viewers are the browser's own: nothing in a file runs.
+
+<FilePreviewExamplesRuntime />
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-file-preview name="mountains.svg" size="3 KB" src="/web-components/images/image-mountains.svg"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=PDF,description=A PDF in the browser's own viewer,useWhen=Readers check a document before downloading it
+<c2-file-preview name="quarterly-report.pdf" size="1 KB" src="/web-components/media/quarterly-report.pdf"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Text,description=A text file shown as text, never as HTML,useWhen=Logs, notes, subtitles and source files
+<c2-file-preview name="tour.en.vtt" size="1 KB" src="/web-components/media/tour.en.vtt"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Video,description=A video with the browser's controls
+<c2-file-preview name="tour.webm" size="1.1 MB" src="/web-components/media/tour.webm"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Audio,description=An audio track; a MIME type in type picks the viewer when the extension is ambiguous
+<style>
+  .file-preview-audio {
+    --c2-file-preview--height: 200px;
+  }
+</style>
+<c2-file-preview class="file-preview-audio" name="voice-note.webm" type="audio/webm" size="96 KB" src="/web-components/media/voice-note.webm"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=A set of files,description=Previous and next move through items; the header counts them,useWhen=An email's or a message's attachments
+<c2-file-preview
+  index="1"
+  items='[{"name":"mountains.svg","src":"/web-components/images/image-mountains.svg","size":"3 KB"},{"name":"workspace.svg","src":"/web-components/images/image-workspace.svg","size":"4 KB"},{"name":"quarterly-report.pdf","src":"/web-components/media/quarterly-report.pdf","size":"1 KB"}]'
+></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=No preview,description=A type the browser cannot show offers its download,useWhen=Archives, office documents and binaries
+<style>
+  .file-preview-none {
+    --c2-file-preview--height: 240px;
+  }
+</style>
+<c2-file-preview class="file-preview-none" name="brand-assets.zip" size="1 KB" src="/web-components/media/brand-assets.zip"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Header actions,description=The actions slot holds the app's own commands,useWhen=Share, rename or attach the file from the preview
+<c2-file-preview name="workspace.svg" size="4 KB" src="/web-components/images/image-workspace.svg">
+  <c2-button slot="actions">Share</c2-button>
+</c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Compact,description=A shorter frame with a tighter header and viewer
+<style>
+  .file-preview-compact {
+    --c2-file-preview--height: 260px;
+    --c2-file-preview--border-radius: 8px;
+    --c2-file-preview__header--padding: 4px 8px;
+    --c2-file-preview__viewer--padding: 8px;
+    --c2-file-preview__action--size: 28px;
+    --c2-file-preview__title--font-size: 12px;
+  }
+</style>
+<c2-file-preview class="file-preview-compact" name="image-chart.svg" size="2 KB" src="/web-components/images/image-chart.svg"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Dialog,description=modal draws the frame in a native dialog that showModal() opens,useWhen=The preview opens over the page
+<div>
+  <c2-button data-file-preview-example="open">Open the report</c2-button>
+  <c2-file-preview modal name="quarterly-report.pdf" size="1 KB" src="/web-components/media/quarterly-report.pdf"></c2-file-preview>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Local files,description=File objects, such as an input's, read without a URL,useWhen=Before an upload, or for files that never leave the browser
+<c2-file-preview data-file-preview-example="files"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=Custom viewer,description=renderViewer draws a CSV as a table and leaves other files to the built-in viewers,useWhen=A format needs its own viewer, such as PDF.js for PDFs
+<c2-file-preview data-file-preview-example="render"></c2-file-preview>
+```
+
+```html tag=MdxCodeBlock,label=En français,description=The interface text in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-file-preview
+    items='[{"name":"montagnes.svg","src":"/web-components/images/image-mountains.svg","size":"3 Ko"},{"name":"sous-titres.vtt","src":"/web-components/media/tour.fr.vtt","size":"1 Ko"}]'
+  ></c2-file-preview>
+</div>
+```
+
+</GalleryGrid>
+
+The Dialog, Local files and Custom viewer cards are set up from script:
+
+```ts tag=CodeBlock
+import type { FilePreview } from '@c2n/components/attachment/file-preview'
+
+const preview = document.querySelector<FilePreview>('c2-file-preview')!
+preview.items = [{ name: 'notes.md', file: new File([markdown], 'notes.md', { type: 'text/markdown' }) }]
+preview.renderViewer = ({ item }) => (item.name.endsWith('.csv') ? csvTable(item.text ?? '') : undefined)
+openButton.addEventListener('click', () => dialogPreview.showModal())
+```

@@ -5,7 +5,10 @@ description: 'File cards, image previews, upload states, and responsive attachme
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import AttachmentExamplesRuntime from '../../components/AttachmentExamplesRuntime.astro'
 import { Attachment, AttachmentGroup } from '@c2n/components/attachment'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid>
 
@@ -77,3 +80,62 @@ Groups provide spacing and collection semantics without changing the attachments
 ## Mixed media
 
 The mixed layout follows the reference composition: visual files form a tile row, while ordinary attachments and upload states span the full width below it.
+
+## Preview
+
+With `preview`, the name and the thumbnail open the file in a `c2-file-preview` dialog, and previous and next move through the group's previewable attachments. The viewer loads the first time a preview opens.
+
+<AttachmentExamplesRuntime />
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Preview a group,description=Each file opens in the preview with previous and next across the group,useWhen=Readers check a file before downloading it
+<c2-attachment-group>
+  <c2-attachment preview name="mountains.svg" type="SVG" size="3 KB" src="/web-components/images/image-mountains.svg" layout="row"></c2-attachment>
+  <c2-attachment preview name="quarterly-report.pdf" type="PDF" size="1 KB" href="/web-components/media/quarterly-report.pdf"></c2-attachment>
+  <c2-attachment preview name="tour.webm" type="Video" size="1.1 MB" href="/web-components/media/tour.webm"></c2-attachment>
+  <c2-attachment preview name="voice-note.webm" type="audio/webm" size="96 KB" href="/web-components/media/voice-note.webm"></c2-attachment>
+  <c2-attachment preview name="tour.en.vtt" type="Text" size="1 KB" href="/web-components/media/tour.en.vtt"></c2-attachment>
+</c2-attachment-group>
+```
+
+```html tag=MdxCodeBlock,label=Styled preview,description=The preview dialog themed through its variables on the attachment,useWhen=The preview should match a darker media surface
+<style>
+  .attachment-preview-styled {
+    --c2-file-preview--border-radius: 8px;
+    --c2-file-preview__viewer--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 88%, var(--c2-theme--color-surface, #ffffff));
+    --c2-file-preview__backdrop--background: rgba(24, 24, 27, 0.85);
+    --c2-file-preview__dialog--width: min(720px, calc(100vw - 32px));
+  }
+</style>
+<c2-attachment class="attachment-preview-styled" preview name="mountains.svg" type="SVG" size="3 KB" src="/web-components/images/image-mountains.svg"></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Own preview action,description=A button in the actions slot opens the preview through openPreview(),useWhen=The row needs a visible Preview command
+<c2-attachment preview name="quarterly-report.pdf" type="PDF" size="1 KB" href="/web-components/media/quarterly-report.pdf">
+  <c2-button slot="actions" data-attachment-example="open">Preview</c2-button>
+</c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Uploaded file,description=The preview reads the File an upload started from through the file property,useWhen=The file is local and has no URL yet
+<c2-attachment preview name="expenses.csv" type="CSV" size="1 KB" status="complete" data-attachment-example="file"></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=En français,description=The preview's text in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-attachment-group>
+    <c2-attachment preview name="notes.vtt" type="Texte" size="1 Ko" href="/web-components/media/tour.fr.vtt"></c2-attachment>
+    <c2-attachment preview name="montagnes.svg" type="SVG" size="3 Ko" src="/web-components/images/image-mountains.svg" layout="row"></c2-attachment>
+  </c2-attachment-group>
+</div>
+```
+
+</GalleryGrid>
+
+`file` and `openPreview()` are set from script:
+
+```ts tag=CodeBlock
+const attachment = document.querySelector('c2-attachment')!
+attachment.file = new File([csv], 'expenses.csv', { type: 'text/csv' })
+attachment.querySelector('c2-button')!.addEventListener('click', () => attachment.openPreview())
+```

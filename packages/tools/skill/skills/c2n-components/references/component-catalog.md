@@ -110,6 +110,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Code Editor** — `c2-code-editor` · `@c2n/components/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.
+- **File Preview** — `c2-file-preview` · `@c2n/components/attachment/file-preview` — Previews any file by type in one frame: an image with zoom, video, audio, a PDF, text, or a download, with previous and next across a set.
 - **Flow** — `c2-flow` · `@c2n/components/flow` — A pipeline, dependency graph or database schema on a pannable canvas: steps with a status, smooth edges, rows joined row to row, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
 - **Image annotator** — `c2-image-annotator` · `@c2n/components/image-annotator` — Arrows, boxes, text, numbered steps, blur and redaction over an image, exported as a PNG and as shapes.
 - **Image Cropper** — `c2-image-cropper` · `@c2n/components/image-cropper` — Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.

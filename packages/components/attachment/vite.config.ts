@@ -6,7 +6,7 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/attachment.ts', 'src/attachment-group.ts'],
+      entry: ['src/attachment.ts', 'src/attachment-group.ts', 'src/file-preview.ts'],
       formats: ['es'],
     },
     minify: false,
@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/attachment.ts', 'src/attachment-group.ts'],
+      files: ['src/attachment.ts', 'src/attachment-group.ts', 'src/file-preview.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],
