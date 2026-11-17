@@ -1,0 +1,57 @@
+name: Component lab replay
+
+# Reruns the journeys of every lab target (lab/targets/) against the components as they are on this commit: every
+# persona, twice, with the lab's oracles. No AI is involved: this is the lab's regression check, the half of the lab
+# that costs nothing to run. It compares each target with its last recorded run (lab/runs/) and lists findings that
+# appeared and known findings that are gone (a component fix to confirm).
+#
+# It runs weekly on develop and from the Actions tab. The new run records are in the artifact; they are committed by
+# the lab session that triages them (see the component-lab skill), not by this workflow. A new reproducible finding
+# fails the run.
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Lab targets to replay, comma-separated (e.g. "catalog-filter"); empty replays every target'
+        type: string
+        default: ''
+  schedule:
+    - cron: '17 4 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lab-replay-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - run: npm ci
+      # The example's build depends on the umbrella build, which builds every component the lab apps import.
+      - name: Build the components and the example app
+        run: npm run build -w apps/examples/support-inbox-vue
+      - run: npx playwright install --with-deps chromium
+      - name: Replay the lab
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: node lab/scripts/lab.mjs replay ${TARGETS:+--targets "$TARGETS"}
+      - name: Job summary
+        if: ${{ !cancelled() }}
+        run: cat test-results/lab/replay-summary.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lab-replay
+          path: |
+            lab/runs/
+            test-results/lab/
+          retention-days: 14

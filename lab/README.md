@@ -33,6 +33,8 @@ can be replayed and confirmed instead of trusted.
 | `scripts/lib/oracles.mjs`                 | Console, uncaught errors, failed requests, axe, overflow, the focus indicator check               |
 | `scripts/lib/ax-tree.mjs`                 | Chrome's accessibility tree (what a screen reader gets), and the checks read from it              |
 | `known.json`                              | Findings already triaged (`key → reason`): a ratchet, it only shrinks as components get fixed     |
+| `runs/<date>-<target>.json`               | Run records: the history of the lab, one file per recorded run (see "Run records and replay")     |
+| `scripts/lib/record.mjs`                  | Builds, compares and writes run records                                                           |
 
 ## Specs, builds and the gap matrix
 
@@ -62,6 +64,28 @@ Once a week, when there is budget, start a Claude Code session in this repositor
 The `component-lab` skill then reruns every target (regressions first), builds the next unbuilt spec, refreshes
 `GAPS.md` and opens a pull request with what it found. Its "The weekly run" section has the steps.
 
+## Run records and replay
+
+The lab keeps its history in the repository: `lab/runs/` holds one JSON file per recorded run, committed with the
+code it tested. A record has:
+
+- **the library under test:** `lerna.json` version, commit, branch, and whether component sources had local edits;
+- **the runner:** personas, repeat count, journeys, and whether it was a **full** run (every persona and journey);
+- **the build:** for a target built from a spec, a snapshot of its build report's outcomes (`R1: met`, …) at the time;
+- **results:** each journey × persona with its runs and passes, and every finding with its key, status (new or known)
+  and whether every repeat saw it;
+- **change:** compared with the target's previous full run, the findings that appeared or are gone and the journeys
+  that started or stopped passing.
+
+`node lab/scripts/lab.mjs replay` is the regression check: every target (or `--targets a,b`), twice, recorded and
+compared, then a summary (also written to `test-results/lab/replay-summary.md`) that lists known findings no longer
+seen, the component fixes to confirm. It needs no AI, so the **Component lab replay** workflow
+(`.github/workflows/lab-replay.yml`) runs it weekly and from the Actions tab, with the records and reports in its
+artifact. Records are committed by the lab session that triages them, not by CI.
+
+`node lab/scripts/lab.mjs run <target> --record` records a single run, for a new build's first run. Ad-hoc `--steps`
+runs are never recorded.
+
 ## Run it
 
 ```bash
@@ -70,6 +94,7 @@ node lab/scripts/lab.mjs list                          # targets, journeys, pers
 node lab/scripts/lab.mjs run support-inbox-vue         # every persona × every journey
 node lab/scripts/lab.mjs run support-inbox-vue --personas keyboard --journeys filter --repeat 3
 node lab/scripts/lab.mjs run support-inbox-vue --personas mouse --steps my-steps.json --aria   # ad-hoc exploration
+node lab/scripts/lab.mjs replay                        # every target, twice, recorded in lab/runs/ and compared
 ```
 
 The runner starts the app's dev server when nothing answers at the target URL. In a container with a preinstalled
