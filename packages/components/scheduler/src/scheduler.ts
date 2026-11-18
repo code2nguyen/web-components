@@ -739,18 +739,19 @@ export class Scheduler extends LitElement {
     return `${this.view}|${this.anchorDay}|${this.scrollTime}`
   }
 
-  /** Scrolls the day to `scroll-time`; false while the grid has no layout yet (a hidden or not yet sized scheduler). */
+  /** Scrolls the day to `scroll-time`; false while the grid is not drawn or has no layout yet (hidden, not yet sized). */
   private scrollToTime(): boolean {
     const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
     const timeline = this.renderRoot.querySelector<HTMLElement>('.scale')
-    if (!scroller || !timeline || !this.layout) return true
+    // Not drawn yet: try again on the next update, or when the retry sees the grid get a size.
+    if (!scroller) return false
     if (this.currentView !== 'day') {
       scroller.scrollLeft = 0
       return true
     }
     const time = parseClock(this.scrollTime)
     if (time === null) return true
-    if (!scroller.clientWidth || !timeline.offsetWidth) return false
+    if (!timeline || !this.layout || !scroller.clientWidth || !timeline.offsetWidth) return false
     scroller.scrollLeft = fractionOf(this.layout.range, this.layout.range.days[0] + time) * timeline.offsetWidth
     return true
   }
@@ -768,6 +769,9 @@ export class Scheduler extends LitElement {
       this.scrollRetryKey = ''
     })
     this.scrollRetry.observe(scroller)
+    // The timeline may get its width after the scroller does.
+    const timeline = this.renderRoot.querySelector<HTMLElement>('.scale')
+    if (timeline) this.scrollRetry.observe(timeline)
   }
 
   // ------------------------------------------------------------------------------------------------- pointer
