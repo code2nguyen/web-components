@@ -1,0 +1,80 @@
+name: Component feedback
+description: A c2n component did not work as documented, missed something you needed, or made you write a workaround.
+title: '[c2-] '
+labels: ['component-feedback']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting what you hit while building with c2n. Coding agents with the c2n MCP server can draft this
+        form for you: ask yours to call `report_issue`, then review the draft here before you submit it.
+
+        Keep it to a minimal reproduction: no application code, internal URLs, names or data.
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      description: The element or package, e.g. `c2-table` or `@c2n/components/table`.
+      placeholder: c2-table
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - 'bug: wrong behaviour'
+        - 'gap: documented or implied, but not implemented'
+        - 'papercut: works, but the common case is hard'
+        - 'docs: the component is right, the documentation or MCP answer is not'
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The installed `@c2n/components` (or `@c2n/<name>`) version.
+      placeholder: 1.0.27
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Framework
+      placeholder: React 19, Vue 3, Angular 22, SvelteKit, Astro, plain HTML…
+  - type: textarea
+    id: building
+    attributes:
+      label: What you were building
+      placeholder: A filter sidebar for a product list.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: What you did instead, if anything. A workaround is the most useful signal of what the component is missing.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: The smallest markup, CSS or script that shows it.
+      render: html
+  - type: checkboxes
+    id: drafted
+    attributes:
+      label: Source
+      options:
+        - label: Drafted by a coding agent (`report_issue`) and reviewed by me before submitting

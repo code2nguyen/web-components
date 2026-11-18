@@ -147,6 +147,23 @@ Use the c2n gallery for the settings page: browse the text-field and button look
 pick ones that suit a calm, dense admin UI, and turn them into app variants.
 ```
 
+## Report what you hit
+
+When a component makes the agent work around it (a bug, something documented that does not work, plain HTML because
+no element fits, a CSS or timing hack), the skill has it mark the spot with a `c2n-workaround: <reason>` comment and,
+at the end of the task, offer to draft an issue for each. The MCP tool `report_issue` writes the draft: it fills in the
+installed `@c2n/components` version and the framework, checks the reproduction with `validate_markup`, looks for
+existing issues and returns a link that opens the [component feedback form](https://github.com/code2nguyen/web-components/issues/new?template=component-feedback.yml)
+already filled in.
+
+The agent never submits anything: you open the link, check that the reproduction holds nothing private (application
+code, internal URLs, names, data) and submit it yourself. Each report shows what a component is missing in real
+applications, which is what the next release fixes.
+
+```text tag=CodeBlock
+The c2-table workaround you wrote for the progress column: draft an issue for it with report_issue.
+```
+
 ## Manual MCP-only configuration
 
 The installer is recommended, but any stdio MCP client can launch:
