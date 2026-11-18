@@ -192,8 +192,8 @@ planner.addEventListener('event-change', (event) => {
 
 ## Agenda view
 
-`view="agenda"` lays the same `events` out as a list instead of a grid: each day of the month that has events, plus
-today, under its own heading, with the events of that day as buttons that fire `event-click`. A multi-day event is
+`view="agenda"` lays the same `events` out as a list instead of a grid: each day of the month that has events (and
+today, marked, when the month has any), under its own heading, with the events of that day as buttons that fire `event-click`. A multi-day event is
 listed under every day it covers, background events first, then by first day. The header and the month picker work as
 on the grid, so the list pages month by month and stays in step with `month` and `month-change`. Editing applies to
 the grid only.
@@ -217,12 +217,14 @@ planner.renderAgendaEvent = ({ event, date, start, end }) =>
 
 ## Change calendar
 
-An event with `display: 'background'` is drawn as a shaded band behind the days it covers instead of a bar, with its
-title along the top: a change freeze, a maintenance window, a public holiday. Its `color` is the shade itself, so give
-it a translucent colour; without one it takes `--c2-month-planner__band--color`, and `textColor` colours its title
-(`--c2-month-planner__band-label--color` otherwise). The bars keep their lanes over it. A band is not a control: it
-cannot be clicked or dragged, and presses go through to the day under it. Assistive technology reads its title and
-dates with the grid, with each day on the compact layout, and first in the day's list in the agenda view.
+An event with `display: 'background'` is drawn as a shaded band behind the days it covers instead of a bar: a change
+freeze, a maintenance window, a public holiday. Its title takes a row of its own under the day numbers
+(`--c2-month-planner__band-label--height`; overlapping bands take one row each), and the bars keep their lanes below.
+Its `color` is the shade itself, so give it a translucent colour; without one it takes
+`--c2-month-planner__band--color`, and `textColor` colours its title (`--c2-month-planner__band-label--color`
+otherwise). A band is not a control: it cannot be clicked or dragged, and presses go through to the day under it.
+Assistive technology reads its title and dates with the grid (with each day's name on an editable or compact planner),
+and first in the day's list in the agenda view.
 
 The planner does not compare the bands with the bars. To flag a change scheduled in a freeze, compute the overlap and
 mark the change yourself, for example with a red `color` and a title that says so:

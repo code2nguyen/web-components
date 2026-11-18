@@ -63,6 +63,9 @@ if (scenario.startsWith('changes') || scenario === 'agenda-changes') {
     { id: 'upgrade', title: 'Database upgrade', start: '2026-09-08', end: '2026-09-09' },
   ]
 }
+if (scenario === 'changes-overlap') {
+  subject.events = [...subject.events, { id: 'network', title: 'Network window', start: '2026-09-16', end: '2026-09-17', display: 'background' }]
+}
 if (scenario === 'changes-editable') subject.editable = true
 if (scenario === 'changes-compact') subject.style.width = '360px'
 if (scenario === 'agenda-attribute') subject.setAttribute('view', 'agenda')

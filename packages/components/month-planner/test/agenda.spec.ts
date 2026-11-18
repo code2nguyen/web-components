@@ -152,32 +152,47 @@ test.describe('agenda view', () => {
 test.describe('background events', () => {
   test('draws a band behind the days, not a bar', async ({ page, scenario }) => {
     await scenario('changes')
-    // Monday 14 – Friday 18 is one week row with a Monday start.
-    const band = shadow(page, '[part="band"]').filter({ hasText: 'Change freeze' })
-    await expect(band).toHaveCount(1)
-    await expect(band.locator('.band-title')).toHaveText('Change freeze')
+    // Monday 14 – Friday 18 is one week row with a Monday start; the window on the 26th is in the next one.
+    await expect(shadow(page, '[part="band"]')).toHaveCount(2)
+    const band = shadow(page, '[part="band"]').first()
+    const label = shadow(page, '[part="band-label"]').filter({ hasText: 'Change freeze' })
+    await expect(label.locator('[aria-hidden="true"]')).toHaveText('Change freeze')
     await expect(page.getByText('Change freeze, September 14, 2026 – September 18, 2026')).toHaveCount(1)
     await expect(page.getByRole('button', { name: /Change freeze|Maintenance window/ })).toHaveCount(0)
 
-    // The bar on the 16th keeps its lane over the band, and stays clickable.
+    // The title has a row of its own under the day numbers, and the bar on the 16th its lane under that.
     const deploy = page.getByRole('button', { name: 'Deploy billing API, September 16, 2026' })
-    const [bandBox, barBox] = [await band.boundingBox(), await deploy.boundingBox()]
+    const [bandBox, labelBox, barBox] = [await band.boundingBox(), await label.boundingBox(), await deploy.boundingBox()]
+    expect(labelBox!.x).toBeCloseTo(bandBox!.x, 0)
+    expect(labelBox!.y).toBeGreaterThanOrEqual(bandBox!.y + 20)
     expect(barBox!.x).toBeGreaterThan(bandBox!.x)
     expect(barBox!.x + barBox!.width).toBeLessThan(bandBox!.x + bandBox!.width)
-    expect(barBox!.y).toBeGreaterThanOrEqual(bandBox!.y + 20)
+    expect(barBox!.y).toBeGreaterThanOrEqual(labelBox!.y + labelBox!.height)
     await deploy.click()
     await expect(page.getByRole('status')).toHaveText('click:deploy')
   })
 
+  test('gives overlapping bands a title row each', async ({ page, scenario }) => {
+    await scenario('changes-overlap')
+    const freeze = await shadow(page, '[part="band-label"]').filter({ hasText: 'Change freeze' }).boundingBox()
+    const network = await shadow(page, '[part="band-label"]').filter({ hasText: 'Network window' }).boundingBox()
+    expect(network!.y).toBeGreaterThanOrEqual(freeze!.y + freeze!.height)
+    // The bar moves below both rows.
+    const deploy = await page.getByRole('button', { name: 'Deploy billing API, September 16, 2026' }).boundingBox()
+    expect(deploy!.y).toBeGreaterThanOrEqual(network!.y + network!.height)
+  })
+
   test('uses its own colour as the shade', async ({ page, scenario }) => {
     await scenario('changes')
-    const window = shadow(page, '[part="band"]').filter({ hasText: 'Maintenance window' })
-    await expect(window).toHaveCSS('background-color', 'rgba(180, 83, 9, 0.16)')
+    await expect(shadow(page, '[part="band"]').last()).toHaveCSS('background-color', 'rgba(180, 83, 9, 0.16)')
   })
 
   test('lets a press through to the day under it when editable', async ({ page, scenario }) => {
     await scenario('changes-editable')
-    const band = shadow(page, '[part="band"]').filter({ hasText: 'Change freeze' })
+    // Read with the days' own names on the editable grid, not a second time from the title.
+    await expect(page.getByText('Change freeze, September 14, 2026 – September 18, 2026')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'September 15, 2026, Change freeze', exact: true })).toHaveCount(1)
+    const band = shadow(page, '[part="band"]').first()
     await band.scrollIntoViewIfNeeded()
     const box = (await band.boundingBox())!
     // The bottom of the band's first day, the 14th, below its bars.
