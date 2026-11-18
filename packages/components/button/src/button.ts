@@ -94,6 +94,13 @@ export class Button extends LitElement {
   /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
   @property({ type: Boolean, reflect: true }) toggle = false
 
+  /**
+   * Declares the item a radio button of a single-selection `c2-button-group`: the `radio` role with `aria-checked`
+   * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
+   * keys the group answers to. Set by the group.
+   */
+  @property({ type: Boolean }) radio = false
+
   /** Native button behavior. `submit` submits the nearest form and `reset` restores it. */
   @property({ reflect: true }) type: 'button' | 'submit' | 'reset' = 'button'
 
@@ -139,10 +146,26 @@ export class Button extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    if (changed.has('radio') || changed.has('selected')) this.syncRadio(this.renderRoot.querySelector<HTMLElement>('button.c2-button'))
     if (changed.has('commandFor') || changed.has('type') || changed.has('ariaControls')) this.resolveReferences()
     if (changed.has('disabled') || changed.has('running')) {
       if (this.unavailable) this.internals?.states.add('disabled')
       else this.internals?.states.delete('disabled')
+    }
+  }
+
+  /**
+   * The radio role and its checked state, written on the inner button directly: the group sets `radio` on the client
+   * only, and a hydrating render keeps the server's attributes without committing values that differ from them.
+   */
+  private syncRadio(button: HTMLElement | null | undefined) {
+    if (!button) return
+    if (this.radio) {
+      button.setAttribute('role', 'radio')
+      button.setAttribute('aria-checked', this.selected ? 'true' : 'false')
+    } else {
+      button.removeAttribute('role')
+      button.removeAttribute('aria-checked')
     }
   }
 
@@ -197,7 +220,7 @@ export class Button extends LitElement {
         ?disabled=${this.unavailable}
         aria-label=${this.ariaLabel || nothing}
         aria-busy=${this.running ? 'true' : nothing}
-        aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
+        aria-pressed=${!this.radio && (this.selected || this.toggle) ? (this.selected ? 'true' : 'false') : nothing}
         aria-expanded=${this.ariaExpanded || nothing}
         aria-haspopup=${this.ariaHasPopup || nothing}
         command=${this.command || nothing}

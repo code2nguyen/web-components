@@ -107,7 +107,7 @@ test('a passphrase joins random words with the chosen separator', async ({ page,
   await renderScenario('<c2-password-field generator></c2-password-field>')
   await page.getByRole('button', { name: 'Generate password' }).click()
   const dialog = page.getByRole('dialog', { name: 'Generate password' })
-  await dialog.getByRole('button', { name: 'Passphrase' }).click()
+  await dialog.getByRole('radio', { name: 'Passphrase' }).click()
   await expect(suggestion(page)).toHaveText(/^[a-z]+(-[a-z]+){4}$/)
   await expect(dialog).toContainText('about 52 bits')
 
@@ -115,7 +115,7 @@ test('a passphrase joins random words with the chosen separator', async ({ page,
   await words.focus()
   await page.keyboard.press('ArrowLeft')
   await expect(suggestion(page)).toHaveText(/^[a-z]+(-[a-z]+){3}$/)
-  await dialog.getByRole('button', { name: '.', exact: true }).click()
+  await dialog.getByRole('radio', { name: '.', exact: true }).click()
   await dialog.getByRole('checkbox', { name: 'Capitalize words' }).click()
   await dialog.getByRole('checkbox', { name: 'Include a number' }).click()
   await expect(suggestion(page)).toHaveText(/^[A-Z][a-z]*\d?(\.[A-Z][a-z]*\d?){3}$/)
@@ -161,7 +161,7 @@ test('the length requirement bounds the slider without minlength, and a passphra
   await page.getByRole('button', { name: 'Generate password' }).click()
   const dialog = page.getByRole('dialog', { name: 'Generate password' })
   await expect(dialog.getByRole('slider', { name: 'Length' })).toHaveAttribute('min', '8')
-  await dialog.getByRole('button', { name: 'Passphrase' }).click()
+  await dialog.getByRole('radio', { name: 'Passphrase' }).click()
   // The capitals and the digit the requirements ask for stay on.
   await expect(dialog.getByRole('checkbox', { name: 'Capitalize words' })).toBeDisabled()
   await expect(dialog.getByRole('checkbox', { name: 'Include a number' })).toBeChecked()
@@ -198,7 +198,7 @@ test('the popover controls do not fire input or change on the field', async ({ p
   await dialog.getByRole('checkbox', { name: 'Symbols (!@#)' }).click()
   await dialog.getByRole('slider', { name: 'Length' }).focus()
   await page.keyboard.press('ArrowRight')
-  await dialog.getByRole('button', { name: 'Passphrase' }).click()
+  await dialog.getByRole('radio', { name: 'Passphrase' }).click()
   await expect(dialog.getByRole('slider', { name: 'Words' })).toBeVisible()
   expect(await events(page)).toEqual([])
 })
@@ -210,10 +210,10 @@ test('generator-options sets where the generator starts, and an own word list re
   await page.getByRole('button', { name: 'Generate password' }).click()
   await expect(suggestion(page)).toHaveText(/^[a-z]+(\+[a-z]+){2}$/)
   // A separator of the app's own is offered beside the built-in ones, pressed.
-  await expect(page.getByRole('button', { name: '+', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: '-', exact: true }).click()
+  await expect(page.getByRole('radio', { name: '+', exact: true })).toHaveAttribute('aria-checked', 'true')
+  await page.getByRole('radio', { name: '-', exact: true }).click()
   await expect(suggestion(page)).toHaveText(/^[a-z]+(-[a-z]+){2}$/)
-  await expect(page.getByRole('button', { name: '+', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('radio', { name: '+', exact: true })).toHaveAttribute('aria-checked', 'false')
 })
 
 test('every draw comes from crypto.getRandomValues, never Math.random', async ({ page, renderScenario }) => {
@@ -270,7 +270,7 @@ test('the open generator has no accessibility violations', async ({ page, render
   await page.getByRole('button', { name: 'Generate password' }).click()
   await expect(suggestion(page)).not.toHaveText('')
   await accessible(page)
-  await page.getByRole('button', { name: 'Passphrase' }).click()
+  await page.getByRole('radio', { name: 'Passphrase' }).click()
   await expect(page.getByRole('slider', { name: 'Words' })).toBeVisible()
   await accessible(page)
 })

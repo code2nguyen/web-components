@@ -41,8 +41,9 @@ export interface ButtonGroup {
  * `orientation="vertical"` to stack either appearance and use Up/Down keyboard navigation. The
  * pressed items carry `selected` (and `aria-pressed`), the group reports them in `value` and fires `input` and `change`.
  *
- * A single-selection group is one Tab stop, like a radio group: Tab lands on the pressed item and the arrow keys move
- * the selection. Set `toolbar` for a toolbar: the group takes the `toolbar` role and stays one Tab stop, and the arrow
+ * A single-selection group is a radio group: the `radiogroup` role, each item a `radio` with `aria-checked` (set through
+ * the item's `radio` property), one Tab stop that lands on the checked item, and the arrow keys moving the selection.
+ * A multiple-selection group stays a `group` of toggle buttons (`aria-pressed`), each item its own Tab stop. Set `toolbar` for a toolbar: the group takes the `toolbar` role and stays one Tab stop, and the arrow
  * keys, Home and End move focus across every focusable child (buttons, `c2-select`, `c2-text-field`, links) without
  * changing the selection, which Space and Enter still do. A key the focused control uses itself — a caret moving in a
  * text field, a select opening — is left to it.
@@ -154,7 +155,7 @@ export class ButtonGroup extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.internals.role = this.toolbar ? 'toolbar' : 'group'
+    this.internals.role = this.groupRole
     this.defaultValue ??= this.value
     if (!isServer) {
       this.observer ??= new MutationObserver(() => this.syncItems())
@@ -231,7 +232,7 @@ export class ButtonGroup extends LitElement {
    */
   private syncFieldSemantics() {
     const managed = this.field.managed
-    this.internals.role = managed ? null : this.toolbar ? 'toolbar' : 'group'
+    this.internals.role = managed ? null : this.groupRole
     this.internals.ariaOrientation = !managed && this.toolbar ? this.orientation : null
     if (this.field.invalid && !this.effectiveDisabled) this.internals.states.add('error')
     else this.internals.states.delete('error')
@@ -263,6 +264,16 @@ export class ButtonGroup extends LitElement {
     this.internals.setFormValue(data)
   }
 
+  /** Whether the items are radio buttons: one pressed item, outside a toolbar (whose items keep their own roles). */
+  private get radioItems(): boolean {
+    return !this.toolbar && this.effectiveSelection === 'single'
+  }
+
+  /** `toolbar`, `radiogroup` for a single-selection group, else `group`. */
+  private get groupRole(): 'toolbar' | 'radiogroup' | 'group' {
+    return this.toolbar ? 'toolbar' : this.radioItems ? 'radiogroup' : 'group'
+  }
+
   private get effectiveSelection(): ButtonGroupSelection {
     return this.appearance === 'segmented' ? 'single' : this.selection
   }
@@ -277,9 +288,15 @@ export class ButtonGroup extends LitElement {
       if (firstEnabledIndex >= 0) this.value = this.itemValue(items[firstEnabledIndex], firstEnabledIndex)
     }
     const selected = new Set(this.selectedValues)
+    const radio = this.radioItems
     items.forEach((item, index) => {
-      if (selectable) item.setAttribute('toggle', '')
+      if (selectable && !radio) item.setAttribute('toggle', '')
       else item.removeAttribute('toggle')
+      // A property, not an attribute: nothing is written on the author's children that a server render would lack.
+      // An item not upgraded yet (a server-rendered page hydrating children after the group) keeps the property:
+      // Lit picks up a value set before the element was defined.
+      const pending = item.localName.includes('-') && !customElements.get(item.localName)
+      if ('radio' in item || (radio && pending)) (item as HTMLElement & { radio: boolean }).radio = radio
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
 
@@ -465,7 +482,7 @@ export class ButtonGroup extends LitElement {
         this.field.managed
           ? html`<div
               class="field-group"
-              role=${this.toolbar ? 'toolbar' : 'group'}
+              role=${this.groupRole}
               aria-label=${this.fieldGroupLabel || nothing}
               aria-describedby=${this.field.describedBy()}
               aria-orientation=${this.toolbar ? this.orientation : nothing}

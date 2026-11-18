@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -55,6 +55,32 @@ export class IconButton extends LitElement {
   /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
   @property({ type: Boolean, reflect: true }) toggle = false
 
+  /**
+   * Declares the item a radio button of a single-selection `c2-button-group`: the `radio` role with `aria-checked`
+   * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
+   * keys the group answers to. Set by the group.
+   */
+  @property({ type: Boolean }) radio = false
+
+  protected override updated(changed: PropertyValues<this>) {
+    if (changed.has('radio') || changed.has('selected')) this.syncRadio(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'))
+  }
+
+  /**
+   * The radio role and its checked state, written on the inner button directly: the group sets `radio` on the client
+   * only, and a hydrating render keeps the server's attributes without committing values that differ from them.
+   */
+  private syncRadio(button: HTMLElement | null | undefined) {
+    if (!button) return
+    if (this.radio) {
+      button.setAttribute('role', 'radio')
+      button.setAttribute('aria-checked', this.selected ? 'true' : 'false')
+    } else {
+      button.removeAttribute('role')
+      button.removeAttribute('aria-checked')
+    }
+  }
+
   override render() {
     return html`
       <button
@@ -62,7 +88,7 @@ export class IconButton extends LitElement {
         part="button"
         type="button"
         ?disabled=${this.disabled}
-        aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
+        aria-pressed=${!this.radio && (this.selected || this.toggle) ? (this.selected ? 'true' : 'false') : nothing}
         aria-label=${ifDefined(this.ariaLabel ?? this.tooltip)}
       >
         <slot></slot>
