@@ -3,6 +3,67 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.28](https://github.com/code2nguyen/web-components/releases/tag/v1.0.28) — 2026-11-18
+
+### Features
+
+- **skill:** Ask the developer whether to report what c2n could improve ([90f113f](https://github.com/code2nguyen/web-components/commit/90f113f))
+- **mcp:** Draft component issues from a coding session with report_issue ([165d1b8](https://github.com/code2nguyen/web-components/commit/165d1b8))
+- **week-planner:** Paint a weekly schedule of ranges [week-planner-1] ([4d345f9](https://github.com/code2nguyen/web-components/commit/4d345f9))
+- **week-planner:** Paint a weekly schedule of ranges by dragging across days and times ([6f1b08e](https://github.com/code2nguyen/web-components/commit/6f1b08e))
+- **scheduler:** Add a proposed meeting with free/busy columns [scheduler-2] ([bec7c20](https://github.com/code2nguyen/web-components/commit/bec7c20))
+- **scheduler:** Add a proposed-meeting block that shows who is busy, for finding a time ([051cdd4](https://github.com/code2nguyen/web-components/commit/051cdd4))
+- **month-planner:** Add an agenda view and background events for change calendars ([0343fe1](https://github.com/code2nguyen/web-components/commit/0343fe1))
+- **core:** Add a drop zone controller and a sync status model [core-1] ([db9db7e](https://github.com/code2nguyen/web-components/commit/db9db7e))
+- **upload:** Take drops and pastes through the core drop zone controller ([ef8093a](https://github.com/code2nguyen/web-components/commit/ef8093a))
+- **core:** Add a drop zone controller, file filtering and a sync status model ([26dd8e2](https://github.com/code2nguyen/web-components/commit/26dd8e2))
+- **image-annotator:** Add extraction review, pinned comments and a detail card [image-annotator-1] ([dfd72ad](https://github.com/code2nguyen/web-components/commit/dfd72ad))
+- **rich-text-editor:** Add merge field chips [rich-text-editor-1] ([966ab96](https://github.com/code2nguyen/web-components/commit/966ab96))
+- **attachment:** Add a lazy file preview and c2-file-preview [attachment-1] ([5d2471c](https://github.com/code2nguyen/web-components/commit/5d2471c))
+- **lab:** Record runs and replay them to follow the library over time ([4022bfd](https://github.com/code2nguyen/web-components/commit/4022bfd))
+- **chart:** Add c2-histogram-chart, binned distributions with density and percentile overlays [chart-3] ([ad979c8](https://github.com/code2nguyen/web-components/commit/ad979c8))
+- **highlight:** Add c2-text-annotator, labelled spans over text [highlight-3] ([261471c](https://github.com/code2nguyen/web-components/commit/261471c))
+- **secret-field:** Add c2-totp-code, a rotating TOTP code [secret-field-1] ([7061fb4](https://github.com/code2nguyen/web-components/commit/7061fb4))
+- **lab:** Add eight specs and extend the capability vocabulary ([92a6267](https://github.com/code2nguyen/web-components/commit/92a6267))
+- **lab:** Build apps from specs and add up the gaps ([412f9fc](https://github.com/code2nguyen/web-components/commit/412f9fc))
+- **selection-toolbar:** Add an inline prompt mode [selection-toolbar-1] ([1431e93](https://github.com/code2nguyen/web-components/commit/1431e93))
+- **lab:** Add the component lab, human-like testing of apps built with c2n ([867f270](https://github.com/code2nguyen/web-components/commit/867f270))
+- **date-input:** Add c2-date-fields, a date typed as day, month and year [date-input-2] ([4f2df9e](https://github.com/code2nguyen/web-components/commit/4f2df9e))
+
+### Fixes
+
+- **mcp:** Address the code review of report_issue ([9a302ab](https://github.com/code2nguyen/web-components/commit/9a302ab))
+- **core:** Draw a server-rendered host in the locale its hydration assumes ([b454e12](https://github.com/code2nguyen/web-components/commit/b454e12))
+- Address the docs screenshot review ([249dc85](https://github.com/code2nguyen/web-components/commit/249dc85))
+- Address code review findings ([f6c32e5](https://github.com/code2nguyen/web-components/commit/f6c32e5))
+- **week-planner:** Keep queued paint changes in step with a late app, and end a clamped first cell on the grid ([b7da3ee](https://github.com/code2nguyen/web-components/commit/b7da3ee))
+- **week-planner:** End a paint stroke on the cell it is released on ([121cf69](https://github.com/code2nguyen/web-components/commit/121cf69))
+- Resolve component feedback for button, checkbox, switch, avatar, number-input, search-field, text-field, table, toast and facet-list ([a80a952](https://github.com/code2nguyen/web-components/commit/a80a952))
+- **theme:** Darken color-on-surface-variant to reach 4.5:1 on tinted surfaces ([3f1001f](https://github.com/code2nguyen/web-components/commit/3f1001f))
+- **mcp:** Print manifest types as text and rank search by title and description ([1216c13](https://github.com/code2nguyen/web-components/commit/1216c13))
+- **reorder-list:** Keep the committed order, add a value attribute and follow label changes ([0125186](https://github.com/code2nguyen/web-components/commit/0125186))
+- **core:** Merge repeated defineMessages catalogs and hydrate localized hosts in the server locale ([0204a6b](https://github.com/code2nguyen/web-components/commit/0204a6b))
+- **scheduler:** Keep a native drag or text selection from cancelling a drag ([73c8a3a](https://github.com/code2nguyen/web-components/commit/73c8a3a))
+- **scheduler:** End a drag released outside its row ([09121bd](https://github.com/code2nguyen/web-components/commit/09121bd))
+- **scheduler:** Keep the proposal in range, out of editable rows' way, and readonly on request ([717ff60](https://github.com/code2nguyen/web-components/commit/717ff60))
+- **month-planner:** Give band titles rows of their own and keep focus above bands ([7302dfb](https://github.com/code2nguyen/web-components/commit/7302dfb))
+- **core:** Address review findings in the drop zone and sync status ([61b1103](https://github.com/code2nguyen/web-components/commit/61b1103))
+- **image-annotator:** Show a server-rendered detail slot; fix the review gallery cards ([114828d](https://github.com/code2nguyen/web-components/commit/114828d))
+- **checkbox:** Keep the hover layer on the touch target, behind the box ([bc4244b](https://github.com/code2nguyen/web-components/commit/bc4244b))
+- **lab:** Address the code review of run records and replay ([4e81f08](https://github.com/code2nguyen/web-components/commit/4e81f08))
+- **lab:** Address the code review of the lab ([a993985](https://github.com/code2nguyen/web-components/commit/a993985))
+- **selection-toolbar:** Keep the caret a control in the content took focus from [selection-toolbar-1] ([c985aad](https://github.com/code2nguyen/web-components/commit/c985aad))
+
+### Performance
+
+- **checkbox:** Draw the default marks on demand and the hover layer as a pseudo-element ([0bd7fd9](https://github.com/code2nguyen/web-components/commit/0bd7fd9))
+
+### Docs site & examples
+
+- **ui:** Escape the committed values the lab pages put in raw links ([20d4341](https://github.com/code2nguyen/web-components/commit/20d4341))
+- **ui:** Address the code review of the lab pages ([aa92b65](https://github.com/code2nguyen/web-components/commit/aa92b65))
+- **ui:** Show the component lab at /lab ([58278b3](https://github.com/code2nguyen/web-components/commit/58278b3))
+
 ## [1.0.27](https://github.com/code2nguyen/web-components/releases/tag/v1.0.27) — 2026-11-17
 
 ### Breaking changes
