@@ -429,12 +429,16 @@ export class Scheduler extends LitElement {
   private scrolledFor = ''
   /** Waits for the scroller to get a size when `scroll-time` was asked for before the grid had any layout. */
   private scrollRetry?: ResizeObserver
+  /** The `scroll-time` key the retry is waiting for; an update asking for the same one leaves it in place. */
+  private scrollRetryKey = ''
   /** `bands` parsed once per array assigned. */
   private parsedBands?: { source: unknown; list: { start: number; end: number; label?: string; color: string | null; resource?: string }[] }
 
   override connectedCallback() {
     super.connectedCallback()
     this.clock = setInterval(() => (this.now = nowIn(this.timeZone)), 30_000)
+    // A retry for `scroll-time` dropped on disconnect resumes now, not at the next clock tick.
+    if (this.hasUpdated && !this.scrolledFor) this.requestUpdate()
   }
 
   override disconnectedCallback() {
@@ -444,8 +448,7 @@ export class Scheduler extends LitElement {
     this.clearRefocus()
     this.scrollRetry?.disconnect()
     this.scrollRetry = undefined
-    // Connected again, it scrolls again: the retry it may have been waiting for is gone.
-    this.scrolledFor = ''
+    this.scrollRetryKey = ''
   }
 
   protected override firstUpdated() {
@@ -462,9 +465,10 @@ export class Scheduler extends LitElement {
 
   protected override updated(changed: PropertyValues<this>) {
     const key = `${this.view}|${this.anchorDay}|${this.scrollTime}`
-    if (this.scrolledFor !== key) {
+    if (this.scrolledFor !== key && !(this.scrollRetry && this.scrollRetryKey === key)) {
       this.scrollRetry?.disconnect()
       this.scrollRetry = undefined
+      this.scrollRetryKey = ''
       if (this.scrollToTime()) this.scrolledFor = key
       else this.retryScroll(key)
     }
@@ -750,11 +754,13 @@ export class Scheduler extends LitElement {
   private retryScroll(key: string) {
     const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
     if (!scroller || typeof ResizeObserver === 'undefined') return
+    this.scrollRetryKey = key
     this.scrollRetry = new ResizeObserver(() => {
       if (!this.scrollToTime()) return
       this.scrolledFor = key
       this.scrollRetry?.disconnect()
       this.scrollRetry = undefined
+      this.scrollRetryKey = ''
     })
     this.scrollRetry.observe(scroller)
   }
