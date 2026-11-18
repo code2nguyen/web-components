@@ -246,8 +246,8 @@
     color: css.cssVar(remove-icon__hover--color);
   }
 
-  svg,
-  ::slotted(*) {
+  // The built-in cross, or the copy of the slotted `remove-icon` drawn in each button.
+  > * {
     width: css.cssVar(remove-icon--size);
     height: css.cssVar(remove-icon--size);
     --c2-feather-icon--size: #{css.cssVar(remove-icon--size)};

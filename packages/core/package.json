@@ -84,6 +84,10 @@
       "types": "./dist/controllers/drawer-controller.d.ts",
       "default": "./dist/controllers/drawer-controller.js"
     },
+    "./controllers/slot-copies.js": {
+      "types": "./dist/controllers/slot-copies.d.ts",
+      "default": "./dist/controllers/slot-copies.js"
+    },
     "./controllers/drop-zone.js": {
       "types": "./dist/controllers/drop-zone.d.ts",
       "default": "./dist/controllers/drop-zone.js"

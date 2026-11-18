@@ -167,3 +167,92 @@ test('an IME Enter (isComposing or keyCode 229) does not commit the pending text
   await page.keyboard.press('Enter')
   await expect(tags(page)).toHaveText(['ann'])
 })
+
+test('a slotted remove-icon replaces the cross of every tag, including tags added later', async ({ page, scenario }) => {
+  await scenario('remove-icon')
+  const host = page.locator('c2-tag-input')
+  // A slot shows its content once: before the fix only the first tag had the custom icon.
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(3)
+  await expect(host.locator('[part="remove-button"] svg:not(.custom-remove)')).toHaveCount(0)
+  await input(page).pressSequentially('dee@example.com')
+  await page.keyboard.press('Enter')
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(4)
+  // The copies are decorative: the button's name stays the message.
+  await expect(host.locator('[part="remove-button"] .custom-remove').first()).toHaveAttribute('aria-hidden', 'true')
+  // A change to the slotted icon itself reaches every copy.
+  await host.evaluate((element) => element.querySelector('[slot="remove-icon"]')!.setAttribute('data-tone', 'muted'))
+  await expect(host.locator('[part="remove-button"] .custom-remove[data-tone="muted"]')).toHaveCount(4)
+  // Replacing the slotted icon replaces every copy.
+  await host.evaluate((element) => {
+    element.querySelector('[slot="remove-icon"]')!.remove()
+  })
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(0)
+  await expect(host.locator('[part="remove-button"] svg')).toHaveCount(4)
+})
+
+test('a value set to null or a string is normalised, not thrown on', async ({ page, scenario }) => {
+  await scenario('remove-icon')
+  const host = page.locator('c2-tag-input')
+  await host.evaluate((element) => ((element as unknown as { value: unknown }).value = null))
+  await expect(tags(page)).toHaveCount(0)
+  await host.evaluate((element) => ((element as unknown as { value: unknown }).value = 'ann@example.com;bob@example.com'))
+  await expect(tags(page)).toHaveText(['ann@example.com', 'bob@example.com'])
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(2)
+})
+
+test('equal tags each get their own icon copy, and ids inside the copies stay unique', async ({ page, scenario }) => {
+  await scenario('duplicate-icons')
+  const host = page.locator('c2-tag-input')
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(2)
+  const ids = await host.evaluate((element) => [...element.shadowRoot!.querySelectorAll('[part="remove-button"] linearGradient')].map((node) => node.id))
+  expect(new Set(ids).size).toBe(2)
+  const fills = await host.evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll('[part="remove-button"] path')].map((node) => node.getAttribute('fill')),
+  )
+  expect(fills).toEqual(ids.map((id) => `url(#${id})`))
+})
+
+test('an icon drawn from a page-level SVG sprite shows in every copy', async ({ page, scenario }) => {
+  await scenario('sprite')
+  const host = page.locator('c2-tag-input')
+  // The symbol a copy points at is copied in with it: inside the shadow root the page's id would not resolve.
+  await expect(host.locator('[part="remove-button"] .sprite-path')).toHaveCount(2)
+  const targets = await host.evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll('[part="remove-button"] use')].map(
+      (use) => !!element.shadowRoot!.getElementById(use.getAttribute('href')!.slice(1)),
+    ),
+  )
+  expect(targets).toEqual([true, true])
+})
+
+test('a value changed in place and reported keeps one icon per tag', async ({ page, scenario }) => {
+  await scenario('remove-icon')
+  const host = page.locator('c2-tag-input')
+  await host.evaluate((element) => {
+    const input = element as unknown as { value: string[]; requestUpdate(name: string): void }
+    input.value.push('dee@example.com', 'eve@example.com')
+    input.requestUpdate('value')
+  })
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(5)
+})
+
+test('a tag whose text looks like a repeat key still gets its own icon', async ({ page, scenario }) => {
+  await scenario('remove-icon')
+  const host = page.locator('c2-tag-input')
+  await host.evaluate((element) => {
+    element.setAttribute('allow-duplicates', '')
+    ;(element as unknown as { value: string[] }).value = ['a', 'a', 'a#2', 'a2']
+  })
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(4)
+})
+
+test('tags pushed in place and an unnamed requestUpdate each get an icon', async ({ page, scenario }) => {
+  await scenario('remove-icon')
+  const host = page.locator('c2-tag-input')
+  await host.evaluate((element) => {
+    const input = element as unknown as { value: string[]; requestUpdate(): void }
+    input.value.push('dee@example.com', 'eve@example.com')
+    input.requestUpdate()
+  })
+  await expect(host.locator('[part="remove-button"] .custom-remove')).toHaveCount(5)
+})

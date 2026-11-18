@@ -9,6 +9,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { SlotCopies } from '@c2n/core/controllers/slot-copies.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { tagInputMessages } from './messages.js'
 import styles from './tag-input.scss?inline'
@@ -77,7 +78,7 @@ function escapeForCharacterClass(characters: string) {
  * @tag c2-tag-input
  *
  * @slot prefix-icon - Icon at the start of the field, before the tags.
- * @slot remove-icon - Replaces the cross of every tag's remove button.
+ * @slot remove-icon - Replaces the cross of every tag's remove button. Drawn as a copy in each place (a page-level SVG symbol it uses comes along): style it with inline styles, attributes or inherited custom properties; page class rules, listeners and properties set on the slotted element do not reach the copies.
  *
  * @event {CustomEvent<TagInputAddEventDetail>} tag-add - Cancelable. Fired before a tag is added; `preventDefault()` rejects it and keeps the text in the input.
  * @event {CustomEvent<TagInputRemoveEventDetail>} tag-remove - Cancelable. Fired before a tag is removed; `preventDefault()` keeps it.
@@ -180,6 +181,8 @@ export class TagInput extends LitElement {
   @state() private text = ''
   /** Set when the last commit refused invalid text, which stays in the input; cleared by the next edit. */
   @state() private rejected = false
+  /** The slotted `remove-icon`, drawn in every tag's remove button: a slot shows its content in one place only. */
+  private readonly removeIcon = new SlotCopies(this, 'remove-icon')
 
   @query('.input') private readonly input?: HTMLInputElement | null
 
@@ -582,7 +585,10 @@ export class TagInput extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
+    // Normalised first: a framework may set null or a string, and the copies are kept per tag of the array.
     if (changed.has('value') && !Array.isArray(this.value)) this.value = arrayPropertyConverter.fromAttribute(String(this.value ?? ''))
+    // A value changed in place keeps its array: the keys are rebuilt whenever value is reported changed.
+    if (changed.has('value')) this.removeIcon.retain(this.copyKeys())
   }
 
   protected override updated(): void {
@@ -608,7 +614,26 @@ export class TagInput extends LitElement {
 
   // Render
 
-  private renderTag(tag: string, index: number) {
+  /**
+   * One icon-copy key per tag: the tag itself, then the tag and its count for a repeat. Stable when another tag is removed
+   * (an index would shift and rebuild every later copy), and distinct for equal tags, which a node cannot be shared by.
+   */
+  private copyKeys(): string[] {
+    const seen = new Map<string, number>()
+    const keys = this.value.map((tag) => {
+      const count = (seen.get(tag) ?? 0) + 1
+      seen.set(tag, count)
+      // JSON-encoded, so no tag text (a NUL included) can equal another tag's key.
+      return JSON.stringify([tag, count])
+    })
+    return keys
+  }
+
+  private tagKey(tag: string, index: number): string {
+    return this.allowDuplicates ? `${index}:${tag}` : tag
+  }
+
+  private renderTag(tag: string, index: number, copyKey: string) {
     const valid = this.validate(tag) === true
     return html`<li
       class=${classMap({ tag: true, invalid: !valid })}
@@ -629,12 +654,22 @@ export class TagInput extends LitElement {
               aria-label=${this.msg.t('remove', tag)}
               @click=${(event: Event) => this.handleRemoveClick(event, index)}
             >
-              <slot name="remove-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </slot>
+              ${
+                this.removeIcon.assigned
+                  ? this.removeIcon.copy(copyKey)
+                  : html`<svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>`
+              }
             </button>`
           : nothing
       }
@@ -642,6 +677,8 @@ export class TagInput extends LitElement {
   }
 
   override render() {
+    // Once per render (not cached on the array, which a caller may change in place), not once per tag drawn.
+    const copyKeys = this.copyKeys()
     const invalid = this.error || this.rejected || this.invalidTags.length > 0 || this.field.invalid
     const label = this.ariaLabel || this.field.label
     const classes = {
@@ -659,8 +696,8 @@ export class TagInput extends LitElement {
             ? html`<ul class="tags" role="list" aria-label=${ifDefined(label || undefined)} aria-disabled=${this.effectiveDisabled ? 'true' : nothing}>
                 ${repeat(
                   this.value,
-                  (tag, index) => (this.allowDuplicates ? `${index}:${tag}` : tag),
-                  (tag, index) => this.renderTag(tag, index),
+                  (tag, index) => this.tagKey(tag, index),
+                  (tag, index) => this.renderTag(tag, index, copyKeys[index]),
                 )}
               </ul>`
             : nothing
@@ -683,6 +720,7 @@ export class TagInput extends LitElement {
           @keydown=${this.handleInputKeydown}
           @paste=${this.handlePaste}
         />
+        ${this.removeIcon.source()}
       </div>
       ${this.field.renderDescription()}`
   }

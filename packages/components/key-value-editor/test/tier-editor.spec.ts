@@ -301,3 +301,11 @@ test('quoteTiers prices graduated and volume tiers', () => {
   // Below the first tier's first value no tier applies.
   expect(quoteTiers(list, 50, { start: 100, pricing: 'volume' })).toMatchObject({ tier: -1, total: null })
 })
+
+test('a slotted remove-icon replaces the cross of every tier', async ({ page, renderScenario }) => {
+  await renderScenario(editor(`tiers='${PRICING}'`, '<svg slot="remove-icon" class="custom-remove" viewBox="0 0 24 24"><path d="M3 6h18"></path></svg>'))
+  const host = page.locator('c2-tier-editor')
+  const buttons = await host.locator('.remove').count()
+  expect(buttons).toBeGreaterThan(1)
+  await expect(host.locator('.remove .custom-remove')).toHaveCount(buttons)
+})
