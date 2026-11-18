@@ -132,6 +132,18 @@ test('reference lines: zones, control limits and spec limits in their tones', ()
     ['UCL', 'Mean', 'LCL'],
   )
   assert.deepEqual(spcReferenceLines(null), [])
+  // Limits at 2 sigma: the zones split the distance to them in thirds, so zone A ends on the drawn limits.
+  const narrow = spcReferenceLines({ center: 10, sigma: 1.5, ucl: 13, lcl: 7, count: 20 })
+  assert.deepEqual(
+    narrow.filter((line) => line.value2 !== undefined).map((line) => [line.value, line.value2]),
+    [
+      [12, 13],
+      [11, 12],
+      [9, 11],
+      [8, 9],
+      [7, 8],
+    ],
+  )
 })
 
 test('mark violations: a copy of each row with the flagged value in its own field', () => {

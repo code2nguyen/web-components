@@ -148,6 +148,7 @@ function draw(self: uPlot, paint: Paint, labels: boolean): void {
   context.clip()
   context.font = `${paint.fontSize * ratio}px ${paint.fontFamily}`
   context.textAlign = 'right'
+  const drawn: { y: number; left: number }[] = []
   paint.lines.forEach((line, index) => {
     const color = paint.colors[index]
     const y1 = self.valToPos(line.low, 'y', true)
@@ -158,8 +159,12 @@ function draw(self: uPlot, paint: Paint, labels: boolean): void {
       // Above the rule, or below it when there is no room above; a halo in the surface colour keeps it legible over the data.
       const below = y1 - (paint.fontSize + 2) * ratio < top
       context.textBaseline = below ? 'top' : 'bottom'
-      const x = left + width - 4 * ratio
       const y = Math.round(y1) + (below ? 3 : -2) * ratio
+      // A label at about the height of one already drawn goes to its left, so equal rules (a target on the centre line) both read.
+      const text = context.measureText(line.label).width
+      let x = left + width - 4 * ratio
+      for (const placed of drawn) if (Math.abs(placed.y - y) < paint.fontSize * ratio && x > placed.left - 8 * ratio) x = placed.left - 8 * ratio
+      drawn.push({ y, left: x - text })
       context.lineJoin = 'round'
       context.lineWidth = 3 * ratio
       context.strokeStyle = paint.halo

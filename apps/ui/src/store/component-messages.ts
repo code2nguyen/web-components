@@ -15,6 +15,8 @@ export interface ComponentMessages {
   messages: ComponentMessage[]
   /** Languages the component carries itself besides English (the planners); others come from the app. */
   builtIn: string[]
+  /** Further shared catalogs the element also draws from, each translated under its own name (a line chart's reference lines). */
+  more?: ComponentMessages[]
 }
 
 // Every component that has interface text keeps it in `src/messages.ts`, exporting its catalog.
@@ -67,6 +69,7 @@ for (const module of Object.values(modules)) {
  */
 const SHARED: Record<string, readonly string[]> = {
   chart: ['area-chart', 'bar-chart', 'bubble-chart', 'candlestick-chart', 'line-chart', 'scatter-chart', 'sparkline'],
+  'chart-reference-lines': ['area-chart', 'line-chart'],
 }
 
 /**
@@ -77,8 +80,10 @@ export function componentMessages(tag: string, orParent = true): ComponentMessag
   const name = tag.replace(/^c2-/, '')
   if (byName.has(name)) return byName.get(name)
   if (!orParent) return undefined
-  const shared = Object.keys(SHARED).find((catalog) => SHARED[catalog].includes(name))
-  if (shared) return byName.get(shared)
+  const shared = Object.keys(SHARED)
+    .filter((catalog) => SHARED[catalog].includes(name))
+    .flatMap((catalog) => byName.get(catalog) ?? [])
+  if (shared.length > 0) return shared.length === 1 ? shared[0] : { ...shared[0], more: shared.slice(1) }
   const parent = [...byName.keys()].filter((candidate) => !(candidate in SHARED) && name.startsWith(`${candidate}-`)).sort((a, b) => b.length - a.length)[0]
   return parent ? byName.get(parent) : undefined
 }

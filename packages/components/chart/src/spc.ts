@@ -59,7 +59,7 @@ export type SpcRule = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
  */
 export const SPC_RULES: Readonly<Record<SpcRule, string>> = {
   1: 'One point beyond 3 sigma',
-  2: 'Nine points in a row on one side of the centre line',
+  2: 'A run of points on one side of the centre line (nine, or `sameSideRun`)',
   3: 'Six points in a row steadily increasing or decreasing',
   4: 'Fourteen points in a row alternating up and down',
   5: 'Two of three points beyond 2 sigma on one side',
@@ -192,7 +192,10 @@ export function runRules(values: Values, limits: SpcLimits | null, options: RunR
 }
 
 export interface SpcReferenceLinesOptions {
-  /** Shades the sigma zones: C within 1 sigma, B from 1 to 2, A from 2 to 3. Defaults to `true`. */
+  /**
+   * Shades the zones: C within a third of the way to each control limit, B to two thirds, A up to the limit, which with
+   * 3-sigma limits is 1, 2 and 3 sigma. Defaults to `true`.
+   */
   zones?: boolean
   /** Specification limits and target, which come from the design rather than the process. */
   spec?: { lsl?: number; usl?: number; target?: number }
@@ -209,13 +212,16 @@ export function spcReferenceLines(limits: SpcLimits | null, options: SpcReferenc
   const label = { center: 'CL', ucl: 'UCL', lcl: 'LCL', usl: 'USL', lsl: 'LSL', target: 'Target', ...options.labels }
   if (limits) {
     const { center, sigma } = limits
-    if ((options.zones ?? true) && sigma > 0) {
+    // The zones split the distance to each drawn limit in thirds, so they meet the limits whatever width they were set at.
+    const up = (limits.ucl - center) / 3
+    const down = (center - limits.lcl) / 3
+    if ((options.zones ?? true) && sigma > 0 && up > 0 && down > 0) {
       lines.push(
-        { value: center + 2 * sigma, value2: center + 3 * sigma, tone: 'danger' },
-        { value: center + sigma, value2: center + 2 * sigma, tone: 'warning' },
-        { value: center - sigma, value2: center + sigma, tone: 'success' },
-        { value: center - 2 * sigma, value2: center - sigma, tone: 'warning' },
-        { value: center - 3 * sigma, value2: center - 2 * sigma, tone: 'danger' },
+        { value: center + 2 * up, value2: limits.ucl, tone: 'danger' },
+        { value: center + up, value2: center + 2 * up, tone: 'warning' },
+        { value: center - down, value2: center + up, tone: 'success' },
+        { value: center - 2 * down, value2: center - down, tone: 'warning' },
+        { value: limits.lcl, value2: center - 2 * down, tone: 'danger' },
       )
     }
     lines.push(

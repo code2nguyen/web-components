@@ -181,3 +181,15 @@ test('a marker-only series leaves the tooltip at a row it does not mark', async 
   expect(await labels(2)).toEqual(['Value'])
   expect(await labels(3)).toEqual(['Value', 'Flagged'])
 })
+
+test('two labelled rules at the same value both get their label, side by side', async ({ page, scenario }) => {
+  await scenario('empty')
+  const lines = (...labels: string[]) => chart(`reference-lines='${JSON.stringify(labels.map((label) => ({ value: 16, label, tone: 'danger' })))}'`)
+  const rule = await paint(page, lines(''), RED)
+  const target = (await paint(page, lines('Target'), RED)) - rule
+  const centre = await paint(page, lines('Centre line'), RED)
+  const both = await paint(page, lines('Centre line', 'Target'), RED)
+  expect(target).toBeGreaterThan(20)
+  // Drawn beside "Centre line", the "Target" text adds all of its pixels; drawn over it, it would add few.
+  expect(both - centre).toBeGreaterThan(target * 0.8)
+})
