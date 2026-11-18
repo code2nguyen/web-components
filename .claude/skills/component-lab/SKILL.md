@@ -80,13 +80,21 @@ The journeys only cover what someone thought to write. Explore like a curious us
 
 For each finding, decide whose it is before writing anything:
 
-| Verdict                | Test                                                                                                     | Action                                                                                                                                                     |
-| ---------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Component bug**      | It reproduces on a page with only that component (the component's `index.html` harness or its test page) | Write a failing test in `packages/components/<name>/test/`. Fix it when the fix is small and clear; otherwise add a `bug` entry to `COMPONENT-FEEDBACK.md` |
-| **Component friction** | The app had to work around the component, or the obvious use was wrong                                   | `papercut`/`gap` entry in `COMPONENT-FEEDBACK.md`: what the app needed, what happened, the smallest change                                                 |
-| **App bug**            | Only the app's own code or CSS is involved                                                               | Fix the example app, or note it in the report                                                                                                              |
-| **Lab false positive** | The oracle is wrong (confirm with the screenshot or Chrome's accessibility tree)                         | Fix the oracle in `lab/scripts/lib/`. Do not hide it in `known.json`                                                                                       |
-| **Tool disagreement**  | axe and Chrome's tree disagree (axe does not follow sectioning across shadow roots)                      | `known.json` with the reason                                                                                                                               |
+| Verdict                | Test                                                                                                     | Action                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component bug**      | It reproduces on a page with only that component (the component's `index.html` harness or its test page) | `bug` entry in `COMPONENT-FEEDBACK.md` with the smallest repro, the root cause if found and the suggested fix. Do not fix it (see below) |
+| **Component friction** | The app had to work around the component, or the obvious use was wrong                                   | `papercut`/`gap` entry in `COMPONENT-FEEDBACK.md`: what the app needed, what happened, the smallest change                               |
+| **App bug**            | Only the app's own code or CSS is involved                                                               | Fix the example app, or note it in the report                                                                                            |
+| **Lab false positive** | The oracle is wrong (confirm with the screenshot or Chrome's accessibility tree)                         | Fix the oracle in `lab/scripts/lib/`. Do not hide it in `known.json`                                                                     |
+| **Tool disagreement**  | axe and Chrome's tree disagree (axe does not follow sectioning across shadow roots)                      | `known.json` with the reason                                                                                                             |
+
+**The lab finds; it does not fix components.** Never change `packages/` (components, `@c2n/core`, the theme, the MCP
+server) during a lab run, however small the fix looks. A lab pull request holds run records, lab builds, journeys,
+reports, `known.json`, `GAPS.md` and `COMPONENT-FEEDBACK.md` entries only, so it needs no component review and the
+session's budget goes to finding, not fixing. A fixed finding also disappears from the record, which is the evidence
+the lab works. Investigate as far as it makes the entry actionable (isolate it, name the line, propose the change),
+then file it; the fix is a separate branch and pull request. Fixing the lab's own build (`lab/apps/`) and oracles
+(`lab/scripts/`) is still part of the run.
 
 Rules that keep the lab honest:
 
