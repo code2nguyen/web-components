@@ -21,6 +21,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { publicProperties, scriptApi, type ManifestMember } from '../src/installed.ts'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
 import { exampleSlug, summarizeExample, themeExampleCss } from './gallery.ts'
+import { dedent, usageRows } from './usage.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, GuideTopic, Preset, Registry, ThemeEntry, ThemeToken } from '../src/registry-types.ts'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -156,38 +157,6 @@ function splitStyle(fence: string): { css?: string; html: string } {
   const style = /<style>([\s\S]*?)<\/style>/.exec(html)
   if (!style) return { html: html.trim() }
   return { css: dedent(style[1]), html: html.replace(style[0], '').trim() }
-}
-
-function dedent(text: string): string {
-  const lines = text.replace(/^\n+|\s+$/g, '').split('\n')
-  const indent = Math.min(...lines.filter((l) => l.trim()).map((l) => /^\s*/.exec(l)![0].length))
-  return lines.map((l) => l.slice(indent)).join('\n')
-}
-
-/** Splits a UsageBlock body into its `<div data-label="…">…</div>` rows (rows may contain nested divs). */
-function usageRows(html: string): { label: string; html: string }[] {
-  const rows: { label: string; html: string }[] = []
-  const open = /<div data-label="([^"]+)">/g
-  let match: RegExpExecArray | null
-  while ((match = open.exec(html))) {
-    let depth = 1
-    let cursor = match.index + match[0].length
-    const tokens = /<div\b|<\/div>/g
-    tokens.lastIndex = cursor
-    let token: RegExpExecArray | null
-    let end = html.length
-    while ((token = tokens.exec(html))) {
-      depth += token[0] === '</div>' ? -1 : 1
-      if (depth === 0) {
-        end = token.index
-        cursor = token.index + token[0].length
-        break
-      }
-    }
-    rows.push({ label: match[1], html: dedent(html.slice(match.index + match[0].length, end)) })
-    open.lastIndex = cursor
-  }
-  return rows
 }
 
 /**
@@ -402,6 +371,12 @@ for (const dir of packageDirs.sort()) {
         if (fence.meta.tag === 'UsageBlock') {
           const { css, html } = splitStyle(fence.body)
           for (const row of usageRows(html)) examples.push({ kind: 'usage', label: row.label, html: row.html, css })
+        }
+        // An icon page has no UsageBlock: its live examples are the usage.
+        else if (doc.section === 'icons' && fence.meta.tag === 'MdxCodeBlock') {
+          const { css, html } = splitStyle(fence.body)
+          const count = examples.filter((example) => example.kind === 'usage').length
+          examples.push({ kind: 'usage', label: fence.meta.label ?? (count ? `Example ${count + 1}` : 'Icons'), html, css })
         }
       }
     }
