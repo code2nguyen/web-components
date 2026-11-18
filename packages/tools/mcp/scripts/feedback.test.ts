@@ -12,6 +12,7 @@ import {
   detectFramework,
   olderVersion,
   renderFeedbackReport,
+  shellQuote,
   type FeedbackEnvironment,
   type FeedbackInput,
 } from '../src/feedback.ts'
@@ -120,4 +121,31 @@ test("each kind's text is one of the issue form's dropdown options, in the same 
     options,
     FEEDBACK_KINDS.map((kind) => KIND_OPTIONS[kind]),
   )
+})
+
+test('the title keeps a prefix only for this exact tag', () => {
+  assert.equal(buildIssueDraft({ ...input, title: 'c2-table: drops the width' }, env).title, 'c2-table: drops the width')
+  assert.equal(buildIssueDraft({ ...input, title: 'c2-table-column ignores width' }, env).title, 'c2-table: c2-table-column ignores width')
+})
+
+test('the reproduction fence outlasts backticks in the code and takes the language of its file', () => {
+  const repro = '<c2-table>\n```\n</c2-table>'
+  const body = buildIssueDraft({ ...input, repro, reproFilename: 'Repro.tsx' }, env).body
+  assert.ok(body.includes('````tsx\n<c2-table>\n```\n</c2-table>\n````'), body)
+})
+
+test('the link stays under the limit even when every field encodes long', () => {
+  const long = '表'.repeat(2000)
+  const draft = buildIssueDraft({ ...input, title: '表'.repeat(1000), building: long, expected: long, actual: long, workaround: long, repro: long }, env)
+  assert.ok(draft.url.length <= MAX_URL_LENGTH, `link is ${draft.url.length} long`)
+  assert.ok(draft.shortened.includes('title'))
+  // The draft keeps everything.
+  assert.ok(draft.body.includes(long))
+})
+
+test('the suggested gh command quotes the title so the shell expands nothing in it', () => {
+  assert.equal(shellQuote("c2-table: `renderCell` $(rm -rf ~) it's"), `'c2-table: \`renderCell\` $(rm -rf ~) it'\\''s'`)
+  const draft = buildIssueDraft({ ...input, title: '`renderCell` $(whoami)' }, env)
+  const report = renderFeedbackReport({ draft, env, duplicates: [], reproFindings: [], unknownComponent: false })
+  assert.ok(report.includes("--title 'c2-table: `renderCell` $(whoami)'"))
 })

@@ -484,7 +484,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Draft a component issue',
       description:
-        'Drafts a GitHub issue about c2n met while building an app: a component bug, something documented that does not work, a missing feature or component, an API that made the common case hard, a mismatch between get_component and the behaviour, or a workaround you had to write (plain HTML instead of a c2-* element, a CSS or timing hack). Fills in the installed version and the framework, checks the reproduction with validate_markup, looks for existing issues, and returns the draft plus a link that opens the pre-filled issue form. It never submits anything: show the draft to the developer, who reviews it and submits it. Keep the reproduction minimal and free of application code, internal URLs, names and data. Ask the developer first whether they want to report it, and call it only when they agree.',
+        'Drafts a GitHub issue about c2n met while building an app: a component bug, something documented that does not work, a missing feature or component, an API that made the common case hard, a mismatch between get_component and the behaviour, or a workaround you had to write (plain HTML instead of a c2-* element, a CSS or timing hack). Fills in the installed version and the framework, checks the reproduction with validate_markup, looks for existing issues that name the component (only its tag is sent to GitHub), and returns the draft plus a link that opens the pre-filled issue form. It never submits anything: show the draft to the developer, who reviews it and submits it. Keep the reproduction minimal and free of application code, internal URLs, names and data. Ask the developer first whether they want to report it, and call it only when they agree.',
       inputSchema: {
         component: z.string().min(1).describe('The element or package the problem is in: `c2-table`, `table` or `@c2n/table`'),
         kind: z
@@ -499,7 +499,10 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         workaround: z.string().optional().describe('What was done instead, if anything'),
         repro: z.string().optional().describe('The smallest markup, CSS or script that shows it (checked with validate_markup)'),
         reproFilename: z.string().optional().describe('File name that sets how the reproduction is read (`repro.tsx`, `repro.css`); HTML by default'),
-        searchExisting: z.boolean().default(true).describe('Search the repository for existing issues about this component (needs network access)'),
+        searchExisting: z
+          .boolean()
+          .default(true)
+          .describe("Search GitHub for existing issues that name this component (sends only the component's tag; needs network access)"),
         format: formatSchema,
       },
       annotations: { readOnlyHint: true, openWorldHint: true },
@@ -507,11 +510,14 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     async ({ component, kind, title, building, expected, actual, workaround, repro, reproFilename, searchExisting, format }) => {
       const installedApi = withInstalledApi(registry)
       const resolved = resolveElement(installedApi, component)
-      const umbrella = umbrellaInstalled()
+      // A package reached through the umbrella reports the umbrella's version (`via`); without either, the umbrella's.
       const own = resolved ? installedPackage(resolved.component.package) : null
-      const installed = own?.via ? { version: own.via.version, of: own.via.package } : own ? { version: own.version, of: resolved?.component.package } : null
-      const fromUmbrella = !installed && umbrella ? { version: umbrella.version, of: '@c2n/components' } : null
-      const version = installed ?? fromUmbrella
+      const umbrella = own ? null : umbrellaInstalled()
+      const version = own
+        ? { version: own.version, of: own.via?.package ?? resolved?.component.package }
+        : umbrella
+          ? { version: umbrella.version, of: '@c2n/components' }
+          : undefined
       const env: FeedbackEnvironment = {
         tag: resolved?.tag ?? component.trim(),
         version: version?.version,
@@ -519,9 +525,9 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         registryVersion: registry.c2nVersion,
         framework: detectFramework(projectRoot()),
       }
-      const draft = buildIssueDraft({ component, kind, title, building, expected, actual, workaround, repro }, env)
+      const draft = buildIssueDraft({ component, kind, title, building, expected, actual, workaround, repro, reproFilename }, env)
       const reproFindings = repro?.trim() ? validateMarkup(installedApi, repro, reproFilename).findings : []
-      const duplicates = searchExisting ? await findDuplicates(env.tag, title) : undefined
+      const duplicates = searchExisting ? await findDuplicates(env.tag) : undefined
       const report = { draft, env, duplicates, reproFindings, unknownComponent: !resolved }
       if (format === 'json') return json(report)
       return text(renderFeedbackReport(report))

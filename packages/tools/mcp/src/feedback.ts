@@ -29,6 +29,7 @@ export const KIND_OPTIONS: Record<FeedbackKind, string> = {
  */
 export const MAX_URL_LENGTH = 7000
 const MIN_KEPT = 200
+const PASTE_NOTE = '[paste this field from the draft]'
 const CUT_NOTE = '\n\n[…cut to fit the link: paste the rest from the draft]'
 
 export interface FeedbackInput {
@@ -42,6 +43,8 @@ export interface FeedbackInput {
   actual: string
   workaround?: string
   repro?: string
+  /** How the reproduction is read (`repro.tsx`), which also names its code block's language. */
+  reproFilename?: string
 }
 
 export interface FeedbackEnvironment {
@@ -117,7 +120,27 @@ function section(heading: string, value: string | undefined) {
 
 function issueTitle(tag: string, title: string) {
   const text = title.trim().replace(/\s+/g, ' ')
-  return text.toLowerCase().startsWith(tag.toLowerCase()) ? text : `${tag}: ${text}`
+  // Already prefixed with this tag (`c2-table: …`, `c2-table drops …`), not a longer one (`c2-table-column …`).
+  const prefixed = text.toLowerCase().startsWith(tag.toLowerCase()) && /^[\s:]|^$/.test(text.slice(tag.length))
+  return prefixed ? text : `${tag}: ${text}`
+}
+
+/** The fence language for a reproduction read as `filename` (`repro.tsx` → `tsx`); HTML without one. */
+function fenceLanguage(filename: string | undefined) {
+  const ext = /\.([a-z]+)$/i.exec(filename ?? '')?.[1]?.toLowerCase()
+  return ext && ['tsx', 'jsx', 'ts', 'js', 'vue', 'svelte', 'astro', 'css', 'scss', 'html'].includes(ext) ? ext : 'html'
+}
+
+/** A fenced block that a run of backticks in the code cannot close early. */
+function fence(code: string, language: string) {
+  const longest = Math.max(0, ...[...code.matchAll(/`+/g)].map((m) => m[0].length))
+  const marks = '`'.repeat(Math.max(3, longest + 1))
+  return `${marks}${language}\n${code}\n${marks}`
+}
+
+/** `value` quoted for a POSIX shell: single quotes, which expand nothing, with each `'` closed and escaped. */
+export function shellQuote(value: string) {
+  return `'${value.replace(/'/g, `'\\''`)}'`
 }
 
 /** The issue text and the link that opens the issue form with every field filled in. */
@@ -133,7 +156,7 @@ export function buildIssueDraft(input: FeedbackInput, env: FeedbackEnvironment):
     section('Expected', input.expected),
     section('What happened', input.actual),
     section('Workaround', input.workaround),
-    input.repro?.trim() ? `### Minimal reproduction\n\n\`\`\`html\n${input.repro.trim()}\n\`\`\`\n` : '',
+    input.repro?.trim() ? `### Minimal reproduction\n\n${fence(input.repro.trim(), fenceLanguage(input.reproFilename))}\n` : '',
     '---\n_Drafted by a coding agent with the c2n MCP server (`report_issue`), reviewed by the developer before submitting._',
   ]
     .filter(Boolean)
@@ -151,8 +174,9 @@ export function buildIssueDraft(input: FeedbackInput, env: FeedbackEnvironment):
     workaround: input.workaround?.trim() ?? '',
     repro: input.repro?.trim() ?? '',
   }
+  let linkTitle = title
   const link = () => {
-    const params = new URLSearchParams({ template: FEEDBACK_TEMPLATE, title, labels: FEEDBACK_LABEL })
+    const params = new URLSearchParams({ template: FEEDBACK_TEMPLATE, title: linkTitle, labels: FEEDBACK_LABEL })
     for (const [key, value] of Object.entries(fields)) if (value) params.set(key, value)
     return `https://github.com/${FEEDBACK_REPO}/issues/new?${params.toString()}`
   }
@@ -174,6 +198,20 @@ export function buildIssueDraft(input: FeedbackInput, env: FeedbackEnvironment):
     if (!shortened.includes(longest)) shortened.push(longest)
     url = link()
   }
+  // Text that encodes long (CJK, emoji) can stay over the limit at the shortest cut: leave whole fields to the draft,
+  // and as a last resort the title, so the link always opens the form.
+  for (const key of cuttable) {
+    if (url.length <= MAX_URL_LENGTH) break
+    if (!fields[key]) continue
+    fields[key] = PASTE_NOTE
+    if (!shortened.includes(key)) shortened.push(key)
+    url = link()
+  }
+  if (url.length > MAX_URL_LENGTH) {
+    linkTitle = `${env.tag}: see the draft`
+    shortened.push('title')
+    url = link()
+  }
   return { title, body, url, shortened }
 }
 
@@ -191,32 +229,23 @@ export function issueSearchUrl(tag: string): string {
 }
 
 /**
- * Open and closed issues that mention the tag, newest first, through GitHub's search API (unauthenticated: a few
- * searches a minute). Resolves to `undefined` when the search could not be made (offline, rate limited), never throws.
+ * The newest issues, open or closed, that name the tag, through GitHub's search API (unauthenticated: about ten searches
+ * a minute). One query, by the tag alone: nothing from the draft's own text (which may name the app) leaves the machine
+ * before the developer has reviewed it. Resolves to `undefined` when the search could not be made (offline, rate
+ * limited), never throws.
  */
-export async function findDuplicates(tag: string, title: string, timeoutMs = 4000): Promise<DuplicateIssue[] | undefined> {
-  const words = title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .split(/\s+/)
-    .filter((word) => word.length > 3)
-    .slice(0, 4)
-  const search = async (q: string) => {
-    const response = await fetch(`https://api.github.com/search/issues?${new URLSearchParams({ q, per_page: '5' }).toString()}`, {
+export async function findDuplicates(tag: string, timeoutMs = 4000): Promise<DuplicateIssue[] | undefined> {
+  const q = `repo:${FEEDBACK_REPO} is:issue "${tag.replace(/"/g, '')}"`
+  try {
+    const response = await fetch(`https://api.github.com/search/issues?${new URLSearchParams({ q, per_page: '8', sort: 'updated' }).toString()}`, {
       headers: { accept: 'application/vnd.github+json', 'user-agent': 'c2n-mcp' },
       signal: AbortSignal.timeout(timeoutMs),
     })
-    if (!response.ok) throw new Error(`GitHub search answered ${response.status}`)
+    if (!response.ok) return undefined
     const data = (await response.json()) as { items?: { number: number; title: string; html_url: string; state: string; pull_request?: unknown }[] }
     return (data.items ?? [])
       .filter((item) => !item.pull_request)
       .map((item) => ({ number: item.number, title: item.title, url: item.html_url, state: item.state }))
-  }
-  try {
-    const base = `repo:${FEEDBACK_REPO} is:issue "${tag}"`
-    // The tag with the title's words first; the tag alone when that finds nothing.
-    const precise = words.length ? await search(`${base} ${words.join(' ')}`) : []
-    return precise.length ? precise : await search(base)
   } catch {
     return undefined
   }
@@ -254,14 +283,14 @@ export function renderFeedbackReport(report: FeedbackReport): string {
   }
   if (duplicates?.length) {
     out.push(
-      `**Existing issues that may be the same** (add to one of them instead of opening another):\n\n${duplicates
+      `**Recent issues about this component** (if one is the same problem, add to it instead of opening another):\n\n${duplicates
         .map((issue) => `- #${issue.number} [${issue.state}] ${issue.title}: ${issue.url}`)
         .join('\n')}\n`,
     )
   } else if (duplicates === undefined) {
     out.push(`Existing issues were not searched. Look for one first: ${issueSearchUrl(env.tag)}\n`)
   } else {
-    out.push('No existing issue mentions this component with these words.\n')
+    out.push('No existing issue mentions this component.\n')
   }
   out.push(
     '**Show this draft to the developer.** Do not submit it yourself: they open the link, review the form (remove anything private) and submit it.',
@@ -271,7 +300,7 @@ export function renderFeedbackReport(report: FeedbackReport): string {
   if (draft.shortened.length) out.push('', `The link cut ${draft.shortened.join(', ')} to fit; the full text is in the draft below.`)
   out.push(
     '',
-    `If the developer prefers the GitHub CLI and asks you to, save the body below to a file and run: \`gh issue create --repo ${FEEDBACK_REPO} --label ${FEEDBACK_LABEL} --title ${JSON.stringify(draft.title)} --body-file <file>\``,
+    `If the developer prefers the GitHub CLI and asks you to, save the body below to a file and run: \`gh issue create --repo ${FEEDBACK_REPO} --label ${FEEDBACK_LABEL} --title ${shellQuote(draft.title)} --body-file <file>\``,
     '',
     `## ${draft.title}`,
     '',

@@ -33,7 +33,8 @@ When c2n MCP tools are available:
 5. `get_theme` **before writing any CSS**, so overrides go on tokens when a token exists.
 6. `validate_markup` on what you wrote, before finishing (§7).
 7. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
-8. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
+8. `report_issue` when the developer agrees to report something c2n could improve (§9): it drafts the issue, the developer submits it.
+9. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
 
 ### 2a. Find the look in the gallery
 
