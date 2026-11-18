@@ -32,6 +32,8 @@ test('a server-rendered select with a value selects that option and shows it on 
   const errors: string[] = []
   page.on('console', (message) => {
     if (message.type() === 'error' && !message.text().startsWith('Failed to load resource')) errors.push(message.text())
+    // Lit's dev warning for an update scheduled from inside another one.
+    if (message.text().includes('scheduled an update')) errors.push(message.text())
   })
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/packages/components/select/test/hydration.html')
