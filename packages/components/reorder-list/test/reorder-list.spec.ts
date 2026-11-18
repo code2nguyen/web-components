@@ -499,11 +499,8 @@ test('maps touch and pen pointer contracts to canonical input methods', async ({
       emit(container, 'pointerup', target.left + 5, target.bottom - 2)
     }, pointerType)
     await expect(host).toHaveAttribute('data-input-method', pointerType)
-    await host.evaluate((element) => {
-      const children = [...element.children].filter((child) => !['placeholder', 'dragging-item'].includes((child as HTMLElement).slot))
-      children.sort((left, right) => ['first', 'second', 'third'].indexOf(left.id) - ['first', 'second', 'third'].indexOf(right.id))
-      for (const child of children) element.append(child)
-    })
+    // Re-appending the same children in the same order keeps the committed order, so reset through `value`.
+    await host.evaluate((element) => ((element as HTMLElement & { value: string[] }).value = ['first', 'second', 'third']))
     await expect.poll(() => visualIds(host)).toEqual(['first', 'second', 'third'])
   }
 })
@@ -622,7 +619,16 @@ test('moves an item across a 20-item list by keyboard within the success budget'
 
 test('resolves aria-labelledby into a shadow-list accessible name', async ({ page, renderScenario }) => {
   await renderScenario(`<h2 id="queue-title">Release priorities</h2><c2-reorder-list editable aria-labelledby="queue-title">${rows}</c2-reorder-list>`)
-  await expect(page.locator('c2-reorder-list').locator('[part="container"]')).toHaveAttribute('aria-label', 'Release priorities')
+  // The heading is referenced (`ariaLabelledByElements`); a browser without element reflection gets its text instead.
+  const name = () =>
+    page
+      .locator('c2-reorder-list')
+      .locator('[part="container"]')
+      .evaluate((container) => {
+        const labels = (container as HTMLElement & { ariaLabelledByElements?: Element[] | null }).ariaLabelledByElements ?? []
+        return labels.map((label) => label.textContent).join(' ') || container.getAttribute('aria-label')
+      })
+  await expect.poll(name).toBe('Release priorities')
 })
 
 test('exposes public parts, variables, default feedback, and reduced-motion behavior', async ({ page, renderScenario }) => {
