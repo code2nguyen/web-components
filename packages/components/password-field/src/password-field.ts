@@ -93,13 +93,19 @@ export interface PasswordField {
 
 const DEFAULT_MIN_LENGTH = 8
 
-const BUILT_IN: Record<PasswordRequirementId, { label: (minLength: number) => string; test: (value: string, minLength: number) => boolean }> = {
-  length: { label: (min) => `At least ${min} characters`, test: (value, min) => [...value].length >= min },
-  lowercase: { label: () => 'One lowercase letter', test: (value) => /\p{Ll}/u.test(value) },
-  uppercase: { label: () => 'One uppercase letter', test: (value) => /\p{Lu}/u.test(value) },
-  number: { label: () => 'One number', test: (value) => /\p{N}/u.test(value) },
-  symbol: { label: () => 'One symbol', test: (value) => /[^\p{L}\p{N}\s]/u.test(value) },
+/** The built-in requirements: the message naming each (translated with the field's other text) and its check. */
+const BUILT_IN: Record<
+  PasswordRequirementId,
+  { message: 'minLength' | 'lowercaseLetter' | 'uppercaseLetter' | 'number' | 'symbol'; test: (value: string, minLength: number) => boolean }
+> = {
+  length: { message: 'minLength', test: (value, min) => [...value].length >= min },
+  lowercase: { message: 'lowercaseLetter', test: (value) => /\p{Ll}/u.test(value) },
+  uppercase: { message: 'uppercaseLetter', test: (value) => /\p{Lu}/u.test(value) },
+  number: { message: 'number', test: (value) => /\p{N}/u.test(value) },
+  symbol: { message: 'symbol', test: (value) => /[^\p{L}\p{N}\s]/u.test(value) },
 }
+
+const STRENGTH_MESSAGES = ['strength0', 'strength1', 'strength2', 'strength3', 'strength4'] as const
 
 const COMMON = new Set([
   'password',
@@ -302,8 +308,11 @@ export class PasswordField extends LitElement {
    */
   @property({ converter: arrayPropertyConverter }) requirements: (string | PasswordRequirement)[] = []
 
-  /** Labels of the five strength scores, 0 to 4, separated by semicolons, or a JSON array. */
-  @property({ attribute: 'strength-labels', converter: arrayPropertyConverter }) strengthLabels: string[] = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong']
+  /**
+   * Labels of the five strength scores, 0 to 4, separated by semicolons, or a JSON array. A missing or empty entry
+   * falls back to its message (`strength0` to `strength4`: "Too weak", "Weak", "Fair", "Good", "Strong").
+   */
+  @property({ attribute: 'strength-labels', converter: arrayPropertyConverter }) strengthLabels: string[] = []
 
   /** Replaces {@link scorePassword} as the strength estimate. Returns 0 to 4. */
   @property({ attribute: false }) scorer?: (value: string) => number
@@ -323,14 +332,17 @@ export class PasswordField extends LitElement {
   /** Helper text under the field. */
   @property({ type: String }) help = ''
 
-  /** Accessible name of the show/hide toggle. Its pressed state says whether the password is shown. */
-  @property({ attribute: 'toggle-label' }) toggleLabel = 'Show password'
+  /**
+   * Accessible name of the show/hide toggle. Its pressed state says whether the password is shown. Defaults to the
+   * `toggle` message ("Show password").
+   */
+  @property({ attribute: 'toggle-label' }) toggleLabel = ''
 
-  /** Warning shown while Caps Lock is on. Empty turns the warning off. */
-  @property({ attribute: 'caps-lock-text' }) capsLockText = 'Caps Lock is on'
+  /** Warning shown while Caps Lock is on. Defaults to the `capsLock` message ("Caps Lock is on"); empty turns the warning off. */
+  @property({ attribute: 'caps-lock-text' }) capsLockText?: string | null
 
-  /** Message of the validity error while a requirement is unmet. */
-  @property({ attribute: 'requirements-message' }) requirementsMessage = 'The password does not meet every requirement.'
+  /** Message of the validity error while a requirement is unmet. Defaults to the `requirementsUnmet` message. */
+  @property({ attribute: 'requirements-message' }) requirementsMessage = ''
 
   @state() private focused = false
   @state() private capsLock = false
@@ -392,7 +404,7 @@ export class PasswordField extends LitElement {
       const requirement: PasswordRequirement = typeof entry === 'string' ? { id: entry.trim() } : entry
       if (!requirement) return
       const builtIn = requirement.id && requirement.id in BUILT_IN ? BUILT_IN[requirement.id as PasswordRequirementId] : undefined
-      const label = requirement.label ?? builtIn?.label(minLength)
+      const label = requirement.label ?? (builtIn && this.msg.t(builtIn.message, minLength))
       if (!label) return
       let met: boolean
       if (requirement.test) met = !!requirement.test(value)
@@ -532,17 +544,22 @@ export class PasswordField extends LitElement {
       return
     }
     const unmet = !!this.value && this.requirementStates.some((requirement) => !requirement.met)
-    this.input.setCustomValidity(this.customValidityMessage || (unmet ? this.requirementsMessage : ''))
+    this.input.setCustomValidity(this.customValidityMessage || (unmet ? this.requirementsMessage || this.msg.t('requirementsUnmet') : ''))
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
 
   private get capsLockShown() {
-    return this.capsLock && this.focused && !this.revealed && !!this.capsLockText
+    return this.capsLock && this.focused && !this.revealed && !!this.capsLockMessage
+  }
+
+  /** `caps-lock-text`, else its message; an empty `caps-lock-text` turns the warning off. */
+  private get capsLockMessage() {
+    return this.capsLockText ?? this.msg.t('capsLock')
   }
 
   private strengthLabel(score: PasswordStrength) {
     const labels = Array.isArray(this.strengthLabels) ? this.strengthLabels : []
-    return labels[score] ?? ''
+    return labels[score] || this.msg.t(STRENGTH_MESSAGES[score])
   }
 
   private renderToggle() {
@@ -550,7 +567,7 @@ export class PasswordField extends LitElement {
     return html`<button
       class="toggle"
       type="button"
-      aria-label=${this.toggleLabel}
+      aria-label=${this.toggleLabel || this.msg.t('toggle')}
       aria-pressed=${this.revealed ? 'true' : 'false'}
       ?disabled=${this.effectiveDisabled}
       @click=${this.toggleReveal}
@@ -592,7 +609,7 @@ export class PasswordField extends LitElement {
       <div
         class="meter ${level}"
         role="meter"
-        aria-label="Password strength"
+        aria-label=${this.msg.t('meter')}
         aria-valuemin="0"
         aria-valuemax="4"
         aria-valuenow=${score}
@@ -606,7 +623,7 @@ export class PasswordField extends LitElement {
 
   private renderRequirements(requirements: PasswordRequirementState[]) {
     if (!requirements.length) return nothing
-    return html`<ul class="requirements" id="requirements" aria-label="Password requirements">
+    return html`<ul class="requirements" id="requirements" aria-label=${this.msg.t('requirements')}>
       ${requirements.map(
         (requirement) =>
           html`<li class="requirement ${requirement.met ? 'met' : ''}" data-requirement=${requirement.id}>
@@ -621,7 +638,7 @@ export class PasswordField extends LitElement {
                     </svg>`
               }
             </span>
-            <span>${requirement.label}<span class="visually-hidden">${requirement.met ? ', met' : ', not met'}</span></span>
+            <span>${requirement.label}<span class="visually-hidden">${`, ${this.msg.t(requirement.met ? 'requirementMet' : 'requirementNotMet')}`}</span></span>
           </li>`,
       )}
     </ul>`
@@ -640,7 +657,7 @@ export class PasswordField extends LitElement {
 
   override render() {
     const requirements = this.requirementStates
-    const name = this.ariaLabel || this.field.label || this.placeholder || 'Password'
+    const name = this.ariaLabel || this.field.label || this.placeholder || this.msg.t('name')
     const describedBy = this.field.describedBy(this.meter && 'meter', requirements.length > 0 && 'requirements', !this.field.managed && 'help', 'caps-lock')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <slot name="prefix-icon" class="prefix"></slot>
@@ -670,7 +687,7 @@ export class PasswordField extends LitElement {
         ${this.renderGenerate()}${this.renderToggle()}
       </div>
       ${this.renderMeter()} ${this.renderRequirements(requirements)}
-      <div class="caps-lock" id="caps-lock" role="status">${this.capsLockShown ? this.capsLockText : nothing}</div>
+      <div class="caps-lock" id="caps-lock" role="status">${this.capsLockShown ? this.capsLockMessage : nothing}</div>
       ${this.renderSupportingText()}${this.field.renderDescription()}${this.generatorPanel?.render() ?? nothing}`
   }
 }

@@ -1,7 +1,27 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
-// The generator's text (`generator`): the generate button, then its popover, which loads on first use.
 const en = {
+  // The field's own text. Each text property (`toggle-label`, `caps-lock-text`, `requirements-message`,
+  // `strength-labels`) still overrides its message on one field.
+  name: 'Password',
+  toggle: 'Show password',
+  capsLock: 'Caps Lock is on',
+  requirementsUnmet: 'The password does not meet every requirement.',
+  requirements: 'Password requirements',
+  requirementMet: 'met',
+  requirementNotMet: 'not met',
+  minLength: (min: number) => `At least ${min} characters`,
+  lowercaseLetter: 'One lowercase letter',
+  uppercaseLetter: 'One uppercase letter',
+  number: 'One number',
+  symbol: 'One symbol',
+  meter: 'Password strength',
+  strength0: 'Too weak',
+  strength1: 'Weak',
+  strength2: 'Fair',
+  strength3: 'Good',
+  strength4: 'Strong',
+  // The generator's text (`generator`): the generate button, then its popover, which loads on first use.
   generate: 'Generate password',
   suggestion: 'Suggested password',
   regenerate: 'Generate another',

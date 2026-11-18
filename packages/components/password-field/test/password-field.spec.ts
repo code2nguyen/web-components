@@ -157,3 +157,26 @@ test('an own disabled removed inside a disabled fieldset stays disabled until th
   await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
   await expect(input).toBeEnabled()
 })
+
+test('draws its own text in the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-password-field meter requirements="length;number" minlength="10" value="Abcdefgh1!xyz"></c2-password-field></div>')
+  await expect(page.getByRole('textbox', { name: 'Mot de passe' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Afficher le mot de passe' })).toBeVisible()
+  await expect(page.getByRole('meter', { name: 'Robustesse du mot de passe' })).toHaveAttribute('aria-valuetext', 'Robuste')
+  await expect(page.getByRole('list', { name: 'Règles du mot de passe' }).getByRole('listitem')).toHaveText([
+    'Au moins 10 caractères, respectée',
+    'Un chiffre, respectée',
+  ])
+})
+
+test('a text property still overrides its message, and an empty caps-lock-text turns the warning off', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-password-field aria-label="Pin" meter strength-labels=";;;;Excellent" toggle-label="Reveal" caps-lock-text="" value="Abcdefgh1!xyz"></c2-password-field>',
+  )
+  await expect(page.getByRole('button', { name: 'Reveal' })).toBeVisible()
+  await expect(page.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Excellent')
+  const input = page.locator('c2-password-field').locator('input')
+  await input.click()
+  await input.evaluate((element) => element.dispatchEvent(new KeyboardEvent('keyup', { key: 'A', modifierCapsLock: true, bubbles: true, composed: true })))
+  await expect(page.getByRole('status')).toHaveText('')
+})
