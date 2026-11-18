@@ -303,6 +303,9 @@ export class FormField extends LitElement {
         if (isIsland(child)) {
           const inner = search(child)
           if (inner) return inner
+          // A control still loading in the island (not upgraded yet) is the field's: adopt nothing until it announces
+          // itself, rather than the decoration after the island.
+          if (child.querySelector(':not(:defined)')) return null
           continue
         }
         // Inside an island only a control counts: a label or prefix next to it is the app's decoration.
@@ -330,7 +333,10 @@ export class FormField extends LitElement {
    */
   private watchIslands() {
     this.islandObserver?.disconnect()
-    const islands = [...this.children].filter((child) => !child.hasAttribute('slot') && isIsland(child))
+    // Every island on the way to the control, nested ones (an `astro-slot` around an `astro-island`) included.
+    const islands = [...this.children]
+      .filter((child) => !child.hasAttribute('slot') && isIsland(child))
+      .flatMap((island) => [island, ...island.querySelectorAll([...ISLAND_WRAPPERS].join(', '))])
     if (!islands.length || !this.isConnected) return
     this.islandObserver ??= new MutationObserver(() => this.adoptControl(this.findControl()))
     // The island's own children, not the control's light DOM (a select's options), which never change the control.

@@ -378,3 +378,23 @@ test('a plain display: contents element is not looked through: only an Astro isl
   await renderScenario(`<c2-form-field label="Name"><div style="display: contents"><c2-text-field></c2-text-field></div></c2-form-field>`)
   expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('div')
 })
+
+test('an island still loading its control adopts nothing in the meantime, and a nested island is watched', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('field protocol')) warnings.push(message.text())
+  })
+  await renderScenario(
+    `<c2-form-field label="Weight"><astro-island><pending-field></pending-field></astro-island><span>kg</span></c2-form-field><c2-form-field label="Code"><astro-slot><astro-island id="inner"></astro-island></astro-slot></c2-form-field>`,
+  )
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => (field as unknown as { control: Element | null }).control?.localName ?? null)
+  expect(await control(0)).toBe(null)
+  // No warning about the decoration: it was never adopted.
+  expect(warnings).toEqual([])
+  await page.evaluate(() => document.getElementById('inner')!.append(document.createElement('input')))
+  await expect.poll(() => control(1)).toBe('input')
+})
