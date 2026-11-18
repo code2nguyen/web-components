@@ -613,10 +613,15 @@
   }
 }
 
+// The block sits in a strip under the hour labels, never over them.
+.scale:has(> .proposal) .tick {
+  padding-bottom: 32px;
+}
+
 .proposal {
   z-index: 1;
-  top: 3px;
-  bottom: 3px;
+  bottom: 4px;
+  height: 24px;
   overflow: hidden;
   padding: 0 8px;
   border: 0;

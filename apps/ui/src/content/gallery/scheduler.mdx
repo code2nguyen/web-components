@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Scheduler } from '@c2n/components/scheduler'
+import { Button } from '@c2n/components/button'
 import CodeBlock from '../../components/CodeBlock.astro'
 import SchedulerExamplesRuntime from '../../components/SchedulerExamplesRuntime.astro'
 
@@ -158,6 +159,7 @@ own zone; they are drawn, not checked.
 <style>
   .meeting-finder {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
   .meeting-finder-scheduler {
@@ -210,7 +212,7 @@ own zone; they are drawn, not checked.
   class="time-zones"
   data-scheduler-example="time-zones"
   date="2026-11-09"
-  day-start="07:00"
+  day-start="09:00"
   day-end="20:00"
   working-hours=""
   time-zone="Europe/Paris"
@@ -220,7 +222,7 @@ own zone; they are drawn, not checked.
   proposal='{"start":"2026-11-09T16:00","end":"2026-11-09T17:00","title":"Quarterly plan"}'
   resources='[{"id":"lea","label":"Léa Moreau","description":"Paris · UTC+1"},{"id":"tom","label":"Tom Hughes","description":"London · UTC+0"},{"id":"maya","label":"Maya Singh","description":"New York · UTC−5"}]'
   events='[{"id":"1","resource":"lea","start":"2026-11-09T15:00","end":"2026-11-09T16:00","title":"Review","readonly":true},{"id":"2","resource":"tom","start":"2026-11-09T16:30","end":"2026-11-09T17:30","title":"Hiring panel","pending":true,"readonly":true},{"id":"3","resource":"maya","start":"2026-11-09T15:00","end":"2026-11-09T15:30","title":"Stand-up","readonly":true}]'
-  bands='[{"start":"2026-11-09T07:00","end":"2026-11-09T09:00","resource":"lea","label":"Before 09:00 in Paris"},{"start":"2026-11-09T18:00","end":"2026-11-09T20:00","resource":"lea","label":"After 18:00 in Paris"},{"start":"2026-11-09T07:00","end":"2026-11-09T10:00","resource":"tom","label":"Before 09:00 in London"},{"start":"2026-11-09T19:00","end":"2026-11-09T20:00","resource":"tom","label":"After 18:00 in London"},{"start":"2026-11-09T07:00","end":"2026-11-09T15:00","resource":"maya","label":"Before 09:00 in New York"}]'
+  bands='[{"start":"2026-11-09T18:00","end":"2026-11-09T20:00","resource":"lea","label":"After 18:00 in Paris"},{"start":"2026-11-09T09:00","end":"2026-11-09T10:00","resource":"tom","label":"Before 09:00 in London"},{"start":"2026-11-09T19:00","end":"2026-11-09T20:00","resource":"tom","label":"After 18:00 in London"},{"start":"2026-11-09T09:00","end":"2026-11-09T15:00","resource":"maya","label":"Before 09:00 in New York"}]'
 ></c2-scheduler>
 ```
 
@@ -310,7 +312,9 @@ scheduler.addEventListener('proposal-change', ({ detail }) => {
 // "Next free time": the first hour after the proposal when no attendee has a booking.
 nextFree.addEventListener('click', () => {
   const slot = scheduler.findFreeTime(60, scheduler.proposal!.end)
-  if (slot) scheduler.proposal = { ...scheduler.proposal, ...slot }
+  if (!slot) return
+  scheduler.proposal = { ...scheduler.proposal, ...slot }
+  scheduler.scrollTime = slot.start.slice(11) // brings it on screen
 })
 
 // How many are free, in the block and in a row under the grid.

@@ -34,6 +34,13 @@
 
   const initialized = new WeakSet<Scheduler>()
 
+  /** The card around a scheduler: past the `<astro-island>` a fence's element is hydrated in. */
+  function cardOf(scheduler: Scheduler): HTMLElement | null {
+    let element = scheduler.parentElement
+    while (element?.localName === 'astro-island') element = element.parentElement
+    return element
+  }
+
   /** "Who is out" per day, flagged when fewer than `data-min-staff` people are left. */
   function setupAbsence(scheduler: Scheduler) {
     const minStaff = Number(scheduler.dataset.minStaff ?? 3)
@@ -47,7 +54,7 @@
 
   /** Plays the app: the scheduler reports where the proposal was moved, and the page moves it there. */
   function applyProposal(scheduler: Scheduler) {
-    const output = scheduler.parentElement?.querySelector('output')
+    const output = cardOf(scheduler)?.querySelector('output')
     const names = (ids: string[]) => ids.map((id) => scheduler.resources.find((resource) => resource.id === id)?.label ?? id).join(', ')
     scheduler.addEventListener('proposal-change', ({ detail }) => {
       scheduler.proposal = { ...scheduler.proposal, start: detail.start, end: detail.end }
@@ -60,8 +67,8 @@
 
   /** "Next free time": the first time after the proposal when no attendee is booked, wrapping to the start of the day. */
   function setupFindATime(scheduler: Scheduler) {
-    const button = scheduler.parentElement?.querySelector('c2-button[data-find-free]')
-    const output = scheduler.parentElement?.querySelector('output')
+    const button = cardOf(scheduler)?.querySelector('c2-button[data-find-free]')
+    const output = cardOf(scheduler)?.querySelector('output')
     button?.addEventListener('click', () => {
       const proposal = scheduler.proposal
       if (!proposal) return
@@ -72,6 +79,8 @@
         return
       }
       scheduler.proposal = { ...proposal, ...slot }
+      // Scroll the day to it: the free time found may be past the hours on screen.
+      scheduler.scrollTime = slot.start.slice(11)
       if (output) output.textContent = `Everyone is free ${slot.start.slice(11)}–${slot.end.slice(11)}.`
     })
   }

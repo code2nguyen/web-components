@@ -90,6 +90,9 @@ test('the proposal is a block in the header and a column on every row, coloured 
     expect(Math.abs(box.x - from.x)).toBeLessThanOrEqual(1)
     expect(Math.abs(box.x + box.width - to.x)).toBeLessThanOrEqual(1)
   }
+  // The block sits in a strip under the hour labels, never over them.
+  const tick = (await scheduler(page).locator('.tick', { hasText: '10:00' }).boundingBox())!
+  expect((await block(page).boundingBox())!.y).toBeGreaterThanOrEqual(tick.y + 24)
   // The colours are variables.
   await scheduler(page).evaluate((element) => (element as HTMLElement).style.setProperty('--c2-scheduler__proposal__busy--color', 'rgb(1, 2, 3)'))
   expect(await border('ana')).toBe('rgb(1, 2, 3)')
