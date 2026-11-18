@@ -62,9 +62,15 @@ test('a planner with no month hydrates on the server’s month, then shows the v
   await page.clock.install({ time: new Date(2026, 9, 2, 10) })
   await page.goto('/packages/components/month-planner/test/hydration.html')
   await page.waitForFunction(() => document.documentElement.dataset.modulesReady === 'true')
+  await page.evaluate(() => {
+    window.addEventListener('month-change', (event) =>
+      document.documentElement.setAttribute('data-month-change', (event as CustomEvent<{ month: string }>).detail.month),
+    )
+  })
   await page.evaluate((html) => window.hydrate(html), markup)
 
   await expect(page.locator('#current .title')).toHaveText(/October 2026/)
+  await expect(page.locator('html')).toHaveAttribute('data-month-change', '2026-10')
   await expect(page.locator('#current .date.today')).toHaveText('2')
   // The planners with a month keep it.
   await expect(page.locator('#grid .title')).toHaveText(/September 2026/)

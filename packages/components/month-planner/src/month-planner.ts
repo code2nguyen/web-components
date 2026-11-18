@@ -220,7 +220,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @tag c2-month-planner
  *
  * @event {CustomEvent<MonthPlannerEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
- * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
+ * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month, and when a server-rendered planner with no `month` moves to the visitor's month after hydration; `detail.month` is `YYYY-MM`.
  * @event {CustomEvent<MonthPlannerDayClickDetail>} day-click - With `editable`: a day's empty area was clicked, tapped or activated with Enter/Space; `detail.date` is `YYYY-MM-DD`. Does not bubble.
  * @event {CustomEvent<MonthPlannerRangeSelectDetail>} range-select - With `editable`: a press on one day was released on another; `detail.start` and `detail.end` are the first and last day (`YYYY-MM-DD`, inclusive, ordered). Does not bubble.
  * @event {CustomEvent<MonthPlannerEventChangeDetail>} event-change - With `editable`: an event bar was dragged, resized or moved with Alt+Arrow keys; `detail.event` is the entry from `events` and `detail.changes` its new `start` and `end`. The planner does not apply it. Does not bubble.
@@ -408,9 +408,14 @@ export class MonthPlanner extends LitElement {
       queueMicrotask(() => {
         this.clockReady = true
         // The server's month, which may not be the visitor's: with no `month` to keep, show the visitor's.
-        if (!parseMonth(this.month)) {
-          this.visibleMonth = beginningOfMonth(new Date())
-          this.pickerYear = this.visibleMonth.getFullYear()
+        // Reported like a navigation, without pinning `month`, so an app that loads events per month loads this one.
+        const current = beginningOfMonth(new Date())
+        if (!parseMonth(this.month) && toMonth(current) !== toMonth(this.visibleMonth)) {
+          this.visibleMonth = current
+          this.pickerYear = current.getFullYear()
+          this.dispatchEvent(
+            new CustomEvent<MonthPlannerMonthChangeDetail>('month-change', { detail: { month: toMonth(current) }, bubbles: true, composed: true }),
+          )
         }
       })
   }
