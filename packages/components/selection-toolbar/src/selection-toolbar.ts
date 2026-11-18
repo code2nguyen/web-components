@@ -294,12 +294,14 @@ export class SelectionToolbar extends LitElement {
     const plain = { range: selection.getRangeAt(0).cloneRange(), text: selection.toString() }
     // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret in the host's parent,
     // which `getComposedRanges` resolves. Anything else is read as is.
-    const caret = plain.range.startContainer
     if (!this.composed || !plain.range.collapsed) return plain
-    // The caret is in the content, or, for a toolbar that is itself in a shadow root, in a tree around it.
-    const around = caret !== this && !this.inContent(caret)
-    if (around && !(caret instanceof Element && composedContains(caret, this))) return plain
-    const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : caret)]
+    // WebKit's caret sits right before the host: anything else (a caret in text, every other caret move) is read as is.
+    const host = plain.range.startContainer.childNodes[plain.range.startOffset]
+    if (!(host instanceof Element) || !host.shadowRoot) return plain
+    // The host is in the content, or, for a toolbar that is itself in a shadow root, it is a host around the toolbar.
+    const around = !this.inContent(host)
+    if (around && !composedContains(host, this)) return plain
+    const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : host)]
     if (!shadowRoots.length || typeof selection.getComposedRanges !== 'function') return plain
     const composed = composedRange(selection, shadowRoots)
     // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
