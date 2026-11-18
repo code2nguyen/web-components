@@ -446,9 +446,7 @@ export class Scheduler extends LitElement {
     clearInterval(this.clock)
     this.endGesture()
     this.clearRefocus()
-    this.scrollRetry?.disconnect()
-    this.scrollRetry = undefined
-    this.scrollRetryKey = ''
+    this.stopScrollRetry()
   }
 
   protected override firstUpdated() {
@@ -465,12 +463,17 @@ export class Scheduler extends LitElement {
 
   protected override updated(changed: PropertyValues<this>) {
     const key = this.scrollKey
-    if (this.scrolledFor !== key && !(this.scrollRetry && this.scrollRetryKey === key)) {
-      this.scrollRetry?.disconnect()
-      this.scrollRetry = undefined
-      this.scrollRetryKey = ''
-      if (this.scrollToTime()) this.scrolledFor = key
-      else this.retryScroll(key)
+    if (this.scrolledFor !== key) {
+      // Every update tries again (cheap); a retry already waiting for this key is kept, and watches the grid as drawn now.
+      const waiting = this.scrollRetry && this.scrollRetryKey === key
+      if (this.scrollToTime()) {
+        this.scrolledFor = key
+        this.stopScrollRetry()
+      } else if (waiting) this.observeScrollTargets()
+      else {
+        this.stopScrollRetry()
+        this.retryScroll(key)
+      }
     }
     if (changed.has('events') && this.refocus) {
       const id = this.refocus
@@ -758,20 +761,28 @@ export class Scheduler extends LitElement {
 
   /** Scrolls once the scroller is laid out: an island hydrated while its frame measured 0 wide would stay at `day-start`. */
   private retryScroll(key: string) {
-    const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
-    if (!scroller || typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') return
     this.scrollRetryKey = key
     this.scrollRetry = new ResizeObserver(() => {
       if (!this.scrollToTime()) return
       this.scrolledFor = key
-      this.scrollRetry?.disconnect()
-      this.scrollRetry = undefined
-      this.scrollRetryKey = ''
+      this.stopScrollRetry()
     })
-    this.scrollRetry.observe(scroller)
-    // The timeline may get its width after the scroller does.
-    const timeline = this.renderRoot.querySelector<HTMLElement>('.scale')
-    if (timeline) this.scrollRetry.observe(timeline)
+    this.observeScrollTargets()
+  }
+
+  /** Watches the scroller and the timeline as drawn now: a re-render may have replaced them, and either may get its width last. */
+  private observeScrollTargets() {
+    for (const selector of ['.scroller', '.scale']) {
+      const element = this.renderRoot.querySelector<HTMLElement>(selector)
+      if (element) this.scrollRetry?.observe(element)
+    }
+  }
+
+  private stopScrollRetry() {
+    this.scrollRetry?.disconnect()
+    this.scrollRetry = undefined
+    this.scrollRetryKey = ''
   }
 
   // ------------------------------------------------------------------------------------------------- pointer
