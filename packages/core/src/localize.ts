@@ -42,13 +42,27 @@ const catalogs = new Map<string, MessageCatalog<Messages>>()
  * Registers a component's messages in English, which every other language falls back to message by message. A
  * component ships English only: the app adds its languages with `addTranslations` or `addMessages`. (`shipped` is for
  * the few components that carried languages before, the planners; translations added later still win over them.)
- * Defining a name twice (two copies of a package) keeps the first.
+ * Defining a name again adds the keys it brings to the catalog already registered, so a companion element can keep its
+ * text in its own module (`defineMessages('tour', beaconMessages)` next to the tour's): every call returns that one
+ * catalog. A key defined twice keeps its first English, with a warning when the two differ (two copies of a package
+ * at different versions define the same keys alike).
  */
 export function defineMessages<M extends Messages>(name: string, en: M, shipped: Record<string, M> = {}): MessageCatalog<M> {
-  const existing = catalogs.get(name)
-  if (existing) return existing as unknown as MessageCatalog<M>
-  const catalog: MessageCatalog<M> = { name, en }
-  catalogs.set(name, catalog as unknown as MessageCatalog<Messages>)
+  let catalog = catalogs.get(name) as unknown as MessageCatalog<M> | undefined
+  if (catalog) {
+    const known = catalog.en as Messages
+    for (const [key, message] of Object.entries(en)) {
+      if (!(key in known)) {
+        known[key] = message
+      } else if (String(known[key]) !== String(message)) {
+        console.warn(`c2n: message "${key}" of "${name}" is defined twice with different English; the first definition is kept.`)
+      }
+    }
+  } else {
+    // A copy, so that keys merged in later never change the object a module passed in.
+    catalog = { name, en: { ...en } }
+    catalogs.set(name, catalog as unknown as MessageCatalog<Messages>)
+  }
   // Translations added before the component loaded (an app registering its languages first) keep winning.
   const byLocale = translations.get(name) ?? new Map<string, TranslatedMessages>()
   for (const [locale, messages] of Object.entries(shipped)) {
@@ -196,30 +210,16 @@ function sameLocale(a: string, b: string): boolean {
   }
 }
 
-/** The controllers drawing their host in the server's language, see `redrawAfterHydration`. */
-const inServerPass = new WeakSet<LocaleController>()
-/** The controllers of each server-rendered host that redraw in the server's language first. */
-const serverPasses = new WeakMap<ReactiveControllerHost & Element, Set<LocaleController>>()
-
 /**
- * Rewrites what a host hydrated in another language than the server's. Hydration adopts the server's DOM and records
- * the client's values as written, so a text or attribute that differs (`Decrease value`, `1.13` for `1,13`) would stay
- * the server's until its value changed again. One render in the server's language makes every such binding differ from
- * what lit-html recorded, and the render after it writes the client's values: only the bindings that depend on the
- * language are touched, through lit-html's own diffing. Both run after hydration, never during it.
+ * The controllers drawing a server-rendered host in the server's language: its first client render, which hydrates the
+ * server's DOM. Hydration adopts that DOM and records the client's values as written, so the first render must produce
+ * what the server did: not only the same text and attributes (a binding that differs would stay the server's until its
+ * value changed again) but the same number of items in an iterable, or Lit throws ("unexpected longer than expected
+ * iterable") and draws the content twice, as `formatToParts` does for a number with more parts in French. Once hydrated,
+ * a host whose language differs redraws in it: every binding that depends on the language then differs from what
+ * lit-html recorded, and only those are touched, through its own diffing.
  */
-async function redrawAfterHydration(host: ReactiveControllerHost & Element, passes: Set<LocaleController>): Promise<void> {
-  try {
-    await host.updateComplete
-    host.requestUpdate()
-    await host.updateComplete
-  } catch {
-    // The host's own update failed: Lit reports it; the language is set back below all the same.
-  }
-  serverPasses.delete(host)
-  for (const controller of passes) inServerPass.delete(controller)
-  host.requestUpdate()
-}
+const inServerPass = new WeakSet<LocaleController>()
 
 const controllers = new Set<LocaleController>()
 let observer: MutationObserver | undefined
@@ -238,8 +238,8 @@ function observeLang(): void {
  * passes one, else `localeOf`), read before each render, and the host redraws when a `lang` attribute changes
  * anywhere in the document. For components whose text comes from `Intl`; `LocalizeController` adds messages.
  *
- * A server-rendered host whose language (or messages) differ from the server's is drawn twice more once hydrated, in
- * the server's language then in its own, so that the text and attributes the server wrote are replaced.
+ * A server-rendered host hydrates in the server's language, so that its first render matches the server's DOM, and is
+ * drawn once more in its own language when that (or its messages) differ from the server's.
  */
 export class LocaleController implements ReactiveController {
   /** The host's language as of its last render. */
@@ -258,6 +258,7 @@ export class LocaleController implements ReactiveController {
     this.explicit = explicit
     // A shadow root before the first update is the server's; a controller made later finds the host's own render.
     this.serverRendered = !!host.shadowRoot && !(host as { hasUpdated?: boolean }).hasUpdated
+    if (this.serverRendered) inServerPass.add(this)
     host.addController(this)
   }
 
@@ -292,17 +293,12 @@ export class LocaleController implements ReactiveController {
 
   hostUpdated(): void {
     if (!this.serverRendered) return
+    // The hydrating render is done, in the server's language: from now on the host draws in its own.
     this.serverRendered = false
-    if (!this.differsFromServer()) return
-    inServerPass.add(this)
-    const passes = serverPasses.get(this.host)
-    if (passes) {
-      passes.add(this)
-      return
-    }
-    const added = new Set<LocaleController>([this])
-    serverPasses.set(this.host, added)
-    void redrawAfterHydration(this.host, added)
+    inServerPass.delete(this)
+    this.locale = this.resolve()
+    // Once this update has completed: outside hydration, and not a change requested in the middle of an update.
+    if (this.differsFromServer()) void this.host.updateComplete.then(() => this.host.requestUpdate())
   }
 
   /** Redraws the host when its language changed, or always when its messages did. */
