@@ -33,4 +33,8 @@ import '@c2n/components/format-number/delta'
   <c2-delta type="unit" unit="millisecond" better="lower" value="-42"><span slot="comparison">p95 latency</span></c2-delta>
   <c2-delta type="currency" better="lower" value="1250"><span slot="comparison">cloud spend</span></c2-delta>
 </div>
+<div data-label="Compact numbers and currencies">
+  <c2-delta notation="compact" value="1250000"><span slot="comparison">new users</span></c2-delta>
+  <c2-delta type="currency" currency="EUR" notation="compact" value="-48200"><span slot="comparison">revenue</span></c2-delta>
+</div>
 ```

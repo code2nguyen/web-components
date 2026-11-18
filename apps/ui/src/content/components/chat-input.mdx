@@ -78,6 +78,14 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     </c2-chat-input>
   </section>
 </div>
+<div data-label="Three lines tall, Enter adds a line">
+  <section class="usage-assistant">
+    <div class="usage-assistant__heading"><strong>Start a conversation</strong><span>Ask, create or explore an idea</span></div>
+    <c2-chat-input min-rows="3" enter-behavior="newline" class="usage-assistant__composer" client:load aria-label="Message" placeholder="Ask anything…">
+      <c2-feather-arrow-up slot="send-icon"></c2-feather-arrow-up>
+    </c2-chat-input>
+  </section>
+</div>
 ```
 
 Listen for `submit-message` to send the value. Call `preventDefault()` when a send fails or requires confirmation—the current draft will remain in the composer.

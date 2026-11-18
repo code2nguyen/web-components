@@ -23,6 +23,7 @@ import '@c2n/components/stat'
 <style>
   .stat-demo { width: 280px; }
   .stat-demo [slot='trend'] { color: #15803d; font-size: 12px; font-weight: 600; }
+  .stat-demo.down [slot='trend'] { color: #b91c1c; }
 </style>
 <div data-label="Default">
   <c2-stat class="stat-demo" value="2M+" label="Fixed income instruments"></c2-stat>
@@ -32,6 +33,12 @@ import '@c2n/components/stat'
     <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-4 3 3 5-7"></path></svg>
     <span slot="trend">+12% YoY</span>
     <span slot="description">Updated at market close</span>
+  </c2-stat>
+</div>
+<div data-label="Negative tone">
+  <c2-stat class="stat-demo down" value="3.2%" label="Monthly churn" tone="negative">
+    <span slot="trend">+0.4 pt</span>
+  <span slot="description">Up from 2.8% last month</span>
   </c2-stat>
 </div>
 ```

@@ -72,6 +72,18 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     <c2-chart-series field="spent" label="Spent"></c2-chart-series>
   </c2-radial-bar-chart>
 </div>
+<div data-label="Rings starting at six o'clock">
+  <c2-radial-bar-chart start-angle="180"
+    class="radial-plot"
+    label-field="ring"
+    max-field="goal"
+    color-field="color"
+    data='[{"ring":"Move","value":420,"goal":600,"color":"#fa114f"},{"ring":"Exercise","value":24,"goal":30,"color":"#92e82a"},{"ring":"Stand","value":15,"goal":12,"color":"#1eeaef"}]'
+  >
+    <c2-chart-series field="value" label="Today"></c2-chart-series>
+    <div slot="center" class="radial-total"><strong>420</strong><span>of 600 kcal</span></div>
+  </c2-radial-bar-chart>
+</div>
 ```
 
 ### Data

@@ -32,6 +32,14 @@ import '@c2n/components/notification-center'
 <div data-label="All caught up">
   <c2-notification-center filter="unread" notifications='[{"id":"1","title":"Deploy succeeded","time":"2026-10-27T08:12:00Z","read":true}]'></c2-notification-center>
 </div>
+<div data-label="Unread only, in one list">
+  <c2-notification-center filter="unread" group-by="none" has-more notifications='[
+    {"id":"1","title":"Ana requested your review","body":"#388 Add bar list and choice matrix","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}},
+    {"id":"2","title":"Deploy to production succeeded","body":"web-components · v1.0.18","time":"2026-10-27T08:12:00Z","read":true,"avatar":{"name":"CI"}},
+    {"id":"3","title":"Ben commented on your pull request","body":"Looks good, one nit on the docs","time":"2026-10-26T16:05:00Z","avatar":{"name":"Ben Ode"}},
+    {"id":"4","title":"Weekly digest is ready","time":"2026-10-20T07:00:00Z","read":true}
+  ]'></c2-notification-center>
+</div>
 ```
 
 ### Notifications

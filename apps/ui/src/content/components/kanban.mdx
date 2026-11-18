@@ -62,6 +62,17 @@ import '@c2n/components/kanban'
     <c2-kanban-column column-id="blocked" label="Blocked"><span slot="empty">Nothing is blocked</span></c2-kanban-column>
   </c2-kanban>
 </div>
+<div data-label="Default cards, editable">
+  <c2-kanban editable
+    client:only="lit"
+    class="usage-board"
+    aria-label="Released"
+    items='[{"id":"1","column":"shipped","title":"Masonry layout","description":"Shipped in 0.0.17"},{"id":"2","column":"shipped","title":"QR code error levels"}]'
+  >
+    <c2-kanban-column column-id="shipped" label="Shipped"></c2-kanban-column>
+    <c2-kanban-column column-id="blocked" label="Blocked"><span slot="empty">Nothing is blocked</span></c2-kanban-column>
+  </c2-kanban>
+</div>
 ```
 
 <KanbanExamplesRuntime />

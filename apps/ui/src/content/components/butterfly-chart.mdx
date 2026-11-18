@@ -71,6 +71,16 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
     <c2-chart-series field="after" label="After redesign"></c2-chart-series>
   </c2-butterfly-chart>
 </div>
+<div data-label="Legend at the top">
+  <c2-butterfly-chart legend="top"
+    class="butterfly-plot"
+    label-field="age"
+    data='[{"age":"80+","men":520,"women":890},{"age":"70–79","men":1210,"women":1480},{"age":"60–69","men":1960,"women":2120},{"age":"50–59","men":2480,"women":2530},{"age":"40–49","men":2710,"women":2690},{"age":"30–39","men":2950,"women":2880},{"age":"20–29","men":2780,"women":2690},{"age":"10–19","men":2520,"women":2390},{"age":"0–9","men":2410,"women":2295}]'
+  >
+    <c2-chart-series field="men" label="Men (thousands)"></c2-chart-series>
+    <c2-chart-series field="women" label="Women (thousands)"></c2-chart-series>
+  </c2-butterfly-chart>
+</div>
 ```
 
 ### Data and order

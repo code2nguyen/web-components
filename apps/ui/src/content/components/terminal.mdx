@@ -50,6 +50,15 @@ Type `help` in the first example: the built-in lists `commands`. Every other com
     <span slot="prompt"><span class="terminal-path">~/acme/web</span> (main)</span>
   </c2-terminal>
 </div>
+<div data-label="With a heading and its own prompt">
+  <c2-terminal heading="Production shell" prompt=">"
+    class="terminal-demo"
+    data-terminal-demo
+    commands='[{"name":"deploy","description":"Deploy, roll back or inspect a service"},{"name":"logs","description":"Stream the logs of a service (Ctrl+C to stop)"},{"name":"test","description":"Run the test suite, or only what changed"}]'
+  >
+    <span slot="banner" class="terminal-banner"><b>Acme CLI 4.2.0</b>  Connected to <b>prod-eu-1</b>. Type <b>help</b> for commands.</span>
+  </c2-terminal>
+</div>
 ```
 
 ## Answering commands

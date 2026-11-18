@@ -17,6 +17,7 @@ import {
   FeatherSettingsIcon as FeatherSettings,
   featherIconSource,
 } from '@c2n/feather-icons'
+import { Button } from '@c2n/components/button'
 
 # Feather Icons
 
@@ -48,7 +49,7 @@ import '@c2n/feather-icons'
 
 ## Examples
 
-```html tag=MdxCodeBlock,compact=true
+```html tag=MdxCodeBlock,compact=true,label=Icons
 <c2-feather-arrow-right></c2-feather-arrow-right>
 <c2-feather-camera></c2-feather-camera>
 <c2-feather-heart></c2-feather-heart>
@@ -57,13 +58,21 @@ import '@c2n/feather-icons'
 
 Icons inherit `currentColor` and are themed with the shared `--c2-feather-icon--*` custom properties.
 
-```html tag=MdxCodeBlock,compact=true
+```html tag=MdxCodeBlock,compact=true,label=Size colour and stroke
 <c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--color: #dc2626"></c2-feather-heart>
 <c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--stroke-width: 1"></c2-feather-heart>
 <c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--stroke-width: 3"></c2-feather-heart>
 ```
 
 Use the sliders button on an example, or select any icon in the gallery, to open that icon directly in the configuration studio.
+
+In a button, an icon goes in its `prefix-icon` or `suffix-icon` slot.
+
+```html tag=MdxCodeBlock,compact=true,label=In a button
+<c2-button><c2-feather-camera slot="prefix-icon"></c2-feather-camera>Take a photo</c2-button>
+<c2-button>Continue<c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right></c2-button>
+```
+
 
 ## API
 

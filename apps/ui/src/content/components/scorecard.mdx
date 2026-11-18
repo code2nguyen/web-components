@@ -42,6 +42,13 @@ The entry registers `c2-scorecard` and `c2-choice-matrix`.
     rows='[{"value":"greeting","label":"Greets and verifies the caller","critical":true},{"value":"empathy","label":"Acknowledges the problem"},{"value":"resolve","label":"Resolves or sets a next step"},{"value":"upsell","label":"Offers the annual plan"}]'
     value='{"greeting":"pass","empathy":"pass","resolve":"fail","upsell":"na"}'></c2-scorecard>
 </div>
+<div data-label="Disabled">
+  <c2-scorecard disabled name="interview" label="Interview scorecard" row-header="Criterion"
+    columns='[{"value":"1","label":"Strong no","fail":true},{"value":"2","label":"No"},{"value":"3","label":"Yes"},{"value":"4","label":"Strong yes"}]'
+    rows='[{"value":"design","label":"System design","group":"Skills","weight":2},{"value":"code","label":"Coding","group":"Skills"},{"value":"comms","label":"Communication","group":"Skills"},{"value":"values","label":"Works with others","group":"Culture","critical":true}]'
+    bands='[{"min":75,"label":"Hire","tone":"success"},{"min":50,"label":"Lean hire","tone":"warning"},{"min":0,"label":"No hire","tone":"error"}]'
+    value='{"design":"4","code":"3","comms":"3"}'></c2-scorecard>
+</div>
 ```
 
 ### The scale

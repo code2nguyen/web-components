@@ -80,4 +80,11 @@ import '@c2n/components/beam'
     <c2-beam from="usage-hub" to="usage-hub-db" reverse></c2-beam>
   </div>
 </div>
+<div data-label="Reversed">
+  <div class="beam-usage">
+    <div class="beam-node" id="usage-straight-a">App</div>
+    <div class="beam-node" id="usage-straight-b">API</div>
+    <c2-beam reverse from="usage-straight-a" to="usage-straight-b"></c2-beam>
+  </div>
+</div>
 ```

@@ -62,6 +62,18 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     <c2-chart-series field="net" label="Net cash flow"></c2-chart-series>
   </c2-waterfall-chart>
 </div>
+<div data-label="Value over every bar">
+  <c2-waterfall-chart value-labels
+    class="waterfall-plot"
+    label-field="month"
+    total-field="opening"
+    total-label="Closing cash"
+    legend="none"
+    data='[{"month":"Opening cash","net":240,"opening":true},{"month":"Jan","net":38},{"month":"Feb","net":-22},{"month":"Mar","net":51},{"month":"Apr","net":-64},{"month":"May","net":17},{"month":"Jun","net":29}]'
+  >
+    <c2-chart-series field="net" label="Net cash flow"></c2-chart-series>
+  </c2-waterfall-chart>
+</div>
 ```
 
 ### Data

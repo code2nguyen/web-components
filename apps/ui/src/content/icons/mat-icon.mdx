@@ -12,6 +12,7 @@ import ApiTable from '../../components/ApiTable.astro'
 import MatIconGallery from '../../components/MatIconGallery.astro'
 
 import { MatIcon } from '@c2n/components/mat-icon'
+import { Button } from '@c2n/components/button'
 
 # Mat Icon
 
@@ -35,7 +36,7 @@ import '@c2n/components/mat-icon'
 
 The ligature is a bare text node, so it cannot receive a class of its own. Customize it through the host's documented font-size, font-weight, and color properties, or wrap other text-slot content in an element when it needs an independently targetable class.
 
-```html tag=MdxCodeBlock,compact=true
+```html tag=MdxCodeBlock,compact=true,label=Size weight and colour
 <style>
   .featured-icon {
     --c2-mat-icon--font-size: 36px;
@@ -47,6 +48,18 @@ The ligature is a bare text node, so it cannot receive a class of its own. Custo
 ```
 
 Use the sliders button on the example, or select any icon in the gallery, to open that icon directly in the configuration studio.
+
+The ligature names the icon. In a button, it goes in the `prefix-icon` or `suffix-icon` slot.
+
+```html tag=MdxCodeBlock,compact=true,label=In a button
+<c2-button><c2-mat-icon slot="prefix-icon">add</c2-mat-icon>New item</c2-button>
+<c2-button>Continue<c2-mat-icon slot="suffix-icon">arrow_forward</c2-mat-icon></c2-button>
+```
+
+```html tag=MdxCodeBlock,compact=true,label=Inline with text
+<p>Saved to <c2-mat-icon>folder</c2-mat-icon> Reports, shared with <c2-mat-icon>group</c2-mat-icon> Finance.</p>
+```
+
 
 ## API
 

@@ -53,6 +53,16 @@ The entry registers `c2-aging-table` and `c2-pivot-table`, and the menu the fiel
     data='[{"invoice":"INV-1041","customer":"Acme Corp","region":"Europe","dueDate":"2026-12-05","amount":4200},{"invoice":"INV-1018","customer":"Acme Corp","region":"Europe","dueDate":"2026-10-28","amount":1850},{"invoice":"INV-0987","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-10-30","amount":920},{"invoice":"INV-0952","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-09-25","amount":2400},{"invoice":"INV-0874","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-07-10","amount":780},{"invoice":"INV-1036","customer":"Contoso","region":"Americas","dueDate":"2026-11-20","amount":3100},{"invoice":"INV-0931","customer":"Contoso","region":"Americas","dueDate":"2026-08-25","amount":1240},{"invoice":"INV-1022","customer":"Fabrikam","region":"Americas","dueDate":"2026-11-02","amount":640},{"invoice":"INV-0901","customer":"Fabrikam","region":"Americas","dueDate":"2026-09-01","amount":1575},{"invoice":"INV-0815","customer":"Northwind Traders","region":"Asia Pacific","dueDate":"2026-06-30","amount":2260},{"invoice":"INV-1044","customer":"Northwind Traders","region":"Asia Pacific","dueDate":"2026-12-10","amount":980}]'
   ></c2-aging-table>
 </div>
+<div data-label="Heatmap">
+  <c2-aging-table heatmap
+    class="aging-usage"
+    as-of="2026-11-15"
+    rows="region;customer"
+    field-labels='{"region":"Region","customer":"Customer"}'
+    values='[{"field":"amount","format":{"style":"currency","currency":"EUR","notation":"compact","maximumSignificantDigits":2}}]'
+    data='[{"invoice":"INV-1041","customer":"Acme Corp","region":"Europe","dueDate":"2026-12-05","amount":4200},{"invoice":"INV-1018","customer":"Acme Corp","region":"Europe","dueDate":"2026-10-28","amount":1850},{"invoice":"INV-0987","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-10-30","amount":920},{"invoice":"INV-0952","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-09-25","amount":2400},{"invoice":"INV-0874","customer":"Bluebird Ltd","region":"Europe","dueDate":"2026-07-10","amount":780},{"invoice":"INV-1036","customer":"Contoso","region":"Americas","dueDate":"2026-11-20","amount":3100},{"invoice":"INV-0931","customer":"Contoso","region":"Americas","dueDate":"2026-08-25","amount":1240},{"invoice":"INV-1022","customer":"Fabrikam","region":"Americas","dueDate":"2026-11-02","amount":640},{"invoice":"INV-0901","customer":"Fabrikam","region":"Americas","dueDate":"2026-09-01","amount":1575},{"invoice":"INV-0815","customer":"Northwind Traders","region":"Asia Pacific","dueDate":"2026-06-30","amount":2260},{"invoice":"INV-1044","customer":"Northwind Traders","region":"Asia Pacific","dueDate":"2026-12-10","amount":980}]'
+  ></c2-aging-table>
+</div>
 ```
 
 ### Items and dates

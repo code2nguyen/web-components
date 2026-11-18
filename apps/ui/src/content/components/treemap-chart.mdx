@@ -62,6 +62,16 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     <c2-chart-series field="size" label="Size (MB)"></c2-chart-series>
   </c2-treemap-chart>
 </div>
+<div data-label="Name and size on every tile">
+  <c2-treemap-chart label-content="name-value"
+    class="treemap-plot"
+    label-field="name"
+    legend="bottom"
+    data='[{"name":"node_modules","children":[{"name":"echarts","size":52},{"name":"typescript","size":23},{"name":"@astrojs","size":18},{"name":"playwright-core","size":9},{"name":"lit","size":2}]},{"name":"packages","children":[{"name":"components","size":31},{"name":"tools","size":12},{"name":"icons","size":8}]},{"name":"apps","children":[{"name":"ui","size":14},{"name":"examples","size":11}]},{"name":".git","size":38}]'
+  >
+    <c2-chart-series field="size" label="Size (MB)"></c2-chart-series>
+  </c2-treemap-chart>
+</div>
 ```
 
 ### Data
