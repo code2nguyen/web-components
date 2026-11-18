@@ -771,19 +771,28 @@ export class Scheduler extends LitElement {
     this.observeScrollTargets()
   }
 
-  /** Watches the scroller and the timeline as drawn now: a re-render may have replaced them, and either may get its width last. */
+  /**
+   * Watches the scroller and the timeline as drawn now: a re-render may have replaced them, and either may get its
+   * width last. An element already watched is left alone; one a re-render replaced is let go.
+   */
   private observeScrollTargets() {
-    for (const selector of ['.scroller', '.scale']) {
-      const element = this.renderRoot.querySelector<HTMLElement>(selector)
-      if (element) this.scrollRetry?.observe(element)
-    }
+    const observer = this.scrollRetry
+    if (!observer) return
+    const current = ['.scroller', '.scale'].flatMap((selector) => this.renderRoot.querySelector<HTMLElement>(selector) ?? [])
+    for (const element of this.scrollTargets) if (!current.includes(element)) observer.unobserve(element)
+    for (const element of current) if (!this.scrollTargets.includes(element)) observer.observe(element)
+    this.scrollTargets = current
   }
 
   private stopScrollRetry() {
     this.scrollRetry?.disconnect()
     this.scrollRetry = undefined
     this.scrollRetryKey = ''
+    this.scrollTargets = []
   }
+
+  /** The elements the retry watches. */
+  private scrollTargets: HTMLElement[] = []
 
   // ------------------------------------------------------------------------------------------------- pointer
 
