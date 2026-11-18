@@ -18,6 +18,23 @@ const ListFormat = (
   }
 ).ListFormat
 
+type ListFormatter = { format(items: string[]): string }
+const listFormatters = new Map<string, ListFormatter | undefined>()
+
+/** One list formatter per language, built once; none for a malformed `lang` (`en_US`), which Intl rejects. */
+function listFormatter(locale: string): ListFormatter | undefined {
+  if (!listFormatters.has(locale)) {
+    let formatter: ListFormatter | undefined
+    try {
+      formatter = ListFormat ? new ListFormat(locale, { type: 'unit', style: 'short' }) : undefined
+    } catch {
+      formatter = undefined
+    }
+    listFormatters.set(locale, formatter)
+  }
+  return listFormatters.get(locale)
+}
+
 export type QuestionnaireQuestionType = 'select' | 'choice' | 'single' | 'multiple'
 export type QuestionnaireAnswer = string | string[]
 export type QuestionnaireAnswers = Record<string, QuestionnaireAnswer>
@@ -405,7 +422,7 @@ export class Questionnaire extends LitElement {
     const labels = values.map((value) => question.options.find((option) => option.value === value)?.label ?? value)
     if (!labels.length) return this.skippedLabel || this.msg.t('skipped')
     // A list in the page's language: "A, B" in English, "A、B" in Japanese.
-    return ListFormat ? new ListFormat(this.msg.locale, { type: 'unit', style: 'short' }).format(labels) : labels.join(', ')
+    return listFormatter(this.msg.locale)?.format(labels) ?? labels.join(', ')
   }
 
   override render() {

@@ -220,3 +220,14 @@ test('a label property still overrides its message on one questionnaire', async 
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
   expect(await page.locator('c2-questionnaire').evaluate((element: Questionnaire) => element.previousLabel)).toBe('')
 })
+
+test('lists a multiple answer under a malformed lang without breaking the summary', async ({ page, scenario }) => {
+  await scenario()
+  const host = page.locator('c2-questionnaire')
+  await host.evaluate((element: Questionnaire) => {
+    element.lang = 'en_US'
+    element.answers = { direction: 'timeline', updates: ['progress', 'risks'], timing: 'now' }
+    element.completed = true
+  })
+  await expect(host.locator('dd').nth(1)).toHaveText('Progress, Risks')
+})
