@@ -307,3 +307,40 @@ test('inside a wrapper, a button or an undefined icon is decoration, and a contr
   })
   await expect.poll(() => page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('input')
 })
+
+test('a wrapper is watched for good: its native control is adopted past a later sibling, swapped and released', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Code"><div style="display: contents" id="island"></div><p>Six digits.</p></c2-form-field><c2-form-field label="Vendor"><div style="display: contents"><vendor-control></vendor-control></div></c2-form-field>`,
+  )
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => {
+        const element = (field as unknown as { control: Element | null }).control
+        return element ? `${element.localName}${element.id ? '#' + element.id : ''}` : null
+      })
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.id = 'first'
+    document.getElementById('island')!.append(input)
+  })
+  await expect.poll(() => control(0)).toBe('input#first')
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.id = 'second'
+    document.getElementById('first')!.replaceWith(input)
+  })
+  await expect.poll(() => control(0)).toBe('input#second')
+  // A form-associated element of another library is a control inside a wrapper too.
+  await page.evaluate(() => {
+    customElements.define(
+      'vendor-control',
+      class extends HTMLElement {
+        static formAssociated = true
+      },
+    )
+  })
+  await page.evaluate(() => document.querySelectorAll('c2-form-field')[1].append(document.createElement('span')))
+  await expect.poll(() => control(1)).toBe('vendor-control')
+})

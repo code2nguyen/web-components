@@ -67,11 +67,14 @@ const isFormControl = (element: Element) =>
   element.matches('input, select, textarea, button') || (element.constructor as { formAssociated?: boolean }).formAssociated === true
 
 /**
- * What may be the control inside a wrapper: a control of the field protocol or a native text or choice control. A
- * button, an icon or a custom element not upgraded yet is the app's decoration; a `c2-*` control announces itself when
- * it upgrades.
+ * What may be the control inside a wrapper: a control of the field protocol, a native text or choice control, or a
+ * form-associated element that is not a button. A button, an icon or a custom element not upgraded yet is the app's
+ * decoration; a `c2-*` control announces itself when it upgrades.
  */
-const isCandidate = (element: Element) => !!fieldConsumerOf(element as FormFieldControl) || element.matches('input, select, textarea')
+const isCandidate = (element: Element) =>
+  !!fieldConsumerOf(element as FormFieldControl) ||
+  element.matches('input, select, textarea') ||
+  (isFormControl(element) && !element.localName.endsWith('button'))
 
 /** Astro's island elements: wrappers by name, whether or not Astro's script has defined them or its style applied. */
 const FRAMEWORK_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
@@ -253,6 +256,7 @@ export class FormField extends LitElement {
     this.ownerForm?.addEventListener('reset', this.handleFormReset)
     // A control that upgraded before this field announced itself to nobody: claim it now.
     this.adoptControl(this.findControl())
+    this.watchWrappers()
   }
 
   override disconnectedCallback(): void {
@@ -302,12 +306,10 @@ export class FormField extends LitElement {
    * a control group that upgrades after its children.
    */
   private findControl(): FormFieldControl | null {
-    const wrappers: Element[] = []
     const search = (parent: Element): FormFieldControl | null => {
       for (const child of parent.children) {
         if (child.hasAttribute('slot') || NOT_RENDERED.has(child.localName)) continue
         if (isWrapper(child)) {
-          wrappers.push(child)
           const inner = search(child)
           if (inner) return inner
           continue
@@ -317,25 +319,7 @@ export class FormField extends LitElement {
       }
       return null
     }
-    const control = search(this)
-    this.watchWrappers(control ? [] : wrappers)
-    return control
-  }
-
-  private wrapperObserver: MutationObserver | undefined
-
-  /**
-   * Watches wrappers that hold no control yet: a framework island renders its content after the field connected, and
-   * a native control it adds announces itself to nobody (a `c2-*` control does, through the field protocol).
-   */
-  private watchWrappers(wrappers: Element[]) {
-    this.wrapperObserver?.disconnect()
-    if (!wrappers.length || !this.isConnected) return
-    this.wrapperObserver ??= new MutationObserver(() => {
-      const control = this.findControl()
-      if (control) this.adoptControl(control)
-    })
-    for (const wrapper of wrappers) this.wrapperObserver.observe(wrapper, { childList: true, subtree: true })
+    return search(this)
   }
 
   /** Whether an element is a direct child of this field, or reached from one through wrappers only. */
@@ -345,6 +329,20 @@ export class FormField extends LitElement {
       if (!isWrapper(parent)) return false
     }
     return false
+  }
+
+  private wrapperObserver: MutationObserver | undefined
+
+  /**
+   * Watches the field's wrapper children: a framework island renders, swaps or removes its control after the field
+   * connected, and a native control announces itself to nobody (a `c2-*` control does, through the field protocol).
+   */
+  private watchWrappers() {
+    this.wrapperObserver?.disconnect()
+    const wrappers = [...this.children].filter((child) => !child.hasAttribute('slot') && isWrapper(child))
+    if (!wrappers.length || !this.isConnected) return
+    this.wrapperObserver ??= new MutationObserver(() => this.adoptControl(this.findControl()))
+    for (const wrapper of wrappers) this.wrapperObserver.observe(wrapper, { childList: true, subtree: true })
   }
 
   private adoptControl(control: FormFieldControl | null) {
@@ -392,7 +390,10 @@ export class FormField extends LitElement {
 
   private handleSlotChange = (event: Event) => {
     this.slots.handleSlotChange(event)
-    if (!(event.target as HTMLSlotElement).name) this.adoptControl(this.findControl())
+    if (!(event.target as HTMLSlotElement).name) {
+      this.adoptControl(this.findControl())
+      this.watchWrappers()
+    }
     this.requestUpdate()
   }
 
