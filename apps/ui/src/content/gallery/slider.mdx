@@ -5,6 +5,7 @@ import SliderExamplesRuntime from '../../components/SliderExamplesRuntime.astro'
 
 import { Slider } from '@c2n/components/slider'
 import { Button } from '@c2n/components/button'
+import { NumberInput } from '@c2n/components/number-input'
 
 <SliderExamplesRuntime />
 
@@ -79,6 +80,28 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
 <c2-slider class="price-range" mode="range" value-start="25" value-end="75" show-value aria-label="Price"></c2-slider>
 ```
 
+```html tag=MdxCodeBlock,label=Range with typed ends
+<style>
+  .price-filter {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 8px;
+    width: min(240px, 100%);
+  }
+  .price-filter c2-slider {
+    grid-column: 1 / -1;
+  }
+  .price-filter c2-number-input {
+    min-width: 0;
+  }
+</style>
+<div class="price-filter" data-slider-example="range-inputs">
+  <c2-slider mode="range" min="0" max="500" step="5" value-start="50" value-end="300" aria-label="Price" start-label="Minimum price" end-label="Maximum price"></c2-slider>
+  <c2-number-input data-end="start" min="0" max="500" step="5" value="50" aria-label="Minimum price"></c2-number-input>
+  <c2-number-input data-end="end" min="0" max="500" step="5" value="300" aria-label="Maximum price"></c2-number-input>
+</div>
+```
+
 ```html tag=MdxCodeBlock,label=Always visible value
 <style>
   .readout {
@@ -138,6 +161,38 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
 ```
 
 </GalleryGrid>
+
+A range slider is dragged and stepped with the arrow keys; for a value typed exactly, such as a price, pair it with two `c2-number-input`s. The slider keeps its ends in order and on the step grid, so the fields are set back to what it kept:
+
+```ts tag=CodeBlock
+import type { Slider } from '@c2n/components/slider'
+import type { NumberInput } from '@c2n/components/number-input'
+
+const filter = document.querySelector('.price-filter')!
+const slider = filter.querySelector<Slider>('c2-slider')!
+const start = filter.querySelector<NumberInput>('[data-end="start"]')!
+const end = filter.querySelector<NumberInput>('[data-end="end"]')!
+
+// An empty or unreadable field falls back to the end of the scale.
+const typed = (field: NumberInput, fallback: number) => (field.value.trim() !== '' && Number.isFinite(Number(field.value)) ? Number(field.value) : fallback)
+const showEnds = () => {
+  start.value = String(slider.valueStart)
+  end.value = String(slider.valueEnd)
+}
+// Dragging the thumbs fills the fields.
+slider.addEventListener('input', showEnds)
+// A typed value moves its thumb once committed, kept within the other end.
+start.addEventListener('change', async () => {
+  slider.valueStart = Math.min(typed(start, slider.min), slider.valueEnd)
+  await slider.updateComplete
+  showEnds()
+})
+end.addEventListener('change', async () => {
+  slider.valueEnd = Math.max(typed(end, slider.max), slider.valueStart)
+  await slider.updateComplete
+  showEnds()
+})
+```
 
 ## Markers
 

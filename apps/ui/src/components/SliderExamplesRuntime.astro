@@ -2,15 +2,18 @@
 /**
  * Plays the application's part in the slider gallery: the time scrubber's transport (a Play toggle and a speed
  * button driving a timer, and Previous/Next buttons calling `seekMarker()`) with its `formatValue`, and the chapter
- * numbers drawn inside the markers through `renderMarker`. Both are property-only.
+ * numbers drawn inside the markers through `renderMarker`. Both are property-only. Also keeps the range slider and the
+ * two number inputs of the typed-ends card in step.
  */
 ---
 
 <script>
   import type { Slider } from '@c2n/components/slider'
   import type { Button } from '@c2n/components/button'
+  import type { NumberInput } from '@c2n/components/number-input'
   import '@c2n/components/slider'
   import '@c2n/components/button'
+  import '@c2n/components/number-input'
 
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds) % 60).padStart(2, '0')}`
   const speeds = [1, 2, 4]
@@ -74,6 +77,30 @@
     slider.renderMarker = ({ index }) => String(index + 1)
   }
 
+  async function setupRangeInputs(root: HTMLElement) {
+    const slider = root.querySelector<Slider>('c2-slider')
+    const start = root.querySelector<NumberInput>('[data-end="start"]')
+    const end = root.querySelector<NumberInput>('[data-end="end"]')
+    if (!slider || !start || !end) return
+    await hydrated(slider)
+    const typed = (field: NumberInput, fallback: number) => (field.value.trim() !== '' && Number.isFinite(Number(field.value)) ? Number(field.value) : fallback)
+    const showEnds = () => {
+      start.value = String(slider.valueStart)
+      end.value = String(slider.valueEnd)
+    }
+    slider.addEventListener('input', showEnds)
+    start.addEventListener('change', async () => {
+      slider.valueStart = Math.min(typed(start, slider.min), slider.valueEnd)
+      await slider.updateComplete
+      showEnds()
+    })
+    end.addEventListener('change', async () => {
+      slider.valueEnd = Math.max(typed(end, slider.max), slider.valueStart)
+      await slider.updateComplete
+      showEnds()
+    })
+  }
+
   const initialized = new WeakSet<Element>()
 
   function setup() {
@@ -82,6 +109,7 @@
       initialized.add(element)
       if (element.dataset.sliderExample === 'scrubber') void setupScrubber(element)
       else if (element.dataset.sliderExample === 'chapters') void setupChapters(element as Slider)
+      else if (element.dataset.sliderExample === 'range-inputs') void setupRangeInputs(element)
     })
   }
 
