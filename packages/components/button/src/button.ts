@@ -147,7 +147,8 @@ export class Button extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    if (changed.has('radio') || changed.has('selected'))
+    // Only while the item is a radio, or just stopped being one: a plain button has nothing to sync.
+    if ((changed.has('radio') && (this.radio || changed.get('radio'))) || (this.radio && changed.has('selected')))
       syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-button'), this.radio, this.selected)
     if (changed.has('commandFor') || changed.has('type') || changed.has('ariaControls')) this.resolveReferences()
     if (changed.has('disabled') || changed.has('running')) {

@@ -293,22 +293,30 @@ export class ButtonGroup extends LitElement {
     }
     const selected = new Set(this.selectedValues)
     const radio = this.radioItems
-    // An item moved out of the group, or every item once the group stops being single: a toggle button again.
+    // An item moved out of the group, or every item once the group stops being single: a toggle button again. An
+    // item another group has taken is left to that group, whichever of the two syncs first.
     for (const item of this.radioItemsSet) {
       if (radio && items.includes(item)) continue
-      ;(item as HTMLElement & { radio: boolean }).radio = false
       this.radioItemsSet.delete(item)
+      const owner = item.parentElement
+      if (owner !== this && owner?.localName === 'c2-button-group') continue
+      ;(item as HTMLElement & { radio: boolean }).radio = false
     }
     items.forEach((item, index) => {
-      if (selectable && !radio) item.setAttribute('toggle', '')
-      else item.removeAttribute('toggle')
       // A property, not an attribute: nothing is written on the author's children that a server render would lack.
       // An item not upgraded yet (a server-rendered page hydrating children after the group) keeps the property:
       // Lit picks up a value set before the element was defined.
       const pending = item.localName.includes('-') && !customElements.get(item.localName)
-      if (radio && ('radio' in item || pending)) {
+      const takesRadio = radio && ('radio' in item || pending)
+      // An item with no radio mode (a split button, another library's toggle) stays a toggle button, with its state.
+      if (selectable && !takesRadio) item.setAttribute('toggle', '')
+      else item.removeAttribute('toggle')
+      if (takesRadio) {
         ;(item as HTMLElement & { radio: boolean }).radio = true
         this.radioItemsSet.add(item)
+      } else if ((item as HTMLElement & { radio?: boolean }).radio) {
+        // Arrived as a radio from a single-selection group.
+        ;(item as HTMLElement & { radio: boolean }).radio = false
       }
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
@@ -429,7 +437,12 @@ export class ButtonGroup extends LitElement {
   }
 
   private handleKeyDown = (event: KeyboardEvent) => {
-    const directionKeys = this.orientation === 'vertical' ? ['ArrowUp', 'ArrowDown'] : ['ArrowLeft', 'ArrowRight']
+    // A radio group answers to all four arrows, as the radio pattern does; a toolbar to the ones of its orientation.
+    const directionKeys = this.radioItems
+      ? ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+      : this.orientation === 'vertical'
+        ? ['ArrowUp', 'ArrowDown']
+        : ['ArrowLeft', 'ArrowRight']
     if (!this.roving || this.effectiveDisabled || ![...directionKeys, 'Home', 'End'].includes(event.key)) return
     // The focused control used the key itself: a select opening, a menu moving, a slider stepping.
     if (event.defaultPrevented) return

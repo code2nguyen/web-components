@@ -71,7 +71,7 @@ test('single selection supports arrow, Home and End keys and skips disabled item
   await expect(host).toHaveAttribute('data-events', '[{"value":"b"},{"value":"a"},{"value":"b"}]')
 })
 
-test('vertical segmented groups stack their items and use Up and Down keys', async ({ page, renderScenario }) => {
+test('vertical segmented groups stack their items and, as radio groups, answer to every arrow key', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-button-group appearance="segmented" orientation="vertical" value="a" aria-label="View">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')
   const indicator = host.locator('.indicator')
@@ -79,15 +79,16 @@ test('vertical segmented groups stack their items and use Up and Down keys', asy
   await expect(host).toHaveCSS('flex-direction', 'column')
   const initialTransform = await indicator.evaluate((element) => getComputedStyle(element).transform)
   await left.focus()
-  await page.keyboard.press('ArrowRight')
-  await expect(host).toHaveJSProperty('value', 'a')
   await page.keyboard.press('ArrowDown')
   await expect(host).toHaveJSProperty('value', 'b')
   await expect.poll(() => indicator.evaluate((element) => getComputedStyle(element).transform)).not.toBe(initialTransform)
-  await page.keyboard.press('ArrowDown')
-  await expect(host).toHaveJSProperty('value', 'a')
   await page.keyboard.press('ArrowUp')
+  await expect(host).toHaveJSProperty('value', 'a')
+  // Left and Right move a radio group whatever its orientation.
+  await page.keyboard.press('ArrowRight')
   await expect(host).toHaveJSProperty('value', 'b')
+  await page.keyboard.press('ArrowLeft')
+  await expect(host).toHaveJSProperty('value', 'a')
 })
 
 test('vertical segmented icon buttons move the indicator on pointer selection', async ({ page, renderScenario }) => {
@@ -253,4 +254,35 @@ test('an item moved out of a single-selection group is a toggle button again', a
   const moved = page.locator('#elsewhere').getByRole('button', { name: 'Left' })
   await expect(moved).toBeVisible()
   await expect(moved).not.toHaveAttribute('aria-checked', /.*/)
+})
+
+test('an item with no radio mode keeps its toggle state in a single-selection group', async ({ page, renderScenario }) => {
+  await page.addInitScript(() =>
+    customElements.define(
+      'x-toggle',
+      class extends HTMLElement {
+        static observedAttributes = ['toggle', 'selected']
+        attributeChangedCallback() {
+          this.dataset.state = this.hasAttribute('toggle') ? String(this.hasAttribute('selected')) : 'none'
+        }
+      },
+    ),
+  )
+  await renderScenario(
+    `    <c2-button-group selection="single" value="x" aria-label="Mixed"><c2-button value="a">A</c2-button><x-toggle value="x">X</x-toggle></c2-button-group>`,
+  )
+  await expect(page.locator('x-toggle')).toHaveAttribute('toggle', '')
+  await expect(page.locator('x-toggle')).toHaveAttribute('data-state', 'true')
+  await expect(page.getByRole('radio', { name: 'A' })).toHaveAttribute('aria-checked', 'false')
+})
+
+test('an item moved from one single-selection group to another stays a radio, whichever group syncs first', async ({ page, renderScenario }) => {
+  // B is created first, so its observer runs before A's.
+  await renderScenario(`<c2-button-group id="b" selection="single" aria-label="B"><c2-button value="1">One</c2-button></c2-button-group>
+    <c2-button-group id="a" selection="single" aria-label="A"><c2-button value="2">Two</c2-button><c2-button value="3">Three</c2-button></c2-button-group>
+    <c2-button-group id="m" selection="multiple" aria-label="M"><c2-button value="4">Four</c2-button></c2-button-group>`)
+  await page.evaluate(() => document.querySelector('#b')!.append(document.querySelector('c2-button[value="2"]')!))
+  await expect(page.locator('#b').getByRole('radio', { name: 'Two' })).toBeVisible()
+  await page.evaluate(() => document.querySelector('#m')!.append(document.querySelector('c2-button[value="3"]')!))
+  await expect(page.locator('#m').getByRole('button', { name: 'Three' })).toHaveAttribute('aria-pressed', 'false')
 })
