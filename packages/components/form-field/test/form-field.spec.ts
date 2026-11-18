@@ -265,3 +265,32 @@ test('a control laid out with display: contents is the control, not a wrapper', 
     'c2-checkbox-group',
   )
 })
+
+test('inside a wrapper, the control is the first control, past decoration and slotted elements', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Price" hint="Before tax"><div style="display: contents"><span>$</span><span slot="label-action">Help</span><c2-text-field></c2-text-field></div></c2-form-field>`,
+  )
+  const input = page.getByRole('textbox', { name: 'Price' })
+  await expect(input).toBeVisible()
+  await expect(input).toHaveAccessibleDescription('Before tax')
+})
+
+test('a second consumer inside a wrapper stays contained in the field', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div id="outer"><c2-form-field label="First"><div style="display: contents"><c2-text-field></c2-text-field></div><div style="display: contents" id="second"></div></c2-form-field></div>`,
+  )
+  const escaped = await page.evaluate(async () => {
+    let count = 0
+    document.getElementById('outer')!.addEventListener('c2-field-connect', () => (count += 1))
+    document.getElementById('second')!.append(document.createElement('c2-text-field'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    return count
+  })
+  expect(escaped).toBe(0)
+})
+
+test('a control group upgrading after its children is still the control', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Plan"><late-group style="display: contents"><c2-checkbox value="a">A</c2-checkbox></late-group></c2-form-field>`)
+  // The child is a consumer already; the group is not defined yet, so it must not be looked through.
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('late-group')
+})

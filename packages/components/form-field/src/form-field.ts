@@ -66,6 +66,21 @@ const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
 const isFormControl = (element: Element) =>
   element.matches('input, select, textarea, button') || (element.constructor as { formAssociated?: boolean }).formAssociated === true
 
+/** What may be the control inside a wrapper: a control, or a custom element that may become one when it upgrades. */
+const isCandidate = (element: Element) =>
+  isFormControl(element) || !!fieldConsumerOf(element as FormFieldControl) || (element.localName.includes('-') && !element.matches(':defined'))
+
+/** Astro's island elements: wrappers by name, whether or not Astro's script has defined them or its style applied. */
+const FRAMEWORK_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
+
+/** A framework's layout-free wrapper: defined, laid out with `display: contents`, and not a control itself. */
+const isWrapper = (element: Element) =>
+  FRAMEWORK_WRAPPERS.has(element.localName) ||
+  (!(element.localName.includes('-') && !element.matches(':defined')) &&
+    !isFormControl(element) &&
+    !fieldConsumerOf(element as FormFieldControl) &&
+    getComputedStyle(element).display === 'contents')
+
 let warnedNative = false
 
 /**
@@ -262,14 +277,11 @@ export class FormField extends LitElement {
   private handleConnect = (event: Event) => {
     const { consumer } = (event as CustomEvent<FieldConnectEventDetail>).detail
     const target = event.composedPath()[0]
-    // Only this field's control (a direct child, or one inside a `display: contents` wrapper) is claimed; anything
-    // deeper belongs to that control (or a nested field).
-    if (!(target instanceof HTMLElement)) return
-    const control = this.findControl()
-    if (target === control || target.parentElement === this) {
-      event.stopPropagation()
-      if (target === control && fieldConsumerOf(target) === consumer) this.adoptControl(target)
-    }
+    // Only this field's children (directly, or through wrappers) are its to claim or contain; anything deeper belongs to
+    // that control (or a nested field).
+    if (!(target instanceof HTMLElement) || !this.ownChild(target)) return
+    event.stopPropagation()
+    if (target === this.findControl() && fieldConsumerOf(target) === consumer) this.adoptControl(target)
   }
 
   private handleFormReset = () => {
@@ -280,26 +292,35 @@ export class FormField extends LitElement {
 
   /**
    * The first unslotted child that draws a box. A child that does not render (`style`, `script`, `template`) is
-   * skipped, and a `display: contents` wrapper (a framework's island element, such as Astro's `astro-island`) that is
-   * not a control itself is looked through to the control it holds.
+   * skipped, and a wrapper (a framework's island element, such as Astro's `astro-island`) is looked through to the
+   * first control it holds, past decoration such as a prefix. A wrapper is a defined element laid out with
+   * `display: contents` that is not a control itself; a custom element not upgraded yet is never one, since it may be
+   * a control group that upgrades after its children.
    */
   private findControl(): FormFieldControl | null {
-    const search = (parent: Element, top: boolean): FormFieldControl | null => {
+    const search = (parent: Element): FormFieldControl | null => {
       for (const child of parent.children) {
-        if (top && child.hasAttribute('slot')) continue
-        if (NOT_RENDERED.has(child.localName)) continue
-        // A control is never a wrapper, even laid out with `display: contents` (a group spread over the page's grid).
-        const control = !!fieldConsumerOf(child as FormFieldControl) || isFormControl(child)
-        if (!control && getComputedStyle(child).display === 'contents') {
-          const inner = search(child, false)
+        if (child.hasAttribute('slot') || NOT_RENDERED.has(child.localName)) continue
+        if (isWrapper(child)) {
+          const inner = search(child)
           if (inner) return inner
           continue
         }
-        return child as FormFieldControl
+        // Inside a wrapper only a control counts: a label or prefix next to it is the app's decoration.
+        if (parent === this || isCandidate(child)) return child as FormFieldControl
       }
       return null
     }
-    return search(this, true)
+    return search(this)
+  }
+
+  /** Whether an element is a direct child of this field, or reached from one through wrappers only. */
+  private ownChild(element: Element): boolean {
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      if (parent === this) return true
+      if (!isWrapper(parent)) return false
+    }
+    return false
   }
 
   private adoptControl(control: FormFieldControl | null) {
