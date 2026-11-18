@@ -403,28 +403,46 @@ export class PasswordField extends LitElement {
     if (!value) return 0
     const raw = this.scorer ? this.scorer(value) : scorePassword(value)
     const score = Math.max(0, Math.min(4, Math.round(Number(raw) || 0))) as PasswordStrength
-    return this.requirementsOf(value, false).every((requirement) => requirement.met) ? score : (Math.min(score, 1) as PasswordStrength)
+    return this.meetsRequirements(value) ? score : (Math.min(score, 1) as PasswordStrength)
   }
 
-  /** The requirements checked against `value`. Without `labels` (the strength check), a built-in label is not translated. */
-  private requirementsOf(value: string, labels = true): PasswordRequirementState[] {
-    const list = Array.isArray(this.requirements) ? this.requirements : []
-    const minLength = this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
-    const states: PasswordRequirementState[] = []
-    list.forEach((entry, index) => {
-      const requirement: PasswordRequirement = typeof entry === 'string' ? { id: entry.trim() } : entry
-      if (!requirement) return
-      const builtIn = requirement.id && requirement.id in BUILT_IN ? BUILT_IN[requirement.id as PasswordRequirementId] : undefined
-      const label = requirement.label ?? (builtIn && (labels ? this.msg.t(builtIn.message, minLength) : builtIn.message))
-      if (!label) return
-      let met: boolean
-      if (requirement.test) met = !!requirement.test(value)
-      else if (requirement.pattern !== undefined)
-        met = (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(value)
-      else met = builtIn ? builtIn.test(value, minLength) : false
-      states.push({ id: requirement.id ?? `requirement-${index}`, label, met })
+  /** The requirements checked against `value`, each with its label (a built-in one in the page's language). */
+  private requirementsOf(value: string): PasswordRequirementState[] {
+    const minLength = this.requirementMinLength
+    return this.requirementEntries().flatMap(({ requirement, builtIn, id }) => {
+      const label = requirement.label ?? (builtIn && this.msg.t(builtIn.message, minLength))
+      return label ? [{ id, label, met: this.requirementMet(requirement, builtIn, value, minLength) }] : []
     })
-    return states
+  }
+
+  /** Whether `value` meets every requirement, without building their labels: the strength check runs on every key. */
+  private meetsRequirements(value: string): boolean {
+    const minLength = this.requirementMinLength
+    return this.requirementEntries().every(
+      ({ requirement, builtIn }) => !(requirement.label ?? builtIn) || this.requirementMet(requirement, builtIn, value, minLength),
+    )
+  }
+
+  private get requirementMinLength(): number {
+    return this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
+  }
+
+  /** `requirements` as objects, with the built-in check each one keeps. A requirement with no label is skipped later. */
+  private requirementEntries(): { requirement: PasswordRequirement; builtIn?: (typeof BUILT_IN)[PasswordRequirementId]; id: string }[] {
+    const list = Array.isArray(this.requirements) ? this.requirements : []
+    return list.flatMap((entry, index) => {
+      const requirement: PasswordRequirement = typeof entry === 'string' ? { id: entry.trim() } : entry
+      if (!requirement) return []
+      const builtIn = requirement.id && requirement.id in BUILT_IN ? BUILT_IN[requirement.id as PasswordRequirementId] : undefined
+      return [{ requirement, builtIn, id: requirement.id ?? `requirement-${index}` }]
+    })
+  }
+
+  private requirementMet(requirement: PasswordRequirement, builtIn: (typeof BUILT_IN)[PasswordRequirementId] | undefined, value: string, minLength: number) {
+    if (requirement.test) return !!requirement.test(value)
+    if (requirement.pattern !== undefined)
+      return (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(value)
+    return builtIn ? builtIn.test(value, minLength) : false
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
