@@ -1,0 +1,397 @@
+{
+  "schema": 1,
+  "id": "2026-11-18T0944-catalog-filter",
+  "startedAt": "2026-11-18T09:44:25.388Z",
+  "durationSeconds": 93,
+  "mode": "replay",
+  "target": "catalog-filter",
+  "spec": "catalog-filter",
+  "direction": "default",
+  "library": {
+    "version": "1.0.28",
+    "commit": "9fe790d01899a134f02c87de0658b58387358d5e",
+    "branch": "lab/2026-11-18",
+    "dirty": false
+  },
+  "runner": {
+    "personas": [
+      "mouse",
+      "keyboard",
+      "mobile",
+      "dark",
+      "fr"
+    ],
+    "repeat": 2,
+    "journeys": [
+      "t1-search",
+      "t1b-search-again",
+      "t2-two-categories",
+      "t3-max-price",
+      "t4-backpacks-in-stock",
+      "t5-remove-chip",
+      "t6-empty-then-clear",
+      "t7-sort-price",
+      "t8-phone-drawer"
+    ],
+    "axe": true,
+    "full": true
+  },
+  "build": {
+    "report": "lab/reports/catalog-filter/default.md",
+    "builder": "agent (Claude Code, c2n MCP server)",
+    "date": "2026-11-17",
+    "outcomes": {
+      "R1": {
+        "outcome": "workaround",
+        "components": [
+          "c2-search-field",
+          "c2-highlight"
+        ]
+      },
+      "R2": {
+        "outcome": "workaround",
+        "components": [
+          "c2-facet-list"
+        ]
+      },
+      "R3": {
+        "outcome": "met",
+        "components": [
+          "c2-facet-list"
+        ]
+      },
+      "R4": {
+        "outcome": "workaround",
+        "components": [
+          "c2-slider",
+          "c2-number-input"
+        ]
+      },
+      "R5": {
+        "outcome": "met",
+        "components": [
+          "c2-switch"
+        ]
+      },
+      "R6": {
+        "outcome": "met",
+        "components": [
+          "c2-chip",
+          "c2-chip-group"
+        ]
+      },
+      "R7": {
+        "outcome": "met",
+        "components": [
+          "c2-button"
+        ]
+      },
+      "R8": {
+        "outcome": "met",
+        "components": [
+          "c2-select",
+          "c2-list-item"
+        ]
+      },
+      "R9": {
+        "outcome": "met",
+        "components": [
+          "c2-status-panel",
+          "c2-button"
+        ]
+      },
+      "R10": {
+        "outcome": "hand-rolled",
+        "components": []
+      },
+      "R11": {
+        "outcome": "workaround",
+        "components": [
+          "c2-sheet",
+          "c2-button"
+        ]
+      },
+      "R12": {
+        "outcome": "met",
+        "components": [
+          "c2-facet-list",
+          "c2-slider",
+          "c2-switch",
+          "c2-chip"
+        ]
+      },
+      "R13": {
+        "outcome": "met",
+        "components": [
+          "c2-format-number"
+        ]
+      }
+    }
+  },
+  "summary": {
+    "journeys": 34,
+    "passed": 34,
+    "flakyJourneys": 0,
+    "failed": 0,
+    "findings": {
+      "new": 0,
+      "known": 0,
+      "flaky": 0
+    }
+  },
+  "journeys": [
+    {
+      "persona": "mouse",
+      "journey": "t1-search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t1b-search-again",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t2-two-categories",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t3-max-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t4-backpacks-in-stock",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t5-remove-chip",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t6-empty-then-clear",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t7-sort-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t1-search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t1b-search-again",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t2-two-categories",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t3-max-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t4-backpacks-in-stock",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t5-remove-chip",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t6-empty-then-clear",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t7-sort-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t7-sort-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t8-phone-drawer",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t1-search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t1b-search-again",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t2-two-categories",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t3-max-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t4-backpacks-in-stock",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t5-remove-chip",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t6-empty-then-clear",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t7-sort-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t1-search",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t1b-search-again",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t2-two-categories",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t3-max-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t4-backpacks-in-stock",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t5-remove-chip",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t6-empty-then-clear",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t7-sort-price",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    }
+  ],
+  "findings": [],
+  "change": {
+    "previous": "2026-11-17T1757-catalog-filter",
+    "previousLibrary": {
+      "version": "1.0.27",
+      "commit": "4022bfdc254aafce186f540146423c05942ddc29",
+      "branch": "claude/brave-allen-ngsefw",
+      "dirty": false
+    },
+    "appeared": [],
+    "gone": [],
+    "unverified": [],
+    "nowPassing": [],
+    "nowFailing": []
+  }
+}

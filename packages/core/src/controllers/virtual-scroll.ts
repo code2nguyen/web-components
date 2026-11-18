@@ -60,7 +60,10 @@ export class VirtualScrollController implements ReactiveController {
   get range(): VirtualScrollRange {
     // Compute on first read so a host that renders before it is attached (server-side rendering, the first paint)
     // still gets a usable window from the estimated viewport height instead of an empty one.
-    if (!this.#hasComputed) this.#computeRange()
+    // While disabled the window is the whole list, which depends on the item count alone: recompute it on every read,
+    // so the render that changed the count already draws every item and `hostUpdated` has no stale window to repair
+    // (a second update from there logs Lit's change-in-update warning).
+    if (!this.#hasComputed || !(this.#options.enabled?.() ?? true)) this.#computeRange()
     return this.#range
   }
 
