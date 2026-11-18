@@ -91,6 +91,12 @@ function check(id: string, label: string, weight: number, score: number, detail?
   return { id, label, weight, score: Math.max(0, Math.min(1, score)), detail: score >= 1 ? undefined : detail }
 }
 
+/**
+ * A slot the author never fills by hand in a page: assigned by the component, kept for compatibility, or server-rendered
+ * content hidden once the element upgrades. Its description tells an agent all it needs; a gallery card cannot show it.
+ */
+const UNWRITTEN = /no `slot` attribute needed|retained for compatibility|server-rendered/i
+
 /** `c2-*` tags written in an example. */
 export function exampleTags(example: Example): string[] {
   return example.tags ?? [...new Set([...example.html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((m) => m[1]))]
@@ -319,11 +325,16 @@ function composition(registry: Registry, c: ComponentEntry): Check[] {
   const html = all.map((e) => e.html).join('\n')
   // A slot family named by pattern (`detail-<row>`) has no one name to show.
   const named = c.elements.flatMap((e) =>
-    e.slots.filter((s) => s.name && s.name !== 'default' && !/[<{]/.test(s.name)).map((s) => ({ tag: e.tag, name: s.name })),
+    e.slots
+      .filter((s) => s.name && s.name !== 'default' && !/[<{]/.test(s.name) && !UNWRITTEN.test(s.description ?? ''))
+      .map((s) => ({ tag: e.tag, name: s.name })),
   )
   const own = new Set(c.elements.map((e) => e.tag))
   // Components the examples put inside this one: its children and slotted content, not the layout around it.
-  const foreign = [...new Set(all.flatMap((e) => nestedTags(e.html, own)))].filter((t) => registry.tagIndex[t] && registry.tagIndex[t] !== c.id)
+  // Buttons and icons are generic slot content (an `actions` slot holds a `c2-button`): no component's docs need to
+  // name them. What counts is a specific child, such as `c2-list-item` in `c2-select`.
+  const generic = (tag: string) => ['Buttons', 'Icons'].includes(registry.components[registry.tagIndex[tag]]?.category ?? '')
+  const foreign = [...new Set(all.flatMap((e) => nestedTags(e.html, own)))].filter((t) => registry.tagIndex[t] && registry.tagIndex[t] !== c.id && !generic(t))
   const known = new Set([...c.composition.internal, ...c.composition.slotted])
   const text = `${c.description} ${c.intro ?? ''} ${c.elements.map((e) => `${e.description} ${e.slots.map((s) => s.description ?? '').join(' ')}`).join(' ')}`
   const children = c.elements.slice(1)
