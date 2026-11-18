@@ -180,3 +180,11 @@ test('a text property still overrides its message, and an empty caps-lock-text t
   await input.evaluate((element) => element.dispatchEvent(new KeyboardEvent('keyup', { key: 'A', modifierCapsLock: true, bubbles: true, composed: true })))
   await expect(page.getByRole('status')).toHaveText('')
 })
+
+test('caps-lock-text reads as its message until set, and goes back to it when the attribute is removed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field aria-label="Pin" caps-lock-text=""></c2-password-field>')
+  const field = page.locator('c2-password-field')
+  expect(await field.evaluate((element: HTMLElement & { capsLockText: string }) => element.capsLockText)).toBe('')
+  await field.evaluate((element) => element.removeAttribute('caps-lock-text'))
+  expect(await field.evaluate((element: HTMLElement & { capsLockText: string }) => element.capsLockText)).toBe('Caps Lock is on')
+})

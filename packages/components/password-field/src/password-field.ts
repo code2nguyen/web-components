@@ -338,8 +338,18 @@ export class PasswordField extends LitElement {
    */
   @property({ attribute: 'toggle-label' }) toggleLabel = ''
 
-  /** Warning shown while Caps Lock is on. Defaults to the `capsLock` message ("Caps Lock is on"); empty turns the warning off. */
-  @property({ attribute: 'caps-lock-text' }) capsLockText?: string | null
+  /**
+   * Warning shown while Caps Lock is on. Reads as the `capsLock` message ("Caps Lock is on", in the page's language)
+   * until set; empty turns the warning off, and removing the attribute goes back to the message.
+   */
+  @property({ attribute: 'caps-lock-text' })
+  get capsLockText(): string {
+    return this.ownCapsLockText ?? this.msg.t('capsLock')
+  }
+  set capsLockText(next: string | null | undefined) {
+    this.ownCapsLockText = next ?? undefined
+  }
+  private ownCapsLockText?: string
 
   /** Message of the validity error while a requirement is unmet. Defaults to the `requirementsUnmet` message. */
   @property({ attribute: 'requirements-message' }) requirementsMessage = ''
@@ -554,7 +564,7 @@ export class PasswordField extends LitElement {
 
   /** `caps-lock-text`, else its message; an empty `caps-lock-text` turns the warning off. */
   private get capsLockMessage() {
-    return this.capsLockText ?? this.msg.t('capsLock')
+    return this.capsLockText
   }
 
   private strengthLabel(score: PasswordStrength) {
