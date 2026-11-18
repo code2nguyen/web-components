@@ -15,7 +15,9 @@ async function paint(page: Page, markup: string, rgb: [number, number, number]):
   return page.evaluate(
     async ({ markup, rgb }) => {
       // Load the reference-line module first, from the same URL the chart imports it from, so its rebuild is not left to a network race.
-      if (markup.includes('reference-lines=')) await import(/* @vite-ignore */ '/packages/components/chart/src/reference-lines.ts')
+      // A URL the browser resolves, held in a variable so the type check does not read it as a module of the test.
+      const moduleUrl: string = '/packages/components/chart/src/reference-lines.ts'
+      if (markup.includes('reference-lines=')) await import(/* @vite-ignore */ moduleUrl)
       const main = document.querySelector('main')!
       main.innerHTML = markup
       const chart = main.firstElementChild as HTMLElement
