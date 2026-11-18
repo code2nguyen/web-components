@@ -438,7 +438,7 @@ export class Scheduler extends LitElement {
     super.connectedCallback()
     this.clock = setInterval(() => (this.now = nowIn(this.timeZone)), 30_000)
     // A retry for `scroll-time` dropped on disconnect resumes now, not at the next clock tick.
-    if (this.hasUpdated && !this.scrolledFor) this.requestUpdate()
+    if (this.hasUpdated && this.scrolledFor !== this.scrollKey) this.requestUpdate()
   }
 
   override disconnectedCallback() {
@@ -464,7 +464,7 @@ export class Scheduler extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    const key = `${this.view}|${this.anchorDay}|${this.scrollTime}`
+    const key = this.scrollKey
     if (this.scrolledFor !== key && !(this.scrollRetry && this.scrollRetryKey === key)) {
       this.scrollRetry?.disconnect()
       this.scrollRetry = undefined
@@ -732,6 +732,11 @@ export class Scheduler extends LitElement {
 
   private get firstWeekday(): number {
     return firstDayOfWeek(this.effectiveLocale)
+  }
+
+  /** What `scroll-time` was last applied for: the view, the day and the time. */
+  private get scrollKey(): string {
+    return `${this.view}|${this.anchorDay}|${this.scrollTime}`
   }
 
   /** Scrolls the day to `scroll-time`; false while the grid has no layout yet (a hidden or not yet sized scheduler). */
