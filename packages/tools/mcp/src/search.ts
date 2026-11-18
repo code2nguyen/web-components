@@ -79,8 +79,8 @@ function termMatch(haystack: string[], term: string, stems?: string[]): number {
 
 /**
  * Rank the components for a need ("empty state", "format currency"). Each query term scores once per component, by
- * its best field: what the component is (title, id, tag) weighs most, then what it is for (description, intro), its
- * icons and category, and only then its API and examples. Summing every attribute, slot and event a term hits made
+ * its best field: what the component is (title, id, tag) weighs most, then the names developers use for it
+ * (keywords), what it is for (description, intro), its icons and category, and only then its API and examples. Summing every attribute, slot and event a term hits made
  * the components with the largest API (the table family) outrank the one whose description names the need. A
  * component matching more of the query outranks one matching a single term strongly; the number of API fields
  * matched only breaks ties within that.
@@ -92,7 +92,9 @@ export function searchComponents(registry: Registry, query: string, limit = 10):
   const terms = meaningful.length ? meaningful : all
   if (terms.length === 0) return []
   const roots = new Set(terms.map(stem))
-  const hits: SearchHit[] = []
+  // The query as a word sequence, so a several-word name ("right click", "segmented control") can match as a phrase.
+  const sequence = ` ${tokens(query).map(stem).join(' ')} `
+  const scored: { component: ComponentEntry; best: Map<string, number>; matches: Set<string>; breadth: number }[] = []
   for (const component of Object.values(registry.components)) {
     const best = new Map<string, number>()
     const matches = new Set<string>()
@@ -111,16 +113,45 @@ export function searchComponents(registry: Registry, query: string, limit = 10):
         matches.add(label)
       }
     }
-    if (best.size === 0) continue
+    if (best.size > 0) scored.push({ component, best, matches, breadth })
+  }
+  // A word most components match ("show", "user", "list") tells little about which one is meant; a rare one ("faq",
+  // "kebab") tells a lot. Each term is weighted by how few components it matches, so a long requirement written in
+  // plain words is not won by the longest description.
+  const total = Object.keys(registry.components).length
+  const rarity = new Map(terms.map((term) => [term, Math.log(1 + total / Math.max(1, scored.filter((s) => s.best.has(term)).length))]))
+  // Over the words some component matched: a word nothing matches would weigh the most and inflate the phrase bonus.
+  const matched = terms.filter((term) => scored.some((s) => s.best.has(term)))
+  const meanRarity = matched.reduce((sum, term) => sum + rarity.get(term)!, 0) / Math.max(1, matched.length)
+  const hits: SearchHit[] = []
+  for (const { component, best, matches, breadth } of scored) {
+    // A name of several words found verbatim in the query says more than its words scattered over a description.
+    const phrase = phrases(component).some((p) => sequence.includes(p)) ? 8 * meanRarity : 0
     const coverage = 0.5 + (0.5 * best.size) / terms.length
     // The query names the component outright ("tree", "modal dialog", "filter chips"): it leads its family.
     const named = tokens(component.id).every((t) => roots.has(stem(t))) ? 1.25 : 1
-    const relevance = [...best.values()].reduce((sum, v) => sum + v, 0) * coverage * named
+    const weighted = [...best].reduce((sum, [term, v]) => sum + v * (rarity.get(term) ?? 1), 0)
+    const relevance = (weighted + phrase) * coverage * named
     // Breadth is a tie-breaker worth less than one weak field match, however large the API.
     const score = relevance + Math.min(breadth, 20) / 20
-    hits.push({ component, score, matches: [...matches].slice(0, 6) })
+    hits.push({ component, score, matches: [...(phrase ? ['phrase'] : []), ...matches].slice(0, 6) })
   }
   return hits.sort((a, b) => b.score - a.score || a.component.title.localeCompare(b.component.title)).slice(0, limit)
+}
+
+const phraseCache = new WeakMap<ComponentEntry, string[]>()
+
+/** The component's names of two words or more (title, keywords, icon names), stemmed and padded for a whole-word `includes`. */
+function phrases(component: ComponentEntry): string[] {
+  let cached = phraseCache.get(component)
+  if (!cached) {
+    cached = [component.title, ...(component.keywords ?? []), ...(component.icons ?? [])]
+      .map((name) => tokens(name).map(stem))
+      .filter((words) => words.length >= 2)
+      .map((words) => ` ${words.join(' ')} `)
+    phraseCache.set(component, cached)
+  }
+  return cached
 }
 
 interface Field {
@@ -140,6 +171,7 @@ function componentFields(component: ComponentEntry): Field[] {
     ['title', component.title, 8],
     ['id', component.id, 8],
     ['tag', component.elements.map((e) => e.tag).join(' '), 8],
+    ['keywords', (component.keywords ?? []).join(' '), 8],
     ['description', `${component.description} ${component.intro ?? ''}`, 5],
     ['category', component.category, 3],
   ]

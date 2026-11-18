@@ -24,6 +24,11 @@ export interface ComponentEntry {
   package: string
   title: string
   description: string
+  /**
+   * What a developer may call the need when they do not know the name: synonyms and other libraries' names ("faq",
+   * "snackbar", "segmented control"). From the docs page's `keywords` frontmatter; searched just below the name.
+   */
+  keywords?: string[]
   intro?: string
   category: string
   /** `stable` has a docs page; `undocumented` is published and built but has no page yet. */
@@ -51,10 +56,25 @@ export interface ElementEntry {
   attributes: { name: string; type: string; default?: string; description?: string }[]
   /** Public instance properties, attribute-backed or not (`rows`, `renderCell`): what a property binding may set. */
   properties?: string[]
+  /**
+   * API reachable from script only: properties with no attribute (renderers, data sources, objects) and public methods,
+   * with their types and descriptions. Attribute-backed properties are documented under `attributes`.
+   */
+  scriptApi?: ScriptMember[]
   slots: { name: string; description?: string }[]
   events: { name: string; type?: string; description?: string }[]
   cssParts: { name: string; description?: string }[]
   cssProperties: CssProperty[]
+}
+
+export interface ScriptMember {
+  kind: 'property' | 'method'
+  name: string
+  /** Property type, or a method's signature `(rows: TableRow[]) => void`. */
+  type?: string
+  description?: string
+  /** A property that can be read but not set. */
+  readonly?: boolean
 }
 
 export interface CssProperty {

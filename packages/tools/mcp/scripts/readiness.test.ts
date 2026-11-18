@@ -2,17 +2,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { grade as gradeAgent } from './readiness/agent.ts'
-import {
-  grade,
-  nestedTags,
-  needFromDescription,
-  propertyOnly,
-  publicMethods,
-  runDiscovery,
-  scoreComponent,
-  type Sources,
-  type Task,
-} from './readiness/score.ts'
+import { scriptApi } from '../src/installed.ts'
+import { grade, nestedTags, needFromDescription, runDiscovery, scoreComponent, type Sources, type Task } from './readiness/score.ts'
 import type { ComponentEntry, Registry } from '../src/registry-types.ts'
 
 function component(id: string, overrides: Partial<ComponentEntry> = {}): ComponentEntry {
@@ -60,7 +51,6 @@ function registry(...components: ComponentEntry[]): Registry {
 }
 
 const sources = (over: Partial<Sources> = {}): Sources => ({
-  members: () => [],
   frameworkFile: (pkg) => `'c2-${pkg.slice(5)}'`,
   angularTags: new Set(),
   declaredTags: (pkg) => new Set([`c2-${pkg.slice(5)}`]),
@@ -107,9 +97,9 @@ test('dimension weights add up to 100 and every component scores 0-100', () => {
 test('a check that does not apply is left out instead of passing', () => {
   const c = component('plain')
   const result = scoreComponent(registry(c), c, sources())
-  const api = result.dimensions.find((d) => d.id === 'api')!
-  assert.equal(api.checks.length, 0)
-  assert.equal(api.score, 1)
+  const composition = result.dimensions.find((d) => d.id === 'composition')!
+  assert.equal(composition.checks.length, 0)
+  assert.equal(composition.score, 1)
 })
 
 test('an example that fails validation costs validation points', () => {
@@ -120,26 +110,34 @@ test('an example that fails validation costs validation points', () => {
   assert.match(valid.detail ?? '', /Unknown element/)
 })
 
-test('property-only API skips attributes, private, static and form-associated members', () => {
-  const element = { ...component('t').elements[0], attributes: [{ name: 'rows', type: 'Row[]' }] }
-  const names = propertyOnly(element, [
-    { kind: 'field', name: 'rows' },
-    { kind: 'field', name: 'renderCell', description: 'Renders a cell.' },
-    { kind: 'field', name: 'sorted', attribute: 'sorted' },
-    { kind: 'field', name: '_cache' },
-    { kind: 'field', name: 'secret', privacy: 'private' },
-    { kind: 'field', name: 'styles', static: true },
-    { kind: 'field', name: 'validity' },
-  ]).map((m) => m.name)
-  assert.deepEqual(names, ['renderCell'])
-  assert.deepEqual(
-    publicMethods([
+test('script-only API keeps renderers and methods, not attributes, private, static, lifecycle or form-associated members', () => {
+  const api = scriptApi(
+    [
+      { kind: 'field', name: 'rows', attribute: 'rows' },
+      { kind: 'field', name: 'rowKey' },
+      { kind: 'field', name: 'renderCell', type: { text: 'Renderer' }, description: 'Renders a cell.' },
+      { kind: 'field', name: '_cache' },
+      { kind: 'field', name: 'secret', privacy: 'private' },
+      { kind: 'field', name: 'styles', static: true },
+      { kind: 'field', name: 'validity' },
       { kind: 'method', name: 'render' },
-      { kind: 'method', name: 'selectAll' },
       { kind: 'method', name: 'checkValidity' },
-    ]).map((m) => m.name),
-    ['selectAll'],
+      {
+        kind: 'method',
+        name: 'selectRows',
+        parameters: [
+          { name: 'rows', type: { text: 'Row[]' } },
+          { name: '{ add = false }', type: { text: '{ add?: boolean }' } },
+        ],
+        return: { type: { text: 'void' } },
+      },
+    ],
+    [{ name: 'row-key', fieldName: 'rowKey' }],
   )
+  assert.deepEqual(api, [
+    { kind: 'property', name: 'renderCell', type: 'Renderer', description: 'Renders a cell.', readonly: undefined },
+    { kind: 'method', name: 'selectRows', type: '(rows: Row[], options: { add?: boolean }) => void', description: undefined },
+  ])
 })
 
 test('nested tags are the ones inside the component, not around it', () => {

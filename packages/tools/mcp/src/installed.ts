@@ -5,12 +5,12 @@
  */
 import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import type { ComponentEntry, ElementEntry, Registry } from './registry-types.ts'
+import type { ComponentEntry, ElementEntry, Registry, ScriptMember } from './registry-types.ts'
 
 /** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
 
-export type InstalledElement = Pick<ElementEntry, 'className' | 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties' | 'properties'>
+export type InstalledElement = Pick<ElementEntry, 'className' | 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties' | 'properties' | 'scriptApi'>
 
 export interface InstalledInfo {
   version: string
@@ -68,8 +68,8 @@ interface ManifestJson {
       tagName?: string
       name?: string
       description?: string
-      members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
-      attributes?: { name?: string; type?: unknown }[]
+      members?: ManifestMember[]
+      attributes?: { name?: string; fieldName?: string; type?: unknown }[]
       slots?: unknown[]
       events?: { name?: string; type?: unknown }[]
       cssParts?: unknown[]
@@ -176,6 +176,7 @@ function manifestIndex(path: string): ManifestIndex | null {
         elements.set(decl.tagName, {
           className: decl.name ?? '',
           properties: publicProperties(decl.members),
+          scriptApi: scriptApi(decl.members, decl.attributes),
           attributes: (decl.attributes ?? []).map((a) => (a.type === undefined ? a : { ...a, type: typeText(a.type) ?? '' })) as ElementEntry['attributes'],
           slots: (decl.slots ?? []) as ElementEntry['slots'],
           events: (decl.events ?? []).map((e) => (e.type === undefined ? e : { ...e, type: typeText(e.type) })) as ElementEntry['events'],
@@ -208,6 +209,70 @@ export function publicProperties(members: { kind?: string; name?: string; static
     .filter((m) => m.kind === 'field' && m.name && !m.static && (!m.privacy || m.privacy === 'public') && !/^[_#]/.test(m.name))
     .map((m) => m.name as string)
   return [...new Set(names)]
+}
+
+/** A manifest member as the analyzer writes it (field or method). */
+export interface ManifestMember {
+  kind?: string
+  name?: string
+  static?: boolean
+  privacy?: string
+  readonly?: boolean
+  attribute?: string
+  description?: string
+  type?: unknown
+  parameters?: { name?: string; type?: unknown; optional?: boolean; rest?: boolean }[]
+  return?: { type?: unknown }
+  inheritedFrom?: { name?: string; package?: string; module?: string }
+}
+
+/**
+ * The platform's own API of a form-associated element (ElementInternals passthroughs) and Lit's lifecycle: documented
+ * elsewhere, and noise in a component's API.
+ */
+const NOT_COMPONENT_API = new Set(
+  'focus blur click form labels validity validationMessage willValidate internals checkValidity reportValidity setCustomValidity connectedCallback disconnectedCallback attributeChangedCallback adoptedCallback firstUpdated updated willUpdate render update shouldUpdate createRenderRoot getUpdateComplete scheduleUpdate performUpdate requestUpdate formResetCallback formDisabledCallback formStateRestoreCallback formAssociatedCallback'.split(
+    ' ',
+  ),
+)
+
+/**
+ * The script-only API of a declaration: public properties no attribute reflects (`renderCell`, `dataSource`) and
+ * public methods (`selectAll()`), with type and description. An agent cannot learn these from the attribute table.
+ */
+export function scriptApi(members: ManifestMember[] = [], attributes: { name?: string; fieldName?: string }[] = []): ScriptMember[] {
+  const attributeFields = new Set(attributes.flatMap((a) => [a.name, a.fieldName]).filter(Boolean))
+  const seen = new Set<string>()
+  const result: ScriptMember[] = []
+  for (const m of members) {
+    if (!m.name || m.static || (m.privacy && m.privacy !== 'public') || /^[_#]/.test(m.name) || NOT_COMPONENT_API.has(m.name)) continue
+    if (m.inheritedFrom?.package && !m.inheritedFrom.package.startsWith('@c2n')) continue
+    if (seen.has(m.name)) continue
+    if (m.kind === 'field') {
+      if (m.attribute || attributeFields.has(m.name)) continue
+      result.push({
+        kind: 'property',
+        name: m.name,
+        type: typeText(m.type),
+        description: m.description?.trim() || undefined,
+        readonly: m.readonly || undefined,
+      })
+    } else if (m.kind === 'method') {
+      const params = (m.parameters ?? []).map(
+        (p) =>
+          `${p.rest ? '...' : ''}${p.name?.startsWith('{') ? 'options' : p.name}${p.optional ? '?' : ''}${typeText(p.type) ? `: ${typeText(p.type)}` : ''}`,
+      )
+      const returns = typeText(m.return?.type)
+      result.push({
+        kind: 'method',
+        name: m.name,
+        type: `(${params.join(', ')})${returns ? ` => ${returns}` : ''}`,
+        description: m.description?.trim() || undefined,
+      })
+    } else continue
+    seen.add(m.name)
+  }
+  return result
 }
 
 /** Every dependency the project's own `package.json` names. */

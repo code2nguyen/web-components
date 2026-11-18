@@ -167,11 +167,11 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Get component API',
       description:
-        'Full API of one component: install/import lines, attributes, slots, events, native CSS parts, CSS variables grouped by semantic target and state (with the theme token each follows), composition and preset names. Examples are served by get_examples.',
+        'Full API of one component: install/import lines, attributes, script-only properties (renderers, data sources) and methods, slots, events, native CSS parts, CSS variables grouped by semantic target and state (with the theme token each follows), composition and preset names. Examples are served by get_examples.',
       inputSchema: {
         tag: tagSchema,
         include: z
-          .array(z.enum(['attributes', 'slots', 'events', 'parts', 'css', 'composition', 'presets']))
+          .array(z.enum(['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']))
           .optional()
           .describe('Sections to include (default: all)'),
         format: formatSchema,
@@ -192,7 +192,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         })
       return text(
         renderComponent(resolved.component, {
-          include: new Set(include ?? ['attributes', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
+          include: new Set(include ?? ['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
           installed,
           concrete: { tag: resolved.tag, modulePath: resolved.modulePath, className: resolved.className },
         }),

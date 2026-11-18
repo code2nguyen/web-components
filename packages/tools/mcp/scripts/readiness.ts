@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadRegistry } from '../src/registry.ts'
-import { DIMENSIONS, grade, runDiscovery, scoreComponent, type ComponentReadiness, type ManifestMember, type Sources, type Task } from './readiness/score.ts'
+import { DIMENSIONS, grade, runDiscovery, scoreComponent, type ComponentReadiness, type Sources, type Task } from './readiness/score.ts'
 import type { AgentReport } from './readiness/agent-types.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -35,11 +35,6 @@ function packageDirs(): Map<string, string> {
   return dirs
 }
 
-interface Declaration {
-  tagName?: string
-  members?: ManifestMember[]
-}
-
 function walk(dir: string, test: (file: string) => boolean, out: string[] = []): string[] {
   if (!existsSync(dir)) return out
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -52,19 +47,10 @@ function walk(dir: string, test: (file: string) => boolean, out: string[] = []):
 
 function fileSources(): Sources {
   const dirs = packageDirs()
-  const members = new Map<string, ManifestMember[]>()
-  for (const dir of dirs.values()) {
-    const file = join(dir, 'custom-elements.json')
-    if (!existsSync(file)) continue
-    const manifest = JSON.parse(readFileSync(file, 'utf8')) as { modules?: { declarations?: Declaration[] }[] }
-    for (const declaration of manifest.modules?.flatMap((m) => m.declarations ?? []) ?? [])
-      if (declaration.tagName) members.set(declaration.tagName, declaration.members ?? [])
-  }
   const accessors = join(repoRoot, 'packages/adapters/angular/src/value-accessors.ts')
   const angularTags = new Set(existsSync(accessors) ? [...readFileSync(accessors, 'utf8').matchAll(/(c2-[a-z0-9-]+)\[ngModel\]/g)].map((m) => m[1]) : [])
   const declared = new Map<string, Set<string>>()
   return {
-    members: (tag) => members.get(tag),
     frameworkFile(pkg, framework) {
       const dir = dirs.get(pkg)
       const file = dir && join(dir, `${framework}.d.ts`)

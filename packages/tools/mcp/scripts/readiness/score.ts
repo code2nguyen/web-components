@@ -10,6 +10,7 @@
  */
 import { searchComponents } from '../../src/search.ts'
 import { validateMarkup } from '../../src/lib/validate.ts'
+import { MAX_CHARS, renderComponent } from '../../src/render.ts'
 import type { ComponentEntry, ElementEntry, Example, Registry } from '../../src/registry-types.ts'
 
 export type DimensionId = 'identity' | 'api' | 'examples' | 'composition' | 'framework' | 'validation'
@@ -23,21 +24,7 @@ export const DIMENSIONS: { id: DimensionId; label: string; weight: number; quest
   { id: 'validation', label: 'Validation', weight: 10, question: 'Can generated usage be checked against the real API and compiled?' },
 ]
 
-/** A member of a manifest declaration (field or method), as `@custom-elements-manifest/analyzer` writes it. */
-export interface ManifestMember {
-  kind: string
-  name: string
-  static?: boolean
-  privacy?: string
-  attribute?: string
-  description?: string
-  type?: { text?: string }
-  inheritedFrom?: { name?: string; package?: string; module?: string }
-}
-
 export interface Sources {
-  /** Public members of the element's manifest declaration, or undefined when the manifest has no such tag. */
-  members(tag: string): ManifestMember[] | undefined
   /** Text of the package's generated `react.d.ts` / `vue.d.ts`, or null when it has none. */
   frameworkFile(pkg: string, framework: 'react' | 'vue'): string | null
   /** Tags the Angular adapter supplies a ControlValueAccessor for. */
@@ -77,18 +64,6 @@ export interface ComponentReadiness {
   dimensions: DimensionResult[]
 }
 
-/**
- * The standard API of a form-associated element (ElementInternals passthroughs): documented by the platform, not by
- * the component, so its absence from a component's docs costs an agent nothing.
- */
-const FORM_ASSOCIATED = new Set('form labels validity validationMessage willValidate internals checkValidity reportValidity setCustomValidity'.split(' '))
-
-const LIFECYCLE = new Set(
-  'connectedCallback disconnectedCallback attributeChangedCallback adoptedCallback firstUpdated updated willUpdate render update shouldUpdate createRenderRoot getUpdateComplete scheduleUpdate performUpdate requestUpdate formResetCallback formDisabledCallback formStateRestoreCallback formAssociatedCallback'.split(
-    ' ',
-  ),
-)
-
 export function grade(score: number): string {
   return score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F'
 }
@@ -114,36 +89,6 @@ function share<T>(id: string, label: string, weight: number, items: T[], test: (
 
 function check(id: string, label: string, weight: number, score: number, detail?: string): Check {
   return { id, label, weight, score: Math.max(0, Math.min(1, score)), detail: score >= 1 ? undefined : detail }
-}
-
-/** Public, instance, own API members of an element that are not attributes: `rows` is an attribute, `renderCell` is not. */
-export function propertyOnly(element: ElementEntry, members: ManifestMember[] = []): ManifestMember[] {
-  const attributes = new Set(element.attributes.map((a) => a.name))
-  return members.filter(
-    (m) =>
-      m.kind === 'field' &&
-      !m.static &&
-      !m.attribute &&
-      (m.privacy ?? 'public') === 'public' &&
-      !m.name.startsWith('_') &&
-      !FORM_ASSOCIATED.has(m.name) &&
-      !attributes.has(m.name) &&
-      !m.inheritedFrom?.package?.startsWith('lit'),
-  )
-}
-
-export function publicMethods(members: ManifestMember[] = []): ManifestMember[] {
-  return members.filter(
-    (m) =>
-      m.kind === 'method' &&
-      !m.static &&
-      (m.privacy ?? 'public') === 'public' &&
-      !m.name.startsWith('_') &&
-      !m.name.startsWith('#') &&
-      !LIFECYCLE.has(m.name) &&
-      !FORM_ASSOCIATED.has(m.name) &&
-      !m.inheritedFrom?.package?.startsWith('lit'),
-  )
 }
 
 /** `c2-*` tags written in an example. */
@@ -236,14 +181,22 @@ function identity(registry: Registry, c: ComponentEntry): Check[] {
   ].filter(Boolean)
 }
 
-function api(c: ComponentEntry, sources: Sources): Check[] {
+function api(c: ComponentEntry): Check[] {
   const attributes = c.elements.flatMap((e) => e.attributes.map((a) => ({ ...a, tag: e.tag })))
   const events = c.elements.flatMap((e) => e.events.map((v) => ({ ...v, tag: e.tag })))
   const slots = c.elements.flatMap((e) => e.slots.map((s) => ({ ...s, tag: e.tag })))
   const css = c.elements.flatMap((e) => e.cssProperties.map((p) => ({ ...p, tag: e.tag })))
-  const props = c.elements.flatMap((e) => propertyOnly(e, sources.members(e.tag)).map((m) => ({ ...m, tag: e.tag })))
-  const methods = c.elements.flatMap((e) => publicMethods(sources.members(e.tag)).map((m) => ({ ...m, tag: e.tag })))
+  // What `get_component` serves: the registry's script-only API, not the manifest an agent never reads.
+  const script = c.elements.flatMap((e) => (e.scriptApi ?? []).map((m) => ({ ...m, tag: e.tag })))
+  const props = script.filter((m) => m.kind === 'property')
+  const methods = script.filter((m) => m.kind === 'method')
+  // `get_component` answers in one response of at most MAX_CHARS: past that the agent sees the head only.
+  const size = renderComponent(c, {
+    include: new Set(['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
+    installed: null,
+  }).length
   const checks = [
+    check('fits', 'get_component fits in one response', 1.5, size <= MAX_CHARS ? 1 : MAX_CHARS / size, `${size} characters, truncated at ${MAX_CHARS}`),
     share(
       'attributes-described',
       'Attributes described',
@@ -281,7 +234,7 @@ function api(c: ComponentEntry, sources: Sources): Check[] {
       'Property-only API typed',
       1,
       props,
-      (p) => typed(p.type?.text),
+      (p) => typed(p.type),
       (p) => p.name,
     ),
     share(
@@ -511,7 +464,7 @@ function dimension(id: DimensionId, checks: Check[]): DimensionResult {
 export function scoreComponent(registry: Registry, c: ComponentEntry, sources: Sources): ComponentReadiness {
   const dimensions = [
     dimension('identity', identity(registry, c)),
-    dimension('api', api(c, sources)),
+    dimension('api', api(c)),
     dimension('examples', examples(c)),
     dimension('composition', composition(registry, c)),
     dimension('framework', framework(c, sources)),

@@ -14,10 +14,11 @@
  * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
  * remain deterministic.
  */
+import { flowList, parseFrontmatter } from './frontmatter.ts'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { publicProperties } from '../src/installed.ts'
+import { publicProperties, scriptApi, type ManifestMember } from '../src/installed.ts'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
 import { exampleSlug, summarizeExample, themeExampleCss } from './gallery.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, GuideTopic, Preset, Registry, ThemeEntry, ThemeToken } from '../src/registry-types.ts'
@@ -45,12 +46,12 @@ interface Manifest {
       description?: string
       tagName?: string
       customElement?: boolean
-      attributes?: { name: string; type?: { text?: string }; default?: string; description?: string }[]
+      attributes?: { name: string; fieldName?: string; type?: { text?: string }; default?: string; description?: string }[]
       slots?: { name?: string; description?: string }[]
       events?: { name: string; type?: { text?: string }; description?: string }[]
       cssParts?: { name: string; description?: string }[]
       cssProperties?: { name?: string; type?: { text?: string }; default?: string; description?: string }[]
-      members?: { kind: string; name: string; static?: boolean; privacy?: string }[]
+      members?: ManifestMember[]
       internalComponents?: string[]
       slotComponents?: string[]
       superclass?: { name: string; module?: string; package?: string }
@@ -86,19 +87,6 @@ function listDirs(dir: string): string[] {
         .filter((d) => d.isDirectory())
         .map((d) => join(dir, d.name))
     : []
-}
-
-/** Frontmatter is flat `key: 'value'` lines; no YAML library needed. */
-function parseFrontmatter(source: string): { frontmatter: Record<string, string>; body: string } {
-  const match = /^---\n([\s\S]*?)\n---\n?/.exec(source)
-  if (!match) return { frontmatter: {}, body: source }
-  const frontmatter: Record<string, string> = {}
-  for (const line of match[1].split('\n')) {
-    const kv = /^([a-zA-Z_-]+):\s*(.*)$/.exec(line.trim())
-    if (!kv) continue
-    frontmatter[kv[1]] = kv[2].replace(/^(['"])(.*)\1$/, '$2')
-  }
-  return { frontmatter, body: source.slice(match[0].length) }
 }
 
 /** Where a docs page sits in the package's own declaration order, by the element its `tag` frontmatter names. */
@@ -355,6 +343,7 @@ for (const dir of packageDirs.sort()) {
         cssParts: (decl.cssParts ?? []).map((part) => ({ name: part.name, description: part.description?.trim() || undefined })),
         cssProperties,
         properties: publicProperties(decl.members),
+        scriptApi: scriptApi(decl.members, decl.attributes),
       })
     }
   }
@@ -467,6 +456,7 @@ for (const dir of packageDirs.sort()) {
       package: pkg.name,
       title: doc?.frontmatter.title ?? shortName,
       description: doc?.frontmatter.description ?? '',
+      keywords: flowList(doc?.frontmatter.keywords ?? ''),
       intro,
       category,
       status: doc ? 'stable' : 'undocumented',
@@ -487,7 +477,11 @@ for (const dir of packageDirs.sort()) {
         umbrella: umbrellaPackages.has(pkg.name) ? `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}` : undefined,
       },
       presets: presetGroup
-        ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }
+        ? // A preset may set attributes only (`appearance="segmented"`); `css` is always an object in the registry.
+          {
+            html: presetGroup.html,
+            items: presetGroup.presets.map((preset) => ({ ...preset, css: preset.css ?? {}, description: describeComponentPreset(preset) })),
+          }
         : undefined,
       examples,
       hasGallery: !!gallery,

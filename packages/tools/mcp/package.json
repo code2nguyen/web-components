@@ -65,6 +65,8 @@
       "files": [
         "scripts/build-registry.ts",
         "scripts/gallery.ts",
+        "scripts/usage.ts",
+        "scripts/frontmatter.ts",
         "src/registry-types.ts",
         "src/installed.ts",
         "src/lib/css-var-name.ts",

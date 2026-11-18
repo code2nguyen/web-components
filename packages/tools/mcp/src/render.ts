@@ -30,7 +30,7 @@ export function renderComponentList(components: ComponentEntry[], installed: (pk
 }
 
 export interface ComponentRenderOptions {
-  include: Set<'attributes' | 'slots' | 'events' | 'parts' | 'css' | 'composition' | 'presets'>
+  include: Set<'attributes' | 'script' | 'slots' | 'events' | 'parts' | 'css' | 'composition' | 'presets'>
   installed: InstalledInfo | null
   /** Concrete tag / module when the request named an icon. */
   concrete?: { tag: string; modulePath: string; className: string }
@@ -100,6 +100,28 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
         ),
       )
     }
+    const script = api.scriptApi ?? []
+    const properties = script.filter((m) => m.kind === 'property')
+    const methods = script.filter((m) => m.kind === 'method')
+    if (include.has('script') && properties.length) {
+      out.push('\n### Properties (set from script)\n')
+      out.push('No attribute: assign them on the element (`el.renderCell = …`), or bind them as properties in a framework.\n')
+      out.push(
+        table(
+          ['Property', 'Type', 'Description'],
+          properties.map((p) => [code(p.name) + (p.readonly ? ' (read-only)' : ''), code(p.type), p.description ?? '']),
+        ),
+      )
+    }
+    if (include.has('script') && methods.length) {
+      out.push('\n### Methods\n')
+      out.push(
+        table(
+          ['Method', 'Signature', 'Description'],
+          methods.map((m) => [code(`${m.name}()`), code(m.type), m.description ?? '']),
+        ),
+      )
+    }
     if (include.has('parts') && api.cssParts.length) {
       out.push('\n### CSS parts\n')
       out.push('Use with `::part(name)` when CSS custom properties do not cover the required change.\n')
@@ -130,7 +152,9 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   if (include.has('presets') && component.presets?.items.length && !secondary) {
     out.push('\n## Presets\n')
     out.push(
-      component.presets.items.map((p) => `- **${p.name}**${p.description ? ` — ${p.description}` : ''} (${Object.keys(p.css).length} variables)`).join('\n'),
+      component.presets.items
+        .map((p) => `- **${p.name}**${p.description ? ` — ${p.description}` : ''} (${Object.keys(p.css ?? {}).length} variables)`)
+        .join('\n'),
     )
     out.push('\nUse `get_presets` for the values, `generate_variant` with `preset` to turn one into code.')
   }
@@ -240,13 +264,8 @@ export function renderPresets(component: ComponentEntry, names?: string): string
   const out = [`# ${component.title} presets`, '', 'Base markup:', '```html', component.presets.html, '```', '']
   for (const preset of items) {
     out.push(`## ${preset.name}${preset.description ? ` — ${preset.description}` : ''}`)
-    out.push('```css')
-    out.push(
-      Object.entries(preset.css)
-        .map(([k, v]) => `${k}: ${v};`)
-        .join('\n'),
-    )
-    out.push('```')
+    const css = Object.entries(preset.css ?? {})
+    if (css.length) out.push('```css', css.map(([k, v]) => `${k}: ${v};`).join('\n'), '```')
     if (preset.attributes && Object.keys(preset.attributes).length)
       out.push(
         `Attributes: ${Object.entries(preset.attributes)
