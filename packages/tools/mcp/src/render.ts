@@ -1,6 +1,6 @@
 /** Compact markdown renderers for tool results. */
 import { groupCssProperties } from './lib/group-css.ts'
-import { importPath, UMBRELLA, type InstalledInfo } from './installed.ts'
+import { importPath, typeText, UMBRELLA, type InstalledInfo } from './installed.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, Registry, ThemeEntry } from './registry-types.ts'
 
 export const MAX_CHARS = 12_000
@@ -66,7 +66,7 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(
         table(
           ['Name', 'Type', 'Default', 'Description'],
-          api.attributes.map((a) => [code(a.name), code(a.type), code(a.default), a.description ?? '']),
+          api.attributes.map((a) => [code(a.name), code(typeText(a.type)), code(a.default), a.description ?? '']),
         ),
       )
     }
@@ -84,7 +84,7 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(
         table(
           ['Event', 'Type', 'Description'],
-          api.events.map((e) => [code(e.name), code(e.type), e.description ?? '']),
+          api.events.map((e) => [code(e.name), code(typeText(e.type)), e.description ?? '']),
         ),
       )
     }
