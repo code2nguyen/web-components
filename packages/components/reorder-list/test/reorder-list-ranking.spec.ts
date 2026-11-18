@@ -353,6 +353,15 @@ test('the name follows label edits and naming attributes changed after the first
   await expect.poll(() => listName(host)).toBe('')
 })
 
+test('a list moved in the document keeps following its naming attributes', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable aria-label="First">${choices}</c2-reorder-list><section></section>`)
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => listName(host)).toBe('First')
+  await host.evaluate((element) => document.querySelector('section')!.append(element))
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Moved'))
+  await expect.poll(() => listName(host)).toBe('Moved')
+})
+
 test('a label for the list is followed when its text changes', async ({ page, renderScenario }) => {
   await renderScenario(`<label for="ranking">Rank these</label><c2-reorder-list id="ranking" editable>${choices}</c2-reorder-list>`)
   const host = page.locator('c2-reorder-list')

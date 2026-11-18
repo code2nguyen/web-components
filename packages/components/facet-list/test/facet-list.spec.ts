@@ -41,7 +41,8 @@ test('actions picks the buttons: none leaves include checkboxes, and an excluded
   await expect(page.getByRole('button', { name: /^Only/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Exclude/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Include/ })).toHaveCount(1)
-  await facet(page).evaluate((element: FacetList) => (element.actions = ['only']))
+  // A string assigned to the property, as Svelte 5 or a server-rendered prop does, reads like the attribute.
+  await facet(page).evaluate((element: FacetList) => ((element as unknown as { actions: string }).actions = 'only'))
   await expect(page.getByRole('button', { name: /^Only/ })).toHaveCount(4)
   await expect(page.getByRole('button', { name: /^Exclude/ })).toHaveCount(0)
   await accessible(page)

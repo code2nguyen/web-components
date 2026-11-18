@@ -361,19 +361,21 @@ export class TextField extends LitElement {
     </button>`
   }
 
+  /** The helper line's text: the error text while it shows, else `help`. */
+  private get supportingMessage() {
+    return this.error && !this.disabled && !!this.errorText ? this.errorText : this.help
+  }
+
   /** Whether the helper line under the field shows a message (`help`, `error-text` or the slot), which then describes the input. */
   private get showsSupportingMessage() {
-    if (this.field.managed) return false
-    const message = this.error && !this.disabled && !!this.errorText ? this.errorText : this.help
-    return !!message || this.slotPresence.has('supporting-text')
+    return !this.field.managed && (!!this.supportingMessage || this.slotPresence.has('supporting-text'))
   }
 
   protected renderSupportingText() {
     if (this.field.managed) {
       return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
     }
-    const showError = this.error && !this.disabled && !!this.errorText
-    const message = showError ? this.errorText : this.help
+    const message = this.supportingMessage
     const counter = this.maxLength > 0 ? `${this.value.length} / ${this.maxLength}` : ''
     if (!message && !counter && !this.slotPresence.has('supporting-text')) {
       return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`

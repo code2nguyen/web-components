@@ -360,6 +360,8 @@ export class ReorderList extends LitElement {
     if (hydrating) void this.updateComplete.then(() => this.reconcileAuthoredOrder())
     else this.reconcileAuthoredOrder()
     this.observeChildren()
+    // Moved in the document: its labels may differ, and the observer was dropped on disconnect.
+    if (this.hasUpdated) this.syncContainerName()
     if (this.hasUpdated) this.syncContainerName()
   }
 
@@ -369,6 +371,8 @@ export class ReorderList extends LitElement {
     this.resizeObserver?.disconnect()
     this.visibilityObserver?.disconnect()
     this.labelObserver?.disconnect()
+    // Dropped, not kept: a reconnected list observes again from scratch (see `connectedCallback`).
+    this.labelObserver = undefined
     this.observedLabels = []
     this.finishSession()
     super.disconnectedCallback()

@@ -60,8 +60,8 @@ test('defining a catalog again merges its new keys, keeps the first English and 
   assert.equal(companion, base)
   assert.equal(formatMessage(companion, 'en', 'next'), 'Next')
   assert.equal(formatMessage(base, 'en', 'close'), 'Close')
-  // Same English (a function with the same source counts as the same): no warning.
-  defineMessages('localize-merge', { count: (n: number) => `${n} items` })
+  // Functions are not compared (another build writes the same message as different source): no warning.
+  defineMessages('localize-merge', { count: (n: number) => n + ' items' })
   assert.equal(warn.mock.callCount(), 0)
   defineMessages('localize-merge', { close: 'Shut' })
   assert.equal(warn.mock.callCount(), 1)

@@ -44,8 +44,8 @@ const catalogs = new Map<string, MessageCatalog<Messages>>()
  * the few components that carried languages before, the planners; translations added later still win over them.)
  * Defining a name again adds the keys it brings to the catalog already registered, so a companion element can keep its
  * text in its own module (`defineMessages('tour', beaconMessages)` next to the tour's): every call returns that one
- * catalog. A key defined twice keeps its first English, with a warning when the two differ (two copies of a package
- * at different versions define the same keys alike).
+ * catalog. A key defined twice keeps its first English, with a warning when two plain strings differ (two copies of a
+ * package at different versions define the same keys alike).
  */
 export function defineMessages<M extends Messages>(name: string, en: M, shipped: Record<string, M> = {}): MessageCatalog<M> {
   let catalog = catalogs.get(name) as unknown as MessageCatalog<M> | undefined
@@ -54,7 +54,8 @@ export function defineMessages<M extends Messages>(name: string, en: M, shipped:
     for (const [key, message] of Object.entries(en)) {
       if (!(key in known)) {
         known[key] = message
-      } else if (String(known[key]) !== String(message)) {
+      } else if (typeof message === 'string' && typeof known[key] === 'string' && known[key] !== message) {
+        // Functions are not compared: two builds of the same package write the same message as different source.
         console.warn(`c2n: message "${key}" of "${name}" is defined twice with different English; the first definition is kept.`)
       }
     }
@@ -287,15 +288,25 @@ export class LocaleController implements ReactiveController {
     controllers.delete(this)
   }
 
+  /** Set when the hydrating update starts, so a second one knows the first never completed. */
+  private hydrationStarted = false
+
   hostUpdate(): void {
+    // The hydrating update threw before `hostUpdated`: end the server pass here, or the host stays in English for good.
+    if (this.serverRendered && this.hydrationStarted) this.endServerPass()
+    if (this.serverRendered) this.hydrationStarted = true
     this.locale = inServerPass.has(this) ? this.serverLocale() : this.resolve()
+  }
+
+  private endServerPass(): void {
+    this.serverRendered = false
+    inServerPass.delete(this)
   }
 
   hostUpdated(): void {
     if (!this.serverRendered) return
     // The hydrating render is done, in the server's language: from now on the host draws in its own.
-    this.serverRendered = false
-    inServerPass.delete(this)
+    this.endServerPass()
     this.locale = this.resolve()
     // Once this update has completed: outside hydration, and not a change requested in the middle of an update.
     if (this.differsFromServer()) void this.host.updateComplete.then(() => this.host.requestUpdate())

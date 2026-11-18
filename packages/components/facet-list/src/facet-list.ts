@@ -20,7 +20,6 @@ export interface FacetValue {
   count?: number
 }
 
-/** What `filter-change` carries: the selection as it is about to become. */
 /** A button each value can carry (`actions`). */
 export type FacetAction = 'only' | 'exclude'
 
@@ -35,8 +34,13 @@ const facetActionsConverter = {
   toAttribute(value: FacetAction[]) {
     return value.length ? value.join(' ') : 'none'
   },
+  /** A string assigned to the property (Svelte 5, a server-rendered prop) is read as the attribute would be. */
+  fromProperty(value: unknown): unknown {
+    return typeof value === 'string' ? facetActionsConverter.fromAttribute(value) : value
+  },
 }
 
+/** What `filter-change` carries: the selection as it is about to become. */
 export interface FacetFilterDetail {
   include: string[]
   exclude: string[]
