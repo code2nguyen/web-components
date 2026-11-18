@@ -11,6 +11,13 @@ import { questionnaireMessages } from './messages'
 
 export { questionnaireMessages } from './messages'
 
+// `Intl.ListFormat` is ES2021, above the library's ES2020 typings; every engine the components support has it.
+const ListFormat = (
+  Intl as unknown as {
+    ListFormat?: new (locale: string, options: { type: 'unit'; style: 'short' }) => { format(items: string[]): string }
+  }
+).ListFormat
+
 export type QuestionnaireQuestionType = 'select' | 'choice' | 'single' | 'multiple'
 export type QuestionnaireAnswer = string | string[]
 export type QuestionnaireAnswers = Record<string, QuestionnaireAnswer>
@@ -396,7 +403,9 @@ export class Questionnaire extends LitElement {
     const answer = this.answers[question.id]
     const values = Array.isArray(answer) ? answer : answer ? [answer] : []
     const labels = values.map((value) => question.options.find((option) => option.value === value)?.label ?? value)
-    return labels.length ? labels.join(', ') : this.skippedLabel || this.msg.t('skipped')
+    if (!labels.length) return this.skippedLabel || this.msg.t('skipped')
+    // A list in the page's language: "A, B" in English, "A、B" in Japanese.
+    return ListFormat ? new ListFormat(this.msg.locale, { type: 'unit', style: 'short' }).format(labels) : labels.join(', ')
   }
 
   override render() {
