@@ -384,10 +384,13 @@ export class List extends LitElement {
     }
   }
 
+  /** Whether the shadow root came from the server (a declarative shadow root), which fires no slotchange. */
+  private readonly serverRendered = this.shadowRoot !== null
+
   protected override firstUpdated(): void {
-    // A server-rendered list (a declarative shadow root, as inside a hydrating `c2-select`) had its rows assigned before
-    // the `slotchange` listener existed, and no slotchange follows: the rows would never join the list's selection.
-    if (this.listItemSlot?.assignedElements().length) this.handleSlotChange()
+    // A server-rendered list (as inside a hydrating `c2-select`) had its rows assigned before the `slotchange` listener
+    // existed, and no slotchange follows: the rows would never join the list's selection. A client render gets one.
+    if (this.serverRendered && this.listItemSlot?.assignedElements().length) this.handleSlotChange()
   }
 
   protected override updated(changedProperties: PropertyValueMap<this>): void {
