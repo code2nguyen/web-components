@@ -330,7 +330,8 @@ export class MonthPlanner extends LitElement {
   /**
    * Whether the today marker may be drawn: never on the server, and not through the hydration of a server-rendered
    * planner (a declarative shadow root is already there in the constructor), whose server may be on another day than
-   * the visitor. Once set, every render reads the clock again, so the marker follows midnight.
+   * the visitor. Once set, every render reads the clock again: the first render after midnight (a navigation, a new
+   * `events`) moves the marker. Nothing redraws the planner at midnight by itself.
    */
   @state() private clockReady = !isServer && !this.shadowRoot
   /** Month index (0–11) holding the picker's roving tab stop. */
