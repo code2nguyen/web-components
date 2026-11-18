@@ -50,7 +50,22 @@ const ListFormat = (
   }
 ).ListFormat
 
-/** Items as a list in `locale`'s words: `a, b and c` for `conjunction`, `a, b, c` for `unit`. */
+const listFormatters = new Map<string, { format(items: string[]): string } | undefined>()
+
+/**
+ * Items as a list in `locale`'s words: `a, b and c` for `conjunction`, `a, b, c` for `unit`. One formatter per locale
+ * and type, built once; a malformed `locale` (`en_US`, which Intl rejects) falls back to a comma-separated list.
+ */
 export function formatList(locale: string, items: string[], type: 'conjunction' | 'unit' = 'unit'): string {
-  return ListFormat ? new ListFormat(locale, { type, style: type === 'unit' ? 'short' : 'long' }).format(items) : items.join(', ')
+  const key = `${type}|${locale}`
+  if (!listFormatters.has(key)) {
+    let formatter: { format(items: string[]): string } | undefined
+    try {
+      formatter = ListFormat ? new ListFormat(locale, { type, style: type === 'unit' ? 'short' : 'long' }) : undefined
+    } catch {
+      formatter = undefined
+    }
+    listFormatters.set(key, formatter)
+  }
+  return listFormatters.get(key)?.format(items) ?? items.join(', ')
 }
