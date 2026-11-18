@@ -172,9 +172,11 @@ block in the header and a column across every row. On each row the column is red
 amber where they have only pending ones and green where they are free, and the block takes the worst of them. Its name
 says who cannot come: "Design review, Monday 9 November, 10:00 to 11:00, busy: Ana Ruiz, tentative: Ben Carter".
 
-- **Move it.** Drag the block or its column on any row; drag an edge of the block to change its length. On the
-  keyboard, focus the block: Left and Right move it by `snap-minutes`, Shift+Left and Shift+Right change its end, and
-  each move is announced. While it is dragged the proposal is drawn uncoloured: who is busy is checked once, on drop.
+- **Move it.** Drag the block, or its column where a row is free; drag an edge of the block to change its length. In
+  an `editable` scheduler a press on the column creates a booking as anywhere else on the row, and only the block
+  moves the proposal. On the keyboard, focus the block: Left and Right move it by `snap-minutes`, Shift+Left and
+  Shift+Right change its end, and each move is announced. The proposal stays in the range shown. While it is dragged
+  it is drawn uncoloured: who is busy is checked once, on drop. `readonly: true` shows a proposal that does not move.
 - **Apply it.** Each move fires `proposal-change` with `{ start, end, busy, tentative }`, the `id`s of the resources
   booked then. As with `events`, the scheduler does not move the proposal itself; set `proposal` from the event.
 - **Find the next free time.** `findFreeTime(minutes, after?)` returns the first `{ start, end }` in the range shown

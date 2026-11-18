@@ -582,7 +582,9 @@
 .proposal-column {
   --_color: #{css.cssVar(proposal--color)};
   box-sizing: border-box;
-  cursor: grab;
+  // A drag that starts here moves the proposal: it never selects text, which the next press would drag natively.
+  user-select: none;
+  -webkit-user-select: none;
 
   &.tentative {
     --_color: #{css.cssVar(proposal__tentative--color)};
@@ -602,8 +604,13 @@
   bottom: 0;
   border-inline: 2px solid var(--_color);
   background: color-mix(in srgb, var(--_color) 14%, transparent);
-  // A sideways drag moves the proposal; the grid still scrolls up and down under a finger.
-  touch-action: pan-y;
+
+  // A sideways drag moves the proposal; the grid still scrolls up and down under a finger. In an `editable`
+  // scheduler a press on the column creates a booking instead, as anywhere on the row.
+  &.grab {
+    cursor: grab;
+    touch-action: pan-y;
+  }
 }
 
 .proposal {
@@ -623,11 +630,13 @@
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
-  touch-action: none;
+
+  &:not(.readonly) {
+    cursor: grab;
+    touch-action: none;
+  }
 }
 
-.proposal-content {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.proposal.readonly .handle {
+  display: none;
 }

@@ -102,10 +102,9 @@ test('the proposal is a block in the header and a column on every row, coloured 
   await accessible(page)
 })
 
-test('dragging the column on a row moves the proposal, checked on drop; Escape cancels', async ({ page, renderScenario }) => {
-  await renderScenario(markup(`editable proposal='${JSON.stringify(PROPOSAL)}'`))
+test('dragging the column on a row moves the proposal, checked on drop, kept in the range shown; Escape cancels', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
   await watch(scheduler(page), 'proposal-change')
-  await scheduler(page).evaluate((element) => element.addEventListener('range-select', () => element.setAttribute('data-selected', '')))
   const start = await at(page, 'chloe', '10:30')
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
@@ -132,6 +131,14 @@ test('dragging the column on a row moves the proposal, checked on drop; Escape c
   await settle(page)
   expect((await events(page))[1]).toEqual({ start: '2026-11-09T10:00', end: '2026-11-09T12:00', busy: ['ana'], tentative: ['ben'] })
 
+  // Dragged past the start of the day, it stops at 07:00.
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move((await at(page, 'chloe', '07:00')).x - 40, start.y, { steps: 8 })
+  await page.mouse.up()
+  await settle(page)
+  expect((await events(page))[2]).toEqual({ start: '2026-11-09T07:00', end: '2026-11-09T08:00', busy: [], tentative: [] })
+
   await page.mouse.move(start.x, start.y)
   await page.mouse.down()
   await page.mouse.move(start.x + 120, start.y, { steps: 5 })
@@ -140,12 +147,57 @@ test('dragging the column on a row moves the proposal, checked on drop; Escape c
   await page.mouse.up()
   await settle(page)
   await expect(scheduler(page).locator('.proposal-column.moving')).toHaveCount(0)
-  expect(await events(page)).toHaveLength(2)
-  // A press on the proposal never starts a new booking.
-  await page.mouse.click(start.x, start.y)
+  expect(await events(page)).toHaveLength(3)
+})
+
+test('in an editable scheduler a press on the column creates a booking; the header block still moves the proposal', async ({ page, renderScenario }) => {
+  await renderScenario(markup(`editable proposal='${JSON.stringify(PROPOSAL)}'`))
+  await watch(scheduler(page), 'range-select')
+  const point = await at(page, 'chloe', '10:20')
+  await page.mouse.click(point.x, point.y)
   await settle(page)
-  expect(await scheduler(page).getAttribute('data-selected')).toBeNull()
-  expect(await events(page)).toHaveLength(2)
+  expect(await events(page)).toEqual([{ resource: 'chloe', start: '2026-11-09T10:00', end: '2026-11-09T11:00' }])
+
+  await watch(scheduler(page), 'proposal-change')
+  const box = (await block(page).boundingBox())!
+  const middle = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  const twoHours = (await at(page, 'chloe', '12:00')).x - (await at(page, 'chloe', '10:00')).x
+  await page.mouse.move(middle.x, middle.y)
+  await page.mouse.down()
+  await page.mouse.move(middle.x + twoHours, middle.y, { steps: 8 })
+  await page.mouse.up()
+  await settle(page)
+  expect(await events(page)).toEqual([{ start: '2026-11-09T12:00', end: '2026-11-09T13:00', busy: [], tentative: [] }])
+})
+
+test('a readonly proposal stays in place', async ({ page, renderScenario }) => {
+  await renderScenario(markup(`proposal='${JSON.stringify({ ...PROPOSAL, readonly: true })}'`))
+  await watch(scheduler(page), 'proposal-change')
+  await expect(column(page, 'chloe')).not.toHaveClass(/\bgrab\b/)
+  const start = await at(page, 'chloe', '10:30')
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(start.x + 120, start.y, { steps: 5 })
+  await page.mouse.up()
+  await block(page).focus()
+  await page.keyboard.press('ArrowRight')
+  await settle(page)
+  expect(await events(page)).toEqual([])
+  await expect(block(page)).toHaveAccessibleName(/^Team sync, Monday 9 November, 10:00 to 11:00/)
+})
+
+test('the keyboard stops the proposal at the end of the range shown, keeping the focus on it', async ({ page, renderScenario }) => {
+  await renderScenario(markup(`proposal='${JSON.stringify({ ...PROPOSAL, start: '2026-11-09T18:00', end: '2026-11-09T18:45' })}'`))
+  await applyChanges(page)
+  await watch(scheduler(page), 'proposal-change')
+  await block(page).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => activeName(page)).toBe('Team sync, Monday 9 November, 18:15 to 19:00, everyone is free')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Shift+ArrowRight')
+  await settle(page)
+  expect(await events(page)).toHaveLength(1)
+  await expect.poll(() => activeName(page)).toBe('Team sync, Monday 9 November, 18:15 to 19:00, everyone is free')
 })
 
 test('from the keyboard the arrows move the proposal, Shift changes its end, and each move is announced', async ({ page, renderScenario }) => {

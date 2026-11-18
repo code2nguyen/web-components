@@ -3,7 +3,7 @@ import { state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { firstDayOfWeek, resolveLocale } from '@c2n/core/locale-helper.js'
+import { firstDayOfWeek, formatList, resolveLocale } from '@c2n/core/locale-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 // Registers `c2-button-group` and `c2-button`, the view switch.
@@ -109,7 +109,8 @@ export interface SchedulerProposal {
   /** Wall-clock end, same shape, after `start`. */
   end: string
   /** Shown in the block and read first in its name. Defaults to "Proposed time" in the scheduler's language. */
-  title?: string
+  title?: string /** Shows the proposal without letting the user move it. */
+  readonly?: boolean
 }
 
 /** What {@link Scheduler.renderProposal} is called with. */
@@ -190,6 +191,13 @@ export interface Scheduler {
   removeEventListener: TypedRemoveEventListener<Scheduler, SchedulerEventMap>
 }
 
+/** An event with its times as minutes. */
+interface Booking {
+  event: SchedulerEvent
+  start: number
+  end: number
+}
+
 /** An event placed on the grid. */
 interface Placed {
   event: SchedulerEvent
@@ -228,7 +236,7 @@ interface Preview {
 const DRAG_THRESHOLD = 4
 
 // Stands for the proposal in a gesture and its preview, which are otherwise those of a bar.
-const PROPOSAL = { id: '', resource: '', start: '', end: '', title: '' } as SchedulerEvent
+const PROPOSAL = { resource: '' } as SchedulerEvent
 
 /** `Intl.DateTimeFormat` is costly to build and a render asks for the same few dozens of times: one per locale and options. */
 const formatters = new Map<string, Intl.DateTimeFormat>()
@@ -284,9 +292,10 @@ function safeColor(value: string | undefined): string | null {
  * For finding a meeting time, the attendees are the resources and their bookings the events (`pending` ones read as
  * tentative). `proposal` (`{ start, end, title? }`) draws the proposed meeting as a block in the header and a column
  * across every row: the column is red on the rows of the attendees busy then and amber on those only tentative, and
- * the block takes the worst of them. Dragging the block or its column moves it, its edges resize it, and on the
- * keyboard Left/Right move it by `snap-minutes` and Shift+Left/Right change its end. Each fires `proposal-change`
- * with `{ start, end, busy, tentative }`, checked against `events` on drop; the app sets `proposal`.
+ * the block takes the worst of them. Dragging the block (or its column, unless `editable`) moves it within the range
+ * shown, its edges resize it, and on the keyboard Left/Right move it by `snap-minutes` and Shift+Left/Right change its
+ * end. Each fires `proposal-change` with `{ start, end, busy, tentative }`, checked against `events` on drop; the app
+ * sets `proposal`. A `readonly` proposal stays in place.
  * `findFreeTime(minutes)` returns the first time everyone is free in the range shown, and `renderProposal` draws the
  * block's content.
  *
@@ -384,7 +393,7 @@ export class Scheduler extends LitElement {
   @property({ attribute: false }) renderSummary?: SchedulerSummaryRenderer
   /** Header of the summary row. Defaults to "Summary" in the scheduler's language. */
   @property({ attribute: 'summary-heading' }) summaryHeading = ''
-  /** A proposed meeting across every row, `{ start, end, title? }`, checked against `events`. Accepts a JSON string as an attribute. */
+  /** A proposed meeting across every row, `{ start, end, title?, readonly? }`, checked against `events`. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) proposal: SchedulerProposal | null = null
   /** Draws the content of the proposal block, called with `{ start, end, title, busy, tentative, resources }`. */
   @property({ attribute: false }) renderProposal?: SchedulerProposalRenderer
@@ -438,8 +447,8 @@ export class Scheduler extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    const keys = ['events', 'resources', 'date', 'view', 'editable', 'proposal'] as const
-    if (this.gesture && keys.some((key) => changed.has(key))) {
+    const moved = changed.has('events') || changed.has('resources') || changed.has('date') || changed.has('view') || changed.has('proposal')
+    if ((moved || changed.has('editable')) && this.gesture) {
       this.endGesture()
     }
     if (changed.has('timeZone') && this.hasUpdated) this.now = nowIn(this.timeZone)
@@ -556,21 +565,29 @@ export class Scheduler extends LitElement {
   }
 
   // The valid `events` of the resources listed, as minutes.
-  private bookings(): { event: SchedulerEvent; start: number; end: number }[] {
+  private bookings(): Booking[] {
     const ids = new Set(this.validResources().map((resource) => resource.id))
     return (Array.isArray(this.events) ? this.events : [])
       .filter((event) => event && ids.has(event.resource))
       .map((event) => ({ event, start: toMinutes(event.start), end: toMinutes(event.end) }))
-      .filter((item): item is { event: SchedulerEvent; start: number; end: number } => item.start !== null && item.end !== null && item.end > item.start)
+      .filter((item): item is Booking => item.start !== null && item.end !== null && item.end > item.start)
   }
 
   // `proposal` as minutes, with its title, or null when it is not a valid range.
-  private get proposed(): { start: number; end: number; title: string } | null {
+  private get proposed(): { start: number; end: number; title: string; readonly: boolean } | null {
     const start = toMinutes(this.proposal?.start)
     const end = toMinutes(this.proposal?.end)
     if (start === null || end === null || end <= start) return null
     const title = this.proposal?.title
-    return { start, end, title: typeof title === 'string' && title ? title : this.msg.t('proposal') }
+    return { start, end, title: typeof title === 'string' && title ? title : this.msg.t('proposal'), readonly: !!this.proposal?.readonly }
+  }
+
+  // Keeps a moved or resized proposal in the range shown, where it stays drawn and its block keeps the focus.
+  private fit(start: number, end: number, move: boolean): [number, number] {
+    const range = this.layout!.range
+    if (!move) return [Math.max(range.start, start), Math.min(range.end, end)]
+    const shift = start < range.start ? range.start - start : end > range.end ? range.end - end : 0
+    return [start + shift, end + shift]
   }
 
   // The resources with a booking over a stretch of time, and those with only pending bookings over it.
@@ -587,16 +604,19 @@ export class Scheduler extends LitElement {
 
   // Who cannot come, as read in the proposal's name: "busy: Ana Ruiz, tentative: Ben Carter", else "everyone is free".
   private availabilityText({ busy, tentative }: { busy: SchedulerResource[]; tentative: SchedulerResource[] }): string {
-    const names = (list: SchedulerResource[]) => list.map((resource) => resource.label).join(', ')
+    const locale = this.effectiveLocale
+    const names = (list: SchedulerResource[]) =>
+      formatList(
+        locale,
+        list.map((resource) => resource.label),
+      )
     const parts = [busy.length ? this.msg.t('busy', names(busy)) : '', tentative.length ? this.msg.t('tentative', names(tentative)) : '']
-    return parts.filter(Boolean).join(', ') || this.msg.t('allFree')
+    return formatList(locale, parts.filter(Boolean)) || this.msg.t('allFree')
   }
 
   /**
-   * The first stretch of `minutes` in the range shown when no resource has a booking (`pending` ones included), not
-   * before `after` (`YYYY-MM-DDTHH:mm`; the start of the range when absent): on the `snap-minutes` grid, within
-   * `working-hours` (else the hours drawn) and off the locale's weekend. Returns `{ start, end }`, or null when there
-   * is none. Set it as `proposal` to move the proposal there.
+   * The first `{ start, end }` of `minutes` in the range shown, from `after` on, when no resource has a booking
+   * (pending ones too), within `working-hours`, off the weekend and on the `snap-minutes` grid; else null.
    */
   findFreeTime(minutes: number, after?: string): { start: string; end: string } | null {
     const length = Math.round(Number(minutes))
@@ -769,7 +789,7 @@ export class Scheduler extends LitElement {
   // The proposal's block in the header or its column on a row: the pointer is measured against that element.
   private startProposalGesture(event: PointerEvent) {
     const proposed = this.proposed
-    if (proposed && (event.target as Element).closest('.proposal, .proposal-column')) {
+    if (proposed && !proposed.readonly && (event.target as Element).closest(this.editable ? '.proposal' : '.proposal, .proposal-column')) {
       this.grab(event, { event: PROPOSAL, start: proposed.start, end: proposed.end, lane: 0 }, event.currentTarget as HTMLElement)
       return true
     }
@@ -817,14 +837,18 @@ export class Scheduler extends LitElement {
     }
     const placed = gesture.placed!
     const delta = this.timeAt(event.clientX, lane) - gesture.origin
-    if (gesture.mode === 'resize-end') {
-      this.preview = { event: placed.event, resource: placed.event.resource, start: placed.start, end: Math.max(placed.start + snap, placed.end + delta) }
-    } else if (gesture.mode === 'resize-start') {
-      this.preview = { event: placed.event, resource: placed.event.resource, start: Math.min(placed.end - snap, placed.start + delta), end: placed.end }
-    } else {
-      const resource = placed.event === PROPOSAL ? '' : (this.resourceAt(event.clientY) ?? placed.event.resource)
-      this.preview = { event: placed.event, resource, start: placed.start + delta, end: placed.end + delta }
+    let start = placed.start
+    let end = placed.end
+    let resource = placed.event.resource
+    if (gesture.mode === 'resize-end') end = Math.max(start + snap, end + delta)
+    else if (gesture.mode === 'resize-start') start = Math.min(end - snap, start + delta)
+    else {
+      start += delta
+      end += delta
+      if (placed.event !== PROPOSAL) resource = this.resourceAt(event.clientY) ?? resource
     }
+    if (placed.event === PROPOSAL) [start, end] = this.fit(start, end, gesture.mode === 'move')
+    this.preview = { event: placed.event, resource, start, end }
   }
 
   private endPointer(event: PointerEvent, commit: boolean) {
@@ -895,17 +919,17 @@ export class Scheduler extends LitElement {
   // Left/Right move the proposal by `snap-minutes`, Shift+Left/Right change its end; each move is announced.
   private handleProposalKey(event: KeyboardEvent) {
     const proposed = this.proposed
-    if (!proposed || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') || event.altKey || event.ctrlKey || event.metaKey) return
+    const horizontal = event.key === 'ArrowLeft' || event.key === 'ArrowRight'
+    if (!proposed || proposed.readonly || !horizontal || event.altKey || event.ctrlKey || event.metaKey || !this.layout) return
     event.preventDefault()
     const snap = this.snap
     const step = (event.key === 'ArrowRight') !== (getComputedStyle(this).direction === 'rtl') ? snap : -snap
-    let { start, end } = proposed
-    if (event.shiftKey) end = Math.max(start + snap, end + step)
-    else {
-      start += step
-      end += step
-    }
-    this.changeProposal(start, end, proposed.title)
+    const { start, end } = proposed
+    const [from, to] = this.fit(event.shiftKey ? start : start + step, event.shiftKey ? Math.max(start + snap, end + step) : end + step, !event.shiftKey)
+    const range = this.layout.range
+    // At the edge of the range, or into hours not drawn, the key does nothing rather than hide the focused block.
+    if ((from === start && to === end) || fractionOf(range, from) >= fractionOf(range, to)) return
+    this.changeProposal(from, to, proposed.title)
   }
 
   private openEvent(event: SchedulerEvent) {
@@ -1102,6 +1126,8 @@ export class Scheduler extends LitElement {
   }
 
   private toggleGroup(group: string) {
+    // Rows re-render by position, so a drag in progress would go on measuring another row.
+    this.endGesture()
     const collapsed = new Set(this.collapsed)
     if (collapsed.has(group)) collapsed.delete(group)
     else collapsed.add(group)
@@ -1281,7 +1307,7 @@ export class Scheduler extends LitElement {
 
   private renderPreview(range: SchedulerRange, resource: string) {
     const preview = this.preview
-    if (!preview || preview.resource !== resource) return nothing
+    if (!preview || preview.event === PROPOSAL || preview.resource !== resource) return nothing
     const time = this.shown(preview.start, preview.end)
     return html`<div
       class="preview"
@@ -1327,10 +1353,8 @@ export class Scheduler extends LitElement {
     const status = proposed ? this.availability(proposed.start, proposed.end) : undefined
     const moving = this.preview?.event === PROPOSAL ? this.preview : undefined
     const at = moving ?? proposed
-    const proposalStyle =
-      at && fractionOf(range, at.start) < fractionOf(range, at.end)
-        ? styleMap({ '--from': String(fractionOf(range, at.start)), '--to': String(fractionOf(range, at.end)) })
-        : undefined
+    const [from, to] = at ? [fractionOf(range, at.start), fractionOf(range, at.end)] : [0, 0]
+    const proposalStyle = from < to ? styleMap({ '--from': String(from), '--to': String(to) }) : undefined
     const proposalState = (resource?: string) => {
       if (moving || !status) return 'moving'
       const has = (list: SchedulerResource[]) => (resource === undefined ? list.length > 0 : list.some((item) => item.id === resource))
@@ -1339,28 +1363,24 @@ export class Scheduler extends LitElement {
     const block =
       proposed && status && proposalStyle
         ? html`<button
-            class="proposal ${proposalState()}"
+            class="proposal ${proposalState()} ${proposed.readonly ? 'readonly' : ''}"
             type="button"
             part="proposal"
             aria-label=${this.msg.t('proposalName', proposed.title, this.spoken(proposed.start, proposed.end), this.availabilityText(status))}
             style=${proposalStyle}
             @keydown=${this.handleProposalKey}
           >
-            <span class="handle start" data-handle="start" aria-hidden="true"></span>
-            <span class="proposal-content"
-              >${
-                typeof this.renderProposal === 'function'
-                  ? this.renderProposal({
-                      start: fromMinutes(proposed.start),
-                      end: fromMinutes(proposed.end),
-                      title: proposed.title,
-                      ...status,
-                      resources: this.validResources(),
-                    })
-                  : proposed.title
-              }</span
-            >
-            <span class="handle end" data-handle="end" aria-hidden="true"></span>
+            ${
+              typeof this.renderProposal === 'function'
+                ? this.renderProposal({
+                    start: fromMinutes(proposed.start),
+                    end: fromMinutes(proposed.end),
+                    title: proposed.title,
+                    ...status,
+                    resources: this.validResources(),
+                  })
+                : proposed.title
+            }<span class="handle start" data-handle="start" aria-hidden="true"></span><span class="handle end" data-handle="end" aria-hidden="true"></span>
           </button>`
         : nothing
 
@@ -1410,7 +1430,12 @@ export class Scheduler extends LitElement {
                 ${this.renderBands(range, id)} ${off}
                 ${
                   block !== nothing
-                    ? html`<div class="proposal-column ${proposalState(id)}" part="proposal-column" aria-hidden="true" style=${proposalStyle}></div>`
+                    ? html`<div
+                        class="proposal-column ${proposalState(id)} ${this.editable || proposed?.readonly ? '' : 'grab'}"
+                        part="proposal-column"
+                        aria-hidden="true"
+                        style=${proposalStyle}
+                      ></div>`
                     : nothing
                 }
                 ${this.renderNowMarker(range, 'now')}
