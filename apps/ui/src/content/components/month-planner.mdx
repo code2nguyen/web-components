@@ -101,6 +101,24 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
     <output class="planner-result">Click a day, drag across days, or drag a bar.</output>
   </div>
 </div>
+<div data-label="Agenda">
+  <c2-month-planner
+    class="planner-demo"
+    view="agenda"
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-12","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+  ></c2-month-planner>
+</div>
+<div data-label="Change calendar">
+  <c2-month-planner
+    class="planner-demo"
+    month="2026-09"
+    week-start="monday"
+    locale="en-US"
+    events='[{"id":"freeze","title":"Release freeze","start":"2026-09-14","end":"2026-09-18","display":"background","color":"rgba(220, 38, 38, 0.12)"},{"id":"window","title":"Maintenance window","start":"2026-09-26","display":"background"},{"id":"cdn","title":"CHG-2050 CDN certificates","start":"2026-09-08","end":"2026-09-09"},{"id":"billing","title":"Conflict: CHG-2063 Billing deploy","start":"2026-09-16","color":"#b91c1c"},{"id":"k8s","title":"CHG-2071 Cluster upgrade","start":"2026-09-26","end":"2026-09-27"}]'
+  ></c2-month-planner>
+</div>
 ```
 
 ## Heading and actions
@@ -124,7 +142,8 @@ instead of overflowing. The planner leaves what they do to you.
 
 ## Events
 
-Each entry is `{ id?, title, start, end?, color?, textColor? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
+Each entry is `{ id?, title, start, end?, color?, textColor?, display? }` (`display: 'background'` is covered under
+[Change calendar](#change-calendar)). Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
 leave it out for a one-day entry. `color` is any CSS colour for that bar (its text stays white in both themes; add `textColor` for a light `color`),
 otherwise `--c2-month-planner__event--background` applies. Entries without a valid `start` are skipped.
 
@@ -169,6 +188,52 @@ planner.addEventListener('event-change', (event) => {
   const { event: entry, changes } = event.detail
   planner.events = planner.events.map((item) => (item === entry ? { ...item, ...changes } : item))
 })
+```
+
+## Agenda view
+
+`view="agenda"` lays the same `events` out as a list instead of a grid: each day of the month that has events, plus
+today, under its own heading, with the events of that day as buttons that fire `event-click`. A multi-day event is
+listed under every day it covers, background events first, then by first day. The header and the month picker work as
+on the grid, so the list pages month by month and stays in step with `month` and `month-change`. Editing applies to
+the grid only.
+
+Past `--c2-month-planner__agenda--max-height` the list scrolls, and each day's heading sticks to its top while that
+day's events pass under it (`--c2-month-planner__agenda-day--background`, `--color`, `--border`). A month without
+events shows the `empty` slot, "No events this month" by default. Switching between the two views is the app's own
+control: put it in the `actions` slot and set `view` from it.
+
+`renderAgendaEvent` replaces the content of each listed event, in the agenda view and in the compact layout's list. It
+receives `{ event, date, start, end, background }` (dates as `YYYY-MM-DD`, `date` being the day it is listed under);
+the planner keeps the button, its name (the title and dates) and its `event-click`.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+planner.view = 'agenda'
+planner.renderAgendaEvent = ({ event, date, start, end }) =>
+  html`<strong>${event.title}</strong>${start !== end ? html` <small>${date === start ? 'starts' : date === end ? 'ends' : 'continues'}</small>` : ''}`
+```
+
+## Change calendar
+
+An event with `display: 'background'` is drawn as a shaded band behind the days it covers instead of a bar, with its
+title along the top: a change freeze, a maintenance window, a public holiday. Its `color` is the shade itself, so give
+it a translucent colour; without one it takes `--c2-month-planner__band--color`, and `textColor` colours its title
+(`--c2-month-planner__band-label--color` otherwise). The bars keep their lanes over it. A band is not a control: it
+cannot be clicked or dragged, and presses go through to the day under it. Assistive technology reads its title and
+dates with the grid, with each day on the compact layout, and first in the day's list in the agenda view.
+
+The planner does not compare the bands with the bars. To flag a change scheduled in a freeze, compute the overlap and
+mark the change yourself, for example with a red `color` and a title that says so:
+
+```ts tag=CodeBlock
+const freezes = changes.filter((change) => change.display === 'background')
+planner.events = changes.map((change) =>
+  change.display !== 'background' && freezes.some((freeze) => change.start <= (freeze.end ?? freeze.start) && (change.end ?? change.start) >= freeze.start)
+    ? { ...change, title: `Conflict: ${change.title}`, color: '#b91c1c' }
+    : change,
+)
 ```
 
 ## Narrow screens
