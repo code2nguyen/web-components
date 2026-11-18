@@ -366,6 +366,10 @@ test.describe('dated week', () => {
   })
 
   test('pages a narrow strip with one pair of arrows, crossing into the next and previous weeks', async ({ page, scenario }) => {
+    const warnings: string[] = []
+    page.on('console', (message) => {
+      if (message.text().includes('scheduled an update')) warnings.push(message.text())
+    })
     await scenario('dated-narrow')
     const planner = page.locator('c2-week-planner')
     const status = page.getByRole('status')
@@ -387,6 +391,8 @@ test.describe('dated week', () => {
     await expect(status).toHaveText('week:2026-09-28..2026-10-04')
     await expect(planner.getByRole('group', { name: /^Sunday, October 4/ })).toBeInViewport({ ratio: 1 })
     await expect(planner.getByRole('button', { name: 'Previous days' })).toBeVisible()
+    // The arrows' edges are read after the strip moved, not from inside the update that moved it.
+    expect(warnings).toEqual([])
   })
 
   test('has no axe violations', async ({ page, scenario }) => {
