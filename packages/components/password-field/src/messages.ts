@@ -3,6 +3,9 @@ import { defineMessages } from '@c2n/core/localize.js'
 const en = {
   // The field's own text. Each text property (`toggle-label`, `caps-lock-text`, `requirements-message`,
   // `strength-labels`) still overrides its message on one field.
+  // The field's own name when nothing else names it; `password` below is the generator's Password option, which a
+  // language may word differently.
+  fieldName: 'Password',
   toggle: 'Show password',
   capsLock: 'Caps Lock is on',
   requirementsUnmet: 'The password does not meet every requirement.',

@@ -3,6 +3,7 @@ import { passwordFieldMessages } from '../src/messages.js'
 
 // The French an app would add: the library ships its text in English only.
 const fr: { [K in keyof typeof passwordFieldMessages.en]: string } = {
+  fieldName: 'Mot de passe',
   toggle: 'Afficher le mot de passe',
   capsLock: 'Verr. Maj. est activé',
   requirementsUnmet: 'Le mot de passe ne respecte pas toutes les règles.',

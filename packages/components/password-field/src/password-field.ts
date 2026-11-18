@@ -572,7 +572,7 @@ export class PasswordField extends LitElement {
       this.internals.setValidity({})
       return
     }
-    const unmet = !!this.value && this.requirementStates.some((requirement) => !requirement.met)
+    const unmet = !!this.value && !this.meetsRequirements(this.value)
     this.input.setCustomValidity(this.customValidityMessage || (unmet ? this.requirementsMessage || this.msg.t('requirementsUnmet') : ''))
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
@@ -681,7 +681,7 @@ export class PasswordField extends LitElement {
 
   override render() {
     const requirements = this.requirementStates
-    const name = this.ariaLabel || this.field.label || this.placeholder || this.msg.t('password')
+    const name = this.ariaLabel || this.field.label || this.placeholder || this.msg.t('fieldName')
     const describedBy = this.field.describedBy(this.meter && 'meter', requirements.length > 0 && 'requirements', !this.field.managed && 'help', 'caps-lock')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <slot name="prefix-icon" class="prefix"></slot>
