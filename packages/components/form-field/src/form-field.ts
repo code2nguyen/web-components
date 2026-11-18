@@ -62,6 +62,10 @@ interface FieldDefaults {
 
 const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
 
+/** A native form control, or a form-associated custom element. */
+const isFormControl = (element: Element) =>
+  element.matches('input, select, textarea, button') || (element.constructor as { formAssociated?: boolean }).formAssociated === true
+
 let warnedNative = false
 
 /**
@@ -276,15 +280,17 @@ export class FormField extends LitElement {
 
   /**
    * The first unslotted child that draws a box. A child that does not render (`style`, `script`, `template`) is
-   * skipped, and a `display: contents` wrapper (a framework's island element, such as Astro's `astro-island`) is
-   * looked through to the control it holds.
+   * skipped, and a `display: contents` wrapper (a framework's island element, such as Astro's `astro-island`) that is
+   * not a control itself is looked through to the control it holds.
    */
   private findControl(): FormFieldControl | null {
     const search = (parent: Element, top: boolean): FormFieldControl | null => {
       for (const child of parent.children) {
         if (top && child.hasAttribute('slot')) continue
         if (NOT_RENDERED.has(child.localName)) continue
-        if (getComputedStyle(child).display === 'contents') {
+        // A control is never a wrapper, even laid out with `display: contents` (a group spread over the page's grid).
+        const control = !!fieldConsumerOf(child as FormFieldControl) || isFormControl(child)
+        if (!control && getComputedStyle(child).display === 'contents') {
           const inner = search(child, false)
           if (inner) return inner
           continue

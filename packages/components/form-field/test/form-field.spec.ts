@@ -254,3 +254,14 @@ test('claims a control that upgrades late inside a wrapper', async ({ page, rend
   })
   await expect(page.getByRole('textbox', { name: 'Late' })).toBeVisible()
 })
+
+test('a control laid out with display: contents is the control, not a wrapper', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Plan" hint="Pick any"><c2-checkbox-group style="display: contents"><c2-checkbox value="a">A</c2-checkbox><c2-checkbox value="b">B</c2-checkbox></c2-checkbox-group></c2-form-field>`,
+  )
+  // The group is adopted: neither checkbox takes the field's hint as its own description.
+  await expect(page.getByRole('checkbox', { name: 'A' })).not.toHaveAccessibleDescription('Pick any')
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe(
+    'c2-checkbox-group',
+  )
+})
