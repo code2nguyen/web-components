@@ -73,7 +73,14 @@ test that covers it instead. A fix that looks wrong in the browser is not done: 
 
 Follow the repo's browser rule: use this headless script, not interactive browser tools, unless the user asks for them.
 
-## 5. Record
+## 5. Review until clean
+
+Run `/code-review high --max-findings all develop...<branch>`: by default it reports at most 10 findings, which can
+hide the rest. Fix what it confirms (each with a test that fails before the fix), then **run it again on the whole
+branch**: the fixes are new code and get reviewed like the rest. Stop when a pass reports nothing new to fix, and say
+why for any finding left unfixed. Run `/security-review` once on the final branch.
+
+## 6. Record
 
 - Move each fixed entry from `## Open` to `## Fixed` in `COMPONENT-FEEDBACK.md`, with what changed and the branch or
   PR. For an entry partly fixed, edit it in place to say what remains.
