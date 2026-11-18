@@ -29,7 +29,7 @@ export type DeltaBetter = 'higher' | 'lower'
  *
  * @csspart number - The `<data>` element holding the formatted change and its arrow, with the raw value as its `value`.
  * @csspart unit - Each currency symbol, unit name, percent sign or compact suffix inside the number.
- * @csspart arrow - The arrow, wrapping the `increase-icon` or `decrease-icon` slot.
+ * @csspart arrow - The arrow's accessible name, wrapping the `increase-icon` or `decrease-icon` slot. Hide the arrow with `--c2-delta__arrow--display`, not by hiding this part, which would also remove that name.
  * @csspart comparison - The wrapper of the `comparison` slot, placed after the number: the label text it projects inherits its colour and size.
  *
  * @cssproperty {color} [--c2-delta__good--color=#15803d] - Colour of a good change: a rise, or a fall with `better="lower"`.
@@ -37,6 +37,7 @@ export type DeltaBetter = 'higher' | 'lower'
  * @cssproperty {color} [--c2-delta__flat--color=#71717a] - Colour of a change that shows as zero.
  * @cssproperty {length} [--c2-delta__arrow--size=0.75em] - Width and height of the default arrow.
  * @cssproperty {length} [--c2-delta__arrow--margin-inline-end=0.2em] - Space between the arrow and the digits.
+ * @cssproperty {string} [--c2-delta__arrow--display=inline] - `none` hides the arrow and its gap where the sign and colour already say the direction; its name ("Increase, better") stays in the accessibility tree.
  * @cssproperty {color} [--c2-delta__comparison--color=#71717a] - Colour of the comparison label.
  * @cssproperty {font-size} [--c2-delta__comparison--font-size=inherit] - Size of the comparison label.
  * @cssproperty {length} [--c2-delta__comparison--margin-inline-start=0.35em] - Space between the number and the comparison label.
@@ -66,8 +67,9 @@ export class Delta extends FormatNumber {
     const name = direction > 0 ? 'increase' : 'decrease'
     const arrow = direction
       ? html`<span part="arrow" role="img" aria-label=${this.#msg.t(`${name}${good ? 'Better' : 'Worse'}`)}
-          ><slot name="${name}-icon"
-            ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l6 7h-4v5H6V9H2z"></path></svg></slot
+          ><span class="glyph"
+            ><slot name="${name}-icon"
+              ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l6 7h-4v5H6V9H2z"></path></svg></slot></span
         ></span>`
       : nothing
     return html`${this.renderNumber(value, options, parts, { good, bad: !!direction && !good, flat: !direction }, arrow)}${comparison}`

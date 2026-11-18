@@ -62,7 +62,8 @@ const markup: Record<string, string> = {
     <c2-format-number id="plain" locale="en-US" value="-5"></c2-format-number>
     <c2-delta id="sign-auto" locale="en-US" sign-display="auto" value="5"></c2-delta>
     <c2-delta id="custom-icon" locale="en-US" value="3"><b slot="increase-icon">↗</b></c2-delta>
-    <c2-delta id="pending">—<span slot="comparison">vs last month</span></c2-delta>`,
+    <c2-delta id="pending">—<span slot="comparison">vs last month</span></c2-delta>
+    <c2-delta id="no-arrow" locale="en-US" sign-display="negative" value="7" style="--c2-delta__arrow--display: none"></c2-delta>`,
   'delta-colour': `
     <style>
       .delta {

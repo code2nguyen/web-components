@@ -128,6 +128,16 @@ test('the increase-icon slot replaces the arrow', async ({ page, scenario }) => 
   await expect(page.locator('#custom-icon [part="arrow"]')).toHaveAttribute('aria-label', 'Increase, better')
 })
 
+test('--c2-delta__arrow--display: none hides the arrow and its gap but keeps its name', async ({ page, scenario }) => {
+  await scenario('delta')
+  await expect(page.locator(number('no-arrow'))).toHaveText('7')
+  await expect(page.locator('#no-arrow svg')).toBeHidden()
+  const arrow = page.locator('#no-arrow [part="arrow"]')
+  await expect(arrow).toHaveAttribute('aria-label', 'Increase, better')
+  expect(await arrow.evaluate((element) => element.getBoundingClientRect().width)).toBe(0)
+  await expect(page.locator('#no-arrow').getByRole('img', { name: 'Increase, better' })).toHaveCount(1)
+})
+
 test('colours a change and its comparison label through their variables', async ({ page, scenario }) => {
   await scenario('delta-colour')
   await expect(page.locator(number('good'))).toHaveCSS('color', 'rgb(0, 128, 0)')
