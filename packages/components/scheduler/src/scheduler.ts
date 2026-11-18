@@ -1413,15 +1413,17 @@ export class Scheduler extends LitElement {
   }
 
   /**
-   * A press on an editable row moves a bar or draws a booking, so it starts no text selection: WebKit otherwise selects
-   * the row headings a drag crosses, and the next press on that selection starts a native drag instead of a move.
+   * A press on an editable row (a bar move, a new booking) or on a movable proposal is a drag, so it starts no text
+   * selection: WebKit otherwise selects the row headings it crosses, and the next press on that selection starts a
+   * native drag instead of a move.
    */
   private readonly handleLaneSelectStart = (event: Event) => {
     // Text in a field or editable content a renderer draws in a bar stays selectable.
     const origin = event.composedPath()[0]
     const element = origin instanceof Element ? origin : (origin as Node | undefined)?.parentElement
     if (element?.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return
-    if (this.editable) event.preventDefault()
+    // A press on a movable proposal drags it, in an editable scheduler or not.
+    if (this.editable || element?.closest('.proposal:not(.readonly), .proposal-column.grab')) event.preventDefault()
   }
 
   override render() {
@@ -1455,6 +1457,7 @@ export class Scheduler extends LitElement {
       proposed && status && proposalStyle
         ? html`<button
             class="proposal ${proposalState()} ${proposed.readonly ? 'readonly' : ''}"
+            @selectstart=${this.handleLaneSelectStart}
             type="button"
             part="proposal"
             aria-label=${this.msg.t('proposalName', proposed.title, this.spoken(proposed.start, proposed.end), this.availabilityText(status))}
