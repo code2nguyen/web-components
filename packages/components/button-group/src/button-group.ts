@@ -271,7 +271,8 @@ export class ButtonGroup extends LitElement {
   /**
    * Whether the group is a radio group: one pressed item, outside a toolbar (whose items keep their own roles), and
    * every item has a radio mode (`c2-button`, `c2-icon-button`). With a plain `<button>`, a split button or an element
-   * not defined yet among them, every item stays a toggle button in a `group`: a radiogroup must hold radios only.
+   * not defined yet among them, every item stays a toggle button in a `group`: a radiogroup must hold radios only. A
+   * `c2-` item not defined yet re-syncs the group once it is.
    * Set by {@link syncItems}.
    */
   private radioMode = false
@@ -298,7 +299,9 @@ export class ButtonGroup extends LitElement {
     }
     const selected = new Set(this.selectedValues)
     const undefinedTags = [...new Set(items.map((item) => item.localName).filter((tag) => tag.includes('-') && !customElements.get(tag)))]
-    for (const tag of undefinedTags) {
+    // Only c2 items are waited for: another tag may never be defined (a layout element, a scoped registry), and a
+    // pending promise would keep the group alive. Such a group stays a group of toggle buttons until it syncs again.
+    for (const tag of undefinedTags.filter((name) => name.startsWith('c2-'))) {
       if (this.awaitedTags.has(tag)) continue
       this.awaitedTags.add(tag)
       customElements.whenDefined(tag).then(() => {

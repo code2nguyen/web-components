@@ -2,7 +2,7 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { syncRadioSemantics } from '@c2n/core/dom-helper.js'
+import { applyRadioSemantics } from '@c2n/core/dom-helper.js'
 import styles from './button.scss?inline'
 
 /** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them the target's own fallback runs. */
@@ -202,7 +202,7 @@ export class Button extends LitElement {
    * says so on the client): put the radio semantics on the inner button once. Later renders bind them as usual.
    */
   protected override firstUpdated() {
-    if (this.radio) syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-button'), true, this.selected)
+    if (this.radio) applyRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-button'), this.selected)
   }
 
   override render() {
@@ -216,8 +216,8 @@ export class Button extends LitElement {
         role=${this.radio ? 'radio' : nothing}
         aria-checked=${this.radio ? String(this.selected) : nothing}
         aria-pressed=${this.radio ? nothing : this.selected ? 'true' : this.toggle ? 'false' : nothing}
-        aria-expanded=${this.ariaExpanded || nothing}
-        aria-haspopup=${this.ariaHasPopup || nothing}
+        aria-expanded=${(!this.radio && this.ariaExpanded) || nothing}
+        aria-haspopup=${(!this.radio && this.ariaHasPopup) || nothing}
         command=${this.command || nothing}
         type="button"
         @click=${this.handleClick}

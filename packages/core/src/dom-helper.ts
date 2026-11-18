@@ -217,18 +217,13 @@ export function deepActiveElement(): Element | null {
 
 /**
  * Gives an inner `<button>` the radio semantics of an item in a single-selection `c2-button-group` (`role="radio"`,
- * `aria-checked`, no `aria-pressed`), or takes them away again. For a hydrating first render, which keeps the server's
- * attributes without committing the values that differ from them: the group sets the item's `radio` property on the
- * client only, so the server rendered a toggle button. Later renders bind these attributes through the template.
+ * `aria-checked`, no `aria-pressed`) after a hydrating first render, which keeps the server's attributes without
+ * committing the values that differ from them: the group sets the item's `radio` property on the client only, so the
+ * server rendered a toggle button. Later renders bind these attributes through the template.
  */
-export function syncRadioSemantics(button: HTMLElement | null | undefined, radio: boolean, checked: boolean) {
+export function applyRadioSemantics(button: HTMLElement | null | undefined, checked: boolean) {
   if (!button) return
-  if (radio) {
-    button.setAttribute('role', 'radio')
-    button.setAttribute('aria-checked', checked ? 'true' : 'false')
-    button.removeAttribute('aria-pressed')
-  } else {
-    button.removeAttribute('role')
-    button.removeAttribute('aria-checked')
-  }
+  button.setAttribute('role', 'radio')
+  button.setAttribute('aria-checked', checked ? 'true' : 'false')
+  button.removeAttribute('aria-pressed')
 }

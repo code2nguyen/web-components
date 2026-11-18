@@ -291,27 +291,36 @@ test('an item moved from one single-selection group to another stays a radio, wh
 })
 
 test('a group whose items are defined later becomes a radio group once they are', async ({ page, renderScenario }) => {
-  await renderScenario(
-    `<c2-button-group selection="single" value="b" aria-label="Late"><x-late value="a">A</x-late><x-late value="b">B</x-late></c2-button-group>`,
-  )
+  await renderScenario(`<c2-button-group selection="single" value="b" aria-label="Late"></c2-button-group>`)
   const group = page.locator('c2-button-group')
+  // Items whose element is not defined yet: the group cannot tell whether they have a radio mode.
+  await group.evaluate((element) => element.insertAdjacentElement('beforeend', document.createElement('c2-late-item')))
+  await group.evaluate((element) => element.insertAdjacentElement('beforeend', document.createElement('c2-late-item')))
   await expect(group).toHaveHostAria('role', 'group')
-  await expect(page.locator('x-late').first()).toHaveAttribute('toggle', '')
-  // The items take a radio mode when their element is defined.
+  await expect(page.locator('c2-late-item').first()).toHaveAttribute('toggle', '')
   await page.evaluate(() =>
     customElements.define(
-      'x-late',
+      'c2-late-item',
       class extends HTMLElement {
         radio = false
       },
     ),
   )
   await expect(group).toHaveHostAria('role', 'radiogroup')
-  await expect(page.locator('x-late').first()).not.toHaveAttribute('toggle', /.*/)
+  await expect(page.locator('c2-late-item').first()).not.toHaveAttribute('toggle', /.*/)
   expect(
     await page
-      .locator('x-late')
+      .locator('c2-late-item')
       .first()
       .evaluate((element) => (element as HTMLElement & { radio: boolean }).radio),
   ).toBe(true)
+})
+test('a radio item drops the popup state its button declares', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">
+      <c2-button value="a" aria-haspopup="menu" aria-expanded="false">A</c2-button><c2-button value="b">B</c2-button>
+    </c2-button-group>`)
+  const radio = page.getByRole('radio', { name: 'A' })
+  await expect(radio).not.toHaveAttribute('aria-haspopup', /.*/)
+  await expect(radio).not.toHaveAttribute('aria-expanded', /.*/)
+  await accessible(page)
 })

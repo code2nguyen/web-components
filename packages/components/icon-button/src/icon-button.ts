@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { syncRadioSemantics } from '@c2n/core/dom-helper.js'
+import { applyRadioSemantics } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './icon-button.scss?inline'
 
@@ -68,7 +68,7 @@ export class IconButton extends LitElement {
    * says so on the client): put the radio semantics on the inner button once. Later renders bind them as usual.
    */
   protected override firstUpdated() {
-    if (this.radio) syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), true, this.selected)
+    if (this.radio) applyRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), this.selected)
   }
 
   override render() {
