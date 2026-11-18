@@ -50,3 +50,23 @@ test('draws no today marker on the server, then marks the visitor’s today once
   await expect(page.locator('#agenda .agenda-day.today')).toHaveAttribute('data-date', '2026-09-15')
   expect(problems).toEqual([])
 })
+
+test('a planner with no month hydrates on the server’s month, then shows the visitor’s', async ({ page }) => {
+  const problems: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'error' && !message.text().startsWith('Failed to load resource')) problems.push(message.text())
+    if (/mismatch/i.test(message.text())) problems.push(message.text())
+  })
+  page.on('pageerror', (error) => problems.push(error.message))
+  // The server drew September (30 days); the visitor is already in October (31), a grid of another length.
+  await page.clock.install({ time: new Date(2026, 9, 2, 10) })
+  await page.goto('/packages/components/month-planner/test/hydration.html')
+  await page.waitForFunction(() => document.documentElement.dataset.modulesReady === 'true')
+  await page.evaluate((html) => window.hydrate(html), markup)
+
+  await expect(page.locator('#current .title')).toHaveText(/October 2026/)
+  await expect(page.locator('#current .date.today')).toHaveText('2')
+  // The planners with a month keep it.
+  await expect(page.locator('#grid .title')).toHaveText(/September 2026/)
+  expect(problems).toEqual([])
+})

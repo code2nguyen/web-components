@@ -28,7 +28,8 @@ export async function renderPlanners(): Promise<string> {
     return collectResultSync(
       render(
         html`<c2-month-planner id="grid" locale="en-US" month="2026-09" events=${events}></c2-month-planner>
-          <c2-month-planner id="agenda" locale="en-US" month="2026-09" view="agenda" events=${events}></c2-month-planner>`,
+          <c2-month-planner id="agenda" locale="en-US" month="2026-09" view="agenda" events=${events}></c2-month-planner>
+          <c2-month-planner id="current" locale="en-US" events=${events}></c2-month-planner>`,
       ),
     )
   } finally {

@@ -322,11 +322,15 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
 export class MonthPlanner extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @state() private visibleMonth = beginningOfMonth(new Date())
+  /**
+   * The month on screen. A server-rendered planner starts on the month its server drew (`data-month` on the root),
+   * which is what hydration must match; without a `month`, it moves to the visitor's month once the clock is read.
+   */
+  @state() private visibleMonth = this.serverMonth() ?? beginningOfMonth(new Date())
   @state() private pickerOpen = false
   /** Day picked in the compact layout, as `YYYY-MM-DD`; its events are listed under the grid. */
   @state() private selectedDay = ''
-  @state() private pickerYear = new Date().getFullYear()
+  @state() private pickerYear = this.visibleMonth.getFullYear()
   /**
    * Whether the today marker may be drawn: never on the server, and not through the hydration of a server-rendered
    * planner (a declarative shadow root is already there in the constructor), whose server may be on another day than
@@ -387,6 +391,12 @@ export class MonthPlanner extends LitElement {
     }
   }
 
+  /** The month a server render drew, read from its declarative shadow root; undefined when not server-rendered. */
+  private serverMonth(): Date | undefined {
+    const drawn = this.shadowRoot?.querySelector<HTMLElement>('.c2-month-planner')?.dataset.month
+    return (drawn && parseMonth(drawn)) || undefined
+  }
+
   /** Today as `YYYY-MM-DD`, read from the clock on each render; empty while {@link clockReady} is not set. */
   private get today(): string {
     return this.clockReady ? toIso(new Date()) : ''
@@ -394,7 +404,15 @@ export class MonthPlanner extends LitElement {
 
   protected override firstUpdated() {
     // After this update, not from inside it, so it does not schedule a second update while the first one runs.
-    if (!this.clockReady && !isServer) queueMicrotask(() => (this.clockReady = true))
+    if (!this.clockReady && !isServer)
+      queueMicrotask(() => {
+        this.clockReady = true
+        // The server's month, which may not be the visitor's: with no `month` to keep, show the visitor's.
+        if (!parseMonth(this.month)) {
+          this.visibleMonth = beginningOfMonth(new Date())
+          this.pickerYear = this.visibleMonth.getFullYear()
+        }
+      })
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -1019,6 +1037,7 @@ export class MonthPlanner extends LitElement {
     const gesture = this.preview ? (this.gesture?.kind === 'move' ? 'moving' : 'resizing') : ''
     return html`<section
       class="c2-month-planner ${this.editable ? 'editable' : ''} ${gesture}"
+      data-month=${toMonth(this.visibleMonth)}
       aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || title}
       aria-labelledby=${labelledByHeading ? 'heading' : nothing}
     >
