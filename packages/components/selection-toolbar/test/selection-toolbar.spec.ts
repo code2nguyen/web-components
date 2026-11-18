@@ -314,3 +314,67 @@ test('a caret survives focus moving to a form-associated control in the content 
   expect(caret.text).toBe('')
   above((await prompt(page).boundingBox())!, caret)
 })
+
+/** A component that draws its text in an open shadow root, as `c2-text-annotator` does. */
+const SHADOW_SCENARIO = (composed: boolean) => `<div style="padding-top: 120px"><c2-selection-toolbar ${composed ? 'composed' : ''}>
+  <shadow-text></shadow-text>
+  <button slot="toolbar" data-action="tag">Tag</button>
+</c2-selection-toolbar></div>`
+
+const defineShadowText = (page: Page) =>
+  page.evaluate(() => {
+    if (customElements.get('shadow-text')) return
+    customElements.define(
+      'shadow-text',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          const paragraph = document.createElement('p')
+          paragraph.id = 'inner'
+          paragraph.textContent = 'The quick brown fox jumps over the lazy dog.'
+          this.attachShadow({ mode: 'open' }).append(paragraph)
+        }
+      },
+    )
+  })
+
+/** Selects `word` in the shadow root of `shadow-text`, as a mouse selection there would. */
+const selectInShadow = (page: Page, word: string) =>
+  page.evaluate((word) => {
+    const node = document.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+    const start = node.textContent!.indexOf(word)
+    document.getSelection()!.setBaseAndExtent(node, start, node, start + word.length)
+  }, word)
+
+test('composed shows the toolbar for a selection inside a shadow root of its content', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  await watch(host(page), 'selection-action')
+  await selectInShadow(page, 'brown fox')
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('brown fox')
+  const [bar, word] = await Promise.all([
+    toolbar(page).boundingBox(),
+    page.evaluate(() => {
+      const node = document.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+      const range = document.createRange()
+      range.setStart(node, 10)
+      range.setEnd(node, 19)
+      return range.getBoundingClientRect().top
+    }),
+  ])
+  expect(bar!.y + bar!.height).toBeLessThanOrEqual(word)
+  await page.getByRole('button', { name: 'Tag' }).click()
+  expect(await events(page)).toEqual([{ action: 'tag', text: 'brown fox' }])
+  // Collapsing the selection hides it again.
+  await page.evaluate(() => document.getSelection()!.collapseToStart())
+  await expect(toolbar(page)).toBeHidden()
+})
+
+test('without composed, a selection inside a shadow root of the content is left to that component', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(false))
+  await defineShadowText(page)
+  await selectInShadow(page, 'brown fox')
+  await page.waitForTimeout(500)
+  await expect(toolbar(page)).toBeHidden()
+})

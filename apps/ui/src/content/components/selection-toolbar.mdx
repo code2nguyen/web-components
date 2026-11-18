@@ -93,4 +93,4 @@ The Gallery has a live version with a streaming answer, and one at the caret.
 
 ### Limits
 
-It acts on selections in the page's own text. Selections inside other components' shadow roots and inside form fields belong to those components.
+It acts on selections in the page's own text. Selections inside form fields belong to those fields, and by default so do selections inside other components' shadow roots; set `composed` to act on those too (an answer drawn by `c2-markdown`, the text of `c2-text-annotator`). It reads them with `Selection.getComposedRanges()` (Baseline newly available); in a browser without it, those selections are not shown.
