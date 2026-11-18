@@ -120,3 +120,12 @@ test('public parts style every slotted region without changing assignment', asyn
   await expect(host.getByText('Body', { exact: true })).toBeVisible()
   await expect(host.getByRole('button', { name: 'Action' })).toBeVisible()
 })
+
+test('--c2-card--border sets all four sides and wins over a side variable', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-card style="--c2-card--border: 2px solid rgb(37, 99, 235); --c2-card--border-left: 5px dashed rgb(0, 0, 0)">Pro</c2-card>')
+  const card = page.locator('c2-card').locator('.c2-card')
+  for (const side of ['top', 'right', 'bottom', 'left']) {
+    await expect(card).toHaveCSS(`border-${side}-width`, '2px')
+    await expect(card).toHaveCSS(`border-${side}-color`, 'rgb(37, 99, 235)')
+  }
+})
