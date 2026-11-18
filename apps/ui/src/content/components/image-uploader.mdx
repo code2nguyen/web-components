@@ -47,6 +47,20 @@ import '@c2n/components/upload/image-uploader'
 <div data-label="Profile photo">
   <c2-image-uploader client:only="lit" data-upload-demo capture="user" aria-label="Profile photo"></c2-image-uploader>
 </div>
+<div data-label="Disabled">
+  <c2-image-uploader disabled
+    client:only="lit"
+    data-upload-demo
+    data-seed="living-room.svg,kitchen.svg,garden.svg"
+    multiple
+    reorderable
+    cover
+    max-files="8"
+    aria-label="Listing photos"
+  >
+    <span slot="hint">PNG, JPG or WebP · the first photo is the cover</span>
+  </c2-image-uploader>
+</div>
 ```
 
 `accept` defaults to `image/*`. With `multiple` the grid holds up to `max-files` images and the add tile disappears when

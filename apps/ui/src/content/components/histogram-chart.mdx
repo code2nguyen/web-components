@@ -61,6 +61,17 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
     <c2-chart-series field="west" label="eu-west"></c2-chart-series>
   </c2-histogram-chart>
 </div>
+<div data-label="Grid: both">
+  <c2-histogram-chart grid="both"
+    class="histogram-plot"
+    bin-width="50"
+    overlay="density"
+    percentiles="[50, 90]"
+    data="[212, 248, 264, 271, 280, 289, 293, 301, 305, 312, 318, 322, 329, 334, 338, 341, 347, 352, 358, 363, 371, 379, 388, 396, 404, 417, 431, 448, 472, 515, 286, 297, 309, 316, 327, 344, 361, 383, 254, 276, 299, 335, 366, 402, 455, 590, 640]"
+  >
+    <c2-chart-series field="value" label="Checkout latency (ms)"></c2-chart-series>
+  </c2-histogram-chart>
+</div>
 ```
 
 ### Data

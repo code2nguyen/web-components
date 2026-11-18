@@ -38,6 +38,12 @@ import '@c2n/components/facet-list'
     <c2-facet-list label="Host" searchable max-items="4" values='[{"value":"web-01","count":5400},{"value":"web-02","count":5100},{"value":"web-03","count":4900},{"value":"worker-01","count":2100},{"value":"worker-02","count":1980},{"value":"db-01","count":640},{"value":"db-02","count":610}]'></c2-facet-list>
   </div>
 </div>
+<div data-label="Sort: label">
+  <div class="facets">
+    <c2-facet-list sort="label" label="Service" include="checkout" exclude="healthcheck" values='[{"value":"checkout","count":12400},{"value":"search","count":8100},{"value":"payments","count":2300},{"value":"healthcheck","count":18200},{"value":"auth","count":950}]'></c2-facet-list>
+    <c2-facet-list label="Status" values='[{"value":"info","label":"Info","count":31200},{"value":"warn","label":"Warn","count":1840},{"value":"error","label":"Error","count":212}]'></c2-facet-list>
+  </div>
+</div>
 ```
 
 ### Values and selection

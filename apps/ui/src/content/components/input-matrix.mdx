@@ -39,6 +39,12 @@ import '@c2n/components/choice-matrix/input-matrix'
     rows='[{"value":"urgent","label":"Urgent"},{"value":"high","label":"High"},{"value":"normal","label":"Normal"}]'
     value='{"urgent":{"first":15,"next":60,"tier":"On call"},"high":{"first":60,"next":240,"tier":"Tier 2"},"normal":{"first":480,"tier":"Tier 1"}}'></c2-input-matrix>
 </div>
+<div data-label="Disabled">
+  <c2-input-matrix disabled name="qty" label="Quantities by size" row-header="Size" totals="both"
+    columns='[{"value":"black","label":"Black","min":0},{"value":"sand","label":"Sand","min":0},{"value":"olive","label":"Olive","min":0}]'
+    rows='[{"value":"s","label":"S"},{"value":"m","label":"M"},{"value":"l","label":"L"},{"value":"xl","label":"XL","disabled":true,"description":"Sold out"}]'
+    value='{"s":{"black":12,"sand":4},"m":{"black":20,"sand":8,"olive":6},"l":{"black":14,"olive":3}}'></c2-input-matrix>
+</div>
 ```
 
 ### Typed cells
