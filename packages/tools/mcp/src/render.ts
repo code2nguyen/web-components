@@ -46,7 +46,9 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   const secondary = !!requested && requested !== component.elements[0]
   out.push(`# ${component.title} (${primary.tag})`)
   if (secondary) {
-    if (requested.description) out.push(requested.description)
+    // The installed manifest's description when there is one: the tables below come from it too.
+    const description = installed?.declared?.get(requested.tag)?.description || requested.description
+    if (description) out.push(description)
     out.push(
       `\nPart of \`${component.package}\`, whose main element is \`${component.elements[0].tag}\`: ${firstSentence(component.description || component.intro || '')} Call get_component with \`tag: "${component.elements[0].tag}"\` for its description.`,
     )
@@ -120,7 +122,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     if (internal.length || slotted.length || usedBy.length) {
       out.push('\n## Composition\n')
       if (internal.length) out.push(`- Renders internally: ${internal.map((t) => `\`${t}\``).join(', ')} (their variables can be set on this element)`)
-      if (slotted.length) out.push(`- Expects slotted: ${slotted.map((t) => `\`${t}\``).join(', ')}`)
+      // A secondary element is one of those children: the line describes the main element.
+      if (slotted.length && !secondary) out.push(`- Expects slotted: ${slotted.map((t) => `\`${t}\``).join(', ')}`)
       if (usedBy.length) out.push(`- Used by: ${usedBy.map((t) => `\`${t}\``).join(', ')}`)
     }
   }
@@ -138,7 +141,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
 }
 
 function firstSentence(text: string): string {
-  const match = /^[\s\S]*?[.!?](?=\s|$)/.exec(text.trim())
+  // A sentence ends where the next one starts with a capital, so `e.g. line, bar` does not cut it short.
+  const match = /^[\s\S]*?[.!?](?=\s+[A-Z(`*]|\s*$)/.exec(text.trim())
   return (match?.[0] ?? text.trim()).replace(/\s+/g, ' ')
 }
 

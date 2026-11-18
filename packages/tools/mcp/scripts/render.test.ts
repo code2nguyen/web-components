@@ -101,3 +101,25 @@ test('get_component on a secondary element leads with its own API, not the packa
   // The main element still prints the whole description.
   assert.ok(renderComponent(table, { include, installed: null }).includes('Long description of the table. Long description'))
 })
+
+test('get_component on a secondary element drops the main element composition and keeps an abbreviation in the summary', () => {
+  const table: ComponentEntry = {
+    ...badge,
+    id: 'chart',
+    package: '@c2n/chart',
+    title: 'Chart',
+    description: 'Charts (e.g. line, bar) drawn on a canvas. Second sentence.',
+    composition: { internal: [], slotted: ['c2-chart-series'], usedBy: [] },
+    elements: [
+      { ...badge.elements[0], tag: 'c2-line-chart', className: 'LineChart', description: 'A line chart.' },
+      { ...badge.elements[0], tag: 'c2-chart-series', className: 'ChartSeries', description: 'One series.' },
+    ],
+  }
+  const out = renderComponent(table, {
+    include: new Set(['attributes', 'composition']),
+    installed: null,
+    concrete: { tag: 'c2-chart-series', modulePath: '@c2n/chart', className: 'ChartSeries' },
+  })
+  assert.match(out, /main element is `c2-line-chart`: Charts \(e\.g\. line, bar\) drawn on a canvas\. Call/)
+  assert.doesNotMatch(out, /Expects slotted/)
+})
