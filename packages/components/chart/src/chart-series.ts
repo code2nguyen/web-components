@@ -49,6 +49,12 @@ export class ChartSeries extends LitElement implements ChartSeriesConfig {
   /** Joins across gaps instead of breaking the line. */
   @property({ type: Boolean, attribute: 'span-gaps' }) spanGaps = false
 
+  /**
+   * When this series' point markers are drawn, overriding the chart's own `points`; `only` draws the markers without
+   * the line. Read by the line chart.
+   */
+  @property({ type: String }) points?: 'auto' | 'always' | 'none' | 'only'
+
   /** Leaves the series out of the chart without removing the definition. */
   @property({ type: Boolean, reflect: true }) override hidden = false
 
@@ -64,6 +70,7 @@ export class ChartSeries extends LitElement implements ChartSeriesConfig {
       lineWidth: this.lineWidth,
       axis: this.axis,
       spanGaps: this.spanGaps,
+      ...(this.points ? { points: this.points } : {}),
       hidden: this.hidden,
       format: this.format,
     }

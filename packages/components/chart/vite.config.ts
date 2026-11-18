@@ -37,7 +37,7 @@ export default defineConfig({
           'src/treemap-chart.ts',
           'src/waterfall-chart.ts',
           'src/histogram-chart.ts',
-          'src/histogram-chart.ts',
+          'src/spc.ts',
           'src/maps/map-source.ts',
           'src/maps/world-110m.ts',
           'src/maps/world-50m.ts',

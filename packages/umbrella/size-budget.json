@@ -1,5 +1,5 @@
 {
-  "lazy": 429631,
+  "lazy": 431836,
   "entries": {
     "accordion": 6905,
     "action-bar": 4526,
@@ -61,6 +61,7 @@
     "chart/sankey-chart": 43143,
     "chart/scatter-chart": 33872,
     "chart/sparkline": 38393,
+    "chart/spc": 2601,
     "chart/sunburst-chart": 50753,
     "chart/treemap-chart": 44595,
     "chart/waterfall-chart": 39487,

@@ -51,8 +51,9 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-area-chart': Omit<C2Props<AreaChart>, 'series' | 'annotations'> & {
+      'c2-area-chart': Omit<C2Props<AreaChart>, 'referenceLines' | 'series' | 'annotations'> & {
         'fill-opacity'?: Attribute
+        'reference-lines'?: Attribute
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -62,6 +63,7 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        referenceLines?: AreaChart['referenceLines'] | string
         series?: AreaChart['series'] | string
         annotations?: AreaChart['annotations'] | string
       }
@@ -272,7 +274,8 @@ declare module 'react' {
         series?: HistogramChart['series'] | string
         annotations?: HistogramChart['annotations'] | string
       }
-      'c2-line-chart': Omit<C2Props<LineChart>, 'series' | 'annotations'> & {
+      'c2-line-chart': Omit<C2Props<LineChart>, 'referenceLines' | 'series' | 'annotations'> & {
+        'reference-lines'?: Attribute
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -282,6 +285,7 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        referenceLines?: LineChart['referenceLines'] | string
         series?: LineChart['series'] | string
         annotations?: LineChart['annotations'] | string
       }

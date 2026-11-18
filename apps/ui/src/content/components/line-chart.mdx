@@ -107,6 +107,19 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
   </c2-line-chart>
 </div>
 
+<div data-label="Control chart">
+  <c2-line-chart
+    class="plot"
+    x-field="sample"
+    points="always"
+    reference-lines='[{"value":10.147,"label":"UCL","tone":"danger"},{"value":10.002,"label":"CL"},{"value":9.857,"label":"LCL","tone":"danger"}]'
+    data='[{"sample":1,"diameter":10.02},{"sample":2,"diameter":9.98},{"sample":3,"diameter":10.05},{"sample":4,"diameter":9.97},{"sample":5,"diameter":10.01},{"sample":6,"diameter":9.95},{"sample":7,"diameter":10.03},{"sample":8,"diameter":10},{"sample":9,"diameter":9.99},{"sample":10,"diameter":10.04},{"sample":11,"diameter":9.96},{"sample":12,"diameter":10.02},{"sample":13,"diameter":10.18,"flagged":10.18},{"sample":14,"diameter":10.01},{"sample":15,"diameter":9.98},{"sample":16,"diameter":10.03},{"sample":17,"diameter":10.04},{"sample":18,"diameter":10.05},{"sample":19,"diameter":10.03},{"sample":20,"diameter":10.06},{"sample":21,"diameter":10.04},{"sample":22,"diameter":10.05},{"sample":23,"diameter":10.07},{"sample":24,"diameter":10.03,"flagged":10.03},{"sample":25,"diameter":10.06,"flagged":10.06},{"sample":26,"diameter":9.97},{"sample":27,"diameter":10},{"sample":28,"diameter":9.98},{"sample":29,"diameter":10.02},{"sample":30,"diameter":9.99}]'
+  >
+    <c2-chart-series field="diameter" label="Diameter (mm)"></c2-chart-series>
+    <c2-chart-series field="flagged" label="Out of control" points="only" color="#dc2626"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
 <div data-label="Custom legend + tooltip" data-energy-custom>
   <div class="energy-linked">
     <c2-line-chart
@@ -141,7 +154,7 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
 </div>
 ```
 
-All three demos use a France extract from the public [Our World in Data Energy dataset](https://github.com/owid/energy-data): annual electricity generation in terawatt-hours, one row per year. The source publishes a codebook and traces these electricity fields to Ember and the Energy Institute. Keeping the same rows across the chart family makes the examples comparable rather than decorative.
+The energy demos use a France extract from the public [Our World in Data Energy dataset](https://github.com/owid/energy-data): annual electricity generation in terawatt-hours, one row per year. The source publishes a codebook and traces these electricity fields to Ember and the Energy Institute. Keeping the same rows across the chart family makes the examples comparable rather than decorative. The control chart plots 30 illustrative shaft-diameter measurements in millimetres, flagged by `runRules()` against limits from the first 12.
 
 ## Data and series
 
@@ -195,6 +208,37 @@ chart.annotations = [
   { x: Date.parse('2024-03-01T10:05Z'), x2: Date.parse('2024-03-01T10:40Z'), label: 'Error surge', tone: 'danger' },
 ]
 chart.addEventListener('annotation-click', (event) => openIncident(event.detail.annotation.id))
+```
+
+## Reference lines and control charts
+
+`reference-lines` draws horizontal rules behind the series: `{ value, label, tone }` is a rule at a y value with its
+label at the right end, and adding `value2` shades the band between the two. They suit targets, thresholds, control
+limits and sigma zones. The y scale stretches to reach every rule, so a limit the data never crosses is still drawn,
+unless `y-min` or `y-max` fixes the scale. They share the annotation tones and variables:
+`--c2-chart__annotation__<tone>--color`, `--c2-chart__annotation-line--border-width` and `--border-style` for a rule,
+`--c2-chart__annotation-range--opacity` for a band. Being canvas marks, they are not focusable: the labelled ones are
+read out at the end of the chart's accessible name ("Reference lines: UCL 10.15, CL 10, LCL 9.86").
+
+A series with `points="only"` draws its markers without the line, overriding the chart's own `points`. Give it values
+only on the rows to flag and it marks them over the main line, as the "Out of control" series does above.
+
+Together they make a statistical process control chart. `@c2n/components/chart/spc` holds the arithmetic as plain
+functions, run when the data changes and never while the chart draws: `controlLimits()` (the centre line, and sigma
+from the moving range or the standard deviation), `runRules()` (the eight Nelson rules, or the subset you pass, each
+flagged on the point that completes it), `spcReferenceLines()` (limits, zones A/B/C and spec limits as
+`reference-lines`) and `markViolations()` (the flagged values copied into a field of their own). The gallery has a
+full control chart.
+
+```js tag=CodeBlock
+import { controlLimits, runRules, spcReferenceLines, markViolations, SPC_RULES } from '@c2n/components/chart/spc'
+
+const values = rows.map((row) => row.diameter)
+const limits = controlLimits(values) // { center, sigma, ucl, lcl, count }
+const violations = runRules(values, limits, { rules: [1, 2, 5, 6] }) // [{ index, rules: [1] }, …]
+chart.referenceLines = spcReferenceLines(limits, { spec: { lsl: 9.8, usl: 10.2 }, zones: true })
+chart.data = markViolations(rows, 'diameter', violations, 'flagged')
+console.log(violations.map((v) => `Sample ${v.index + 1}: ${v.rules.map((rule) => SPC_RULES[rule]).join('; ')}`))
 ```
 
 ## Independent legend and tooltip
