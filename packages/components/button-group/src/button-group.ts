@@ -319,6 +319,9 @@ export class ButtonGroup extends LitElement {
 
   /** Mirrors `value`, `selection` and `disabled` onto the items. */
   private syncItems() {
+    // A removed group lets its items go (see `disconnectedCallback`) and syncs again once it is connected: an update
+    // it gets meanwhile (a new `value`) must not take them back or wait for a definition on their behalf.
+    if (!this.isConnected) return
     const items = this.items
     const selection = this.effectiveSelection
     const selectable = selection !== 'none'
@@ -357,18 +360,17 @@ export class ButtonGroup extends LitElement {
         const element = item as HTMLElement & { radio: boolean; hasUpdated?: boolean; updateComplete?: Promise<unknown> }
         // Not before the item's first update: a server-rendered item hydrates against the server's markup, which knows
         // nothing of the group, and a value written before then would not reach its DOM.
+        // Held from now on, so an item that leaves before its first update gets its `toggle` back too.
+        this.radioItemsSet.add(item)
         if (element.hasUpdated === false && element.updateComplete) {
           if (!this.pendingRadio.has(element)) {
             this.pendingRadio.add(element)
             element.updateComplete.then(() => {
               this.pendingRadio.delete(element)
-              if (element.parentElement === this && this.radioMode) this.syncItems()
+              if (element.parentElement === this && this.radioMode && this.isConnected) element.radio = true
             })
           }
-        } else {
-          element.radio = true
-          this.radioItemsSet.add(item)
-        }
+        } else element.radio = true
       } else if ((item as HTMLElement & { radio?: boolean }).radio) {
         // The group stopped being single, or the item arrived as a radio from a single-selection group.
         ;(item as HTMLElement & { radio: boolean }).radio = false

@@ -270,6 +270,20 @@ test('the items of a removed single-selection group are toggle buttons again', a
   await expect(page.locator('#elsewhere').getByRole('button', { name: 'Right' })).toHaveAttribute('aria-pressed', 'false')
 })
 
+test('a removed group does not take its items back when it updates', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  const radio = await page.evaluate(async () => {
+    const group = document.querySelector('c2-button-group') as HTMLElement & { value: string; updateComplete: Promise<unknown> }
+    group.remove()
+    group.value = 'b'
+    await group.updateComplete
+    const item = group.querySelector('c2-button') as HTMLElement & { radio: boolean }
+    return { radio: item.radio, toggle: item.hasAttribute('toggle') }
+  })
+  expect(radio).toEqual({ radio: false, toggle: true })
+})
+
 test('a single-selection group with an item that has no radio mode stays a group of toggle buttons', async ({ page, renderScenario }) => {
   await page.addInitScript(() =>
     customElements.define(
