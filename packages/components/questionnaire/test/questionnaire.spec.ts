@@ -201,3 +201,22 @@ test('letter shortcuts no longer change answers once the summary shows', async (
   await host.press('b')
   await expect(host).toHaveJSProperty('answers', { timing: 'now' })
 })
+
+test('draws its own text in the language of the page', async ({ page, scenario }) => {
+  await scenario('fr')
+  const host = page.locator('c2-questionnaire')
+  await expect(host.locator('.progress')).toHaveText('Question 1 sur 3')
+  await expect(page.getByRole('button', { name: 'Suivant' })).toBeVisible()
+  await page.getByRole('button', { name: 'Suivant' }).click()
+  await expect(host.getByText('Choisissez une réponse pour continuer.')).toBeVisible()
+  await page.getByRole('radio', { name: /Tool call timeline/ }).check()
+  await page.getByRole('button', { name: 'Suivant' }).click()
+  await expect(page.getByRole('button', { name: 'Précédent' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Passer' })).toBeVisible()
+})
+
+test('a label property still overrides its message on one questionnaire', async ({ page, scenario }) => {
+  await scenario('own-label')
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
+  expect(await page.locator('c2-questionnaire').evaluate((element: Questionnaire) => element.previousLabel)).toBe('')
+})
