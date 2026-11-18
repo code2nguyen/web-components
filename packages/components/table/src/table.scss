@@ -625,6 +625,16 @@
   justify-content: center;
 }
 
+// A renderer's node fills the cell (so a 100% bar spans it), which leaves `justify-content` nothing to place: align
+// its inline content instead.
+.cell--align-center > .cell-content--node {
+  text-align: center;
+}
+
+.cell--align-end > .cell-content--node {
+  text-align: end;
+}
+
 .cell--align-end {
   justify-content: flex-end;
 }
