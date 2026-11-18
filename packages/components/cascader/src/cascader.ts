@@ -429,7 +429,7 @@ export class Cascader extends LitElement {
         @keydown=${this.handleTriggerKeydown}
       >
         <slot name="prefix-icon"></slot>
-        <span class=${classMap({ value: true, placeholder: !displayValue })}>${displayValue || this.placeholder}</span>
+        <span class=${classMap({ value: true, placeholder: !displayValue })}>${displayValue || this.placeholder || nothing}</span>
         <slot name="suffix-icon">${this.renderChevron()}</slot>
       </button>
       <c2-overlay id="panel-overlay" popover free-width @toggle=${this.handleOverlayToggle}>
