@@ -229,3 +229,28 @@ test('is accessible with a hint, an error and a warning', async ({ page, renderS
   await page.locator('#err').evaluate((element) => (element as FormField).validate())
   await accessible(page)
 })
+
+test('looks through a display: contents wrapper and a style element for its control', async ({ page, renderScenario }) => {
+  // The shape an Astro island takes in the docs: a `<style>` before the first island, then the wrapper.
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
+  await renderScenario(
+    `<c2-form-field label="Email" hint="Work address"><style>astro-island { display: contents }</style><astro-island><c2-text-field></c2-text-field></astro-island></c2-form-field>`,
+  )
+  const input = page.getByRole('textbox', { name: 'Email' })
+  await expect(input).toBeVisible()
+  await expect(input).toHaveAccessibleDescription('Work address')
+  expect(warnings.filter((text) => text.includes('field protocol'))).toEqual([])
+})
+
+test('claims a control that upgrades late inside a wrapper', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Late"><div style="display: contents"><late-wrapped-field></late-wrapped-field></div></c2-form-field>`)
+  await page.evaluate(async () => {
+    const TextField = customElements.get('c2-text-field')!
+    customElements.define('late-wrapped-field', class extends TextField {})
+    await customElements.whenDefined('late-wrapped-field')
+  })
+  await expect(page.getByRole('textbox', { name: 'Late' })).toBeVisible()
+})

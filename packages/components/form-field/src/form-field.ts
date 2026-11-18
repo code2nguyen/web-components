@@ -60,6 +60,8 @@ interface FieldDefaults {
   validateOn?: FormFieldValidateOn
 }
 
+const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
+
 let warnedNative = false
 
 /**
@@ -256,10 +258,13 @@ export class FormField extends LitElement {
   private handleConnect = (event: Event) => {
     const { consumer } = (event as CustomEvent<FieldConnectEventDetail>).detail
     const target = event.composedPath()[0]
-    // Only a direct child is this field's control; anything deeper belongs to that control (or a nested field).
-    if (target instanceof HTMLElement && target.parentElement === this) {
+    // Only this field's control (a direct child, or one inside a `display: contents` wrapper) is claimed; anything
+    // deeper belongs to that control (or a nested field).
+    if (!(target instanceof HTMLElement)) return
+    const control = this.findControl()
+    if (target === control || target.parentElement === this) {
       event.stopPropagation()
-      if (target === this.findControl() && fieldConsumerOf(target) === consumer) this.adoptControl(target)
+      if (target === control && fieldConsumerOf(target) === consumer) this.adoptControl(target)
     }
   }
 
@@ -269,11 +274,26 @@ export class FormField extends LitElement {
     requestAnimationFrame(() => this.requestUpdate())
   }
 
+  /**
+   * The first unslotted child that draws a box. A child that does not render (`style`, `script`, `template`) is
+   * skipped, and a `display: contents` wrapper (a framework's island element, such as Astro's `astro-island`) is
+   * looked through to the control it holds.
+   */
   private findControl(): FormFieldControl | null {
-    for (const child of this.children) {
-      if (!child.hasAttribute('slot')) return child as FormFieldControl
+    const search = (parent: Element, top: boolean): FormFieldControl | null => {
+      for (const child of parent.children) {
+        if (top && child.hasAttribute('slot')) continue
+        if (NOT_RENDERED.has(child.localName)) continue
+        if (getComputedStyle(child).display === 'contents') {
+          const inner = search(child, false)
+          if (inner) return inner
+          continue
+        }
+        return child as FormFieldControl
+      }
+      return null
     }
-    return null
+    return search(this, true)
   }
 
   private adoptControl(control: FormFieldControl | null) {
