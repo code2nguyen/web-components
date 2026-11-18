@@ -826,8 +826,13 @@ export class Scheduler extends LitElement {
     doc.addEventListener('pointermove', this.followPointer, true)
     doc.addEventListener('pointerup', this.releasePointer, true)
     doc.addEventListener('pointercancel', this.releasePointer, true)
+    // A native drag or text selection started under the pointer cancels it (WebKit drags selected text), ending the drag.
+    doc.addEventListener('dragstart', this.preventNative, true)
+    doc.addEventListener('selectstart', this.preventNative, true)
+    doc.getSelection()?.removeAllRanges()
   }
 
+  private readonly preventNative = (event: Event) => event.preventDefault()
   private readonly followPointer = (event: PointerEvent) => this.moveGesture(event)
   private readonly releasePointer = (event: PointerEvent) => this.endPointer(event, event.type === 'pointerup')
 
@@ -895,6 +900,8 @@ export class Scheduler extends LitElement {
     doc?.removeEventListener('pointermove', this.followPointer, true)
     doc?.removeEventListener('pointerup', this.releasePointer, true)
     doc?.removeEventListener('pointercancel', this.releasePointer, true)
+    doc?.removeEventListener('dragstart', this.preventNative, true)
+    doc?.removeEventListener('selectstart', this.preventNative, true)
   }
 
   /** Escape drops a drag in progress; the bar stays where it was. */
