@@ -57,6 +57,28 @@
         events='[{"title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"}]'
       ></c2-month-planner>
     </section>
+    <section>
+      <h3>Change calendar, as a grid and as an agenda</h3>
+      <c2-month-planner
+        month="2026-09"
+        events='[
+          {"title":"Change freeze","start":"2026-09-14","end":"2026-09-18","display":"background"},
+          {"title":"Maintenance window","start":"2026-09-26","display":"background","color":"rgba(180, 83, 9, 0.16)"},
+          {"title":"Conflict: deploy billing API","start":"2026-09-16","color":"#b91c1c"},
+          {"title":"Database upgrade","start":"2026-09-08","end":"2026-09-09"}
+        ]'
+      ></c2-month-planner>
+      <c2-month-planner
+        view="agenda"
+        month="2026-09"
+        style="--c2-month-planner__agenda--max-height: 320px; margin-top: 16px"
+        events='[
+          {"title":"Change freeze","start":"2026-09-14","end":"2026-09-18","display":"background"},
+          {"title":"Conflict: deploy billing API","start":"2026-09-16","color":"#b91c1c"},
+          {"title":"Database upgrade","start":"2026-09-08","end":"2026-09-09"}
+        ]'
+      ></c2-month-planner>
+    </section>
     <script type="module">
       const log = document.querySelector('#log')
       const plan = document.querySelector('#plan')

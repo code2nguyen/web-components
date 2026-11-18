@@ -91,7 +91,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **textarea-1** · `c2-textarea` · expression input #265 · +0.5 kB on 2.9 kB, 5 kB lazy · risk medium · needs the `triggers` API listed for `c2-textarea` and `c2-text-field` in the roadmap
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
-- **month-planner-1** · `c2-month-planner` · agenda view #298, change calendar #303 · +2.3 kB on 10.9 kB · risk low
 - **month-planner-2** · `c2-month-planner` · rate calendar #304 · +0.8 kB on 10.9 kB · risk medium
 - **scheduler-2** · `c2-scheduler` · availability grid #300 · +1 kB on 38.1 kB · risk low
 - **scheduler-3** · `c2-scheduler` · dispatch board #305 · +1.2 kB on 38.1 kB · risk medium

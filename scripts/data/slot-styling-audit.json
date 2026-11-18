@@ -3000,6 +3000,13 @@
     },
     {
       "tag": "c2-month-planner",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty-state region owns the agenda view's empty slot: its padding, border and alignment; the assigned message keeps its own styles."
+    },
+    {
+      "tag": "c2-month-planner",
       "slot": "heading",
       "decision": "part",
       "parts": ["heading"],

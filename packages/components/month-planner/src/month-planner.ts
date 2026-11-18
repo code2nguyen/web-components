@@ -12,6 +12,9 @@ import styles from './month-planner.scss?inline'
 
 export type MonthPlannerWeekStart = 'monday' | 'sunday' | 'saturday'
 
+/** How the planner lays the month out: the grid of weeks, or a list of the days that have events. */
+export type MonthPlannerView = 'month' | 'agenda'
+
 /** One entry in the plan: a single day, or a span from `start` to `end` (both inclusive, `YYYY-MM-DD`). */
 export interface MonthPlannerEvent {
   /** Identifies the event in `event-click`. */
@@ -20,14 +23,38 @@ export interface MonthPlannerEvent {
   start: string
   /** Last day of the event; omit for a one-day event. */
   end?: string
-  /** Bar colour, any CSS colour. Defaults to `--c2-month-planner__event--background`. */
+  /**
+   * Bar colour, any CSS colour. Defaults to `--c2-month-planner__event--background`. On a background event it is the
+   * shade itself, so give it a translucent colour; it defaults to `--c2-month-planner__band--color`.
+   */
   color?: string
   /**
    * Text colour on a bar with its own `color`. Defaults to white, which suits a mid-to-dark colour in both themes;
-   * set a dark one for a light `color`.
+   * set a dark one for a light `color`. On a background event it colours the band's title.
    */
   textColor?: string
+  /**
+   * `background` draws the event as a shaded band behind the days it covers, such as a change freeze or a maintenance
+   * window, instead of a bar: it takes no lane, cannot be clicked or dragged, and is listed first under its days.
+   */
+  display?: 'background'
 }
+
+/** What {@link MonthPlanner.renderAgendaEvent} is called with, once per event listed under a day. */
+export interface MonthPlannerAgendaEventContext {
+  /** The entry from `events`. */
+  event: MonthPlannerEvent
+  /** The day it is listed under, as `YYYY-MM-DD`. */
+  date: string
+  /** Its first and last day, as `YYYY-MM-DD` (`end` equals `start` for a one-day event). */
+  start: string
+  end: string
+  /** It is a background event (`display: 'background'`), drawn as a band on the grid. */
+  background: boolean
+}
+
+/** Draws the content of one listed event: anything Lit can render. */
+export type MonthPlannerAgendaEventRenderer = (context: MonthPlannerAgendaEventContext) => unknown
 
 export interface MonthPlannerEventClickDetail {
   event: MonthPlannerEvent
@@ -144,6 +171,15 @@ function dayDiff(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / 86_400_000)
 }
 
+function isBackground(event: MonthPlannerEvent): boolean {
+  return event?.display === 'background'
+}
+
+/** A day's list: background events first, then by first day, the longest first among those starting together. */
+function byDayOrder(a: DatedEvent, b: DatedEvent): number {
+  return Number(isBackground(b.event)) - Number(isBackground(a.event)) || a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime()
+}
+
 /**
  * A month planner that draws events as bars across the days they cover: a vacation from the 10th to the 15th reads as
  * one strip, continued on the next row when it crosses a week. Overlapping events stack in separate lanes. Pass the
@@ -167,6 +203,16 @@ function dayDiff(from: Date, to: Date): number {
  * week and Alt+Shift+Arrow Left/Right changes its end. The planner never changes `events` itself: update them in the
  * handler. A compact planner fires `day-click` on a tap as well.
  *
+ * `view="agenda"` lays the same month out as a list: each day that has events (and today) under its own heading, which
+ * stays at the top while its events scroll past once `--c2-month-planner__agenda--max-height` is set. The header pages
+ * between months as on the grid, and a month without events shows the `empty` slot. `renderAgendaEvent` replaces the
+ * content of each listed event, here and in the compact layout's list.
+ *
+ * An event with `display: 'background'` is drawn as a shaded band behind the days it covers instead of a bar: a change
+ * freeze, a maintenance window, a public holiday. Its title takes a row under the day numbers (overlapping bands one row
+ * each) and the bars keep their lanes below. It is read with the days it covers, listed first under them, and cannot
+ * be clicked or dragged.
+ *
  * Text follows `locale`, else the nearest `lang` attribute (redrawing when it changes), else the browser's language:
  * month and day names, "Today" and "this month" come from `Intl`, and the navigation labels from a built-in list
  * (English, French, German, Spanish, Italian, Portuguese, Dutch, Vietnamese; other languages fall back to English).
@@ -181,11 +227,17 @@ function dayDiff(from: Date, to: Date): number {
  *
  * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
  * @slot actions - Controls at the end of the header, before the month navigation, e.g. an "Add event" button.
+ * @slot empty - Shown by the agenda view in place of the list when the month has no events; defaults to "No events this month".
  *
  * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
  * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the month navigation; assigned controls keep their own styles.
  * @csspart event - Each event bar (one per week the event covers).
- * @csspart agenda-event - Each event in the compact layout's list of the selected day.
+ * @csspart band - Each background event's shaded band on the grid, behind the days it covers (one per week).
+ * @csspart band-label - Each background event's title row on the grid, under the day numbers and above the bars (one per week).
+ * @csspart agenda - The agenda view's list region: the days of the month that have events, scrolling under sticky day headings.
+ * @csspart agenda-day - Each day's heading in the agenda view, the region that sticks to the top of the list while its events scroll past.
+ * @csspart agenda-event - Each event listed under a day: in the agenda view, and in the compact layout's list of the selected day.
+ * @csspart empty - Empty-state region wrapping the `empty` slot, shown by the agenda view for a month without events.
  *
  * @cssproperty {color} [--c2-month-planner--background=#ffffff]
  * @cssproperty {color} [--c2-month-planner--color=#18181b]
@@ -253,6 +305,17 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {box-shadow} [--c2-month-planner__event__dragging--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)] - The bar being dragged or resized.
  * @cssproperty {pixel} [--c2-month-planner__handle--width=6px] - Width of the start and end edges that resize a bar, with `editable`.
  * @cssproperty {color} [--c2-month-planner__handle--color=#ffffff] - Grip shown on a resize edge under the pointer; a bar with its own `textColor` uses that instead.
+ * @cssproperty {color} [--c2-month-planner__band--color=color-mix(in srgb, currentColor 10%, transparent)] - Shade of a background event without a `color` of its own.
+ * @cssproperty {color} [--c2-month-planner__band-label--color=#52525b] - Title of a band, on its row under the day numbers.
+ * @cssproperty {font-size} [--c2-month-planner__band-label--font-size=11px]
+ * @cssproperty {pixel} [--c2-month-planner__band-label--height=18px] - Height of each band title row, added to a week with bands.
+ * @cssproperty {pixel} [--c2-month-planner__agenda--max-height=none] - Height past which the agenda view's list scrolls under its sticky day headings.
+ * @cssproperty {pixel} [--c2-month-planner__agenda--gap=12px] - Space between the agenda view's days.
+ * @cssproperty {color} [--c2-month-planner__agenda-day--background=#ffffff] - Behind a sticky day heading, so the events scroll under it.
+ * @cssproperty {color} [--c2-month-planner__agenda-day--color=#71717a]
+ * @cssproperty {font-size} [--c2-month-planner__agenda-day--font-size=12px]
+ * @cssproperty {font-weight} [--c2-month-planner__agenda-day--font-weight=600]
+ * @cssproperty {border} [--c2-month-planner__agenda-day--border=1px solid #e4e4e7] - Line under a day heading.
  */
 @customElement('c2-month-planner')
 export class MonthPlanner extends LitElement {
@@ -294,6 +357,18 @@ export class MonthPlanner extends LitElement {
    * or resizing an event bar (or Alt+Arrow keys on it) `event-change`. The planner never changes `events` itself.
    */
   @property({ type: Boolean }) editable = false
+  /**
+   * `month` draws the grid of weeks; `agenda` lists the month's days that have events, each under its own heading, from
+   * the same `events`. The header and its navigation work the same in both; editing applies to the grid only.
+   */
+  @property({ reflect: true }) view: MonthPlannerView = 'month'
+  /**
+   * Draws the content of each event listed under a day, in the agenda view and the compact layout's list; it receives
+   * `{ event, date, start, end, background }`. The planner keeps the item itself: a button named after the event's title
+   * and dates that fires `event-click` (a background event's item is not a button). Without it, a colour swatch, the
+   * title and the dates of a multi-day event are drawn.
+   */
+  @property({ attribute: false }) renderAgendaEvent?: MonthPlannerAgendaEventRenderer
   /** Accessible name for the planner; defaults to `heading`, else the month title. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
@@ -370,7 +445,8 @@ export class MonthPlanner extends LitElement {
     const months = new Set<string>()
     for (const event of Array.isArray(this.events) ? this.events : []) {
       const start = fromIso(event?.start)
-      if (!start) continue
+      // A background event shades days: like the day dots and "has events", the picker's marks are for events only.
+      if (!start || isBackground(event)) continue
       const end = fromIso(event.end) ?? start
       // A malformed multi-decade event should not stall rendering: stop after 100 years of months.
       for (let month = beginningOfMonth(start), count = 0; month <= end && count < 1200; month = beginningOfMonth(month, 1), count++) months.add(toMonth(month))
@@ -673,7 +749,7 @@ export class MonthPlanner extends LitElement {
   private segmentsOf(weekStart: Date): Segment[] {
     const weekEnd = addDays(weekStart, 6)
     const events = this.datedEvents
-      .filter((item) => item.start <= weekEnd && item.end >= weekStart)
+      .filter((item) => item.start <= weekEnd && item.end >= weekStart && !isBackground(item.event))
       .sort((a, b) => a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime())
 
     const laneEnds: number[] = []
@@ -684,6 +760,38 @@ export class MonthPlanner extends LitElement {
       if (lane === -1) lane = laneEnds.length
       laneEnds[lane] = last
       return { event, column, span: last - column + 1, lane, starts: start >= weekStart, ends: end <= weekEnd }
+    })
+  }
+
+  /** The background events that touch the week, each with the title row it takes under the day numbers. */
+  private bandsOf(weekStart: Date, dated: DatedEvent[]) {
+    const weekEnd = addDays(weekStart, 6)
+    const rowEnds: number[] = []
+    return dated
+      .filter((item) => isBackground(item.event) && item.start <= weekEnd && item.end >= weekStart)
+      .sort((a, b) => a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime())
+      .map((item) => {
+        const column = Math.max(0, dayDiff(weekStart, item.start))
+        const last = Math.min(6, dayDiff(weekStart, item.end))
+        let row = rowEnds.findIndex((end) => end < column)
+        if (row === -1) row = rowEnds.length
+        rowEnds[row] = last
+        return { item, column: `${column + 1} / span ${last - column + 1}`, row }
+      })
+  }
+
+  /**
+   * A shade behind the days each band covers, and its title on a row of its own between the day numbers and the bars.
+   * On the editable grid each day's button reads the band's title, so the title's own text is not read twice.
+   */
+  private renderBands(bands: ReturnType<MonthPlanner['bandsOf']>, dateLabel: Intl.DateTimeFormat) {
+    return bands.map(({ item, column, row }) => {
+      const colors = { '--event-color': item.event.color || null, '--event-text-color': item.event.textColor || null }
+      return html`<div class="band" part="band" style=${styleMap({ ...colors, gridColumn: column })}></div>
+        <span class="band-title" part="band-label" style=${styleMap({ ...colors, gridColumn: column, gridRow: String(row + 2) })}>
+          <span aria-hidden="true">${item.event.title}</span>
+          ${this.editable ? nothing : html`<span class="visually-hidden">${this.eventLabel(item, dateLabel)}</span>`}
+        </span>`
     })
   }
 
@@ -698,7 +806,11 @@ export class MonthPlanner extends LitElement {
     const events = Array.isArray(this.events) ? this.events : []
     const lanes = segments.reduce((count, segment) => Math.max(count, segment.lane + 1), 0)
     const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index))
-    return html`<div class="week" style=${styleMap({ '--lanes': String(lanes) })}>
+    const bands = this.bandsOf(weekStart, dated)
+    const bandRows = bands.reduce((count, band) => Math.max(count, band.row + 1), 0)
+    // Band titles take rows of their own under the day numbers, pushing the bars down; a week without bands is unchanged.
+    const rows = bandRows ? { '--band-rows': `repeat(${bandRows}, var(--band-row))`, '--lane-rows': lanes ? `repeat(${lanes}, var(--lane-row))` : null } : {}
+    return html`<div class="week ${bandRows ? 'has-bands' : ''}" style=${styleMap({ '--lanes': String(lanes), ...rows })}>
       ${days.map((date, index) => {
         const value = toIso(date)
         const outside = date.getMonth() !== this.visibleMonth.getMonth()
@@ -712,6 +824,7 @@ export class MonthPlanner extends LitElement {
           ${this.renderDaySelect(date, value, value === today, value === selected, dated, dateLabel)}
         </div>`
       })}
+      ${this.renderBands(bands, dateLabel)}
       ${segments.map((segment) => {
         const item = dated.find((entry) => entry.event === segment.event)!
         const dragging = this.preview?.event === segment.event
@@ -725,7 +838,7 @@ export class MonthPlanner extends LitElement {
           title=${segment.event.title}
           style=${styleMap({
             gridColumn: `${segment.column + 1} / span ${segment.span}`,
-            gridRow: String(segment.lane + 2),
+            gridRow: String(segment.lane + 2 + bandRows),
             '--event-color': segment.event.color || null,
             // A colour of the author's own keeps its text colour in every theme; only the default follows it.
             '--event-text-color': segment.event.color ? segment.event.textColor || '#ffffff' : null,
@@ -757,8 +870,11 @@ export class MonthPlanner extends LitElement {
 
   /** The compact layout's day: a date in a circle over one dot per event (three at most), picking the listed day. */
   private renderDaySelect(date: Date, value: string, today: boolean, selected: boolean, dated: DatedEvent[], dateLabel: Intl.DateTimeFormat) {
-    const onDay = dated.filter((item) => item.start <= date && item.end >= date)
-    const label = `${dateLabel.format(date)}${today ? `, ${this.relative('day')}` : ''}${onDay.length ? `, ${this.msg.t('hasEvents')}` : ''}`
+    const covering = dated.filter((item) => item.start <= date && item.end >= date)
+    const onDay = covering.filter((item) => !isBackground(item.event))
+    // A band has no box of its own on the compact grid or under the editable day's button: its title is read with the day.
+    const bands = covering.filter((item) => isBackground(item.event)).map((item) => `, ${item.event.title}`)
+    const label = `${dateLabel.format(date)}${today ? `, ${this.relative('day')}` : ''}${bands.join('')}${onDay.length ? `, ${this.msg.t('hasEvents')}` : ''}`
     return html`<button
       class="day-select"
       type="button"
@@ -783,35 +899,86 @@ export class MonthPlanner extends LitElement {
     const heading = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' }).format(day)
     const range = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' })
     const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
-    const onDay = this.datedEvents.filter((item) => item.start <= day && item.end >= day)
+    // Background events lead, as in the agenda view; the others keep their order in `events`.
+    const onDay = this.datedEvents
+      .filter((item) => item.start <= day && item.end >= day)
+      .sort((a, b) => Number(isBackground(b.event)) - Number(isBackground(a.event)))
     return html`<section class="agenda" aria-label=${heading}>
       <h3 class="agenda-heading">${heading}</h3>
-      ${
-        onDay.length
-          ? html`<ul class="agenda-list">
-              ${onDay.map(
-                (item) =>
-                  html`<li>
-                    <button
-                      class="agenda-event"
-                      type="button"
-                      part="agenda-event"
-                      aria-label=${this.eventLabel(item, dateLabel)}
-                      style=${styleMap({ '--event-color': item.event.color || null })}
-                      @click=${() => this.openEvent(item.event)}
-                    >
-                      <span class="swatch" aria-hidden="true"></span>
-                      <span class="agenda-text">
-                        <span class="agenda-name">${item.event.title}</span>
-                        ${item.end > item.start ? html`<span class="agenda-when">${range.format(item.start)} – ${range.format(item.end)}</span>` : nothing}
-                      </span>
-                    </button>
-                  </li>`,
-              )}
-            </ul>`
-          : html`<p class="agenda-empty">${this.msg.t('noEvents')}</p>`
-      }
+      ${this.renderAgendaList(onDay, day, range, dateLabel)}
     </section>`
+  }
+
+  /** The events listed under one day, or the day's "No events" line. */
+  private renderAgendaList(items: DatedEvent[], day: Date, range: Intl.DateTimeFormat, dateLabel: Intl.DateTimeFormat) {
+    if (!items.length) return html`<p class="agenda-empty">${this.msg.t('noEvents')}</p>`
+    return html`<ul class="agenda-list" role="list">
+      ${items.map((item) => html`<li>${this.renderAgendaItem(item, day, range, dateLabel)}</li>`)}
+    </ul>`
+  }
+
+  /** One listed event: a button firing `event-click`, or plain text for a background event; `renderAgendaEvent` fills it. */
+  private renderAgendaItem(item: DatedEvent, day: Date, range: Intl.DateTimeFormat, dateLabel: Intl.DateTimeFormat) {
+    const { event, start, end } = item
+    const background = isBackground(event)
+    const render = this.renderAgendaEvent
+    const content =
+      typeof render === 'function'
+        ? render({ event, date: toIso(day), start: toIso(start), end: toIso(end), background })
+        : html`<span class="swatch" aria-hidden="true"></span>
+            <span class="agenda-text">
+              <span class="agenda-name">${event.title}</span>
+              ${end > start ? html`<span class="agenda-when">${range.format(start)} – ${range.format(end)}</span>` : nothing}
+            </span>`
+    const style = styleMap({ '--event-color': event.color || null })
+    // Not a control, so no name of its own: it reads as the same title and dates a button would carry, whatever is drawn.
+    if (background) {
+      return html`<div class="agenda-event background" part="agenda-event" style=${style}>
+        <span class="visually-hidden">${this.eventLabel(item, dateLabel)}</span>
+        <span class="agenda-content" aria-hidden="true">${content}</span>
+      </div>`
+    }
+    return html`<button
+      class="agenda-event"
+      type="button"
+      part="agenda-event"
+      aria-label=${this.eventLabel(item, dateLabel)}
+      style=${style}
+      @click=${() => this.openEvent(event)}
+    >
+      ${content}
+    </button>`
+  }
+
+  /** `view="agenda"`: the month's days that have events (and today), each under a heading that sticks while it scrolls. */
+  private renderAgendaView(locale: string) {
+    const first = this.visibleMonth
+    const next = beginningOfMonth(first, 1)
+    const inMonth = this.datedEvents.filter((item) => item.start < next && item.end >= first)
+    if (!inMonth.length) {
+      return html`<div class="empty" part="empty"><slot name="empty">${this.msg.t('noEventsThisMonth')}</slot></div>`
+    }
+    const heading = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' })
+    const range = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' })
+    const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
+    const today = toIso(new Date())
+    const days = []
+    for (let day = first; day < next; day = addDays(day, 1)) {
+      const value = toIso(day)
+      const items = inMonth.filter((item) => item.start <= day && item.end >= day).sort(byDayOrder)
+      if (!items.length && value !== today) continue
+      days.push(
+        html`<li class="agenda-day ${value === today ? 'today' : ''}" data-date=${value}>
+          <h3 class="agenda-day-heading" part="agenda-day" aria-current=${value === today ? 'date' : nothing}>
+            ${heading.format(day)} ${value === today ? html`<span class="agenda-today">${this.todayLabel()}</span>` : nothing}
+          </h3>
+          ${this.renderAgendaList(items, day, range, dateLabel)}
+        </li>`,
+      )
+    }
+    return html`<ol class="agenda-view" part="agenda" role="list" aria-label=${this.msg.t('eventsByDay')}>
+      ${days}
+    </ol>`
   }
 
   override render() {
@@ -871,9 +1038,15 @@ export class MonthPlanner extends LitElement {
         </div>
         ${this.monthPicker && this.pickerOpen ? this.renderPicker(locale) : nothing}
       </header>
-      <div class="weekdays" aria-hidden="true">${Array.from({ length: 7 }, (_, index) => html`<span>${weekdays.format(addDays(first, index))}</span>`)}</div>
-      <div class="weeks">${Array.from({ length: weeks }, (_, week) => this.renderWeek(addDays(first, week * 7), today, selected, dateLabel))}</div>
-      ${this.renderAgenda(selected, locale)}
+      ${
+        this.view === 'agenda'
+          ? this.renderAgendaView(locale)
+          : html`<div class="weekdays" aria-hidden="true">
+                ${Array.from({ length: 7 }, (_, index) => html`<span>${weekdays.format(addDays(first, index))}</span>`)}
+              </div>
+              <div class="weeks">${Array.from({ length: weeks }, (_, week) => this.renderWeek(addDays(first, week * 7), today, selected, dateLabel))}</div>
+              ${this.renderAgenda(selected, locale)}`
+      }
     </section>`
   }
 }
