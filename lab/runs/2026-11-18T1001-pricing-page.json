@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "id": "2026-11-18T1001-pricing-page",
+  "startedAt": "2026-11-18T10:01:56.871Z",
+  "durationSeconds": 28,
+  "mode": "run",
+  "target": "pricing-page",
+  "spec": "pricing-page",
+  "direction": "default",
+  "library": {
+    "version": "1.0.28",
+    "commit": "9fe790d01899a134f02c87de0658b58387358d5e",
+    "branch": "lab/2026-11-18",
+    "dirty": true
+  },
+  "runner": {
+    "personas": [
+      "mouse",
+      "keyboard",
+      "mobile",
+      "dark",
+      "fr"
+    ],
+    "repeat": 2,
+    "journeys": [
+      "t1-yearly",
+      "t2-faq",
+      "t3-phone"
+    ],
+    "axe": true,
+    "full": true
+  },
+  "build": {
+    "report": "lab/reports/pricing-page/default.md",
+    "builder": "agent (Claude Code, c2n MCP server)",
+    "date": "2026-11-18",
+    "outcomes": {
+      "R1": {
+        "outcome": "met",
+        "components": [
+          "c2-button-group",
+          "c2-button",
+          "c2-badge"
+        ]
+      },
+      "R2": {
+        "outcome": "workaround",
+        "components": [
+          "c2-format-number"
+        ]
+      },
+      "R3": {
+        "outcome": "met",
+        "components": [
+          "c2-details"
+        ]
+      },
+      "R4": {
+        "outcome": "met",
+        "components": [
+          "c2-table",
+          "c2-card"
+        ]
+      },
+      "R5": {
+        "outcome": "met",
+        "components": [
+          "c2-card",
+          "c2-button"
+        ]
+      },
+      "R6": {
+        "outcome": "met",
+        "components": [
+          "c2-table",
+          "c2-details",
+          "c2-button-group"
+        ]
+      },
+      "R7": {
+        "outcome": "workaround",
+        "components": [
+          "c2-table",
+          "c2-table-column"
+        ]
+      }
+    }
+  },
+  "summary": {
+    "journeys": 10,
+    "passed": 10,
+    "flakyJourneys": 0,
+    "failed": 0,
+    "findings": {
+      "new": 0,
+      "known": 2,
+      "flaky": 0
+    }
+  },
+  "journeys": [
+    {
+      "persona": "mouse",
+      "journey": "t1-yearly",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t2-faq",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t1-yearly",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t2-faq",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t2-faq",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t3-phone",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t1-yearly",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t2-faq",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t1-yearly",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t2-faq",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    }
+  ],
+  "findings": [
+    {
+      "key": "pricing-page/keyboard-unreachable/c2-button/click {\"ax\":\"button\",\"name\":\"Monthly\",\"exact\":true}",
+      "kind": "keyboard-unreachable",
+      "severity": "error",
+      "component": "c2-button",
+      "rule": "click {\"ax\":\"button\",\"name\":\"Monthly\",\"exact\":true}",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "keyboard/t1-yearly": 2
+      },
+      "message": "Neither Tab (80 presses) nor the arrow keys reached \"\" in c2-button."
+    },
+    {
+      "key": "pricing-page/keyboard-unreachable/c2-button/click {\"ax\":\"button\",\"name\":\"Yearly\",\"exact\":true}",
+      "kind": "keyboard-unreachable",
+      "severity": "error",
+      "component": "c2-button",
+      "rule": "click {\"ax\":\"button\",\"name\":\"Yearly\",\"exact\":true}",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "keyboard/t1-yearly": 2
+      },
+      "message": "Neither Tab (80 presses) nor the arrow keys reached \"\" in c2-button."
+    }
+  ],
+  "change": null
+}

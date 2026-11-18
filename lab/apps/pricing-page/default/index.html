@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pricing · pricing-page lab build</title>
+    <script>
+      ;(function () {
+        try {
+          var theme = new URLSearchParams(location.search).get('theme')
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme
+        } catch (e) {
+          /* the prefers-color-scheme fallback still applies */
+        }
+      })()
+    </script>
+    <script type="module" src="./main.js"></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>Simple pricing for growing teams</h1>
+        <p class="hero__lead">One plan per stage of your team. Change or cancel any time.</p>
+      </header>
+
+      <div class="billing">
+        <c2-button-group id="billing" appearance="segmented" selection="single" value="monthly" aria-label="Billing period">
+          <c2-button value="monthly">Monthly</c2-button>
+          <c2-button value="yearly">Yearly</c2-button>
+        </c2-button-group>
+        <c2-badge tone="success">Save 20%</c2-badge>
+      </div>
+
+      <section class="plans" aria-label="Plans" id="plans"></section>
+
+      <section class="compare" aria-labelledby="compare-title">
+        <h2 id="compare-title">Compare plans</h2>
+        <c2-table id="comparison" class="compare__table" row-key="id" virtual="never" aria-labelledby="compare-title">
+          <c2-table-column field="feature" header="Feature" width="180px" pinned="start"></c2-table-column>
+          <c2-table-column field="starter" header="Starter" width="160px" align="center"></c2-table-column>
+          <c2-table-column field="team" header="Team" width="160px" align="center"></c2-table-column>
+          <c2-table-column field="business" header="Business" width="160px" align="center"></c2-table-column>
+        </c2-table>
+      </section>
+
+      <section class="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Frequently asked questions</h2>
+        <c2-details name="faq" label="Can I change plans later?">
+          <p>Yes, you can move up or down a plan from the billing settings at any moment. We prorate the difference on your next invoice.</p>
+        </c2-details>
+        <c2-details name="faq" label="What counts as a user?">
+          <p>A user is anyone with a seat who can edit projects in your workspace. Guests who only comment are free and do not take a seat.</p>
+        </c2-details>
+        <c2-details name="faq" label="Do you offer discounts for non-profits?">
+          <p>Registered non-profits and schools get half off any plan. Write to our sales team with proof of status to claim it.</p>
+        </c2-details>
+        <c2-details name="faq" label="How does the free trial work?">
+          <p>Every plan starts with fourteen days free, no card needed. At the end you pick a plan or your workspace becomes read-only.</p>
+        </c2-details>
+        <c2-details name="faq" label="Where is my data stored?">
+          <p>Your workspace lives in Frankfurt datacenters by default, encrypted at rest. Business customers can choose a Virginia region instead.</p>
+        </c2-details>
+      </section>
+
+      <section class="cta" aria-labelledby="cta-title">
+        <h2 id="cta-title">Still deciding? Talk to sales</h2>
+        <c2-button id="talk-to-sales">Talk to sales</c2-button>
+      </section>
+    </main>
+  </body>
+</html>

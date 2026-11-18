@@ -1,0 +1,133 @@
+body {
+  margin: 0;
+  background: var(--c2-theme--color-surface);
+  color: var(--c2-theme--color-on-surface);
+  font-family: system-ui, sans-serif;
+}
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 16px 64px;
+}
+
+.hero {
+  text-align: center;
+}
+.hero h1 {
+  margin: 0 0 8px;
+  font-size: 2.25rem;
+}
+.hero__lead {
+  margin: 0;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+
+.billing {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.plan--popular {
+  --c2-card--border-top: 2px solid var(--c2-theme--color-primary);
+  --c2-card--border-right: 2px solid var(--c2-theme--color-primary);
+  --c2-card--border-bottom: 2px solid var(--c2-theme--color-primary);
+  --c2-card--border-left: 2px solid var(--c2-theme--color-primary);
+}
+.plan__head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan__head h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+.plan__pitch,
+.plan__note {
+  margin: 0;
+  color: var(--c2-theme--color-on-surface-variant);
+}
+.plan__price {
+  margin: 16px 0 4px;
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+.plan__features {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  gap: 8px;
+}
+.plan__features li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plan__check {
+  --c2-feather-icon--size: 16px;
+  --c2-feather-icon--color: var(--c2-theme--color-primary);
+}
+.plan__cta {
+  flex: 1;
+}
+.plan__cta:not(.plan__cta--primary) {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-primary);
+  --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #d4d4d8);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-primary-container, #edf1fe);
+  --c2-button__container__hover--color: var(--c2-theme--color-primary);
+}
+
+.compare,
+.faq,
+.cta {
+  margin-top: 56px;
+}
+.compare__table {
+  width: 100%;
+}
+/* A positioned ancestor inside the cell, so the visually hidden text stays inside the table's clip. */
+c2-table::part(mark) {
+  position: relative;
+  display: inline-flex;
+}
+c2-table::part(sr-only) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.faq c2-details + c2-details {
+  margin-top: 8px;
+}
+
+.cta {
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+@media (max-width: 720px) {
+  .plans {
+    grid-template-columns: 1fr;
+  }
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+}

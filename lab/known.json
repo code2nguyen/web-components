@@ -1,9 +1,7 @@
 {
-  "support-inbox-vue/a11y-tree/c2-avatar/hidden-disabled-button": "c2-avatar renders its file input when not editable; COMPONENT-FEEDBACK.md (c2-avatar, bug).",
+  "pricing-page/keyboard-unreachable/c2-button/click {\"ax\":\"button\",\"name\":\"Monthly\",\"exact\":true}": "c2-button-group single selection is a roving Tab stop exposed as group/button, so Yearly is reachable by arrows only and nothing says so; COMPONENT-FEEDBACK.md (c2-button-group, gap).",
+  "pricing-page/keyboard-unreachable/c2-button/click {\"ax\":\"button\",\"name\":\"Yearly\",\"exact\":true}": "c2-button-group single selection is a roving Tab stop exposed as group/button, so Yearly is reachable by arrows only and nothing says so; COMPONENT-FEEDBACK.md (c2-button-group, gap).",
   "support-inbox-vue/axe/-/color-contrast": "App: the agent bubble is blue but the c2-chat-message title keeps the dark text colour (3.28:1). The app should set the title colour with the bubble.",
   "support-inbox-vue/axe/-/scrollable-region-focusable": "App: on a phone the .thread__messages list scrolls but is not focusable, so keyboard users cannot scroll it.",
-  "support-inbox-vue/axe/c2-format-date/color-contrast": "@c2n/theme on-surface-variant on surface-variant (4.39:1), plus the app's blue agent bubble; COMPONENT-FEEDBACK.md (@c2n/theme).",
-  "support-inbox-vue/axe/c2-highlight/color-contrast": "@c2n/theme on-surface-variant on the selected-row tint (4.28:1); COMPONENT-FEEDBACK.md (@c2n/theme).",
-  "support-inbox-vue/axe/c2-relative-time/color-contrast": "@c2n/theme on-surface-variant on the selected-row tint (4.28:1); COMPONENT-FEEDBACK.md (@c2n/theme).",
-  "support-inbox-vue/console-warning/c2-toast-region/Element c2-toast-region scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inef": "c2-toast-region requests an update from updated(); COMPONENT-FEEDBACK.md (c2-toast, papercut)."
+  "support-inbox-vue/axe/c2-format-date/color-contrast": "@c2n/theme on-surface-variant on surface-variant (4.39:1), plus the app's blue agent bubble; COMPONENT-FEEDBACK.md (@c2n/theme)."
 }
