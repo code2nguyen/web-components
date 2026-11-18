@@ -1,11 +1,36 @@
 ---
-/** Enhances scheduler examples whose property-only API (`renderSummary`) cannot be expressed as an HTML attribute. */
+/** Enhances scheduler examples whose property-only APIs (`renderSummary`, `renderProposal`, `findFreeTime`) cannot be expressed as HTML attributes. */
 ---
 
 <script>
   import { html } from 'lit'
   import type { Scheduler } from '@c2n/components/scheduler'
   import '@c2n/components/scheduler'
+  import '@c2n/components/button'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French an app would add for the gallery's French card: the library ships English only.
+  addTranslations({
+    fr: {
+      scheduler: {
+        schedule: 'Planning',
+        resources: 'Ressources',
+        range: '{0} à {1}',
+        event: '{0}, {1}, {2}',
+        readonly: 'non modifiable',
+        pending: 'en attente',
+        slot: '{0}, {1}',
+        slotBookings: '{0}, occupé : {1}',
+        slotBands: '{0}, {1}',
+        now: 'Maintenant',
+        proposal: 'Créneau proposé',
+        proposalName: '{0}, {1}, {2}',
+        allFree: 'tout le monde est libre',
+        busy: 'occupé : {0}',
+        tentative: 'à confirmer : {0}',
+      },
+    },
+  })
 
   const initialized = new WeakSet<Scheduler>()
 
@@ -20,11 +45,62 @@
     }
   }
 
+  /** Plays the app: the scheduler reports where the proposal was moved, and the page moves it there. */
+  function applyProposal(scheduler: Scheduler) {
+    const output = scheduler.parentElement?.querySelector('output')
+    const names = (ids: string[]) => ids.map((id) => scheduler.resources.find((resource) => resource.id === id)?.label ?? id).join(', ')
+    scheduler.addEventListener('proposal-change', ({ detail }) => {
+      scheduler.proposal = { ...scheduler.proposal, start: detail.start, end: detail.end }
+      if (!output) return
+      const busy = detail.busy.length ? `Busy: ${names(detail.busy)}. ` : ''
+      const tentative = detail.tentative.length ? `Tentative: ${names(detail.tentative)}.` : ''
+      output.textContent = busy || tentative ? `${busy}${tentative}` : 'Everyone is free.'
+    })
+  }
+
+  /** "Next free time": the first time after the proposal when no attendee is booked, wrapping to the start of the day. */
+  function setupFindATime(scheduler: Scheduler) {
+    const button = scheduler.parentElement?.querySelector('c2-button[data-find-free]')
+    const output = scheduler.parentElement?.querySelector('output')
+    button?.addEventListener('click', () => {
+      const proposal = scheduler.proposal
+      if (!proposal) return
+      const minutes = (Date.parse(`${proposal.end}Z`) - Date.parse(`${proposal.start}Z`)) / 60_000
+      const slot = scheduler.findFreeTime(minutes, proposal.end) ?? scheduler.findFreeTime(minutes)
+      if (!slot) {
+        if (output) output.textContent = 'No time when everyone is free today.'
+        return
+      }
+      scheduler.proposal = { ...proposal, ...slot }
+      if (output) output.textContent = `Everyone is free ${slot.start.slice(11)}–${slot.end.slice(11)}.`
+    })
+  }
+
+  /** How many attendees are free in each hour, and in the proposal. */
+  function setupFreeCount(scheduler: Scheduler) {
+    const free = (busy: number, total: number) => `${total - busy}/${total}`
+    scheduler.renderSummary = ({ events, resources }) => {
+      const busy = new Set(events.filter((event) => !event.pending).map((event) => event.resource)).size
+      return html`<span part=${busy ? 'free' : 'free all'}>${free(busy, resources.length)}</span>`
+    }
+    scheduler.renderProposal = ({ title, busy, resources }) => html`${title} <span part="count">${free(busy.length, resources.length)} free</span>`
+  }
+
+  async function setupOne(scheduler: Scheduler) {
+    await customElements.whenDefined('c2-scheduler')
+    await scheduler.updateComplete
+    const example = scheduler.dataset.schedulerExample
+    if (example === 'absence') setupAbsence(scheduler)
+    if (scheduler.hasAttribute('proposal')) applyProposal(scheduler)
+    if (example === 'find-a-time') setupFindATime(scheduler)
+    if (example === 'free-count') setupFreeCount(scheduler)
+  }
+
   function setup() {
     document.querySelectorAll<Scheduler>('c2-scheduler[data-scheduler-example]').forEach((scheduler) => {
       if (initialized.has(scheduler)) return
       initialized.add(scheduler)
-      if (scheduler.dataset.schedulerExample === 'absence') setupAbsence(scheduler)
+      void setupOne(scheduler)
     })
   }
 

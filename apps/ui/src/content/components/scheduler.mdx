@@ -88,6 +88,23 @@ import '@c2n/components/scheduler'
     <output class="scheduler-result">Drag across empty time, drag a booking, or drag one of its edges.</output>
   </div>
 </div>
+<div data-label="Find a time">
+  <div class="scheduler-demo">
+    <c2-scheduler
+      data-planner-demo="editable"
+      date="2026-11-09"
+      day-start="08:00"
+      day-end="15:00"
+      locale="en-GB"
+      hide-header
+      resource-heading="Attendees"
+      proposal='{"start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Design review"}'
+      resources='[{"id":"ana","label":"Ana Ruiz","color":"#7c3aed"},{"id":"ben","label":"Ben Carter","color":"#0891b2"},{"id":"chloe","label":"Chloé Martin","color":"#db2777"}]'
+      events='[{"id":"1","resource":"ana","start":"2026-11-09T09:00","end":"2026-11-09T10:30","title":"Kick-off","readonly":true},{"id":"2","resource":"ben","start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Interview","pending":true,"readonly":true},{"id":"3","resource":"chloe","start":"2026-11-09T11:00","end":"2026-11-09T12:30","title":"Customer call","readonly":true},{"id":"4","resource":"ben","start":"2026-11-09T13:00","end":"2026-11-09T14:00","title":"Focus time","readonly":true}]'
+    ></c2-scheduler>
+    <output class="scheduler-result">Drag the proposed time, or focus it and use the arrow keys, to a time when everyone is free.</output>
+  </div>
+</div>
 ```
 
 ## Resources and events
@@ -144,6 +161,42 @@ scheduler.addEventListener('event-change', ({ detail }) => {
 })
 scheduler.addEventListener('range-select', ({ detail }) => {
   scheduler.events = [...scheduler.events, { id: crypto.randomUUID(), title: 'New booking', ...detail }]
+})
+```
+
+## Finding a time
+
+For a meeting finder, the attendees are the resources and their bookings are `readonly` events; a `pending` booking
+reads as tentative. `proposal` (`{ start, end, title? }`, JSON as an attribute) is the meeting being planned, drawn as a
+block in the header and a column across every row. On each row the column is red where that attendee has a booking,
+amber where they have only pending ones and green where they are free, and the block takes the worst of them. Its name
+says who cannot come: "Design review, Monday 9 November, 10:00 to 11:00, busy: Ana Ruiz, tentative: Ben Carter".
+
+- **Move it.** Drag the block or its column on any row; drag an edge of the block to change its length. On the
+  keyboard, focus the block: Left and Right move it by `snap-minutes`, Shift+Left and Shift+Right change its end, and
+  each move is announced. While it is dragged the proposal is drawn uncoloured: who is busy is checked once, on drop.
+- **Apply it.** Each move fires `proposal-change` with `{ start, end, busy, tentative }`, the `id`s of the resources
+  booked then. As with `events`, the scheduler does not move the proposal itself; set `proposal` from the event.
+- **Find the next free time.** `findFreeTime(minutes, after?)` returns the first `{ start, end }` in the range shown
+  when no resource has a booking (pending ones included), within `working-hours`, off the weekend and on the
+  `snap-minutes` grid, or `null`. Put it in your own toolbar as a "Next free time" button.
+- **Draw it.** `renderProposal` replaces the block's content and is called with
+  `{ start, end, title, busy, tentative, resources }` ("Design review · 3/4 free"); `renderSummary` can count the free
+  attendees per column under the grid.
+- **Time zones.** Times are wall-clock in the scheduler's `time-zone`. Shade each attendee's evening and night with
+  `bands` that name a `resource`; bands are drawn but not checked, so add a `readonly` event where an attendee must not
+  be booked.
+- **Colours.** `--c2-scheduler__proposal--color`, `--c2-scheduler__proposal__tentative--color` and
+  `--c2-scheduler__proposal__busy--color` set the three states; the `proposal` and `proposal-column` parts style the
+  block and the column.
+
+```typescript tag=CodeBlock
+scheduler.addEventListener('proposal-change', ({ detail }) => {
+  scheduler.proposal = { ...scheduler.proposal, start: detail.start, end: detail.end }
+})
+nextFreeButton.addEventListener('click', () => {
+  const slot = scheduler.findFreeTime(60, scheduler.proposal?.end)
+  if (slot) scheduler.proposal = { ...scheduler.proposal, ...slot }
 })
 ```
 

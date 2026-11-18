@@ -143,6 +143,146 @@ below cover.
 
 </GalleryGrid>
 
+## Find a time
+
+The attendees are the resources and their bookings read-only events (`pending` ones are tentative). `proposal` draws
+the meeting being planned as a block in the header and a column on every row: red where an attendee is busy, amber
+where they are only tentative, green where they are free. Drag the block or its column, or focus the block and use
+the arrow keys; `proposal-change` reports who is busy at the new time, checked on drop, and the page moves the
+proposal there. Across time zones, per-resource `bands` shade each attendee's evening and night in the scheduler's
+own zone; they are drawn, not checked.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Meeting finder
+<style>
+  .meeting-finder {
+    display: grid;
+    gap: 8px;
+  }
+  .meeting-finder-scheduler {
+    --c2-scheduler__slot--width: 64px;
+    --c2-scheduler__resource--width: 150px;
+  }
+  .meeting-finder-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div class="meeting-finder">
+  <c2-scheduler
+    class="meeting-finder-scheduler"
+    data-scheduler-example="find-a-time"
+    date="2026-11-09"
+    day-start="08:00"
+    day-end="18:00"
+    locale="en-GB"
+    hide-header
+    resource-heading="Attendees"
+    proposal='{"start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Design review"}'
+    resources='[{"id":"ana","label":"Ana Ruiz","description":"Organiser","color":"#7c3aed"},{"id":"ben","label":"Ben Carter","description":"Engineering","color":"#0891b2"},{"id":"chloe","label":"Chloé Martin","description":"Support","color":"#db2777"},{"id":"dev","label":"Dev Patel","description":"Sales","color":"#ea580c"}]'
+    events='[{"id":"1","resource":"ana","start":"2026-11-09T09:00","end":"2026-11-09T10:30","title":"Kick-off","readonly":true},{"id":"2","resource":"ana","start":"2026-11-09T14:00","end":"2026-11-09T15:00","title":"1:1","readonly":true},{"id":"3","resource":"ben","start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Interview","pending":true,"readonly":true},{"id":"4","resource":"ben","start":"2026-11-09T13:00","end":"2026-11-09T14:30","title":"Focus time","readonly":true},{"id":"5","resource":"chloe","start":"2026-11-09T11:00","end":"2026-11-09T12:00","title":"Customer call","readonly":true},{"id":"6","resource":"dev","start":"2026-11-09T08:00","end":"2026-11-09T09:30","title":"Gym","readonly":true},{"id":"7","resource":"dev","start":"2026-11-09T15:30","end":"2026-11-09T17:00","title":"Demo","readonly":true}]'
+  ></c2-scheduler>
+  <div class="meeting-finder-actions">
+    <c2-button data-find-free>Next free time</c2-button>
+    <output>Busy: Ana Ruiz. Tentative: Ben Carter.</output>
+  </div>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Across time zones
+<style>
+  .time-zones {
+    --c2-scheduler__slot--width: 56px;
+    --c2-scheduler__resource--width: 160px;
+    --c2-scheduler__band--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, transparent);
+    --c2-scheduler__proposal--color: #0d9488;
+    --c2-scheduler__proposal__tentative--color: #ca8a04;
+    --c2-scheduler__proposal__busy--color: #be123c;
+    --c2-scheduler__event--color: #64748b;
+  }
+</style>
+<c2-scheduler
+  class="time-zones"
+  data-scheduler-example="time-zones"
+  date="2026-11-09"
+  day-start="07:00"
+  day-end="20:00"
+  working-hours=""
+  time-zone="Europe/Paris"
+  locale="en-GB"
+  hide-header
+  resource-heading="Paris time"
+  proposal='{"start":"2026-11-09T16:00","end":"2026-11-09T17:00","title":"Quarterly plan"}'
+  resources='[{"id":"lea","label":"Léa Moreau","description":"Paris · UTC+1"},{"id":"tom","label":"Tom Hughes","description":"London · UTC+0"},{"id":"maya","label":"Maya Singh","description":"New York · UTC−5"}]'
+  events='[{"id":"1","resource":"lea","start":"2026-11-09T15:00","end":"2026-11-09T16:00","title":"Review","readonly":true},{"id":"2","resource":"tom","start":"2026-11-09T16:30","end":"2026-11-09T17:30","title":"Hiring panel","pending":true,"readonly":true},{"id":"3","resource":"maya","start":"2026-11-09T15:00","end":"2026-11-09T15:30","title":"Stand-up","readonly":true}]'
+  bands='[{"start":"2026-11-09T07:00","end":"2026-11-09T09:00","resource":"lea","label":"Before 09:00 in Paris"},{"start":"2026-11-09T18:00","end":"2026-11-09T20:00","resource":"lea","label":"After 18:00 in Paris"},{"start":"2026-11-09T07:00","end":"2026-11-09T10:00","resource":"tom","label":"Before 09:00 in London"},{"start":"2026-11-09T19:00","end":"2026-11-09T20:00","resource":"tom","label":"After 18:00 in London"},{"start":"2026-11-09T07:00","end":"2026-11-09T15:00","resource":"maya","label":"Before 09:00 in New York"}]'
+></c2-scheduler>
+```
+
+```html tag=MdxCodeBlock,label=Free count
+<style>
+  .free-count {
+    --c2-scheduler__slot--width: 64px;
+    --c2-scheduler__resource--width: 150px;
+  }
+  .free-count::part(free) {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+  .free-count::part(all) {
+    color: light-dark(#15803d, #4ade80);
+    font-weight: 600;
+  }
+  .free-count::part(count) {
+    font-weight: 400;
+  }
+</style>
+<c2-scheduler
+  class="free-count"
+  data-scheduler-example="free-count"
+  date="2026-11-09"
+  day-start="08:00"
+  day-end="18:00"
+  locale="en-GB"
+  hide-header
+  resource-heading="Attendees"
+  summary-heading="Free"
+  proposal='{"start":"2026-11-09T12:00","end":"2026-11-09T13:00","title":"Lunch and learn"}'
+  resources='[{"id":"ana","label":"Ana Ruiz","description":"Organiser","color":"#7c3aed"},{"id":"ben","label":"Ben Carter","description":"Engineering","color":"#0891b2"},{"id":"chloe","label":"Chloé Martin","description":"Support","color":"#db2777"},{"id":"dev","label":"Dev Patel","description":"Sales","color":"#ea580c"}]'
+  events='[{"id":"1","resource":"ana","start":"2026-11-09T09:00","end":"2026-11-09T10:30","title":"Kick-off","readonly":true},{"id":"2","resource":"ana","start":"2026-11-09T14:00","end":"2026-11-09T15:00","title":"1:1","readonly":true},{"id":"3","resource":"ben","start":"2026-11-09T10:00","end":"2026-11-09T11:00","title":"Interview","pending":true,"readonly":true},{"id":"4","resource":"ben","start":"2026-11-09T13:00","end":"2026-11-09T14:30","title":"Focus time","readonly":true},{"id":"5","resource":"chloe","start":"2026-11-09T11:00","end":"2026-11-09T12:00","title":"Customer call","readonly":true},{"id":"6","resource":"dev","start":"2026-11-09T08:00","end":"2026-11-09T09:30","title":"Gym","readonly":true},{"id":"7","resource":"dev","start":"2026-11-09T15:30","end":"2026-11-09T17:00","title":"Demo","readonly":true}]'
+></c2-scheduler>
+```
+
+```html tag=MdxCodeBlock,label=Français
+<style>
+  .creneau {
+    --c2-scheduler__slot--width: 64px;
+    --c2-scheduler__resource--width: 140px;
+  }
+</style>
+<div lang="fr">
+  <c2-scheduler
+    class="creneau"
+    data-scheduler-example="fr"
+    date="2026-11-09"
+    day-start="08:00"
+    day-end="16:00"
+    locale="fr"
+    hide-header
+    resource-heading="Participants"
+    proposal='{"start":"2026-11-09T11:00","end":"2026-11-09T12:00"}'
+    resources='[{"id":"lea","label":"Léa Moreau"},{"id":"hugo","label":"Hugo Bernard"},{"id":"ines","label":"Inès Petit"}]'
+    events='[{"id":"1","resource":"lea","start":"2026-11-09T09:00","end":"2026-11-09T10:00","title":"Point équipe","readonly":true},{"id":"2","resource":"hugo","start":"2026-11-09T10:30","end":"2026-11-09T12:00","title":"Atelier","readonly":true},{"id":"3","resource":"ines","start":"2026-11-09T11:00","end":"2026-11-09T12:00","title":"Rendez-vous","pending":true,"readonly":true}]'
+  ></c2-scheduler>
+</div>
+```
+
+</GalleryGrid>
+
 <SchedulerExamplesRuntime />
 
 ```ts tag=CodeBlock
@@ -156,5 +296,27 @@ scheduler.renderSummary = ({ events, resources }) => {
   if (!out) return ''
   const short = resources.length - out < 4
   return html`<span part=${short ? 'out short' : 'out'}>${out}</span>`
+}
+```
+
+```ts tag=CodeBlock
+// Find a time: the page owns the proposal and moves it where the user dropped it.
+scheduler.proposal = { start: '2026-11-09T10:00', end: '2026-11-09T11:00', title: 'Design review' }
+scheduler.addEventListener('proposal-change', ({ detail }) => {
+  scheduler.proposal = { ...scheduler.proposal, start: detail.start, end: detail.end }
+  console.log('busy', detail.busy, 'tentative', detail.tentative)
+})
+
+// "Next free time": the first hour after the proposal when no attendee has a booking.
+nextFree.addEventListener('click', () => {
+  const slot = scheduler.findFreeTime(60, scheduler.proposal!.end)
+  if (slot) scheduler.proposal = { ...scheduler.proposal, ...slot }
+})
+
+// How many are free, in the block and in a row under the grid.
+scheduler.renderProposal = ({ title, busy, resources }) => html`${title} <span part="count">${resources.length - busy.length}/${resources.length} free</span>`
+scheduler.renderSummary = ({ events, resources }) => {
+  const busy = new Set(events.filter((event) => !event.pending).map((event) => event.resource)).size
+  return html`<span part="free">${resources.length - busy}/${resources.length}</span>`
 }
 ```

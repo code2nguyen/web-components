@@ -602,6 +602,8 @@
   bottom: 0;
   border-inline: 2px solid var(--_color);
   background: color-mix(in srgb, var(--_color) 14%, transparent);
+  // A sideways drag moves the proposal; the grid still scrolls up and down under a finger.
+  touch-action: pan-y;
 }
 
 .proposal {
