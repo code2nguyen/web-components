@@ -12,7 +12,7 @@ import '@c2n/badge'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { weekPlannerMessages } from './messages'
 import styles from './week-planner.scss?inline'
-import { DAYS, cellStart, clamp, columnAt, formatMinutes, minutesOf, rangeOf, scheduleOf, valueAt, type Paint, type Span } from './week-time.js'
+import { DAYS, cellEnd, cellStart, clamp, columnAt, formatMinutes, minutesOf, rangeOf, scheduleOf, valueAt, type Paint, type Span } from './week-time.js'
 import type { PaintCell, Painter } from './paint.js'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -945,7 +945,7 @@ export class WeekPlanner extends LitElement {
   private renderCursor(spans: Paint, nameOf: (column: DayColumn) => string, firstHour: number) {
     const cell = this.cursorCell
     const { column, from } = cell
-    const to = Math.min(1440, from + this.snap)
+    const to = cellEnd(from, this.snap)
     const value = valueAt(spans[this.layout.columns[column].weekday], from)
     const state = value === undefined ? this.msg.t('empty') : value || this.msg.t('available')
     return html`<button
@@ -1089,7 +1089,7 @@ export class WeekPlanner extends LitElement {
                   ${Array.from({ length: hours }, () => html`<div class="hour-line"></div>`)}
                   ${editable ? this.renderAdd(column, dayName, placed, firstHour, firstHour + hours) : nothing}
                   ${spans[column.weekday].map((span) => this.drawRange(span, column.weekday, dayName, block(span.from, span.to)))}
-                  ${hover?.column === index ? html`<div class="slot-hover" aria-hidden="true" style=${block(hover.from, Math.min(1440, hover.from + (paint ? this.snap : 60)))}></div>` : nothing}
+                  ${hover?.column === index ? html`<div class="slot-hover" aria-hidden="true" style=${block(hover.from, paint ? cellEnd(hover.from, this.snap) : Math.min(1440, hover.from + 60))}></div>` : nothing}
                   ${placed.map((item) => this.renderEvent(item, dayName, firstHour, index))}
                   ${
                     preview?.column === index

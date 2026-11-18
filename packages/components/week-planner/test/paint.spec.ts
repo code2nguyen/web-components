@@ -316,11 +316,18 @@ test('paints the same cells from the pointer and the keyboard when the scale doe
   await cursor.focus()
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('ArrowLeft')
+  // The first cell ends where the second starts.
+  await expect(cursor).toHaveAccessibleName('Monday 08:00–08:15, Not set')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('status')).toContainText('{"day":"mon","start":"08:00","end":"08:15"}')
   await page.keyboard.press('ArrowDown')
   await expect(cursor).toHaveAccessibleName(/^Monday 08:15–09:00/)
   await page.keyboard.press('ArrowDown')
   await expect(cursor).toHaveAccessibleName('Monday 09:00–09:45, Available')
 })
+
+const applyRanges = (page: Page, count?: number) =>
+  page.evaluate((count) => (window as unknown as { applyRanges(count?: number): void }).applyRanges(count), count)
 
 test('keeps every step of a keyboard run while the app applies changes late', async ({ page, scenario }) => {
   await scenario('paint-async')
@@ -330,10 +337,62 @@ test('keeps every step of a keyboard run while the app applies changes late', as
   await page.keyboard.press('ArrowLeft')
   await page.keyboard.press('Shift+ArrowDown')
   await page.keyboard.press('Shift+ArrowDown')
+  // The app catches up with the first change only, then the run goes on.
+  await applyRanges(page)
+  await page.keyboard.press('Shift+ArrowDown')
   await expect(page.getByRole('status')).toHaveText(
     ranges([
-      { day: 'mon', start: '08:00', end: '09:30' },
+      { day: 'mon', start: '08:00', end: '10:00' },
       { day: 'tue', start: '09:00', end: '11:00' },
+    ]),
+  )
+  // Once the app has applied everything, the next change builds on `ranges` again.
+  await applyRanges(page, 2)
+  await expect(planner(page).locator('.range')).toHaveCount(2)
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('status')).toHaveText(
+    ranges([
+      { day: 'mon', start: '08:00', end: '10:00' },
+      { day: 'tue', start: '09:00', end: '09:30' },
+      { day: 'tue', start: '10:00', end: '11:00' },
+    ]),
+  )
+})
+
+test('builds a stroke on a keyboard change the app has not applied yet', async ({ page, scenario }) => {
+  await scenario('paint-async')
+  await planner(page).locator('.cursor').focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('Space')
+  await stroke(page, await cell(page, 'Friday', 13 * 60), await cell(page, 'Friday', 13 * 60))
+  await expect(page.getByRole('status')).toHaveText(
+    ranges([
+      { day: 'mon', start: '08:00', end: '08:30' },
+      { day: 'tue', start: '09:00', end: '11:00' },
+      { day: 'fri', start: '13:00', end: '13:30' },
+    ]),
+  )
+})
+
+test('forgets a change the app does not apply', async ({ page, scenario }) => {
+  await scenario('paint-async')
+  await planner(page).locator('.cursor').focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('status')).toContainText('{"day":"mon","start":"08:00","end":"08:30"}')
+  // The app never assigns it; after a while the planner builds on `ranges` again.
+  await page.clock.fastForward(1500)
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Space')
+  await expect(page.getByRole('status')).toHaveText(
+    ranges([
+      { day: 'tue', start: '09:00', end: '11:00' },
+      { day: 'thu', start: '08:00', end: '08:30' },
     ]),
   )
 })

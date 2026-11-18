@@ -236,7 +236,9 @@ property.
 - **Pointer.** Press and drag across days and times: the rectangle of `snap-minutes` cells under the stroke is painted
   with `paint-value`, or with no `value` when it is empty. A stroke that starts on a cell already painted with
   `paint-value` clears instead. The stroke shows its result while it lasts and Escape drops it. It follows the pointer
-  past the grid, and it cannot select text or start a native drag on the way.
+  past the grid, and it cannot select text or start a native drag on the way. On a touch screen a stroke takes the
+  finger, so the day columns no longer scroll: the page scrolls from the hour labels and the header, and a narrow
+  strip pages with its arrows.
 - **Keyboard.** The grid's first Tab stop is a cursor cell, drawn when it has focus and named after its day, time and
   what it holds. The arrows move it, Space or Enter paints or clears its cell, and Shift+Arrow paints (or clears) the
   cells it crosses.

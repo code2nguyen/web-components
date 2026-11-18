@@ -2,7 +2,7 @@
 // first time `paint` is set (or `copyDay()` is called), so a planner that is never painted pays only for drawing the
 // ranges.
 import type { WeekPlanner, WeekPlannerDay, WeekPlannerRange, WeekPlannerRangesChangeDetail } from './week-planner.js'
-import { DAYS, cellStart, clamp, columnAt, paintSpans, rangeOf, scheduleOf, valueAt, type Paint } from './week-time.js'
+import { DAYS, cellEnd, cellStart, clamp, columnAt, paintSpans, rangeOf, scheduleOf, valueAt, type Paint } from './week-time.js'
 
 /** What the painter reads from the planner as last rendered. */
 export interface PaintLayout {
@@ -21,6 +21,12 @@ export interface PaintCell {
   from: number
 }
 
+/**
+ * How long a fired change is awaited in `ranges`, in milliseconds: an app that rejects a change never assigns it, and
+ * the planner then goes back to what `ranges` holds.
+ */
+const PENDING_MS = 1000
+
 // The ranges of a painted schedule, from Monday to Sunday.
 function rangesOf(paint: Paint): WeekPlannerRange[] {
   return [1, 2, 3, 4, 5, 6, 0].flatMap((weekday) => paint[weekday].map((span) => rangeOf(span, weekday)))
@@ -30,26 +36,39 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
   let stroke: { pointerId: number; base: Paint; start: PaintCell; end: PaintCell; erase: boolean } | undefined
   // Whether Shift+Arrow clears rather than paints, decided by the cell the run started on.
   let erasing: boolean | undefined
-  // What the last key made of `ranges`: the next key builds on it until the app has applied it, so a run of keys
-  // pressed faster than the app updates `ranges` loses no step.
-  let pending: { ranges: WeekPlannerRange[]; after: Paint } | undefined
+  // The changes fired and not yet seen back in `ranges`: `from` is what `ranges` held before the first, `awaiting` each
+  // one's ranges as JSON and `after` the last one's schedule. The next change builds on `after` until the app has
+  // applied the last change, so keys pressed (or a stroke made) faster than the app updates `ranges` lose no step.
+  let pending: { from: WeekPlannerRange[]; awaiting: string[]; after: Paint; at: number } | undefined
   const doc = host.ownerDocument
-  const base = () => scheduleOf(host.ranges)
+  // The schedule the next change builds on.
+  const base = (): Paint => {
+    const { ranges } = host
+    if (pending && performance.now() - pending.at < PENDING_MS) {
+      if (ranges === pending.from) return pending.after
+      // The app has applied an earlier change but not the last one yet.
+      const applied = pending.awaiting.indexOf(JSON.stringify(rangesOf(scheduleOf(ranges))))
+      if (applied >= 0 && applied < pending.awaiting.length - 1) return pending.after
+    }
+    pending = undefined
+    return scheduleOf(ranges)
+  }
   // A removed `paint-value` attribute leaves null, a framework may leave undefined: both paint ranges without a value.
   const brush = () => host.paintValue ?? ''
   const isPainted = (paint: Paint, cell: PaintCell) => valueAt(paint[layout().columns[cell.column]?.weekday ?? 0], cell.from) === brush()
 
-  // The schedule with the rectangle between two cells, each `snap` minutes tall, painted with `paint-value` or cleared.
+  // The schedule with the rectangle between two cells (inclusive) painted with `paint-value` or cleared.
   const paintRect = (paint: Paint, a: PaintCell, b: PaintCell, erase: boolean) => {
     const { columns, snap } = layout()
     const weekdays = columns.slice(Math.min(a.column, b.column), Math.max(a.column, b.column) + 1).map((column) => column.weekday)
-    return paintSpans(paint, weekdays, Math.min(a.from, b.from), Math.min(1440, Math.max(a.from, b.from) + snap), erase ? null : brush())
+    return paintSpans(paint, weekdays, Math.min(a.from, b.from), cellEnd(Math.max(a.from, b.from), snap), erase ? null : brush())
   }
 
   const fire = (before: Paint, after: Paint) => {
     const ranges = rangesOf(after)
-    if (JSON.stringify(ranges) === JSON.stringify(rangesOf(before))) return
-    pending = { ranges: host.ranges, after }
+    const json = JSON.stringify(ranges)
+    if (json === JSON.stringify(rangesOf(before))) return
+    pending = { from: pending?.from ?? host.ranges, awaiting: [...(pending?.awaiting ?? []), json], after, at: performance.now() }
     host.dispatchEvent(new CustomEvent<WeekPlannerRangesChangeDetail>('ranges-change', { detail: { ranges }, bubbles: true, composed: true }))
   }
 
@@ -70,11 +89,11 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
   }
   const release = (event: PointerEvent) => {
     if (!stroke || event.pointerId !== stroke.pointerId) return
-    const { start, erase } = stroke
+    const { base: before, start, erase } = stroke
     // The release point ends the stroke: an engine may coalesce or drop the last move before it.
     const end = event.type === 'pointerup' ? cellAt(event) : stroke.end
     painter.stop()
-    const before = base()
+    // Applied to the schedule the stroke showed its preview on.
     if (event.type === 'pointerup') fire(before, paintRect(before, start, end, erase))
   }
   const escape = (event: KeyboardEvent) => {
@@ -124,7 +143,7 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
     key(event: KeyboardEvent, cell: PaintCell) {
       const { key } = event
       if (event.altKey || event.ctrlKey || event.metaKey) return
-      const before = pending?.ranges === host.ranges ? pending.after : base()
+      const before = base()
       if (key === ' ' || key === 'Enter') {
         event.preventDefault()
         // A held key would toggle the cell back and forth.

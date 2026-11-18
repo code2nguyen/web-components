@@ -91,11 +91,13 @@ if (scenario === 'paint-overlap')
   ]
 if (scenario === 'paint-snap') subject.snapMinutes = 45
 if (scenario === 'paint-render') subject.renderRange = ({ range, dayName }) => `${dayName}: ${range.start} to ${range.end}`
+const queued: (typeof subject.ranges)[] = []
+Object.assign(window, { applyRanges: (count = 1) => queued.splice(0, count).forEach((ranges) => (subject.ranges = ranges)) })
 // Like an app would: the planner reports the new schedule, the page applies it.
 subject.addEventListener('ranges-change', ({ detail }) => {
   output.value = `ranges:${JSON.stringify(detail.ranges)}`
-  // An app that applies the change later, as a framework re-render does.
-  if (scenario === 'paint-async') setTimeout(() => (subject.ranges = detail.ranges), 300)
+  // An app that applies each change later, as a framework re-render does: `applyRanges()` applies the next one.
+  if (scenario === 'paint-async') queued.push(detail.ranges)
   else subject.ranges = detail.ranges
 })
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))

@@ -27,6 +27,12 @@ export function cellStart(minutes: number, snap: number, firstHour: number, last
   return clamp(Math.floor(minutes / snap) * snap, firstHour * 60, Math.max(firstHour * 60, Math.floor((lastHour * 60 - 1) / snap) * snap))
 }
 
+// The end of the cell starting at `from`: the next midnight-aligned boundary, so a first cell that `cellStart` clamped
+// to the scale is shorter than `snap` rather than overlapping the next one.
+export function cellEnd(from: number, snap: number): number {
+  return Math.min(1440, (Math.floor(from / snap) + 1) * snap)
+}
+
 /** A painted range inside one weekday, in minutes; `value` is `''` for a range without a category. */
 export interface Span {
   from: number
