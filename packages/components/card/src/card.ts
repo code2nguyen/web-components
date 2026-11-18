@@ -69,6 +69,7 @@ const INNER_CONTROL =
  * @cssproperty {aspect-ratio} --c2-card__media--aspect-ratio
  * @cssproperty {object-fit} [--c2-card__media--object-fit=cover]
  *
+ * @cssproperty {border} --c2-card__hover--border - All four sides on hover; a per-side hover variable wins over it for its side.
  * @cssproperty {border} --c2-card__hover--border-top
  * @cssproperty {border} --c2-card__hover--border-bottom
  * @cssproperty {border} --c2-card__hover--border-right

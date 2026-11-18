@@ -130,3 +130,10 @@ test('--c2-card--border sets all four sides, and a side variable overrides its s
   }
   await expect(card).toHaveCSS('border-bottom-style', 'none')
 })
+
+test('--c2-card__hover--border sets all four sides on hover', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-card interactive style="--c2-card__hover--border: 3px solid rgb(126, 34, 206)">Pro</c2-card>')
+  const card = page.locator('c2-card').locator('.c2-card')
+  await card.hover()
+  for (const side of ['top', 'right', 'bottom', 'left']) await expect(card).toHaveCSS(`border-${side}-width`, '3px')
+})

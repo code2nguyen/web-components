@@ -43,6 +43,7 @@
     media--aspect-ratio: null,
     media--object-fit: cover,
 
+    hover--border: null,
     hover--border-top: null,
     hover--border-bottom: null,
     hover--border-right: null,
@@ -88,10 +89,10 @@
   transition: animation.standard(background), animation.standard(border-color), animation.standard(box-shadow), animation.standard(transform);
 
   @include pointer.hover {
-    border-top: css.cssVar(hover--border-top, border-top, border);
-    border-bottom: css.cssVar(hover--border-bottom, border-bottom, border);
-    border-right: css.cssVar(hover--border-right, border-right, border);
-    border-left: css.cssVar(hover--border-left, border-left, border);
+    border-top: css.cssVar(hover--border-top, hover--border, border-top, border);
+    border-bottom: css.cssVar(hover--border-bottom, hover--border, border-bottom, border);
+    border-right: css.cssVar(hover--border-right, hover--border, border-right, border);
+    border-left: css.cssVar(hover--border-left, hover--border, border-left, border);
 
     background: css.cssVar(hover--background, background);
     box-shadow: css.cssVar(hover--box-shadow, box-shadow);
