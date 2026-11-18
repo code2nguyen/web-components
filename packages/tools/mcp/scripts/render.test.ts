@@ -110,19 +110,20 @@ test('get_component on a secondary element drops the main element composition an
     title: 'Chart',
     description: 'Charts (e.g. Line, bar) drawn on a canvas. Second sentence.',
     composition: { internal: ['c2-overlay'], slotted: ['c2-chart-series'], usedBy: [] },
+    presets: { items: [{ name: 'Dense', css: { '--c2-line-chart--gap': '2px' } }] },
     elements: [
       { ...badge.elements[0], tag: 'c2-line-chart', className: 'LineChart', description: 'A line chart.' },
       { ...badge.elements[0], tag: 'c2-chart-series', className: 'ChartSeries', description: 'One series.' },
     ],
   }
   const out = renderComponent(table, {
-    include: new Set(['attributes', 'composition']),
+    include: new Set(['attributes', 'composition', 'presets']),
     installed: null,
     concrete: { tag: 'c2-chart-series', modulePath: '@c2n/chart', className: 'ChartSeries' },
   })
   assert.match(out, /Part of `@c2n\/chart`: Charts \(e\.g\. Line, bar\) drawn on a canvas\.$/m)
   assert.doesNotMatch(out.split('\n- Package')[0], /c2-line-chart/)
-  assert.doesNotMatch(out, /Expects slotted|Renders internally/)
+  assert.doesNotMatch(out, /Expects slotted|Renders internally|## Presets/)
 })
 
 test('get_component on a secondary element of a package with no description prints no empty summary', () => {

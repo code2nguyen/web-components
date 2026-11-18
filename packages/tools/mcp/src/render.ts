@@ -126,7 +126,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       if (usedBy.length) out.push(`- Used by: ${usedBy.map((t) => `\`${t}\``).join(', ')}`)
     }
   }
-  if (include.has('presets') && component.presets?.items.length) {
+  // Presets are keyed by the main element's tag: none applies to a child element.
+  if (include.has('presets') && component.presets?.items.length && !secondary) {
     out.push('\n## Presets\n')
     out.push(
       component.presets.items.map((p) => `- **${p.name}**${p.description ? ` — ${p.description}` : ''} (${Object.keys(p.css).length} variables)`).join('\n'),
