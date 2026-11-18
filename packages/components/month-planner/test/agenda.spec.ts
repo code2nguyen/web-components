@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
+import type { MonthPlanner } from '../src/month-planner'
 import { test, expect } from './fixture'
 
 /** The planner's inner elements, for assertions on what is drawn rather than read. */
@@ -62,7 +63,7 @@ test.describe('agenda view', () => {
     await expect(page.getByRole('status')).toHaveText('month:2026-10')
     // Moving week continues from September 28 to October 4.
     await expect(page.getByRole('heading', { level: 3 })).toHaveText(['Thursday, October 1', 'Friday, October 2', 'Saturday, October 3', 'Sunday, October 4'])
-    await page.locator('c2-month-planner').evaluate((planner) => {
+    await page.locator('c2-month-planner').evaluate((planner: MonthPlanner) => {
       planner.events = [...planner.events, { id: 'review', title: 'Review', start: '2026-10-20' }]
     })
     await expect(page.getByRole('heading', { level: 3 })).toHaveCount(5)
@@ -115,15 +116,16 @@ test.describe('agenda view', () => {
       .poll(() =>
         list.evaluate((element) => {
           const heading = element.children[1].querySelector('h3')!
-          return Math.round(heading.getBoundingClientRect().top - element.getBoundingClientRect().top)
+          return Math.abs(heading.getBoundingClientRect().top - element.getBoundingClientRect().top)
         }),
       )
-      .toBe(0)
+      // Sticky offsets land on different subpixels per engine.
+      .toBeLessThanOrEqual(1)
     await expect
       .poll(() =>
         list.evaluate((element) => {
           const heading = element.children[0].querySelector('h3')!
-          return heading.getBoundingClientRect().bottom <= element.getBoundingClientRect().top
+          return heading.getBoundingClientRect().bottom <= element.getBoundingClientRect().top + 1
         }),
       )
       .toBe(true)
@@ -131,7 +133,7 @@ test.describe('agenda view', () => {
 
   test('goes back to the grid', async ({ page, scenario }) => {
     await scenario('agenda')
-    await page.locator('c2-month-planner').evaluate((planner) => (planner.view = 'month'))
+    await page.locator('c2-month-planner').evaluate((planner: MonthPlanner) => (planner.view = 'month'))
     await expect(page.getByRole('list', { name: 'Events by day' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Vacation, September 10, 2026 – September 15, 2026' })).toHaveCount(2)
   })
@@ -163,11 +165,12 @@ test.describe('background events', () => {
     // The title has a row of its own under the day numbers, and the bar on the 16th its lane under that.
     const deploy = page.getByRole('button', { name: 'Deploy billing API, September 16, 2026' })
     const [bandBox, labelBox, barBox] = [await band.boundingBox(), await label.boundingBox(), await deploy.boundingBox()]
-    expect(labelBox!.x).toBeCloseTo(bandBox!.x, 0)
-    expect(labelBox!.y).toBeGreaterThanOrEqual(bandBox!.y + 20)
+    // Grid tracks round to different subpixels per engine: allow a pixel.
+    expect(Math.abs(labelBox!.x - bandBox!.x)).toBeLessThanOrEqual(1)
+    expect(labelBox!.y).toBeGreaterThanOrEqual(bandBox!.y + 19)
     expect(barBox!.x).toBeGreaterThan(bandBox!.x)
     expect(barBox!.x + barBox!.width).toBeLessThan(bandBox!.x + bandBox!.width)
-    expect(barBox!.y).toBeGreaterThanOrEqual(labelBox!.y + labelBox!.height)
+    expect(barBox!.y).toBeGreaterThanOrEqual(labelBox!.y + labelBox!.height - 1)
     await deploy.click()
     await expect(page.getByRole('status')).toHaveText('click:deploy')
   })
@@ -176,10 +179,10 @@ test.describe('background events', () => {
     await scenario('changes-overlap')
     const freeze = await shadow(page, '[part="band-label"]').filter({ hasText: 'Change freeze' }).boundingBox()
     const network = await shadow(page, '[part="band-label"]').filter({ hasText: 'Network window' }).boundingBox()
-    expect(network!.y).toBeGreaterThanOrEqual(freeze!.y + freeze!.height)
+    expect(network!.y).toBeGreaterThanOrEqual(freeze!.y + freeze!.height - 1)
     // The bar moves below both rows.
     const deploy = await page.getByRole('button', { name: 'Deploy billing API, September 16, 2026' }).boundingBox()
-    expect(deploy!.y).toBeGreaterThanOrEqual(network!.y + network!.height)
+    expect(deploy!.y).toBeGreaterThanOrEqual(network!.y + network!.height - 1)
   })
 
   test('uses its own colour as the shade', async ({ page, scenario }) => {
