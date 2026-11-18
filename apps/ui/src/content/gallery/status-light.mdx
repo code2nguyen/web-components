@@ -1,11 +1,16 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import StatusLightExamplesRuntime from '../../components/StatusLightExamplesRuntime.astro'
 
+import { Button } from '@c2n/components/button'
 import { StatusLight } from '@c2n/components/status-light'
 
 ## Presets
 
 Curated looks for `c2-status-light`. Open any card in the studio to start from it. `--c2-status-light--background` with the paddings turns the light into a pill, `--c2-status-light__dot--clip-path` and `--border-radius` code each tone with a shape as well as a colour, and the per-tone `--c2-status-light__dot__<tone>--background` variables recolour a tone everywhere.
+
+<StatusLightExamplesRuntime />
 
 <GalleryGrid>
 
@@ -135,4 +140,51 @@ Curated looks for `c2-status-light`. Open any card in the studio to start from i
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=Sync status
+<style>
+  .sync-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .sync-status__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+<div class="sync-status" data-status-light-example="sync">
+  <span role="status"><c2-status-light tone="success">Saved</c2-status-light></span>
+  <c2-button data-sync="retry" hidden>Retry</c2-button>
+  <div class="sync-status__actions">
+    <c2-button data-sync="edit">Edit</c2-button>
+    <c2-button data-sync="fail">Edit, save fails</c2-button>
+    <c2-button data-sync="offline">Go offline</c2-button>
+  </div>
+</div>
+```
+
 </GalleryGrid>
+
+The Sync status card feeds the light from `SyncStatus` in `@c2n/core`, the model behind the "Saved" indicator of an editor or a form: the app reports each change and wraps each save, and the model works out saved, unsaved changes, saving, offline (changes wait and are saved once the connection is back) or a failed save with a retry. Its text is translated under `sync-status`. In a Lit component, `SyncStatusController` redraws the host on each change and gives the text and the tone:
+
+```ts tag=CodeBlock
+import { SyncStatusController } from '@c2n/core/controllers/sync-status.js'
+
+class DraftHeader extends LitElement {
+  // Follows the browser's online and offline events while connected; retries the save when it is back.
+  private readonly sync = new SyncStatusController(this, { retry: () => this.saveDraft() })
+
+  edited() {
+    this.sync.model.change()
+    void this.sync.model.save(() => this.saveDraft()).catch(() => {})
+  }
+
+  render() {
+    const sync = this.sync
+    return html`<span role="status"><c2-status-light tone=${sync.tone} ?pulse=${sync.state === 'saving'}>${sync.text}</c2-status-light></span>
+      ${sync.state === 'error' ? html`<c2-button @click=${() => sync.model.retry()}>${sync.retryLabel}</c2-button>` : nothing}`
+  }
+}
+```
