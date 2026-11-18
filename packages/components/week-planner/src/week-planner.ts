@@ -12,7 +12,7 @@ import '@c2n/badge'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { weekPlannerMessages } from './messages'
 import styles from './week-planner.scss?inline'
-import { DAYS, clamp, columnAt, formatMinutes, minutesOf, spansOf, valueAt, type Paint, type Span } from './week-time.js'
+import { DAYS, cellStart, clamp, columnAt, formatMinutes, minutesOf, rangeOf, scheduleOf, valueAt, type Paint, type Span } from './week-time.js'
 import type { PaintCell, Painter } from './paint.js'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -463,7 +463,6 @@ export class WeekPlanner extends LitElement {
         (this.painter = createPainter(this, () => ({
           ...this.layout,
           snap: this.snap,
-          spans: spansOf(this.ranges),
           minutesAt: (day, clientY) => this.minutesAt(day, clientY),
         }))),
       // Not loaded (offline, a deploy that replaced the file): painting stays off, and the next update tries again.
@@ -648,8 +647,7 @@ export class WeekPlanner extends LitElement {
     const rect = dayElement.getBoundingClientRect()
     const hourHeight = rect.height / Math.max(1, lastHour - firstHour) || 1
     const minutes = firstHour * 60 + ((clientY - rect.top) / hourHeight) * 60
-    const snapped = Math.floor(minutes / this.snap) * this.snap
-    return clamp(snapped, firstHour * 60, Math.max(firstHour * 60, Math.floor((lastHour * 60 - 1) / this.snap) * this.snap))
+    return cellStart(minutes, this.snap, firstHour, lastHour)
   }
 
   private handleDayClick(event: MouseEvent, column: number) {
@@ -785,12 +783,11 @@ export class WeekPlanner extends LitElement {
   // The keyboard cursor's cell, kept on the grid shown: today's column (else the first) at the first hour until it moves.
   private get cursorCell(): PaintCell {
     const { columns, firstHour, lastHour } = this.layout
-    const snap = this.snap
-    const low = firstHour * 60
     const cursor = this.painter?.cursor
-    const column = clamp(cursor?.column ?? columns.findIndex((column) => column.weekday === this.now.getDay()), 0, columns.length - 1)
-    const from = clamp(low + Math.floor(((cursor?.from ?? low) - low) / snap) * snap, low, Math.max(low, lastHour * 60 - snap))
-    return { column, from }
+    return {
+      column: clamp(cursor?.column ?? columns.findIndex((column) => column.weekday === this.now.getDay()), 0, columns.length - 1),
+      from: cellStart(cursor?.from ?? firstHour * 60, this.snap, firstHour, lastHour),
+    }
   }
 
   /** Alt+Arrow moves the focused block by `snap-minutes` or a day; Alt+Shift+Arrow Up/Down changes its end. */
@@ -934,8 +931,7 @@ export class WeekPlanner extends LitElement {
 
   // One painted range in a day column: the renderer's content, or its category (or "Available") and times.
   private drawRange(span: Span, weekday: number, dayName: string, style: ReturnType<typeof styleMap>) {
-    const range: WeekPlannerRange = { day: DAYS[weekday], start: formatMinutes(span.from), end: formatMinutes(span.to) }
-    if (span.value) range.value = span.value
+    const range = rangeOf(span, weekday)
     return html`<div class="range" part=${/^[\w-]+$/.test(span.value) ? `range range-${span.value}` : 'range'} style=${style}>
       ${
         this.renderRange
@@ -956,7 +952,7 @@ export class WeekPlanner extends LitElement {
         class="cursor"
         part="cursor"
         type="button"
-        aria-pressed=${value === this.paintValue ? 'true' : 'false'}
+        aria-pressed=${value === (this.paintValue ?? '') ? 'true' : 'false'}
         aria-label=${`${nameOf(this.layout.columns[column])} ${formatMinutes(from)}–${formatMinutes(to)}, ${state}`}
         aria-describedby="paint-hint"
         style=${styleMap({ gridColumn: `${column + 1} / ${column + 2}`, '--from': String(from / 60 - firstHour), '--span': String((to - from) / 60) })}
@@ -997,7 +993,7 @@ export class WeekPlanner extends LitElement {
     const shown = this.shownParity
     const visible = all.filter(({ event, date }) => date || !usesParity || !event.weeks || event.weeks === 'all' || event.weeks === shown)
 
-    const painted = spansOf(this.ranges)
+    const painted = scheduleOf(this.ranges)
     // The scale grows to fit every event and painted range.
     const extent = [...all, ...painted.flat()]
     const firstHour = Math.max(

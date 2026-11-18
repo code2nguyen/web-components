@@ -244,6 +244,63 @@ test('keeps the cursor in view on a narrow planner', async ({ page, scenario }) 
     .toBe(true)
 })
 
+test('draws overlapping ranges as the later one wins', async ({ page, scenario }) => {
+  await scenario('paint-overlap')
+  await expect(planner(page).locator('.range')).toHaveText([/Available\s+09:00–12:00/, /lunch\s+12:00–13:00/, /Available\s+13:00–17:00/])
+})
+
+test('paints ranges without a value once the paint-value attribute is removed', async ({ page, scenario }) => {
+  await scenario('paint-category')
+  await planner(page).evaluate((element) => {
+    element.setAttribute('paint-value', 'peak')
+    element.removeAttribute('paint-value')
+  })
+  await stroke(page, await cell(page, 'Monday', 13 * 60), await cell(page, 'Monday', 13 * 60))
+  await expect(page.getByRole('status')).toContainText('{"day":"mon","start":"13:00","end":"13:30"}')
+})
+
+test('ignores a held Space, and copyDay from a day that does not exist', async ({ page, scenario }) => {
+  await scenario('paint')
+  const cursor = planner(page).locator('.cursor')
+  await cursor.focus()
+  await expect(cursor).toBeFocused()
+  await cursor.dispatchEvent('keydown', { key: ' ', repeat: true, bubbles: true })
+  await planner(page).evaluate((element: WeekPlanner) => element.copyDay('monday' as never, ['tue']))
+  await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 50)))
+  await expect(page.getByRole('status')).toHaveText('')
+})
+
+test('paints the same cells from the pointer and the keyboard when the scale does not start on a cell', async ({ page, scenario }) => {
+  await scenario('paint-snap')
+  // 45-minute cells from midnight: 08:15, 09:00, 09:45… The scale starts at 8:00, so its first cell starts there.
+  await stroke(page, await cell(page, 'Monday', 9 * 60), await cell(page, 'Monday', 9 * 60))
+  await expect(page.getByRole('status')).toContainText('{"day":"mon","start":"09:00","end":"09:45"}')
+  const cursor = planner(page).locator('.cursor')
+  await cursor.focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowDown')
+  await expect(cursor).toHaveAccessibleName(/^Monday 08:15–09:00/)
+  await page.keyboard.press('ArrowDown')
+  await expect(cursor).toHaveAccessibleName('Monday 09:00–09:45, Available')
+})
+
+test('keeps every step of a keyboard run while the app applies changes late', async ({ page, scenario }) => {
+  await scenario('paint-async')
+  const cursor = planner(page).locator('.cursor')
+  await cursor.focus()
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('Shift+ArrowDown')
+  await page.keyboard.press('Shift+ArrowDown')
+  await expect(page.getByRole('status')).toHaveText(
+    ranges([
+      { day: 'mon', start: '08:00', end: '09:30' },
+      { day: 'tue', start: '09:00', end: '11:00' },
+    ]),
+  )
+})
+
 test('has no axe violations while painting', async ({ page, scenario }) => {
   await scenario('paint-category')
   await planner(page).locator('.cursor').focus()

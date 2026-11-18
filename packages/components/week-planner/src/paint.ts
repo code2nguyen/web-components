@@ -2,7 +2,7 @@
 // first time `paint` is set (or `copyDay()` is called), so a planner that is never painted pays only for drawing the
 // ranges.
 import type { WeekPlanner, WeekPlannerDay, WeekPlannerRange, WeekPlannerRangesChangeDetail } from './week-planner.js'
-import { DAYS, clamp, columnAt, formatMinutes, valueAt, type Paint } from './week-time.js'
+import { DAYS, cellStart, clamp, columnAt, paintSpans, rangeOf, scheduleOf, valueAt, type Paint } from './week-time.js'
 
 /** What the painter reads from the planner as last rendered. */
 export interface PaintLayout {
@@ -11,8 +11,6 @@ export interface PaintLayout {
   firstHour: number
   lastHour: number
   snap: number
-  /** `ranges`, validated, by weekday. */
-  spans: Paint
   /** Minutes since midnight at a pointer's height in a day column, snapped down to `snap`. */
   minutesAt(day: Element, clientY: number): number
 }
@@ -23,61 +21,35 @@ export interface PaintCell {
   from: number
 }
 
-// `paint` with `value` (or cleared, for `null`) from `from` to `to` on `weekdays`, merging equal neighbours.
-function paintSpans(paint: Paint, weekdays: number[], from: number, to: number, value: string | null): Paint {
-  return paint.map((spans, weekday) => {
-    if (!weekdays.includes(weekday)) return spans
-    const kept = spans.flatMap((span) =>
-      span.to <= from || span.from >= to ? [span] : [...(span.from < from ? [{ ...span, to: from }] : []), ...(span.to > to ? [{ ...span, from: to }] : [])],
-    )
-    if (value !== null) kept.push({ from, to, value })
-    kept.sort((a, b) => a.from - b.from)
-    return kept.reduce<Paint[number]>((merged, span) => {
-      const last = merged[merged.length - 1]
-      if (last && last.to === span.from && last.value === span.value) last.to = span.to
-      else merged.push({ ...span })
-      return merged
-    }, [])
-  })
-}
-
-// Overlapping entries resolved in favour of the later one, and equal neighbours merged.
-function normalise(paint: Paint): Paint {
-  return paint.reduce(
-    (all, spans, weekday) => spans.reduce((done, span) => paintSpans(done, [weekday], span.from, span.to, span.value), all),
-    DAYS.map((): Paint[number] => []),
-  )
-}
-
 // The ranges of a painted schedule, from Monday to Sunday.
 function rangesOf(paint: Paint): WeekPlannerRange[] {
-  return [1, 2, 3, 4, 5, 6, 0].flatMap((weekday) =>
-    paint[weekday].map(({ from, to, value }) => {
-      const range: WeekPlannerRange = { day: DAYS[weekday], start: formatMinutes(from), end: formatMinutes(to) }
-      if (value) range.value = value
-      return range
-    }),
-  )
+  return [1, 2, 3, 4, 5, 6, 0].flatMap((weekday) => paint[weekday].map((span) => rangeOf(span, weekday)))
 }
 
 export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
-  let stroke: { pointerId: number; start: PaintCell; end: PaintCell; erase: boolean } | undefined
+  let stroke: { pointerId: number; base: Paint; start: PaintCell; end: PaintCell; erase: boolean } | undefined
   // Whether Shift+Arrow clears rather than paints, decided by the cell the run started on.
   let erasing: boolean | undefined
+  // What the last key made of `ranges`: the next key builds on it until the app has applied it, so a run of keys
+  // pressed faster than the app updates `ranges` loses no step.
+  let pending: { ranges: WeekPlannerRange[]; after: Paint } | undefined
   const doc = host.ownerDocument
-  const base = () => normalise(layout().spans)
-  const isPainted = (paint: Paint, cell: PaintCell) => valueAt(paint[layout().columns[cell.column]?.weekday ?? 0], cell.from) === host.paintValue
+  const base = () => scheduleOf(host.ranges)
+  // A removed `paint-value` attribute leaves null, a framework may leave undefined: both paint ranges without a value.
+  const brush = () => host.paintValue ?? ''
+  const isPainted = (paint: Paint, cell: PaintCell) => valueAt(paint[layout().columns[cell.column]?.weekday ?? 0], cell.from) === brush()
 
   // The schedule with the rectangle between two cells, each `snap` minutes tall, painted with `paint-value` or cleared.
   const paintRect = (paint: Paint, a: PaintCell, b: PaintCell, erase: boolean) => {
     const { columns, snap } = layout()
     const weekdays = columns.slice(Math.min(a.column, b.column), Math.max(a.column, b.column) + 1).map((column) => column.weekday)
-    return paintSpans(paint, weekdays, Math.min(a.from, b.from), Math.min(1440, Math.max(a.from, b.from) + snap), erase ? null : host.paintValue)
+    return paintSpans(paint, weekdays, Math.min(a.from, b.from), Math.min(1440, Math.max(a.from, b.from) + snap), erase ? null : brush())
   }
 
   const fire = (before: Paint, after: Paint) => {
     const ranges = rangesOf(after)
     if (JSON.stringify(ranges) === JSON.stringify(rangesOf(before))) return
+    pending = { ranges: host.ranges, after }
     host.dispatchEvent(new CustomEvent<WeekPlannerRangesChangeDetail>('ranges-change', { detail: { ranges }, bubbles: true, composed: true }))
   }
 
@@ -93,7 +65,7 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
     const end = cellAt(event)
     if (end.column === stroke.end.column && end.from === stroke.end.from) return
     stroke.end = end
-    painter.preview = paintRect(base(), stroke.start, end, stroke.erase)
+    painter.preview = paintRect(stroke.base, stroke.start, end, stroke.erase)
     host.requestUpdate()
   }
   const release = (event: PointerEvent) => {
@@ -131,7 +103,7 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
       const start = cellAt(event)
       const before = base()
       const erase = isPainted(before, start)
-      stroke = { pointerId: event.pointerId, start, end: start, erase }
+      stroke = { pointerId: event.pointerId, base: before, start, end: start, erase }
       painter.preview = paintRect(before, start, start, erase)
       for (const [type, listener] of listeners) doc.addEventListener(type, listener, true)
       doc.getSelection()?.removeAllRanges()
@@ -150,9 +122,11 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
     key(event: KeyboardEvent, cell: PaintCell) {
       const { key } = event
       if (event.altKey || event.ctrlKey || event.metaKey) return
-      const before = base()
+      const before = pending?.ranges === host.ranges ? pending.after : base()
       if (key === ' ' || key === 'Enter') {
         event.preventDefault()
+        // A held key would toggle the cell back and forth.
+        if (event.repeat) return
         erasing = isPainted(before, cell)
         fire(before, paintRect(before, cell, cell, erasing))
         return
@@ -163,7 +137,7 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
       event.preventDefault()
       const next = {
         column: clamp(cell.column + step[0], 0, columns.length - 1),
-        from: clamp(cell.from + step[1], firstHour * 60, Math.max(firstHour * 60, lastHour * 60 - snap)),
+        from: cellStart(cell.from + step[1], snap, firstHour, lastHour),
       }
       if (event.shiftKey) {
         erasing ??= isPainted(before, cell)
@@ -176,8 +150,10 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
     },
 
     copyDay(source: WeekPlannerDay, targets: WeekPlannerDay[]) {
+      const index = DAYS.indexOf(source)
+      if (index < 0) return
       const before = base()
-      const spans = before[DAYS.indexOf(source)] ?? []
+      const spans = before[index]
       fire(
         before,
         before.map((day, weekday) => (targets.includes(DAYS[weekday]) ? spans : day)),
