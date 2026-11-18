@@ -12,6 +12,8 @@ import '@c2n/badge'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { weekPlannerMessages } from './messages'
 import styles from './week-planner.scss?inline'
+import { DAYS, clamp, columnAt, formatMinutes, minutesOf, spansOf, valueAt, type Paint, type Span } from './week-time.js'
+import type { PaintCell, Painter } from './paint.js'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 export type WeekPlannerParity = 'odd' | 'even'
@@ -89,6 +91,31 @@ export interface WeekPlannerEventChangeDetail {
   changes: WeekPlannerEventChanges
 }
 
+/** A weekly time range of a painted schedule: a weekday, a time range and the category painted on it. */
+export interface WeekPlannerRange {
+  day: WeekPlannerDay
+  /** `HH:MM` (24-hour). */
+  start: string
+  /** `HH:MM`; `24:00` ends at midnight. */
+  end: string
+  /** The category painted, e.g. `peak`; absent for a plain on/off schedule. */
+  value?: string
+}
+
+export interface WeekPlannerRangesChangeDetail {
+  /** The whole painted schedule after the change, merged and sorted from Monday: assign it to `ranges`. */
+  ranges: WeekPlannerRange[]
+}
+
+export interface WeekPlannerRangeContext {
+  range: WeekPlannerRange
+  /** The day's full name in the planner's language. */
+  dayName: string
+}
+
+/** Draws the content of a painted range; the planner keeps the block, its place and its `part`. */
+export type WeekPlannerRangeRenderer = (context: WeekPlannerRangeContext) => unknown
+
 /** Events fired by {@link WeekPlanner}, keyed for `addEventListener`. */
 export interface WeekPlannerEventMap {
   'event-click': CustomEvent<WeekPlannerEventClickDetail>
@@ -96,6 +123,7 @@ export interface WeekPlannerEventMap {
   'week-change': CustomEvent<WeekPlannerWeekChangeDetail>
   'slot-click': CustomEvent<WeekPlannerSlotClickDetail>
   'event-change': CustomEvent<WeekPlannerEventChangeDetail>
+  'ranges-change': CustomEvent<WeekPlannerRangesChangeDetail>
 }
 
 export interface WeekPlanner {
@@ -145,22 +173,6 @@ interface DragPreview {
   to: number
 }
 
-const DAYS: WeekPlannerDay[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-const timePattern = /^(\d{1,2}):(\d{2})$/
-
-function minutesOf(value: string | undefined): number | null {
-  const match = value ? timePattern.exec(value) : null
-  if (!match) return null
-  const hours = Number(match[1])
-  const minutes = Number(match[2])
-  if (minutes > 59 || hours > 24 || (hours === 24 && minutes > 0)) return null
-  return hours * 60 + minutes
-}
-
-function formatMinutes(value: number): string {
-  return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`
-}
-
 const isoPattern = /^\d{4}-\d{2}-\d{2}$/
 
 function toIso(date: Date): string {
@@ -177,10 +189,6 @@ function fromIso(value: string | undefined): Date | null {
 
 function addDays(date: Date, amount: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount, 12)
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value))
 }
 
 /** Pointer travel, in pixels, past which pressing an event block drags it instead of clicking it. */
@@ -250,6 +258,14 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  *   is still a click (`event-click`). From the keyboard, on a focused block: Alt+Arrow Up/Down moves it by
  *   `snap-minutes`, Alt+Arrow Left/Right by a day, and Alt+Shift+Arrow Up/Down changes its end time.
  *
+ * `paint` turns the grid into a schedule the user paints, such as opening hours or when someone can work: pressing and
+ * dragging across days and times paints the rectangle of `snap-minutes` cells with `paint-value` (no category when it is
+ * empty), or clears it when the stroke starts on a cell already painted with it. From the keyboard, a cursor cell (the
+ * first stop in the grid) moves with the arrow keys, Space or Enter paints or clears it, and Shift+Arrow paints while it
+ * moves. Like the rest of the planner it does not change `ranges` itself: each stroke fires `ranges-change` with the
+ * whole schedule, merged, which the app assigns to `ranges`. `copyDay()` copies a day onto others the same way. Events
+ * stay on view under the paint but do not take the pointer, and `editable` is off while painting.
+ *
  * `heading` puts a title at the start of the header; the `heading` slot replaces it with markup of your own (an icon,
  * a link, an editable field). The `actions` slot puts buttons of your own at the end of the header, e.g. "Add event"
  * or a settings menu.
@@ -271,6 +287,7 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @event {CustomEvent<WeekPlannerParityChangeDetail>} parity-change - Fired when the switch shows the other kind of week; `detail.parity` is `odd` or `even`.
  * @event {CustomEvent<WeekPlannerWeekChangeDetail>} week-change - Fired when the header navigation of a dated planner shows another week; `detail.start` and `detail.end` are its first and last day as `YYYY-MM-DD`. Does not bubble.
  * @event {CustomEvent<WeekPlannerSlotClickDetail>} slot-click - With `editable`, fired when an empty spot or a day's "New event" button is activated: `{ day, date?, start, end }`, `start` snapped to `snap-minutes` and `end` an hour later. Add the event to `events` yourself.
+ * @event {CustomEvent<WeekPlannerRangesChangeDetail>} ranges-change - With `paint`, fired when a stroke, a key or `copyDay()` changes the painted schedule: `detail.ranges` is the whole new schedule. Assign it to `ranges` yourself.
  * @event {CustomEvent<WeekPlannerEventChangeDetail>} event-change - With `editable`, fired when an event is dropped after a drag or moved/resized from the keyboard: `{ event, changes }`, `event` the original entry and `changes` its new `start`, `end` and `day` or `date`. Update `events` yourself.
  *
  * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
@@ -279,6 +296,8 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
  * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the previous/next arrows; assigned controls keep their own styles.
  * @csspart event - Each event block.
+ * @csspart range - Each painted range block in a day column. A range whose `value` is a plain word (letters, digits, `-`, `_`) also exports `range-<value>`, e.g. `::part(range-peak)`, to colour a category.
+ * @csspart cursor - With `paint`, the keyboard's cursor cell in the grid, shown while it has focus.
  *
  * @cssproperty {color} [--c2-week-planner--background=#ffffff]
  * @cssproperty {color} [--c2-week-planner--color=#18181b]
@@ -322,6 +341,9 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @cssproperty {color} [--c2-week-planner__preview--color=rgb(2, 101, 220)]
  * @cssproperty {opacity} [--c2-week-planner__event__dragging--opacity=0.4] - The event being dragged, at its original place.
  * @cssproperty {pixel} [--c2-week-planner__resize-handle--height=6px] - With `editable`, the strip at the bottom of a block that resizes it.
+ * @cssproperty {color} [--c2-week-planner__range--background=rgba(2, 101, 220, 0.2)] - With `paint`, a painted range.
+ * @cssproperty {color} [--c2-week-planner__range--color=#18181b] - Text of a painted range.
+ * @cssproperty {border-radius} [--c2-week-planner__range--border-radius=0px]
  */
 @customElement('c2-week-planner')
 export class WeekPlanner extends LitElement {
@@ -352,6 +374,9 @@ export class WeekPlanner extends LitElement {
   private gesture?: PointerGesture
   /** Swallows the click that ends a drag, so dropping an event does not also open it or add one. */
   private suppressClick = false
+  /** With `paint`, the strokes, keyboard cursor and `copyDay()`, from a module loaded the first time they are needed. */
+  private painter?: Painter
+  private painterLoad?: Promise<Painter | undefined>
   /** The event block to focus again once the app has applied a keyboard move: its key and new place. */
   private refocus?: { key: string; slot: string }
 
@@ -364,7 +389,21 @@ export class WeekPlanner extends LitElement {
   @property({ type: String }) date = ''
   /** Lets the user add events by clicking an empty spot and move or resize them by dragging; see `slot-click` and `event-change`. */
   @property({ type: Boolean }) editable = false
-  /** Step, in minutes, that `slot-click` times, drags and keyboard moves snap to. */
+  /**
+   * Turns the grid into a schedule the user paints by dragging across days and times; see `ranges` and
+   * `ranges-change`.
+   */
+  @property({ type: Boolean }) paint = false
+  /**
+   * The painted schedule: `{ day, start, end, value? }` weekly ranges. Accepts a JSON string as an attribute.
+   * Overlapping entries resolve in favour of the later one.
+   */
+  @property({ converter: jsonPropertyConverter }) ranges: WeekPlannerRange[] = []
+  /** The category a stroke paints, e.g. `peak`. Empty — the default — paints ranges without a `value`. */
+  @property({ attribute: 'paint-value' }) paintValue = ''
+  /** Draws the content of each painted range from `{ range, dayName }`; by default its category (or "Available") and times. */
+  @property({ attribute: false }) renderRange?: WeekPlannerRangeRenderer
+  /** Step, in minutes, that `slot-click` times, drags, keyboard moves and painted cells snap to. */
   @property({ type: Number, attribute: 'snap-minutes' }) snapMinutes = 30
   /** Honours each event's `weeks` and shows the Odd week | Even week switch. Off by default: every event shows each week. */
   @property({ type: Boolean, attribute: 'alternate-weeks' }) alternateWeeks = false
@@ -401,11 +440,35 @@ export class WeekPlanner extends LitElement {
     this.resizeObserver = undefined
     this.overflowing = false
     this.endGesture()
+    this.painter?.stop()
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
     // A new plan or week ends any drag: the block it started on may be gone.
-    if ((changed.has('events') || changed.has('date') || changed.has('editable')) && this.gesture) this.endGesture()
+    if ((changed.has('events') || changed.has('date') || changed.has('editable') || changed.has('paint')) && this.gesture) this.endGesture()
+    if (this.paint && !isServer) void this.loadPainter()
+    else if (changed.has('paint')) this.painter?.stop()
+  }
+
+  // `updateComplete` also waits for the paint module, so a planner set to `paint` is ready for a stroke once it resolves.
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const complete = await super.getUpdateComplete()
+    await this.painterLoad
+    return complete
+  }
+
+  private loadPainter() {
+    return (this.painterLoad ??= import('./paint.js').then(
+      ({ createPainter }) =>
+        (this.painter = createPainter(this, () => ({
+          ...this.layout,
+          snap: this.snap,
+          spans: spansOf(this.ranges),
+          minutesAt: (day, clientY) => this.minutesAt(day, clientY),
+        }))),
+      // Not loaded (offline, a deploy that replaced the file): painting stays off, and the next update tries again.
+      () => (this.painterLoad = undefined),
+    ))
   }
 
   override updated(changed: PropertyValues<this>) {
@@ -590,14 +653,20 @@ export class WeekPlanner extends LitElement {
   }
 
   private handleDayClick(event: MouseEvent, column: number) {
-    if (!this.editable || this.suppressClick) return
+    if (!this.editing || this.suppressClick) return
     if ((event.target as Element).closest('.event, .add')) return
     const slot = this.layout.columns[column]
     if (slot) this.fireSlot(slot, this.minutesAt(event.currentTarget as Element, event.clientY))
   }
 
   private handleDayHover(event: PointerEvent, column: number) {
-    if (!this.editable || this.gesture || event.pointerType === 'touch' || (event.target as Element).closest('.event')) {
+    if (
+      !(this.editing || this.paint) ||
+      this.gesture ||
+      this.painter?.preview ||
+      event.pointerType === 'touch' ||
+      (event.target as Element).closest('.event')
+    ) {
       if (this.hover) this.hover = undefined
       return
     }
@@ -618,7 +687,7 @@ export class WeekPlanner extends LitElement {
   }
 
   private startGesture(event: PointerEvent, item: Placed, column: number) {
-    if (!this.editable || event.button !== 0 || !event.isPrimary || this.gesture) return
+    if (!this.editing || event.button !== 0 || !event.isPrimary || this.gesture) return
     const target = event.currentTarget as HTMLElement
     this.gesture = {
       item,
@@ -661,17 +730,7 @@ export class WeekPlanner extends LitElement {
       this.preview = { event: gesture.item.event, column: gesture.column, from, to: end }
       return
     }
-    // The column under the pointer, or the nearest one at either end of the strip.
-    let column = gesture.column
-    let best = Infinity
-    days.forEach((day, index) => {
-      const rect = day.getBoundingClientRect()
-      const distance = event.clientX < rect.left ? rect.left - event.clientX : event.clientX > rect.right ? event.clientX - rect.right : 0
-      if (distance < best) {
-        best = distance
-        column = index
-      }
-    })
+    const column = columnAt(days, event.clientX)
     const duration = to - from
     const start = clamp(snapped(from + delta), low, Math.max(low, high - duration))
     this.preview = { event: gesture.item.event, column, from: start, to: Math.min(1440, start + duration) }
@@ -710,9 +769,33 @@ export class WeekPlanner extends LitElement {
     this.preview = undefined
   }
 
+  // `editable` gestures, which painting turns off.
+  private get editing() {
+    return this.editable && !this.paint
+  }
+
+  /**
+   * Copies the painted ranges of one weekday onto others, replacing what they held, and fires `ranges-change` with
+   * the result; `ranges` itself is left to the app. For an action of your own, e.g. a "Copy Monday to weekdays" button.
+   */
+  async copyDay(source: WeekPlannerDay, targets: WeekPlannerDay[]) {
+    ;(await this.loadPainter())?.copyDay(source, targets)
+  }
+
+  // The keyboard cursor's cell, kept on the grid shown: today's column (else the first) at the first hour until it moves.
+  private get cursorCell(): PaintCell {
+    const { columns, firstHour, lastHour } = this.layout
+    const snap = this.snap
+    const low = firstHour * 60
+    const cursor = this.painter?.cursor
+    const column = clamp(cursor?.column ?? columns.findIndex((column) => column.weekday === this.now.getDay()), 0, columns.length - 1)
+    const from = clamp(low + Math.floor(((cursor?.from ?? low) - low) / snap) * snap, low, Math.max(low, lastHour * 60 - snap))
+    return { column, from }
+  }
+
   /** Alt+Arrow moves the focused block by `snap-minutes` or a day; Alt+Shift+Arrow Up/Down changes its end. */
   private handleEventKey(event: KeyboardEvent, item: Placed, column: number) {
-    if (!this.editable || !event.altKey || event.ctrlKey || event.metaKey) return
+    if (!this.editing || !event.altKey || event.ctrlKey || event.metaKey) return
     const key = event.key
     if (key !== 'ArrowUp' && key !== 'ArrowDown' && key !== 'ArrowLeft' && key !== 'ArrowRight') return
     event.preventDefault()
@@ -815,7 +898,7 @@ export class WeekPlanner extends LitElement {
   }
 
   private renderEvent(item: Placed, dayName: string, firstHour: number, column: number) {
-    const editable = this.editable
+    const editable = this.editing
     const dragging = this.preview?.event === item.event
     return html`<button
       class="event ${editable ? 'editable' : ''} ${dragging ? 'dragging' : ''}"
@@ -847,6 +930,39 @@ export class WeekPlanner extends LitElement {
       </span>
       ${editable ? html`<span class="resize-handle" aria-hidden="true"></span>` : nothing}
     </button>`
+  }
+
+  // One painted range in a day column: the renderer's content, or its category (or "Available") and times.
+  private drawRange(span: Span, weekday: number, dayName: string, style: ReturnType<typeof styleMap>) {
+    const range: WeekPlannerRange = { day: DAYS[weekday], start: formatMinutes(span.from), end: formatMinutes(span.to) }
+    if (span.value) range.value = span.value
+    return html`<div class="range" part=${/^[\w-]+$/.test(span.value) ? `range range-${span.value}` : 'range'} style=${style}>
+      ${
+        this.renderRange
+          ? this.renderRange({ range, dayName })
+          : html`<span class="range-label">${span.value || this.msg.t('available')}</span> <span class="range-time">${range.start}–${range.end}</span>`
+      }
+    </div>`
+  }
+
+  // The keyboard's way to paint: one cursor cell in the grid, its label saying which cell it is on and what it holds.
+  private renderCursor(spans: Paint, nameOf: (column: DayColumn) => string, firstHour: number) {
+    const cell = this.cursorCell
+    const { column, from } = cell
+    const to = Math.min(1440, from + this.snap)
+    const value = valueAt(spans[this.layout.columns[column].weekday], from)
+    const state = value === undefined ? this.msg.t('empty') : value || this.msg.t('available')
+    return html`<button
+        class="cursor"
+        part="cursor"
+        type="button"
+        aria-pressed=${value === this.paintValue ? 'true' : 'false'}
+        aria-label=${`${nameOf(this.layout.columns[column])} ${formatMinutes(from)}–${formatMinutes(to)}, ${state}`}
+        aria-describedby="paint-hint"
+        style=${styleMap({ gridColumn: `${column + 1} / ${column + 2}`, '--from': String(from / 60 - firstHour), '--span': String((to - from) / 60) })}
+        @keydown=${(event: KeyboardEvent) => this.painter?.key(event, cell)}
+      ></button
+      ><span id="paint-hint" hidden>${this.msg.t('paintHint')}</span>`
   }
 
   /** The keyboard way to add: a button at the column's first free hour, shown while it has focus. */
@@ -881,8 +997,14 @@ export class WeekPlanner extends LitElement {
     const shown = this.shownParity
     const visible = all.filter(({ event, date }) => date || !usesParity || !event.weeks || event.weeks === 'all' || event.weeks === shown)
 
-    const firstHour = Math.max(0, Math.min(Number.isFinite(this.startHour) ? Math.floor(this.startHour) : 8, ...all.map((item) => Math.floor(item.from / 60))))
-    const lastHour = Math.min(24, Math.max(Number.isFinite(this.endHour) ? Math.ceil(this.endHour) : 18, ...all.map((item) => Math.ceil(item.to / 60))))
+    const painted = spansOf(this.ranges)
+    // The scale grows to fit every event and painted range.
+    const extent = [...all, ...painted.flat()]
+    const firstHour = Math.max(
+      0,
+      Math.min(Number.isFinite(this.startHour) ? Math.floor(this.startHour) : 8, ...extent.map((item) => Math.floor(item.from / 60))),
+    )
+    const lastHour = Math.min(24, Math.max(Number.isFinite(this.endHour) ? Math.ceil(this.endHour) : 18, ...extent.map((item) => Math.ceil(item.to / 60))))
     const hours = Math.max(1, lastHour - firstHour)
 
     const first = this.firstWeekday
@@ -890,6 +1012,10 @@ export class WeekPlanner extends LitElement {
       weekStart ? { weekday: (first + index) % 7, date: addDays(weekStart, index) } : { weekday: (first + index) % 7 },
     )
     this.layout = { columns, firstHour, lastHour: firstHour + hours }
+    const paint = this.paint
+    // A stroke in progress shows the schedule it would make; the app applies it on release.
+    const stroking = paint ? this.painter?.preview : undefined
+    const spans = stroking ?? painted
     const locale = this.effectiveLocale
     const shortName = new Intl.DateTimeFormat(locale, { weekday: 'short' })
     const longName = new Intl.DateTimeFormat(locale, { weekday: 'long' })
@@ -897,6 +1023,7 @@ export class WeekPlanner extends LitElement {
     const longDate = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' })
     // 2024-01-07 is a Sunday: index 0 of DAYS.
     const dayDate = (column: DayColumn) => column.date ?? new Date(2024, 0, 7 + column.weekday, 12)
+    const nameOf = (column: DayColumn) => (column.date ? longDate.format(column.date) : longName.format(dayDate(column)))
     const todayIso = toIso(this.now)
     const todayShown = !usesParity || shown === this.currentParity
     const isToday = (column: DayColumn) => (column.date ? toIso(column.date) === todayIso : todayShown && column.weekday === this.now.getDay())
@@ -907,9 +1034,9 @@ export class WeekPlanner extends LitElement {
     const hasActions = this.slotPresence.has('actions')
     // Slotted heading markup names the planner through the heading itself; text set as a property names it directly.
     const labelledByHeading = !this.ariaLabel && !this.heading && hasHeading
-    const editable = this.editable
+    const editable = this.editing
     const preview = this.preview
-    const hover = editable && !preview ? this.hover : undefined
+    const hover = (editable || paint) && !preview && !stroking ? this.hover : undefined
     const block = (from: number, to: number) => styleMap({ '--from': String(from / 60 - firstHour), '--span': String((to - from) / 60) })
 
     return html`<section
@@ -936,7 +1063,7 @@ export class WeekPlanner extends LitElement {
             ${Array.from({ length: hours }, (_, hour) => html`<div class="hour-label">${formatMinutes((firstHour + hour) * 60)}</div>`)}
           </div>
           <div class="scroller" @scroll=${this.updateEdges}>
-            <div class="grid" style=${styleMap({ '--hours': String(hours) })}>
+            <div class="grid ${paint ? 'paint' : ''}" style=${styleMap({ '--hours': String(hours) })}>
               ${columns.map(
                 (column) =>
                   html`<div class="day-header ${isToday(column) ? 'today' : ''}" aria-hidden="true">
@@ -947,10 +1074,11 @@ export class WeekPlanner extends LitElement {
                     }
                   </div>`,
               )}
+              ${paint ? this.renderCursor(spans, nameOf, firstHour) : nothing}
               ${columns.map((column, index) => {
                 const day = DAYS[column.weekday]
                 const iso = column.date ? toIso(column.date) : ''
-                const dayName = column.date ? longDate.format(column.date) : longName.format(dayDate(column))
+                const dayName = nameOf(column)
                 const placed = placeDay(visible.filter((item) => (item.date ? item.date === iso : item.event.day === day)))
                 const today = isToday(column)
                 return html`<div
@@ -960,10 +1088,12 @@ export class WeekPlanner extends LitElement {
                   @click=${(event: MouseEvent) => this.handleDayClick(event, index)}
                   @pointermove=${(event: PointerEvent) => this.handleDayHover(event, index)}
                   @pointerleave=${() => (this.hover = undefined)}
+                  @pointerdown=${(event: PointerEvent) => paint && this.painter?.start(event)}
                 >
                   ${Array.from({ length: hours }, () => html`<div class="hour-line"></div>`)}
                   ${editable ? this.renderAdd(column, dayName, placed, firstHour, firstHour + hours) : nothing}
-                  ${hover?.column === index ? html`<div class="slot-hover" aria-hidden="true" style=${block(hover.from, Math.min(1440, hover.from + 60))}></div>` : nothing}
+                  ${spans[column.weekday].map((span) => this.drawRange(span, column.weekday, dayName, block(span.from, span.to)))}
+                  ${hover?.column === index ? html`<div class="slot-hover" aria-hidden="true" style=${block(hover.from, Math.min(1440, hover.from + (paint ? this.snap : 60)))}></div>` : nothing}
                   ${placed.map((item) => this.renderEvent(item, dayName, firstHour, index))}
                   ${
                     preview?.column === index

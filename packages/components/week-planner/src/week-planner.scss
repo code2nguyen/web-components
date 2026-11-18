@@ -45,6 +45,9 @@
     preview--color: rgb(2, 101, 220),
     event__dragging--opacity: 0.4,
     resize-handle--height: 6px,
+    range--background: rgba(2, 101, 220, 0.2),
+    range--color: #18181b,
+    range--border-radius: 0px,
   )
 );
 
@@ -257,6 +260,8 @@
 }
 
 .grid {
+  // The containing block of the paint cursor, placed in a day's grid area.
+  position: relative;
   display: grid;
   grid-template-columns: repeat(7, var(--day-width, minmax(0, 1fr)));
 }
@@ -395,7 +400,8 @@
 // Blocks drawn on the grid like an event: the hour under the pointer, a drag's landing place, the add button.
 .slot-hover,
 .preview,
-.add {
+.add,
+.cursor {
   position: absolute;
   top: calc(var(--from) * #{css.cssVar(hour--height)} + 1px);
   right: 2px;
@@ -537,5 +543,69 @@
     content: '';
     border-radius: 999px;
     background: inherit;
+  }
+}
+
+// With `paint`: a stroke must not select text or start a native drag (WebKit then cancels the pointer), nor scroll the
+// page under a finger; the events stay on view but let the stroke through.
+.grid.paint {
+  -webkit-user-select: none;
+  user-select: none;
+
+  .day {
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .event {
+    pointer-events: none;
+  }
+}
+
+// A painted range, under the events, across the whole column so merged cells read as one band.
+.range {
+  position: absolute;
+  top: calc(var(--from) * #{css.cssVar(hour--height)});
+  right: 0;
+  left: 0;
+  display: flex;
+  overflow: hidden;
+  height: calc(var(--span) * #{css.cssVar(hour--height)});
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0 6px;
+  padding: 2px 5px;
+  border-radius: css.cssVar(range--border-radius);
+  background: css.cssVar(range--background);
+  color: css.cssVar(range--color);
+  font-size: css.cssVar(event--font-size);
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.range-label {
+  font-weight: css.cssVar(event--font-weight);
+}
+
+.range-time {
+  font-variant-numeric: tabular-nums;
+}
+
+// The keyboard's paint cursor: one cell in a day's grid area, invisible until it has focus.
+.cursor {
+  z-index: 4;
+  grid-row: 2;
+  margin: 0;
+  padding: 0;
+  border: css.cssVar(preview--border);
+  background: transparent;
+  opacity: 0;
+
+  // modern-web-ignore: bare-focus-style the cursor is invisible until focused, so it must show on any focus, as the "New event" button does
+  &:focus {
+    opacity: 1;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
   }
 }
