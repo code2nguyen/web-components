@@ -392,7 +392,7 @@ export class List extends LitElement {
     // existed, and no slotchange follows: the rows would never join the list's selection. A client render gets one.
     // After the first update completes: the sync updates the list again, which inside `firstUpdated` Lit flags as an
     // update scheduled from an update. The hydrating render itself had to match the server's, so it cannot sync first.
-    if (this.serverRendered && this.listItemSlot?.assignedElements().length) void this.updateComplete.then(() => this.handleSlotChange())
+    if (this.serverRendered && this.items.length) void this.updateComplete.then(() => this.handleSlotChange())
   }
 
   protected override updated(changedProperties: PropertyValueMap<this>): void {
