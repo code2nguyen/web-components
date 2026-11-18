@@ -384,6 +384,12 @@ export class List extends LitElement {
     }
   }
 
+  protected override firstUpdated(): void {
+    // A server-rendered list (a declarative shadow root, as inside a hydrating `c2-select`) had its rows assigned before
+    // the `slotchange` listener existed, and no slotchange follows: the rows would never join the list's selection.
+    if (this.listItemSlot?.assignedElements().length) this.handleSlotChange()
+  }
+
   protected override updated(changedProperties: PropertyValueMap<this>): void {
     if (changedProperties.has('value') || changedProperties.has('disabled')) {
       this.syncRows()
