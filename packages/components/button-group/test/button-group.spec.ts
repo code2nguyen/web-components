@@ -254,6 +254,20 @@ test('an item moved out of a single-selection group is a toggle button again', a
   const moved = page.locator('#elsewhere').getByRole('button', { name: 'Left' })
   await expect(moved).toBeVisible()
   await expect(moved).not.toHaveAttribute('aria-checked', /.*/)
+  await expect(moved).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('the items of a removed single-selection group are toggle buttons again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group><div id="elsewhere"></div>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  await page.evaluate(() => {
+    const group = document.querySelector('c2-button-group')!
+    document.querySelector('#elsewhere')!.append(...group.children)
+    group.remove()
+  })
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.locator('#elsewhere').getByRole('button', { name: 'Left' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('#elsewhere').getByRole('button', { name: 'Right' })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('a single-selection group with an item that has no radio mode stays a group of toggle buttons', async ({ page, renderScenario }) => {

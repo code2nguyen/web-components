@@ -17,6 +17,27 @@ export type ButtonGroupAppearance = 'joined' | 'segmented'
 export type ButtonGroupSize = 's' | 'm' | 'l'
 
 const GROUP_DISABLED = 'data-c2-button-group-disabled'
+
+/**
+ * Connected groups waiting for a `c2-` item tag to be defined, by tag: one `whenDefined` per tag for the page, and a
+ * group leaves the list when it is removed, so a tag that is never defined (a typo, a module never imported) does not
+ * keep a removed group alive.
+ */
+const waitingGroups = new Map<string, Map<object, () => void>>()
+
+function waitForTag(tag: string, group: object, sync: () => void) {
+  let groups = waitingGroups.get(tag)
+  if (!groups) {
+    groups = new Map()
+    waitingGroups.set(tag, groups)
+    customElements.whenDefined(tag).then(() => {
+      const waiting = waitingGroups.get(tag)
+      waitingGroups.delete(tag)
+      waiting?.forEach((callback) => callback())
+    })
+  }
+  if (!groups.has(group)) groups.set(group, sync)
+}
 /** Marks an item whose `tabindex` the group manages, holding the author's own value (empty when there was none). */
 const ROVING = 'data-c2-button-group-tabindex'
 
@@ -39,10 +60,10 @@ export interface ButtonGroup {
  * are `c2-button` or `c2-icon-button` elements (any element works for layout). With `selection="single"` the group is
  * a segmented control that keeps one item pressed; with `selection="multiple"` each item toggles independently. Set
  * `orientation="vertical"` to stack either appearance and use Up/Down keyboard navigation. The
- * pressed items carry `selected` (announced with `aria-checked` in single selection, `aria-pressed` in multiple), the
+ * pressed items carry `selected` (announced with `aria-checked` in single selection outside a toolbar, `aria-pressed` otherwise), the
  * group reports them in `value` and fires `input` and `change`.
  *
- * A single-selection group is a radio group: the `radiogroup` role, each item a `radio` with `aria-checked` (set through
+ * A single-selection group outside a toolbar is a radio group: the `radiogroup` role, each item a `radio` with `aria-checked` (set through
  * the item's `radio` property), one Tab stop that lands on the checked item, and the arrow keys moving the selection.
  * A multiple-selection group stays a `group` of toggle buttons (`aria-pressed`), each item its own Tab stop. Set `toolbar` for a toolbar: the group takes the `toolbar` role and stays one Tab stop, and the arrow
  * keys, Home and End move focus across every focusable child (buttons, `c2-select`, `c2-text-field`, links) without
@@ -175,8 +196,12 @@ export class ButtonGroup extends LitElement {
     this.observer?.disconnect()
     this.resizeObserver?.disconnect()
     if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame)
+    for (const groups of waitingGroups.values()) groups.delete(this)
     // Removed, the group no longer holds them: its items are toggle buttons again until it is connected and syncs.
-    for (const item of this.radioItemsSet) (item as HTMLElement & { radio: boolean }).radio = false
+    for (const item of this.radioItemsSet) {
+      ;(item as HTMLElement & { radio: boolean }).radio = false
+      item.setAttribute('toggle', '')
+    }
     this.radioItemsSet.clear()
     this.radioMode = false
   }
@@ -280,8 +305,8 @@ export class ButtonGroup extends LitElement {
    * Set by {@link syncItems}.
    */
   private radioMode = false
-  /** Tags of items not defined yet, whose definition re-syncs the group. */
-  private readonly awaitedTags = new Set<string>()
+  /** Items whose `radio` waits for their first update, so a second sync does not queue another wait. */
+  private readonly pendingRadio = new WeakSet<HTMLElement>()
 
   /** `toolbar`, `radiogroup` for a group of radios, else `group`. */
   private get groupRole(): 'toolbar' | 'radiogroup' | 'group' {
@@ -305,14 +330,7 @@ export class ButtonGroup extends LitElement {
     const undefinedTags = [...new Set(items.map((item) => item.localName).filter((tag) => tag.includes('-') && !customElements.get(tag)))]
     // Only c2 items are waited for: another tag may never be defined (a layout element, a scoped registry), and a
     // pending promise would keep the group alive. Such a group stays a group of toggle buttons until it syncs again.
-    for (const tag of undefinedTags.filter((name) => name.startsWith('c2-'))) {
-      if (this.awaitedTags.has(tag)) continue
-      this.awaitedTags.add(tag)
-      customElements.whenDefined(tag).then(() => {
-        this.awaitedTags.delete(tag)
-        if (this.isConnected) this.syncItems()
-      })
-    }
+    for (const tag of undefinedTags) if (tag.startsWith('c2-')) waitForTag(tag, this, () => this.syncItems())
     const radio = !this.toolbar && selection === 'single' && items.length > 0 && !undefinedTags.length && items.every((item): boolean => 'radio' in item)
     if (radio !== this.radioMode) {
       this.radioMode = radio
@@ -328,6 +346,7 @@ export class ButtonGroup extends LitElement {
       const owner = item.parentElement
       if (owner !== this && owner?.localName === 'c2-button-group') continue
       ;(item as HTMLElement & { radio: boolean }).radio = false
+      item.setAttribute('toggle', '')
     }
     items.forEach((item, index) => {
       // `radio` is a property, not an attribute: nothing is written on the author's children that a server render
@@ -335,15 +354,21 @@ export class ButtonGroup extends LitElement {
       if (selectable && !radio) item.setAttribute('toggle', '')
       else item.removeAttribute('toggle')
       if (radio) {
-        this.radioItemsSet.add(item)
         const element = item as HTMLElement & { radio: boolean; hasUpdated?: boolean; updateComplete?: Promise<unknown> }
         // Not before the item's first update: a server-rendered item hydrates against the server's markup, which knows
         // nothing of the group, and a value written before then would not reach its DOM.
         if (element.hasUpdated === false && element.updateComplete) {
-          element.updateComplete.then(() => {
-            if (element.parentElement === this && this.radioMode) element.radio = true
-          })
-        } else element.radio = true
+          if (!this.pendingRadio.has(element)) {
+            this.pendingRadio.add(element)
+            element.updateComplete.then(() => {
+              this.pendingRadio.delete(element)
+              if (element.parentElement === this && this.radioMode) this.syncItems()
+            })
+          }
+        } else {
+          element.radio = true
+          this.radioItemsSet.add(item)
+        }
       } else if ((item as HTMLElement & { radio?: boolean }).radio) {
         // The group stopped being single, or the item arrived as a radio from a single-selection group.
         ;(item as HTMLElement & { radio: boolean }).radio = false
