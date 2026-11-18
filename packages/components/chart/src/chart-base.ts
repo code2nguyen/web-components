@@ -285,6 +285,9 @@ export interface ChartBase {
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
 
+  /** Whether the first render hydrates server-rendered markup (a declarative shadow root was there on construction). */
+  #hydrating = !isServer && this.shadowRoot !== null
+
   // State is exposed as custom states, never as host attributes: an attribute written on the host after the engine
   // loads is one the server never rendered, which a hydrating framework reports as a mismatch.
   protected readonly internals = this.attachInternals()
@@ -562,6 +565,11 @@ export abstract class ChartBase extends LitElement {
    * well, so a chart whose initial layout is zero-sized still draws when its container becomes measurable.
    */
   protected override firstUpdated(): void {
+    if (this.#hydrating) {
+      this.#hydrating = false
+      // After the hydrating render matched the server's: a chart that really is misconfigured shows its error now.
+      if (this.validationError()) queueMicrotask(() => this.requestUpdate())
+    }
     if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
     // The canvas says nothing: the plot is one image, named in `#renderAccessibleView`. Set on the shadow node, never the host.
     if (this.usesSharedAccessibleView) this.plotElement?.setAttribute('role', 'img')
@@ -1333,7 +1341,11 @@ export abstract class ChartBase extends LitElement {
   }
 
   private renderState(): TemplateResult | typeof nothing {
-    const error = this.error || this.validationError()
+    // A server cannot see the `c2-chart-series` children, so it cannot tell a chart missing a series from one whose
+    // series are declared in markup: validating there rendered "needs two series" for a correct chart, and the
+    // client then failed to hydrate it. The client reads the children before its first render and validates then.
+    // A client hydrating that markup renders it once as the server did, then validates (see `firstUpdated`).
+    const error = this.error || (isServer || this.#hydrating ? '' : this.validationError())
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
     if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
