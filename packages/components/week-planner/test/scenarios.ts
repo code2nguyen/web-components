@@ -69,6 +69,37 @@ if (scenario === 'dated-narrow') subject.style.width = '360px'
 if (scenario.startsWith('editable')) subject.editable = true
 if (scenario === 'editable-snap') subject.snapMinutes = 15
 if (scenario === 'editable-dateless') subject.date = ''
+// Paint scenarios: a typical week with Tuesday 9:00–11:00 painted and one event, which the paint passes through.
+if (scenario.startsWith('paint')) {
+  subject.paint = true
+  subject.events = subject.events.filter((event) => event.id === 'standup')
+  subject.ranges = [{ day: 'tue', start: '09:00', end: '11:00' }]
+}
+if (scenario === 'paint-category') {
+  subject.paintValue = 'peak'
+  subject.ranges = [
+    { day: 'tue', start: '09:00', end: '11:00', value: 'peak' },
+    { day: 'thu', start: '10:00', end: '12:00', value: 'off peak' },
+  ]
+}
+if (scenario === 'paint-editable') subject.editable = true
+if (scenario === 'paint-narrow') subject.style.width = '360px'
+if (scenario === 'paint-overlap')
+  subject.ranges = [
+    { day: 'mon', start: '09:00', end: '17:00' },
+    { day: 'mon', start: '12:00', end: '13:00', value: 'lunch' },
+  ]
+if (scenario === 'paint-snap') subject.snapMinutes = 45
+if (scenario === 'paint-render') subject.renderRange = ({ range, dayName }) => `${dayName}: ${range.start} to ${range.end}`
+const queued: (typeof subject.ranges)[] = []
+Object.assign(window, { applyRanges: (count = 1) => queued.splice(0, count).forEach((ranges) => (subject.ranges = ranges)) })
+// Like an app would: the planner reports the new schedule, the page applies it.
+subject.addEventListener('ranges-change', ({ detail }) => {
+  output.value = `ranges:${JSON.stringify(detail.ranges)}`
+  // An app that applies each change later, as a framework re-render does: `applyRanges()` applies the next one.
+  if (scenario === 'paint-async') queued.push(detail.ranges)
+  else subject.ranges = detail.ranges
+})
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('parity-change', (event) => (output.value = `parity:${event.detail.parity}`))
 subject.addEventListener('week-change', (event) => {

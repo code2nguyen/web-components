@@ -2,7 +2,11 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { WeekPlanner } from '@c2n/components/week-planner'
+import { Button } from '@c2n/components/button'
+import { ButtonGroup } from '@c2n/components/button-group'
 import ExampleModules from '../../components/ExampleModules.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import WeekPlannerExamplesRuntime from '../../components/WeekPlannerExamplesRuntime.astro'
 
 <ExampleModules />
 
@@ -94,3 +98,159 @@ The hour height sets how dense the week reads; the event and today-column variab
 ```
 
 </GalleryGrid>
+
+## Painted schedules
+
+With `paint`, the user drags across days and times to mark weekly ranges such as opening hours or when someone can
+work; a stroke that starts on a painted cell clears instead. The planner reports each stroke through `ranges-change`
+and the app assigns `detail.ranges` to `ranges`, as these cards do. From the keyboard, Tab to the cursor cell, move it
+with the arrows and press Space.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Opening hours
+<style>
+  .opening-hours {
+    --c2-week-planner__hour--height: 28px;
+    --c2-week-planner__range--background: rgba(15, 118, 110, 0.22);
+    --c2-week-planner__range--color: light-dark(#115e59, #5eead4);
+    --c2-week-planner__range--border-radius: 4px;
+  }
+</style>
+<c2-week-planner
+  class="opening-hours"
+  paint
+  data-planner-demo="editable"
+  heading="Opening hours"
+  locale="en-US"
+  week-start="monday"
+  start-hour="7"
+  end-hour="21"
+  ranges='[{"day":"mon","start":"09:00","end":"18:00"},{"day":"tue","start":"09:00","end":"18:00"},{"day":"wed","start":"09:00","end":"13:00"},{"day":"thu","start":"09:00","end":"20:00"},{"day":"fri","start":"09:00","end":"18:00"},{"day":"sat","start":"10:00","end":"16:00"}]'
+></c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=Time-of-use tariff
+<style>
+  .tariff {
+    --c2-week-planner__hour--height: 22px;
+    --c2-week-planner__range--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .tariff::part(range-peak) {
+    background: rgba(220, 38, 38, 0.22);
+  }
+  .tariff::part(range-shoulder) {
+    background: rgba(217, 119, 6, 0.24);
+  }
+</style>
+<c2-week-planner
+  class="tariff"
+  paint
+  paint-value="peak"
+  snap-minutes="60"
+  data-planner-demo="editable"
+  heading="Time-of-use tariff"
+  locale="en-US"
+  week-start="monday"
+  start-hour="6"
+  end-hour="23"
+  ranges='[{"day":"mon","start":"07:00","end":"10:00","value":"shoulder"},{"day":"mon","start":"17:00","end":"21:00","value":"peak"},{"day":"tue","start":"07:00","end":"10:00","value":"shoulder"},{"day":"tue","start":"17:00","end":"21:00","value":"peak"},{"day":"wed","start":"07:00","end":"10:00","value":"shoulder"},{"day":"wed","start":"17:00","end":"21:00","value":"peak"},{"day":"thu","start":"07:00","end":"10:00","value":"shoulder"},{"day":"thu","start":"17:00","end":"21:00","value":"peak"},{"day":"fri","start":"07:00","end":"10:00","value":"shoulder"}]'
+>
+  <c2-button-group slot="actions" appearance="segmented" size="s" value="peak" aria-label="Rate to paint" data-week-planner-action="paint-value">
+    <c2-button value="peak">Peak</c2-button>
+    <c2-button value="shoulder">Shoulder</c2-button>
+  </c2-button-group>
+</c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=Copy a day
+<style>
+  .work-hours {
+    --c2-week-planner__hour--height: 26px;
+    --c2-week-planner__range--background: rgba(109, 40, 217, 0.18);
+    --c2-week-planner__range--color: light-dark(#5b21b6, #c4b5fd);
+  }
+</style>
+<c2-week-planner
+  class="work-hours"
+  paint
+  data-planner-demo="editable"
+  heading="When I can work"
+  locale="en-US"
+  week-start="monday"
+  start-hour="8"
+  end-hour="19"
+  ranges='[{"day":"mon","start":"09:00","end":"12:00"},{"day":"mon","start":"13:00","end":"17:30"},{"day":"wed","start":"10:00","end":"15:00"}]'
+>
+  <c2-button slot="actions" data-week-planner-action="copy-monday">Copy Monday to weekdays</c2-button>
+</c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=Heating schedule
+<style>
+  .heating {
+    --c2-week-planner__hour--height: 22px;
+    --c2-week-planner__range--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .heating::part(range-21) {
+    background: rgba(234, 88, 12, 0.24);
+  }
+  .heating::part(range-17) {
+    background: rgba(37, 99, 235, 0.18);
+  }
+</style>
+<c2-week-planner
+  class="heating"
+  paint
+  paint-value="21"
+  snap-minutes="30"
+  data-planner-demo="editable"
+  data-week-planner-example="renderer"
+  heading="Heating schedule"
+  locale="en-US"
+  week-start="monday"
+  start-hour="5"
+  end-hour="24"
+  ranges='[{"day":"mon","start":"06:00","end":"08:30","value":"21"},{"day":"mon","start":"08:30","end":"17:00","value":"17"},{"day":"mon","start":"17:00","end":"22:30","value":"21"},{"day":"sat","start":"08:00","end":"23:00","value":"21"},{"day":"sun","start":"08:00","end":"22:00","value":"21"}]'
+></c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=In French
+<style>
+  .dispo {
+    --c2-week-planner__hour--height: 26px;
+    --c2-week-planner__range--background: rgba(2, 132, 199, 0.2);
+    --c2-week-planner__range--color: light-dark(#075985, #7dd3fc);
+  }
+</style>
+<c2-week-planner
+  class="dispo"
+  lang="fr"
+  locale="fr"
+  paint
+  data-planner-demo="editable"
+  heading="Mes disponibilités"
+  start-hour="8"
+  end-hour="18"
+  ranges='[{"day":"mon","start":"14:00","end":"18:00"},{"day":"thu","start":"09:00","end":"12:00"}]'
+></c2-week-planner>
+```
+
+</GalleryGrid>
+
+`renderRange` draws the content of each painted range from `{ range, dayName }`; the planner keeps the block, its place
+and its parts (`range`, and `range-<value>` for a value that is a plain word, which the cards above colour):
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { WeekPlannerRangeContext } from '@c2n/components/week-planner'
+
+planner.paint = true
+planner.paintValue = '21'
+planner.renderRange = ({ range }: WeekPlannerRangeContext) => html`<strong part="temperature">${range.value}°C</strong> <span>${range.start}–${range.end}</span>`
+planner.addEventListener('ranges-change', ({ detail }) => (planner.ranges = detail.ranges))
+// An action of your own in the `actions` slot:
+copyButton.addEventListener('click', () => planner.copyDay('mon', ['tue', 'wed', 'thu', 'fri']))
+```
+
+<WeekPlannerExamplesRuntime />
