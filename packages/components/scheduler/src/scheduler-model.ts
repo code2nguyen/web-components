@@ -191,3 +191,17 @@ export function nowIn(timeZone: string, now = Date.now()): number {
     return fromClock(wallClockAt(now, ''))
   }
 }
+
+// The first start, on the `step` grid and not before `from`, of `length` minutes inside one of `windows` (in order)
+// that no `busy` stretch overlaps; null when there is none.
+export function firstFree(windows: [number, number][], busy: [number, number][], length: number, from: number, step: number): number | null {
+  for (const [open, close] of windows) {
+    let start = Math.ceil(Math.max(open, from) / step) * step
+    while (start + length <= close) {
+      const clash = busy.filter(([begin, end]) => begin < start + length && end > start)
+      if (!clash.length) return start
+      start = Math.ceil(Math.max(...clash.map(([, end]) => end)) / step) * step
+    }
+  }
+  return null
+}
