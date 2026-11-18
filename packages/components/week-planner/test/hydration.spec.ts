@@ -43,7 +43,7 @@ test('a planner with its own locale is drawn in that language on the server and 
   await page.waitForFunction(() => document.documentElement.dataset.modulesReady === 'true')
   await page.evaluate((html) => window.hydrate(html), markup)
 
-  await expect(page.getByRole('button', { name: /^Semaine impaire/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: /^Odd week/ })).toHaveCount(0)
+  await expect(page.getByRole('radio', { name: /^Semaine impaire/ })).toBeVisible()
+  await expect(page.getByRole('radio', { name: /^Odd week/ })).toHaveCount(0)
   expect(errors).toEqual([])
 })

@@ -220,7 +220,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @tag c2-month-planner
  *
  * @event {CustomEvent<MonthPlannerEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
- * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
+ * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month, and when a server-rendered planner with no `month` moves to the visitor's month after hydration; `detail.month` is `YYYY-MM`.
  * @event {CustomEvent<MonthPlannerDayClickDetail>} day-click - With `editable`: a day's empty area was clicked, tapped or activated with Enter/Space; `detail.date` is `YYYY-MM-DD`. Does not bubble.
  * @event {CustomEvent<MonthPlannerRangeSelectDetail>} range-select - With `editable`: a press on one day was released on another; `detail.start` and `detail.end` are the first and last day (`YYYY-MM-DD`, inclusive, ordered). Does not bubble.
  * @event {CustomEvent<MonthPlannerEventChangeDetail>} event-change - With `editable`: an event bar was dragged, resized or moved with Alt+Arrow keys; `detail.event` is the entry from `events` and `detail.changes` its new `start` and `end`. The planner does not apply it. Does not bubble.
@@ -244,6 +244,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @cssproperty {border} [--c2-month-planner--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-month-planner--border-radius=8px]
  * @cssproperty {padding} [--c2-month-planner--padding=12px]
+ * @cssproperty {length} [--c2-month-planner--contain-intrinsic-inline-size=720px] - Width the planner asks for in a layout that sizes it from its content (a centred flex column, a table cell), capped by the space available. It is also the narrowest a content-sized wrapper around it can shrink (a `<div lang>` in a flex row): lower it there.
  * @cssproperty {font-family} [--c2-month-planner--font-family=inherit]
  * @cssproperty {font-size} [--c2-month-planner--font-size=14px]
  * @cssproperty {font-weight} [--c2-month-planner__title--font-weight=600]
@@ -321,11 +322,22 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
 export class MonthPlanner extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @state() private visibleMonth = beginningOfMonth(new Date())
+  /**
+   * The month on screen. A server-rendered planner starts on the month its server drew (`data-month` on the root),
+   * which is what hydration must match; without a `month`, it moves to the visitor's month once the clock is read.
+   */
+  @state() private visibleMonth = this.serverMonth() ?? beginningOfMonth(new Date())
   @state() private pickerOpen = false
   /** Day picked in the compact layout, as `YYYY-MM-DD`; its events are listed under the grid. */
   @state() private selectedDay = ''
-  @state() private pickerYear = new Date().getFullYear()
+  @state() private pickerYear = this.visibleMonth.getFullYear()
+  /**
+   * Whether the today marker may be drawn: never on the server, and not through the hydration of a server-rendered
+   * planner (a declarative shadow root is already there in the constructor), whose server may be on another day than
+   * the visitor. Once set, every render reads the clock again: the first render after midnight (a navigation, a new
+   * `events`) moves the marker. Nothing redraws the planner at midnight by itself.
+   */
+  @state() private clockReady = !isServer && !this.shadowRoot
   /** Month index (0–11) holding the picker's roving tab stop. */
   @state() private pickerFocus = 0
   @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
@@ -377,6 +389,35 @@ export class MonthPlanner extends LitElement {
       const month = parseMonth(this.month)
       if (month) this.visibleMonth = month
     }
+  }
+
+  /** The month a server render drew, read from its declarative shadow root; undefined when not server-rendered. */
+  private serverMonth(): Date | undefined {
+    const drawn = this.shadowRoot?.querySelector<HTMLElement>('.c2-month-planner')?.dataset.month
+    return (drawn && parseMonth(drawn)) || undefined
+  }
+
+  /** Today as `YYYY-MM-DD`, read from the clock on each render; empty while {@link clockReady} is not set. */
+  private get today(): string {
+    return this.clockReady ? toIso(new Date()) : ''
+  }
+
+  protected override firstUpdated() {
+    // After this update, not from inside it, so it does not schedule a second update while the first one runs.
+    if (!this.clockReady && !isServer)
+      queueMicrotask(() => {
+        this.clockReady = true
+        // The server's month, which may not be the visitor's: with no `month` to keep, show the visitor's.
+        // Reported like a navigation, without pinning `month`, so an app that loads events per month loads this one.
+        const current = beginningOfMonth(new Date())
+        if (!parseMonth(this.month) && toMonth(current) !== toMonth(this.visibleMonth)) {
+          this.visibleMonth = current
+          this.pickerYear = current.getFullYear()
+          this.dispatchEvent(
+            new CustomEvent<MonthPlannerMonthChangeDetail>('month-change', { detail: { month: toMonth(current) }, bubbles: true, composed: true }),
+          )
+        }
+      })
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -576,7 +617,9 @@ export class MonthPlanner extends LitElement {
   private get shownDay(): string {
     const month = toMonth(this.visibleMonth)
     if (this.selectedDay.startsWith(month)) return this.selectedDay
-    const today = toIso(new Date())
+    // Today once the client's clock is read (see `clockReady`): the server may be on another day than the visitor, and a
+    // hydrating render would keep its choice. Until then, the 1st of the month.
+    const today = this.today
     return today.startsWith(month) ? today : toIso(this.visibleMonth)
   }
 
@@ -961,7 +1004,7 @@ export class MonthPlanner extends LitElement {
     const heading = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' })
     const range = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' })
     const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
-    const today = toIso(new Date())
+    const today = this.today
     const days = []
     for (let day = first; day < next; day = addDays(day, 1)) {
       const value = toIso(day)
@@ -986,7 +1029,7 @@ export class MonthPlanner extends LitElement {
     const title = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(this.visibleMonth)
     const weekdays = new Intl.DateTimeFormat(locale, { weekday: 'short' })
     const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
-    const today = toIso(new Date())
+    const today = this.today
     const first = this.firstGridDay
     const last = beginningOfMonth(this.visibleMonth, 1)
     const weeks = Math.ceil(dayDiff(first, last) / 7)
@@ -999,6 +1042,7 @@ export class MonthPlanner extends LitElement {
     const gesture = this.preview ? (this.gesture?.kind === 'move' ? 'moving' : 'resizing') : ''
     return html`<section
       class="c2-month-planner ${this.editable ? 'editable' : ''} ${gesture}"
+      data-month=${toMonth(this.visibleMonth)}
       aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || title}
       aria-labelledby=${labelledByHeading ? 'heading' : nothing}
     >

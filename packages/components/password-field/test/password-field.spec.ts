@@ -157,3 +157,52 @@ test('an own disabled removed inside a disabled fieldset stays disabled until th
   await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = false))
   await expect(input).toBeEnabled()
 })
+
+test('draws its own text in the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-password-field meter requirements="length;number" minlength="10" value="Abcdefgh1!xyz"></c2-password-field></div>')
+  await expect(page.getByRole('textbox', { name: 'Mot de passe' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Afficher le mot de passe' })).toBeVisible()
+  await expect(page.getByRole('meter', { name: 'Robustesse du mot de passe' })).toHaveAttribute('aria-valuetext', 'Robuste')
+  await expect(page.getByRole('list', { name: 'Règles du mot de passe' }).getByRole('listitem')).toHaveText([
+    'Au moins 10 caractères, respectée',
+    'Un chiffre, respectée',
+  ])
+})
+
+test('a text property still overrides its message, and an empty caps-lock-text turns the warning off', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-password-field aria-label="Pin" meter strength-labels=";;;;Excellent" toggle-label="Reveal" caps-lock-text="" value="Abcdefgh1!xyz"></c2-password-field>',
+  )
+  await expect(page.getByRole('button', { name: 'Reveal' })).toBeVisible()
+  await expect(page.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Excellent')
+  const input = page.locator('c2-password-field').locator('input')
+  await input.click()
+  await input.evaluate((element) => element.dispatchEvent(new KeyboardEvent('keyup', { key: 'A', modifierCapsLock: true, bubbles: true, composed: true })))
+  await expect(page.getByRole('status')).toHaveText('')
+})
+
+test('caps-lock-text reads as its message until set, and goes back to it when the attribute is removed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field aria-label="Pin" caps-lock-text=""></c2-password-field>')
+  const field = page.locator('c2-password-field')
+  expect(await field.evaluate((element: HTMLElement & { capsLockText: string }) => element.capsLockText)).toBe('')
+  await field.evaluate((element) => element.removeAttribute('caps-lock-text'))
+  expect(await field.evaluate((element: HTMLElement & { capsLockText: string }) => element.capsLockText)).toBe('Caps Lock is on')
+})
+
+test('an empty requirements-message leaves the field valid while a requirement is unmet', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field aria-label="Pin" requirements="number" requirements-message="" value="abc"></c2-password-field>')
+  const field = page.locator('c2-password-field')
+  expect(await field.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(true)
+  await field.evaluate((element) => element.removeAttribute('requirements-message'))
+  await expect.poll(() => field.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(false)
+})
+
+test('a checklist label follows translations added after the field rendered', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="de"><c2-password-field aria-label="Pin" requirements="number" value="abc"></c2-password-field></div>')
+  await expect(page.getByRole('listitem')).toHaveText('One number, not met')
+  await page.evaluate(() => {
+    const { addTranslations } = window as unknown as { addTranslations: (languages: Record<string, Record<string, Record<string, string>>>) => void }
+    addTranslations({ de: { 'password-field': { number: 'Eine Ziffer', requirementNotMet: ', nicht erfüllt' } } })
+  })
+  await expect(page.getByRole('listitem')).toHaveText('Eine Ziffer, nicht erfüllt')
+})

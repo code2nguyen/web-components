@@ -14,10 +14,11 @@
     border-bottom-left-radius: 8px,
     border-bottom-right-radius: 8px,
 
-    border-top: 1px solid variables.$color-border-light,
-    border-bottom: 1px solid variables.$color-border-light,
-    border-right: 1px solid variables.$color-border-light,
-    border-left: 1px solid variables.$color-border-light,
+    border: 1px solid variables.$color-border-light,
+    border-top: null,
+    border-bottom: null,
+    border-right: null,
+    border-left: null,
 
     background: variables.$color-bg-lighter,
     color: null,
@@ -42,6 +43,7 @@
     media--aspect-ratio: null,
     media--object-fit: cover,
 
+    hover--border: null,
     hover--border-top: null,
     hover--border-bottom: null,
     hover--border-right: null,
@@ -75,10 +77,10 @@
   border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
   border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
-  border-top: css.cssVar(border-top);
-  border-bottom: css.cssVar(border-bottom);
-  border-right: css.cssVar(border-right);
-  border-left: css.cssVar(border-left);
+  border-top: css.cssVar(border-top, border);
+  border-bottom: css.cssVar(border-bottom, border);
+  border-right: css.cssVar(border-right, border);
+  border-left: css.cssVar(border-left, border);
 
   background: css.cssVar(background);
   color: css.cssVar(color);
@@ -87,10 +89,10 @@
   transition: animation.standard(background), animation.standard(border-color), animation.standard(box-shadow), animation.standard(transform);
 
   @include pointer.hover {
-    border-top: css.cssVar(hover--border-top, border-top);
-    border-bottom: css.cssVar(hover--border-bottom, border-bottom);
-    border-right: css.cssVar(hover--border-right, border-right);
-    border-left: css.cssVar(hover--border-left, border-left);
+    border-top: css.cssVar(hover--border-top, hover--border, border-top, border);
+    border-bottom: css.cssVar(hover--border-bottom, hover--border, border-bottom, border);
+    border-right: css.cssVar(hover--border-right, hover--border, border-right, border);
+    border-left: css.cssVar(hover--border-left, hover--border, border-left, border);
 
     background: css.cssVar(hover--background, background);
     box-shadow: css.cssVar(hover--box-shadow, box-shadow);

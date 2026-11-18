@@ -87,15 +87,15 @@ test('shows every event each week while alternate weeks are off', async ({ page,
 test('opens on the current kind of week and switches to the other', async ({ page, scenario }) => {
   await scenario('alternate')
   // The current week's number sits in a badge on its own button only.
-  await expect(page.getByRole('button', { name: 'Even week 40 this week' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Odd week', exact: true })).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Even week 40 this week' })).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Odd week', exact: true })).toBeVisible()
   await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveJSProperty('value', 'even')
   await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^Gym/ })).toHaveCount(0)
   // Every-week events stay in both.
   await expect(page.getByRole('button', { name: /^Stand-up/ })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Odd week' }).click()
+  await page.getByRole('radio', { name: 'Odd week' }).click()
   await expect(page.getByRole('status')).toHaveText('parity:odd')
   await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveJSProperty('value', 'odd')
   await expect(page.getByRole('button', { name: /^Gym/ })).toBeVisible()
@@ -107,7 +107,7 @@ test('opens on the current kind of week and switches to the other', async ({ pag
 
 test('switches with the arrow keys', async ({ page, scenario }) => {
   await scenario('odd')
-  await page.getByRole('button', { name: 'Odd week' }).focus()
+  await page.getByRole('radio', { name: 'Odd week' }).focus()
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('status')).toHaveText('parity:even')
   await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
@@ -120,7 +120,7 @@ test('keeps the button group change event inside', async ({ page, scenario }) =>
     ;(window as Window & { leaks?: Event[] }).leaks = leaks
     document.querySelector('c2-week-planner')!.addEventListener('change', (event) => leaks.push(event))
   })
-  await page.getByRole('button', { name: 'Odd week' }).click()
+  await page.getByRole('radio', { name: 'Odd week' }).click()
   await expect(page.getByRole('status')).toHaveText('parity:odd')
   expect(await page.evaluate(() => (window as Window & { leaks?: Event[] }).leaks!.length)).toBe(0)
 })
@@ -157,8 +157,8 @@ test('speaks the language set in locale', async ({ page, scenario }) => {
   await scenario('french')
   await expect(page.getByRole('region', { name: 'Planning de la semaine' })).toBeVisible()
   await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveAttribute('aria-label', 'Type de semaine')
-  await expect(page.getByRole('button', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Semaine impaire', exact: true })).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Semaine impaire', exact: true })).toBeVisible()
   await expect(page.locator('c2-week-planner').locator('.day-header').first()).toHaveText('lun.')
   await expect(page.getByRole('group', { name: /^mercredi, aujourd/ })).toBeVisible()
 })
@@ -168,7 +168,7 @@ test.describe('without a locale attribute', () => {
 
   test("follows the browser's language", async ({ page, scenario }) => {
     await scenario('browser-locale')
-    await expect(page.getByRole('button', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
+    await expect(page.getByRole('radio', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
   })
 })
 
@@ -252,7 +252,7 @@ test('shows a heading that also names the planner', async ({ page, scenario }) =
   // Next to the switch, the heading takes the free space and pushes the switch to the end.
   await scenario('heading-alternate')
   const heading = await planner.getByRole('heading', { name: 'Team schedule' }).boundingBox()
-  const evenWeek = await planner.getByRole('button', { name: /^Even week/ }).boundingBox()
+  const evenWeek = await planner.getByRole('radio', { name: /^Even week/ }).boundingBox()
   expect(evenWeek!.x).toBeGreaterThan(heading!.x + heading!.width - 1)
   expect(Math.abs(evenWeek!.y + evenWeek!.height / 2 - (heading!.y + heading!.height / 2))).toBeLessThan(2)
 })
@@ -366,6 +366,10 @@ test.describe('dated week', () => {
   })
 
   test('pages a narrow strip with one pair of arrows, crossing into the next and previous weeks', async ({ page, scenario }) => {
+    const warnings: string[] = []
+    page.on('console', (message) => {
+      if (message.text().includes('scheduled an update')) warnings.push(message.text())
+    })
     await scenario('dated-narrow')
     const planner = page.locator('c2-week-planner')
     const status = page.getByRole('status')
@@ -387,6 +391,8 @@ test.describe('dated week', () => {
     await expect(status).toHaveText('week:2026-09-28..2026-10-04')
     await expect(planner.getByRole('group', { name: /^Sunday, October 4/ })).toBeInViewport({ ratio: 1 })
     await expect(planner.getByRole('button', { name: 'Previous days' })).toBeVisible()
+    // The arrows' edges are read after the strip moved, not from inside the update that moved it.
+    expect(warnings).toEqual([])
   })
 
   test('has no axe violations', async ({ page, scenario }) => {

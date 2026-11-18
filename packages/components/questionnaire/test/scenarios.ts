@@ -1,4 +1,5 @@
 import '../src/questionnaire'
+import './translations'
 import type { Questionnaire, QuestionnaireQuestion } from '../src/questionnaire'
 import { html } from 'lit'
 
@@ -49,6 +50,8 @@ main.innerHTML =
 const subject = document.querySelector<Questionnaire>('c2-questionnaire')!
 subject.questions = questions
 if (scenario === 'disabled') subject.disabled = true
+if (scenario === 'fr') main.lang = 'fr'
+if (scenario === 'own-label') subject.nextLabel = 'Continue'
 if (scenario.startsWith('inline')) {
   subject.inline = true
   subject.completeLabel = 'Submit'

@@ -27,7 +27,7 @@
         },
         {
           "click": {
-            "ax": "button",
+            "ax": "radio",
             "name": "Yearly",
             "exact": true
           }
@@ -58,7 +58,7 @@
         },
         {
           "click": {
-            "ax": "button",
+            "ax": "radio",
             "name": "Monthly",
             "exact": true
           }

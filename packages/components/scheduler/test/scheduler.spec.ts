@@ -317,3 +317,14 @@ test('renderSummary draws a summary row with one cell per column from the events
   await expect(summary.getByRole('rowheader')).toHaveText('Summary')
   await accessible(page)
 })
+
+test('scrolls to scroll-time once a scheduler drawn without a size is laid out', async ({ page, renderScenario }) => {
+  // Hidden while it first renders, as an island that hydrates before its frame is measured.
+  await renderScenario(`<div id="frame" style="display: none; width: 600px">${markup('scroll-time="13:00"')}</div>`)
+  const scroller = scheduler(page).locator('.scroller')
+  await expect(scheduler(page).locator('.scale')).toHaveCount(1)
+  expect(await scroller.evaluate((element) => element.scrollLeft)).toBe(0)
+  await page.locator('#frame').evaluate((element) => (element.style.display = 'block'))
+  // 13:00 is six 80px columns after 07:00.
+  await expect.poll(() => scroller.evaluate((element) => element.scrollLeft)).toBeGreaterThan(400)
+})

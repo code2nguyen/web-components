@@ -110,6 +110,22 @@ Curated looks for `c2-delta`. Open any card in the studio to start from it. The 
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=No arrow
+<style>
+  .delta-no-arrow {
+    display: grid;
+    gap: 6px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    --c2-delta__arrow--display: none;
+  }
+</style>
+<div class="delta-no-arrow">
+  <c2-delta type="percent" sign-display="negative" value="0.124"><span slot="comparison">vs last month</span></c2-delta>
+  <c2-delta type="percent" sign-display="negative" value="-0.031"><span slot="comparison">vs last month</span></c2-delta>
+</div>
+```
+
 ```html tag=MdxCodeBlock,label=Brand colours
 <style>
   .delta-brand {

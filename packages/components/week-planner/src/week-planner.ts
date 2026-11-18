@@ -490,7 +490,8 @@ export class WeekPlanner extends LitElement {
           const target = scroller.querySelector<HTMLElement>('.day-header.today') ?? scroller.querySelector<HTMLElement>('.day-header')
           if (target) scroller.scrollLeft = target.offsetLeft
         }
-        this.updateEdges()
+        // The edges are state: read them once this update is over, or it schedules a second one from inside itself.
+        queueMicrotask(() => this.isConnected && this.updateEdges())
       }
       this.landing = undefined
       this.renderedWeek = week

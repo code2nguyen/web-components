@@ -173,6 +173,27 @@ grid; today is marked even on a day without events.
 ></c2-month-planner>
 ```
 
+```html tag=MdxCodeBlock,label=Content-sized sidebar
+<style>
+  .planner-sidebar {
+    display: flex;
+    width: 100%;
+  }
+  /* The wrapper sizes itself from the planner: ask for a sidebar's width, not the 720px default. */
+  .planner-sidebar-panel {
+    --c2-month-planner--contain-intrinsic-inline-size: 300px;
+  }
+</style>
+<div class="planner-sidebar">
+  <div class="planner-sidebar-panel">
+    <c2-month-planner
+      month="2026-09"
+      events='[{"id":"offsite","title":"Team offsite","start":"2026-09-16","end":"2026-09-18","color":"#4f46e5"},{"id":"launch","title":"Launch","start":"2026-09-24"}]'
+    ></c2-month-planner>
+  </div>
+</div>
+```
+
 </GalleryGrid>
 
 ## Change calendar

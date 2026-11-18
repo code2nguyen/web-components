@@ -427,12 +427,18 @@ export class Scheduler extends LitElement {
   /** The range and columns of the last render, which the pointer and keyboard handlers work in. */
   private layout: { range: SchedulerRange; columns: SchedulerColumn[]; rows: Row[] } | null = null
   private scrolledFor = ''
+  /** Waits for the scroller to get a size when `scroll-time` was asked for before the grid had any layout. */
+  private scrollRetry?: ResizeObserver
+  /** The `scroll-time` key the retry is waiting for; an update asking for the same one leaves it in place. */
+  private scrollRetryKey = ''
   /** `bands` parsed once per array assigned. */
   private parsedBands?: { source: unknown; list: { start: number; end: number; label?: string; color: string | null; resource?: string }[] }
 
   override connectedCallback() {
     super.connectedCallback()
     this.clock = setInterval(() => (this.now = nowIn(this.timeZone)), 30_000)
+    // A retry for `scroll-time` dropped on disconnect resumes now, not at the next clock tick.
+    if (this.hasUpdated && this.scrolledFor !== this.scrollKey) this.requestUpdate()
   }
 
   override disconnectedCallback() {
@@ -440,6 +446,7 @@ export class Scheduler extends LitElement {
     clearInterval(this.clock)
     this.endGesture()
     this.clearRefocus()
+    this.stopScrollRetry()
   }
 
   protected override firstUpdated() {
@@ -455,10 +462,18 @@ export class Scheduler extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    const key = `${this.view}|${this.anchorDay}|${this.scrollTime}`
+    const key = this.scrollKey
     if (this.scrolledFor !== key) {
-      this.scrolledFor = key
-      this.scrollToTime()
+      // A retry already waiting for this key is kept and watches the grid as drawn now: it scrolls once a target gets
+      // its size (a newly observed element reports at once), so this update forces no layout read of its own.
+      if (this.scrollRetry && this.scrollRetryKey === key) this.observeScrollTargets()
+      else if (this.scrollToTime()) {
+        this.scrolledFor = key
+        this.stopScrollRetry()
+      } else {
+        this.stopScrollRetry()
+        this.retryScroll(key)
+      }
     }
     if (changed.has('events') && this.refocus) {
       const id = this.refocus
@@ -722,18 +737,62 @@ export class Scheduler extends LitElement {
     return firstDayOfWeek(this.effectiveLocale)
   }
 
-  private scrollToTime() {
+  /** What `scroll-time` was last applied for: the view, the day and the time. */
+  private get scrollKey(): string {
+    return `${this.view}|${this.anchorDay}|${this.scrollTime}`
+  }
+
+  /** Scrolls the day to `scroll-time`; false while the grid is not drawn or has no layout yet (hidden, not yet sized). */
+  private scrollToTime(): boolean {
     const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
     const timeline = this.renderRoot.querySelector<HTMLElement>('.scale')
-    if (!scroller || !timeline || !this.layout) return
+    // Not drawn yet: try again on the next update, or when the retry sees the grid get a size.
+    if (!scroller) return false
     if (this.currentView !== 'day') {
       scroller.scrollLeft = 0
-      return
+      return true
     }
     const time = parseClock(this.scrollTime)
-    if (time === null) return
+    if (time === null) return true
+    if (!timeline || !this.layout || !scroller.clientWidth || !timeline.offsetWidth) return false
     scroller.scrollLeft = fractionOf(this.layout.range, this.layout.range.days[0] + time) * timeline.offsetWidth
+    return true
   }
+
+  /** Scrolls once the scroller is laid out: an island hydrated while its frame measured 0 wide would stay at `day-start`. */
+  private retryScroll(key: string) {
+    if (typeof ResizeObserver === 'undefined') return
+    this.scrollRetryKey = key
+    this.scrollRetry = new ResizeObserver(() => {
+      if (!this.scrollToTime()) return
+      this.scrolledFor = key
+      this.stopScrollRetry()
+    })
+    this.observeScrollTargets()
+  }
+
+  /**
+   * Watches the scroller and the timeline as drawn now: a re-render may have replaced them, and either may get its
+   * width last. An element already watched is left alone; one a re-render replaced is let go.
+   */
+  private observeScrollTargets() {
+    const observer = this.scrollRetry
+    if (!observer) return
+    const current = ['.scroller', '.scale'].flatMap((selector) => this.renderRoot.querySelector<HTMLElement>(selector) ?? [])
+    for (const element of this.scrollTargets) if (!current.includes(element)) observer.unobserve(element)
+    for (const element of current) if (!this.scrollTargets.includes(element)) observer.observe(element)
+    this.scrollTargets = current
+  }
+
+  private stopScrollRetry() {
+    this.scrollRetry?.disconnect()
+    this.scrollRetry = undefined
+    this.scrollRetryKey = ''
+    this.scrollTargets = []
+  }
+
+  /** The elements the retry watches. */
+  private scrollTargets: HTMLElement[] = []
 
   // ------------------------------------------------------------------------------------------------- pointer
 

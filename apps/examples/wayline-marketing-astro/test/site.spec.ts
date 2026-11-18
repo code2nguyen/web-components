@@ -45,11 +45,11 @@ test('the billing toggle switches every price', async ({ page }) => {
   const prices = () => Promise.all(['Starter', 'Team', 'Business'].map((plan) => price(plan).textContent()))
   await expect.poll(prices).toEqual(['$0', '$24', '$49'])
 
-  await page.getByRole('button', { name: 'Yearly · save 20%' }).click()
+  await page.getByRole('radio', { name: 'Yearly · save 20%' }).click()
   await expect.poll(prices).toEqual(['$0', '$19', '$39'])
   await expect(page.locator('[data-billing-note]')).toContainText('Billed yearly')
 
-  await page.getByRole('button', { name: 'Monthly' }).click()
+  await page.getByRole('radio', { name: 'Monthly' }).click()
   await expect.poll(prices).toEqual(['$0', '$24', '$49'])
 })
 

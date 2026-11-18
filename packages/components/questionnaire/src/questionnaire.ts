@@ -6,6 +6,11 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './questionnaire.scss?inline'
 import { disabledByAncestor } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { formatList } from '@c2n/core/locale-helper.js'
+import { questionnaireMessages } from './messages'
+
+export { questionnaireMessages } from './messages'
 
 export type QuestionnaireQuestionType = 'select' | 'choice' | 'single' | 'multiple'
 export type QuestionnaireAnswer = string | string[]
@@ -180,20 +185,26 @@ export class Questionnaire extends LitElement {
 
   @state() private disabledByForm = false
 
-  /** Label of the forward action before the final question. */
-  @property({ attribute: 'next-label' }) nextLabel = 'Next'
+  /** Label of the forward action before the final question. Defaults to the `next` message ("Next"). */
+  @property({ attribute: 'next-label' }) nextLabel = ''
 
-  /** Label of the forward action on the final question. */
-  @property({ attribute: 'complete-label' }) completeLabel = 'Save'
+  /** Label of the forward action on the final question. Defaults to the `complete` message ("Save"). */
+  @property({ attribute: 'complete-label' }) completeLabel = ''
 
-  /** Label of the backward action. */
-  @property({ attribute: 'previous-label' }) previousLabel = 'Previous'
+  /** Label of the backward action. Defaults to the `previous` message ("Previous"). */
+  @property({ attribute: 'previous-label' }) previousLabel = ''
 
-  /** Label of the skip action. */
-  @property({ attribute: 'skip-label' }) skipLabel = 'Skip'
+  /** Label of the skip action. Defaults to the `skip` message ("Skip"). */
+  @property({ attribute: 'skip-label' }) skipLabel = ''
 
-  /** Text shown for a skipped question in the answer summary and the collapsed answer of an `inline` questionnaire. */
-  @property({ attribute: 'skipped-label' }) skippedLabel = 'Skipped'
+  /**
+   * Text shown for a skipped question in the answer summary and the collapsed answer of an `inline` questionnaire.
+   * Defaults to the `skipped` message ("Skipped").
+   */
+  @property({ attribute: 'skipped-label' }) skippedLabel = ''
+
+  /** The nearest `lang`, else the browser's language; a `lang` change redraws the questionnaire. */
+  private readonly msg = new LocalizeController(this, questionnaireMessages)
 
   @state() private showError = false
   @query('.option input') private firstOption?: HTMLInputElement
@@ -386,12 +397,14 @@ export class Questionnaire extends LitElement {
     const answer = this.answers[question.id]
     const values = Array.isArray(answer) ? answer : answer ? [answer] : []
     const labels = values.map((value) => question.options.find((option) => option.value === value)?.label ?? value)
-    return labels.length ? labels.join(', ') : this.skippedLabel
+    if (!labels.length) return this.skippedLabel || this.msg.t('skipped')
+    // A list in the page's language: "A, B" in English, "A、B" in Japanese.
+    return formatList(this.msg.locale, labels)
   }
 
   override render() {
     const question = this.question
-    if (!question) return html`<slot name="empty">No questions configured.</slot>`
+    if (!question) return html`<slot name="empty">${this.msg.t('empty')}</slot>`
     if (this.completed && this.inline) {
       return html`
         <div class="questionnaire">
@@ -412,7 +425,7 @@ export class Questionnaire extends LitElement {
           <slot name="header"></slot>
           <section class="summary" aria-live="polite">
             <slot name="summary">
-              <h2>Summary</h2>
+              <h2>${this.msg.t('summary')}</h2>
               <dl>
                 ${this.questions.map(
                   (item) =>
@@ -434,7 +447,7 @@ export class Questionnaire extends LitElement {
     return html`
       <div class="questionnaire">
         <slot name="header"></slot>
-        ${this.inline ? nothing : html`<div class="progress">Question ${this.current + 1} of ${this.questions.length}</div>`}
+        ${this.inline ? nothing : html`<div class="progress">${this.msg.t('progress', this.current + 1, this.questions.length)}</div>`}
         <section aria-labelledby="question-title" aria-describedby=${describedBy}>
           <h2 id="question-title">${question.title}</h2>
           ${question.description ? html`<p id="question-description">${question.description}</p>` : html`<span id="question-description" hidden></span>`}
@@ -484,7 +497,7 @@ export class Questionnaire extends LitElement {
           ${
             this.showError
               ? html`<p class="error" id="question-error" role="alert">
-                  ${question.errorMessage ?? (question.skippable ? 'Choose an answer or skip this question.' : 'Choose an answer to continue.')}
+                  ${question.errorMessage ?? this.msg.t(question.skippable ? 'requiredSkippable' : 'required')}
                 </p>`
               : nothing
           }
@@ -494,7 +507,9 @@ export class Questionnaire extends LitElement {
             ${
               this.current > 0 && !this.inline
                 ? html`<slot name="previous-button" @click=${this.previous}>
-                    <button class="secondary" part="previous-button" type="button" ?disabled=${this.effectiveDisabled}>${this.previousLabel}</button>
+                    <button class="secondary" part="previous-button" type="button" ?disabled=${this.effectiveDisabled}>
+                      ${this.previousLabel || this.msg.t('previous')}
+                    </button>
                   </slot>`
                 : nothing
             }
@@ -503,17 +518,23 @@ export class Questionnaire extends LitElement {
             ${
               question.skippable
                 ? html`<slot name="skip-button" @click=${this.skip}>
-                    <button class="secondary" part="skip-button" type="button" ?disabled=${this.effectiveDisabled}>${this.skipLabel}</button>
+                    <button class="secondary" part="skip-button" type="button" ?disabled=${this.effectiveDisabled}>
+                      ${this.skipLabel || this.msg.t('skip')}
+                    </button>
                   </slot>`
                 : nothing
             }
             ${
               this.isLastStep
                 ? html`<slot name="submit-button" @click=${this.next}>
-                    <button class="primary" part="submit-button" type="button" ?disabled=${this.effectiveDisabled}>${this.completeLabel}</button>
+                    <button class="primary" part="submit-button" type="button" ?disabled=${this.effectiveDisabled}>
+                      ${this.completeLabel || this.msg.t('complete')}
+                    </button>
                   </slot>`
                 : html`<slot name="next-button" @click=${this.next}>
-                    <button class="primary" part="next-button" type="button" ?disabled=${this.effectiveDisabled}>${this.nextLabel}</button>
+                    <button class="primary" part="next-button" type="button" ?disabled=${this.effectiveDisabled}>
+                      ${this.nextLabel || this.msg.t('next')}
+                    </button>
                   </slot>`
             }
           </div>
