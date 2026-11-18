@@ -403,25 +403,29 @@ export class PasswordField extends LitElement {
     if (!value) return 0
     const raw = this.scorer ? this.scorer(value) : scorePassword(value)
     const score = Math.max(0, Math.min(4, Math.round(Number(raw) || 0))) as PasswordStrength
-    return this.meetsRequirements(value) ? score : (Math.min(score, 1) as PasswordStrength)
+    return this.requirementsOf(value).every((requirement) => requirement.met) ? score : (Math.min(score, 1) as PasswordStrength)
   }
 
-  /** The requirements checked against `value`, each with its label (a built-in one in the page's language). */
+  /**
+   * The requirements checked against `value`, each with its label (a built-in one in the page's language). Kept for
+   * the last value, list, minimum and language asked for: render, `updated`, the strength and the validity all read it
+   * on every key.
+   */
   private requirementsOf(value: string): PasswordRequirementState[] {
     const minLength = this.requirementMinLength
-    return this.requirementEntries().flatMap(({ requirement, builtIn, id }) => {
+    const locale = this.msg.locale
+    const cached = this.requirementsCache
+    if (cached && cached.value === value && cached.list === this.requirements && cached.minLength === minLength && cached.locale === locale)
+      return cached.states
+    const states = this.requirementEntries().flatMap(({ requirement, builtIn, id }) => {
       const label = requirement.label ?? (builtIn && this.msg.t(builtIn.message, minLength))
       return label ? [{ id, label, met: this.requirementMet(requirement, builtIn, value, minLength) }] : []
     })
+    this.requirementsCache = { value, list: this.requirements, minLength, locale, states }
+    return states
   }
 
-  /** Whether `value` meets every requirement, without building their labels: the strength check runs on every key. */
-  private meetsRequirements(value: string): boolean {
-    const minLength = this.requirementMinLength
-    return this.requirementEntries().every(
-      ({ requirement, builtIn }) => !(requirement.label ?? builtIn) || this.requirementMet(requirement, builtIn, value, minLength),
-    )
-  }
+  private requirementsCache?: { value: string; list: unknown; minLength: number; locale: string; states: PasswordRequirementState[] }
 
   private get requirementMinLength(): number {
     return this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
@@ -572,7 +576,7 @@ export class PasswordField extends LitElement {
       this.internals.setValidity({})
       return
     }
-    const unmet = !!this.value && !this.meetsRequirements(this.value)
+    const unmet = !!this.value && this.requirementStates.some((requirement) => !requirement.met)
     this.input.setCustomValidity(this.customValidityMessage || (unmet ? this.requirementsMessage || this.msg.t('requirementsUnmet') : ''))
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
