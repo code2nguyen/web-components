@@ -10,6 +10,9 @@ const en = {
   previousWeek: 'Previous week',
   nextWeek: 'Next week',
   add: 'New event',
+  available: 'Available',
+  empty: 'Not set',
+  paintHint: 'Arrow keys move, Space paints or clears, Shift+Arrow paints while moving',
 }
 
 const fr: typeof en = {
@@ -22,6 +25,9 @@ const fr: typeof en = {
   previousWeek: 'Semaine précédente',
   nextWeek: 'Semaine suivante',
   add: 'Nouvel événement',
+  available: 'Disponible',
+  empty: 'Non défini',
+  paintHint: 'Flèches pour se déplacer, Espace pour peindre ou effacer, Maj+flèche pour peindre en se déplaçant',
 }
 
 const de: typeof en = {
@@ -34,6 +40,9 @@ const de: typeof en = {
   previousWeek: 'Vorherige Woche',
   nextWeek: 'Nächste Woche',
   add: 'Neuer Termin',
+  available: 'Verfügbar',
+  empty: 'Nicht festgelegt',
+  paintHint: 'Pfeiltasten bewegen, Leertaste markiert oder löscht, Umschalt+Pfeil markiert beim Bewegen',
 }
 
 const es: typeof en = {
@@ -46,6 +55,9 @@ const es: typeof en = {
   previousWeek: 'Semana anterior',
   nextWeek: 'Semana siguiente',
   add: 'Nuevo evento',
+  available: 'Disponible',
+  empty: 'Sin definir',
+  paintHint: 'Las flechas mueven, Espacio pinta o borra, Mayús+flecha pinta al moverse',
 }
 
 const it: typeof en = {
@@ -58,6 +70,9 @@ const it: typeof en = {
   previousWeek: 'Settimana precedente',
   nextWeek: 'Settimana successiva',
   add: 'Nuovo evento',
+  available: 'Disponibile',
+  empty: 'Non impostato',
+  paintHint: 'Le frecce spostano, Spazio colora o cancella, Maiusc+freccia colora spostandosi',
 }
 
 const pt: typeof en = {
@@ -70,6 +85,9 @@ const pt: typeof en = {
   previousWeek: 'Semana anterior',
   nextWeek: 'Próxima semana',
   add: 'Novo evento',
+  available: 'Disponível',
+  empty: 'Não definido',
+  paintHint: 'As setas movem, Espaço pinta ou apaga, Shift+seta pinta ao mover',
 }
 
 const nl: typeof en = {
@@ -82,6 +100,9 @@ const nl: typeof en = {
   previousWeek: 'Vorige week',
   nextWeek: 'Volgende week',
   add: 'Nieuwe afspraak',
+  available: 'Beschikbaar',
+  empty: 'Niet ingesteld',
+  paintHint: 'Pijltjestoetsen verplaatsen, spatie markeert of wist, Shift+pijl markeert tijdens het verplaatsen',
 }
 
 const vi: typeof en = {
@@ -94,6 +115,9 @@ const vi: typeof en = {
   previousWeek: 'Tuần trước',
   nextWeek: 'Tuần sau',
   add: 'Sự kiện mới',
+  available: 'Còn trống',
+  empty: 'Chưa đặt',
+  paintHint: 'Phím mũi tên để di chuyển, phím cách để tô hoặc xóa, Shift+mũi tên để tô khi di chuyển',
 }
 
 /**
