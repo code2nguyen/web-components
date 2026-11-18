@@ -44,3 +44,6 @@ const fr: { [K in keyof typeof passwordFieldMessages.en]: string } = {
 }
 
 addTranslations({ fr: { 'password-field': fr } })
+
+// Lets a test add a language after the field rendered, as an app that lazy-loads its translations does.
+;(window as unknown as { addTranslations: typeof addTranslations }).addTranslations = addTranslations

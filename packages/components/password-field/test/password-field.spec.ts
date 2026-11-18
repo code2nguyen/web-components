@@ -188,3 +188,21 @@ test('caps-lock-text reads as its message until set, and goes back to it when th
   await field.evaluate((element) => element.removeAttribute('caps-lock-text'))
   expect(await field.evaluate((element: HTMLElement & { capsLockText: string }) => element.capsLockText)).toBe('Caps Lock is on')
 })
+
+test('an empty requirements-message leaves the field valid while a requirement is unmet', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-password-field aria-label="Pin" requirements="number" requirements-message="" value="abc"></c2-password-field>')
+  const field = page.locator('c2-password-field')
+  expect(await field.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(true)
+  await field.evaluate((element) => element.removeAttribute('requirements-message'))
+  await expect.poll(() => field.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(false)
+})
+
+test('a checklist label follows translations added after the field rendered', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="de"><c2-password-field aria-label="Pin" requirements="number" value="abc"></c2-password-field></div>')
+  await expect(page.getByRole('listitem')).toHaveText('One number, not met')
+  await page.evaluate(() => {
+    const { addTranslations } = window as unknown as { addTranslations: (languages: Record<string, Record<string, Record<string, string>>>) => void }
+    addTranslations({ de: { 'password-field': { number: 'Eine Ziffer', requirementNotMet: ', nicht erfüllt' } } })
+  })
+  await expect(page.getByRole('listitem')).toHaveText('Eine Ziffer, nicht erfüllt')
+})
