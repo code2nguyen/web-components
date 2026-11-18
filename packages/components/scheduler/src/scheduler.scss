@@ -27,6 +27,9 @@
     band--color: color-mix(in srgb, currentColor 8%, transparent),
     event__pending--stripe-color: color-mix(in srgb, currentColor 16%, transparent),
     summary--background-color: #fafafa,
+    proposal--color: #16a34a,
+    proposal__tentative--color: #d97706,
+    proposal__busy--color: #dc2626,
     event--color: rgb(2, 101, 220),
     event--text-color: #18181b,
     event--border-radius: 6px,
@@ -120,7 +123,8 @@
 
 .nav:focus-visible,
 .group-toggle:focus-visible,
-.event:focus-visible {
+.event:focus-visible,
+.proposal:focus-visible {
   outline: css.cssVar(focus--outline);
   outline-offset: 2px;
 }
@@ -345,7 +349,9 @@
 .now,
 .cursor,
 .event,
-.preview {
+.preview,
+.proposal,
+.proposal-column {
   position: absolute;
   inset-inline-start: calc(var(--from) * 100%);
   width: calc((var(--to) - var(--from)) * 100%);
@@ -567,4 +573,59 @@
   border-inline-start: 1px solid css.cssVar(line--color);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+
+// ------------------------------------------------------------------------------------------------------- proposal
+// A column across every row in the attendee's state (free, tentative, busy), under the bars it is checked against,
+// and a block in the header in the worst state of them. While it is dragged it is neutral: the check runs on drop.
+.proposal,
+.proposal-column {
+  --_color: #{css.cssVar(proposal--color)};
+  box-sizing: border-box;
+  cursor: grab;
+
+  &.tentative {
+    --_color: #{css.cssVar(proposal__tentative--color)};
+  }
+
+  &.busy {
+    --_color: #{css.cssVar(proposal__busy--color)};
+  }
+
+  &.moving {
+    --_color: #{css.cssVar(muted--color)};
+  }
+}
+
+.proposal-column {
+  top: 0;
+  bottom: 0;
+  border-inline: 2px solid var(--_color);
+  background: color-mix(in srgb, var(--_color) 14%, transparent);
+}
+
+.proposal {
+  z-index: 1;
+  top: 3px;
+  bottom: 3px;
+  overflow: hidden;
+  padding: 0 8px;
+  border: 0;
+  border-radius: css.cssVar(event--border-radius);
+  // An inset ring rather than a border, which would push the resize handles off its edges.
+  box-shadow: inset 0 0 0 2px var(--_color);
+  background: color-mix(in srgb, var(--_color) 22%, #{css.cssVar(background-color)});
+  color: css.cssVar(color);
+  font: inherit;
+  font-size: css.cssVar(event--font-size);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  touch-action: none;
+}
+
+.proposal-content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

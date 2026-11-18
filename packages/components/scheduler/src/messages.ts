@@ -43,6 +43,15 @@ const en = {
   cancelled: 'Move cancelled',
   /** The line that marks the current time. */
   now: 'Now',
+  /** The `proposal` block without a `title`. */
+  proposal: 'Proposed time',
+  /** The proposal's name: `{0}` is its title, `{1}` its time, `{2}` who is free. */
+  proposalName: (title: string, time: string, status: string) => `${title}, ${time}, ${status}`,
+  allFree: 'everyone is free',
+  /** `{0}` lists the resources booked during the proposal. */
+  busy: (names: string) => `busy: ${names}`,
+  /** `{0}` lists the resources with only `pending` bookings then. */
+  tentative: (names: string) => `tentative: ${names}`,
 }
 
 export const schedulerMessages = defineMessages('scheduler', en)
