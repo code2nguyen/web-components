@@ -133,3 +133,15 @@ test('get_component on a secondary element of a package with no description prin
   )
   assert.match(out, /^Part of `@c2n\/badge`\.$/m)
 })
+
+test('the summary of a secondary element ends at an etc. that ends a sentence', () => {
+  const out = renderComponent(
+    {
+      ...badge,
+      description: 'Shows rows, columns, filters, etc. Sorting is built in.',
+      elements: [badge.elements[0], { ...badge.elements[0], tag: 'c2-badge-dot', className: 'BadgeDot' }],
+    },
+    { include, installed: null, concrete: { tag: 'c2-badge-dot', modulePath: '@c2n/badge', className: 'BadgeDot' } },
+  )
+  assert.match(out, /^Part of `@c2n\/badge`: Shows rows, columns, filters, etc\.$/m)
+})

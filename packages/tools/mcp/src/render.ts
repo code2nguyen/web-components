@@ -142,10 +142,10 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
 
 function firstSentence(text: string): string {
   const flat = text.trim().replace(/\s+/g, ' ')
-  // A sentence ends at `.`, `!` or `?` before a space and a capital, but not after an abbreviation such as `e.g.`.
+  // A sentence ends at `.`, `!` or `?` before a space and a capital, but not after `e.g.` or `i.e.` (`etc.` often ends one).
   const end = /[.!?](?= [A-Z(`*]|$)/g
   for (let match = end.exec(flat); match; match = end.exec(flat)) {
-    if (!/\b(?:e\.g|i\.e|etc|vs|cf)\.$/i.test(flat.slice(0, match.index + 1))) return flat.slice(0, match.index + 1)
+    if (!/\b(?:e\.g|i\.e)\.$/i.test(flat.slice(0, match.index + 1))) return flat.slice(0, match.index + 1)
   }
   return flat
 }
