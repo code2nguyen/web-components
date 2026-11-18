@@ -328,11 +328,11 @@ export class MonthPlanner extends LitElement {
   @state() private selectedDay = ''
   @state() private pickerYear = new Date().getFullYear()
   /**
-   * Today, as `YYYY-MM-DD`. Empty on the server and through the hydration of a server-rendered planner (a declarative
-   * shadow root is already there in the constructor), then set: the server's clock may be on another day than the
-   * visitor's, and a marker drawn from it would not match the first client render.
+   * Whether the today marker may be drawn: never on the server, and not through the hydration of a server-rendered
+   * planner (a declarative shadow root is already there in the constructor), whose server may be on another day than
+   * the visitor. Once set, every render reads the clock again, so the marker follows midnight.
    */
-  @state() private today = isServer || this.shadowRoot ? '' : toIso(new Date())
+  @state() private clockReady = !isServer && !this.shadowRoot
   /** Month index (0–11) holding the picker's roving tab stop. */
   @state() private pickerFocus = 0
   @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
@@ -386,9 +386,14 @@ export class MonthPlanner extends LitElement {
     }
   }
 
+  /** Today as `YYYY-MM-DD`, read from the clock on each render; empty while {@link clockReady} is not set. */
+  private get today(): string {
+    return this.clockReady ? toIso(new Date()) : ''
+  }
+
   protected override firstUpdated() {
     // After this update, not from inside it, so it does not schedule a second update while the first one runs.
-    if (!this.today && !isServer) queueMicrotask(() => (this.today = toIso(new Date())))
+    if (!this.clockReady && !isServer) queueMicrotask(() => (this.clockReady = true))
   }
 
   protected override updated(changed: PropertyValues<this>) {
