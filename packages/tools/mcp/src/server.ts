@@ -1,7 +1,8 @@
 /** The c2n MCP server: tools and resources over the bundled registry. */
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { importPath, installedPackage, umbrellaInstalled, withInstalledApi, withInstalledComponents } from './installed.ts'
+import { importPath, installedPackage, projectRoot, umbrellaInstalled, withInstalledApi, withInstalledComponents } from './installed.ts'
+import { FEEDBACK_KINDS, buildIssueDraft, detectFramework, findDuplicates, renderFeedbackReport, type FeedbackEnvironment } from './feedback.ts'
 import { generateCode, type CodeFormat } from './lib/generate-code.ts'
 import { formatFindings, validateMarkup } from './lib/validate.ts'
 import { loadRegistry, resolveElement, suggest } from './registry.ts'
@@ -106,6 +107,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         'adapt the chosen card to the application tokens (its remaining colour literals are accents to swap), and start a variant from it with generate_variant `example`.',
         'When a look repeats, call generate_variant (css | html | lit) instead of repeating inline styles.',
         'Before finishing, call validate_markup on the markup and CSS you wrote and fix what it reports.',
+        'When you notice c2n itself could be better (a component bug, a missing feature or component, a workaround or hack you had to write, docs or an answer of this server that is wrong), mark any workaround with a `c2n-workaround: <reason>` comment and ask the developer whether to report it: once per problem, at the end of the task unless it blocks you. If they agree, draft it with report_issue; they review and submit it, you never do.',
         'get_workflow_guide explains the application workflow, theming, variant components and framework notes.',
       ].join(' '),
     },
@@ -474,6 +476,61 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       const imports = [...new Set(elements.map((e) => `import '${e.modulePath}'`))]
       if (imports.length) out.push(`\nThe elements used are registered by:\n\n\`\`\`ts\n${imports.join('\n')}\n\`\`\``)
       return text(out.join('\n'))
+    },
+  )
+
+  server.registerTool(
+    'report_issue',
+    {
+      title: 'Draft a component issue',
+      description:
+        'Drafts a GitHub issue about c2n met while building an app: a component bug, something documented that does not work, a missing feature or component, an API that made the common case hard, a mismatch between get_component and the behaviour, or a workaround you had to write (plain HTML instead of a c2-* element, a CSS or timing hack). Fills in the installed version and the framework, checks the reproduction with validate_markup, looks for existing issues that name the component (only its tag is sent to GitHub), and returns the draft plus a link that opens the pre-filled issue form. It never submits anything: show the draft to the developer, who reviews it and submits it. Keep the reproduction minimal and free of application code, internal URLs, names and data. Ask the developer first whether they want to report it, and call it only when they agree.',
+      inputSchema: {
+        component: z.string().min(1).describe('The element or package the problem is in: `c2-table`, `table` or `@c2n/table`'),
+        kind: z
+          .enum(FEEDBACK_KINDS)
+          .describe(
+            '`bug`: wrong behaviour; `gap`: documented or implied but missing; `feature`: a capability or component c2n does not have; `papercut`: works, but the common case is hard; `docs`: the docs or an MCP answer is wrong',
+          ),
+        title: z.string().min(1).describe('One line naming the problem, e.g. "renderCell node does not fill the cell"'),
+        building: z.string().min(1).describe('What the developer was building, in a sentence, without private details'),
+        expected: z.string().min(1).describe('What should have happened'),
+        actual: z.string().min(1).describe('What happened instead'),
+        workaround: z.string().optional().describe('What was done instead, if anything'),
+        repro: z.string().optional().describe('The smallest markup, CSS or script that shows it (checked with validate_markup)'),
+        reproFilename: z.string().optional().describe('File name that sets how the reproduction is read (`repro.tsx`, `repro.css`); HTML by default'),
+        searchExisting: z
+          .boolean()
+          .default(true)
+          .describe("Search GitHub for existing issues that name this component (sends only the component's tag; needs network access)"),
+        format: formatSchema,
+      },
+      annotations: { readOnlyHint: true, openWorldHint: true },
+    },
+    async ({ component, kind, title, building, expected, actual, workaround, repro, reproFilename, searchExisting, format }) => {
+      const installedApi = withInstalledApi(registry)
+      const resolved = resolveElement(installedApi, component)
+      // A package reached through the umbrella reports the umbrella's version (`via`); without either, the umbrella's.
+      const own = resolved ? installedPackage(resolved.component.package) : null
+      const umbrella = own ? null : umbrellaInstalled()
+      const version = own
+        ? { version: own.version, of: own.via?.package ?? resolved?.component.package }
+        : umbrella
+          ? { version: umbrella.version, of: '@c2n/components' }
+          : undefined
+      const env: FeedbackEnvironment = {
+        tag: resolved?.tag ?? component.trim(),
+        version: version?.version,
+        versionOf: version?.of,
+        registryVersion: registry.c2nVersion,
+        framework: detectFramework(projectRoot()),
+      }
+      const draft = buildIssueDraft({ component, kind, title, building, expected, actual, workaround, repro, reproFilename }, env)
+      const reproFindings = repro?.trim() ? validateMarkup(installedApi, repro, reproFilename).findings : []
+      const duplicates = searchExisting ? await findDuplicates(env.tag) : undefined
+      const report = { draft, env, duplicates, reproFindings, unknownComponent: !resolved }
+      if (format === 'json') return json(report)
+      return text(renderFeedbackReport(report))
     },
   )
 

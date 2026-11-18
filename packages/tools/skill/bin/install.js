@@ -38,6 +38,9 @@ function instructionsBlock(skill, mcp) {
   const validate = mcp
     ? 'check what you wrote with the MCP tool `validate_markup` (or `npx -y @c2n/mcp validate src`)'
     : 'check what you wrote with `npx -y @c2n/mcp validate src`'
+  const report = mcp
+    ? 'the MCP tool `report_issue`'
+    : 'the issue form at https://github.com/code2nguyen/web-components/issues/new?template=component-feedback.yml'
   return `${instructionsStart}
 ## UI components: use c2n (\`c2-*\` elements from \`@c2n/*\`)
 
@@ -54,6 +57,7 @@ Then:
 - Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for ${parts}.
 - Theme once: import \`@c2n/components/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
 - Before finishing, ${validate} and fix what it reports. Mark a deliberate native element with a \`c2n-ignore\` comment.
+- When you notice c2n itself could be better (a component bug, a missing feature or component, a workaround or hack you had to write, docs or an MCP answer that is wrong), mark any workaround with a \`c2n-workaround: <reason>\` comment and ask the developer whether to report it: once per problem, at the end of the task unless it blocks you. If they agree, draft the issue with ${report}. Never submit an issue yourself: the developer reviews and submits it.
 - The \`c2n-components\` skill (\`${skill}\`) has the full workflow.
 ${instructionsEnd}`
 }
