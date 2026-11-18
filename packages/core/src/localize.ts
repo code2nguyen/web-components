@@ -1,4 +1,5 @@
 import type { ReactiveController, ReactiveControllerHost } from '@lit/reactive-element'
+import { isServer } from 'lit'
 
 /**
  * A component's interface text, one entry per message: a string, or a function of the values it carries for text with
@@ -243,8 +244,19 @@ function observeLang(): void {
  * drawn once more in its own language when that (or its messages) differ from the server's.
  */
 export class LocaleController implements ReactiveController {
-  /** The host's language as of its last render. */
-  locale = 'en'
+  #locale = 'en'
+
+  /**
+   * The host's language as of its last render. On the server it is the server's language: Lit's server render runs
+   * no `hostUpdate`, and hydration assumes the server drew in `serverLocale()` (the component's own `locale`, else
+   * English).
+   */
+  get locale(): string {
+    return isServer ? this.serverLocale() : this.#locale
+  }
+  set locale(value: string) {
+    this.#locale = value
+  }
   readonly catalogName: string = ''
 
   protected readonly host: ReactiveControllerHost & Element
