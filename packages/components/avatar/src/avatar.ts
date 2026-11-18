@@ -148,7 +148,7 @@ export class Avatar extends LitElement {
   @state() private imageFailed = false
   @state() private previewUrl: string | undefined = undefined
   private selectedFile: File | undefined
-  @query('input', true) private input!: HTMLInputElement
+  @query('input') private input?: HTMLInputElement | null
 
   /** Accepts the pre-1.0 camelCase `initialCount="2"` attribute as well. */
   static override get observedAttributes() {
@@ -223,7 +223,7 @@ export class Avatar extends LitElement {
 
   /** Opens the avatar image picker. */
   browse(): void {
-    if (this.editable && !this.disabled) this.input.click()
+    if (this.editable && !this.disabled) this.input?.click()
   }
 
   /** Clears the selected preview and the current `src` image. */
@@ -317,16 +317,23 @@ export class Avatar extends LitElement {
     const source = this.previewUrl ?? this.src
     const showImage = !!source && !this.imageFailed
     const subject = this.name ? `${this.name} avatar` : 'avatar'
+    // The file input exists only while the avatar is editable, and is hidden from assistive technology even then: the
+    // Change/Upload button opens it, and an exposed one is a second "No file chosen" button in every row that shows an
+    // avatar.
     return html`
-      <input
-        type="file"
-        tabindex="-1"
-        .accept=${this.accept}
-        ?disabled=${!this.editable || this.disabled}
-        aria-label=${`${subject} image file`}
-        @input=${this.stopNativeInput}
-        @change=${this.handleFileChange}
-      />
+      ${
+        this.editable
+          ? html`<input
+              type="file"
+              tabindex="-1"
+              .accept=${this.accept}
+              ?disabled=${this.disabled}
+              aria-hidden="true"
+              @input=${this.stopNativeInput}
+              @change=${this.handleFileChange}
+            />`
+          : nothing
+      }
       ${
         this.editable
           ? html`<button

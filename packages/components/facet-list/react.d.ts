@@ -23,12 +23,13 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-facet-list': Omit<C2Props<FacetList>, 'values' | 'include' | 'exclude'> & {
+      'c2-facet-list': Omit<C2Props<FacetList>, 'values' | 'include' | 'exclude' | 'actions'> & {
         'max-items'?: Attribute
         'count-format'?: Attribute
         values?: FacetList['values'] | string
         include?: FacetList['include'] | string
         exclude?: FacetList['exclude'] | string
+        actions?: FacetList['actions'] | string
       }
     }
   }

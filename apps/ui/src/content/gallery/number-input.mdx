@@ -56,8 +56,9 @@ Use the public field, value, adornment and stepper variables to fit different da
 
 ## Language
 
-The step controls are named "Increase value" and "Decrease value". An app translates them under `number-input`, and
-they follow the nearest `lang`.
+The step controls are named after the field ("Increase Quantity", from `aria-label`, the enclosing field's label or a
+`<label for>`), and "Increase value" / "Decrease value" when it has no name. An app translates them under
+`number-input` (`increaseNamed`, `decreaseNamed` take the name as `{0}`), and they follow the nearest `lang`.
 
 <GalleryGrid>
 

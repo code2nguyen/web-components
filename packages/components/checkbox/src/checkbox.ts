@@ -46,6 +46,7 @@ const MIXEDMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19
  * @csspart checkmark - Wrapper containing the `checkmark` slot or fallback mark while checked.
  * @csspart mixedmark - Wrapper containing the `mixedmark` slot or fallback mark while indeterminate.
  * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
+ * @csspart field - The whole row (box, label, description, trailing): the clickable `<label>`, for a card-style option.
  * @csspart label - Region containing the default slot (the label text).
  * @csspart description - Region containing the `description` slot below the label.
  * @csspart trailing - Region at the end of the row containing the `trailing` slot, hidden while that slot is empty.
@@ -95,6 +96,12 @@ const MIXEDMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19
  * @cssproperty {color} --c2-checkbox__state-layer__hover__selected--color
  *
  * @cssproperty {pixel} [--c2-checkbox__field--gap=4px] - Space between the box's touch target and the label.
+ * @cssproperty {padding} [--c2-checkbox__field--padding=0] - Padding of the whole row, for a card-style option.
+ * @cssproperty {border} [--c2-checkbox__field--border=none] - Border around the whole row.
+ * @cssproperty {border-radius} [--c2-checkbox__field--border-radius=0] - Corner radius of the whole row.
+ * @cssproperty {color} [--c2-checkbox__field--background-color=transparent] - Background of the whole row.
+ * @cssproperty {border} [--c2-checkbox__field__checked--border=none] - Border around the row while checked. Defaults to `--c2-checkbox__field--border`.
+ * @cssproperty {color} [--c2-checkbox__field__checked--background-color=transparent] - Background of the row while checked. Defaults to `--c2-checkbox__field--background-color`.
  * @cssproperty {color} [--c2-checkbox__label--color=inherit]
  * @cssproperty {font-size} [--c2-checkbox__label--font-size=inherit]
  * @cssproperty {font-weight} [--c2-checkbox__label--font-weight=inherit]
@@ -165,6 +172,21 @@ export class Checkbox extends LitElement {
   /** Description handed down by an enclosing `c2-form-field`; the checkbox keeps its own text as its name. */
   private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
 
+  constructor() {
+    super()
+    this.addEventListener('click', this.forwardHostClick)
+  }
+
+  /**
+   * A click aimed at the host itself — `host.click()`, a native `<label for>` around or pointing at the element,
+   * `c2-form-field`'s label — toggles like a click on the box. Clicks from inside the shadow root or on slotted content
+   * already reach the inner input and are left alone.
+   */
+  private readonly forwardHostClick = (event: Event) => {
+    if (event.composedPath()[0] !== this || !this.formElement) return
+    this.formElement.click()
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     // A group's lock does not follow an option moved out of it.
@@ -228,6 +250,7 @@ export class Checkbox extends LitElement {
     // hidden while their slots are empty, which leaves a bare checkbox exactly the size of its touch target.
     return html`
       <label
+        part="field"
         class=${classMap({
           'c2-checkbox-field': true,
           'has-text': hasLabel || hasDescription || hasTrailing,

@@ -1,5 +1,6 @@
 import { test, expect, accessible } from '../../../../tests/component-fixture'
 import type { Locator, Page } from '@playwright/test'
+import { readFileSync } from 'node:fs'
 
 const choices = `
   <div id="speed" data-reorder-key="speed" data-reorder-label="Speed">Speed</div>
@@ -18,6 +19,18 @@ async function displayed(host: Locator): Promise<string[]> {
       (wrapper) => (wrapper.querySelector('slot') as HTMLSlotElement).assignedElements()[0]?.id ?? '',
     ),
   )
+}
+
+/** The container's name: the text of the elements it references, else its `aria-label`. */
+async function listName(host: Locator): Promise<string> {
+  return host.locator('[part="container"]').evaluate((container) => {
+    const labels = (container as HTMLElement & { ariaLabelledByElements?: Element[] | null }).ariaLabelledByElements ?? []
+    const text = labels
+      .map((label) => label.textContent?.replace(/\s+/g, ' ').trim() ?? '')
+      .filter(Boolean)
+      .join(' ')
+    return text || container.getAttribute('aria-label') || ''
+  })
 }
 
 async function submitted(page: Page): Promise<string[]> {
@@ -194,13 +207,65 @@ test('a named list keeps its ranking when rows are added or swiped away, and rep
   await expect.poll(() => submitted(page)).toEqual(['support', 'speed', 'look'])
 })
 
-test('an unnamed list still follows the light-DOM order when rows change', async ({ page, renderScenario }) => {
+test('an unnamed list keeps the committed order when rows are added or swiped away', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable swipeable aria-label="Priorities">${choices}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await moveFirstToEnd(host)
+  expect(await displayed(host)).toEqual(['price', 'support', 'speed'])
+
+  await page.locator('#support').evaluate((row) => row.remove())
+  await expect.poll(() => displayed(host)).toEqual(['price', 'speed'])
+
+  await host.evaluate((element) => {
+    const row = document.createElement('div')
+    row.id = 'design'
+    row.textContent = 'Design'
+    element.prepend(row)
+  })
+  // A new row takes its light-DOM place; the rows that stayed keep the order the user gave them.
+  await expect.poll(() => displayed(host)).toEqual(['design', 'price', 'speed'])
+
+  // The built-in Delete, from the keyboard, on the focused row.
+  await host.locator('[part~="item"]').nth(1).focus()
+  await page.keyboard.press('Delete')
+  await expect.poll(() => displayed(host)).toEqual(['design', 'speed'])
+})
+
+test('rows the light DOM itself reorders follow the light-DOM order', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-reorder-list editable aria-label="Priorities">${choices}</c2-reorder-list>`)
   const host = page.locator('c2-reorder-list')
   await moveFirstToEnd(host)
   expect(await displayed(host)).toEqual(['price', 'support', 'speed'])
-  await page.locator('#support').evaluate((row) => row.remove())
-  await expect.poll(() => displayed(host)).toEqual(['speed', 'price'])
+  // The application reconciled its children (support before speed before price): that order wins.
+  await host.evaluate((element) => element.append(element.querySelector('#speed')!, element.querySelector('#price')!))
+  await expect.poll(() => displayed(host)).toEqual(['support', 'speed', 'price'])
+})
+
+test('the value attribute sets the initial order, and a form reset returns to it', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-reorder-list name="priorities" editable value="support;speed" aria-label="Priorities">${choices}</c2-reorder-list></form>`)
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => displayed(host)).toEqual(['support', 'speed', 'price'])
+  expect(await submitted(page)).toEqual(['support', 'speed', 'price'])
+
+  await moveFirstToEnd(host)
+  expect(await submitted(page)).toEqual(['speed', 'price', 'support'])
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect.poll(() => submitted(page)).toEqual(['support', 'speed', 'price'])
+
+  // Changing the attribute later reorders like setting the property; a string assigned to the property is parsed the same way.
+  await host.evaluate((element) => element.setAttribute('value', 'price'))
+  await expect.poll(() => displayed(host)).toEqual(['price', 'support', 'speed'])
+  await host.evaluate((element) => ((element as HTMLElement & { value: unknown }).value = 'speed;price'))
+  await expect.poll(() => displayed(host)).toEqual(['speed', 'price', 'support'])
+})
+
+test('the manifest documents the value attribute, which makes the list a form control for framework bindings', () => {
+  type Declaration = { tagName?: string; attributes?: Array<{ name: string; fieldName?: string }> }
+  const manifest = JSON.parse(readFileSync(new URL('../custom-elements.json', import.meta.url), 'utf8')) as { modules: Array<{ declarations?: Declaration[] }> }
+  const declaration = manifest.modules.flatMap((module) => module.declarations ?? []).find((entry) => entry.tagName === 'c2-reorder-list')
+  const attributes = (declaration?.attributes ?? []).map((attribute) => [attribute.name, attribute.fieldName])
+  expect(attributes).toContainEqual(['value', 'value'])
+  expect(attributes).toContainEqual(['name', 'name'])
 })
 
 test('form reset restores the authored order and state restore reapplies a saved one', async ({ page, renderScenario }) => {
@@ -251,7 +316,58 @@ test('a label for the list names it', async ({ page, renderScenario }) => {
   await renderScenario(
     `<form><label for="ranking">Rank these features</label><c2-reorder-list id="ranking" name="priorities" editable ranked>${choices}</c2-reorder-list></form>`,
   )
-  await expect(page.locator('c2-reorder-list').locator('[part="container"]')).toHaveAttribute('aria-label', 'Rank these features')
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => listName(host)).toBe('Rank these features')
+  // The label is referenced, not copied, when the browser supports element reflection.
+  const referenced = await host
+    .locator('[part="container"]')
+    .evaluate((container) =>
+      'ariaLabelledByElements' in Element.prototype
+        ? (container as HTMLElement & { ariaLabelledByElements: Element[] | null }).ariaLabelledByElements?.[0] === document.querySelector('label')
+        : true,
+    )
+  expect(referenced).toBe(true)
+})
+
+test('the name follows label edits and naming attributes changed after the first render', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <h2 id="title">Release priorities</h2>
+    <h3 id="subtitle">Next quarter</h3>
+    <c2-reorder-list editable aria-labelledby="title">${choices}</c2-reorder-list>
+  `)
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => listName(host)).toBe('Release priorities')
+
+  await page.locator('#title').evaluate((title) => (title.textContent = 'Launch priorities'))
+  await expect.poll(() => listName(host)).toBe('Launch priorities')
+
+  await host.evaluate((element) => element.setAttribute('aria-labelledby', 'title subtitle'))
+  await expect.poll(() => listName(host)).toBe('Launch priorities Next quarter')
+
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Own name'))
+  await expect.poll(() => listName(host)).toBe('Own name')
+  await host.evaluate((element) => {
+    element.removeAttribute('aria-label')
+    element.removeAttribute('aria-labelledby')
+  })
+  await expect.poll(() => listName(host)).toBe('')
+})
+
+test('a list moved in the document keeps following its naming attributes', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable aria-label="First">${choices}</c2-reorder-list><section></section>`)
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => listName(host)).toBe('First')
+  await host.evaluate((element) => document.querySelector('section')!.append(element))
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Moved'))
+  await expect.poll(() => listName(host)).toBe('Moved')
+})
+
+test('a label for the list is followed when its text changes', async ({ page, renderScenario }) => {
+  await renderScenario(`<label for="ranking">Rank these</label><c2-reorder-list id="ranking" editable>${choices}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await expect.poll(() => listName(host)).toBe('Rank these')
+  await page.locator('label').evaluate((label) => label.append(' features'))
+  await expect.poll(() => listName(host)).toBe('Rank these features')
 })
 
 test('has no detectable accessibility violations as a ranked form control', async ({ page, renderScenario }) => {

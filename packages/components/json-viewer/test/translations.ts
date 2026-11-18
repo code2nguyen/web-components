@@ -4,6 +4,14 @@ import { addTranslations } from '@c2n/core/localize.js'
 addTranslations({
   fr: {
     'json-viewer': {
+      label: 'Données JSON',
+      noData: 'Aucune donnée',
+      noMatch: 'Aucun résultat',
+      showMore: '{0} de plus sur {1}',
+      itemCount: { one: '{0} élément', other: '{0} éléments' },
+      keyCount: { one: '{0} clé', other: '{0} clés' },
+      copyPath: 'Copier le chemin',
+      copyValue: 'Copier la valeur',
       schema: 'Schéma',
       required: 'obligatoire',
       deprecated: 'obsolète',

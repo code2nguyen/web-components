@@ -53,4 +53,15 @@ Looks for `c2-facet-list`. The row height and the selected colour do most of the
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=Shop filter (no actions)
+<style>
+  .facet-shop {
+    width: 220px;
+  }
+</style>
+<div class="facet-shop">
+  <c2-facet-list label="Brand" actions="none" include="acme" values='[{"value":"acme","label":"Acme","count":128},{"value":"northwind","label":"Northwind","count":64},{"value":"globex","label":"Globex","count":17}]'></c2-facet-list>
+</div>
+```
+
 </GalleryGrid>

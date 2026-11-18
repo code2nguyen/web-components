@@ -10,6 +10,17 @@ test('supporting-text presence reconciles initially and after later mutations', 
   })
 })
 
+test('help and the error text describe the input', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-text-field aria-label="Email" help="We never share it"></c2-text-field>')
+  const host = page.locator('c2-text-field')
+  const input = page.getByRole('textbox', { name: 'Email' })
+  await expect(input).toHaveAccessibleDescription('We never share it')
+  await props(host, { error: true, errorText: 'Enter an email address.' })
+  await expect(input).toHaveAccessibleDescription('Enter an email address.')
+  await props(host, { error: false, help: '' })
+  await expect(input).not.toHaveAttribute('aria-describedby', /supporting-text/)
+})
+
 test('editing emits input/change, exposes a name, and reset restores the default', async ({ page, renderScenario }) => {
   await renderScenario('<c2-text-field aria-label="Message" value="Original" help="Describe the issue"></c2-text-field><button>Commit</button>')
   const host = page.locator('c2-text-field')

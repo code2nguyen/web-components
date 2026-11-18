@@ -1897,7 +1897,7 @@ export class Table extends LitElement {
       >
         ${own && level.toggle ? level.toggle() : nothing} ${detail && row ? this.#renderDetailToggle(row, rowIndex, line, columnIndex) : nothing}
         <span
-          class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
+          class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0, 'cell-content--node': typeof Node !== 'undefined' && content instanceof Node })}
           part="cell-content cell-content-${fieldPart}"
           style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
           >${content}</span

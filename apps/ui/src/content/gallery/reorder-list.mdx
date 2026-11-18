@@ -142,7 +142,7 @@ import { ReorderList } from '@c2n/components/reorder-list'
 </style>
 <form class="survey">
   <label class="survey-question" for="commute-ranking">Rank how you get to work</label>
-  <c2-reorder-list client:only="lit" id="commute-ranking" class="survey-list" name="commute" editable ranked data-reorder-list-example="form">
+  <c2-reorder-list client:only="lit" id="commute-ranking" class="survey-list" name="commute" value="train;bike" editable ranked data-reorder-list-example="form">
     <div class="survey-option" data-reorder-key="bike">Bike</div>
     <div class="survey-option" data-reorder-key="train">Train</div>
     <div class="survey-option" data-reorder-key="car">Car</div>
@@ -204,7 +204,7 @@ import { ReorderList } from '@c2n/components/reorder-list'
 
 <ReorderListExamplesRuntime />
 
-`ranked` draws each row's position; `renderRank` replaces the number with your own content, and `name` makes the list a form control that submits the item keys in their displayed order:
+`ranked` draws each row's position; `renderRank` replaces the number with your own content, and `name` makes the list a form control that submits the item keys in their displayed order. The `value` attribute (keys separated by `;`) sets the order it starts in, which the Ranking form card uses for a saved answer and which a form reset returns to:
 
 ```ts tag=CodeBlock
 import { html } from 'lit'
@@ -215,7 +215,7 @@ const ordinals = new Intl.PluralRules('en', { type: 'ordinal' })
 const suffixes: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' }
 list.renderRank = ({ rank }) => html`${rank}<sup>${suffixes[ordinals.select(rank)]}</sup>`
 
-// <form><c2-reorder-list name="commute" editable ranked>…</c2-reorder-list></form>
+// <form><c2-reorder-list name="commute" value="train;bike" editable ranked>…</c2-reorder-list></form>
 list.addEventListener('input', () => {
   const ranking = new FormData(list.closest('form')!).getAll('commute') // ['train', 'bike', …]
 })

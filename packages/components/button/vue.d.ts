@@ -20,6 +20,7 @@ declare module 'vue' {
         'aria-label'?: unknown
         commandfor?: unknown
         'aria-expanded'?: unknown
+        'aria-haspopup'?: unknown
         'aria-controls'?: unknown
       }
     >

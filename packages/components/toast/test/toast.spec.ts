@@ -152,3 +152,21 @@ test('an open event from an element that is not a modal does not re-show the sta
   await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
   await expect(stack).not.toHaveAttribute('data-toggles', '0')
 })
+
+test('showing toasts schedules no update after an update completed', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('change-in-update')) warnings.push(message.text())
+  })
+  await renderScenario('<c2-toast-region inline animation-duration="0"></c2-toast-region>')
+  const region = page.locator('c2-toast-region')
+  await region.evaluate((el) => {
+    const target = el as HTMLElement & { show(options: { message: string; duration: number }): string }
+    target.show({ message: 'Saved', duration: 0 })
+    target.show({ message: 'Sent', duration: 0 })
+  })
+  await expect(page.getByText('Sent', { exact: true })).toBeVisible()
+  await page.getByText('Saved', { exact: true }).hover()
+  await page.mouse.move(0, 0)
+  expect(warnings).toEqual([])
+})

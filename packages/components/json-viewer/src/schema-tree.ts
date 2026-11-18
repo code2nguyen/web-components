@@ -2,10 +2,8 @@ import { html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateR
 import { state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { LocalizeController } from '@c2n/core/localize.js'
 import { JsonViewer } from './json-viewer.js'
 import { copyText, type JsonPathSegment, type JsonRow, type SearchText } from './json-model.js'
-import { jsonViewerMessages } from './messages.js'
 import type { SchemaRenderContext, SchemaTreeModel } from './schema-model.js'
 import styles from './schema-tree.scss?inline'
 
@@ -94,8 +92,6 @@ export class SchemaTree extends JsonViewer {
 
   @state() private model: SchemaTreeModel | undefined
   @state() private failed = false
-
-  private readonly msg = new LocalizeController(this, jsonViewerMessages)
 
   /**
    * Rendered on the server, where the schema mode never loads: the first client render must match that empty tree, so

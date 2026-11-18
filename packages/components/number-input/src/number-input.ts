@@ -83,6 +83,13 @@ export class NumberInput extends LitElement {
   private defaultCaptured = false
   @state() private disabledByForm = false
   @state() private focused = false
+  /**
+   * Whether the steppers carry the field's name. Off for the hydrating render of a server-rendered field, which must
+   * match the server's markup (the server sees no enclosing field and no `<label for>`); turned on right after it.
+   */
+  @state() private namedSteppers = !this.shadowRoot
+  /** The text of the field's first `<label for>`, read when the field connects, hydrates or takes the focus. */
+  @state() private labelText = ''
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
@@ -146,6 +153,8 @@ export class NumberInput extends LitElement {
       this.defaultValue = this.getAttribute('value') ?? ''
       this.defaultCaptured = true
     }
+    this.readLabelText()
+    if (!this.namedSteppers) void this.updateComplete.then(() => (this.namedSteppers = true))
   }
 
   override focus(options?: FocusOptions) {
@@ -242,6 +251,7 @@ export class NumberInput extends LitElement {
   // A companion element binds these to its own focusable control too.
   protected handleFocusIn(event: FocusEvent) {
     this.focused = true
+    this.readLabelText()
     if (!this.movesWithin(event)) redispatchEvent(this, event)
   }
   protected handleFocusOut(event: FocusEvent) {
@@ -290,14 +300,28 @@ export class NumberInput extends LitElement {
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
 
+  private readLabelText() {
+    // `labels` is missing from the server's ElementInternals shim.
+    const labels = this.internals.labels as NodeListOf<HTMLLabelElement> | undefined
+    this.labelText = labels?.length ? (labels[0].textContent ?? '').replace(/\s+/g, ' ').trim() : ''
+  }
+
+  /** The field's name for its steppers: `aria-label`, the enclosing field's label, else a `<label for>`'s text. */
+  private fieldName() {
+    if (!this.namedSteppers) return ''
+    return (this.ariaLabel || this.field.label || this.labelText).trim()
+  }
+
   private renderStepper(direction: 'down' | 'up') {
     const down = direction === 'down'
     const disabled = this.steppersDisabled || (down ? this.atMinimum : this.atMaximum)
+    const name = this.fieldName()
+    const label = name ? this.msg.t(down ? 'decreaseNamed' : 'increaseNamed', name) : this.msg.t(down ? 'decrease' : 'increase')
     return html`<button
       class="stepper ${direction}"
       type="button"
       tabindex="-1"
-      aria-label=${this.msg.t(down ? 'decrease' : 'increase')}
+      aria-label=${label}
       ?disabled=${disabled}
       @pointerdown=${this.keepInputFocus}
       @click=${() => (down ? this.stepDown() : this.stepUp())}

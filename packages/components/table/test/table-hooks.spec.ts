@@ -14,6 +14,35 @@ type TableHost = HTMLElement & {
   renderedRange: { start: number; end: number; keys: string[]; rows: { line: number; key: string; row: unknown }[] }
 }
 
+test('a node from renderCell gets the width of its cell, so a 100% bar fills the column', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id"></c2-table>`)
+  const host = page.locator('c2-table')
+  await host.evaluate(async (element, rows) => {
+    const table = element as TableHost
+    table.columns = [
+      { field: 'name', header: 'Name', width: 200 },
+      {
+        field: 'status',
+        header: 'Status',
+        width: 200,
+        renderCell: () => {
+          const bar = document.createElement('span')
+          bar.className = 'bar'
+          bar.style.cssText = 'display:block;width:100%;height:4px;background:currentColor'
+          return bar
+        },
+      },
+    ]
+    table.rows = rows
+    await table.updateComplete
+  }, PEOPLE)
+  const widths = await host.evaluate((element) => {
+    const bar = element.shadowRoot!.querySelector('.bar') as HTMLElement
+    return { bar: bar.getBoundingClientRect().width, cell: bar.closest('[role="gridcell"]')!.getBoundingClientRect().width }
+  })
+  expect(widths.bar).toBeGreaterThan(widths.cell / 2)
+})
+
 test('a part on what renderCell returns is reachable as c2-table::part()', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id"></c2-table>`)
   const host = page.locator('c2-table')

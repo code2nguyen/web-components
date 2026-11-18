@@ -36,6 +36,18 @@ test('the checkbox includes, Only isolates, Exclude excludes, Clear empties; eac
   await expect(page.getByRole('button', { name: 'Clear Service' })).toHaveCount(0)
 })
 
+test('actions picks the buttons: none leaves include checkboxes, and an excluded value can still be included again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-facet-list label="Service" actions="none" exclude="auth" ${VALUES}></c2-facet-list>`)
+  await expect(page.getByRole('button', { name: /^Only/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Exclude/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Include/ })).toHaveCount(1)
+  // A string assigned to the property, as Svelte 5 or a server-rendered prop does, reads like the attribute.
+  await facet(page).evaluate((element: FacetList) => ((element as unknown as { actions: string }).actions = 'only'))
+  await expect(page.getByRole('button', { name: /^Only/ })).toHaveCount(4)
+  await expect(page.getByRole('button', { name: /^Exclude/ })).toHaveCount(0)
+  await accessible(page)
+})
+
 test('cancelling filter-change keeps the selection, and the checkbox follows it', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-facet-list label="Service" ${VALUES}></c2-facet-list>`)
   await facet(page).evaluate((element: FacetList) => element.addEventListener('filter-change', (event) => event.preventDefault()))

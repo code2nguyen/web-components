@@ -24,6 +24,21 @@ test('mixed state clears on activation and property updates stay synchronized', 
   await props(host, { checked: true })
   await expect(input).toBeChecked()
 })
+test('host.click() and a native label toggle it once, like a click on the control', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<label for="c">Outside label</label><c2-checkbox id="c" label="Option"></c2-checkbox><c2-checkbox id="d" disabled label="Off"></c2-checkbox>',
+  )
+  const host = page.locator('#c')
+  await watch(host, 'change')
+  await host.evaluate((el) => (el as HTMLElement).click())
+  await expect(host).toHaveJSProperty('checked', true)
+  await page.getByText('Outside label').click()
+  await expect(host).toHaveJSProperty('checked', false)
+  await expect(host).toHaveAttribute('data-events', '[null,null]')
+  await page.locator('#d').evaluate((el) => (el as HTMLElement).click())
+  await expect(page.locator('#d')).toHaveJSProperty('checked', false)
+})
+
 test('disabled blocks clicks and host focus reaches the enabled input', async ({ page, renderScenario }) => {
   await renderScenario('<c2-checkbox aria-label="Accept" disabled></c2-checkbox>')
   const input = page.getByRole('checkbox')
@@ -397,4 +412,18 @@ test('the hover layer fills the touch target behind the box, and stays behind it
   // Disabled while hovered: the layer leaves, and the box above it is never covered.
   await props(host, { disabled: true })
   await expect.poll(async () => (await layer()).opacity).toBe(0)
+})
+
+test('the row is a field part whose card variables follow the checked state', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-checkbox style="--c2-checkbox__field--border:1px solid rgb(1, 2, 3);--c2-checkbox__field__checked--background-color:rgb(4, 5, 6);--c2-checkbox__field--padding:10px">Backups</c2-checkbox>`,
+  )
+  const field = page.locator('c2-checkbox').locator('[part~="field"]')
+  await expect(field).toHaveCSS('border-top-color', 'rgb(1, 2, 3)')
+  await expect(field).toHaveCSS('padding-top', '10px')
+  await expect(field).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await page.getByText('Backups').click()
+  await expect(field).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  // The border set for the resting row stays while checked.
+  await expect(field).toHaveCSS('border-top-color', 'rgb(1, 2, 3)')
 })

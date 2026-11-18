@@ -4,6 +4,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import {
   copyText,
   filterVisible,
@@ -21,6 +22,7 @@ import {
   type SearchText,
 } from './json-model.js'
 import styles from './json-viewer.scss?inline'
+import { jsonViewerMessages } from './messages.js'
 
 export type { JsonPathFormat, JsonPathSegment, JsonValueKind } from './json-model.js'
 export { formatPath } from './json-model.js'
@@ -170,8 +172,11 @@ export class JsonViewer extends LitElement {
   /** How many children of a branch are shown before a "show more" line. */
   @property({ type: Number, attribute: 'page-size' }) pageSize = 100
 
-  /** Accessible name of the tree. */
-  @property({ type: String }) label = 'JSON'
+  /** Accessible name of the tree. "JSON" (its `label` message) when empty. */
+  @property({ type: String }) label = ''
+
+  /** The viewer's interface text, in the language of the nearest `lang`; shared with companion elements. */
+  protected readonly msg = new LocalizeController(this, jsonViewerMessages)
 
   /** Branches opened or closed by the user, overriding the depth rule. */
   @state() private overrides = new Map<string, boolean>()
@@ -221,7 +226,7 @@ export class JsonViewer extends LitElement {
 
   /** The tree's accessible name. */
   protected get treeLabel(): string {
-    return this.label
+    return this.label || this.msg.t('label')
   }
 
   /** What `search` matches for a line in place of its key and value; unset here. */
@@ -387,14 +392,14 @@ export class JsonViewer extends LitElement {
   override render() {
     const source = this.source
     if (source === undefined) {
-      return html`<div class="empty" part="tree"><slot name="empty">No data</slot></div>`
+      return html`<div class="empty" part="tree"><slot name="empty">${this.msg.t('noData')}</slot></div>`
     }
     const rootKind = kindOf(source)
     if (isBranch(rootKind) && this.rows.length === 0 && !this.searchResult) {
       return html`<div class="empty" part="tree">${rootKind === 'array' ? '[]' : '{}'}</div>`
     }
     if (this.rows.length === 0) {
-      return html`<div class="tree" part="tree" role="tree" aria-label=${this.treeLabel}><div class="empty" role="none">No match</div></div>`
+      return html`<div class="tree" part="tree" role="tree" aria-label=${this.treeLabel}><div class="empty" role="none">${this.msg.t('noMatch')}</div></div>`
     }
     // The window's lines sit in normal flow between padding standing for the lines above and below, so the viewer
     // still takes its width from its content. The focused line is rendered too wherever it is, so keyboard focus
@@ -454,7 +459,7 @@ export class JsonViewer extends LitElement {
         style=${style}
       >
         <span class="twisty" aria-hidden="true"></span>
-        <span class="more-label">Show ${Math.min(row.more, this.pageStep)} more of ${row.more}</span>
+        <span class="more-label">${this.msg.t('showMore', Math.min(row.more, this.pageStep), row.more)}</span>
       </div>`
     }
     const copied = this.copied?.id === row.id ? this.copied.kind : undefined
@@ -499,11 +504,9 @@ export class JsonViewer extends LitElement {
       case 'object':
       case 'array': {
         const [open, close] = row.kind === 'array' ? ['[', ']'] : ['{', '}']
-        const unit = row.kind === 'array' ? (row.size === 1 ? 'item' : 'items') : row.size === 1 ? 'key' : 'keys'
+        const count = row.kind === 'array' ? this.msg.t('itemCount', row.size) : this.msg.t('keyCount', row.size)
         if (row.size === 0) return html`<span class="value summary" part="value">${open}${close}</span>`
-        return html`<span class="value summary" part="value"
-          >${open}${row.expanded ? nothing : html`…${close}`} <span class="count">${row.size} ${unit}</span></span
-        >`
+        return html`<span class="value summary" part="value">${open}${row.expanded ? nothing : html`…${close}`} <span class="count">${count}</span></span>`
       }
       default: {
         const text = leafText(row.value, row.kind)
@@ -515,8 +518,8 @@ export class JsonViewer extends LitElement {
   }
 
   private renderAction(kind: 'path' | 'value', copied: boolean): TemplateResult {
-    const label = kind === 'path' ? 'Copy path' : 'Copy value'
-    return html`<span class="action ${copied ? 'copied' : ''}" data-action=${kind} title=${copied ? 'Copied' : label}>
+    const label = kind === 'path' ? this.msg.t('copyPath') : this.msg.t('copyValue')
+    return html`<span class="action ${copied ? 'copied' : ''}" data-action=${kind} title=${copied ? this.msg.t('copied') : label}>
       ${
         copied
           ? html`<svg viewBox="0 0 16 16" width="12" height="12">
