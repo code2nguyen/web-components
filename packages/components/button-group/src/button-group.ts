@@ -39,7 +39,8 @@ export interface ButtonGroup {
  * are `c2-button` or `c2-icon-button` elements (any element works for layout). With `selection="single"` the group is
  * a segmented control that keeps one item pressed; with `selection="multiple"` each item toggles independently. Set
  * `orientation="vertical"` to stack either appearance and use Up/Down keyboard navigation. The
- * pressed items carry `selected` (and `aria-pressed`), the group reports them in `value` and fires `input` and `change`.
+ * pressed items carry `selected` (announced with `aria-checked` in single selection, `aria-pressed` in multiple), the
+ * group reports them in `value` and fires `input` and `change`.
  *
  * A single-selection group is a radio group: the `radiogroup` role, each item a `radio` with `aria-checked` (set through
  * the item's `radio` property), one Tab stop that lands on the checked item, and the arrow keys moving the selection.
@@ -130,6 +131,9 @@ export class ButtonGroup extends LitElement {
   /** Accessible name of the group. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
+
+  /** Items the group made radios, so one that leaves the group (or a group that stops being single) is reset. */
+  private readonly radioItemsSet = new Set<HTMLElement>()
 
   /** The item that holds the group's Tab stop in a toolbar: the one focused last. */
   private activeItem?: HTMLElement
@@ -289,6 +293,12 @@ export class ButtonGroup extends LitElement {
     }
     const selected = new Set(this.selectedValues)
     const radio = this.radioItems
+    // An item moved out of the group, or every item once the group stops being single: a toggle button again.
+    for (const item of this.radioItemsSet) {
+      if (radio && items.includes(item)) continue
+      ;(item as HTMLElement & { radio: boolean }).radio = false
+      this.radioItemsSet.delete(item)
+    }
     items.forEach((item, index) => {
       if (selectable && !radio) item.setAttribute('toggle', '')
       else item.removeAttribute('toggle')
@@ -296,7 +306,10 @@ export class ButtonGroup extends LitElement {
       // An item not upgraded yet (a server-rendered page hydrating children after the group) keeps the property:
       // Lit picks up a value set before the element was defined.
       const pending = item.localName.includes('-') && !customElements.get(item.localName)
-      if ('radio' in item || (radio && pending)) (item as HTMLElement & { radio: boolean }).radio = radio
+      if (radio && ('radio' in item || pending)) {
+        ;(item as HTMLElement & { radio: boolean }).radio = true
+        this.radioItemsSet.add(item)
+      }
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
 

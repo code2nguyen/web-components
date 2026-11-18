@@ -2,6 +2,7 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { syncRadioSemantics } from '@c2n/core/dom-helper.js'
 import styles from './button.scss?inline'
 
 /** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them the target's own fallback runs. */
@@ -146,26 +147,12 @@ export class Button extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    if (changed.has('radio') || changed.has('selected')) this.syncRadio(this.renderRoot.querySelector<HTMLElement>('button.c2-button'))
+    if (changed.has('radio') || changed.has('selected'))
+      syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-button'), this.radio, this.selected)
     if (changed.has('commandFor') || changed.has('type') || changed.has('ariaControls')) this.resolveReferences()
     if (changed.has('disabled') || changed.has('running')) {
       if (this.unavailable) this.internals?.states.add('disabled')
       else this.internals?.states.delete('disabled')
-    }
-  }
-
-  /**
-   * The radio role and its checked state, written on the inner button directly: the group sets `radio` on the client
-   * only, and a hydrating render keeps the server's attributes without committing values that differ from them.
-   */
-  private syncRadio(button: HTMLElement | null | undefined) {
-    if (!button) return
-    if (this.radio) {
-      button.setAttribute('role', 'radio')
-      button.setAttribute('aria-checked', this.selected ? 'true' : 'false')
-    } else {
-      button.removeAttribute('role')
-      button.removeAttribute('aria-checked')
     }
   }
 

@@ -245,3 +245,12 @@ test('a single-selection group is a radio group, a multiple-selection group a gr
   await expect(billing.getByRole('button', { name: 'Right' })).toHaveAttribute('aria-pressed', 'true')
   await accessible(page)
 })
+
+test('an item moved out of a single-selection group is a toggle button again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group><div id="elsewhere"></div>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  await page.evaluate(() => document.querySelector('#elsewhere')!.append(document.querySelector('c2-button[value="a"]')!))
+  const moved = page.locator('#elsewhere').getByRole('button', { name: 'Left' })
+  await expect(moved).toBeVisible()
+  await expect(moved).not.toHaveAttribute('aria-checked', /.*/)
+})

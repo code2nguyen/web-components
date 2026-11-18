@@ -29,13 +29,13 @@ test('dashboard renders a coherent scoped baseline and deterministic panel state
   await page.getByRole('button', { name: 'Refresh replay from baseline' }).click()
   await expect(page.getByText(/Replay snapshot: paused at tick 0/)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Show loading dashboard state' }).click()
+  await page.getByRole('radio', { name: 'Show loading dashboard state' }).click()
   await expect(page.getByText('Loading scoped panel data').first()).toBeVisible()
-  await page.getByRole('button', { name: 'Show empty dashboard state' }).click()
+  await page.getByRole('radio', { name: 'Show empty dashboard state' }).click()
   await expect(page.getByText('No scoped values')).toHaveCount(7)
-  await page.getByRole('button', { name: 'Show error dashboard state' }).click()
+  await page.getByRole('radio', { name: 'Show error dashboard state' }).click()
   await expect(page.getByText('Panel data unavailable')).toHaveCount(7)
-  await page.getByRole('button', { name: 'Show normal dashboard state' }).click()
+  await page.getByRole('radio', { name: 'Show normal dashboard state' }).click()
   await expect(page.getByText(/^Text summary:/).first()).toBeVisible()
 })
 
@@ -50,7 +50,7 @@ test('keyboard move and named size choices announce, persist, and reset independ
   await expect(page.getByRole('status')).toContainText(/moved to position 2 of 7/i)
   await expect(panels.nth(1)).toHaveAttribute('data-panel-id', initialFirst!)
 
-  await page.getByRole('button', { name: 'Set Request traffic size to Medium' }).focus()
+  await page.getByRole('radio', { name: 'Set Request traffic size to Medium' }).focus()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('status')).toContainText(/Request traffic resized to Medium/i)
   await page.reload()

@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { syncRadioSemantics } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './icon-button.scss?inline'
 
@@ -63,22 +64,8 @@ export class IconButton extends LitElement {
   @property({ type: Boolean }) radio = false
 
   protected override updated(changed: PropertyValues<this>) {
-    if (changed.has('radio') || changed.has('selected')) this.syncRadio(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'))
-  }
-
-  /**
-   * The radio role and its checked state, written on the inner button directly: the group sets `radio` on the client
-   * only, and a hydrating render keeps the server's attributes without committing values that differ from them.
-   */
-  private syncRadio(button: HTMLElement | null | undefined) {
-    if (!button) return
-    if (this.radio) {
-      button.setAttribute('role', 'radio')
-      button.setAttribute('aria-checked', this.selected ? 'true' : 'false')
-    } else {
-      button.removeAttribute('role')
-      button.removeAttribute('aria-checked')
-    }
+    if (changed.has('radio') || changed.has('selected'))
+      syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), this.radio, this.selected)
   }
 
   override render() {
