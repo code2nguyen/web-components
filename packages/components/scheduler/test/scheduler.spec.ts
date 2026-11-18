@@ -369,3 +369,21 @@ test('a bar move or a create drag across bars and the row heading selects no tex
   await page.mouse.up()
   expect(await page.evaluate(() => (window as Window & { dragStarts?: number }).dragStarts)).toBe(0)
 })
+
+test('an editable row cancels a text selection from its own surface, not from a field a renderer draws in a bar', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  const prevented = await scheduler(page).evaluate((element) => {
+    const lane = element.shadowRoot!.querySelector('.lane')!
+    const fire = (target: Element) => {
+      const event = new Event('selectstart', { bubbles: true, cancelable: true, composed: true })
+      target.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    const input = document.createElement('input')
+    lane.append(input)
+    const result = { lane: fire(lane), input: fire(input) }
+    input.remove()
+    return result
+  })
+  expect(prevented).toEqual({ lane: true, input: false })
+})

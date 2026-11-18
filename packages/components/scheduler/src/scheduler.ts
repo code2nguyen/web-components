@@ -1417,6 +1417,10 @@ export class Scheduler extends LitElement {
    * the row headings a drag crosses, and the next press on that selection starts a native drag instead of a move.
    */
   private readonly handleLaneSelectStart = (event: Event) => {
+    // Text in a field or editable content a renderer draws in a bar stays selectable.
+    const origin = event.composedPath()[0]
+    const element = origin instanceof Element ? origin : (origin as Node | undefined)?.parentElement
+    if (element?.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return
     if (this.editable) event.preventDefault()
   }
 
