@@ -29,7 +29,7 @@ export type DeltaBetter = 'higher' | 'lower'
  *
  * @csspart number - The `<data>` element holding the formatted change and its arrow, with the raw value as its `value`.
  * @csspart unit - Each currency symbol, unit name, percent sign or compact suffix inside the number.
- * @csspart arrow - The arrow's accessible name, wrapping the `increase-icon` or `decrease-icon` slot. Hide the arrow with `--c2-delta__arrow--display`, not by hiding this part, which would also remove that name.
+ * @csspart arrow - The visible arrow, wrapping the `increase-icon` or `decrease-icon` slot. Its accessible name ("Increase, better") sits on a box around it, so hiding the part (or `--c2-delta__arrow--display: none`) keeps the name.
  * @csspart comparison - The wrapper of the `comparison` slot, placed after the number: the label text it projects inherits its colour and size.
  *
  * @cssproperty {color} [--c2-delta__good--color=#15803d] - Colour of a good change: a rise, or a fall with `better="lower"`.
@@ -66,8 +66,8 @@ export class Delta extends FormatNumber {
     const good = this.better === 'lower' ? direction < 0 : direction > 0
     const name = direction > 0 ? 'increase' : 'decrease'
     const arrow = direction
-      ? html`<span part="arrow" role="img" aria-label=${this.#msg.t(`${name}${good ? 'Better' : 'Worse'}`)}
-          ><span class="glyph"
+      ? html`<span class="arrow" role="img" aria-label=${this.#msg.t(`${name}${good ? 'Better' : 'Worse'}`)}
+          ><span part="arrow"
             ><slot name="${name}-icon"
               ><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2l6 7h-4v5H6V9H2z"></path></svg></slot></span
         ></span>`

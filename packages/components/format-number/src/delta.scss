@@ -27,8 +27,9 @@
   color: css.cssVar(flat--color);
 }
 
-// The named `role="img"` box stays rendered (empty when hidden), so the direction keeps its accessible name.
-.glyph {
+// The named `role="img"` box around the part stays rendered (empty when the arrow is hidden), so the direction keeps
+// its accessible name.
+[part='arrow'] {
   display: css.cssVar(arrow--display);
   margin-inline-end: css.cssVar(arrow--margin-inline-end);
 }
