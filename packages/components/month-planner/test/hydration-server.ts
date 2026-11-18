@@ -11,10 +11,27 @@ export async function renderPlanners(): Promise<string> {
   globalThis.customElements ??= customElements
   await import('../src/month-planner')
   const events = JSON.stringify([{ title: 'Offsite', start: '2026-09-03' }])
-  return collectResultSync(
-    render(
-      html`<c2-month-planner id="grid" locale="en-US" month="2026-09" events=${events}></c2-month-planner>
-        <c2-month-planner id="agenda" locale="en-US" month="2026-09" view="agenda" events=${events}></c2-month-planner>`,
-    ),
-  )
+  // The server's clock is on a day of the month shown (the 20th), unlike the visitor's (the 15th, in the browser): a
+  // marker drawn on the server would show in the markup.
+  const RealDate = globalThis.Date
+  const serverNow = new RealDate(2026, 8, 20, 10).getTime()
+  globalThis.Date = class extends RealDate {
+    constructor(...args: ConstructorParameters<typeof RealDate> | []) {
+      if (args.length) super(...(args as ConstructorParameters<typeof RealDate>))
+      else super(serverNow)
+    }
+    static override now() {
+      return serverNow
+    }
+  } as DateConstructor
+  try {
+    return collectResultSync(
+      render(
+        html`<c2-month-planner id="grid" locale="en-US" month="2026-09" events=${events}></c2-month-planner>
+          <c2-month-planner id="agenda" locale="en-US" month="2026-09" view="agenda" events=${events}></c2-month-planner>`,
+      ),
+    )
+  } finally {
+    globalThis.Date = RealDate
+  }
 }
