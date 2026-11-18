@@ -268,14 +268,19 @@ export class ButtonGroup extends LitElement {
     this.internals.setFormValue(data)
   }
 
-  /** Whether the items are radio buttons: one pressed item, outside a toolbar (whose items keep their own roles). */
-  private get radioItems(): boolean {
-    return !this.toolbar && this.effectiveSelection === 'single'
-  }
+  /**
+   * Whether the group is a radio group: one pressed item, outside a toolbar (whose items keep their own roles), and
+   * every item has a radio mode (`c2-button`, `c2-icon-button`). With a plain `<button>`, a split button or an element
+   * not defined yet among them, every item stays a toggle button in a `group`: a radiogroup must hold radios only.
+   * Set by {@link syncItems}.
+   */
+  private radioMode = false
+  /** Tags of items not defined yet, whose definition re-syncs the group. */
+  private readonly awaitedTags = new Set<string>()
 
-  /** `toolbar`, `radiogroup` for a single-selection group, else `group`. */
+  /** `toolbar`, `radiogroup` for a group of radios, else `group`. */
   private get groupRole(): 'toolbar' | 'radiogroup' | 'group' {
-    return this.toolbar ? 'toolbar' : this.radioItems ? 'radiogroup' : 'group'
+    return this.toolbar ? 'toolbar' : this.radioMode ? 'radiogroup' : 'group'
   }
 
   private get effectiveSelection(): ButtonGroupSelection {
@@ -292,7 +297,22 @@ export class ButtonGroup extends LitElement {
       if (firstEnabledIndex >= 0) this.value = this.itemValue(items[firstEnabledIndex], firstEnabledIndex)
     }
     const selected = new Set(this.selectedValues)
-    const radio = this.radioItems
+    const undefinedTags = [...new Set(items.map((item) => item.localName).filter((tag) => tag.includes('-') && !customElements.get(tag)))]
+    for (const tag of undefinedTags) {
+      if (this.awaitedTags.has(tag)) continue
+      this.awaitedTags.add(tag)
+      customElements.whenDefined(tag).then(() => {
+        this.awaitedTags.delete(tag)
+        if (this.isConnected) this.syncItems()
+      })
+    }
+    const radio = !this.toolbar && selection === 'single' && items.length > 0 && !undefinedTags.length && items.every((item): boolean => 'radio' in item)
+    if (radio !== this.radioMode) {
+      this.radioMode = radio
+      // Outside an update when an item's definition re-syncs: the roles are written where they live.
+      this.internals.role = this.field.managed ? null : this.groupRole
+      this.renderRoot?.querySelector('.field-group')?.setAttribute('role', this.groupRole)
+    }
     // An item moved out of the group, or every item once the group stops being single: a toggle button again. An
     // item another group has taken is left to that group, whichever of the two syncs first.
     for (const item of this.radioItemsSet) {
@@ -303,15 +323,11 @@ export class ButtonGroup extends LitElement {
       ;(item as HTMLElement & { radio: boolean }).radio = false
     }
     items.forEach((item, index) => {
-      // A property, not an attribute: nothing is written on the author's children that a server render would lack.
-      // An item not upgraded yet (a server-rendered page hydrating children after the group) keeps the property:
-      // Lit picks up a value set before the element was defined.
-      const pending = item.localName.includes('-') && !customElements.get(item.localName)
-      const takesRadio = radio && ('radio' in item || pending)
-      // An item with no radio mode (a split button, another library's toggle) stays a toggle button, with its state.
-      if (selectable && !takesRadio) item.setAttribute('toggle', '')
+      // `radio` is a property, not an attribute: nothing is written on the author's children that a server render
+      // would lack.
+      if (selectable && !radio) item.setAttribute('toggle', '')
       else item.removeAttribute('toggle')
-      if (takesRadio) {
+      if (radio) {
         ;(item as HTMLElement & { radio: boolean }).radio = true
         this.radioItemsSet.add(item)
       } else if ((item as HTMLElement & { radio?: boolean }).radio) {
@@ -438,7 +454,7 @@ export class ButtonGroup extends LitElement {
 
   private handleKeyDown = (event: KeyboardEvent) => {
     // A radio group answers to all four arrows, as the radio pattern does; a toolbar to the ones of its orientation.
-    const directionKeys = this.radioItems
+    const directionKeys = this.radioMode
       ? ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
       : this.orientation === 'vertical'
         ? ['ArrowUp', 'ArrowDown']

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { syncRadioSemantics } from '@c2n/core/dom-helper.js'
@@ -63,10 +63,12 @@ export class IconButton extends LitElement {
    */
   @property({ type: Boolean }) radio = false
 
-  protected override updated(changed: PropertyValues<this>) {
-    // Only while the item is a radio, or just stopped being one: a plain button has nothing to sync.
-    if ((changed.has('radio') && (this.radio || changed.get('radio'))) || (this.radio && changed.has('selected')))
-      syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), this.radio, this.selected)
+  /**
+   * A hydrating first render keeps the server's attributes, and the server never knows the item is a radio (its group
+   * says so on the client): put the radio semantics on the inner button once. Later renders bind them as usual.
+   */
+  protected override firstUpdated() {
+    if (this.radio) syncRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), true, this.selected)
   }
 
   override render() {
@@ -76,7 +78,9 @@ export class IconButton extends LitElement {
         part="button"
         type="button"
         ?disabled=${this.disabled}
-        aria-pressed=${!this.radio && (this.selected || this.toggle) ? (this.selected ? 'true' : 'false') : nothing}
+        role=${this.radio ? 'radio' : nothing}
+        aria-checked=${this.radio ? String(this.selected) : nothing}
+        aria-pressed=${this.radio ? nothing : this.selected ? 'true' : this.toggle ? 'false' : nothing}
         aria-label=${ifDefined(this.ariaLabel ?? this.tooltip)}
       >
         <slot></slot>

@@ -256,7 +256,7 @@ test('an item moved out of a single-selection group is a toggle button again', a
   await expect(moved).not.toHaveAttribute('aria-checked', /.*/)
 })
 
-test('an item with no radio mode keeps its toggle state in a single-selection group', async ({ page, renderScenario }) => {
+test('a single-selection group with an item that has no radio mode stays a group of toggle buttons', async ({ page, renderScenario }) => {
   await page.addInitScript(() =>
     customElements.define(
       'x-toggle',
@@ -273,7 +273,10 @@ test('an item with no radio mode keeps its toggle state in a single-selection gr
   )
   await expect(page.locator('x-toggle')).toHaveAttribute('toggle', '')
   await expect(page.locator('x-toggle')).toHaveAttribute('data-state', 'true')
-  await expect(page.getByRole('radio', { name: 'A' })).toHaveAttribute('aria-checked', 'false')
+  // A radiogroup must hold radios only: with one item that cannot be a radio, none is.
+  await expect(page.locator('c2-button-group')).toHaveHostAria('role', 'group')
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('an item moved from one single-selection group to another stays a radio, whichever group syncs first', async ({ page, renderScenario }) => {
@@ -285,4 +288,30 @@ test('an item moved from one single-selection group to another stays a radio, wh
   await expect(page.locator('#b').getByRole('radio', { name: 'Two' })).toBeVisible()
   await page.evaluate(() => document.querySelector('#m')!.append(document.querySelector('c2-button[value="3"]')!))
   await expect(page.locator('#m').getByRole('button', { name: 'Three' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('a group whose items are defined later becomes a radio group once they are', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-button-group selection="single" value="b" aria-label="Late"><x-late value="a">A</x-late><x-late value="b">B</x-late></c2-button-group>`,
+  )
+  const group = page.locator('c2-button-group')
+  await expect(group).toHaveHostAria('role', 'group')
+  await expect(page.locator('x-late').first()).toHaveAttribute('toggle', '')
+  // The items take a radio mode when their element is defined.
+  await page.evaluate(() =>
+    customElements.define(
+      'x-late',
+      class extends HTMLElement {
+        radio = false
+      },
+    ),
+  )
+  await expect(group).toHaveHostAria('role', 'radiogroup')
+  await expect(page.locator('x-late').first()).not.toHaveAttribute('toggle', /.*/)
+  expect(
+    await page
+      .locator('x-late')
+      .first()
+      .evaluate((element) => (element as HTMLElement & { radio: boolean }).radio),
+  ).toBe(true)
 })
