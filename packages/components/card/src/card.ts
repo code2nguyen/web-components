@@ -40,11 +40,11 @@ const INNER_CONTROL =
  * @cssproperty {border-radius} [--c2-card--border-bottom-left-radius=8px]
  * @cssproperty {border-radius} [--c2-card--border-bottom-right-radius=8px]
  *
- * @cssproperty {border} --c2-card--border - All four sides at once (a highlighted "Most popular" card); when set, it wins over the per-side variables.
- * @cssproperty {border} [--c2-card--border-top=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-card--border-bottom=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-card--border-right=1px solid rgb(213, 213, 213)]
- * @cssproperty {border} [--c2-card--border-left=1px solid rgb(213, 213, 213)]
+ * @cssproperty {border} [--c2-card--border=1px solid rgb(213, 213, 213)] - All four sides at once (a highlighted "Most popular" card). A per-side variable wins over it for its side.
+ * @cssproperty {border} --c2-card--border-top - Top side; falls back to `--c2-card--border`.
+ * @cssproperty {border} --c2-card--border-bottom - Bottom side; falls back to `--c2-card--border`.
+ * @cssproperty {border} --c2-card--border-right - Right side; falls back to `--c2-card--border`.
+ * @cssproperty {border} --c2-card--border-left - Left side; falls back to `--c2-card--border`.
  *
  * @cssproperty {background} [--c2-card--background=rgb(255, 255, 255)]
  * @cssproperty {color} --c2-card--color - Text color of the card; inherits by default.
