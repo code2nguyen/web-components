@@ -32,6 +32,7 @@ declare module 'vue' {
         'resource-heading'?: unknown
         onRangeSelect?: (event: EventOf<Scheduler, 'range-select'>) => void
         onEventChange?: (event: EventOf<Scheduler, 'event-change'>) => void
+        onProposalChange?: (event: EventOf<Scheduler, 'proposal-change'>) => void
         onEventClick?: (event: EventOf<Scheduler, 'event-click'>) => void
         onDateChange?: (event: EventOf<Scheduler, 'date-change'>) => void
         onViewChange?: (event: EventOf<Scheduler, 'view-change'>) => void
