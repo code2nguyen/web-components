@@ -49,9 +49,7 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     // The installed manifest's description when there is one: the tables below come from it too.
     const description = installed?.declared?.get(requested.tag)?.description || requested.description
     if (description) out.push(description)
-    out.push(
-      `\nPart of \`${component.package}\`, whose main element is \`${component.elements[0].tag}\`: ${firstSentence(component.description || component.intro || '')} Call get_component with \`tag: "${component.elements[0].tag}"\` for its description.`,
-    )
+    out.push(`\nPart of \`${component.package}\`: ${firstSentence(component.description || component.intro || '')}`)
   } else out.push(component.description || component.intro || '')
   out.push('')
   const status = installed?.via
@@ -117,13 +115,13 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(renderCssGroups(api.cssProperties.map((p) => ('part' in p ? p : withParsedName(p)))))
     }
   }
-  if (include.has('composition')) {
+  // The composition is the package's main element's: none of it describes a child element.
+  if (include.has('composition') && !secondary) {
     const { internal, slotted, usedBy } = component.composition
     if (internal.length || slotted.length || usedBy.length) {
       out.push('\n## Composition\n')
       if (internal.length) out.push(`- Renders internally: ${internal.map((t) => `\`${t}\``).join(', ')} (their variables can be set on this element)`)
-      // A secondary element is one of those children: the line describes the main element.
-      if (slotted.length && !secondary) out.push(`- Expects slotted: ${slotted.map((t) => `\`${t}\``).join(', ')}`)
+      if (slotted.length) out.push(`- Expects slotted: ${slotted.map((t) => `\`${t}\``).join(', ')}`)
       if (usedBy.length) out.push(`- Used by: ${usedBy.map((t) => `\`${t}\``).join(', ')}`)
     }
   }

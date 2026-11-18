@@ -96,7 +96,7 @@ test('get_component on a secondary element leads with its own API, not the packa
   const concrete = { tag: 'c2-table-column', modulePath: '@c2n/table', className: 'TableColumn' }
   const out = renderComponent(table, { include, installed: null, concrete })
   assert.ok(out.length < 3000, `the package description is shortened (${out.length} characters)`)
-  assert.match(out, /^# Table \(c2-table-column\)\nOne column\.\n\nPart of `@c2n\/table`, whose main element is `c2-table`: A data table\./)
+  assert.match(out, /^# Table \(c2-table-column\)\nOne column\.\n\nPart of `@c2n\/table`: A data table\.$/m)
   assert.ok(out.indexOf('`pinned`') < out.indexOf('`rows`'), 'the requested element is listed first')
   // The main element still prints the whole description.
   assert.ok(renderComponent(table, { include, installed: null }).includes('Long description of the table. Long description'))
@@ -109,7 +109,7 @@ test('get_component on a secondary element drops the main element composition an
     package: '@c2n/chart',
     title: 'Chart',
     description: 'Charts (e.g. line, bar) drawn on a canvas. Second sentence.',
-    composition: { internal: [], slotted: ['c2-chart-series'], usedBy: [] },
+    composition: { internal: ['c2-overlay'], slotted: ['c2-chart-series'], usedBy: [] },
     elements: [
       { ...badge.elements[0], tag: 'c2-line-chart', className: 'LineChart', description: 'A line chart.' },
       { ...badge.elements[0], tag: 'c2-chart-series', className: 'ChartSeries', description: 'One series.' },
@@ -120,6 +120,7 @@ test('get_component on a secondary element drops the main element composition an
     installed: null,
     concrete: { tag: 'c2-chart-series', modulePath: '@c2n/chart', className: 'ChartSeries' },
   })
-  assert.match(out, /main element is `c2-line-chart`: Charts \(e\.g\. line, bar\) drawn on a canvas\. Call/)
-  assert.doesNotMatch(out, /Expects slotted/)
+  assert.match(out, /Part of `@c2n\/chart`: Charts \(e\.g\. line, bar\) drawn on a canvas\.$/m)
+  assert.doesNotMatch(out.split('\n- Package')[0], /c2-line-chart/)
+  assert.doesNotMatch(out, /Expects slotted|Renders internally/)
 })
