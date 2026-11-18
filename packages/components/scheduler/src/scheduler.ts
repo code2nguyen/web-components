@@ -427,6 +427,8 @@ export class Scheduler extends LitElement {
   /** The range and columns of the last render, which the pointer and keyboard handlers work in. */
   private layout: { range: SchedulerRange; columns: SchedulerColumn[]; rows: Row[] } | null = null
   private scrolledFor = ''
+  /** Waits for the scroller to get a size when `scroll-time` was asked for before the grid had any layout. */
+  private scrollRetry?: ResizeObserver
   /** `bands` parsed once per array assigned. */
   private parsedBands?: { source: unknown; list: { start: number; end: number; label?: string; color: string | null; resource?: string }[] }
 
@@ -440,6 +442,10 @@ export class Scheduler extends LitElement {
     clearInterval(this.clock)
     this.endGesture()
     this.clearRefocus()
+    this.scrollRetry?.disconnect()
+    this.scrollRetry = undefined
+    // Connected again, it scrolls again: the retry it may have been waiting for is gone.
+    this.scrolledFor = ''
   }
 
   protected override firstUpdated() {
@@ -457,8 +463,10 @@ export class Scheduler extends LitElement {
   protected override updated(changed: PropertyValues<this>) {
     const key = `${this.view}|${this.anchorDay}|${this.scrollTime}`
     if (this.scrolledFor !== key) {
-      this.scrolledFor = key
-      this.scrollToTime()
+      this.scrollRetry?.disconnect()
+      this.scrollRetry = undefined
+      if (this.scrollToTime()) this.scrolledFor = key
+      else this.retryScroll(key)
     }
     if (changed.has('events') && this.refocus) {
       const id = this.refocus
@@ -722,17 +730,33 @@ export class Scheduler extends LitElement {
     return firstDayOfWeek(this.effectiveLocale)
   }
 
-  private scrollToTime() {
+  /** Scrolls the day to `scroll-time`; false while the grid has no layout yet (a hidden or not yet sized scheduler). */
+  private scrollToTime(): boolean {
     const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
     const timeline = this.renderRoot.querySelector<HTMLElement>('.scale')
-    if (!scroller || !timeline || !this.layout) return
+    if (!scroller || !timeline || !this.layout) return true
     if (this.currentView !== 'day') {
       scroller.scrollLeft = 0
-      return
+      return true
     }
     const time = parseClock(this.scrollTime)
-    if (time === null) return
+    if (time === null) return true
+    if (!scroller.clientWidth || !timeline.offsetWidth) return false
     scroller.scrollLeft = fractionOf(this.layout.range, this.layout.range.days[0] + time) * timeline.offsetWidth
+    return true
+  }
+
+  /** Scrolls once the scroller is laid out: an island hydrated while its frame measured 0 wide would stay at `day-start`. */
+  private retryScroll(key: string) {
+    const scroller = this.renderRoot.querySelector<HTMLElement>('.scroller')
+    if (!scroller || typeof ResizeObserver === 'undefined') return
+    this.scrollRetry = new ResizeObserver(() => {
+      if (!this.scrollToTime()) return
+      this.scrolledFor = key
+      this.scrollRetry?.disconnect()
+      this.scrollRetry = undefined
+    })
+    this.scrollRetry.observe(scroller)
   }
 
   // ------------------------------------------------------------------------------------------------- pointer
