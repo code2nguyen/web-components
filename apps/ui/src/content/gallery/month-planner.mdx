@@ -2,7 +2,10 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { MonthPlanner } from '@c2n/components/month-planner'
+import { Button } from '@c2n/components/button'
 import ExampleModules from '../../components/ExampleModules.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import MonthPlannerExamplesRuntime from '../../components/MonthPlannerExamplesRuntime.astro'
 
 <ExampleModules />
 
@@ -85,3 +88,176 @@ month reads.
 ```
 
 </GalleryGrid>
+
+## Agenda view
+
+`view="agenda"` lists the month's days that have events, each under a heading that sticks to the top of the list
+while its events scroll past (`--c2-month-planner__agenda--max-height`). The header pages between months as on the
+grid; today is marked even on a day without events.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Agenda
+<style>
+  .agenda-plan {
+    --c2-month-planner__agenda--max-height: 360px;
+    --c2-month-planner__agenda-day--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-month-planner__agenda-day--font-size: 13px;
+    --c2-month-planner__agenda-event__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-month-planner
+  class="agenda-plan"
+  view="agenda"
+  heading="Trips"
+  month="2026-09"
+  locale="en-US"
+  events='[{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-14","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"review","title":"Quarterly review","start":"2026-09-24"},{"id":"move","title":"Moving week","start":"2026-09-28","end":"2026-10-04","color":"#be185d"}]'
+></c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Month or agenda
+<style>
+  .view-switch {
+    --c2-month-planner__agenda--max-height: 320px;
+  }
+  .view-switch-button {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+  }
+</style>
+<c2-month-planner
+  class="view-switch"
+  data-month-planner-example="view"
+  month="2026-10"
+  locale="en-US"
+  events='[{"id":"offsite","title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"id":"half-term","title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"},{"id":"launch","title":"Launch","start":"2026-10-28","color":"#be185d"}]'
+>
+  <c2-button class="view-switch-button" slot="actions" toggle data-month-planner-action="view">Agenda</c2-button>
+</c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Empty month
+<style>
+  .agenda-empty-state__message {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 13px;
+  }
+  .agenda-empty-state__message strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+  .agenda-empty-state::part(empty) {
+    padding-block: 40px;
+  }
+</style>
+<c2-month-planner class="agenda-empty-state" view="agenda" month="2026-08" locale="en-US" events="[]">
+  <div slot="empty" class="agenda-empty-state__message">
+    <strong>A quiet month</strong>
+    <span>Nothing is planned for August yet.</span>
+  </div>
+</c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Agenda in French
+<c2-month-planner
+  lang="fr"
+  view="agenda"
+  month="2026-09"
+  events='[{"id":"vacances","title":"Vacances à Lisbonne","start":"2026-09-10","end":"2026-09-12","color":"#0f766e"},{"id":"vol","title":"Vol TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"revue","title":"Revue trimestrielle","start":"2026-09-24"}]'
+></c2-month-planner>
+```
+
+</GalleryGrid>
+
+## Change calendar
+
+An event with `display: 'background'` is drawn as a shaded band behind the days it covers: a change freeze, a
+maintenance window, a public holiday. Its `color` is the shade itself, so give it a translucent one. Changes stay bars
+in their own lanes over the bands. The planner does not compare them: the app flags a change that lands in a freeze,
+here with a red bar and a title that says so.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Change calendar
+<style>
+  .change-calendar {
+    --c2-month-planner__event--background: #4f46e5;
+    --c2-month-planner__event--color: var(--c2-theme--color-on-fill, #ffffff);
+    --c2-month-planner__band-label--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .change-calendar::part(band) {
+    background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, currentColor 7%, transparent) 6px 12px);
+  }
+</style>
+<c2-month-planner
+  class="change-calendar"
+  heading="Change calendar"
+  month="2026-09"
+  week-start="monday"
+  locale="en-US"
+  events='[{"id":"freeze","title":"Release freeze","start":"2026-09-14","end":"2026-09-18","display":"background","color":"rgba(220, 38, 38, 0.12)"},{"id":"window-1","title":"Maintenance window","start":"2026-09-05","display":"background","color":"rgba(217, 119, 6, 0.16)"},{"id":"window-2","title":"Maintenance window","start":"2026-09-26","display":"background","color":"rgba(217, 119, 6, 0.16)"},{"id":"db","title":"CHG-2041 Database upgrade","start":"2026-09-05"},{"id":"cdn","title":"CHG-2050 CDN certificates","start":"2026-09-08","end":"2026-09-09"},{"id":"billing","title":"Conflict: CHG-2063 Billing deploy","start":"2026-09-16","color":"#b91c1c"},{"id":"k8s","title":"CHG-2071 Cluster upgrade","start":"2026-09-26","end":"2026-09-27"}]'
+></c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Agenda items
+<style>
+  .change-agenda {
+    --c2-month-planner__agenda--max-height: 360px;
+  }
+  .change-agenda::part(agenda-event) {
+    align-items: center;
+  }
+  .change-agenda::part(change-kind) {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .change-agenda::part(change-title) {
+    flex: 1;
+    font-weight: 500;
+  }
+  .change-agenda::part(change-progress) {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 64%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 12px;
+  }
+</style>
+<c2-month-planner
+  class="change-agenda"
+  data-month-planner-example="renderer"
+  view="agenda"
+  month="2026-09"
+  locale="en-US"
+  events='[{"id":"freeze","title":"Release freeze","start":"2026-09-14","end":"2026-09-18","display":"background","color":"rgba(220, 38, 38, 0.12)"},{"id":"cdn","title":"CHG-2050 CDN certificates","start":"2026-09-08","end":"2026-09-09"},{"id":"billing","title":"CHG-2063 Billing deploy","start":"2026-09-16","color":"#b91c1c"},{"id":"k8s","title":"CHG-2071 Cluster upgrade","start":"2026-09-26","end":"2026-09-27"}]'
+></c2-month-planner>
+```
+
+</GalleryGrid>
+
+`renderAgendaEvent` draws the content of each listed event. The planner keeps the item, a button named after the
+event's title and dates that fires `event-click`, and calls the renderer once for each day the event is listed under:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { MonthPlannerAgendaEventContext } from '@c2n/components/month-planner'
+
+const days = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000)
+
+planner.view = 'agenda'
+planner.renderAgendaEvent = ({ event, date, start, end, background }: MonthPlannerAgendaEventContext) => {
+  const length = days(start, end) + 1
+  return html`<span part="change-kind">${background ? 'Window' : 'Change'}</span>
+    <span part="change-title">${event.title}</span>
+    ${length > 1 ? html`<span part="change-progress">Day ${days(start, date) + 1} of ${length}</span>` : ''}`
+}
+```
+
+<MonthPlannerExamplesRuntime />
