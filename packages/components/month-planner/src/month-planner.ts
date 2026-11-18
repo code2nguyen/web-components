@@ -244,6 +244,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @cssproperty {border} [--c2-month-planner--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-month-planner--border-radius=8px]
  * @cssproperty {padding} [--c2-month-planner--padding=12px]
+ * @cssproperty {length} [--c2-month-planner--contain-intrinsic-inline-size=720px] - Width the planner asks for in a layout that sizes it from its content (a centred flex column, a table cell), capped by the space available. It is also the narrowest a content-sized wrapper around it can shrink (a `<div lang>` in a flex row): lower it there.
  * @cssproperty {font-family} [--c2-month-planner--font-family=inherit]
  * @cssproperty {font-size} [--c2-month-planner--font-size=14px]
  * @cssproperty {font-weight} [--c2-month-planner__title--font-weight=600]
@@ -326,6 +327,12 @@ export class MonthPlanner extends LitElement {
   /** Day picked in the compact layout, as `YYYY-MM-DD`; its events are listed under the grid. */
   @state() private selectedDay = ''
   @state() private pickerYear = new Date().getFullYear()
+  /**
+   * Today, as `YYYY-MM-DD`. Empty on the server and through the hydration of a server-rendered planner (a declarative
+   * shadow root is already there in the constructor), then set: the server's clock may be on another day than the
+   * visitor's, and a marker drawn from it would not match the first client render.
+   */
+  @state() private today = isServer || this.shadowRoot ? '' : toIso(new Date())
   /** Month index (0–11) holding the picker's roving tab stop. */
   @state() private pickerFocus = 0
   @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
@@ -377,6 +384,11 @@ export class MonthPlanner extends LitElement {
       const month = parseMonth(this.month)
       if (month) this.visibleMonth = month
     }
+  }
+
+  protected override firstUpdated() {
+    // After this update, not from inside it, so it does not schedule a second update while the first one runs.
+    if (!this.today && !isServer) queueMicrotask(() => (this.today = toIso(new Date())))
   }
 
   protected override updated(changed: PropertyValues<this>) {
@@ -576,7 +588,7 @@ export class MonthPlanner extends LitElement {
   private get shownDay(): string {
     const month = toMonth(this.visibleMonth)
     if (this.selectedDay.startsWith(month)) return this.selectedDay
-    const today = toIso(new Date())
+    const today = this.today
     return today.startsWith(month) ? today : toIso(this.visibleMonth)
   }
 
@@ -961,7 +973,7 @@ export class MonthPlanner extends LitElement {
     const heading = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' })
     const range = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' })
     const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
-    const today = toIso(new Date())
+    const today = this.today
     const days = []
     for (let day = first; day < next; day = addDays(day, 1)) {
       const value = toIso(day)
@@ -986,7 +998,7 @@ export class MonthPlanner extends LitElement {
     const title = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(this.visibleMonth)
     const weekdays = new Intl.DateTimeFormat(locale, { weekday: 'short' })
     const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
-    const today = toIso(new Date())
+    const today = this.today
     const first = this.firstGridDay
     const last = beginningOfMonth(this.visibleMonth, 1)
     const weeks = Math.ceil(dayDiff(first, last) / 7)

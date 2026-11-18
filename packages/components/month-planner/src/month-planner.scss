@@ -8,6 +8,7 @@
     border: 1px solid #e4e4e7,
     border-radius: 8px,
     padding: 12px,
+    contain-intrinsic-inline-size: 720px,
     font-family: inherit,
     font-size: 14px,
     title--font-weight: 600,
@@ -95,8 +96,9 @@
 .c2-month-planner {
   container: month-planner / inline-size;
   // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
-  // a table cell) gets this instead, capped by the space available.
-  contain-intrinsic-inline-size: 720px;
+  // a table cell) gets this instead, capped by the space available. It is also the planner's min-content width, so a
+  // content-sized wrapper in a flex row cannot shrink below it: the variable lets an app lower it.
+  contain-intrinsic-inline-size: css.cssVar(contain-intrinsic-inline-size);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
