@@ -378,3 +378,34 @@ test('without composed, a selection inside a shadow root of the content is left 
   await page.waitForTimeout(500)
   await expect(toolbar(page)).toBeHidden()
 })
+
+test('composed reads a selection bounded by the shadow root itself, and works with the toolbar inside a shadow root', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  // Select All in the component: the range's containers are the shadow root.
+  await page.evaluate(() => {
+    const root = document.querySelector('shadow-text')!.shadowRoot!
+    document.getSelection()!.setBaseAndExtent(root, 0, root, root.childNodes.length)
+  })
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('The quick brown fox jumps over the lazy dog.')
+
+  // The same toolbar, moved into an app's shadow root.
+  await page.evaluate(() => {
+    const toolbarElement = document.querySelector('c2-selection-toolbar')!
+    const app = document.createElement('div')
+    app.style.paddingTop = '120px'
+    document.body.append(app)
+    app.attachShadow({ mode: 'open' }).append(toolbarElement)
+    document.getSelection()!.removeAllRanges()
+  })
+  const inShadow = page.locator('div >> c2-selection-toolbar')
+  await expect(inShadow.getByRole('toolbar')).toBeHidden()
+  await page.evaluate(() => {
+    const app = [...document.body.querySelectorAll('div')].find((element) => element.shadowRoot)!
+    const node = app.shadowRoot!.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+    document.getSelection()!.setBaseAndExtent(node, 4, node, 9)
+  })
+  await expect(inShadow.getByRole('toolbar')).toBeVisible()
+  expect(await inShadow.evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('quick')
+})

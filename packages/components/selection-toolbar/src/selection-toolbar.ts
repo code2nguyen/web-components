@@ -34,6 +34,18 @@ export interface SelectionToolbar {
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-toggle-button, c2-text-field, c2-textarea, c2-chat-input'
 
+/** Whether `node` is inside `ancestor`, through the hosts of the shadow roots between them. */
+function composedContains(ancestor: Element, node: Node): boolean {
+  const root = ancestor.getRootNode()
+  let current: Node = node
+  while (current.getRootNode() !== root) {
+    const own = current.getRootNode()
+    if (!(own instanceof ShadowRoot)) return false
+    current = own.host
+  }
+  return ancestor.contains(current)
+}
+
 /** How long a keyboard selection has to stay still before the toolbar shows. */
 const KEYBOARD_SETTLE = 300
 
@@ -101,9 +113,9 @@ export class SelectionToolbar extends LitElement {
   @property() label = ''
 
   /**
-   * Also acts on a selection inside the open shadow roots of the content, which `document.getSelection()` reports as a
-   * collapsed caret at the component's host. Reads it with `Selection.getComposedRanges()` where the browser has it; a
-   * selection that starts outside a shadow root and ends inside it is not shown.
+   * Also acts on a selection inside the open shadow roots of the content. WebKit reports one as a caret next to the
+   * component's host, so it is read there with `Selection.getComposedRanges()`. A selection that crosses a shadow
+   * boundary is read as it is without `composed`.
    */
   @property({ type: Boolean }) composed = false
 
@@ -257,39 +269,63 @@ export class SelectionToolbar extends LitElement {
   private currentSelection(): { range: Range; text: string } | null {
     const selection = document.getSelection()
     if (!selection || selection.rangeCount === 0) return null
-    if (this.composed && typeof selection.getComposedRanges === 'function') {
-      const shadowRoots = this.openShadowRoots()
-      const [composed] = shadowRoots.length ? selection.getComposedRanges({ shadowRoots }) : []
-      if (composed && composed.startContainer.getRootNode() !== document) {
-        const range = document.createRange()
-        // Ends in two different trees cannot share a Range: setEnd collapses it, and it is not shown.
-        range.setStart(composed.startContainer, composed.startOffset)
-        range.setEnd(composed.endContainer, composed.endOffset)
-        return { range, text: range.toString() }
-      }
+    const plain = { range: selection.getRangeAt(0).cloneRange(), text: selection.toString() }
+    // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret in the host's parent,
+    // which `getComposedRanges` resolves. Anything else is read as is.
+    const caret = plain.range.startContainer
+    if (!this.composed || !plain.range.collapsed) return plain
+    // The caret is in the content, or, for a toolbar that is itself in a shadow root, in a tree around it.
+    const around = caret !== this && !this.inContent(caret)
+    if (around && !(caret instanceof Element && composedContains(caret, this))) return plain
+    const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : caret)]
+    if (!shadowRoots.length || typeof selection.getComposedRanges !== 'function') return plain
+    let composed: StaticRange | undefined
+    try {
+      ;[composed] = selection.getComposedRanges({ shadowRoots })
+    } catch {
+      // An engine with the older variadic signature: the selection stays the component's.
+      return plain
     }
-    return { range: selection.getRangeAt(0).cloneRange(), text: selection.toString() }
+    // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
+    if (!composed || composed.startContainer.getRootNode() !== composed.endContainer.getRootNode()) return plain
+    const range = document.createRange()
+    range.setStart(composed.startContainer, composed.startOffset)
+    range.setEnd(composed.endContainer, composed.endOffset)
+    return { range, text: range.toString() }
   }
 
-  /** The open shadow roots inside the content, nested ones included. */
-  private openShadowRoots(): ShadowRoot[] {
+  /** The open shadow roots under the content's children around a node, nested ones included. */
+  private openShadowRoots(near: Node): ShadowRoot[] {
     const roots: ShadowRoot[] = []
-    const visit = (parent: Element | ShadowRoot) => {
-      for (const element of parent.querySelectorAll('*')) {
-        if (!element.shadowRoot || this.inToolbar(element)) continue
+    const visit = (element: Element) => {
+      if (element.shadowRoot) {
         roots.push(element.shadowRoot)
-        visit(element.shadowRoot)
+        for (const inner of element.shadowRoot.querySelectorAll('*')) if (inner.shadowRoot) visit(inner)
       }
+      for (const child of element.querySelectorAll('*')) if (child.shadowRoot && !this.inToolbar(child)) visit(child)
     }
-    visit(this)
+    // The caret sits in the parent of the host whose shadow root holds the selection: only that parent's subtree.
+    const parent = near instanceof Element ? near : near.parentElement
+    if (parent && (parent === this || !this.inToolbar(parent))) visit(parent)
+    return [...new Set(roots)]
+  }
+
+  /** The shadow roots this toolbar sits in, innermost first. */
+  private enclosingShadowRoots(): ShadowRoot[] {
+    const roots: ShadowRoot[] = []
+    for (let root = this.getRootNode(); root instanceof ShadowRoot; root = root.host.getRootNode()) roots.push(root)
     return roots
   }
 
   /** Whether a node is inside the content, through the hosts of the shadow roots it is in. */
   private inContent(node: Node): boolean {
+    const own = this.getRootNode()
     let current: Node | null = node
-    while (current && current.getRootNode() !== document && current.getRootNode() !== current) {
-      current = (current.getRootNode() as ShadowRoot).host ?? null
+    // Climb from shadow root to host until the node is in this toolbar's own tree (a document or a shadow root).
+    while (current && current.getRootNode() !== own) {
+      const root = current.getRootNode()
+      if (!(root instanceof ShadowRoot)) return false
+      current = root.host
     }
     return !!current && current !== this && this.contains(current) && !this.inToolbar(current)
   }
