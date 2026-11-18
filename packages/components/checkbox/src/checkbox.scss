@@ -51,6 +51,10 @@
     state-layer__hover__selected--color: null,
 
     field--gap: 4px,
+    field--padding: 0,
+    field--border: none,
+    field--border-radius: 0,
+    field--background-color: transparent,
     label--color: inherit,
     label--font-size: inherit,
     label--font-weight: inherit,
@@ -93,6 +97,18 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   align-items: center;
   min-width: 0;
   cursor: pointer;
+
+  // Off by default: a card-style option (a bordered box around box, label and price) sets these through `field`.
+  padding: css.cssVar(field--padding);
+  border: css.cssVar(field--border);
+  border-radius: css.cssVar(field--border-radius);
+  background-color: css.cssVar(field--background-color);
+
+  // Checked, each falls back to the row's own value, so setting only `field--border` keeps it when checked.
+  &:has(.c2-checkbox-input:checked) {
+    border: css.cssVar(field__checked--border, field--border);
+    background-color: css.cssVar(field__checked--background-color, field--background-color);
+  }
 
   &.has-text {
     gap: css.cssVar(field--gap);

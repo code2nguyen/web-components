@@ -290,14 +290,25 @@ export class NumberInput extends LitElement {
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
 
+  /** The field's name for its steppers: `aria-label`, the enclosing field's label, else a `<label for>`'s text. */
+  private fieldName() {
+    const own = this.ariaLabel || this.field.label
+    if (own) return own.trim()
+    // `labels` is missing from the server's ElementInternals shim.
+    const labels = this.internals.labels as NodeListOf<HTMLLabelElement> | undefined
+    return labels?.length ? (labels[0].textContent ?? '').replace(/\s+/g, ' ').trim() : ''
+  }
+
   private renderStepper(direction: 'down' | 'up') {
     const down = direction === 'down'
     const disabled = this.steppersDisabled || (down ? this.atMinimum : this.atMaximum)
+    const name = this.fieldName()
+    const label = name ? this.msg.t(down ? 'decreaseNamed' : 'increaseNamed', name) : this.msg.t(down ? 'decrease' : 'increase')
     return html`<button
       class="stepper ${direction}"
       type="button"
       tabindex="-1"
-      aria-label=${this.msg.t(down ? 'decrease' : 'increase')}
+      aria-label=${label}
       ?disabled=${disabled}
       @pointerdown=${this.keepInputFocus}
       @click=${() => (down ? this.stepDown() : this.stepUp())}

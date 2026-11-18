@@ -35,6 +35,19 @@ test('label activation and Space update checked and emit one change', async ({ p
   await expect(host).toHaveAttribute('data-events', '[null,null]')
   await accessible(page)
 })
+test('host.click() and a native label toggle it once, like a click on the control', async ({ page, renderScenario }) => {
+  await renderScenario('<label for="c">Outside label</label><c2-switch id="c" label="Option"></c2-switch><c2-switch id="d" disabled label="Off"></c2-switch>')
+  const host = page.locator('#c')
+  await watch(host, 'change')
+  await host.evaluate((el) => (el as HTMLElement).click())
+  await expect(host).toHaveJSProperty('checked', true)
+  await page.getByText('Outside label').click()
+  await expect(host).toHaveJSProperty('checked', false)
+  await expect(host).toHaveAttribute('data-events', '[null,null]')
+  await page.locator('#d').evaluate((el) => (el as HTMLElement).click())
+  await expect(page.locator('#d')).toHaveJSProperty('checked', false)
+})
+
 test('disabled prevents toggling and external checked updates restore native state', async ({ page, renderScenario }) => {
   await renderScenario('<c2-switch label="Notifications" disabled></c2-switch>')
   const host = page.locator('c2-switch')

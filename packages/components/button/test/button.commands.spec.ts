@@ -76,6 +76,15 @@ test('a disabled button or a submit button of a form sends no command', async ({
   expect(await commandLog(page)).toEqual([])
 })
 
+test('aria-haspopup reaches the inner button of a dialog invoker, without being written on the host', async ({ page, scenario }) => {
+  await scenario()
+  await render(page, '<c2-button commandfor="sheet" command="show-modal" aria-haspopup="dialog">Shortcuts</c2-button><dialog id="sheet">Sheet</dialog>')
+  const inner = page.getByRole('button', { name: 'Shortcuts' })
+  await expect(inner).toHaveAttribute('aria-haspopup', 'dialog')
+  await page.locator('c2-button').evaluate((element) => element.removeAttribute('aria-haspopup'))
+  await expect(page.locator('c2-button button')).not.toHaveAttribute('aria-haspopup')
+})
+
 test('aria-expanded and aria-controls reach the inner button, without being written on the host', async ({ page, scenario }) => {
   await scenario()
   await render(page, '<c2-button aria-expanded="false" aria-controls="panel">Filters</c2-button><div id="panel">Panel</div>')

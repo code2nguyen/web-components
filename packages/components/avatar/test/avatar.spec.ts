@@ -96,6 +96,15 @@ test('disabled editable avatars keep change and remove controls inert', async ({
   await expect(page.locator('c2-avatar input[type="file"]')).toBeDisabled()
 })
 
+test('a read-only avatar has no file input for a screen reader to announce', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-avatar name="Ada Lovelace"></c2-avatar>')
+  const avatar = page.locator('c2-avatar')
+  await expect(avatar.locator('input[type="file"]')).toHaveCount(0)
+  await avatar.evaluate((el) => el.setAttribute('editable', ''))
+  await expect(avatar.locator('input[type="file"]')).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Upload Ada Lovelace avatar' })).toBeVisible()
+})
+
 test('editable avatars have no detectable accessibility violations', async ({ page, renderScenario }) => {
   await renderScenario('<c2-avatar editable name="Ada Lovelace" initial-count="2" style="--c2-avatar--size:72px"></c2-avatar>')
   await accessible(page)

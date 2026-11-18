@@ -27,6 +27,7 @@ declare module 'react' {
         'aria-label'?: Attribute
         commandfor?: Attribute
         'aria-expanded'?: Attribute
+        'aria-haspopup'?: Attribute
         'aria-controls'?: Attribute
       }
     }

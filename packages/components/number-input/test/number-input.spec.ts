@@ -23,10 +23,10 @@ test('steps with pointer controls and publishes input and change', async ({ page
   await renderScenario('<c2-number-input value="2" min="0" max="4" step="0.5" aria-label="Quantity"></c2-number-input>')
   const host = page.locator('c2-number-input')
   await watch(host, 'input')
-  await page.getByRole('button', { name: 'Increase value' }).click()
+  await page.getByRole('button', { name: 'Increase Quantity' }).click()
   await expect(host).toHaveJSProperty('value', '2.5')
   await expect(host).toHaveAttribute('data-events', '[null]')
-  await page.getByRole('button', { name: 'Decrease value' }).click()
+  await page.getByRole('button', { name: 'Decrease Quantity' }).click()
   await expect(host.locator('input')).toHaveValue('2')
 })
 
@@ -36,7 +36,7 @@ test('keeps native spinbutton keyboard behavior and clamps controls at bounds', 
   const input = page.getByRole('spinbutton', { name: 'Guests' })
   await input.press('ArrowUp')
   await expect(host).toHaveJSProperty('value', '2')
-  await expect(page.getByRole('button', { name: 'Increase value' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Increase Guests' })).toBeDisabled()
   await input.press('ArrowDown')
   await expect(host).toHaveJSProperty('value', '1')
 })
@@ -69,9 +69,21 @@ test('supports adornments, helper text, errors and hidden steppers', async ({ pa
   await accessible(page)
 })
 
+test('the steppers are named after the field, so two fields on a page can be told apart', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <label for="min">Minimum price</label><c2-number-input id="min" value="10"></c2-number-input>
+    <c2-number-input aria-label="Maximum price" value="90"></c2-number-input>
+    <c2-number-input value="1"></c2-number-input>
+  `)
+  await expect(page.getByRole('button', { name: 'Increase Minimum price' })).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Decrease Maximum price' })).toHaveCount(1)
+  // An unnamed field keeps the generic name.
+  await expect(page.getByRole('button', { name: 'Increase value' })).toHaveCount(1)
+})
+
 test('disabled fieldsets exclude the value and step any disables controls', async ({ page, renderScenario }) => {
   await renderScenario('<form><fieldset><c2-number-input name="rate" value="3" step="any" aria-label="Rate"></c2-number-input></fieldset></form>')
-  await expect(page.getByRole('button', { name: 'Increase value' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Increase Rate' })).toBeDisabled()
   await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = true))
   await expect(page.getByRole('spinbutton')).toBeDisabled()
   await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).has('rate'))).toBe(false)

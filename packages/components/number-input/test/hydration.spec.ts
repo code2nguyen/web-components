@@ -31,7 +31,7 @@ test.beforeAll(async () => {
 test('hydration rewrites the text and attributes the server rendered in another language', async ({ page }) => {
   expect(markup).toContain('shadowrootmode')
   expect(markup).toContain('1.13')
-  expect(markup).toContain('aria-label="Decrease value"')
+  expect(markup).toContain('aria-label="Decrease Farine"')
 
   const errors: string[] = []
   page.on('console', (message) => {
@@ -46,8 +46,8 @@ test('hydration rewrites the text and attributes the server rendered in another 
   const host = page.locator('c2-unit-input')
   // A number formatted with the page's language (text), and a translated message (attribute).
   await expect(host.locator('[part="equivalent"]')).toHaveText('= 1,13 kg')
-  await expect(host.locator('[aria-label="Diminuer la valeur"]')).toHaveCount(1)
-  await expect(host.locator('[aria-label="Decrease value"]')).toHaveCount(0)
+  await expect(host.locator('[aria-label="Diminuer « Farine »"]')).toHaveCount(1)
+  await expect(host.locator('[aria-label="Decrease Farine"]')).toHaveCount(0)
   // Rewritten after hydration, not instead of it: no mismatch error.
   expect(errors).toEqual([])
 })

@@ -21,6 +21,22 @@ export interface FacetValue {
 }
 
 /** What `filter-change` carries: the selection as it is about to become. */
+/** A button each value can carry (`actions`). */
+export type FacetAction = 'only' | 'exclude'
+
+const FACET_ACTIONS: readonly FacetAction[] = ['only', 'exclude']
+
+/** `actions` from its attribute: words separated by spaces (or `;`); `none` and an empty value mean no buttons. */
+const facetActionsConverter = {
+  fromAttribute(value: string | null): FacetAction[] {
+    if (value === null) return [...FACET_ACTIONS]
+    return value.split(/[\s;,]+/).filter((word): word is FacetAction => (FACET_ACTIONS as readonly string[]).includes(word))
+  },
+  toAttribute(value: FacetAction[]) {
+    return value.length ? value.join(' ') : 'none'
+  },
+}
+
 export interface FacetFilterDetail {
   include: string[]
   exclude: string[]
@@ -51,6 +67,9 @@ export interface FacetList {
  * filters a long list, and `max-items` shows the first values with a button to show the rest. The title is a
  * disclosure button that collapses the facet (`open`).
  *
+ * `actions` picks the per-value buttons: `only exclude` (the default) for a log search, `only`, `exclude`, or `none`
+ * for the plain include checkboxes of a shop or a CRM. An excluded value keeps its button to include it again.
+ *
  * The Only and Exclude buttons appear on hover and focus, but are always in the tab order and named for screen readers
  * ("Only checkout"); each checkbox is named by its value and count, and says when the value is excluded.
  *
@@ -68,6 +87,8 @@ export interface FacetList {
  * @csspart label - A value's label.
  * @csspart count - A value's count.
  * @csspart action - The Only and Exclude buttons.
+ * @csspart action-only - The Only button.
+ * @csspart action-exclude - The Exclude (or include again) button.
  * @csspart toggle - The button that shows or hides the values past `max-items`.
  *
  * @cssproperty {font-size} [--c2-facet-list--font-size=14px]
@@ -108,6 +129,12 @@ export class FacetList extends LitElement {
 
   /** The values excluded. As an attribute, values separated by `;`. */
   @property({ converter: arrayPropertyConverter }) exclude: string[] = []
+
+  /**
+   * The buttons each value carries, separated by spaces: `only`, `exclude`, both (the default), or `none` for include
+   * checkboxes alone.
+   */
+  @property({ converter: facetActionsConverter }) actions: FacetAction[] = ['only', 'exclude']
 
   /** Whether the values are shown. */
   @property({ type: Boolean, reflect: true }) open = true
@@ -269,6 +296,46 @@ export class FacetList extends LitElement {
     `
   }
 
+  private renderActions(value: string, label: string, excluded: boolean) {
+    const actions = Array.isArray(this.actions) ? this.actions : []
+    const only = actions.includes('only')
+    // An excluded value always offers to be included again, even when new exclusions are not offered.
+    const exclude = actions.includes('exclude') || excluded
+    if (!only && !exclude) return nothing
+    return html`<span class="actions">
+      ${
+        only
+          ? html`<button
+              class="action action--only"
+              part="action action-only"
+              type="button"
+              aria-label=${this.msg.t('only', label)}
+              @click=${() => this.only(value)}
+            >
+              ${this.msg.t('onlyText')}
+            </button>`
+          : nothing
+      }
+      ${
+        exclude
+          ? html`<button
+              class="action"
+              part="action action-exclude"
+              type="button"
+              aria-label=${excluded ? this.msg.t('include', label) : this.msg.t('exclude', label)}
+              @click=${() => this.toggleExclude(value)}
+            >
+              ${
+                excluded
+                  ? html`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4v8M4 8h8" /></svg>`
+                  : html`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" /></svg>`
+              }
+            </button>`
+          : nothing
+      }
+    </span>`
+  }
+
   private renderValue(item: FacetValue) {
     const value = String(item.value)
     const label = item.label ?? value
@@ -289,25 +356,7 @@ export class FacetList extends LitElement {
         />
         <span class="label" part="label">${label}</span>
       </label>
-      <span class="actions">
-        <button class="action action--only" part="action" type="button" aria-label=${this.msg.t('only', label)} @click=${() => this.only(value)}>
-          ${this.msg.t('onlyText')}
-        </button>
-        <button
-          class="action"
-          part="action"
-          type="button"
-          aria-label=${excluded ? this.msg.t('include', label) : this.msg.t('exclude', label)}
-          @click=${() => this.toggleExclude(value)}
-        >
-          ${
-            excluded
-              ? html`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4v8M4 8h8" /></svg>`
-              : html`<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" /></svg>`
-          }
-        </button>
-      </span>
-      ${count ? html`<span class="count" part="count" aria-hidden="true">${count}</span>` : nothing}
+      ${this.renderActions(value, label, excluded)} ${count ? html`<span class="count" part="count" aria-hidden="true">${count}</span>` : nothing}
     </li>`
   }
 }

@@ -6,6 +6,8 @@ addTranslations({
     'number-input': {
       decrease: 'Diminuer la valeur',
       increase: 'Augmenter la valeur',
+      decreaseNamed: 'Diminuer « {0} »',
+      increaseNamed: 'Augmenter « {0} »',
     },
     'unit-input': {
       unit: 'Unité',

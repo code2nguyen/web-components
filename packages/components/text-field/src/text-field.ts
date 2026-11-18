@@ -361,6 +361,13 @@ export class TextField extends LitElement {
     </button>`
   }
 
+  /** Whether the helper line under the field shows a message (`help`, `error-text` or the slot), which then describes the input. */
+  private get showsSupportingMessage() {
+    if (this.field.managed) return false
+    const message = this.error && !this.disabled && !!this.errorText ? this.errorText : this.help
+    return !!message || this.slotPresence.has('supporting-text')
+  }
+
   protected renderSupportingText() {
     if (this.field.managed) {
       return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
@@ -372,7 +379,7 @@ export class TextField extends LitElement {
       return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
     }
     return html`<div class="supporting-text ${classMap({ error: this.error && !this.disabled })}">
-      <div class="supporting-text__message">
+      <div class="supporting-text__message" id="supporting-text">
         <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
       </div>
       ${counter ? html`<span class="supporting-text__counter">${counter}</span>` : nothing}
@@ -425,7 +432,7 @@ export class TextField extends LitElement {
           ${this.renderPrefixSlot()}
           <input
             aria-label=${ifDefined(this.ariaLabel || this.field.label || undefined)}
-            aria-describedby=${this.field.describedBy()}
+            aria-describedby=${this.field.describedBy(this.showsSupportingMessage && 'supporting-text')}
             type=${this.type}
             class="input"
             name=${ifDefined(this.name || undefined)}

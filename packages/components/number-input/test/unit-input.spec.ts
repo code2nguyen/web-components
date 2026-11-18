@@ -138,7 +138,7 @@ test('the picker name and the equivalent follow the language', async ({ page, re
     `<div lang="fr"><c2-unit-input aria-label="Poids" value="2.5" unit="lb" units='[{"value":"kg","factor":1},{"value":"lb","factor":0.45359237}]'></c2-unit-input></div>`,
   )
   await expect(page.getByRole('combobox', { name: 'Unité' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Augmenter la valeur' })).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Augmenter « Poids »' })).toHaveCount(1)
   await expect(page.locator('c2-unit-input [part="equivalent"]')).toHaveText('≈ 1,134 kg')
 })
 

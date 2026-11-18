@@ -141,6 +141,21 @@ export class Switch extends LitElement {
   /** The click that follows a drag must not toggle the input again. */
   private suppressClick = false
 
+  constructor() {
+    super()
+    this.addEventListener('click', this.forwardHostClick)
+  }
+
+  /**
+   * A click aimed at the host itself — `host.click()`, a native `<label for>` around or pointing at the element,
+   * `c2-form-field`'s label — toggles like a click on the box. Clicks from inside the shadow root or on slotted content
+   * already reach the inner input and are left alone.
+   */
+  private readonly forwardHostClick = (event: Event) => {
+    if (event.composedPath()[0] !== this || !this.formElement) return
+    this.formElement.click()
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     if (!this.defaultCheckedCaptured) {

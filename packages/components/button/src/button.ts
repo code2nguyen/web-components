@@ -13,8 +13,9 @@ const elementReflection = !isServer && 'ariaControlsElements' in Element.prototy
  * Action button with optional leading/trailing icons, busy state and toggle-button semantics.
  *
  * Like a native `<button>`, it can be an invoker: `commandfor="<id>"` + `command` send the command to that element
- * (`show-modal`, `toggle-popover`, or a custom `--name` that arrives as a `command` event). `aria-expanded` and
- * `aria-controls` written on the host are handed to the inner button, so a disclosure trigger reports its state.
+ * (`show-modal`, `toggle-popover`, or a custom `--name` that arrives as a `command` event). `aria-expanded`,
+ * `aria-haspopup` and `aria-controls` written on the host are handed to the inner button, so a disclosure trigger reports
+ * its state and a button that opens a dialog or a menu says so.
  *
  * @tag c2-button
  *
@@ -120,6 +121,9 @@ export class Button extends LitElement {
   /** Expanded state of the content this button shows or hides (`"true"`/`"false"`), forwarded to the inner `<button>`. */
   @property({ attribute: 'aria-expanded' }) override ariaExpanded: string | null = null
 
+  /** Kind of popup this button opens (`"dialog"`, `"menu"`, `"listbox"`, …), forwarded to the inner `<button>`. */
+  @property({ attribute: 'aria-haspopup' }) override ariaHasPopup: string | null = null
+
   /**
    * Ids (space-separated) of the elements this button controls, looked up in the button's own document or shadow root
    * and handed to the inner `<button>` as element references, since an id does not cross the shadow boundary. They are
@@ -195,6 +199,7 @@ export class Button extends LitElement {
         aria-busy=${this.running ? 'true' : nothing}
         aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
         aria-expanded=${this.ariaExpanded || nothing}
+        aria-haspopup=${this.ariaHasPopup || nothing}
         command=${this.command || nothing}
         type="button"
         @click=${this.handleClick}
