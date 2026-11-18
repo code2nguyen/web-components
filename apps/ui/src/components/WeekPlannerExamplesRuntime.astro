@@ -1,0 +1,50 @@
+---
+/**
+ * Plays the application's part in the week planner gallery's paint cards: the rate switch in the "Time-of-use tariff"
+ * card sets `paint-value`, the "Copy a day" button calls `copyDay()`, as an app's own controls in the `actions` slot
+ * do, and the "Heating schedule" card draws its ranges through `renderRange`, a property that cannot be written in
+ * the fence. Applying each `ranges-change` is `planner-examples.ts`'s job (`data-planner-demo="editable"`).
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { ButtonGroup } from '@c2n/components/button-group'
+  import type { WeekPlanner, WeekPlannerRangeContext } from '@c2n/components/week-planner'
+  import '@c2n/components/week-planner'
+
+  const initialized = new WeakSet<WeekPlanner>()
+
+  /** A heating schedule's range: the temperature it holds, then its times. */
+  function renderTemperature({ range }: WeekPlannerRangeContext) {
+    return html`<strong part="temperature">${range.value}°C</strong> <span>${range.start}–${range.end}</span>`
+  }
+
+  async function setUp(planner: WeekPlanner) {
+    if (initialized.has(planner)) return
+    initialized.add(planner)
+    await customElements.whenDefined('c2-week-planner')
+    await planner.updateComplete
+    if (planner.dataset.weekPlannerExample === 'renderer') planner.renderRange = renderTemperature
+  }
+
+  function setUpAll() {
+    document.querySelectorAll<WeekPlanner>('c2-week-planner[data-week-planner-example]').forEach((planner) => void setUp(planner))
+  }
+
+  // The app's own controls in the `actions` slot; one listener of each serves every card, however late it hydrates.
+  document.addEventListener('change', (event) => {
+    const group = (event.target as Element | null)?.closest<ButtonGroup>('[data-week-planner-action="paint-value"]')
+    const planner = group?.closest<WeekPlanner>('c2-week-planner')
+    if (group && planner && typeof group.value === 'string') planner.paintValue = group.value
+  })
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest('[data-week-planner-action="copy-monday"]')
+    void button?.closest<WeekPlanner>('c2-week-planner')?.copyDay('mon', ['tue', 'wed', 'thu', 'fri'])
+  })
+
+  setUpAll()
+  customElements.whenDefined('c2-week-planner').then(setUpAll)
+  new MutationObserver(setUpAll).observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setUpAll)
+</script>

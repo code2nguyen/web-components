@@ -19,8 +19,8 @@ import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons
 `c2-week-planner` shows a week: seven day columns on an hour scale, each event a block from its start to its end
 time. By default it is a typical week, with no dates: an event names the weekday it happens on and repeats every week,
 or, with `alternate-weeks`, only in odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Set
-`date` to show a real calendar week with week-by-week navigation instead, and `editable` to let the user add, move and
-resize events. Today's
+`date` to show a real calendar week with week-by-week navigation instead, `editable` to let the user add, move and
+resize events, and `paint` to let them paint a weekly schedule of time ranges. Today's
 column is tinted (`--c2-week-planner__day__today--background`, drawn inside the grid lines) and carries a line at the
 current time. Overlapping events cascade, each stepped in from the one before and drawn over it, so the earlier one's
 title stays readable, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
@@ -224,6 +224,79 @@ planner.addEventListener('slot-click', ({ detail }) => {
 })
 planner.addEventListener('event-change', ({ detail }) => {
   planner.events = planner.events.map((entry) => (entry === detail.event ? { ...entry, ...detail.changes } : entry))
+})
+```
+
+## Painting a schedule
+
+`paint` turns the grid into a weekly schedule the user paints, such as opening hours, when someone can work or the
+hours a tariff applies. The schedule is `ranges`: `{ day, start, end, value? }` entries, as a JSON attribute or the
+property.
+
+- **Pointer.** Press and drag across days and times: the rectangle of `snap-minutes` cells under the stroke is painted
+  with `paint-value`, or with no `value` when it is empty. A stroke that starts on a cell already painted with
+  `paint-value` clears instead. The stroke shows its result while it lasts and Escape drops it. It follows the pointer
+  past the grid, and it cannot select text or start a native drag on the way.
+- **Keyboard.** The grid's first Tab stop is a cursor cell, drawn when it has focus and named after its day, time and
+  what it holds. The arrows move it, Space or Enter paints or clears its cell, and Shift+Arrow paints (or clears) the
+  cells it crosses.
+- **Result.** As with `events`, the planner never changes `ranges` itself: each stroke fires `ranges-change` with the
+  whole schedule, overlaps resolved, touching ranges of one value merged and sorted from Monday. Assign
+  `detail.ranges` to `ranges`. `copyDay(source, targets)` copies a day onto others the same way, for a button of your
+  own in the `actions` slot.
+
+Each range is drawn under the events, which stay on view but let a stroke through (`editable` is off while painting):
+its category, or "Available", and its times, coloured by `--c2-week-planner__range--background`,
+`--c2-week-planner__range--color` and `--c2-week-planner__range--border-radius`. It exports a `range` part, plus
+`range-<value>` when the value is a plain word, so `::part(range-peak)` colours a category. `renderRange` replaces the
+content. The interaction loads the first time `paint` is set; `updateComplete` waits for it.
+
+```html tag=UsageBlock,package=@c2n/week-planner
+<style>
+  .paint-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .paint-planner {
+    --c2-week-planner__hour--height: 28px;
+  }
+  .paint-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="Opening hours">
+  <div class="paint-demo">
+    <c2-week-planner
+      class="paint-planner"
+      paint
+      data-planner-demo="editable"
+      heading="Opening hours"
+      locale="en-US"
+      week-start="monday"
+      start-hour="8"
+      end-hour="19"
+      ranges='[{"day":"mon","start":"09:00","end":"18:00"},{"day":"tue","start":"09:00","end":"18:00"},{"day":"wed","start":"09:00","end":"13:00"},{"day":"thu","start":"09:00","end":"18:00"},{"day":"fri","start":"09:00","end":"17:00"}]'
+    ></c2-week-planner>
+    <output class="paint-result">Drag across days and hours to paint them, or across painted ones to clear them.</output>
+  </div>
+</div>
+```
+
+```ts tag=CodeBlock
+import '@c2n/components/week-planner'
+import type { WeekPlannerRange } from '@c2n/components/week-planner'
+
+const planner = document.querySelector('c2-week-planner')!
+planner.paint = true
+planner.paintValue = 'peak'
+planner.ranges = [{ day: 'mon', start: '17:00', end: '21:00', value: 'peak' }] satisfies WeekPlannerRange[]
+planner.addEventListener('ranges-change', ({ detail }) => {
+  planner.ranges = detail.ranges
+  saveSchedule(detail.ranges) // your own persistence
 })
 ```
 

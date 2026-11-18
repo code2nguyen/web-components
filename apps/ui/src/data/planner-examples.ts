@@ -4,8 +4,9 @@ import type { WeekPlanner, WeekPlannerEvent } from '@c2n/components/week-planner
 
 /**
  * Makes the editable planner examples live. `c2-month-planner`, `c2-week-planner` and `c2-scheduler` with
- * `data-planner-demo="editable"` play the application: the planners never rewrite `events`, so each
- * add, move and resize is applied here, and what happened is written into the `output` next to the planner.
+ * `data-planner-demo="editable"` play the application: the planners never rewrite `events` (nor a week planner's
+ * painted `ranges`), so each add, move, resize and stroke is applied here, and what happened is written into the
+ * `output` next to the planner.
  */
 
 const seeded = new WeakSet<Element>()
@@ -49,6 +50,11 @@ function wireWeek(planner: WeekPlanner): void {
     planner.events = planner.events.map((entry) => (entry === detail.event ? { ...entry, ...detail.changes } : entry))
     const { day, date, start, end } = detail.changes
     say(`event-change: ${detail.event.title}, ${date ?? day} ${start}–${end}`)
+  })
+  // A planner with `paint` reports the whole painted schedule; the app keeps it.
+  planner.addEventListener('ranges-change', ({ detail }) => {
+    planner.ranges = detail.ranges
+    say(`ranges-change: ${detail.ranges.map(({ day, start, end, value }) => `${day} ${start}–${end}${value ? ` ${value}` : ''}`).join(', ') || 'empty'}`)
   })
   planner.addEventListener('week-change', ({ detail }) => say(`week-change: ${detail.start} → ${detail.end}`))
   planner.addEventListener('event-click', ({ detail }) => say(`event-click: ${detail.event.title}`))
