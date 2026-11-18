@@ -217,8 +217,6 @@ const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 // the list's own module).
 // `c2-swipe-action` lays its actions out as flex items and clicks the outermost one on a full swipe, which a
 // `display: contents` island wrapper defeats; `c2-button` and `c2-icon-button` are registered by `chrome-modules.ts`.
-// `c2-form-field` adopts its first child as its control, which would be the `<astro-island>` wrapper: the label and
-// hint then never name the field (`c2-text-field` is registered by `chrome-modules.ts`).
 // The Lit renderer drops `slot` from an island wrapper, so `c2-image-annotator`'s `detail` slot would stay empty; the
 // image annotator gallery runtime registers `c2-comment-thread`.
 const NESTED_CHILDREN_OF = new Map([
