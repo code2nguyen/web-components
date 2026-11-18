@@ -33,6 +33,7 @@ npm run fix                       # lint:fix + format:fix
 npm run build -w packages/tools/theme     # regenerate @c2n/theme (tokens.css, base.css, tokens.json, report.json) from the component manifests
 npm run build:tools               # after the root build: @c2n/mcp registry (packages/tools/mcp/data/registry.json) + @c2n/skill catalog/version sync
 npm run mcp:smoke                 # spawn the MCP server over stdio and exercise every tool
+npm run mcp:readiness             # AI readiness score: per-component checks + discovery benchmark → test-results/ai-readiness/ (readiness:agent -w packages/tools/mcp adds an opt-in Claude Code run)
 npm run mcp:inspect               # MCP Inspector against packages/tools/mcp/src/cli.ts
 npm run generate                  # scaffold a new component (plop)
 npm run changelog                 # regenerate CHANGELOG.md + apps/ui/src/data/changelog.json from git history (--next <version> files unreleased commits under it)

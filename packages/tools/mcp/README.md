@@ -76,3 +76,13 @@ Resources: `c2n://components`, `c2n://components/{tag}`, `c2n://theme`, `c2n://g
 - `dev`, `inspect`, `smoke` and `npm pack` automatically build the registry when needed.
 - `npm run smoke -w packages/tools/mcp` spawns the server over stdio and checks every tool.
 - `npm run inspect -w packages/tools/mcp` opens the MCP Inspector against the source entry (`node src/cli.ts`, Node 24 type stripping).
+
+## AI readiness score
+
+`npm run mcp:readiness` (repo root, after `npm run build && npm run build:tools`) answers one question with a number: _given a user requirement, can an AI independently find the correct c2n component, understand its API, generate valid code and use it correctly?_ It writes `test-results/ai-readiness/report.{json,md}` and prints the summary. Pass component ids to score only those, and `--min <score>` to exit 1 below a threshold.
+
+- **Component readiness** (`scripts/readiness/score.ts`): every component in the registry, scored 0–100 from deterministic checks on what an agent receives (the registry, the manifests, the framework declarations), weighted over six dimensions: identity and purpose 15, API documentation 25, usage examples 20, composition knowledge 15, framework integration 15, validation 10. A check that does not apply is left out of its dimension rather than passed. The report lists the checks costing the library the most points and the details of the lowest components.
+- **Discovery** (`scripts/readiness/tasks.json`): 60 requirements written as an app developer would, each with the components that answer it, run through `search_components`; scored as the mean reciprocal rank, with hit@1 and hit@3. When an agent picks the wrong component in real use, add the requirement there.
+- **Agent run** (`npm run readiness:agent -w packages/tools/mcp [-- --tasks a,b --limit n --model id --concurrency n]`, opt-in): starts Claude Code headless per requirement in an empty directory with only this MCP server, asks it to write `index.html`, and grades it — an expected tag used (40), no `validate_markup` error (30), the task's attributes and slots used (30). It costs model calls (about $0.35 a task) and varies between runs, so it is not in CI; the next `readiness` report folds its `agent.json` in.
+
+The headline is component readiness 70% and discovery 30%, or 50/20 plus the agent run's 30% when one exists.

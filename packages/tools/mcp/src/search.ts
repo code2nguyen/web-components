@@ -68,11 +68,11 @@ function stem(word: string): string {
  * How well a query term matches the tokens of a text: 2 for the word itself, 1.5 for another form of it ("chips" and
  * "chip", "removable" and "removed"), 1 for a word it begins ("drop" in "dropdown"), else 0.
  */
-function termMatch(haystack: string[], term: string): number {
+function termMatch(haystack: string[], term: string, stems?: string[]): number {
   if (haystack.includes(term)) return 2
   if (term.length < 3) return 0
   const root = stem(term)
-  if (haystack.some((h) => h.length > 2 && stem(h) === root)) return 1.5
+  if (haystack.some((h, i) => h.length > 2 && (stems ? stems[i] : stem(h)) === root)) return 1.5
   // A text word the term extends counts only when it is most of the term: "chip" for "chips", not "form" for "format".
   return haystack.some((h) => h.length > 2 && (h.startsWith(term) || (term.startsWith(h) && h.length * 4 >= term.length * 3))) ? 1 : 0
 }
@@ -94,30 +94,13 @@ export function searchComponents(registry: Registry, query: string, limit = 10):
   const roots = new Set(terms.map(stem))
   const hits: SearchHit[] = []
   for (const component of Object.values(registry.components)) {
-    const fields: [string, string, number][] = [
-      ['title', component.title, 8],
-      ['id', component.id, 8],
-      ['tag', component.elements.map((e) => e.tag).join(' '), 8],
-      ['description', `${component.description} ${component.intro ?? ''}`, 5],
-      ['category', component.category, 3],
-    ]
-    for (const icon of component.icons ?? []) fields.push([`icon:${icon}`, icon, 5])
-    for (const element of component.elements) {
-      for (const a of element.attributes) fields.push([`attr:${a.name}`, `${a.name} ${a.description ?? ''}`, 2])
-      for (const s of element.slots) fields.push([`slot:${s.name || 'default'}`, `${s.name} ${s.description ?? ''}`, 2])
-      for (const e of element.events) fields.push([`event:${e.name}`, `${e.name} ${e.description ?? ''}`, 2])
-    }
-    for (const ex of component.examples)
-      if (ex.kind !== 'preview')
-        fields.push([`example:${ex.label}`, `${ex.label} ${ex.section ?? ''} ${ex.description ?? ''} ${ex.useWhen ?? ''} ${ex.accessibility ?? ''}`, 1])
     const best = new Map<string, number>()
     const matches = new Set<string>()
     let breadth = 0
-    for (const [label, text, weight] of fields) {
-      const haystack = tokens(text)
+    for (const { label, haystack, stems, weight } of componentFields(component)) {
       let hit = false
       for (const term of terms) {
-        const quality = termMatch(haystack, term)
+        const quality = termMatch(haystack, term, stems)
         if (!quality) continue
         hit = true
         best.set(term, Math.max(best.get(term) ?? 0, weight * quality))
@@ -138,4 +121,41 @@ export function searchComponents(registry: Registry, query: string, limit = 10):
     hits.push({ component, score, matches: [...matches].slice(0, 6) })
   }
   return hits.sort((a, b) => b.score - a.score || a.component.title.localeCompare(b.component.title)).slice(0, limit)
+}
+
+interface Field {
+  label: string
+  haystack: string[]
+  stems: string[]
+  weight: number
+}
+
+/** The searchable fields of a component, tokenised once: a registry entry does not change while it is loaded. */
+const fieldCache = new WeakMap<ComponentEntry, Field[]>()
+
+function componentFields(component: ComponentEntry): Field[] {
+  const cached = fieldCache.get(component)
+  if (cached) return cached
+  const fields: [string, string, number][] = [
+    ['title', component.title, 8],
+    ['id', component.id, 8],
+    ['tag', component.elements.map((e) => e.tag).join(' '), 8],
+    ['description', `${component.description} ${component.intro ?? ''}`, 5],
+    ['category', component.category, 3],
+  ]
+  for (const icon of component.icons ?? []) fields.push([`icon:${icon}`, icon, 5])
+  for (const element of component.elements) {
+    for (const a of element.attributes) fields.push([`attr:${a.name}`, `${a.name} ${a.description ?? ''}`, 2])
+    for (const s of element.slots) fields.push([`slot:${s.name || 'default'}`, `${s.name} ${s.description ?? ''}`, 2])
+    for (const e of element.events) fields.push([`event:${e.name}`, `${e.name} ${e.description ?? ''}`, 2])
+  }
+  for (const ex of component.examples)
+    if (ex.kind !== 'preview')
+      fields.push([`example:${ex.label}`, `${ex.label} ${ex.section ?? ''} ${ex.description ?? ''} ${ex.useWhen ?? ''} ${ex.accessibility ?? ''}`, 1])
+  const result = fields.map(([label, text, weight]) => {
+    const haystack = tokens(text)
+    return { label, haystack, stems: haystack.map(stem), weight }
+  })
+  fieldCache.set(component, result)
+  return result
 }

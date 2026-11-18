@@ -51,7 +51,9 @@
     "prepack": "npm run build",
     "smoke": "node scripts/smoke.ts",
     "theme:examples": "node scripts/theme-examples.ts",
-    "test": "node --test scripts/*.test.ts"
+    "test": "node --test scripts/*.test.ts",
+    "readiness": "node scripts/readiness.ts",
+    "readiness:agent": "node scripts/readiness/agent.ts"
   },
   "wireit": {
     "build:registry": {
