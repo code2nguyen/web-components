@@ -262,6 +262,23 @@ test('form reset lets the same query be searched again', async ({ page, renderSc
   ])
 })
 
+test('an app setting value lets the same query be searched again', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-search-field debounce="0"></c2-search-field>')
+  const host = page.locator('c2-search-field')
+  await watch(host, 'search')
+  const input = page.getByRole('searchbox', { name: 'Search' })
+  await input.click()
+  await page.keyboard.type('a')
+  // A "Clear filters" button in the app empties the field from code.
+  await host.evaluate((el) => ((el as HTMLElement & { value: string }).value = ''))
+  await expect(input).toHaveValue('')
+  await page.keyboard.type('a')
+  expect(await events(page)).toEqual([
+    { value: 'a', trigger: 'input' },
+    { value: 'a', trigger: 'input' },
+  ])
+})
+
 test('submits the query with its form and resets to the authored value', async ({ page, renderScenario }) => {
   await renderScenario('<form><c2-search-field name="q" value="open"></c2-search-field><button type="reset">Reset</button></form>')
   const read = () => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('q'))

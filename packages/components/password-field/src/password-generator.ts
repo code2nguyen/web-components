@@ -56,7 +56,7 @@ export interface GeneratorField {
  */
 export interface FieldInternals {
   strengthOf: PasswordField['strengthOf']
-  requirementsOf: PasswordField['requirementsOf']
+  meetsRequirements: PasswordField['meetsRequirements']
   strengthLabel: PasswordField['strengthLabel']
   readonly effectiveDisabled: PasswordField['effectiveDisabled']
   dirty: PasswordField['dirty']
@@ -69,13 +69,7 @@ export const internals = (field: PasswordField) => field as unknown as FieldInte
 /** Whether the field takes `value` as it is: within `minlength` and `maxlength`, and meeting every requirement. */
 export const acceptsFor = (field: PasswordField) => (value: string) => {
   const length = [...value].length
-  return (
-    length >= field.minLength &&
-    (field.maxLength < 0 || length <= field.maxLength) &&
-    internals(field)
-      .requirementsOf(value)
-      .every((requirement) => requirement.met)
-  )
+  return length >= field.minLength && (field.maxLength < 0 || length <= field.maxLength) && internals(field).meetsRequirements(value)
 }
 
 /** A uniformly random integer in `[0, n)`, from `crypto.getRandomValues` with rejection sampling (no modulo bias). */

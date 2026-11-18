@@ -34,6 +34,40 @@ export interface SelectionToolbar {
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-toggle-button, c2-text-field, c2-textarea, c2-chat-input'
 
+/** `node`, or the host of the shadow root holding it, climbed until it is in `root`'s tree; null when it never is. */
+function retarget(node: Node, root: Node): Node | null {
+  let current: Node = node
+  while (current.getRootNode() !== root) {
+    const own = current.getRootNode()
+    if (!(own instanceof ShadowRoot)) return null
+    current = own.host
+  }
+  return current
+}
+
+/** Whether `node` is inside `ancestor`, through the hosts of the shadow roots between them. */
+function composedContains(ancestor: Element, node: Node): boolean {
+  const own = retarget(node, ancestor.getRootNode())
+  return !!own && ancestor.contains(own)
+}
+
+/**
+ * The selection's range with boundaries inside the given shadow roots, or undefined. Takes the options object of the
+ * standard, then the shadow roots as arguments, the form WebKit first shipped.
+ */
+function composedRange(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange | undefined {
+  try {
+    return selection.getComposedRanges({ shadowRoots })[0]
+  } catch {
+    try {
+      const variadic = selection.getComposedRanges as unknown as (...roots: ShadowRoot[]) => StaticRange[]
+      return variadic.apply(selection, shadowRoots)[0]
+    } catch {
+      return undefined
+    }
+  }
+}
+
 /** How long a keyboard selection has to stay still before the toolbar shows. */
 const KEYBOARD_SETTLE = 300
 
@@ -51,8 +85,8 @@ const KEYBOARD_SETTLE = 300
  *
  * Alt+F10 moves focus into the toolbar (the convention of TinyMCE, CKEditor and Google Docs); the arrow keys move
  * between its controls, Home and End go to the ends, and Escape returns focus to where it was. The toolbar is announced
- * once per selection. Selections inside other components' shadow roots and inside form fields are theirs, not this
- * toolbar's.
+ * once per selection. Selections inside form fields are theirs, not this toolbar's, and so by default are selections
+ * inside other components' shadow roots: `composed` opts in to those (a `c2-text-annotator`'s text, say).
  *
  * `prompting` (or pressing a control with `data-prompt`) turns it into an inline prompt at the same anchor: the
  * `prompt` and `result` slots replace the controls, focus moves to the first field, and the selection, or the caret
@@ -99,6 +133,13 @@ export class SelectionToolbar extends LitElement {
 
   /** The toolbar's accessible name. */
   @property() label = ''
+
+  /**
+   * Also acts on a selection inside the open shadow roots of the content. WebKit reports one as a caret next to the
+   * component's host, so it is read there with `Selection.getComposedRanges()`. A selection that crosses a shadow
+   * boundary is read as it is without `composed`.
+   */
+  @property({ type: Boolean }) composed = false
 
   /** Shows the inline prompt, anchored to the selection or the caret. Escape sets it back to false. */
   @property({ type: Boolean }) prompting = false
@@ -155,13 +196,13 @@ export class SelectionToolbar extends LitElement {
     this.keepFocus()
     if (this.open) return
     // Opened without a toolbar: anchor to the selection or the caret in the content, else to the content itself.
-    const selection = document.getSelection()
-    const owned = !!selection && this.ownsSelection(selection, false)
+    const current = this.currentSelection()
+    const owned = !!current && this.ownsRange(current.range, false)
     // Focus on a control in the content (an "Ask AI" button) keeps the caret it left, even where the engine dropped it.
-    const active = document.activeElement
+    const active = this.focusedInOwnTree()
     const last = !owned && active && this.contains(active) && !this.inToolbar(active) && this.lastRange?.startContainer.isConnected ? this.lastRange : null
-    this.range = owned ? selection.getRangeAt(0).cloneRange() : last
-    this.text = owned ? selection.toString() : (last?.toString() ?? '')
+    this.range = owned ? current.range : last
+    this.text = owned ? current.text : (last?.toString() ?? '')
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -170,7 +211,7 @@ export class SelectionToolbar extends LitElement {
 
   /** Remembers where focus is, to give it back when the panel hides, unless it is already in the panel. */
   private keepFocus(): void {
-    const active = document.activeElement
+    const active = this.focusedInOwnTree()
     if (!this.inToolbar(active)) this.returnFocus = active instanceof HTMLElement ? active : null
   }
 
@@ -193,8 +234,7 @@ export class SelectionToolbar extends LitElement {
 
   /** Whether a node is in one of the floating panel's slots. */
   private inToolbar(node: Node | null): boolean {
-    const slots = [...(this.renderRoot?.querySelectorAll<HTMLSlotElement>('.toolbar slot') ?? [])]
-    return !!node && slots.some((slot) => slot.assignedElements().some((element) => element.contains(node)))
+    return !!node && [...this.toolbarElements()].some((element) => element.contains(node))
   }
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -213,11 +253,11 @@ export class SelectionToolbar extends LitElement {
     // A prompt keeps its anchor while focus and the selection move into its field.
     if (this.pointerDown || this.prompting) return
     clearTimeout(this.settleTimer)
-    const selection = document.getSelection()
-    if (selection && this.ownsSelection(selection, false)) this.lastRange = selection.getRangeAt(0).cloneRange()
+    const current = this.currentSelection()
+    if (current && this.ownsRange(current.range, false)) this.lastRange = current.range
     // A collapsed selection, or one that left the content, hides at once; a growing one waits to settle.
-    if (!selection || selection.isCollapsed || !this.ownsSelection(selection)) {
-      if (this.open && !this.inToolbar(document.activeElement)) this.hide()
+    if (!current || current.range.collapsed || !this.ownsRange(current.range)) {
+      if (this.open && !this.inToolbar(this.focusedInOwnTree())) this.hide()
       return
     }
     this.settleTimer = setTimeout(() => this.refresh(), KEYBOARD_SETTLE)
@@ -233,7 +273,7 @@ export class SelectionToolbar extends LitElement {
       this.keepFocus()
       first.focus()
     } else if (event.key === 'Escape') {
-      const focusInside = this.inToolbar(document.activeElement)
+      const focusInside = this.inToolbar(this.focusedInOwnTree())
       this.hide()
       if (focusInside) {
         event.preventDefault()
@@ -243,36 +283,123 @@ export class SelectionToolbar extends LitElement {
     }
   }
 
-  /** Whether the selection lies inside the content (and not in the toolbar). */
-  private ownsSelection(selection: Selection, strict = true): boolean {
-    if (selection.rangeCount === 0) return false
+  /**
+   * The document's selection as a range and its text. With `composed`, a selection inside an open shadow root of the
+   * content is read through `getComposedRanges`, since `getRangeAt` reports it as a caret at the host.
+   */
+  private currentSelection(): { range: Range; readonly text: string } | null {
+    const selection = document.getSelection()
+    if (!selection || selection.rangeCount === 0) return null
+    // The text is read only once the selection is known to be the toolbar's: serializing it costs a layout walk.
+    const plain = {
+      range: selection.getRangeAt(0).cloneRange(),
+      get text() {
+        return selection.toString()
+      },
+    }
+    // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret next to the host, which
+    // `getComposedRanges` resolves. Anything else is read as is.
+    if (!plain.range.collapsed || typeof selection.getComposedRanges !== 'function') return plain
+    const { startContainer, startOffset } = plain.range
+    const nodes = startContainer.childNodes
+    // The caret sits right before or right after the host: anything else (a caret in text, every other caret move) is
+    // read as is.
+    const host = [nodes[startOffset], nodes[startOffset - 1]].find((node): node is Element => node instanceof Element && !!node.shadowRoot)
+    if (!host) return plain
+    // The host is in the content (only with `composed`), or, for a toolbar that is itself in a shadow root, it is a host
+    // around the toolbar, whose own content always counts.
+    const around = !this.inContent(host)
+    if (around ? !composedContains(host, this) : !this.composed) return plain
+    const shadowRoots = [...this.enclosingShadowRoots(), ...(this.composed ? this.openShadowRoots(around ? this : host) : [])]
+    if (!shadowRoots.length) return plain
+    const composed = composedRange(selection, shadowRoots)
+    // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
+    if (!composed || composed.startContainer.getRootNode() !== composed.endContainer.getRootNode()) return plain
+    const range = document.createRange()
+    range.setStart(composed.startContainer, composed.startOffset)
+    range.setEnd(composed.endContainer, composed.endOffset)
+    return { range, text: range.toString() }
+  }
+
+  /** The open shadow roots under an element of the content, nested ones included, in one walk. */
+  private openShadowRoots(near: Node): ShadowRoot[] {
+    const start = near instanceof Element ? near : near.parentElement
+    if (!start) return []
+    const toolbarElements = this.toolbarElements()
+    const roots: ShadowRoot[] = []
+    const walk = (root: Element | ShadowRoot) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+        // A control in the toolbar's slots is not content: skip it and what it holds.
+        acceptNode: (node) => (toolbarElements.has(node as Element) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+      })
+      for (let node = walker.currentNode as Element | null; node; node = walker.nextNode() as Element | null) {
+        // The toolbar's own shadow root is its panel, not content.
+        if (node.shadowRoot && node !== this) {
+          roots.push(node.shadowRoot)
+          walk(node.shadowRoot)
+        }
+      }
+    }
+    walk(start)
+    return roots
+  }
+
+  /** The elements in the floating panel's slots. */
+  private toolbarElements(): Set<Element> {
+    const slots = [...(this.renderRoot?.querySelectorAll<HTMLSlotElement>('.toolbar slot') ?? [])]
+    return new Set(slots.flatMap((slot) => slot.assignedElements()))
+  }
+
+  /** The shadow roots this toolbar sits in, innermost first. */
+  private enclosingShadowRoots(): ShadowRoot[] {
+    const roots: ShadowRoot[] = []
+    for (let root = this.getRootNode(); root instanceof ShadowRoot; root = root.host.getRootNode()) roots.push(root)
+    return roots
+  }
+
+  /** Whether a node is inside the content, through the hosts of the shadow roots it is in. */
+  private inContent(node: Node): boolean {
+    const own = retarget(node, this.getRootNode())
+    return !!own && own !== this && this.contains(own) && !this.inToolbar(own)
+  }
+
+  /** The focused element of the tree this toolbar is in (the document, or the shadow root holding it). */
+  private focusedInOwnTree(): Element | null {
+    return (this.getRootNode() as Document | ShadowRoot).activeElement ?? null
+  }
+
+  /** Whether the range lies inside the content (and not in the toolbar). */
+  private ownsRange(range: Range, strict = true): boolean {
     // Text selected in a form field is the field's: some engines report it as a range around the field.
     // Focus may sit inside a component's shadow root (a c2-text-field), so walk down to the innermost element.
-    let active = document.activeElement
+    // Focus as seen from the toolbar's own tree, which may itself be a shadow root.
+    const focused = this.focusedInOwnTree()
+    let active = focused
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
     const field = (element: Element | null) =>
       !!element && (element.matches('input, textarea') || (element.constructor as { formAssociated?: boolean }).formAssociated === true)
-    if (document.activeElement && this.contains(document.activeElement) && (field(active) || (strict && field(document.activeElement)))) return false
+    if (focused && this.contains(focused) && (field(active) || (strict && field(focused)))) return false
     // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
-    const range = selection.getRangeAt(0)
-    const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
-    return inside(range.startContainer) && inside(range.endContainer)
+    if (!this.composed) {
+      const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
+      return inside(range.startContainer) && inside(range.endContainer)
+    }
+    return this.inContent(range.startContainer) && this.inContent(range.endContainer)
   }
 
   /** Shows, moves or hides the toolbar for the current selection. */
   private refresh(): void {
     if (this.prompting) return
-    const selection = document.getSelection()
-    if (this.disabled || !selection || selection.isCollapsed || !this.ownsSelection(selection)) {
+    const current = this.currentSelection()
+    if (this.disabled || !current || current.range.collapsed || !this.ownsRange(current.range)) {
       this.hide()
       return
     }
-    const text = selection.toString()
+    const { range, text } = current
     if (text.trim().length < Math.max(1, this.minLength || 1)) {
       this.hide()
       return
     }
-    const range = selection.getRangeAt(0).cloneRange()
     const changed = text !== this.text || !this.open
     this.range = range
     this.text = text
@@ -322,7 +449,7 @@ export class SelectionToolbar extends LitElement {
     this.prompting = false
     if (!this.open) return
     // Focus in the panel would be lost once it hides: give it back to where it was.
-    if (this.inToolbar(document.activeElement)) this.returnFocus?.focus()
+    if (this.inToolbar(this.focusedInOwnTree())) this.returnFocus?.focus()
     this.open = false
     this.range = null
     this.text = ''
@@ -364,7 +491,8 @@ export class SelectionToolbar extends LitElement {
     // A prompt holds text fields: the arrows and Home/End are theirs, and Tab moves between its controls.
     if (this.prompting) return
     const controls = this.controls()
-    const at = controls.findIndex((control) => control === document.activeElement || control.contains(document.activeElement))
+    const focused = this.focusedInOwnTree()
+    const at = controls.findIndex((control) => control === focused || control.contains(focused))
     let target: HTMLElement | undefined
     switch (event.key) {
       case 'ArrowRight':

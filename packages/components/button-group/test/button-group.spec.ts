@@ -11,10 +11,10 @@ test('single selection updates pressed state and emits one change', async ({ pag
   await renderScenario(`<c2-button-group selection="single" aria-label="Alignment">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')
   await watch(host, 'change')
-  await page.getByRole('button', { name: 'Left', exact: true }).click()
-  await page.getByRole('button', { name: 'Right', exact: true }).click()
+  await page.getByRole('radio', { name: 'Left', exact: true }).click()
+  await page.getByRole('radio', { name: 'Right', exact: true }).click()
   await expect(host).toHaveJSProperty('value', 'b')
-  await expect(page.getByRole('button', { name: 'Left', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('radio', { name: 'Left', exact: true })).toHaveAttribute('aria-checked', 'false')
   await expect(host).toHaveAttribute('data-events', '[{"value":"a"},{"value":"b"}]')
   await accessible(page)
 })
@@ -38,7 +38,7 @@ test('segmented appearance selects the first enabled item by default', async ({ 
   await renderScenario(`<c2-button-group appearance="segmented" aria-label="View">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')
   await expect(host).toHaveJSProperty('value', 'a')
-  await expect(page.getByRole('button', { name: 'Left', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('radio', { name: 'Left', exact: true })).toHaveAttribute('aria-checked', 'true')
   await expect(host.locator('.indicator')).toHaveCSS('display', 'block')
   await accessible(page)
 })
@@ -48,7 +48,7 @@ test('segmented surface is not overridden by app-wide button presentation variab
       c2-button { --c2-button__container--background-color: rgb(200, 10, 10); --c2-button__container--color: rgb(0, 0, 0); --c2-button__container--box-shadow: 0 4px 18px rgb(200, 10, 10); --c2-button__container__hover--box-shadow: 0 8px 28px rgb(200, 10, 10); }
     </style>
     <c2-button-group appearance="segmented" aria-label="View">${items}</c2-button-group>`)
-  const left = page.getByRole('button', { name: 'Left', exact: true })
+  const left = page.getByRole('radio', { name: 'Left', exact: true })
   await expect(left).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(left).toHaveCSS('color', 'rgb(24, 24, 27)')
   await expect(left).toHaveCSS('box-shadow', 'none')
@@ -60,7 +60,7 @@ test('single selection supports arrow, Home and End keys and skips disabled item
   await renderScenario(`<c2-button-group appearance="segmented" value="a" aria-label="View">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')
   await watch(host, 'change')
-  const left = page.getByRole('button', { name: 'Left', exact: true })
+  const left = page.getByRole('radio', { name: 'Left', exact: true })
   await left.focus()
   await page.keyboard.press('ArrowRight')
   await expect(host).toHaveJSProperty('value', 'b')
@@ -71,23 +71,24 @@ test('single selection supports arrow, Home and End keys and skips disabled item
   await expect(host).toHaveAttribute('data-events', '[{"value":"b"},{"value":"a"},{"value":"b"}]')
 })
 
-test('vertical segmented groups stack their items and use Up and Down keys', async ({ page, renderScenario }) => {
+test('vertical segmented groups stack their items and, as radio groups, answer to every arrow key', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-button-group appearance="segmented" orientation="vertical" value="a" aria-label="View">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')
   const indicator = host.locator('.indicator')
-  const left = page.getByRole('button', { name: 'Left', exact: true })
+  const left = page.getByRole('radio', { name: 'Left', exact: true })
   await expect(host).toHaveCSS('flex-direction', 'column')
   const initialTransform = await indicator.evaluate((element) => getComputedStyle(element).transform)
   await left.focus()
-  await page.keyboard.press('ArrowRight')
-  await expect(host).toHaveJSProperty('value', 'a')
   await page.keyboard.press('ArrowDown')
   await expect(host).toHaveJSProperty('value', 'b')
   await expect.poll(() => indicator.evaluate((element) => getComputedStyle(element).transform)).not.toBe(initialTransform)
-  await page.keyboard.press('ArrowDown')
-  await expect(host).toHaveJSProperty('value', 'a')
   await page.keyboard.press('ArrowUp')
+  await expect(host).toHaveJSProperty('value', 'a')
+  // Left and Right move a radio group whatever its orientation.
+  await page.keyboard.press('ArrowRight')
   await expect(host).toHaveJSProperty('value', 'b')
+  await page.keyboard.press('ArrowLeft')
+  await expect(host).toHaveJSProperty('value', 'a')
 })
 
 test('vertical segmented icon buttons move the indicator on pointer selection', async ({ page, renderScenario }) => {
@@ -100,7 +101,7 @@ test('vertical segmented icon buttons move the indicator on pointer selection', 
   const indicator = host.locator('.indicator')
   const initialTransform = await indicator.evaluate((element) => getComputedStyle(element).transform)
 
-  await page.getByRole('button', { name: 'Grid view' }).click()
+  await page.getByRole('radio', { name: 'Grid view' }).click()
 
   await expect(host).toHaveJSProperty('value', 'grid')
   await expect(page.locator('c2-icon-button[value="grid"]')).toHaveAttribute('selected', '')
@@ -207,7 +208,7 @@ test('a named group submits its pressed values, resets with its form and follows
 
   const view = page.locator('c2-button-group[name="view"]')
   await watch(view, 'input')
-  await page.getByRole('button', { name: 'List', exact: true }).click()
+  await page.getByRole('radio', { name: 'List', exact: true }).click()
   await expect(view).toHaveAttribute('data-events', '[null]')
   await expect.poll(entries).toEqual(['view=list', 'tags=a', 'tags=c'])
 
@@ -215,7 +216,139 @@ test('a named group submits its pressed values, resets with its form and follows
   await expect(view).toHaveJSProperty('value', 'grid')
 
   await page.evaluate(() => (document.querySelector('fieldset')!.disabled = true))
-  await expect(page.getByRole('button', { name: 'List', exact: true })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: 'List', exact: true })).toBeDisabled()
   await page.evaluate(() => (document.querySelector('fieldset')!.disabled = false))
-  await expect(page.getByRole('button', { name: 'List', exact: true })).toBeEnabled()
+  await expect(page.getByRole('radio', { name: 'List', exact: true })).toBeEnabled()
+})
+
+test('a single-selection group is a radio group, a multiple-selection group a group of toggle buttons', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button id="before">Before</c2-button>
+    <c2-button-group id="billing" selection="single" value="b" aria-label="Billing">${items}</c2-button-group>
+    <c2-button-group id="tags" selection="multiple" value="a" aria-label="Tags">${items}</c2-button-group>`)
+  await expect(page.locator('#billing')).toHaveHostAria('role', 'radiogroup')
+  const billing = page.locator('#billing')
+  await expect(billing.getByRole('radio')).toHaveCount(3)
+  await expect(billing.getByRole('radio', { name: 'Right' })).toHaveAttribute('aria-checked', 'true')
+  await expect(billing.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'false')
+  await expect(billing.getByRole('radio', { name: 'Left' })).not.toHaveAttribute('aria-pressed', /.*/)
+  // One Tab stop, on the checked radio.
+  await page.locator('#before').focus()
+  await page.keyboard.press('Tab')
+  await expect(billing.getByRole('radio', { name: 'Right' })).toBeFocused()
+
+  await expect(page.locator('#tags')).toHaveHostAria('role', 'group')
+  await expect(page.locator('#tags').getByRole('radio')).toHaveCount(0)
+  await expect(page.locator('#tags').getByRole('button', { name: 'Left' })).toHaveAttribute('aria-pressed', 'true')
+
+  // Switched to multiple selection, the items are toggle buttons again.
+  await page.locator('#billing').evaluate((element) => element.setAttribute('selection', 'multiple'))
+  await expect(page.locator('#billing')).toHaveHostAria('role', 'group')
+  await expect(billing.getByRole('button', { name: 'Right' })).toHaveAttribute('aria-pressed', 'true')
+  await accessible(page)
+})
+
+test('an item moved out of a single-selection group is a toggle button again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group><div id="elsewhere"></div>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  await page.evaluate(() => document.querySelector('#elsewhere')!.append(document.querySelector('c2-button[value="a"]')!))
+  const moved = page.locator('#elsewhere').getByRole('button', { name: 'Left' })
+  await expect(moved).toBeVisible()
+  await expect(moved).not.toHaveAttribute('aria-checked', /.*/)
+  await expect(moved).toHaveAttribute('aria-pressed', 'true')
+})
+
+test('the items of a removed single-selection group are toggle buttons again', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group><div id="elsewhere"></div>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  await page.evaluate(() => {
+    const group = document.querySelector('c2-button-group')!
+    document.querySelector('#elsewhere')!.append(...group.children)
+    group.remove()
+  })
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.locator('#elsewhere').getByRole('button', { name: 'Left' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('#elsewhere').getByRole('button', { name: 'Right' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('a removed group does not take its items back when it updates', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">${items}</c2-button-group>`)
+  await expect(page.getByRole('radio', { name: 'Left' })).toHaveAttribute('aria-checked', 'true')
+  const radio = await page.evaluate(async () => {
+    const group = document.querySelector('c2-button-group') as HTMLElement & { value: string; updateComplete: Promise<unknown> }
+    group.remove()
+    group.value = 'b'
+    await group.updateComplete
+    const item = group.querySelector('c2-button') as HTMLElement & { radio: boolean }
+    return { radio: item.radio, toggle: item.hasAttribute('toggle') }
+  })
+  expect(radio).toEqual({ radio: false, toggle: true })
+})
+
+test('a single-selection group with an item that has no radio mode stays a group of toggle buttons', async ({ page, renderScenario }) => {
+  await page.addInitScript(() =>
+    customElements.define(
+      'x-toggle',
+      class extends HTMLElement {
+        static observedAttributes = ['toggle', 'selected']
+        attributeChangedCallback() {
+          this.dataset.state = this.hasAttribute('toggle') ? String(this.hasAttribute('selected')) : 'none'
+        }
+      },
+    ),
+  )
+  await renderScenario(
+    `    <c2-button-group selection="single" value="x" aria-label="Mixed"><c2-button value="a">A</c2-button><x-toggle value="x">X</x-toggle></c2-button-group>`,
+  )
+  await expect(page.locator('x-toggle')).toHaveAttribute('toggle', '')
+  await expect(page.locator('x-toggle')).toHaveAttribute('data-state', 'true')
+  // A radiogroup must hold radios only: with one item that cannot be a radio, none is.
+  await expect(page.locator('c2-button-group')).toHaveHostAria('role', 'group')
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('an item moved from one single-selection group to another stays a radio, whichever group syncs first', async ({ page, renderScenario }) => {
+  // B is created first, so its observer runs before A's.
+  await renderScenario(`<c2-button-group id="b" selection="single" aria-label="B"><c2-button value="1">One</c2-button></c2-button-group>
+    <c2-button-group id="a" selection="single" aria-label="A"><c2-button value="2">Two</c2-button><c2-button value="3">Three</c2-button></c2-button-group>
+    <c2-button-group id="m" selection="multiple" aria-label="M"><c2-button value="4">Four</c2-button></c2-button-group>`)
+  await page.evaluate(() => document.querySelector('#b')!.append(document.querySelector('c2-button[value="2"]')!))
+  await expect(page.locator('#b').getByRole('radio', { name: 'Two' })).toBeVisible()
+  await page.evaluate(() => document.querySelector('#m')!.append(document.querySelector('c2-button[value="3"]')!))
+  await expect(page.locator('#m').getByRole('button', { name: 'Three' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('a group whose items are defined later becomes a radio group once they are', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="b" aria-label="Late"></c2-button-group>`)
+  const group = page.locator('c2-button-group')
+  // Items whose element is not defined yet: the group cannot tell whether they have a radio mode.
+  await group.evaluate((element) => element.insertAdjacentElement('beforeend', document.createElement('c2-late-item')))
+  await group.evaluate((element) => element.insertAdjacentElement('beforeend', document.createElement('c2-late-item')))
+  await expect(group).toHaveHostAria('role', 'group')
+  await expect(page.locator('c2-late-item').first()).toHaveAttribute('toggle', '')
+  await page.evaluate(() =>
+    customElements.define(
+      'c2-late-item',
+      class extends HTMLElement {
+        radio = false
+      },
+    ),
+  )
+  await expect(group).toHaveHostAria('role', 'radiogroup')
+  await expect(page.locator('c2-late-item').first()).not.toHaveAttribute('toggle', /.*/)
+  expect(
+    await page
+      .locator('c2-late-item')
+      .first()
+      .evaluate((element) => (element as HTMLElement & { radio: boolean }).radio),
+  ).toBe(true)
+})
+test('a radio item drops the popup state its button declares', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button-group selection="single" value="a" aria-label="View">
+      <c2-button value="a" aria-haspopup="menu" aria-expanded="false">A</c2-button><c2-button value="b">B</c2-button>
+    </c2-button-group>`)
+  const radio = page.getByRole('radio', { name: 'A' })
+  await expect(radio).not.toHaveAttribute('aria-haspopup', /.*/)
+  await expect(radio).not.toHaveAttribute('aria-expanded', /.*/)
+  await accessible(page)
 })

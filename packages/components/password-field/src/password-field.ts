@@ -93,13 +93,19 @@ export interface PasswordField {
 
 const DEFAULT_MIN_LENGTH = 8
 
-const BUILT_IN: Record<PasswordRequirementId, { label: (minLength: number) => string; test: (value: string, minLength: number) => boolean }> = {
-  length: { label: (min) => `At least ${min} characters`, test: (value, min) => [...value].length >= min },
-  lowercase: { label: () => 'One lowercase letter', test: (value) => /\p{Ll}/u.test(value) },
-  uppercase: { label: () => 'One uppercase letter', test: (value) => /\p{Lu}/u.test(value) },
-  number: { label: () => 'One number', test: (value) => /\p{N}/u.test(value) },
-  symbol: { label: () => 'One symbol', test: (value) => /[^\p{L}\p{N}\s]/u.test(value) },
+/** The built-in requirements: the message naming each (translated with the field's other text) and its check. */
+const BUILT_IN: Record<
+  PasswordRequirementId,
+  { message: 'minLength' | 'lowercaseLetter' | 'uppercaseLetter' | 'number' | 'symbol'; test: (value: string, minLength: number) => boolean }
+> = {
+  length: { message: 'minLength', test: (value, min) => [...value].length >= min },
+  lowercase: { message: 'lowercaseLetter', test: (value) => /\p{Ll}/u.test(value) },
+  uppercase: { message: 'uppercaseLetter', test: (value) => /\p{Lu}/u.test(value) },
+  number: { message: 'number', test: (value) => /\p{N}/u.test(value) },
+  symbol: { message: 'symbol', test: (value) => /[^\p{L}\p{N}\s]/u.test(value) },
 }
+
+const STRENGTH_MESSAGES = ['strength0', 'strength1', 'strength2', 'strength3', 'strength4'] as const
 
 const COMMON = new Set([
   'password',
@@ -133,6 +139,9 @@ export function scorePassword(value: string): PasswordStrength {
   if (length >= 8) return 1
   return 0
 }
+
+/** A requirement counts when it has a label of its own or is a built-in one; a custom one without a label is skipped. */
+const counts = (requirement: PasswordRequirement, builtIn: unknown) => !!(requirement.label ?? builtIn)
 
 /**
  * A password input: the sign-in and sign-up field of Stripe, GitHub and Carbon. A toggle at the end of the field shows
@@ -302,8 +311,11 @@ export class PasswordField extends LitElement {
    */
   @property({ converter: arrayPropertyConverter }) requirements: (string | PasswordRequirement)[] = []
 
-  /** Labels of the five strength scores, 0 to 4, separated by semicolons, or a JSON array. */
-  @property({ attribute: 'strength-labels', converter: arrayPropertyConverter }) strengthLabels: string[] = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong']
+  /**
+   * Labels of the five strength scores, 0 to 4, separated by semicolons, or a JSON array. A missing or empty entry
+   * falls back to its message (`strength0` to `strength4`: "Too weak", "Weak", "Fair", "Good", "Strong").
+   */
+  @property({ attribute: 'strength-labels', converter: arrayPropertyConverter }) strengthLabels: string[] = []
 
   /** Replaces {@link scorePassword} as the strength estimate. Returns 0 to 4. */
   @property({ attribute: false }) scorer?: (value: string) => number
@@ -323,14 +335,37 @@ export class PasswordField extends LitElement {
   /** Helper text under the field. */
   @property({ type: String }) help = ''
 
-  /** Accessible name of the show/hide toggle. Its pressed state says whether the password is shown. */
-  @property({ attribute: 'toggle-label' }) toggleLabel = 'Show password'
+  /**
+   * Accessible name of the show/hide toggle. Its pressed state says whether the password is shown. Defaults to the
+   * `toggle` message ("Show password").
+   */
+  @property({ attribute: 'toggle-label' }) toggleLabel = ''
 
-  /** Warning shown while Caps Lock is on. Empty turns the warning off. */
-  @property({ attribute: 'caps-lock-text' }) capsLockText = 'Caps Lock is on'
+  /**
+   * Warning shown while Caps Lock is on. Reads as the `capsLock` message ("Caps Lock is on", in the page's language)
+   * until set; empty turns the warning off, and removing the attribute goes back to the message.
+   */
+  @property({ attribute: 'caps-lock-text' })
+  get capsLockText(): string {
+    return this.ownCapsLockText ?? this.msg.t('capsLock')
+  }
+  set capsLockText(next: string | null | undefined) {
+    this.ownCapsLockText = next ?? undefined
+  }
+  private ownCapsLockText?: string
 
-  /** Message of the validity error while a requirement is unmet. */
-  @property({ attribute: 'requirements-message' }) requirementsMessage = 'The password does not meet every requirement.'
+  /**
+   * Message of the validity error while a requirement is unmet. Reads as the `requirementsUnmet` message until set;
+   * empty leaves the field valid (the checklist then only guides), and removing the attribute goes back to the message.
+   */
+  @property({ attribute: 'requirements-message' })
+  get requirementsMessage(): string {
+    return this.ownRequirementsMessage ?? this.msg.t('requirementsUnmet')
+  }
+  set requirementsMessage(next: string | null | undefined) {
+    this.ownRequirementsMessage = next ?? undefined
+  }
+  private ownRequirementsMessage?: string
 
   @state() private focused = false
   @state() private capsLock = false
@@ -381,27 +416,51 @@ export class PasswordField extends LitElement {
     if (!value) return 0
     const raw = this.scorer ? this.scorer(value) : scorePassword(value)
     const score = Math.max(0, Math.min(4, Math.round(Number(raw) || 0))) as PasswordStrength
-    return this.requirementsOf(value).every((requirement) => requirement.met) ? score : (Math.min(score, 1) as PasswordStrength)
+    return this.meetsRequirements(value) ? score : (Math.min(score, 1) as PasswordStrength)
   }
 
+  /** The requirements checked against `value`, each with its label (a built-in one in the page's language). */
   private requirementsOf(value: string): PasswordRequirementState[] {
-    const list = Array.isArray(this.requirements) ? this.requirements : []
-    const minLength = this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
-    const states: PasswordRequirementState[] = []
-    list.forEach((entry, index) => {
-      const requirement: PasswordRequirement = typeof entry === 'string' ? { id: entry.trim() } : entry
-      if (!requirement) return
-      const builtIn = requirement.id && requirement.id in BUILT_IN ? BUILT_IN[requirement.id as PasswordRequirementId] : undefined
-      const label = requirement.label ?? builtIn?.label(minLength)
-      if (!label) return
-      let met: boolean
-      if (requirement.test) met = !!requirement.test(value)
-      else if (requirement.pattern !== undefined)
-        met = (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(value)
-      else met = builtIn ? builtIn.test(value, minLength) : false
-      states.push({ id: requirement.id ?? `requirement-${index}`, label, met })
+    const minLength = this.requirementMinLength
+    return this.requirementEntries().flatMap(({ requirement, builtIn, id }) => {
+      if (!counts(requirement, builtIn)) return []
+      // A translation left empty still shows the requirement, under its id: it is checked either way.
+      const label = requirement.label || (builtIn && this.msg.t(builtIn.message, minLength)) || id
+      return [{ id, label, met: this.requirementMet(requirement, builtIn, value, minLength) }]
     })
-    return states
+  }
+
+  /**
+   * Whether `value` meets every requirement, without building their labels: the strength and the validity read it on
+   * every key, and the generator for every candidate. The same requirements count as in the checklist above.
+   */
+  private meetsRequirements(value: string): boolean {
+    const minLength = this.requirementMinLength
+    return this.requirementEntries().every(
+      ({ requirement, builtIn }) => !counts(requirement, builtIn) || this.requirementMet(requirement, builtIn, value, minLength),
+    )
+  }
+
+  private get requirementMinLength(): number {
+    return this.minLength > 0 ? this.minLength : DEFAULT_MIN_LENGTH
+  }
+
+  /** `requirements` as objects, with the built-in check each one keeps. A requirement with no label is skipped later. */
+  private requirementEntries(): { requirement: PasswordRequirement; builtIn?: (typeof BUILT_IN)[PasswordRequirementId]; id: string }[] {
+    const list = Array.isArray(this.requirements) ? this.requirements : []
+    return list.flatMap((entry, index) => {
+      const requirement: PasswordRequirement = typeof entry === 'string' ? { id: entry.trim() } : entry
+      if (!requirement) return []
+      const builtIn = requirement.id && requirement.id in BUILT_IN ? BUILT_IN[requirement.id as PasswordRequirementId] : undefined
+      return [{ requirement, builtIn, id: requirement.id ?? `requirement-${index}` }]
+    })
+  }
+
+  private requirementMet(requirement: PasswordRequirement, builtIn: (typeof BUILT_IN)[PasswordRequirementId] | undefined, value: string, minLength: number) {
+    if (requirement.test) return !!requirement.test(value)
+    if (requirement.pattern !== undefined)
+      return (typeof requirement.pattern === 'string' ? new RegExp(requirement.pattern, 'u') : requirement.pattern).test(value)
+    return builtIn ? builtIn.test(value, minLength) : false
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
@@ -531,7 +590,7 @@ export class PasswordField extends LitElement {
       this.internals.setValidity({})
       return
     }
-    const unmet = !!this.value && this.requirementStates.some((requirement) => !requirement.met)
+    const unmet = !!this.value && !this.meetsRequirements(this.value)
     this.input.setCustomValidity(this.customValidityMessage || (unmet ? this.requirementsMessage : ''))
     this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
   }
@@ -542,7 +601,7 @@ export class PasswordField extends LitElement {
 
   private strengthLabel(score: PasswordStrength) {
     const labels = Array.isArray(this.strengthLabels) ? this.strengthLabels : []
-    return labels[score] ?? ''
+    return labels[score] || this.msg.t(STRENGTH_MESSAGES[score])
   }
 
   private renderToggle() {
@@ -550,7 +609,7 @@ export class PasswordField extends LitElement {
     return html`<button
       class="toggle"
       type="button"
-      aria-label=${this.toggleLabel}
+      aria-label=${this.toggleLabel || this.msg.t('toggle')}
       aria-pressed=${this.revealed ? 'true' : 'false'}
       ?disabled=${this.effectiveDisabled}
       @click=${this.toggleReveal}
@@ -592,7 +651,7 @@ export class PasswordField extends LitElement {
       <div
         class="meter ${level}"
         role="meter"
-        aria-label="Password strength"
+        aria-label=${this.msg.t('meter')}
         aria-valuemin="0"
         aria-valuemax="4"
         aria-valuenow=${score}
@@ -606,7 +665,7 @@ export class PasswordField extends LitElement {
 
   private renderRequirements(requirements: PasswordRequirementState[]) {
     if (!requirements.length) return nothing
-    return html`<ul class="requirements" id="requirements" aria-label="Password requirements">
+    return html`<ul class="requirements" id="requirements" aria-label=${this.msg.t('requirements')}>
       ${requirements.map(
         (requirement) =>
           html`<li class="requirement ${requirement.met ? 'met' : ''}" data-requirement=${requirement.id}>
@@ -621,7 +680,7 @@ export class PasswordField extends LitElement {
                     </svg>`
               }
             </span>
-            <span>${requirement.label}<span class="visually-hidden">${requirement.met ? ', met' : ', not met'}</span></span>
+            <span>${requirement.label}<span class="visually-hidden">${this.msg.t(requirement.met ? 'requirementMet' : 'requirementNotMet')}</span></span>
           </li>`,
       )}
     </ul>`
@@ -640,7 +699,7 @@ export class PasswordField extends LitElement {
 
   override render() {
     const requirements = this.requirementStates
-    const name = this.ariaLabel || this.field.label || this.placeholder || 'Password'
+    const name = this.ariaLabel || this.field.label || this.placeholder || this.msg.t('fieldName')
     const describedBy = this.field.describedBy(this.meter && 'meter', requirements.length > 0 && 'requirements', !this.field.managed && 'help', 'caps-lock')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <slot name="prefix-icon" class="prefix"></slot>

@@ -179,14 +179,20 @@ With `inline`, the questionnaire asks a single question in place, as an agent do
   <c2-questionnaire
     inline
     complete-label="Envoyer"
-    skip-label="Passer"
-    skipped-label="Question passée"
-    questions='[{"id":"ton","title":"Quel ton pour la réponse ?","skippable":true,"errorMessage":"Choisissez une réponse ou passez la question.","otherPlaceholder":"Un autre ton…","options":[{"value":"bref","label":"Bref et direct"},{"value":"detaille","label":"Détaillé, avec des exemples"},{"value":"formel","label":"Formel"}]}]'
+    questions='[{"id":"ton","title":"Quel ton pour la réponse ?","skippable":true,"otherPlaceholder":"Un autre ton…","options":[{"value":"bref","label":"Bref et direct"},{"value":"detaille","label":"Détaillé, avec des exemples"},{"value":"formel","label":"Formel"}]}]'
   ></c2-questionnaire>
 </div>
 ```
 
 </GalleryGrid>
+
+The French card sets only its own Submit label (`complete-label`); Skip, the validation message and the collapsed "Question passée" come from the questionnaire's messages, which an app translates once:
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { questionnaire: { skip: 'Passer', skipped: 'Question passée', progress: 'Question {0} sur {1}' /* … */ } } })
+```
 
 ## Custom option renderer
 

@@ -26,6 +26,13 @@ Each example has a simulated upload transport. Choose or drop local files to see
 </c2-upload>
 ```
 
+```html tag=MdxCodeBlock,label=Paste or drop,description=Takes files dropped on it or pasted with Ctrl+V while it has focus and announces how many were added,useWhen=People bring screenshots or files copied in their file manager,accessibility=Paste is a keyboard path beside Enter and Space, which open the file picker
+<c2-upload data-upload-demo multiple paste accept="image/*,.pdf" max-size="10485760" aria-label="Add screenshots or PDFs">
+  <span slot="prompt">Drop, paste or <strong>browse</strong> screenshots</span>
+  <span slot="hint">Focus here and press Ctrl+V or ⌘V · images or PDF, up to 10 MB</span>
+</c2-upload>
+```
+
 ```html tag=MdxCodeBlock,label=Image collection,description=Image-only selection with previews in attachment rows,useWhen=The workflow accepts visual assets
 <style>
   .image-upload {

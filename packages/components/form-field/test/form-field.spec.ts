@@ -229,3 +229,172 @@ test('is accessible with a hint, an error and a warning', async ({ page, renderS
   await page.locator('#err').evaluate((element) => (element as FormField).validate())
   await accessible(page)
 })
+
+test('looks through an Astro island and a style element for its control', async ({ page, renderScenario }) => {
+  // The shape an Astro island takes in the docs: a `<style>` before the first island, then the wrapper.
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
+  await renderScenario(
+    `<c2-form-field label="Email" hint="Work address"><style>astro-island { display: contents }</style><astro-island><c2-text-field></c2-text-field></astro-island></c2-form-field>`,
+  )
+  const input = page.getByRole('textbox', { name: 'Email' })
+  await expect(input).toBeVisible()
+  await expect(input).toHaveAccessibleDescription('Work address')
+  expect(warnings.filter((text) => text.includes('field protocol'))).toEqual([])
+})
+
+test('claims a control that upgrades late inside an island', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Late"><astro-island><late-wrapped-field></late-wrapped-field></astro-island></c2-form-field>`)
+  await page.evaluate(async () => {
+    const TextField = customElements.get('c2-text-field')!
+    customElements.define('late-wrapped-field', class extends TextField {})
+    await customElements.whenDefined('late-wrapped-field')
+  })
+  await expect(page.getByRole('textbox', { name: 'Late' })).toBeVisible()
+})
+
+test('a control laid out with display: contents is the control, not a wrapper', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Plan" hint="Pick any"><c2-checkbox-group style="display: contents"><c2-checkbox value="a">A</c2-checkbox><c2-checkbox value="b">B</c2-checkbox></c2-checkbox-group></c2-form-field>`,
+  )
+  // The group is adopted: neither checkbox takes the field's hint as its own description.
+  await expect(page.getByRole('checkbox', { name: 'A' })).not.toHaveAccessibleDescription('Pick any')
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe(
+    'c2-checkbox-group',
+  )
+})
+
+test('inside an island, the control is the first control, past decoration and slotted elements', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Price" hint="Before tax"><astro-island><span>$</span><span slot="label-action">Help</span><c2-text-field></c2-text-field></astro-island></c2-form-field>`,
+  )
+  const input = page.getByRole('textbox', { name: 'Price' })
+  await expect(input).toBeVisible()
+  await expect(input).toHaveAccessibleDescription('Before tax')
+})
+
+test('a second consumer inside an island stays contained in the field', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div id="outer"><c2-form-field label="First"><astro-island><c2-text-field></c2-text-field></astro-island><astro-island id="second"></astro-island></c2-form-field></div>`,
+  )
+  const escaped = await page.evaluate(async () => {
+    let count = 0
+    document.getElementById('outer')!.addEventListener('c2-field-connect', () => (count += 1))
+    document.getElementById('second')!.append(document.createElement('c2-text-field'))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    return count
+  })
+  expect(escaped).toBe(0)
+})
+
+test('a control group upgrading after its children is still the control', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Plan"><late-group style="display: contents"><c2-checkbox value="a">A</c2-checkbox></late-group></c2-form-field>`)
+  // The child is a consumer already; the group is not defined yet, so it must not be looked through.
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('late-group')
+})
+
+test('inside an island, a button or an undefined icon is decoration, and a control rendered later is adopted', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Price" hint="Before tax"><astro-island id="island"><c2-button>?</c2-button><icon-not-defined></icon-not-defined></astro-island></c2-form-field>`,
+  )
+  // The island renders its native input after the field connected.
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.setAttribute('aria-describedby', '')
+    document.getElementById('island')!.append(input)
+  })
+  await expect.poll(() => page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('input')
+})
+
+test('an island is watched for good: its native control is adopted past a later sibling, swapped and released', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Code"><astro-island id="island"></astro-island><p>Six digits.</p></c2-form-field><c2-form-field label="Vendor"><astro-island><vendor-control></vendor-control></astro-island></c2-form-field>`,
+  )
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => {
+        const element = (field as unknown as { control: Element | null }).control
+        return element ? `${element.localName}${element.id ? '#' + element.id : ''}` : null
+      })
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.id = 'first'
+    document.getElementById('island')!.append(input)
+  })
+  await expect.poll(() => control(0)).toBe('input#first')
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.id = 'second'
+    document.getElementById('first')!.replaceWith(input)
+  })
+  await expect.poll(() => control(0)).toBe('input#second')
+  // A form-associated element of another library is a control inside an island too.
+  await page.evaluate(() => {
+    customElements.define(
+      'vendor-control',
+      class extends HTMLElement {
+        static formAssociated = true
+      },
+    )
+  })
+  await page.evaluate(() => document.querySelectorAll('c2-form-field')[1].append(document.createElement('span')))
+  await expect.poll(() => control(1)).toBe('vendor-control')
+})
+
+test('a display: contents control with no control inside it is still the control, and a hidden input is not one', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Name"><contents-input></contents-input></c2-form-field><c2-form-field label="Email"><astro-island><input type="hidden" name="token" /><input type="email" id="email" /></astro-island></c2-form-field>`,
+  )
+  await page.evaluate(() => {
+    customElements.define(
+      'contents-input',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          this.style.display = 'contents'
+          this.attachShadow({ mode: 'open' }).append(document.createElement('input'))
+        }
+      },
+    )
+    document.querySelectorAll('c2-form-field')[0].append(document.createElement('span'))
+  })
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => {
+        const element = (field as unknown as { control: Element | null }).control
+        return element ? `${element.localName}${element.id ? '#' + element.id : ''}` : null
+      })
+  await expect.poll(() => control(0)).toBe('contents-input')
+  expect(await control(1)).toBe('input#email')
+})
+
+test('a plain display: contents element is not looked through: only an Astro island is', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Name"><div style="display: contents"><c2-text-field></c2-text-field></div></c2-form-field>`)
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('div')
+})
+
+test('an island still loading its control adopts nothing in the meantime, and a nested island is watched', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('field protocol')) warnings.push(message.text())
+  })
+  await renderScenario(
+    `<c2-form-field label="Weight"><astro-island><pending-field></pending-field></astro-island><span>kg</span></c2-form-field><c2-form-field label="Code"><astro-slot><astro-island id="inner"></astro-island></astro-slot></c2-form-field>`,
+  )
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => (field as unknown as { control: Element | null }).control?.localName ?? null)
+  expect(await control(0)).toBe(null)
+  // No warning about the decoration: it was never adopted.
+  expect(warnings).toEqual([])
+  await page.evaluate(() => document.getElementById('inner')!.append(document.createElement('input')))
+  await expect.poll(() => control(1)).toBe('input')
+})

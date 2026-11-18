@@ -317,3 +317,73 @@ test('renderSummary draws a summary row with one cell per column from the events
   await expect(summary.getByRole('rowheader')).toHaveText('Summary')
   await accessible(page)
 })
+
+test('scrolls to scroll-time once a scheduler drawn without a size is laid out', async ({ page, renderScenario }) => {
+  // Hidden while it first renders, as an island that hydrates before its frame is measured.
+  await renderScenario(`<div id="frame" style="display: none; width: 600px">${markup('scroll-time="13:00"')}</div>`)
+  const scroller = scheduler(page).locator('.scroller')
+  await expect(scheduler(page).locator('.scale')).toHaveCount(1)
+  expect(await scroller.evaluate((element) => element.scrollLeft)).toBe(0)
+  await page.locator('#frame').evaluate((element) => (element.style.display = 'block'))
+  // 13:00 is six 80px columns after 07:00.
+  await expect.poll(() => scroller.evaluate((element) => element.scrollLeft)).toBeGreaterThan(400)
+})
+
+test('a bar move or a create drag across bars and the row heading selects no text, and the next press starts no native drag', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(markup())
+  await page.evaluate(() => {
+    ;(window as Window & { dragStarts?: number }).dragStarts = 0
+    document.addEventListener('dragstart', () => ((window as Window & { dragStarts?: number }).dragStarts! += 1), true)
+  })
+  const selected = () =>
+    page.evaluate(() => {
+      const selection = document.getSelection()!
+      const root = document.querySelector('c2-scheduler')!.shadowRoot!
+      const composed = typeof selection.getComposedRanges === 'function' ? selection.getComposedRanges({ shadowRoots: [root] }) : []
+      return selection.toString() + composed.map((range) => (range.collapsed ? '' : 'range')).join('')
+    })
+  const heading = (await scheduler(page).getByText('Ana Ruiz').first().boundingBox())!
+  // A bar moved across the row heading and back, then a create drag from empty time across a bar into the heading.
+  const kickoff = await at(page, 'ana', '09:45')
+  await page.mouse.move(kickoff.x, kickoff.y)
+  await page.mouse.down()
+  await page.mouse.move(heading.x + 4, heading.y + heading.height / 2, { steps: 8 })
+  await page.mouse.move(kickoff.x + 40, kickoff.y, { steps: 8 })
+  await page.mouse.up()
+  expect(await selected()).toBe('')
+  const empty = await at(page, 'kenji', '15:00')
+  await page.mouse.move(empty.x, empty.y)
+  await page.mouse.down()
+  await page.mouse.move(heading.x + 4, (await at(page, 'kenji', '10:00')).y, { steps: 12 })
+  await page.mouse.up()
+  expect(await selected()).toBe('')
+  // The next press-and-drag on a bar moves it rather than dragging a selection.
+  const standup = await at(page, 'aurora', '09:30')
+  await page.mouse.move(standup.x, standup.y)
+  await page.mouse.down()
+  await page.mouse.move(standup.x + 80, standup.y, { steps: 5 })
+  await expect(scheduler(page).locator('.preview')).toHaveCount(1)
+  await page.mouse.up()
+  expect(await page.evaluate(() => (window as Window & { dragStarts?: number }).dragStarts)).toBe(0)
+})
+
+test('an editable row cancels a text selection from its own surface, not from a field a renderer draws in a bar', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  const prevented = await scheduler(page).evaluate((element) => {
+    const lane = element.shadowRoot!.querySelector('.lane')!
+    const fire = (target: Element) => {
+      const event = new Event('selectstart', { bubbles: true, cancelable: true, composed: true })
+      target.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    const input = document.createElement('input')
+    lane.append(input)
+    const result = { lane: fire(lane), input: fire(input) }
+    input.remove()
+    return result
+  })
+  expect(prevented).toEqual({ lane: true, input: false })
+})

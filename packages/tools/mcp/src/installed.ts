@@ -69,9 +69,9 @@ interface ManifestJson {
       name?: string
       description?: string
       members?: { kind?: string; name?: string; static?: boolean; privacy?: string }[]
-      attributes?: unknown[]
+      attributes?: { name?: string; type?: unknown }[]
       slots?: unknown[]
-      events?: unknown[]
+      events?: { name?: string; type?: unknown }[]
       cssParts?: unknown[]
       cssProperties?: { name?: string }[]
     }[]
@@ -176,9 +176,9 @@ function manifestIndex(path: string): ManifestIndex | null {
         elements.set(decl.tagName, {
           className: decl.name ?? '',
           properties: publicProperties(decl.members),
-          attributes: (decl.attributes ?? []) as ElementEntry['attributes'],
+          attributes: (decl.attributes ?? []).map((a) => (a.type === undefined ? a : { ...a, type: typeText(a.type) ?? '' })) as ElementEntry['attributes'],
           slots: (decl.slots ?? []) as ElementEntry['slots'],
-          events: (decl.events ?? []) as ElementEntry['events'],
+          events: (decl.events ?? []).map((e) => (e.type === undefined ? e : { ...e, type: typeText(e.type) })) as ElementEntry['events'],
           cssParts: (decl.cssParts ?? []) as ElementEntry['cssParts'],
           cssProperties: (decl.cssProperties ?? []).filter((p) => p.name) as ElementEntry['cssProperties'],
         })
@@ -190,6 +190,16 @@ function manifestIndex(path: string): ManifestIndex | null {
   }
   manifests.set(key, index)
   return index
+}
+
+/**
+ * A manifest type as the registry stores it: the analyzer writes `{ text: "'a' | 'b'" }`, the registry the text, so
+ * an installed manifest's attributes and events read like the bundled ones (and never print as `[object Object]`).
+ */
+export function typeText(type: unknown): string | undefined {
+  if (typeof type === 'string') return type
+  if (type && typeof type === 'object' && typeof (type as { text?: unknown }).text === 'string') return (type as { text: string }).text
+  return undefined
 }
 
 /** Public instance fields of a manifest declaration: what a property binding may set. */

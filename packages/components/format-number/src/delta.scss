@@ -6,6 +6,7 @@
     flat--color: #71717a,
     arrow--size: 0.75em,
     arrow--margin-inline-end: 0.2em,
+    arrow--display: inline,
     comparison--color: #71717a,
     comparison--font-size: inherit,
     comparison--margin-inline-start: 0.35em,
@@ -26,7 +27,10 @@
   color: css.cssVar(flat--color);
 }
 
+// The named `role="img"` box around the part stays rendered (empty when the arrow is hidden), so the direction keeps
+// its accessible name.
 [part='arrow'] {
+  display: css.cssVar(arrow--display);
   margin-inline-end: css.cssVar(arrow--margin-inline-end);
 }
 

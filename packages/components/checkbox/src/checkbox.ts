@@ -21,6 +21,10 @@ export interface Checkbox {
   removeEventListener: TypedRemoveEventListener<Checkbox, CheckboxEventMap>
 }
 
+/** The default marks, drawn inside their slots when no mark of the author's is slotted. */
+const CHECKMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>`
+const MIXEDMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z" /></svg>`
+
 /**
  * A checkbox with native `<input type="checkbox">` behaviour. The visible box sits centred in a square touch target
  * (`state-layer--size`) that doubles as the hover layer; that layer is transparent unless a
@@ -42,6 +46,7 @@ export interface Checkbox {
  * @csspart checkmark - Wrapper containing the `checkmark` slot or fallback mark while checked.
  * @csspart mixedmark - Wrapper containing the `mixedmark` slot or fallback mark while indeterminate.
  * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
+ * @csspart field - The whole row (box, label, description, trailing): the clickable `<label>`, for a card-style option.
  * @csspart label - Region containing the default slot (the label text).
  * @csspart description - Region containing the `description` slot below the label.
  * @csspart trailing - Region at the end of the row containing the `trailing` slot, hidden while that slot is empty.
@@ -91,6 +96,12 @@ export interface Checkbox {
  * @cssproperty {color} --c2-checkbox__state-layer__hover__selected--color
  *
  * @cssproperty {pixel} [--c2-checkbox__field--gap=4px] - Space between the box's touch target and the label.
+ * @cssproperty {padding} [--c2-checkbox__field--padding=0] - Padding of the whole row, for a card-style option.
+ * @cssproperty {border} [--c2-checkbox__field--border=none] - Border around the whole row.
+ * @cssproperty {border-radius} [--c2-checkbox__field--border-radius=0] - Corner radius of the whole row.
+ * @cssproperty {color} [--c2-checkbox__field--background-color=transparent] - Background of the whole row.
+ * @cssproperty {border} [--c2-checkbox__field__checked--border=none] - Border around the row while checked. Defaults to `--c2-checkbox__field--border`.
+ * @cssproperty {color} [--c2-checkbox__field__checked--background-color=transparent] - Background of the row while checked. Defaults to `--c2-checkbox__field--background-color`.
  * @cssproperty {color} [--c2-checkbox__label--color=inherit]
  * @cssproperty {font-size} [--c2-checkbox__label--font-size=inherit]
  * @cssproperty {font-weight} [--c2-checkbox__label--font-weight=inherit]
@@ -153,8 +164,28 @@ export class Checkbox extends LitElement {
   @property({ type: Boolean, attribute: false }) groupDisabled = false
 
   private readonly slotPresence = new SlotPresenceController(this, ['', 'description', 'trailing'])
+  /**
+   * Which default marks have been needed yet. Each is drawn the first time its state is reached and kept after, so a
+   * box that was never checked carries no SVG (most boxes on a page), while unchecking still fades the mark out.
+   */
+  private readonly drawnMarks = { check: false, mixed: false }
   /** Description handed down by an enclosing `c2-form-field`; the checkbox keeps its own text as its name. */
   private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
+
+  constructor() {
+    super()
+    this.addEventListener('click', this.forwardHostClick)
+  }
+
+  /**
+   * A click aimed at the host itself — `host.click()`, a native `<label for>` around or pointing at the element,
+   * `c2-form-field`'s label — toggles like a click on the box. Clicks from inside the shadow root or on slotted content
+   * already reach the inner input and are left alone.
+   */
+  private readonly forwardHostClick = (event: Event) => {
+    if (event.composedPath()[0] !== this || !this.formElement) return
+    this.formElement.click()
+  }
 
   override connectedCallback() {
     super.connectedCallback()
@@ -219,6 +250,7 @@ export class Checkbox extends LitElement {
     // hidden while their slots are empty, which leaves a bare checkbox exactly the size of its touch target.
     return html`
       <label
+        part="field"
         class=${classMap({
           'c2-checkbox-field': true,
           'has-text': hasLabel || hasDescription || hasTrailing,
@@ -247,24 +279,15 @@ export class Checkbox extends LitElement {
             <!-- Each mark slot sits in its own positioned wrapper, so any slotted content (an inline SVG, a c2-feather-*
                icon, a c2-mat-icon, or a framework wrapper around them) is centred, sized and faded as one unit. -->
             <span class="c2-checkbox__mark c2-checkbox__mark--check" part="checkmark">
-              <slot name="checkmark">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                </svg>
-              </slot>
+              <slot name="checkmark">${this.drawnMarks.check ? CHECKMARK : nothing}</slot>
             </span>
             <span class="c2-checkbox__mark c2-checkbox__mark--mixed" part="mixedmark">
-              <slot name="mixedmark">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 13H5v-2h14v2z" />
-                </svg>
-              </slot>
+              <slot name="mixedmark">${this.drawnMarks.mixed ? MIXEDMARK : nothing}</slot>
             </span>
             <span class="c2-checkbox__mark c2-checkbox__mark--uncheck" part="uncheckmark">
               <slot name="uncheckmark"></slot>
             </span>
           </div>
-          <div class="c2-checkbox-state-layer"></div>
         </div>
         <span class="c2-checkbox-text" ?hidden=${!hasLabel && !hasDescription}>
           <span class="c2-checkbox-label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
@@ -282,6 +305,13 @@ export class Checkbox extends LitElement {
 
   override focus(options?: FocusOptions | undefined): void {
     this.formElement?.focus(options)
+  }
+
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties)
+    // Before rendering, so the mark is in the template that shows the new state.
+    if (changedProperties.has('checked')) this.drawnMarks.check ||= this.checked
+    if (changedProperties.has('indeterminate')) this.drawnMarks.mixed ||= this.indeterminate
   }
 
   protected override update(changedProperties: PropertyValues) {

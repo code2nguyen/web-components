@@ -60,4 +60,10 @@ const imageUploader: typeof imageUploaderMessages.en = {
   rejectSize: (file, limit) => `${file} dépasse la limite de ${limit}.`,
 }
 
-addTranslations({ fr: { 'document-checklist': documentChecklist, 'image-uploader': imageUploader } })
+// The drop zone's announcement comes from `@c2n/core`, under its own name; JSON choices pick the plural.
+const dropZone = {
+  added: { one: '{0} fichier ajouté', other: '{0} fichiers ajoutés' },
+  rejected: { one: '{0} fichier refusé', other: '{0} fichiers refusés' },
+}
+
+addTranslations({ fr: { 'document-checklist': documentChecklist, 'image-uploader': imageUploader, 'drop-zone': dropZone } })

@@ -120,3 +120,20 @@ test('public parts style every slotted region without changing assignment', asyn
   await expect(host.getByText('Body', { exact: true })).toBeVisible()
   await expect(host.getByRole('button', { name: 'Action' })).toBeVisible()
 })
+
+test('--c2-card--border sets all four sides, and a side variable overrides its side', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-card style="--c2-card--border: 2px solid rgb(37, 99, 235); --c2-card--border-bottom: none">Pro</c2-card>')
+  const card = page.locator('c2-card').locator('.c2-card')
+  for (const side of ['top', 'right', 'left']) {
+    await expect(card).toHaveCSS(`border-${side}-width`, '2px')
+    await expect(card).toHaveCSS(`border-${side}-color`, 'rgb(37, 99, 235)')
+  }
+  await expect(card).toHaveCSS('border-bottom-style', 'none')
+})
+
+test('--c2-card__hover--border sets all four sides on hover', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-card interactive style="--c2-card__hover--border: 3px solid rgb(126, 34, 206)">Pro</c2-card>')
+  const card = page.locator('c2-card').locator('.c2-card')
+  await card.hover()
+  for (const side of ['top', 'right', 'bottom', 'left']) await expect(card).toHaveCSS(`border-${side}-width`, '3px')
+})

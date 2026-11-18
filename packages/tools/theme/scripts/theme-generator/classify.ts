@@ -48,7 +48,7 @@ const BACKGROUND_TOKENS: [Set<string>, string][] = [
 
 const TEXT_TOKENS: [Set<string>, string][] = [
   [new Set(['#18181b', '#222222', '#1f2937']), 'color-on-surface'],
-  [new Set(['#71717a', '#6d6d6d', '#a1a1aa']), 'color-on-surface-variant'],
+  [new Set(['#71717a', '#6b6b74', '#6d6d6d', '#a1a1aa']), 'color-on-surface-variant'],
   [new Set(['#52525b']), 'color-on-surface-variant-strong'],
   [new Set([...ACCENT, ...ACCENT_HOVER]), 'color-primary'],
   [new Set(['#dc2626', '#d31510']), 'color-error'],
@@ -82,6 +82,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-distribution-bar',
   'c2-filter-builder',
   'c2-hover-card',
+  'c2-image-annotator',
   'c2-menu',
   'c2-navigation-menu',
   'c2-navigation-menu-item',

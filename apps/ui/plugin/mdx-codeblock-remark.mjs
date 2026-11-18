@@ -217,8 +217,11 @@ const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 // the list's own module).
 // `c2-swipe-action` lays its actions out as flex items and clicks the outermost one on a full swipe, which a
 // `display: contents` island wrapper defeats; `c2-button` and `c2-icon-button` are registered by `chrome-modules.ts`.
+// The Lit renderer drops `slot` from an island wrapper, so `c2-image-annotator`'s `detail` slot would stay empty; the
+// image annotator gallery runtime registers `c2-comment-thread`.
 const NESTED_CHILDREN_OF = new Map([
   ['c2-chip-group', new Set(['c2-chip', 'c2-badge'])],
+  ['c2-image-annotator', new Set(['c2-comment-thread'])],
   ['c2-overflow-list', new Set(['c2-button', 'c2-icon-button', 'c2-link-button', 'c2-menu-item'])],
   ['c2-swipe-action', new Set(['c2-button', 'c2-icon-button'])],
 ])

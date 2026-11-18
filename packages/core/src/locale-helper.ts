@@ -46,11 +46,28 @@ export function firstDayOfWeek(locale: string): Weekday {
 // `Intl.ListFormat` is ES2021, above the library's ES2020 typings; every engine the components support has it.
 const ListFormat = (
   Intl as unknown as {
-    ListFormat?: new (locale: string, options: { type: 'conjunction' | 'unit'; style: 'long' | 'short' }) => { format(items: string[]): string }
+    ListFormat?: new (locale: string | undefined, options: { type: 'conjunction' | 'unit'; style: 'long' | 'short' }) => { format(items: string[]): string }
   }
 ).ListFormat
 
-/** Items as a list in `locale`'s words: `a, b and c` for `conjunction`, `a, b, c` for `unit`. */
+const listFormatters = new Map<string, { format(items: string[]): string } | undefined>()
+
+/**
+ * Items as a list in `locale`'s words: `a, b and c` for `conjunction`, `a, b, c` for `unit`. One formatter per locale
+ * and type, built once; a malformed `locale` (`en_US`, which Intl rejects) falls back to the browser's language, and
+ * a comma-separated list only where `Intl.ListFormat` is missing.
+ */
 export function formatList(locale: string, items: string[], type: 'conjunction' | 'unit' = 'unit'): string {
-  return ListFormat ? new ListFormat(locale, { type, style: type === 'unit' ? 'short' : 'long' }).format(items) : items.join(', ')
+  const key = `${type}|${locale}`
+  if (!listFormatters.has(key)) {
+    const options = { type, style: type === 'unit' ? ('short' as const) : ('long' as const) }
+    let formatter: { format(items: string[]): string } | undefined
+    try {
+      formatter = ListFormat ? new ListFormat(locale, options) : undefined
+    } catch {
+      formatter = ListFormat ? new ListFormat(undefined, options) : undefined
+    }
+    listFormatters.set(key, formatter)
+  }
+  return listFormatters.get(key)?.format(items) ?? items.join(', ')
 }

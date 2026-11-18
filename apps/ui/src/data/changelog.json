@@ -2,6 +2,271 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.28",
+      "date": "2026-11-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["skill"],
+              "text": "Ask the developer whether to report what c2n could improve",
+              "hash": "90f113f"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Draft component issues from a coding session with report_issue",
+              "hash": "165d1b8"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Paint a weekly schedule of ranges [week-planner-1]",
+              "hash": "4d345f9"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Paint a weekly schedule of ranges by dragging across days and times",
+              "hash": "6f1b08e"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Add a proposed meeting with free/busy columns [scheduler-2]",
+              "hash": "bec7c20"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Add a proposed-meeting block that shows who is busy, for finding a time",
+              "hash": "051cdd4"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Add an agenda view and background events for change calendars",
+              "hash": "0343fe1"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Add a drop zone controller and a sync status model [core-1]",
+              "hash": "db9db7e"
+            },
+            {
+              "scopes": ["upload"],
+              "text": "Take drops and pastes through the core drop zone controller",
+              "hash": "ef8093a"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Add a drop zone controller, file filtering and a sync status model",
+              "hash": "26dd8e2"
+            },
+            {
+              "scopes": ["image-annotator"],
+              "text": "Add extraction review, pinned comments and a detail card [image-annotator-1]",
+              "hash": "dfd72ad"
+            },
+            {
+              "scopes": ["rich-text-editor"],
+              "text": "Add merge field chips [rich-text-editor-1]",
+              "hash": "966ab96"
+            },
+            {
+              "scopes": ["attachment"],
+              "text": "Add a lazy file preview and c2-file-preview [attachment-1]",
+              "hash": "5d2471c"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Record runs and replay them to follow the library over time",
+              "hash": "4022bfd"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add c2-histogram-chart, binned distributions with density and percentile overlays [chart-3]",
+              "hash": "ad979c8"
+            },
+            {
+              "scopes": ["highlight"],
+              "text": "Add c2-text-annotator, labelled spans over text [highlight-3]",
+              "hash": "261471c"
+            },
+            {
+              "scopes": ["secret-field"],
+              "text": "Add c2-totp-code, a rotating TOTP code [secret-field-1]",
+              "hash": "7061fb4"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Add eight specs and extend the capability vocabulary",
+              "hash": "92a6267"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Build apps from specs and add up the gaps",
+              "hash": "412f9fc"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Add an inline prompt mode [selection-toolbar-1]",
+              "hash": "1431e93"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Add the component lab, human-like testing of apps built with c2n",
+              "hash": "867f270"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Add c2-date-fields, a date typed as day, month and year [date-input-2]",
+              "hash": "4f2df9e"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["mcp"],
+              "text": "Address the code review of report_issue",
+              "hash": "9a302ab"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Draw a server-rendered host in the locale its hydration assumes",
+              "hash": "b454e12"
+            },
+            {
+              "scopes": [],
+              "text": "Address the docs screenshot review",
+              "hash": "249dc85"
+            },
+            {
+              "scopes": [],
+              "text": "Address code review findings",
+              "hash": "f6c32e5"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Keep queued paint changes in step with a late app, and end a clamped first cell on the grid",
+              "hash": "b7da3ee"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "End a paint stroke on the cell it is released on",
+              "hash": "121cf69"
+            },
+            {
+              "scopes": [],
+              "text": "Resolve component feedback for button, checkbox, switch, avatar, number-input, search-field, text-field, table, toast and facet-list",
+              "hash": "a80a952"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Darken color-on-surface-variant to reach 4.5:1 on tinted surfaces",
+              "hash": "3f1001f"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Print manifest types as text and rank search by title and description",
+              "hash": "1216c13"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Keep the committed order, add a value attribute and follow label changes",
+              "hash": "0125186"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Merge repeated defineMessages catalogs and hydrate localized hosts in the server locale",
+              "hash": "0204a6b"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Keep a native drag or text selection from cancelling a drag",
+              "hash": "73c8a3a"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "End a drag released outside its row",
+              "hash": "09121bd"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Keep the proposal in range, out of editable rows' way, and readonly on request",
+              "hash": "717ff60"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Give band titles rows of their own and keep focus above bands",
+              "hash": "7302dfb"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Address review findings in the drop zone and sync status",
+              "hash": "61b1103"
+            },
+            {
+              "scopes": ["image-annotator"],
+              "text": "Show a server-rendered detail slot; fix the review gallery cards",
+              "hash": "114828d"
+            },
+            {
+              "scopes": ["checkbox"],
+              "text": "Keep the hover layer on the touch target, behind the box",
+              "hash": "bc4244b"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Address the code review of run records and replay",
+              "hash": "4e81f08"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Address the code review of the lab",
+              "hash": "a993985"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Keep the caret a control in the content took focus from [selection-toolbar-1]",
+              "hash": "c985aad"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["checkbox"],
+              "text": "Draw the default marks on demand and the hover layer as a pseudo-element",
+              "hash": "0bd7fd9"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Escape the committed values the lab pages put in raw links",
+              "hash": "20d4341"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Address the code review of the lab pages",
+              "hash": "aa92b65"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Show the component lab at /lab",
+              "hash": "58278b3"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.27",
       "date": "2026-11-17",
       "sections": [

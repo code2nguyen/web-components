@@ -202,3 +202,13 @@ test('a list with no enabled row is not a tab stop', async ({ page, renderScenar
   await page.keyboard.press('Tab')
   await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
 })
+
+test('a list rendered in the browser updates once on connect, with no update scheduled after its first', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(`<c2-list value="b"><c2-list-item value="a">A</c2-list-item><c2-list-item value="b">B</c2-list-item></c2-list>`)
+  await expect(page.locator('c2-list-item[value="b"]')).toHaveJSProperty('selected', true)
+  expect(warnings).toEqual([])
+})

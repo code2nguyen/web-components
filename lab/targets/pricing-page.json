@@ -1,0 +1,158 @@
+{
+  "name": "pricing-page",
+  "spec": "lab/specs/scenarios/pricing-page.md",
+  "title": "pricing-page (default direction): a SaaS pricing page, built from its spec.",
+  "app": "lab/apps/pricing-page/default",
+  "url": "http://127.0.0.1:4194/",
+  "server": {
+    "command": "npx vite lab/apps/pricing-page/default --host 127.0.0.1 --port 4194 --strictPort",
+    "cwd": "."
+  },
+  "journeys": [
+    {
+      "id": "t1-yearly",
+      "title": "T1 · Switch to yearly and back",
+      "personas": ["mouse", "keyboard", "dark", "fr"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans c2-card[data-plan=\"team\"] .plan__price"
+            },
+            "contains": "29"
+          }
+        },
+        {
+          "click": {
+            "ax": "radio",
+            "name": "Yearly",
+            "exact": true
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans c2-card[data-plan=\"team\"] .plan__price"
+            },
+            "contains": "24"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans [data-plan-note=\"team\"]"
+            },
+            "contains": "288"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans [data-plan-note=\"team\"]"
+            },
+            "contains": "billed"
+          }
+        },
+        {
+          "click": {
+            "ax": "radio",
+            "name": "Monthly",
+            "exact": true
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans c2-card[data-plan=\"team\"] .plan__price"
+            },
+            "contains": "29"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans [data-plan-note=\"team\"]"
+            },
+            "contains": "per user / month"
+          }
+        }
+      ]
+    },
+    {
+      "id": "t2-faq",
+      "title": "T2 · Read an answer",
+      "personas": ["mouse", "keyboard", "mobile", "dark", "fr"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "DisclosureTriangle",
+            "name": "Where is my data stored?"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "Frankfurt"
+            }
+          }
+        },
+        {
+          "click": {
+            "ax": "DisclosureTriangle",
+            "name": "What counts as a user?"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "text": "anyone with a seat"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t3-phone",
+      "title": "T3 · On a phone: Team first, comparison table in its frame",
+      "personas": ["mobile"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "expect": {
+            "text": {
+              "css": ".plans > c2-card:first-child h2"
+            },
+            "contains": "Team"
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "ax": "gridcell",
+              "name": "Support",
+              "exact": true
+            }
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "ax": "gridcell",
+              "name": "Not included",
+              "exact": true
+            },
+            "equals": 7
+          }
+        }
+      ]
+    }
+  ]
+}

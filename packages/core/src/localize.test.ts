@@ -52,3 +52,21 @@ test('translations given before the component defines its messages still apply, 
   assert.equal(formatMessage(early, 'fr', 'hello'), 'Salut')
   assert.equal(formatMessage(early, 'fr', 'bye'), 'Au revoir')
 })
+
+test('defining a catalog again merges its new keys, keeps the first English and warns on a conflict', (t) => {
+  const warn = t.mock.method(console, 'warn', () => {})
+  const base = defineMessages('localize-merge', { close: 'Close', count: (n: number) => `${n} items` })
+  const companion = defineMessages('localize-merge', { close: 'Close', next: 'Next' })
+  assert.equal(companion, base)
+  assert.equal(formatMessage(companion, 'en', 'next'), 'Next')
+  assert.equal(formatMessage(base, 'en', 'close'), 'Close')
+  // Functions are not compared (another build writes the same message as different source): no warning.
+  defineMessages('localize-merge', { count: (n: number) => n + ' items' })
+  assert.equal(warn.mock.callCount(), 0)
+  defineMessages('localize-merge', { close: 'Shut' })
+  assert.equal(warn.mock.callCount(), 1)
+  assert.equal(formatMessage(base, 'en', 'close'), 'Close')
+  // Translations of a merged key apply like any other.
+  addTranslations({ fr: { 'localize-merge': { next: 'Suivant' } } })
+  assert.equal(formatMessage(companion, 'fr', 'next'), 'Suivant')
+})

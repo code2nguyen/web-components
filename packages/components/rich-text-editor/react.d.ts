@@ -23,11 +23,13 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-rich-text-editor': C2Props<RichTextEditor> & {
+      'c2-rich-text-editor': Omit<C2Props<RichTextEditor>, 'mergeFields'> & {
         'aria-label'?: Attribute
         'toolbar-position'?: Attribute
+        'merge-fields'?: Attribute
         readonly?: Attribute
         maxlength?: Attribute
+        mergeFields?: RichTextEditor['mergeFields'] | string
       }
     }
   }

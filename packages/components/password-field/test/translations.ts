@@ -3,6 +3,24 @@ import { passwordFieldMessages } from '../src/messages.js'
 
 // The French an app would add: the library ships its text in English only.
 const fr: { [K in keyof typeof passwordFieldMessages.en]: string } = {
+  fieldName: 'Mot de passe',
+  toggle: 'Afficher le mot de passe',
+  capsLock: 'Verr. Maj. est activé',
+  requirementsUnmet: 'Le mot de passe ne respecte pas toutes les règles.',
+  requirements: 'Règles du mot de passe',
+  requirementMet: ', respectée',
+  requirementNotMet: ', non respectée',
+  minLength: 'Au moins {0} caractères',
+  lowercaseLetter: 'Une minuscule',
+  uppercaseLetter: 'Une majuscule',
+  number: 'Un chiffre',
+  symbol: 'Un symbole',
+  meter: 'Robustesse du mot de passe',
+  strength0: 'Trop faible',
+  strength1: 'Faible',
+  strength2: 'Moyen',
+  strength3: 'Bon',
+  strength4: 'Robuste',
   generate: 'Générer un mot de passe',
   suggestion: 'Mot de passe suggéré',
   regenerate: 'En générer un autre',
@@ -26,3 +44,6 @@ const fr: { [K in keyof typeof passwordFieldMessages.en]: string } = {
 }
 
 addTranslations({ fr: { 'password-field': fr } })
+
+// Lets a test add a language after the field rendered, as an app that lazy-loads its translations does.
+;(window as unknown as { addTranslations: typeof addTranslations }).addTranslations = addTranslations

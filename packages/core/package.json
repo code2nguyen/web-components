@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -40,6 +40,10 @@
       "types": "./dist/data-helper.d.ts",
       "default": "./dist/data-helper.js"
     },
+    "./file-accept.js": {
+      "types": "./dist/file-accept.d.ts",
+      "default": "./dist/file-accept.js"
+    },
     "./lit-helper.js": {
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"
@@ -51,6 +55,10 @@
     "./shortcut-helper.js": {
       "types": "./dist/shortcut-helper.d.ts",
       "default": "./dist/shortcut-helper.js"
+    },
+    "./sync-status.js": {
+      "types": "./dist/sync-status.d.ts",
+      "default": "./dist/sync-status.js"
     },
     "./contexts/field.js": {
       "types": "./dist/contexts/field.d.ts",
@@ -76,6 +84,10 @@
       "types": "./dist/controllers/drawer-controller.d.ts",
       "default": "./dist/controllers/drawer-controller.js"
     },
+    "./controllers/drop-zone.js": {
+      "types": "./dist/controllers/drop-zone.d.ts",
+      "default": "./dist/controllers/drop-zone.js"
+    },
     "./controllers/breakpoints-observer.js": {
       "types": "./dist/controllers/breakpoints-observer.d.ts",
       "default": "./dist/controllers/breakpoints-observer.js"
@@ -91,6 +103,10 @@
     "./controllers/sticky.js": {
       "types": "./dist/controllers/sticky.d.ts",
       "default": "./dist/controllers/sticky.js"
+    },
+    "./controllers/sync-status.js": {
+      "types": "./dist/controllers/sync-status.d.ts",
+      "default": "./dist/controllers/sync-status.js"
     },
     "./locale-helper.js": {
       "types": "./dist/locale-helper.d.ts",

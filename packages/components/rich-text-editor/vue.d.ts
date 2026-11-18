@@ -22,10 +22,12 @@ declare module 'vue' {
       C2Props<RichTextEditor> & {
         'aria-label'?: unknown
         'toolbar-position'?: unknown
+        'merge-fields'?: unknown
         readonly?: unknown
         maxlength?: unknown
         onInput?: (event: EventOf<RichTextEditor, 'input'>) => void
         onFormatChange?: (event: EventOf<RichTextEditor, 'format-change'>) => void
+        onMergeFieldActivate?: (event: EventOf<RichTextEditor, 'merge-field-activate'>) => void
         onTrigger?: (event: EventOf<RichTextEditor, 'trigger'>) => void
         onChange?: (event: EventOf<RichTextEditor, 'change'>) => void
         onSubmit?: (event: EventOf<RichTextEditor, 'submit'>) => void

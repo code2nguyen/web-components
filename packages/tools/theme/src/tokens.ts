@@ -11,7 +11,7 @@
 
 export const TOKEN_PREFIX = '--c2-theme--'
 
-const STRONG_VARIANT = 'color-mix(in srgb, var(--c2-theme--color-on-surface-variant, #71717a) 65%, var(--c2-theme--color-on-surface, #18181b))'
+const STRONG_VARIANT = 'color-mix(in srgb, var(--c2-theme--color-on-surface-variant, #6b6b74) 65%, var(--c2-theme--color-on-surface, #18181b))'
 
 export type TokenCategory = 'color' | 'font' | 'radius' | 'border' | 'focus' | 'disabled' | 'motion' | 'shadow' | 'chart'
 
@@ -42,10 +42,11 @@ export const tokens: TokenDef[] = [
   token('color-surface-container-low', 'color', '#fafafa', 'Slightly raised surface: side navigation, read-only fields, subtle hover.', '#1f1f23'),
   token('color-surface-container', 'color', '#f4f4f5', 'Hover surface for rows and icon buttons.', '#27272a'),
   token('color-on-surface', 'color', '#18181b', 'Primary text colour.', '#f4f4f5'),
-  token('color-on-surface-variant', 'color', '#71717a', 'Secondary text, placeholders, icons, supporting text.', '#a1a1aa'),
-  // Secondary text that sits on a container surface (a neutral badge, an unselected segment, an action button): the
-  // variant reaches only 4.38:1 on `color-surface-container`. Derived from the two text roles (#52525b by default) so a
-  // theme that sets them gets this one too; repeated as the dark value so a nested `data-theme` resolves it locally.
+  token('color-on-surface-variant', 'color', '#6b6b74', 'Secondary text, placeholders, icons, supporting text.', '#a1a1aa'),
+  // Secondary text that sits on a container surface (a neutral badge, an unselected segment, an action button): a
+  // stronger step than the variant (4.80:1 on `color-surface-container`), with margin for a theme's darker containers.
+  // Derived from the two text roles (#4e4e55 by default) so a theme that sets them gets this one too; repeated as the
+  // dark value so a nested `data-theme` resolves it locally.
   token(
     'color-on-surface-variant-strong',
     'color',

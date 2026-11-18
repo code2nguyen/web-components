@@ -245,3 +245,21 @@ test('expandAll reopens branches closed during a search', async ({ page, renderS
   await page.locator('c2-json-viewer').evaluate((element) => (element as HTMLElement & { expandAll(): void }).expandAll())
   await expect(line(page, 'city')).toBeVisible()
 })
+
+test('reads its text in the page language', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div lang="fr"><c2-json-viewer page-size="2" data='${JSON.stringify({ roles: ['admin', 'editor', 'viewer'], address: { city: 'London' } })}'></c2-json-viewer></div>`,
+  )
+  await expect(page.getByRole('tree', { name: 'Données JSON' })).toBeVisible()
+  await expect(line(page, 'roles')).toContainText('3 éléments')
+  await expect(line(page, 'address')).toContainText('1 clé')
+  await expect(page.getByRole('treeitem', { name: '1 de plus sur 1' })).toBeVisible()
+  await expect(line(page, 'roles').locator('[data-action="path"]')).toHaveAttribute('title', 'Copier le chemin')
+  // A message the app did not translate falls back to English.
+  await clipboard(page)
+  await line(page, 'roles').focus()
+  await page.keyboard.press('c')
+  await expect(line(page, 'roles').locator('[data-action="value"]')).toHaveAttribute('title', 'Copied')
+  await renderScenario(`<div lang="fr"><c2-json-viewer></c2-json-viewer></div>`)
+  await expect(page.locator('c2-json-viewer')).toContainText('Aucune donnée')
+})

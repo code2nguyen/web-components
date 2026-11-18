@@ -397,6 +397,12 @@
   text-overflow: ellipsis;
 }
 
+// A node from `renderCell` (a progress bar, a meter) gets the cell's width, so a `width: 100%` inside it means the
+// column rather than the text next to it. Text keeps its content size, which the cell's alignment positions.
+.cell-content--node {
+  flex: 1 1 auto;
+}
+
 // Editing (`editable`). A changed cell carries a corner mark, an invalid one a red ring and its message for screen
 // readers; the one editor sits over the cell being edited, so the row keeps its height.
 .cell--dirty,
@@ -617,6 +623,16 @@
 
 .cell--align-center {
   justify-content: center;
+}
+
+// A renderer's node fills the cell (so a 100% bar spans it), which leaves `justify-content` nothing to place: align
+// its inline content instead.
+.cell--align-center > .cell-content--node {
+  text-align: center;
+}
+
+.cell--align-end > .cell-content--node {
+  text-align: end;
 }
 
 .cell--align-end {

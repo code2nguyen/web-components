@@ -1,6 +1,6 @@
 import { html, LitElement, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { assignSlot, property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, assignSlot, property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -144,6 +144,12 @@ const EDGE_SCROLL_ZONE = 40
 const EDGE_SCROLL_STEP = 8
 let componentId = 0
 
+/** Element reflection lets the list in the shadow root be labelled by elements in the light DOM, which ids cannot reach. */
+const canReferenceElements = typeof Element !== 'undefined' && 'ariaLabelledByElements' in Element.prototype
+const LABEL_ATTRIBUTES = ['aria-label', 'aria-labelledby', 'id']
+
+type LabelledElement = HTMLElement & { ariaLabelledByElements: Element[] | null }
+
 function parseMotionDuration(value: string): number {
   const duration = Number.parseFloat(value)
   if (!Number.isFinite(duration)) return 0
@@ -165,7 +171,9 @@ function parseMotionDuration(value: string): number {
  * interactive descendants retain their native behavior and never arm a reorder.
  *
  * With `ranked`, each row shows its position in a `rank` badge. With a `name`, the list is a form control: it submits
- * the `data-reorder-key` of each keyed row in the displayed order, and `value` reads or sets that order.
+ * the `data-reorder-key` of each keyed row in the displayed order, and `value` reads or sets that order (the `value`
+ * attribute, keys separated by `;`, sets the initial one). When rows are added or removed, the list keeps the order the
+ * user committed for the rows that stayed; only rows the light DOM itself moved return to its order.
  *
  * @tag c2-reorder-list
  *
@@ -270,12 +278,12 @@ export class ReorderList extends LitElement {
 
   /**
    * Form field name. With a name, the list submits the `data-reorder-key` of each keyed row, in the displayed order, as
-   * one entry per row under it; rows without a key are not submitted. A named list also keeps its displayed order when
-   * rows are added or removed, instead of returning to the light-DOM order.
+   * one entry per row under it; rows without a key are not submitted.
    */
   @property({ reflect: true }) name = ''
 
   /** The `data-reorder-key` of each keyed row, in the displayed order, which is what a form submits under `name`. */
+  @property({ converter: arrayPropertyConverter })
   get value(): string[] {
     return this.visualOrder.length === 0 && this.pendingValue ? [...this.pendingValue] : this.keysOf(this.visualOrder)
   }
@@ -283,9 +291,13 @@ export class ReorderList extends LitElement {
   /**
    * Puts the movable rows with these keys first, in this order, and the other movable rows after them in their current
    * order; fixed rows keep their positions and unknown keys are ignored. The light DOM is not moved. A value set before
-   * the rows exist applies once they arrive.
+   * the rows exist applies once they arrive. In markup, the `value` attribute lists the keys of the initial order
+   * separated by `;` (`value="price;speed"`, or a JSON array when a key holds a `;`); a form reset returns to it.
    */
-  set value(keys: readonly string[]) {
+  set value(value: readonly string[] | string) {
+    // A string assigned to the property (what a server render or a framework writing attributes hands over) is the
+    // attribute's `;`-separated list.
+    const keys: unknown = typeof value === 'string' ? arrayPropertyConverter.fromProperty(value) : value
     if (!Array.isArray(keys)) return
     if (this.visualOrder.length === 0) {
       this.pendingValue = [...keys]
@@ -326,6 +338,8 @@ export class ReorderList extends LitElement {
   private childListObserver?: MutationObserver
   private resizeObserver?: ResizeObserver
   private visibilityObserver?: MutationObserver
+  private labelObserver?: MutationObserver
+  private observedLabels: readonly HTMLElement[] = []
   private focusedItem: HTMLElement | null = null
   private pendingFocus: HTMLElement | 'host' | null = null
   private scrollContainer: HTMLElement | null = null
@@ -346,6 +360,9 @@ export class ReorderList extends LitElement {
     if (hydrating) void this.updateComplete.then(() => this.reconcileAuthoredOrder())
     else this.reconcileAuthoredOrder()
     this.observeChildren()
+    // Moved in the document: its labels may differ, and the observer was dropped on disconnect.
+    if (this.hasUpdated) this.syncContainerName()
+    if (this.hasUpdated) this.syncContainerName()
   }
 
   override disconnectedCallback(): void {
@@ -353,6 +370,10 @@ export class ReorderList extends LitElement {
     this.childListObserver?.disconnect()
     this.resizeObserver?.disconnect()
     this.visibilityObserver?.disconnect()
+    this.labelObserver?.disconnect()
+    // Dropped, not kept: a reconnected list observes again from scratch (see `connectedCallback`).
+    this.labelObserver = undefined
+    this.observedLabels = []
     this.finishSession()
     super.disconnectedCallback()
   }
@@ -368,6 +389,7 @@ export class ReorderList extends LitElement {
   protected override updated(changedProperties: PropertyValues<this>): void {
     super.updated(changedProperties)
     if ((changedProperties as PropertyValues).has('visualOrder') || changedProperties.has('name')) this.syncFormValue()
+    this.syncContainerName()
     this.observeRenderedSize()
     if (this.session) this.observeSessionVisibility()
     this.restorePendingFocus()
@@ -387,7 +409,6 @@ export class ReorderList extends LitElement {
         part="container"
         class="c2-reorder-list-container"
         role="list"
-        aria-label=${this.getAccessibleName() || this.field.label || nothing}
         aria-describedby=${this.field.describedBy()}
         @pointerdown=${this.handlePointerDown}
         @pointermove=${this.handlePointerMove}
@@ -578,9 +599,8 @@ export class ReorderList extends LitElement {
   private reconcileAuthoredOrder(): void {
     const authored = this.getAuthoredItems()
     if (!this.manualSlots) for (const item of authored) item.setAttribute('slot', this.getAssignmentId(item))
-    let next: readonly HTMLElement[] = authored
-    if (this.pendingValue && authored.length) next = this.orderByKeys(authored, this.pendingValue)
-    else if (this.name) next = this.keepDisplayedOrder(authored)
+    // Rows added or removed keep the order the user committed for the rows that stayed (`keepDisplayedOrder`).
+    const next = this.pendingValue && authored.length ? this.orderByKeys(authored, this.pendingValue) : this.keepDisplayedOrder(authored)
     if (authored.length) this.pendingValue = undefined
     this.authoredOrder = authored
     this.visualOrder = next
@@ -1104,18 +1124,53 @@ export class ReorderList extends LitElement {
     return item.dataset.reorderLabel?.trim() || item.getAttribute('aria-label')?.trim() || item.textContent?.replace(/\s+/g, ' ').trim() || this.msg.t('item')
   }
 
-  private getAccessibleName(): string {
-    const direct = this.getAttribute('aria-label')?.trim()
-    if (direct) return direct
+  /**
+   * The elements that name the list: those `aria-labelledby` lists, else the `<label for>`s pointing at it. A label that
+   * wraps the list is left out, since it would read the rows too.
+   */
+  private getLabelElements(): HTMLElement[] {
     const ids = this.getAttribute('aria-labelledby')?.split(/\s+/).filter(Boolean) ?? []
-    // A `<label for>` names the list when no ARIA attribute does; a label wrapping the list would read the rows too.
-    const labels = ids.length
-      ? ids.map((id) => this.ownerDocument.getElementById(id))
-      : [...(this.internals.labels ?? [])].filter((label) => !label.contains(this))
-    return labels
-      .map((label) => label?.textContent?.trim() ?? '')
+    const root = this.getRootNode() as Document | ShadowRoot
+    if (ids.length) return ids.map((id) => root.getElementById?.(id)).filter((label): label is HTMLElement => label instanceof HTMLElement)
+    return [...(this.internals.labels ?? [])].filter((label): label is HTMLElement => label instanceof HTMLElement && !label.contains(this))
+  }
+
+  /**
+   * Names the `role=list` container. The label elements are referenced (`ariaLabelledByElements`), so the name follows
+   * their text; a browser without element reflection gets their text as `aria-label`. Done after each render rather than
+   * in the template, so a server-rendered list is named once it hydrates, and again whenever the host's naming
+   * attributes or the labels' text change.
+   */
+  private syncContainerName(): void {
+    const container = this.containerElement as LabelledElement | undefined
+    if (!container) return
+    const direct = this.getAttribute('aria-label')?.trim() ?? ''
+    const labels = direct ? [] : this.getLabelElements()
+    this.observeLabels(labels)
+    const referenced = canReferenceElements && labels.length > 0
+    if (canReferenceElements) {
+      const current = container.ariaLabelledByElements ?? []
+      if (!this.sameOrder(current, labels)) container.ariaLabelledByElements = referenced ? labels : null
+    }
+    const text = labels
+      .map((label) => label.textContent?.replace(/\s+/g, ' ').trim() ?? '')
       .filter(Boolean)
       .join(' ')
+    // With references in place, `aria-label` is only the fallback for labels that hold no text.
+    const name = direct || (referenced ? '' : text) || this.field.label
+    if (name) {
+      if (container.getAttribute('aria-label') !== name) container.setAttribute('aria-label', name)
+    } else container.removeAttribute('aria-label')
+  }
+
+  /** Watches the host's naming attributes and the label elements' text, which change the list's name. */
+  private observeLabels(labels: readonly HTMLElement[]): void {
+    if (this.labelObserver && this.sameOrder(this.observedLabels, labels)) return
+    this.labelObserver?.disconnect()
+    this.labelObserver ??= new MutationObserver(() => this.syncContainerName())
+    this.observedLabels = [...labels]
+    this.labelObserver.observe(this, { attributes: true, attributeFilter: LABEL_ATTRIBUTES })
+    for (const label of labels) this.labelObserver.observe(label, { childList: true, characterData: true, subtree: true })
   }
 
   // Form control -----------------------------------------------------------------------------------------------------
@@ -1124,7 +1179,10 @@ export class ReorderList extends LitElement {
     this.pendingValue = undefined
     if (this.session) this.cancelSession(this.msg.t('canceled'))
     this.closeSwipe()
-    this.visualOrder = this.getAuthoredItems()
+    // The `value` attribute is the default order, as it is the default value of an `<input>`.
+    const authored = this.getAuthoredItems()
+    const initial = this.getAttribute('value')
+    this.visualOrder = initial === null ? authored : this.orderByKeys(authored, arrayPropertyConverter.fromAttribute(initial))
   }
 
   formDisabledCallback(disabled: boolean): void {
@@ -1227,7 +1285,7 @@ export class ReorderList extends LitElement {
     return Number.isFinite(this.dragStartThreshold) && this.dragStartThreshold >= 0 ? this.dragStartThreshold : DEFAULT_DRAG_THRESHOLD
   }
 
-  private sameOrder(left: readonly HTMLElement[], right: readonly HTMLElement[]): boolean {
+  private sameOrder(left: readonly Element[], right: readonly Element[]): boolean {
     return left.length === right.length && left.every((item, index) => item === right[index])
   }
 

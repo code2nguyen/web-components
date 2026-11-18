@@ -1,10 +1,29 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
 /**
- * The text `c2-schema-tree` draws around a schema's own words: the marks of a property and its constraints. Values
- * arrive written as JSON (`"draft"`, `40`), so a translation only places them.
+ * The text `c2-json-viewer` draws around the data, then the text `c2-schema-tree` draws around a schema's own words:
+ * the marks of a property and its constraints. Values arrive written as JSON (`"draft"`, `40`), so a translation only
+ * places them.
  */
 const en = {
+  /** Accessible name of the viewer's tree while `label` is empty. */
+  label: 'JSON',
+  /** Default content of the `empty` slot, shown while there is no data. */
+  noData: 'No data',
+  /** Shown in place of the lines when `search` with `filter` matches nothing. */
+  noMatch: 'No match',
+  /** The line that reveals the next children of a long branch: how many it reveals, of how many left. */
+  showMore: (shown: number, remaining: number) => `Show ${shown} more of ${remaining}`,
+  /** Size of a closed or open array. */
+  itemCount: (count: number) => (count === 1 ? `${count} item` : `${count} items`),
+  /** Size of a closed or open object. */
+  keyCount: (count: number) => (count === 1 ? `${count} key` : `${count} keys`),
+  /** Tooltip of the line action that copies the line's path. */
+  copyPath: 'Copy path',
+  /** Tooltip of the line action that copies the line's value. */
+  copyValue: 'Copy value',
+  /** Tooltip of a copy action right after a successful copy. */
+  copied: 'Copied',
   /** Accessible name of the tree while `label` is empty. */
   schema: 'Schema',
   /** Mark of a property the parent object requires. */

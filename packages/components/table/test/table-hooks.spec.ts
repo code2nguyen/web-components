@@ -14,6 +14,35 @@ type TableHost = HTMLElement & {
   renderedRange: { start: number; end: number; keys: string[]; rows: { line: number; key: string; row: unknown }[] }
 }
 
+test('a node from renderCell gets the width of its cell, so a 100% bar fills the column', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id"></c2-table>`)
+  const host = page.locator('c2-table')
+  await host.evaluate(async (element, rows) => {
+    const table = element as TableHost
+    table.columns = [
+      { field: 'name', header: 'Name', width: 200 },
+      {
+        field: 'status',
+        header: 'Status',
+        width: 200,
+        renderCell: () => {
+          const bar = document.createElement('span')
+          bar.className = 'bar'
+          bar.style.cssText = 'display:block;width:100%;height:4px;background:currentColor'
+          return bar
+        },
+      },
+    ]
+    table.rows = rows
+    await table.updateComplete
+  }, PEOPLE)
+  const widths = await host.evaluate((element) => {
+    const bar = element.shadowRoot!.querySelector('.bar') as HTMLElement
+    return { bar: bar.getBoundingClientRect().width, cell: bar.closest('[role="gridcell"]')!.getBoundingClientRect().width }
+  })
+  expect(widths.bar).toBeGreaterThan(widths.cell / 2)
+})
+
 test('a part on what renderCell returns is reachable as c2-table::part()', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id"></c2-table>`)
   const host = page.locator('c2-table')
@@ -269,4 +298,50 @@ test('an input rendered in a cell keeps its own arrow keys', async ({ page, rend
   await page.keyboard.press('ArrowRight')
   await expect(input).toBeFocused()
   expect(await input.evaluate((element) => (element as HTMLInputElement).selectionStart)).toBe(1)
+})
+
+test('renderCell assigned to a column child after upgrade logs no change-in-update warning', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('change-in-update')) warnings.push(message.text())
+  })
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" virtual="never">
+    <c2-table-column field="name" header="Name" width="200px" pinned="start"></c2-table-column>
+    <c2-table-column field="status" header="Status" width="200px"></c2-table-column>
+  </c2-table>`)
+  await page.locator('c2-table').evaluate(async (element, rows) => {
+    const table = element as TableHost
+    for (const column of element.querySelectorAll('c2-table-column[field="status"]')) {
+      ;(column as HTMLElement & { renderCell: unknown }).renderCell = ({ value }: { value: unknown }) => `[${String(value)}]`
+    }
+    table.rows = rows
+    await table.updateComplete
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  }, PEOPLE)
+  await expect(page.locator('c2-table')).toBeVisible()
+  expect(warnings).toEqual([])
+})
+
+test('an inline node from renderCell follows the column alignment', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
+    <c2-table-column field="name" header="Name" width="200px" align="center"></c2-table-column>
+  </c2-table>`)
+  const host = page.locator('c2-table')
+  const offset = await host.evaluate(async (element, rows) => {
+    const table = element as TableHost
+    ;(element.querySelector('c2-table-column') as HTMLElement & { renderCell: unknown }).renderCell = () => {
+      const mark = document.createElement('span')
+      mark.className = 'mark'
+      mark.textContent = '✓'
+      return mark
+    }
+    table.rows = rows
+    await table.updateComplete
+    const mark = element.shadowRoot!.querySelector('.mark') as HTMLElement
+    const cell = mark.closest('.cell') as HTMLElement
+    const a = mark.getBoundingClientRect()
+    const b = cell.getBoundingClientRect()
+    return Math.abs(a.left + a.width / 2 - (b.left + b.width / 2))
+  }, PEOPLE)
+  expect(offset).toBeLessThan(2)
 })

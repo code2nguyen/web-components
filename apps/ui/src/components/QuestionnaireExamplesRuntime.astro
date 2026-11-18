@@ -1,11 +1,33 @@
 ---
-/** Enhances questionnaire gallery examples whose renderer and answer APIs must be assigned as JavaScript properties. */
+/**
+ * Enhances questionnaire gallery examples whose renderer and answer APIs must be assigned as JavaScript properties, and
+ * registers the French of the "Question en français" card.
+ */
 ---
 
 <script>
   import { html } from 'lit'
   import type { Questionnaire, QuestionnaireAnswers, QuestionnaireItemRenderContext } from '@c2n/components/questionnaire'
   import '@c2n/components/questionnaire'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the "Question en français" card: the library ships its text in English only.
+  addTranslations({
+    fr: {
+      questionnaire: {
+        next: 'Suivant',
+        complete: 'Enregistrer',
+        previous: 'Précédent',
+        skip: 'Passer',
+        skipped: 'Question passée',
+        progress: 'Question {0} sur {1}',
+        summary: 'Récapitulatif',
+        empty: 'Aucune question.',
+        required: 'Choisissez une réponse pour continuer.',
+        requiredSkippable: 'Choisissez une réponse ou passez la question.',
+      },
+    },
+  })
 
   const initialized = new WeakSet<Questionnaire>()
 

@@ -293,3 +293,15 @@ test('without a locale it follows the nearest lang and redraws when it changes',
   await lang.evaluate((el) => el.setAttribute('lang', 'fr'))
   await expect(page.getByRole('button', { name: 'Next month', exact: true })).toBeVisible()
 })
+
+test('moves the today marker on at midnight, on the next render', async ({ page, scenario }) => {
+  await page.clock.install({ time: new Date(2026, 8, 15, 23, 59) })
+  await scenario()
+  const planner = page.locator('c2-month-planner')
+  await expect(planner.locator('.date.today')).toHaveText('15')
+  await page.clock.runFor(2 * 60_000)
+  // Any redraw after midnight reads the clock again: here, the month shown away and back.
+  await planner.getByRole('button', { name: 'Next month' }).click()
+  await planner.getByRole('button', { name: 'Previous month' }).click()
+  await expect(planner.locator('.date.today')).toHaveText('16')
+})

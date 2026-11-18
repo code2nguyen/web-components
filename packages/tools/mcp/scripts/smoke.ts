@@ -22,7 +22,7 @@ const client = new Client({ name: 'c2n-smoke', version: '0.0.0' })
 await client.connect(new StdioClientTransport({ command: process.execPath, args: [entry], cwd: packageRoot }))
 
 const { tools } = await client.listTools()
-assert(tools.length === 10, `expected 10 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
+assert(tools.length === 11, `expected 11 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
 
 const list = textOf(await client.callTool({ name: 'list_components', arguments: {} }))
 assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_components lacks c2-button')
@@ -58,6 +58,26 @@ const fromCard = textOf(
   await client.callTool({ name: 'generate_variant', arguments: { tag: 'c2-button', name: 'app-outline-button', example: 'variants--outline', format: 'css' } }),
 )
 assert(fromCard.includes('.app-outline-button') && fromCard.includes('--c2-theme--color-outline'), 'generate_variant should start from a gallery card')
+
+// Offline: the duplicate search is skipped, and the report says where to look instead.
+const issue = textOf(
+  await client.callTool({
+    name: 'report_issue',
+    arguments: {
+      component: 'table',
+      kind: 'bug',
+      title: 'renderCell node does not fill the cell',
+      building: 'A goals table',
+      expected: 'The bar fills the column',
+      actual: 'It is as wide as its label',
+      repro: '<c2-table rowz="[]"></c2-table>',
+      searchExisting: false,
+    },
+  }),
+)
+assert(issue.includes('## c2-table: renderCell node does not fill the cell'), 'report_issue should title the draft with the tag')
+assert(issue.includes('issues/new?template=component-feedback.yml'), 'report_issue should link the issue form')
+assert(issue.includes('Check the reproduction first'), 'report_issue should validate the reproduction')
 
 const presets = textOf(await client.callTool({ name: 'get_presets', arguments: { tag: 'c2-button' } }))
 assert(presets.includes('```css'), 'get_presets should return css blocks')

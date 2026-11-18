@@ -201,6 +201,8 @@ export class SearchField extends LitElement {
   private dirty = false
   private timer: ReturnType<typeof setTimeout> | undefined
   private lastSearch: string | undefined
+  /** Set while the field itself changes `value` (typing, clear, a recent pick), so `willUpdate` can tell an app's assignment apart. */
+  private valueFromField = false
   private unregisterShortcuts: (() => void) | undefined
 
   @query('.input') private readonly input?: HTMLInputElement | null
@@ -262,6 +264,7 @@ export class SearchField extends LitElement {
   clear() {
     if (!this.value) return
     this.cancelPending()
+    this.valueFromField = true // `value` is not empty here (checked above)
     this.value = ''
     this.dirty = true
     this.activeIndex = -1
@@ -389,6 +392,7 @@ export class SearchField extends LitElement {
   }
 
   private pick(item: string) {
+    this.valueFromField = item !== this.value
     this.value = item
     this.dirty = true
     this.dismissed = true
@@ -415,7 +419,9 @@ export class SearchField extends LitElement {
 
   private handleInput(event: Event) {
     this.dirty = true
-    this.value = (event.target as HTMLInputElement).value
+    const typed = (event.target as HTMLInputElement).value
+    this.valueFromField = typed !== this.value
+    this.value = typed
     this.dismissed = false
     this.activeIndex = -1
     redispatchEvent(this, event)
@@ -510,6 +516,13 @@ export class SearchField extends LitElement {
   protected override willUpdate(changed: PropertyValues) {
     if (changed.has('historyKey') && changed.get('historyKey') !== undefined) this.loadHistory(true)
     if (this.lastSearch === undefined) this.lastSearch = this.value
+    else if (changed.has('value') && !this.valueFromField) {
+      // The app set `value` (clearing the search from a filter chip): that is the current search now, so typing the
+      // previous query again is a change and fires `search`. A search still waiting on the debounce is dropped.
+      this.cancelPending()
+      this.lastSearch = this.value
+    }
+    this.valueFromField = false
   }
 
   protected override updated(changed: PropertyValues) {

@@ -1,6 +1,7 @@
 @use '@c2n/sass/pointer';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
+@use '@c2n/sass/visually-hidden';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-upload,
   $theme: (
@@ -168,4 +169,9 @@ input {
   color: css.cssVar(error--color);
   font-size: css.cssVar(error--font-size);
   line-height: 1.4;
+}
+
+// The live region a drop or paste is announced in: read by screen readers, never drawn.
+.announcer {
+  @include visually-hidden.visually-hidden;
 }

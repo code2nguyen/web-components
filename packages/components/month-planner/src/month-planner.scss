@@ -8,6 +8,7 @@
     border: 1px solid #e4e4e7,
     border-radius: 8px,
     padding: 12px,
+    contain-intrinsic-inline-size: 720px,
     font-family: inherit,
     font-size: 14px,
     title--font-weight: 600,
@@ -69,6 +70,17 @@
     event__dragging--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
     handle--width: 6px,
     handle--color: #ffffff,
+    band--color: color-mix(in srgb, currentColor 10%, transparent),
+    band-label--color: #52525b,
+    band-label--font-size: 11px,
+    band-label--height: 18px,
+    agenda--max-height: none,
+    agenda--gap: 12px,
+    agenda-day--background: #ffffff,
+    agenda-day--color: #71717a,
+    agenda-day--font-size: 12px,
+    agenda-day--font-weight: 600,
+    agenda-day--border: 1px solid #e4e4e7,
   )
 );
 
@@ -84,8 +96,9 @@
 .c2-month-planner {
   container: month-planner / inline-size;
   // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
-  // a table cell) gets this instead, capped by the space available.
-  contain-intrinsic-inline-size: 720px;
+  // a table cell) gets this instead, capped by the space available. It is also the planner's min-content width, so a
+  // content-sized wrapper in a flex row cannot shrink below it: the variable lets an app lower it.
+  contain-intrinsic-inline-size: css.cssVar(contain-intrinsic-inline-size);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -308,6 +321,56 @@
     outline: css.cssVar(focus--outline);
     outline-offset: css.cssVar(focus--outline-offset);
   }
+}
+
+// A week with background events: their titles take rows of their own between the day numbers and the bars.
+.week.has-bands {
+  --band-row: #{css.cssVar(band-label--height)};
+  --lane-row: #{css.cssVar(event--height)};
+
+  grid-template-rows: 26px var(--band-rows) var(--lane-rows,) 1fr;
+
+  // Above the shade: the day number, and the focus ring of an editable day.
+  .date,
+  .day-select:focus-visible {
+    z-index: 1;
+  }
+
+  .date {
+    position: relative;
+  }
+}
+
+// A background event: a shade behind the days it covers, under the bars. Positioned so it paints over the days' own
+// backgrounds, which an editable planner positions; presses go through to the day under it.
+.band {
+  position: relative;
+  z-index: 0;
+  grid-row: 1 / -1;
+  min-width: 0;
+  background: var(--event-color, #{css.cssVar(band--color)});
+  // The default shade is a tint of this colour.
+  color: css.cssVar(band-label--color);
+  pointer-events: none;
+
+  // Forced colours drop the shade: a line keeps the band's extent visible.
+  @media (forced-colors: active) {
+    border-top: 2px dashed CanvasText;
+  }
+}
+
+.band-title {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  min-width: 0;
+  padding: 0 6px;
+  color: var(--event-text-color, #{css.cssVar(band-label--color)});
+  font-size: css.cssVar(band-label--font-size);
+  line-height: css.cssVar(band-label--height);
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .title-button {
@@ -714,10 +777,77 @@
   padding: 8px 0;
 }
 
+// A background event listed under a day is information, not a control.
+.agenda-event.background {
+  cursor: default;
+
+  @include pointer.hover {
+    background: transparent;
+  }
+
+  .agenda-content {
+    display: contents;
+  }
+
+  .swatch {
+    background: var(--event-color, #{css.cssVar(band--color)});
+    box-shadow: inset 0 0 0 1px css.cssVar(band-label--color);
+    opacity: 0.6;
+  }
+}
+
+// `view="agenda"`: the month as a list of days. The list scrolls past `agenda--max-height`, each day's heading sticking
+// to its top while that day's events pass under it.
+.agenda-view {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(agenda--gap);
+  box-sizing: border-box;
+  max-height: css.cssVar(agenda--max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  // A focused item scrolled into view clears the sticky heading: its line, padding and margin, with room for a border.
+  scroll-padding-top: calc(#{css.cssVar(agenda-day--font-size)} * 1.5 + 24px);
+  // Room for the items' focus ring, which the scrolling box would otherwise clip.
+  margin: 0 -4px;
+  padding: 0 4px 4px;
+  list-style: none;
+}
+
+.agenda-day-heading {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 -4px 4px;
+  padding: 6px 12px;
+  border-bottom: css.cssVar(agenda-day--border);
+  background: css.cssVar(agenda-day--background);
+  color: css.cssVar(agenda-day--color);
+  font-size: css.cssVar(agenda-day--font-size);
+  font-weight: css.cssVar(agenda-day--font-weight);
+  line-height: 1.5;
+
+  .today & {
+    color: css.cssVar(day__today--color);
+  }
+}
+
+.empty {
+  padding: 24px 8px;
+  border-top: css.cssVar(day--border);
+  color: css.cssVar(weekday--color);
+  text-align: center;
+}
+
 // A planner too narrow for bars reads like a phone calendar: date numbers with event dots, no grid lines, and the
 // selected day's events listed under the month.
 @container month-planner (max-width: 479.98px) {
   .event,
+  .band,
+  .band-title,
   .date {
     display: none;
   }
@@ -755,7 +885,8 @@
     border: 0;
   }
 
-  .week {
+  .week,
+  .week.has-bands {
     min-height: 0;
     grid-template-rows: auto;
   }

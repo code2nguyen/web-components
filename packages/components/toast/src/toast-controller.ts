@@ -73,7 +73,11 @@ export class ToastController {
   }
 
   set maxVisible(value: number) {
-    this.limit = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 3
+    const limit = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 3
+    // Unchanged, it notifies no one: the region assigns it from `updated()`, and a notification there is an update
+    // scheduled after an update completed.
+    if (limit === this.limit) return
+    this.limit = limit
     this.sync()
   }
 

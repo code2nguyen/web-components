@@ -1897,7 +1897,7 @@ export class Table extends LitElement {
       >
         ${own && level.toggle ? level.toggle() : nothing} ${detail && row ? this.#renderDetailToggle(row, rowIndex, line, columnIndex) : nothing}
         <span
-          class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
+          class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0, 'cell-content--node': typeof Node !== 'undefined' && content instanceof Node })}
           part="cell-content cell-content-${fieldPart}"
           style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
           >${content}</span
@@ -3269,7 +3269,9 @@ export class Table extends LitElement {
     const height = first.getBoundingClientRect().height
     if (height > 0 && Math.abs(height - this.#measuredRowHeight) > 0.01) {
       this.#measuredRowHeight = height
-      this.requestUpdate()
+      // Only the virtual window (spacers, range) is drawn from the row height; an unvirtualized table renders the same
+      // markup, and a second update from `updated()` would only log Lit's change-in-update warning.
+      if (this.isVirtualized) this.requestUpdate()
     }
   }
 
@@ -3282,7 +3284,10 @@ export class Table extends LitElement {
       const width = Math.round(cell.getBoundingClientRect().width)
       if (width > 0 && this.#measuredWidths.get(key) !== width) {
         this.#measuredWidths.set(key, width)
-        if (cell.classList.contains('cell--pinned')) pinnedChanged = true
+        // Only a pinned column with another one further in on its side offsets anything: the edge column's own width
+        // is never read, and re-rendering for it would only log Lit's change-in-update warning.
+        const edge = cell.classList.contains('cell--pinned-edge-start') || cell.classList.contains('cell--pinned-edge-end')
+        if (cell.classList.contains('cell--pinned') && !edge) pinnedChanged = true
       }
     }
     if (pinnedChanged) this.requestUpdate()

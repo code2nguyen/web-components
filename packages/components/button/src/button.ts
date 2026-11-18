@@ -13,8 +13,9 @@ const elementReflection = !isServer && 'ariaControlsElements' in Element.prototy
  * Action button with optional leading/trailing icons, busy state and toggle-button semantics.
  *
  * Like a native `<button>`, it can be an invoker: `commandfor="<id>"` + `command` send the command to that element
- * (`show-modal`, `toggle-popover`, or a custom `--name` that arrives as a `command` event). `aria-expanded` and
- * `aria-controls` written on the host are handed to the inner button, so a disclosure trigger reports its state.
+ * (`show-modal`, `toggle-popover`, or a custom `--name` that arrives as a `command` event). `aria-expanded`,
+ * `aria-haspopup` and `aria-controls` written on the host are handed to the inner button, so a disclosure trigger reports
+ * its state and a button that opens a dialog or a menu says so.
  *
  * @tag c2-button
  *
@@ -90,8 +91,15 @@ export class Button extends LitElement {
   /** Pressed state of a toggle button (`aria-pressed="true"`); styled with the `container__selected--*` variables. */
   @property({ type: Boolean, reflect: true }) selected = false
 
-  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
+  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in multiple selection, and in single selection when an item cannot be a radio. */
   @property({ type: Boolean, reflect: true }) toggle = false
+
+  /**
+   * Declares the item a radio button of a single-selection `c2-button-group`: the `radio` role with `aria-checked`
+   * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
+   * keys the group answers to. Set by the group.
+   */
+  @property({ type: Boolean, attribute: false }) radio = false
 
   /** Native button behavior. `submit` submits the nearest form and `reset` restores it. */
   @property({ reflect: true }) type: 'button' | 'submit' | 'reset' = 'button'
@@ -119,6 +127,9 @@ export class Button extends LitElement {
 
   /** Expanded state of the content this button shows or hides (`"true"`/`"false"`), forwarded to the inner `<button>`. */
   @property({ attribute: 'aria-expanded' }) override ariaExpanded: string | null = null
+
+  /** Kind of popup this button opens (`"dialog"`, `"menu"`, `"listbox"`, …), forwarded to the inner `<button>`. */
+  @property({ attribute: 'aria-haspopup' }) override ariaHasPopup: string | null = null
 
   /**
    * Ids (space-separated) of the elements this button controls, looked up in the button's own document or shadow root
@@ -193,8 +204,11 @@ export class Button extends LitElement {
         ?disabled=${this.unavailable}
         aria-label=${this.ariaLabel || nothing}
         aria-busy=${this.running ? 'true' : nothing}
-        aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
-        aria-expanded=${this.ariaExpanded || nothing}
+        role=${this.radio ? 'radio' : nothing}
+        aria-checked=${this.radio ? String(this.selected) : nothing}
+        aria-pressed=${this.radio ? nothing : this.selected ? 'true' : this.toggle ? 'false' : nothing}
+        aria-expanded=${(!this.radio && this.ariaExpanded) || nothing}
+        aria-haspopup=${(!this.radio && this.ariaHasPopup) || nothing}
         command=${this.command || nothing}
         type="button"
         @click=${this.handleClick}

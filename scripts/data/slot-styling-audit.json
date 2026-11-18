@@ -3000,6 +3000,13 @@
     },
     {
       "tag": "c2-month-planner",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty-state region owns the agenda view's empty slot: its padding, border and alignment; the assigned message keeps its own styles."
+    },
+    {
+      "tag": "c2-month-planner",
       "slot": "heading",
       "decision": "part",
       "parts": ["heading"],
@@ -5088,6 +5095,13 @@
       "decision": "part",
       "parts": ["placeholder"],
       "reason": "The loading surface owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-image-annotator",
+      "slot": "detail",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The card beside the active shape (width, padding, border, radius, surface, shadow, offset) owns the detail slot's component-side presentation; the slotted card content is the app's."
     },
     {
       "tag": "c2-image-compare",

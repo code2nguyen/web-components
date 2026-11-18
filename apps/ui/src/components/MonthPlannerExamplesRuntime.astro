@@ -1,0 +1,56 @@
+---
+/**
+ * Plays the application's part in the month planner gallery: the "Month or agenda" card's button switches `view`, as an
+ * app's own control in the `actions` slot does, and the "Agenda items" card draws its events through
+ * `renderAgendaEvent`, a property that cannot be written in the fence.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Button } from '@c2n/components/button'
+  import type { MonthPlanner, MonthPlannerAgendaEventContext } from '@c2n/components/month-planner'
+  import '@c2n/components/month-planner'
+
+  const initialized = new WeakSet<MonthPlanner>()
+
+  /** Days from `from` to `to` (both `YYYY-MM-DD`), counted as calendar days. */
+  function daysBetween(from: string, to: string) {
+    return Math.round((Date.parse(`${to}T00:00Z`) - Date.parse(`${from}T00:00Z`)) / 86_400_000)
+  }
+
+  /** A change calendar's row: what kind of entry it is, its title, and how far into a multi-day window the day is. */
+  function renderChange({ event, date, start, end, background }: MonthPlannerAgendaEventContext) {
+    const length = daysBetween(start, end) + 1
+    return html`<span part="change-kind">${background ? 'Window' : 'Change'}</span>
+      <span part="change-title">${event.title}</span>
+      ${length > 1 ? html`<span part="change-progress">Day ${daysBetween(start, date) + 1} of ${length}</span>` : ''}`
+  }
+
+  async function setUp(planner: MonthPlanner) {
+    if (initialized.has(planner)) return
+    initialized.add(planner)
+    await customElements.whenDefined('c2-month-planner')
+    await planner.updateComplete
+    if (planner.dataset.monthPlannerExample === 'renderer') planner.renderAgendaEvent = renderChange
+  }
+
+  function setUpAll() {
+    document.querySelectorAll<MonthPlanner>('c2-month-planner[data-month-planner-example]').forEach((planner) => void setUp(planner))
+  }
+
+  // The view switch is the app's own toggle button in the `actions` slot, pressed while the agenda shows; one listener
+  // serves every card, however late it hydrates.
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest<Button>('[data-month-planner-action="view"]')
+    const planner = button?.closest<MonthPlanner>('c2-month-planner')
+    if (!button || !planner) return
+    planner.view = planner.view === 'agenda' ? 'month' : 'agenda'
+    button.selected = planner.view === 'agenda'
+  })
+
+  setUpAll()
+  customElements.whenDefined('c2-month-planner').then(setUpAll)
+  new MutationObserver(setUpAll).observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setUpAll)
+</script>
