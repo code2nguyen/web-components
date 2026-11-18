@@ -427,3 +427,24 @@ test('composed also works where getComposedRanges takes the shadow roots as argu
   await expect(toolbar(page)).toBeVisible()
   expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('brown fox')
 })
+
+test('inside a shadow root, the toolbar still leaves text selected in a field of its content to the field', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="app"></div>`)
+  await page.evaluate(() => {
+    const root = document.getElementById('app')!.attachShadow({ mode: 'open' })
+    const toolbar = document.createElement('c2-selection-toolbar')
+    toolbar.setAttribute('composed', '')
+    const input = document.createElement('input')
+    input.value = 'The quick brown fox'
+    const button = document.createElement('button')
+    button.slot = 'toolbar'
+    button.textContent = 'Ask AI'
+    toolbar.append(input, button)
+    root.append(toolbar)
+  })
+  const input = page.locator('#app input')
+  await input.focus()
+  await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(4, 15))
+  await page.waitForTimeout(500)
+  await expect(page.locator('#app c2-selection-toolbar').getByRole('toolbar')).toBeHidden()
+})

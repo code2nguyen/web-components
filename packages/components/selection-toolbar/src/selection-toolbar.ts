@@ -199,7 +199,7 @@ export class SelectionToolbar extends LitElement {
     const current = this.currentSelection()
     const owned = !!current && this.ownsRange(current.range, false)
     // Focus on a control in the content (an "Ask AI" button) keeps the caret it left, even where the engine dropped it.
-    const active = document.activeElement
+    const active = this.focusedInOwnTree()
     const last = !owned && active && this.contains(active) && !this.inToolbar(active) && this.lastRange?.startContainer.isConnected ? this.lastRange : null
     this.range = owned ? current.range : last
     this.text = owned ? current.text : (last?.toString() ?? '')
@@ -315,7 +315,7 @@ export class SelectionToolbar extends LitElement {
   /** The open shadow roots under an element of the content, nested ones included, in one walk. */
   private openShadowRoots(near: Node): ShadowRoot[] {
     const start = near instanceof Element ? near : near.parentElement
-    if (!start || (start !== this && this.inToolbar(start))) return []
+    if (!start) return []
     const toolbarElements = this.toolbarElements()
     const roots: ShadowRoot[] = []
     const walk = (root: Element | ShadowRoot) => {
@@ -354,15 +354,22 @@ export class SelectionToolbar extends LitElement {
     return !!own && own !== this && this.contains(own) && !this.inToolbar(own)
   }
 
+  /** The focused element of the tree this toolbar is in (the document, or the shadow root holding it). */
+  private focusedInOwnTree(): Element | null {
+    return (this.getRootNode() as Document | ShadowRoot).activeElement ?? null
+  }
+
   /** Whether the range lies inside the content (and not in the toolbar). */
   private ownsRange(range: Range, strict = true): boolean {
     // Text selected in a form field is the field's: some engines report it as a range around the field.
     // Focus may sit inside a component's shadow root (a c2-text-field), so walk down to the innermost element.
-    let active = document.activeElement
+    // Focus as seen from the toolbar's own tree, which may itself be a shadow root.
+    const focused = this.focusedInOwnTree()
+    let active = focused
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
     const field = (element: Element | null) =>
       !!element && (element.matches('input, textarea') || (element.constructor as { formAssociated?: boolean }).formAssociated === true)
-    if (document.activeElement && this.contains(document.activeElement) && (field(active) || (strict && field(document.activeElement)))) return false
+    if (focused && this.contains(focused) && (field(active) || (strict && field(focused)))) return false
     // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
     if (!this.composed) {
       const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
