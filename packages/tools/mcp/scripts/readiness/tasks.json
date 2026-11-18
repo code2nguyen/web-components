@@ -177,7 +177,12 @@
       "tags": ["c2-skeleton"]
     },
     { "id": "upload-progress", "requirement": "Show how much of the import has finished as a percentage bar", "expect": ["progress"], "tags": ["c2-progress"] },
-    { "id": "hint", "requirement": "Show a short hint when hovering an icon button", "expect": ["tooltip"], "tags": ["c2-tooltip"] },
+    {
+      "id": "hint",
+      "requirement": "Show a short hint when hovering an icon button",
+      "expect": ["tooltip", "icon-button"],
+      "tags": ["c2-tooltip", "c2-icon-button"]
+    },
     { "id": "copy", "requirement": "A button that copies the API key to the clipboard", "expect": ["copy-button"], "tags": ["c2-copy-button"] },
     { "id": "pager", "requirement": "Page through search results 20 at a time with numbered pages", "expect": ["pagination"], "tags": ["c2-pagination"] },
     {
