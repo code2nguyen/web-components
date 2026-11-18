@@ -175,6 +175,10 @@ export class ButtonGroup extends LitElement {
     this.observer?.disconnect()
     this.resizeObserver?.disconnect()
     if (this.indicatorFrame !== undefined) cancelAnimationFrame(this.indicatorFrame)
+    // Removed, the group no longer holds them: its items are toggle buttons again until it is connected and syncs.
+    for (const item of this.radioItemsSet) (item as HTMLElement & { radio: boolean }).radio = false
+    this.radioItemsSet.clear()
+    this.radioMode = false
   }
 
   /** The item elements, in order. */
@@ -316,10 +320,10 @@ export class ButtonGroup extends LitElement {
       this.internals.role = this.field.managed ? null : this.groupRole
       this.renderRoot?.querySelector('.field-group')?.setAttribute('role', this.groupRole)
     }
-    // An item moved out of the group, or every item once the group stops being single: a toggle button again. An
-    // item another group has taken is left to that group, whichever of the two syncs first.
+    // An item moved out of the group is a toggle button again; one another group has taken is left to that group,
+    // whichever of the two syncs first. Items still here are handled below.
     for (const item of this.radioItemsSet) {
-      if (radio && items.includes(item)) continue
+      if (items.includes(item)) continue
       this.radioItemsSet.delete(item)
       const owner = item.parentElement
       if (owner !== this && owner?.localName === 'c2-button-group') continue
@@ -341,8 +345,9 @@ export class ButtonGroup extends LitElement {
           })
         } else element.radio = true
       } else if ((item as HTMLElement & { radio?: boolean }).radio) {
-        // Arrived as a radio from a single-selection group.
+        // The group stopped being single, or the item arrived as a radio from a single-selection group.
         ;(item as HTMLElement & { radio: boolean }).radio = false
+        this.radioItemsSet.delete(item)
       }
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
