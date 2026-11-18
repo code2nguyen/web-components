@@ -165,13 +165,12 @@ grid; today is marked even on a day without events.
 ```
 
 ```html tag=MdxCodeBlock,label=Agenda in French
-<div lang="fr">
-  <c2-month-planner
-    view="agenda"
-    month="2026-09"
-    events='[{"id":"vacances","title":"Vacances à Lisbonne","start":"2026-09-10","end":"2026-09-12","color":"#0f766e"},{"id":"vol","title":"Vol TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"revue","title":"Revue trimestrielle","start":"2026-09-24"}]'
-  ></c2-month-planner>
-</div>
+<c2-month-planner
+  lang="fr"
+  view="agenda"
+  month="2026-09"
+  events='[{"id":"vacances","title":"Vacances à Lisbonne","start":"2026-09-10","end":"2026-09-12","color":"#0f766e"},{"id":"vol","title":"Vol TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"revue","title":"Revue trimestrielle","start":"2026-09-24"}]'
+></c2-month-planner>
 ```
 
 </GalleryGrid>
