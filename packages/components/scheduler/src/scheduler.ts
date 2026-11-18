@@ -819,8 +819,17 @@ export class Scheduler extends LitElement {
     } catch {
       // A synthetic pointer cannot be captured; the gesture still follows the element's own events.
     }
-    this.ownerDocument.addEventListener('keydown', this.handleGestureKey, true)
+    const doc = this.ownerDocument
+    doc.addEventListener('keydown', this.handleGestureKey, true)
+    // Followed from the document too: where pointer capture is not kept (WebKit, once the pointer leaves the element),
+    // the release lands outside the row and the drag would never end. The row's own handlers then find no gesture.
+    doc.addEventListener('pointermove', this.followPointer, true)
+    doc.addEventListener('pointerup', this.releasePointer, true)
+    doc.addEventListener('pointercancel', this.releasePointer, true)
   }
+
+  private readonly followPointer = (event: PointerEvent) => this.moveGesture(event)
+  private readonly releasePointer = (event: PointerEvent) => this.endPointer(event, event.type === 'pointerup')
 
   private moveGesture(event: PointerEvent) {
     const gesture = this.gesture
@@ -881,7 +890,11 @@ export class Scheduler extends LitElement {
   private endGesture() {
     this.gesture = undefined
     this.preview = undefined
-    this.ownerDocument?.removeEventListener('keydown', this.handleGestureKey, true)
+    const doc = this.ownerDocument
+    doc?.removeEventListener('keydown', this.handleGestureKey, true)
+    doc?.removeEventListener('pointermove', this.followPointer, true)
+    doc?.removeEventListener('pointerup', this.releasePointer, true)
+    doc?.removeEventListener('pointercancel', this.releasePointer, true)
   }
 
   /** Escape drops a drag in progress; the bar stays where it was. */
