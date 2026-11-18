@@ -116,15 +116,15 @@ test('Enter and Space on the zone open the file picker', async ({ page, renderSc
   await renderScenario('<c2-upload aria-label="Project files"></c2-upload>')
   const upload = page.locator('c2-upload')
   const zone = upload.locator('.dropzone')
-  await zone.focus()
-  await expect(zone).toBeFocused()
   for (const key of ['Enter', ' ']) {
+    // Focus again for each key: closing the file chooser may leave focus elsewhere in some engines.
+    await zone.focus()
+    await expect(zone).toBeFocused()
     const chooser = page.waitForEvent('filechooser')
     await page.keyboard.press(key)
     await (await chooser).setFiles({ name: `${key === ' ' ? 'space' : 'enter'}.pdf`, mimeType: 'application/pdf', buffer: Buffer.from('x') })
     await expect.poll(() => names(upload)).toEqual([`${key === ' ' ? 'space' : 'enter'}.pdf`])
     await upload.evaluate((element: Upload) => element.clear())
-    await zone.focus()
   }
 })
 
