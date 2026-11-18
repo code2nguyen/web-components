@@ -172,6 +172,12 @@ export class ImageUploader extends Upload {
     super.browse()
   }
 
+  /** A drop or a paste adds images: a Replace whose file dialog was cancelled must not swallow them. */
+  protected override addDroppedFiles(files: File[]): UploadItem[] {
+    if (this.multiple) this.replacing = undefined
+    return super.addDroppedFiles(files)
+  }
+
   /** Adds images; without `multiple`, a valid image replaces the one there. */
   override addFiles(files: Iterable<File>): UploadItem[] {
     const replacing = this.uploadItems.find((item) => item.id === this.replacing)
@@ -491,6 +497,7 @@ export class ImageUploader extends Upload {
           aria-invalid=${this.field.invalid ? 'true' : nothing}
           aria-describedby=${this.field.describedBy() || nothing}
           @click=${this.browse}
+          @paste=${this.dropZone.handlePaste}
         >
           <slot name="add-icon"
             ><svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
@@ -531,7 +538,7 @@ export class ImageUploader extends Upload {
           : nothing
       }
       <div part="hint" class="hint" ?hidden=${!this.slots.has('hint')}><slot name="hint" @slotchange=${this.slots.handleSlotChange}></slot></div>
-      ${this.renderErrors()}
+      ${this.renderErrors()} ${this.renderAnnouncer()}
       <span class="visually-hidden" role="status">${this.announcement}</span>
       ${this.field.renderDescription()}
     `

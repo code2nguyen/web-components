@@ -7,6 +7,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import type { AttachmentStatus } from '@c2n/attachment'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { DropZoneController } from '@c2n/core/controllers/drop-zone.js'
+import { matchesAccept } from '@c2n/core/file-accept.js'
 import { uploadMessages } from './messages.js'
 import styles from './upload.scss?inline'
 
@@ -153,14 +155,21 @@ export class Upload extends LitElement {
 
   private readonly internals = this.attachInternals()
   private readonly controllers = new Map<string, AbortController>()
-  private dragDepth = 0
   private customValidityMessage = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
   protected readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private readonly msg = new LocalizeController(this, uploadMessages)
+  /** Drag-over state, drops, pastes and the announcement of the files they add. The component checks the files itself. */
+  protected readonly dropZone = new DropZoneController(this, {
+    disabled: () => this.pickerDisabled,
+    paste: () => this.paste,
+    onActivate: () => this.browse(),
+    // Each refused file already has its message in the errors status region.
+    announce: 'added',
+    onFiles: ({ files }) => this.addDroppedFiles(files).map((item) => item.file),
+  })
   @state() protected uploadItems: UploadItem[] = []
   @state() protected rejections: UploadRejection[] = []
-  @state() protected dragging = false
   @state() private disabledByForm = false
 
   /** Accept several files in one browse or drop operation. */
@@ -180,6 +189,14 @@ export class Upload extends LitElement {
 
   /** Run `uploadHandler` immediately after files are accepted. */
   @property({ type: Boolean, attribute: 'auto-upload' }) autoUpload = true
+
+  /**
+   * Also takes files pasted (Ctrl+V, ⌘V) while the drop zone has focus, a keyboard path for a screenshot or a file
+   * copied in the file manager; on `c2-image-uploader`, while its add tile has focus. Files are checked as dropped
+   * ones are, and the number added is announced. Browsers that fire no `paste` on a focused region that is not
+   * editable (Safari) keep the file picker as that path. `c2-document-checklist` ignores it.
+   */
+  @property({ type: Boolean }) paste = false
 
   /** Disables browsing, dropping and attachment actions. */
   @property({ type: Boolean, reflect: true }) disabled = false
@@ -287,6 +304,11 @@ export class Upload extends LitElement {
   /** Opens the native file browser. */
   browse(): void {
     if (!this.pickerDisabled) this.input.click()
+  }
+
+  /** Adds the files of a drop or a paste. Companions that also add files another way (a tile being replaced) reset that here. */
+  protected addDroppedFiles(files: File[]): UploadItem[] {
+    return this.addFiles(files)
   }
 
   /** Validates and adds files supplied by the browser, drag-and-drop or application code. */
@@ -447,18 +469,7 @@ export class Upload extends LitElement {
   }
 
   protected accepts(file: File, accept = this.accept): boolean {
-    const rules = accept
-      .split(',')
-      .map((rule) => rule.trim().toLowerCase())
-      .filter(Boolean)
-    if (!rules.length) return true
-    const name = file.name.toLowerCase()
-    const type = file.type.toLowerCase()
-    return rules.some((rule) => {
-      if (rule.startsWith('.')) return name.endsWith(rule)
-      if (rule.endsWith('/*')) return type.startsWith(rule.slice(0, -1))
-      return type === rule
-    })
+    return matchesAccept(file, accept)
   }
 
   protected formatBytes(bytes: number): string {
@@ -482,37 +493,30 @@ export class Upload extends LitElement {
     event.stopPropagation()
   }
 
-  private handleKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Enter' && event.key !== ' ') return
-    event.preventDefault()
-    this.browse()
+  /** Whether files are being dragged over the drop zone. */
+  protected get dragging(): boolean {
+    return this.dropZone.over
   }
 
   protected handleDragEnter(event: DragEvent): void {
-    event.preventDefault()
-    if (this.pickerDisabled || !event.dataTransfer?.types.includes('Files')) return
-    this.dragDepth += 1
-    this.dragging = true
+    this.dropZone.handleDragEnter(event)
   }
 
   protected handleDragOver(event: DragEvent): void {
-    if (this.pickerDisabled) return
-    event.preventDefault()
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy'
+    this.dropZone.handleDragOver(event)
   }
 
   protected handleDragLeave(event: DragEvent): void {
-    event.preventDefault()
-    this.dragDepth = Math.max(0, this.dragDepth - 1)
-    if (this.dragDepth === 0) this.dragging = false
+    this.dropZone.handleDragLeave(event)
   }
 
   protected handleDrop(event: DragEvent): void {
-    event.preventDefault()
-    this.dragDepth = 0
-    this.dragging = false
-    if (this.pickerDisabled || !event.dataTransfer?.files) return
-    this.addFiles(event.dataTransfer.files)
+    this.dropZone.handleDrop(event)
+  }
+
+  /** The live region announcing the files a drop or paste added, present from the first render so it is heard. */
+  protected renderAnnouncer() {
+    return html`<span class="announcer" role="status">${this.dropZone.announcement}</span>`
   }
 
   private syncFormState(): void {
@@ -579,7 +583,8 @@ export class Upload extends LitElement {
         aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
         @click=${this.browse}
-        @keydown=${this.handleKeydown}
+        @keydown=${this.dropZone.handleKeydown}
+        @paste=${this.dropZone.handlePaste}
         @dragenter=${this.handleDragEnter}
         @dragover=${this.handleDragOver}
         @dragleave=${this.handleDragLeave}
@@ -647,7 +652,8 @@ export class Upload extends LitElement {
   }
 
   override render() {
-    return html`${this.renderInput()} ${this.renderPicker()} ${this.renderErrors()} ${this.renderQueue()} ${this.field.renderDescription()}`
+    return html`${this.renderInput()} ${this.renderPicker()} ${this.renderErrors()} ${this.renderQueue()} ${this.field.renderDescription()}
+    ${this.renderAnnouncer()}`
   }
 }
 
