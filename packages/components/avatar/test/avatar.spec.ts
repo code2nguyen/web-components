@@ -103,6 +103,8 @@ test('a read-only avatar has no file input for a screen reader to announce', asy
   await avatar.evaluate((el) => el.setAttribute('editable', ''))
   await expect(avatar.locator('input[type="file"]')).toHaveCount(1)
   await expect(page.getByRole('button', { name: 'Upload Ada Lovelace avatar' })).toBeVisible()
+  // The input stays out of the accessibility tree: the Upload button is the one way to it.
+  await expect(page.getByRole('button')).toHaveCount(1)
 })
 
 test('editable avatars have no detectable accessibility violations', async ({ page, renderScenario }) => {

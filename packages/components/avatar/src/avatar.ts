@@ -317,8 +317,9 @@ export class Avatar extends LitElement {
     const source = this.previewUrl ?? this.src
     const showImage = !!source && !this.imageFailed
     const subject = this.name ? `${this.name} avatar` : 'avatar'
-    // The file input exists only while the avatar is editable: a disabled one is still a "No file chosen" button in the
-    // accessibility tree, read out inside every list row and message that shows an avatar.
+    // The file input exists only while the avatar is editable, and is hidden from assistive technology even then: the
+    // Change/Upload button opens it, and an exposed one is a second "No file chosen" button in every row that shows an
+    // avatar.
     return html`
       ${
         this.editable
@@ -327,7 +328,7 @@ export class Avatar extends LitElement {
               tabindex="-1"
               .accept=${this.accept}
               ?disabled=${this.disabled}
-              aria-label=${`${subject} image file`}
+              aria-hidden="true"
               @input=${this.stopNativeInput}
               @change=${this.handleFileChange}
             />`

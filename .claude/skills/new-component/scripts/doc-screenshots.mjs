@@ -49,7 +49,15 @@ if ((await portTaken('127.0.0.1')) || (await portTaken('::1'))) {
 }
 
 // Its own process group, so stopping it also stops the node process npx starts for astro.
-const preview = spawn('npx', ['astro', 'preview', '--port', String(port)], { cwd: join(root, 'apps/ui'), stdio: 'ignore', detached: true })
+// Astro 7 moves `preview` to the background when it detects an AI coding agent: the command exits at once and the
+// server outlives this script. `ASTRO_PREVIEW_BACKGROUND` is the variable Astro sets for that background process, so
+// setting it keeps the server in the foreground, where this script can wait on it and stop it.
+const preview = spawn('npx', ['astro', 'preview', '--port', String(port)], {
+  cwd: join(root, 'apps/ui'),
+  stdio: 'ignore',
+  detached: true,
+  env: { ...process.env, ASTRO_PREVIEW_BACKGROUND: '1' },
+})
 let previewExited = false
 preview.once('exit', () => (previewExited = true))
 function stop() {
