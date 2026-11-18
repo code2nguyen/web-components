@@ -448,3 +448,36 @@ test('inside a shadow root, the toolbar still leaves text selected in a field of
   await page.waitForTimeout(500)
   await expect(page.locator('#app c2-selection-toolbar').getByRole('toolbar')).toBeHidden()
 })
+
+test('a toolbar inside a shadow root opens for its own content without composed, and its arrow keys and Escape work', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="app" style="padding-top: 120px"></div>`)
+  await page.evaluate(() => {
+    const root = document.getElementById('app')!.attachShadow({ mode: 'open' })
+    const toolbar = document.createElement('c2-selection-toolbar')
+    const paragraph = document.createElement('p')
+    paragraph.id = 'text'
+    paragraph.textContent = 'The quick brown fox jumps over the lazy dog.'
+    toolbar.append(paragraph)
+    for (const name of ['One', 'Two', 'Three']) {
+      const button = document.createElement('button')
+      button.slot = 'toolbar'
+      button.textContent = name
+      toolbar.append(button)
+    }
+    root.append(toolbar)
+  })
+  await page.evaluate(() => {
+    const node = document.getElementById('app')!.shadowRoot!.getElementById('text')!.firstChild!
+    document.getSelection()!.setBaseAndExtent(node, 4, node, 9)
+  })
+  const bar = page.locator('#app c2-selection-toolbar').getByRole('toolbar')
+  await expect(bar).toBeVisible()
+  await page.keyboard.press('Alt+F10')
+  await expect(page.getByRole('button', { name: 'One' })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('button', { name: 'Two' })).toBeFocused()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('button', { name: 'One' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(bar).toBeHidden()
+})

@@ -211,7 +211,7 @@ export class SelectionToolbar extends LitElement {
 
   /** Remembers where focus is, to give it back when the panel hides, unless it is already in the panel. */
   private keepFocus(): void {
-    const active = document.activeElement
+    const active = this.focusedInOwnTree()
     if (!this.inToolbar(active)) this.returnFocus = active instanceof HTMLElement ? active : null
   }
 
@@ -234,8 +234,7 @@ export class SelectionToolbar extends LitElement {
 
   /** Whether a node is in one of the floating panel's slots. */
   private inToolbar(node: Node | null): boolean {
-    const slots = [...(this.renderRoot?.querySelectorAll<HTMLSlotElement>('.toolbar slot') ?? [])]
-    return !!node && slots.some((slot) => slot.assignedElements().some((element) => element.contains(node)))
+    return !!node && [...this.toolbarElements()].some((element) => element.contains(node))
   }
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -258,7 +257,7 @@ export class SelectionToolbar extends LitElement {
     if (current && this.ownsRange(current.range, false)) this.lastRange = current.range
     // A collapsed selection, or one that left the content, hides at once; a growing one waits to settle.
     if (!current || current.range.collapsed || !this.ownsRange(current.range)) {
-      if (this.open && !this.inToolbar(document.activeElement)) this.hide()
+      if (this.open && !this.inToolbar(this.focusedInOwnTree())) this.hide()
       return
     }
     this.settleTimer = setTimeout(() => this.refresh(), KEYBOARD_SETTLE)
@@ -274,7 +273,7 @@ export class SelectionToolbar extends LitElement {
       this.keepFocus()
       first.focus()
     } else if (event.key === 'Escape') {
-      const focusInside = this.inToolbar(document.activeElement)
+      const focusInside = this.inToolbar(this.focusedInOwnTree())
       this.hide()
       if (focusInside) {
         event.preventDefault()
@@ -288,20 +287,30 @@ export class SelectionToolbar extends LitElement {
    * The document's selection as a range and its text. With `composed`, a selection inside an open shadow root of the
    * content is read through `getComposedRanges`, since `getRangeAt` reports it as a caret at the host.
    */
-  private currentSelection(): { range: Range; text: string } | null {
+  private currentSelection(): { range: Range; readonly text: string } | null {
     const selection = document.getSelection()
     if (!selection || selection.rangeCount === 0) return null
-    const plain = { range: selection.getRangeAt(0).cloneRange(), text: selection.toString() }
-    // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret in the host's parent,
-    // which `getComposedRanges` resolves. Anything else is read as is.
-    if (!this.composed || !plain.range.collapsed || typeof selection.getComposedRanges !== 'function') return plain
-    // WebKit's caret sits right before the host: anything else (a caret in text, every other caret move) is read as is.
-    const host = plain.range.startContainer.childNodes[plain.range.startOffset]
-    if (!(host instanceof Element) || !host.shadowRoot) return plain
-    // The host is in the content, or, for a toolbar that is itself in a shadow root, it is a host around the toolbar.
+    // The text is read only once the selection is known to be the toolbar's: serializing it costs a layout walk.
+    const plain = {
+      range: selection.getRangeAt(0).cloneRange(),
+      get text() {
+        return selection.toString()
+      },
+    }
+    // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret next to the host, which
+    // `getComposedRanges` resolves. Anything else is read as is.
+    if (!plain.range.collapsed || typeof selection.getComposedRanges !== 'function') return plain
+    const { startContainer, startOffset } = plain.range
+    const nodes = startContainer.childNodes
+    // The caret sits right before or right after the host: anything else (a caret in text, every other caret move) is
+    // read as is.
+    const host = [nodes[startOffset], nodes[startOffset - 1]].find((node): node is Element => node instanceof Element && !!node.shadowRoot)
+    if (!host) return plain
+    // The host is in the content (only with `composed`), or, for a toolbar that is itself in a shadow root, it is a host
+    // around the toolbar, whose own content always counts.
     const around = !this.inContent(host)
-    if (around && !composedContains(host, this)) return plain
-    const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : host)]
+    if (around ? !composedContains(host, this) : !this.composed) return plain
+    const shadowRoots = [...this.enclosingShadowRoots(), ...(this.composed ? this.openShadowRoots(around ? this : host) : [])]
     if (!shadowRoots.length) return plain
     const composed = composedRange(selection, shadowRoots)
     // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
@@ -440,7 +449,7 @@ export class SelectionToolbar extends LitElement {
     this.prompting = false
     if (!this.open) return
     // Focus in the panel would be lost once it hides: give it back to where it was.
-    if (this.inToolbar(document.activeElement)) this.returnFocus?.focus()
+    if (this.inToolbar(this.focusedInOwnTree())) this.returnFocus?.focus()
     this.open = false
     this.range = null
     this.text = ''
@@ -482,7 +491,8 @@ export class SelectionToolbar extends LitElement {
     // A prompt holds text fields: the arrows and Home/End are theirs, and Tab moves between its controls.
     if (this.prompting) return
     const controls = this.controls()
-    const at = controls.findIndex((control) => control === document.activeElement || control.contains(document.activeElement))
+    const focused = this.focusedInOwnTree()
+    const at = controls.findIndex((control) => control === focused || control.contains(focused))
     let target: HTMLElement | undefined
     switch (event.key) {
       case 'ArrowRight':
