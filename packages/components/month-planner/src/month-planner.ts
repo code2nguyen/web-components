@@ -593,7 +593,9 @@ export class MonthPlanner extends LitElement {
   private get shownDay(): string {
     const month = toMonth(this.visibleMonth)
     if (this.selectedDay.startsWith(month)) return this.selectedDay
-    const today = this.today
+    // The real clock, not the deferred marker: the compact layout opens on today on the server already, so the list
+    // under the grid does not swap days after hydration.
+    const today = toIso(new Date())
     return today.startsWith(month) ? today : toIso(this.visibleMonth)
   }
 
