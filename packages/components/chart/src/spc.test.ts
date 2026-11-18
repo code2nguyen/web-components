@@ -45,6 +45,15 @@ test('rule 2: the ninth point in a row on one side, and every one after it', () 
   assert.deepEqual(flagged([...above.slice(0, 5), -0.5, ...above.slice(0, 9)], 2), [14])
 })
 
+test('rule 2: the run length is an option, eight for the Western Electric rules', () => {
+  const above = Array.from({ length: 8 }, () => 0.5)
+  assert.deepEqual(flagged(above, 2), [])
+  assert.deepEqual(
+    runRules(above, unit, { rules: [2], sameSideRun: 8 }).map((violation) => violation.index),
+    [7],
+  )
+})
+
 test('rule 3: six points steadily increasing or decreasing', () => {
   assert.deepEqual(flagged([0, 0.1, 0.2, 0.3, 0.4, 0.5], 3), [5])
   assert.deepEqual(flagged([0.5, 0.4, 0.3, 0.2, 0.1, 0, -0.1], 3), [5, 6])
@@ -72,6 +81,14 @@ test('rules 7 and 8: fifteen in a row within 1 sigma, eight in a row beyond it o
   assert.deepEqual(flagged(hugging, 7), [14])
   const avoiding = Array.from({ length: 8 }, (_item, index) => (index % 2 ? 1.5 : -1.5))
   assert.deepEqual(flagged(avoiding, 8), [7])
+  // Eight beyond 1 sigma on one side is a shift, not a mixture.
+  assert.deepEqual(
+    flagged(
+      Array.from({ length: 8 }, () => 1.5),
+      8,
+    ),
+    [],
+  )
 })
 
 test('rules: indices are those of the input, gaps continue a run, and a point lists every rule it breaks', () => {

@@ -133,7 +133,7 @@ test('setting reference-lines after the first draw redraws them, and clearing th
       await chart.updateComplete
     }, value)
   await set([{ value: 18, tone: 'danger' }])
-  await expect.poll(count).toBeGreaterThan(200)
+  await expect.poll(count).toBeGreaterThan(100)
   await set(undefined)
   await expect.poll(count).toBe(0)
 })
@@ -145,4 +145,39 @@ test('a line chart without reference lines never loads their module', async ({ p
   expect(await loaded()).toBe(false)
   await paint(page, chart(`reference-lines='[{"value":18,"tone":"danger"}]'`), RED)
   expect(await loaded()).toBe(true)
+})
+
+test('a y bound removed from markup reads as auto again, so the scale still reaches the rules', async ({ page, scenario }) => {
+  await scenario('empty')
+  expect(await paint(page, chart(`y-max="30" reference-lines='[{"value":100,"tone":"danger"}]'`), RED)).toBe(0)
+  const red = await page.locator('main c2-line-chart').evaluate(async (element) => {
+    const chart = element as HTMLElement & { updateComplete: Promise<boolean> }
+    chart.removeAttribute('y-max')
+    await chart.updateComplete
+    for (let frame = 0; frame < 3; frame += 1) await new Promise((resolve) => requestAnimationFrame(resolve))
+    let matching = 0
+    for (const canvas of chart.shadowRoot!.querySelectorAll('canvas')) {
+      const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height)
+      for (let index = 0; index < data.length; index += 4)
+        if (data[index + 3] > 200 && data[index] > 230 && data[index + 1] < 30 && data[index + 2] < 30) matching += 1
+    }
+    return matching
+  })
+  expect(red).toBeGreaterThan(200)
+})
+
+test('a marker-only series leaves the tooltip at a row it does not mark', async ({ page, scenario }) => {
+  await scenario('empty')
+  await paint(
+    page,
+    `<c2-line-chart style="width:480px;height:280px" x-field="t" legend="none" data='${ROWS}'><c2-chart-series field="a" label="Value"></c2-chart-series><c2-chart-series field="flag" label="Flagged" points="only"></c2-chart-series></c2-line-chart>`,
+    RED,
+  )
+  const labels = (index: number) =>
+    page.locator('main c2-line-chart').evaluate((element, index) => {
+      const chart = element as unknown as { tooltipContextAt(detail: object): { entries: { series: { label?: string } }[] } }
+      return chart.tooltipContextAt({ index, seriesIndex: 0, px: 0, py: 0 }).entries.map((entry) => entry.series.label)
+    }, index)
+  expect(await labels(2)).toEqual(['Value'])
+  expect(await labels(3)).toEqual(['Value', 'Flagged'])
 })

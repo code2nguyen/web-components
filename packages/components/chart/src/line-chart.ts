@@ -6,7 +6,7 @@ import { UplotChartBase, type UplotSeriesStyle } from './uplot-chart-base.js'
 import { linePaths } from './engines/uplot-paths.js'
 import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
-import type { ChartReferenceLine, ChartSeriesConfig } from './chart-types.js'
+import type { ChartReferenceLine, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
 import './chart-series.js'
 import type { ChartKindMessage } from './messages.js'
 
@@ -96,9 +96,19 @@ export class LineChart extends UplotChartBase {
     if (referenceLines)
       return referenceLines.decorateReferenceLines(options, context, this, (expression, fallback) => this.themeController.resolveColor(expression, fallback))
     // First use on the page: draw without them, then rebuild once the module is in.
-    referenceLinesLoad ??= import('./reference-lines.js').then((module) => (referenceLines = module))
-    void referenceLinesLoad.then(() => this.requestUpdate('referenceLines', null))
+    referenceLinesLoad ??= import('./reference-lines.js').then(
+      (module) => (referenceLines = module),
+      // A failed load (a chunk gone after a deploy) is retried by the next chart that asks, not cached for the page.
+      () => (referenceLinesLoad = undefined),
+    )
+    void referenceLinesLoad.then(() => referenceLines && this.requestUpdate('referenceLines', null))
     return options
+  }
+
+  /** A marker-only series has nothing to say at a row it does not mark, so it leaves the tooltip there. */
+  protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
+    const context = super.tooltipContextAt(detail)
+    return { ...context, entries: context.entries.filter((entry) => entry.value !== null || (entry.series.points ?? this.points) !== 'only') }
   }
 
   protected override accessibleSummary(resolved?: ChartSeriesConfig[]): string {

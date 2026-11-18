@@ -3,20 +3,13 @@
  * bands drawn on uPlot's canvas, the y range that reaches them, and the text that reads them out. A line chart without
  * reference lines never downloads this module.
  */
-import { defineMessages, formatMessage, localeOf } from '@c2n/core/localize.js'
+import { formatMessage, localeOf } from '@c2n/core/localize.js'
 import type uPlot from 'uplot'
 import type { Options } from 'uplot'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { ChartReferenceLine } from './chart-types.js'
-
-const en = {
-  withReferenceLines: (summary: string, lines: string) => `${summary}. Reference lines: ${lines}`,
-  referenceLine: (label: string, value: string) => `${label} ${value}`,
-  referenceBand: (label: string, from: string, to: string) => `${label} ${from} to ${to}`,
-}
-
-/** How the line chart reads out its reference lines. An app adds its languages with `addTranslations`. */
-export const referenceLineMessages = defineMessages('chart-reference-lines', en)
+import { referenceLineMessages } from './reference-line-messages.js'
+import { loadedUplot } from './engines/uplot-loader.js'
 
 const TONES = ['neutral', 'info', 'success', 'warning', 'danger'] as const
 const TONE_DEFAULTS: Record<(typeof TONES)[number], string> = {
@@ -40,8 +33,8 @@ interface ResolvedReferenceLine {
 /** The line chart, as this module reads it: its lines, its fixed bounds and its locale. */
 export interface ReferenceLineHost extends HTMLElement {
   referenceLines?: ChartReferenceLine[]
-  yMin?: number
-  yMax?: number
+  yMin?: number | null
+  yMax?: number | null
   locale?: string
 }
 
@@ -101,7 +94,9 @@ export function decorateReferenceLines(
     fontFamily: context.theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : context.theme.fontFamily,
     halo: context.theme.surface,
   }
-  const { yMin: fixedMin, yMax: fixedMax } = host
+  // A bound removed from markup reads as null: auto, like undefined.
+  const fixedMin = host.yMin ?? undefined
+  const fixedMax = host.yMax ?? undefined
   const scales = options.scales ?? {}
   return {
     ...options,
@@ -124,9 +119,13 @@ export function decorateReferenceLines(
             reach(line.low)
             reach(line.high)
           }
-          const pad = (high - low) * 0.05 || Math.abs(high) * 0.1 || 1
-          // Twice the room on top, where a label above the highest rule needs a line of text.
-          return [fixedMin ?? low - pad, fixedMax ?? high + pad * 2]
+          if (!Number.isFinite(low) || !Number.isFinite(high)) return [fixedMin ?? 0, fixedMax ?? 1]
+          // uPlot's own rounding, as its auto range does, with the room on top a label above the highest rule needs.
+          const [niceLow, niceHigh] = loadedUplot()?.rangeNum(low, high, {
+            min: { pad: 0.1, soft: 0, mode: 3 },
+            max: { pad: 0.15, soft: 0, mode: 3 },
+          }) ?? [low, high]
+          return [fixedMin ?? niceLow ?? low, fixedMax ?? niceHigh ?? high]
         },
       },
     },

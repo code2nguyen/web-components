@@ -178,6 +178,7 @@ export type {
   ChartInput,
   ChartPointEventDetail,
   ChartRangeEventDetail,
+  ChartReferenceLine,
   ChartRow,
   ChartSeriesConfig,
   ChartSeriesToggleEventDetail,

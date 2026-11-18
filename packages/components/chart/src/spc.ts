@@ -4,7 +4,7 @@
  * changes, never on the chart's draw path:
  *
  * - {@link controlLimits} computes the centre line, sigma and the control limits;
- * - {@link runRules} evaluates the Nelson rules (the Western Electric rules are rules 1, 5 and 6 of them);
+ * - {@link runRules} evaluates the Nelson rules, or the Western Electric ones with `sameSideRun: 8`;
  * - {@link spcReferenceLines} turns the limits into the chart's `reference-lines` (limits, sigma zones, spec limits);
  * - {@link markViolations} copies the flagged values into a field of their own, drawn by a `points="only"` series.
  *
@@ -65,7 +65,7 @@ export const SPC_RULES: Readonly<Record<SpcRule, string>> = {
   5: 'Two of three points beyond 2 sigma on one side',
   6: 'Four of five points beyond 1 sigma on one side',
   7: 'Fifteen points in a row within 1 sigma',
-  8: 'Eight points in a row beyond 1 sigma on either side',
+  8: 'Eight points in a row beyond 1 sigma, on both sides of the centre line',
 }
 
 /** One flagged point: its index in the values handed to {@link runRules}, and every rule it breaks. */
@@ -75,8 +75,13 @@ export interface SpcViolation {
 }
 
 export interface RunRulesOptions {
-  /** The rules to evaluate. Defaults to all eight. `[1, 5, 6]` and a run of eight for rule 2 are the Western Electric set. */
+  /** The rules to evaluate. Defaults to all eight. */
   rules?: readonly SpcRule[]
+  /**
+   * How many points in a row on one side of the centre line rule 2 flags. Defaults to 9 (Nelson); the Western Electric
+   * rules are `{ rules: [1, 2, 5, 6], sameSideRun: 8 }`.
+   */
+  sameSideRun?: number
 }
 
 /** d2 for a moving range of two consecutive points. */
@@ -125,6 +130,7 @@ export function controlLimits(values: Values, options: ControlLimitsOptions = {}
 export function runRules(values: Values, limits: SpcLimits | null, options: RunRulesOptions = {}): SpcViolation[] {
   if (!limits) return []
   const rules = new Set<SpcRule>(options.rules ?? [1, 2, 3, 4, 5, 6, 7, 8])
+  const sameSideRun = Math.max(1, options.sameSideRun ?? 9)
   const points = finite(values)
   const { center, sigma, ucl, lcl } = limits
   const zoned = sigma > 0
@@ -157,7 +163,7 @@ export function runRules(values: Values, limits: SpcLimits | null, options: RunR
     const currentSide = Math.sign(value - center)
     sameSide = currentSide !== 0 && currentSide === side ? sameSide + 1 : currentSide === 0 ? 0 : 1
     side = currentSide
-    if (rules.has(2) && sameSide >= 9) flag(position, 2)
+    if (rules.has(2) && sameSide >= sameSideRun) flag(position, 2)
 
     const delta = position > 0 ? Math.sign(value - points[position - 1].value) : 0
     trend = delta !== 0 && delta === direction ? trend + 1 : delta === 0 ? 0 : 1
@@ -178,7 +184,8 @@ export function runRules(values: Values, limits: SpcLimits | null, options: RunR
     inside = Math.abs(score) < 1 ? inside + 1 : 0
     if (rules.has(7) && inside >= 15) flag(position, 7)
     outside = Math.abs(score) > 1 ? outside + 1 : 0
-    if (rules.has(8) && outside >= 8) flag(position, 8)
+    // Eight in a row avoiding zone C and crossing the centre line: a mixture, not a shift (which rules 2 and 6 catch).
+    if (rules.has(8) && outside >= 8 && beyond(position, 8, 1, 1) > 0 && beyond(position, 8, 1, -1) > 0) flag(position, 8)
   })
 
   return [...found.entries()].sort(([a], [b]) => a - b).map(([index, set]) => ({ index, rules: [...set].sort((a, b) => a - b) }))
