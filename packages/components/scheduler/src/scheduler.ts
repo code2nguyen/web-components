@@ -464,13 +464,13 @@ export class Scheduler extends LitElement {
   protected override updated(changed: PropertyValues<this>) {
     const key = this.scrollKey
     if (this.scrolledFor !== key) {
-      // Every update tries again (cheap); a retry already waiting for this key is kept, and watches the grid as drawn now.
-      const waiting = this.scrollRetry && this.scrollRetryKey === key
-      if (this.scrollToTime()) {
+      // A retry already waiting for this key is kept and watches the grid as drawn now: it scrolls once a target gets
+      // its size (a newly observed element reports at once), so this update forces no layout read of its own.
+      if (this.scrollRetry && this.scrollRetryKey === key) this.observeScrollTargets()
+      else if (this.scrollToTime()) {
         this.scrolledFor = key
         this.stopScrollRetry()
-      } else if (waiting) this.observeScrollTargets()
-      else {
+      } else {
         this.stopScrollRetry()
         this.retryScroll(key)
       }
