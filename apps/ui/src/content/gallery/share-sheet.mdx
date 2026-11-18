@@ -43,3 +43,16 @@ Looks for `c2-share-sheet`. Press a card's button to open its sheet. The tiles a
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-button onclick="document.getElementById('share-card-1').show()">Share</c2-button>
+<c2-share-sheet id="share-card-1" heading="Trip to Lisbon" url="https://example.com/trips/lisbon">
+  <span slot="icon-linkedin" aria-hidden="true">in</span>
+</c2-share-sheet>
+```
+
+</GalleryGrid>

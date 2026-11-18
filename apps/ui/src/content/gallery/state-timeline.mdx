@@ -101,3 +101,20 @@ sets the density.
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .state-timeline-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="state-timeline-states">
+  <c2-state-timeline aria-label="Service health" start="2026-10-08T09:00:00Z" end="2026-10-08T12:00:00Z">
+    <div slot="empty">No state changes in this window.</div>
+  </c2-state-timeline>
+</div>
+```
+
+</GalleryGrid>

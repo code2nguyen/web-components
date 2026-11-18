@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { SunburstChart } from '@c2n/components/chart/sunburst-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -63,6 +64,51 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <c2-sunburst-chart class="sunburst-compact" label-field="name" value-prefix="$" value-suffix="M" levels="2" labels="none" legend="bottom" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
   <c2-chart-series field="budget" label="Budget"></c2-chart-series>
 </c2-sunburst-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .sunburst-slots { width: 100%; }
+  .sunburst-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-sunburst-chart class="sunburst-slots" label-field="name" value-prefix="$" value-suffix="M" data='[{"name":"Engineering","children":[{"name":"Platform","children":[{"name":"Compute","budget":1.1},{"name":"Storage","budget":0.6},{"name":"Network","budget":0.4}]},{"name":"Product","children":[{"name":"Web","budget":0.9},{"name":"Mobile","budget":0.8},{"name":"Design","budget":0.3}]},{"name":"Data","children":[{"name":"Warehouse","budget":0.6},{"name":"ML","budget":0.4}]}]},{"name":"Sales","children":[{"name":"Field","children":[{"name":"Enterprise","budget":1.0},{"name":"Mid-market","budget":0.6}]},{"name":"Inside","children":[{"name":"Renewals","budget":0.5},{"name":"New logos","budget":0.4}]}]},{"name":"Marketing","children":[{"name":"Brand","budget":0.9},{"name":"Demand","children":[{"name":"Search","budget":0.6},{"name":"Social","budget":0.4}]},{"name":"Events","budget":0.3}]},{"name":"Operations","children":[{"name":"Finance","budget":0.8},{"name":"People","budget":0.7},{"name":"Legal","budget":0.4}]}]'>
+  <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+  <div slot="legend" class="sunburst-slots__legend">
+    <strong>Budget</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-sunburst-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .sunburst-states { display: grid; gap: 12px; width: 100%; }
+  .sunburst-states c2-sunburst-chart { --c2-chart--height: 140px; }
+</style>
+<div class="sunburst-states">
+  <c2-sunburst-chart label-field="name" value-prefix="$" value-suffix="M" loading>
+    <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-sunburst-chart>
+  <c2-sunburst-chart label-field="name" value-prefix="$" value-suffix="M">
+    <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-sunburst-chart>
+  <c2-sunburst-chart label-field="name" value-prefix="$" value-suffix="M" error="Request failed">
+    <c2-chart-series field="budget" label="Budget"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-sunburst-chart>
+</div>
 ```
 
 </GalleryGrid>

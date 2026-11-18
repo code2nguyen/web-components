@@ -213,3 +213,16 @@ editor.querySelector('c2-button-group')!.addEventListener('change', (event) => {
   editor.pricing = event.detail.value === 'volume' ? 'volume' : 'graduated'
 })
 ```
+
+## Slots
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<c2-tier-editor label="Pricing tiers" tiers='[{"upTo":1000,"value":0.05},{"upTo":5000,"value":0.04},{"upTo":null,"value":0.03}]'>
+  <svg slot="add-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  <svg slot="remove-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+</c2-tier-editor>
+```
+
+</GalleryGrid>

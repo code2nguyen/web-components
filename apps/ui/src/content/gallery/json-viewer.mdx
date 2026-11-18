@@ -76,3 +76,20 @@ variables (`__row--height`, `__row--indent`) do most of the work. Open any card 
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .json-viewer-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="json-viewer-states">
+  <c2-json-viewer>
+    <div slot="empty">No response yet. Send the request to inspect it.</div>
+  </c2-json-viewer>
+</div>
+```
+
+</GalleryGrid>

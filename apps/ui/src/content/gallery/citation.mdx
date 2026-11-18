@@ -70,3 +70,15 @@ import { Citation } from '@c2n/components/citation'
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="320">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<p>Static HTML first, then hydration<c2-citation index="1" href="https://lit.dev/docs/ssr/overview/" source-title="Server-side rendering – Lit" snippet="Lit's SSR renders components to static HTML in Node.">
+  <div slot="preview"><strong>Annual report 2025</strong><p>Revenue grew 8% year over year.</p></div>
+</c2-citation>.</p>
+```
+
+</GalleryGrid>

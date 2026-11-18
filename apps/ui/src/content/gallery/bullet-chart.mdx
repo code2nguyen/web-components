@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { BulletChart } from '@c2n/components/chart/bullet-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="420">
 
@@ -146,6 +147,71 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 >
   <c2-chart-series field="actual" label="Actual"></c2-chart-series>
 </c2-bullet-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .bullet-slots { width: 100%; }
+  .bullet-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-bullet-chart class="bullet-slots"
+  label-field="kpi"
+  description-field="unit"
+  target-field="target"
+  bands-field="bands"
+  data='[{"kpi":"Revenue","unit":"US$, thousands","actual":270,"target":250,"bands":[150,225,300]},{"kpi":"Profit","unit":"% of revenue","actual":22.5,"target":27,"bands":[20,25,30]},{"kpi":"New customers","unit":"count","actual":1650,"target":2100,"bands":[1400,2000,2500]},{"kpi":"Satisfaction","unit":"out of 5","actual":4.6,"target":4.2,"bands":[3.5,4.25,5]}]'>
+  <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+  <div slot="legend" class="bullet-slots__legend">
+    <strong>Actual</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-bullet-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .bullet-states { display: grid; gap: 12px; width: 100%; }
+  .bullet-states c2-bullet-chart { --c2-chart--height: 140px; }
+</style>
+<div class="bullet-states">
+  <c2-bullet-chart
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+    loading>
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-bullet-chart>
+  <c2-bullet-chart
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+   >
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-bullet-chart>
+  <c2-bullet-chart
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+    error="Request failed">
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-bullet-chart>
+</div>
 ```
 
 </GalleryGrid>

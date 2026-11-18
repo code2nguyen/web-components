@@ -61,3 +61,31 @@ import { TextField } from '@c2n/components/text-field'
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Rich label and error
+<style>
+  .email-field { width: 280px; }
+</style>
+<c2-form-field class="email-field" label="Email" hint="We'll send a confirmation link.">
+  <c2-text-field name="email" type="email" required placeholder="you@example.com"></c2-text-field>
+  <span slot="label">Email <small>(work)</small></span>
+  <span slot="error" data-match="valueMissing">Enter your work email.</span>
+</c2-form-field>
+```
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .email-field { width: 280px; }
+</style>
+<c2-form-field class="email-field" label="Email" hint="We'll send a confirmation link.">
+  <c2-text-field name="email" type="email" required placeholder="you@example.com"></c2-text-field>
+  <a slot="label-action" href="#">Forgot password?</a>
+  <span slot="hint">Use the address you signed up with.</span>
+</c2-form-field>
+```
+
+</GalleryGrid>

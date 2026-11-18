@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { VideoTile } from '@c2n/components/video-tile'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -90,6 +91,24 @@ Looks for `c2-video-tile`. The speaking outline, the name pill and the camera-of
   }
 </style>
 <c2-video-tile class="vt-violet" name="Mia Chen" hand-raised speaking level="0.6"></c2-video-tile>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .vt-default {
+    width: 100%;
+  }
+</style>
+<c2-video-tile class="vt-default" name="Ana Ruiz" speaking level="0.6">
+  <span slot="badge">Host</span>
+  <c2-button slot="actions">Pin</c2-button>
+</c2-video-tile>
 ```
 
 </GalleryGrid>

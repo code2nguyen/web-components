@@ -65,3 +65,17 @@ Looks for `c2-image-compare`. The divider, the handle and the corner chips each 
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-image-compare>
+  <img slot="before" src="/web-components/images/compare-before.svg" alt="Living room before the makeover" width="800" height="500" />
+  <img slot="after" src="/web-components/images/compare-after.svg" alt="Living room after the makeover" width="800" height="500" />
+  <span slot="handle" aria-hidden="true">⇆</span>
+</c2-image-compare>
+```
+
+</GalleryGrid>

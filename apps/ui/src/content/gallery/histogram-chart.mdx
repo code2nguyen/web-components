@@ -10,6 +10,7 @@ import HistogramExamplesRuntime from '../../components/HistogramExamplesRuntime.
 
 import { HistogramChart } from '@c2n/components/chart/histogram-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -162,3 +163,48 @@ chart.dataSource = {
   subscribe: (push) => onRequest((ms) => push(Date.now(), [ms])),
 }
 ```
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .histogram-slots { width: 100%; }
+  .histogram-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-histogram-chart class="histogram-slots" data="[302,326,275,319,351,323,386,251,304,261,257,290,312,323,328,423,347,212,311,266,272,372,288,193,317,284,235,249,266,299,277,304,401,256,256,286,360,261,379,228,243,297,253,266,325,340,306,285,374,322,287,367,250,309,336,299,268,319,270,267,244,372,270,364,321,286,337,315,307,224,304,349,327,355,382,323,409,217,287,161,345,305,393,280,189,370,226,230,290,335,272,310,197,395,296,307,332,309,311,249,294,324,357,293,305,319,331,311,286,272,362,316,301,491,349,347,308,244,363,295,303,356,356,313,301,415,332,244,341,308,302,338,313,410,311,314,364,269,356,297,365,253,323,212,276,301,327,409,401,226,258,369,324,225,327,238,253,231,286,424,826,459,875,842,582,455,725,466,865,582,457,472,571,551,615,765,480,450,757,452]">
+  <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+  <div slot="legend" class="histogram-slots__legend">
+    <strong>Latency (ms)</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-histogram-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .histogram-states { display: grid; gap: 12px; width: 100%; }
+  .histogram-states c2-histogram-chart { --c2-chart--height: 140px; }
+</style>
+<div class="histogram-states">
+  <c2-histogram-chart loading>
+    <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-histogram-chart>
+  <c2-histogram-chart>
+    <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-histogram-chart>
+  <c2-histogram-chart error="Request failed">
+    <c2-chart-series field="value" label="Latency (ms)"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-histogram-chart>
+</div>
+```
+
+</GalleryGrid>

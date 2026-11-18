@@ -69,3 +69,32 @@ The symbol, picker and input variables do most of the work: `__input--text-align
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .default {
+    width: 220px;
+  }
+</style>
+<c2-money-input class="default" aria-label="Amount" locale="en-US" value="125000">
+  <svg slot="chevron-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+  <span slot="supporting-text">Charged when the order ships.</span>
+</c2-money-input>
+```
+
+```html tag=MdxCodeBlock,label=Custom currency symbol
+<style>
+  .default {
+    width: 220px;
+  }
+</style>
+<c2-money-input class="default" aria-label="Amount" locale="en-US" value="125000">
+  <span slot="symbol">€</span>
+</c2-money-input>
+```
+
+</GalleryGrid>

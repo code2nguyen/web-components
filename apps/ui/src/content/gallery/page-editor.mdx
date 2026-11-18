@@ -89,3 +89,23 @@ console.log(orders.length) // 42
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .doc-page { width: 420px; max-width: 100%; }
+</style>
+<c2-page-editor class="doc-page" label="Meeting notes" placeholder="Start writing…" value="## Thursday sync
+
+We agreed to ship **behind a flag** and to <mark data-color=&quot;yellow&quot;>revisit pricing</mark>.
+
+- [x] Draft the announcement
+- [ ] Book the demo room">
+  <strong slot="header">Onboarding guide</strong>
+</c2-page-editor>
+```
+
+</GalleryGrid>

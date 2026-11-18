@@ -12,6 +12,7 @@ import { ScatterChart } from '@c2n/components/chart/scatter-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
 import { ChartLegend } from '@c2n/components/chart/chart-legend'
 import { ChartTooltip } from '@c2n/components/chart/chart-tooltip'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <ChartFinancialGallery />
@@ -50,6 +51,59 @@ The default card uses illustrative usage data (weekly active hours against 90-da
 <c2-scatter-chart x-field="revenue" symbol-size="13" data='[{"year":2021,"revenue":365.817,"income":108.949},{"year":2022,"revenue":394.328,"income":119.437},{"year":2023,"revenue":383.285,"income":114.301},{"year":2024,"revenue":391.035,"income":123.216},{"year":2025,"revenue":416.161,"income":133.05}]'>
   <c2-chart-series field="income" label="Operating income"></c2-chart-series>
 </c2-scatter-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .scatter-slots { width: 100%; }
+  .scatter-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-scatter-chart class="scatter-slots" x-field="hours" data='[{"hours":2.5,"starter":33.2},{"hours":4.2,"starter":32.6},{"hours":4.9,"starter":35.9},{"hours":5.7,"starter":34.9},{"hours":7.4,"starter":42.8},{"hours":7.9,"starter":32.1},{"hours":9.1,"starter":44.6},{"hours":10.3,"growth":45.9},{"hours":11.0,"starter":28.8},{"hours":11.5,"growth":51.9},{"hours":12.5,"starter":51.1},{"hours":13.3,"starter":43.9},{"hours":13.7,"growth":62.3},{"hours":13.9,"starter":30.7},{"hours":15.3,"growth":58.7},{"hours":15.4,"starter":33.1},{"hours":16.7,"growth":60.2},{"hours":18.2,"growth":52.2},{"hours":20.5,"growth":70.6},{"hours":21.8,"growth":64.8},{"hours":22.5,"growth":54.1},{"hours":23.4,"scale":81.1},{"hours":23.5,"scale":67.5},{"hours":23.9,"growth":51.4},{"hours":26.1,"growth":60.7},{"hours":26.4,"scale":74.9},{"hours":27.8,"growth":61.5},{"hours":28.0,"scale":74.4},{"hours":28.1,"scale":79.4},{"hours":30.7,"scale":73.3},{"hours":31.1,"scale":75.0},{"hours":33.9,"scale":85.9},{"hours":34.2,"scale":75.1},{"hours":35.7,"scale":72.0},{"hours":38.2,"scale":76.2},{"hours":39.3,"scale":82.7}]'>
+  <c2-chart-series field="starter" label="Starter"></c2-chart-series>
+  <c2-chart-series field="growth" label="Growth"></c2-chart-series>
+  <c2-chart-series field="scale" label="Scale"></c2-chart-series>
+  <div slot="legend" class="scatter-slots__legend">
+    <strong>Starter · Growth · Scale</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-scatter-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .scatter-states { display: grid; gap: 12px; width: 100%; }
+  .scatter-states c2-scatter-chart { --c2-chart--height: 140px; }
+</style>
+<div class="scatter-states">
+  <c2-scatter-chart x-field="hours" loading>
+    <c2-chart-series field="starter" label="Starter"></c2-chart-series>
+    <c2-chart-series field="growth" label="Growth"></c2-chart-series>
+    <c2-chart-series field="scale" label="Scale"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-scatter-chart>
+  <c2-scatter-chart x-field="hours">
+    <c2-chart-series field="starter" label="Starter"></c2-chart-series>
+    <c2-chart-series field="growth" label="Growth"></c2-chart-series>
+    <c2-chart-series field="scale" label="Scale"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-scatter-chart>
+  <c2-scatter-chart x-field="hours" error="Request failed">
+    <c2-chart-series field="starter" label="Starter"></c2-chart-series>
+    <c2-chart-series field="growth" label="Growth"></c2-chart-series>
+    <c2-chart-series field="scale" label="Scale"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-scatter-chart>
+</div>
 ```
 
 </GalleryGrid>

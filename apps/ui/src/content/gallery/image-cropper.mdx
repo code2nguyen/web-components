@@ -59,3 +59,20 @@ Croppers for the usual jobs. `--c2-image-cropper__overlay--color` and the handle
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Before content
+<style>
+  .image-cropper-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="image-cropper-states">
+  <c2-image-cropper>
+    <div slot="placeholder">Drop a photo here, or paste one.</div>
+  </c2-image-cropper>
+</div>
+```
+
+</GalleryGrid>

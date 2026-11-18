@@ -90,3 +90,32 @@ import { Switch } from '@c2n/components/switch'
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .notify-group { width: 320px; }
+</style>
+<c2-fieldset class="notify-group" legend="Notifications" description="Choose what we email you about.">
+  <c2-checkbox name="notify" value="mentions" checked>Mentions and replies</c2-checkbox>
+  <c2-checkbox name="notify" value="digest">Weekly digest</c2-checkbox>
+  <span slot="legend">Shipping address <small>(required)</small></span>
+  <span slot="description">We deliver Monday to Friday.</span>
+</c2-fieldset>
+```
+
+```html tag=MdxCodeBlock,label=Rich error
+<style>
+  .notify-group { width: 320px; }
+</style>
+<c2-fieldset class="notify-group" legend="Notifications" description="Choose what we email you about.">
+  <c2-checkbox name="notify" value="mentions" checked>Mentions and replies</c2-checkbox>
+  <c2-checkbox name="notify" value="digest">Weekly digest</c2-checkbox>
+  <span slot="error">Choose at least one <strong>delivery day</strong>.</span>
+</c2-fieldset>
+```
+
+</GalleryGrid>

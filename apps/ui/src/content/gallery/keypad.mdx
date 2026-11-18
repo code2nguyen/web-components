@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Keypad } from '@c2n/components/keypad'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -55,6 +56,18 @@ Looks for `c2-keypad`. The keys' shape and fill, and the size of the display, se
   }
 </style>
 <c2-keypad class="keypad-accent" label="Tip" currency="USD" decimals="0" value="15"></c2-keypad>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-keypad label="Amount to send" value="42.5">
+  <c2-button slot="start">Face ID</c2-button>
+</c2-keypad>
 ```
 
 </GalleryGrid>

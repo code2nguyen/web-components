@@ -128,3 +128,23 @@ the board to reach every column. Give the board a `renderItem` for richer card c
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-kanban
+  client:only="lit"
+  editable
+  aria-label="Tasks"
+  items='[{"id":"1","column":"todo","title":"Write the release notes"},{"id":"2","column":"todo","title":"Update the screenshots"},{"id":"3","column":"done","title":"Fix the build"}]'
+>
+  <c2-kanban-column column-id="todo" label="To do">
+    <strong slot="header">Backlog · triage weekly</strong>
+  </c2-kanban-column>
+  <c2-kanban-column column-id="done" label="Done"></c2-kanban-column>
+</c2-kanban>
+```
+
+</GalleryGrid>
