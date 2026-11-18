@@ -140,6 +140,9 @@ export function scorePassword(value: string): PasswordStrength {
   return 0
 }
 
+/** A requirement counts when it has a label of its own or is a built-in one; a custom one without a label is skipped. */
+const counts = (requirement: PasswordRequirement, builtIn: unknown) => !!(requirement.label ?? builtIn)
+
 /**
  * A password input: the sign-in and sign-up field of Stripe, GitHub and Carbon. A toggle at the end of the field shows
  * the password in clear text and hides it again (`revealed`, `reveal-change`; `hide-toggle` removes it). For a new
@@ -420,19 +423,21 @@ export class PasswordField extends LitElement {
   private requirementsOf(value: string): PasswordRequirementState[] {
     const minLength = this.requirementMinLength
     return this.requirementEntries().flatMap(({ requirement, builtIn, id }) => {
-      const label = requirement.label ?? (builtIn && this.msg.t(builtIn.message, minLength))
-      return label ? [{ id, label, met: this.requirementMet(requirement, builtIn, value, minLength) }] : []
+      if (!counts(requirement, builtIn)) return []
+      // A translation left empty still shows the requirement, under its id: it is checked either way.
+      const label = requirement.label || (builtIn && this.msg.t(builtIn.message, minLength)) || id
+      return [{ id, label, met: this.requirementMet(requirement, builtIn, value, minLength) }]
     })
   }
 
   /**
    * Whether `value` meets every requirement, without building their labels: the strength and the validity read it on
-   * every key, and the generator for every candidate. A requirement counts when it has a label to show, as above.
+   * every key, and the generator for every candidate. The same requirements count as in the checklist above.
    */
   private meetsRequirements(value: string): boolean {
     const minLength = this.requirementMinLength
     return this.requirementEntries().every(
-      ({ requirement, builtIn }) => !(requirement.label ?? builtIn) || this.requirementMet(requirement, builtIn, value, minLength),
+      ({ requirement, builtIn }) => !counts(requirement, builtIn) || this.requirementMet(requirement, builtIn, value, minLength),
     )
   }
 
