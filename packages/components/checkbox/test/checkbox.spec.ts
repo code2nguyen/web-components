@@ -339,3 +339,62 @@ test('an option added inside a wrapper after the group is full cannot pass max, 
   await page.evaluate(() => document.querySelector('#outside')!.append(document.querySelector('c2-checkbox[value="b"]')!))
   await expect(page.getByRole('checkbox', { name: 'B' })).toBeEnabled()
 })
+
+test('default marks are drawn the first time their state is reached, and kept after', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const marks = () =>
+    host.evaluate((el) => ({
+      check: el.shadowRoot!.querySelectorAll('slot[name="checkmark"] svg').length,
+      mixed: el.shadowRoot!.querySelectorAll('slot[name="mixedmark"] svg').length,
+    }))
+  // A box that was never checked carries no SVG: most boxes on a page.
+  expect(await marks()).toEqual({ check: 0, mixed: 0 })
+  await page.getByRole('checkbox').check()
+  expect(await marks()).toEqual({ check: 1, mixed: 0 })
+  // Unchecking keeps the mark, so it can fade out instead of vanishing.
+  await page.getByRole('checkbox').uncheck()
+  expect(await marks()).toEqual({ check: 1, mixed: 0 })
+  await props(host, { indeterminate: true })
+  expect(await marks()).toEqual({ check: 1, mixed: 1 })
+})
+
+test('a slotted mark replaces the default one, drawn or not', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Star"><span slot="checkmark" id="star">★</span></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const state = () =>
+    host.evaluate((el) => {
+      const slot = el.shadowRoot!.querySelector<HTMLSlotElement>('slot[name="checkmark"]')!
+      return { assigned: slot.assignedElements().map((node) => node.id), defaults: slot.querySelectorAll('svg').length }
+    })
+  expect(await state()).toEqual({ assigned: ['star'], defaults: 0 })
+  await page.getByRole('checkbox').check()
+  // The default is drawn as fallback content of the slot, so the author's mark still wins.
+  expect((await state()).assigned).toEqual(['star'])
+  await expect(host.locator('#star')).toBeVisible()
+})
+
+test('the hover layer fills the touch target behind the box, and stays behind it once disabled', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept" checked style="--c2-checkbox__state-layer__hover__selected--color: rgb(255, 0, 0)"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const layer = () =>
+    host.evaluate((el) => {
+      const target = el.shadowRoot!.querySelector('.c2-checkbox')!
+      const style = getComputedStyle(target, '::before')
+      return {
+        color: style.backgroundColor,
+        opacity: Number(style.opacity),
+        width: style.width,
+        zIndex: style.zIndex,
+        // The layer's stacking context: the touch target, which positions it and sits above nothing else.
+        context: getComputedStyle(target).zIndex,
+      }
+    })
+  expect(await layer()).toMatchObject({ opacity: 0, width: '32px', zIndex: '-1', context: '0' })
+  await page.getByRole('checkbox').hover()
+  await expect.poll(async () => (await layer()).color).toBe('rgb(255, 0, 0)')
+  await expect.poll(async () => (await layer()).opacity).toBeGreaterThan(0)
+  // Disabled while hovered: the layer leaves, and the box above it is never covered.
+  await props(host, { disabled: true })
+  await expect.poll(async () => (await layer()).opacity).toBe(0)
+})

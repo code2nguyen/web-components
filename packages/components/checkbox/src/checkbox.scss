@@ -212,7 +212,6 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   border-style: solid;
   background-color: css.cssVar(container--background-color);
   pointer-events: none;
-  will-change: background-color, border-color;
 
   transition: animation.standard(background-color), animation.standard(border-color);
 
@@ -274,8 +273,13 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   --c2-mat-icon--font-size: #{css.cssVar(uncheckmark--size)};
 }
 
-// Hover layer behind the box. Transparent unless a `state-layer__hover__*--color` is set.
-.c2-checkbox-state-layer {
+// Hover layer behind the box. Transparent unless a `state-layer__hover__*--color` is set. A pseudo-element of the
+// touch target rather than an element of its own: one fewer node per checkbox, the same size (the whole touch target)
+// and the same place in the stacking order (`.c2-checkbox` is its stacking context, so the box always paints on top,
+// even while a disabled box's opacity makes the box a stacking context of its own). No `will-change`: on `opacity` it
+// gave every checkbox its own compositing layer.
+.c2-checkbox::before {
+  content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -288,7 +292,6 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   background-color: transparent;
   opacity: 0;
   pointer-events: none;
-  will-change: background-color, opacity;
   transition: animation.standard(background-color), animation.standard(opacity);
 }
 
@@ -387,11 +390,11 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
 
 // Hover: quiet by default. The selected fill can shift (`container__selected__hover--background-color`) and the
 // layer behind the box can tint (`state-layer__hover__*--color`); neither is set out of the box.
-#{$_unselected-enabled-selector}:hover ~ {
-  .c2-checkbox-state-layer {
-    background-color: css.cssVar(state-layer__hover__unselected--color);
-    opacity: variables.$state-layer-hover-opacity;
-  }
+// The layer is the touch target's own pseudo-element, which the input's sibling selectors cannot reach: `:has()` reads
+// the input from its parent (evaluated on hover only).
+.c2-checkbox:has(> #{$_unselected-enabled-selector}:hover)::before {
+  background-color: css.cssVar(state-layer__hover__unselected--color);
+  opacity: variables.$state-layer-hover-opacity;
 }
 
 #{$_indeterminate-enabled-selector}:hover ~,
@@ -399,10 +402,12 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   .c2-checkbox__background {
     background-color: css.cssVar(container__selected__hover--background-color, container__selected--background-color);
   }
-  .c2-checkbox-state-layer {
-    background-color: css.cssVar(state-layer__hover__selected--color);
-    opacity: variables.$state-layer-hover-opacity;
-  }
+}
+
+.c2-checkbox:has(> #{$_indeterminate-enabled-selector}:hover)::before,
+.c2-checkbox:has(> #{$_selected-enabled-selector}:hover)::before {
+  background-color: css.cssVar(state-layer__hover__selected--color);
+  opacity: variables.$state-layer-hover-opacity;
 }
 
 // Focus: keyboard focus draws a ring around the box itself.

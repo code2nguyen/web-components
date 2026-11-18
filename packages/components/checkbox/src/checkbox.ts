@@ -21,6 +21,10 @@ export interface Checkbox {
   removeEventListener: TypedRemoveEventListener<Checkbox, CheckboxEventMap>
 }
 
+/** The default marks, drawn inside their slots when no mark of the author's is slotted. */
+const CHECKMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></svg>`
+const MIXEDMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H5v-2h14v2z" /></svg>`
+
 /**
  * A checkbox with native `<input type="checkbox">` behaviour. The visible box sits centred in a square touch target
  * (`state-layer--size`) that doubles as the hover layer; that layer is transparent unless a
@@ -153,6 +157,11 @@ export class Checkbox extends LitElement {
   @property({ type: Boolean, attribute: false }) groupDisabled = false
 
   private readonly slotPresence = new SlotPresenceController(this, ['', 'description', 'trailing'])
+  /**
+   * Which default marks have been needed yet. Each is drawn the first time its state is reached and kept after, so a
+   * box that was never checked carries no SVG (most boxes on a page), while unchecking still fades the mark out.
+   */
+  private readonly drawnMarks = { check: false, mixed: false }
   /** Description handed down by an enclosing `c2-form-field`; the checkbox keeps its own text as its name. */
   private readonly field = new FieldContextConsumer(this, { kind: 'check', selfLabelled: true })
 
@@ -247,24 +256,15 @@ export class Checkbox extends LitElement {
             <!-- Each mark slot sits in its own positioned wrapper, so any slotted content (an inline SVG, a c2-feather-*
                icon, a c2-mat-icon, or a framework wrapper around them) is centred, sized and faded as one unit. -->
             <span class="c2-checkbox__mark c2-checkbox__mark--check" part="checkmark">
-              <slot name="checkmark">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                </svg>
-              </slot>
+              <slot name="checkmark">${this.drawnMarks.check ? CHECKMARK : nothing}</slot>
             </span>
             <span class="c2-checkbox__mark c2-checkbox__mark--mixed" part="mixedmark">
-              <slot name="mixedmark">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M19 13H5v-2h14v2z" />
-                </svg>
-              </slot>
+              <slot name="mixedmark">${this.drawnMarks.mixed ? MIXEDMARK : nothing}</slot>
             </span>
             <span class="c2-checkbox__mark c2-checkbox__mark--uncheck" part="uncheckmark">
               <slot name="uncheckmark"></slot>
             </span>
           </div>
-          <div class="c2-checkbox-state-layer"></div>
         </div>
         <span class="c2-checkbox-text" ?hidden=${!hasLabel && !hasDescription}>
           <span class="c2-checkbox-label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
@@ -282,6 +282,13 @@ export class Checkbox extends LitElement {
 
   override focus(options?: FocusOptions | undefined): void {
     this.formElement?.focus(options)
+  }
+
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties)
+    // Before rendering, so the mark is in the template that shows the new state.
+    if (changedProperties.has('checked')) this.drawnMarks.check ||= this.checked
+    if (changedProperties.has('indeterminate')) this.drawnMarks.mixed ||= this.indeterminate
   }
 
   protected override update(changedProperties: PropertyValues) {
