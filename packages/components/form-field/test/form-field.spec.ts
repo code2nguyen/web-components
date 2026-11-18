@@ -230,7 +230,7 @@ test('is accessible with a hint, an error and a warning', async ({ page, renderS
   await accessible(page)
 })
 
-test('looks through a display: contents wrapper and a style element for its control', async ({ page, renderScenario }) => {
+test('looks through an Astro island and a style element for its control', async ({ page, renderScenario }) => {
   // The shape an Astro island takes in the docs: a `<style>` before the first island, then the wrapper.
   const warnings: string[] = []
   page.on('console', (message) => {
@@ -245,8 +245,8 @@ test('looks through a display: contents wrapper and a style element for its cont
   expect(warnings.filter((text) => text.includes('field protocol'))).toEqual([])
 })
 
-test('claims a control that upgrades late inside a wrapper', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-form-field label="Late"><div style="display: contents"><late-wrapped-field></late-wrapped-field></div></c2-form-field>`)
+test('claims a control that upgrades late inside an island', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Late"><astro-island><late-wrapped-field></late-wrapped-field></astro-island></c2-form-field>`)
   await page.evaluate(async () => {
     const TextField = customElements.get('c2-text-field')!
     customElements.define('late-wrapped-field', class extends TextField {})
@@ -266,18 +266,18 @@ test('a control laid out with display: contents is the control, not a wrapper', 
   )
 })
 
-test('inside a wrapper, the control is the first control, past decoration and slotted elements', async ({ page, renderScenario }) => {
+test('inside an island, the control is the first control, past decoration and slotted elements', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-form-field label="Price" hint="Before tax"><div style="display: contents"><span>$</span><span slot="label-action">Help</span><c2-text-field></c2-text-field></div></c2-form-field>`,
+    `<c2-form-field label="Price" hint="Before tax"><astro-island><span>$</span><span slot="label-action">Help</span><c2-text-field></c2-text-field></astro-island></c2-form-field>`,
   )
   const input = page.getByRole('textbox', { name: 'Price' })
   await expect(input).toBeVisible()
   await expect(input).toHaveAccessibleDescription('Before tax')
 })
 
-test('a second consumer inside a wrapper stays contained in the field', async ({ page, renderScenario }) => {
+test('a second consumer inside an island stays contained in the field', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<div id="outer"><c2-form-field label="First"><div style="display: contents"><c2-text-field></c2-text-field></div><div style="display: contents" id="second"></div></c2-form-field></div>`,
+    `<div id="outer"><c2-form-field label="First"><astro-island><c2-text-field></c2-text-field></astro-island><astro-island id="second"></astro-island></c2-form-field></div>`,
   )
   const escaped = await page.evaluate(async () => {
     let count = 0
@@ -295,9 +295,9 @@ test('a control group upgrading after its children is still the control', async 
   expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('late-group')
 })
 
-test('inside a wrapper, a button or an undefined icon is decoration, and a control rendered later is adopted', async ({ page, renderScenario }) => {
+test('inside an island, a button or an undefined icon is decoration, and a control rendered later is adopted', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-form-field label="Price" hint="Before tax"><div style="display: contents" id="island"><c2-button>?</c2-button><icon-not-defined></icon-not-defined></div></c2-form-field>`,
+    `<c2-form-field label="Price" hint="Before tax"><astro-island id="island"><c2-button>?</c2-button><icon-not-defined></icon-not-defined></astro-island></c2-form-field>`,
   )
   // The island renders its native input after the field connected.
   await page.evaluate(() => {
@@ -308,9 +308,9 @@ test('inside a wrapper, a button or an undefined icon is decoration, and a contr
   await expect.poll(() => page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('input')
 })
 
-test('a wrapper is watched for good: its native control is adopted past a later sibling, swapped and released', async ({ page, renderScenario }) => {
+test('an island is watched for good: its native control is adopted past a later sibling, swapped and released', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-form-field label="Code"><div style="display: contents" id="island"></div><p>Six digits.</p></c2-form-field><c2-form-field label="Vendor"><div style="display: contents"><vendor-control></vendor-control></div></c2-form-field>`,
+    `<c2-form-field label="Code"><astro-island id="island"></astro-island><p>Six digits.</p></c2-form-field><c2-form-field label="Vendor"><astro-island><vendor-control></vendor-control></astro-island></c2-form-field>`,
   )
   const control = (index: number) =>
     page
@@ -332,7 +332,7 @@ test('a wrapper is watched for good: its native control is adopted past a later 
     document.getElementById('first')!.replaceWith(input)
   })
   await expect.poll(() => control(0)).toBe('input#second')
-  // A form-associated element of another library is a control inside a wrapper too.
+  // A form-associated element of another library is a control inside an island too.
   await page.evaluate(() => {
     customElements.define(
       'vendor-control',
@@ -347,7 +347,7 @@ test('a wrapper is watched for good: its native control is adopted past a later 
 
 test('a display: contents control with no control inside it is still the control, and a hidden input is not one', async ({ page, renderScenario }) => {
   await renderScenario(
-    `<c2-form-field label="Name"><contents-input></contents-input></c2-form-field><c2-form-field label="Email"><div style="display: contents"><input type="hidden" name="token" /><input type="email" id="email" /></div></c2-form-field>`,
+    `<c2-form-field label="Name"><contents-input></contents-input></c2-form-field><c2-form-field label="Email"><astro-island><input type="hidden" name="token" /><input type="email" id="email" /></astro-island></c2-form-field>`,
   )
   await page.evaluate(() => {
     customElements.define(
@@ -372,4 +372,9 @@ test('a display: contents control with no control inside it is still the control
       })
   await expect.poll(() => control(0)).toBe('contents-input')
   expect(await control(1)).toBe('input#email')
+})
+
+test('a plain display: contents element is not looked through: only an Astro island is', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Name"><div style="display: contents"><c2-text-field></c2-text-field></div></c2-form-field>`)
+  expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('div')
 })
