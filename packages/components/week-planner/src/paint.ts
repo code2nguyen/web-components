@@ -70,7 +70,9 @@ export function createPainter(host: WeekPlanner, layout: () => PaintLayout) {
   }
   const release = (event: PointerEvent) => {
     if (!stroke || event.pointerId !== stroke.pointerId) return
-    const { start, end, erase } = stroke
+    const { start, erase } = stroke
+    // The release point ends the stroke: an engine may coalesce or drop the last move before it.
+    const end = event.type === 'pointerup' ? cellAt(event) : stroke.end
     painter.stop()
     const before = base()
     if (event.type === 'pointerup') fire(before, paintRect(before, start, end, erase))

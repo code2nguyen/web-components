@@ -60,6 +60,29 @@ test('clears the cells of a stroke that starts on a painted one', async ({ page,
   await expect(page.getByRole('status')).toHaveText(ranges([{ day: 'tue', start: '09:00', end: '10:00' }]))
 })
 
+test('ends a stroke on the cell it is released on, even without a move there', async ({ page, scenario }) => {
+  await scenario('paint')
+  const from = await cell(page, 'Monday', 13 * 60)
+  const to = await cell(page, 'Wednesday, today', 14 * 60)
+  const pointerId = page.evaluate(() => new Promise<number>((resolve) => addEventListener('pointerdown', (event) => resolve(event.pointerId), { once: true })))
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+  // A release reported away from the last move, as when an engine coalesces the moves before it.
+  await page.evaluate(
+    ({ id, x, y }) => document.body.dispatchEvent(new PointerEvent('pointerup', { pointerId: id, isPrimary: true, clientX: x, clientY: y, bubbles: true })),
+    { id: await pointerId, ...to },
+  )
+  await page.mouse.up()
+  await expect(page.getByRole('status')).toHaveText(
+    ranges([
+      { day: 'mon', start: '13:00', end: '14:30' },
+      { day: 'tue', start: '09:00', end: '11:00' },
+      { day: 'tue', start: '13:00', end: '14:30' },
+      { day: 'wed', start: '13:00', end: '14:30' },
+    ]),
+  )
+})
+
 test('drops a stroke on Escape', async ({ page, scenario }) => {
   await scenario('paint')
   const from = await cell(page, 'Monday', 13 * 60)
@@ -80,8 +103,9 @@ test('follows a stroke past the grid, to the nearest cell', async ({ page, scena
   await scenario('paint')
   const from = await cell(page, 'Saturday', 17 * 60)
   const sunday = (await planner(page).getByRole('group', { name: 'Sunday' }).boundingBox())!
-  // Right of the planner and below its last hour, still inside the viewport.
-  await stroke(page, from, { x: sunday.x + sunday.width + 20, y: sunday.y + sunday.height + 20 })
+  // Right of the planner and below its last hour, kept inside the viewport: no engine reports a pointer past it.
+  const viewport = page.viewportSize()!
+  await stroke(page, from, { x: Math.min(sunday.x + sunday.width + 20, viewport.width - 2), y: Math.min(sunday.y + sunday.height + 20, viewport.height - 2) })
   await expect(page.getByRole('status')).toHaveText(
     ranges([
       { day: 'tue', start: '09:00', end: '11:00' },
@@ -123,6 +147,19 @@ test('keeps text selection and native drags out of a stroke', async ({ page, sce
   )
   // Released: the page selects and drags as before.
   expect(await page.evaluate(() => document.body.dispatchEvent(new Event('selectstart', { bubbles: true, cancelable: true })))).toBe(true)
+})
+
+test('lets go of the document when the planner is removed mid-stroke', async ({ page, scenario }) => {
+  await scenario('paint')
+  const from = await cell(page, 'Monday', 13 * 60)
+  await page.mouse.move(from.x, from.y)
+  await page.mouse.down()
+  const refused = () => page.evaluate(() => !document.body.dispatchEvent(new Event('selectstart', { bubbles: true, cancelable: true })))
+  expect(await refused()).toBe(true)
+  await planner(page).evaluate((element) => element.remove())
+  expect(await refused()).toBe(false)
+  await page.mouse.up()
+  await expect(page.getByRole('status')).toHaveText('')
 })
 
 test('paints from the keyboard with the cursor cell', async ({ page, scenario }) => {
