@@ -1,5 +1,5 @@
 name: Component feedback
-description: A c2n component did not work as documented, missed something you needed, or made you write a workaround.
+description: A c2n component did not work as documented, missed a feature you needed, or made you write a workaround.
 title: '[c2-] '
 labels: ['component-feedback']
 body:
@@ -25,6 +25,7 @@ body:
       options:
         - 'bug: wrong behaviour'
         - 'gap: documented or implied, but not implemented'
+        - 'feature: a capability or a component c2n does not have yet'
         - 'papercut: works, but the common case is hard'
         - 'docs: the component is right, the documentation or MCP answer is not'
     validations:

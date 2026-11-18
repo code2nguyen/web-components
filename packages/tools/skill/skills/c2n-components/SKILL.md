@@ -105,14 +105,22 @@ Read `references/frameworks.md` for details.
 
 List the packages added, where the theme is imported and which tokens are set, each variant created (name → base tag, file), composed components, and the gaps left as plain app components.
 
-## 9. Report component problems upstream
+## 9. Ask the developer about reporting to c2n
 
-When a component makes you work around it, the fix belongs in c2n, not only in this app. That covers a bug, something documented that does not work, a `get_component` answer that does not match the behaviour, an API that makes the common case hard, plain HTML because no `c2-*` element fits, and a CSS or timing hack.
+Whenever you notice that c2n itself could be better, ask the developer whether they want to report it. Watch for:
 
-1. Mark the spot where you work around it with a `c2n-workaround: <what and why>` comment (next to `c2n-ignore` when the validator flags a native element), so the app's maintainers can remove it once the component is fixed.
-2. At the end of the task, list the workarounds in your report and offer to draft an issue for each. Do not interrupt the task for it.
-3. When the developer agrees, call `report_issue` (MCP) with the component, the kind (`bug`, `gap`, `papercut`, `docs`), a one-line title, what was being built, expected, actual, the workaround and a minimal reproduction. It fills in the installed version and the framework, checks the reproduction with `validate_markup`, searches for existing issues and returns a draft with a link to the pre-filled issue form.
-4. Show the developer the draft and the link. **Never submit the issue yourself**: the developer opens the link, reviews the form and submits it. If an existing issue matches, suggest adding to it instead. Use `gh issue create` only when the developer asks for it.
+- **bug**: a component behaves wrongly, or unlike `get_component` and its docs say;
+- **gap**: something documented or implied does not work;
+- **feature**: a capability or a component the app needs and c2n does not have, so you wrote plain HTML or your own widget;
+- **papercut**: it works, but the common case took a workaround, a CSS or timing hack, or more code than it should;
+- **docs**: the component is right, but its documentation or an MCP answer is wrong or missing.
+
+Only c2n's components, docs and MCP answers count: not a problem in the app's own code, and not a misuse you can fix by following `get_component`. Check that first.
+
+1. Where you work around it in code, mark the spot with a `c2n-workaround: <what and why>` comment (next to `c2n-ignore` when the validator flags a native element), so the workaround can be removed once c2n is fixed.
+2. Ask at a natural pause, in one short question that lists what you found: by default at the end of the task, together with your report ("While building this I hit 2 things c2n could improve: … Do you want me to draft issues for them?"). Ask right away only when the problem blocks the task. Ask once per problem: if the developer says no, do not ask again about it in this session.
+3. When the developer agrees, call `report_issue` (MCP) for each: the component, the kind, a one-line title, what was being built, expected, actual, the workaround and a minimal reproduction. It fills in the installed version and the framework, checks the reproduction with `validate_markup`, searches for existing issues and returns a draft with a link to the pre-filled issue form.
+4. Show the developer each draft and its link. **Never submit an issue yourself**: the developer opens the link, reviews the form and submits it. If an existing issue matches, suggest adding to it instead. Use `gh issue create` only when the developer asks for it.
 5. Keep the reproduction minimal and generic: no application code, internal URLs, names, customer data or secrets. A few lines of `c2-*` markup that show the problem are enough.
 
 Without the MCP server, link the developer to the form directly: <https://github.com/code2nguyen/web-components/issues/new?template=component-feedback.yml>.

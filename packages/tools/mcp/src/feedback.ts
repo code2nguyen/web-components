@@ -11,13 +11,14 @@ export const FEEDBACK_REPO = 'code2nguyen/web-components'
 export const FEEDBACK_TEMPLATE = 'component-feedback.yml'
 export const FEEDBACK_LABEL = 'component-feedback'
 
-export const FEEDBACK_KINDS = ['bug', 'gap', 'papercut', 'docs'] as const
+export const FEEDBACK_KINDS = ['bug', 'gap', 'feature', 'papercut', 'docs'] as const
 export type FeedbackKind = (typeof FEEDBACK_KINDS)[number]
 
 /** The issue form's dropdown options, which a pre-filled link must match exactly. */
-const KIND_OPTIONS: Record<FeedbackKind, string> = {
+export const KIND_OPTIONS: Record<FeedbackKind, string> = {
   bug: 'bug: wrong behaviour',
   gap: 'gap: documented or implied, but not implemented',
+  feature: 'feature: a capability or a component c2n does not have yet',
   papercut: 'papercut: works, but the common case is hard',
   docs: 'docs: the component is right, the documentation or MCP answer is not',
 }

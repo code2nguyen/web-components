@@ -57,7 +57,7 @@ Then:
 - Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for ${parts}.
 - Theme once: import \`@c2n/components/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
 - Before finishing, ${validate} and fix what it reports. Mark a deliberate native element with a \`c2n-ignore\` comment.
-- When a component forces a workaround (a bug, a documented feature that does not work, plain HTML because nothing fits, a CSS or timing hack), mark it with a \`c2n-workaround: <reason>\` comment and, at the end, offer the developer an issue draft for each (${report}). Never submit an issue yourself: the developer reviews and submits it.
+- When you notice c2n itself could be better (a component bug, a missing feature or component, a workaround or hack you had to write, docs or an MCP answer that is wrong), mark any workaround with a \`c2n-workaround: <reason>\` comment and ask the developer whether to report it: once per problem, at the end of the task unless it blocks you. If they agree, draft the issue with ${report}. Never submit an issue yourself: the developer reviews and submits it.
 - The \`c2n-components\` skill (\`${skill}\`) has the full workflow.
 ${instructionsEnd}`
 }

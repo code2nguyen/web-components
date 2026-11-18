@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import {
+  FEEDBACK_KINDS,
   FEEDBACK_REPO,
+  KIND_OPTIONS,
   MAX_URL_LENGTH,
   buildIssueDraft,
   detectFramework,
@@ -109,4 +111,13 @@ test('the framework is read from package.json, the meta-framework first', () => 
   } finally {
     rmSync(root, { recursive: true, force: true })
   }
+})
+
+test("each kind's text is one of the issue form's dropdown options, in the same order", () => {
+  const form = readFileSync(new URL('../../../../.github/ISSUE_TEMPLATE/component-feedback.yml', import.meta.url), 'utf8')
+  const options = [...form.matchAll(/^\s+- '([a-z]+: [^']+)'$/gm)].map((m) => m[1])
+  assert.deepEqual(
+    options,
+    FEEDBACK_KINDS.map((kind) => KIND_OPTIONS[kind]),
+  )
 })

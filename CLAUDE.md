@@ -310,8 +310,9 @@ you fix the component in the same change, skip the log — the commit and the te
 
 Developers outside this repo report the same kind of friction as GitHub issues through the **component feedback**
 issue form (`.github/ISSUE_TEMPLATE/component-feedback.yml`, label `component-feedback`). Their coding agents draft
-those issues with the `@c2n/mcp` tool `report_issue` (`packages/tools/mcp/src/feedback.ts`), which the `@c2n/skill`
-instructions call for each `c2n-workaround` comment; the developer always reviews and submits. The form's field ids
+those issues with the `@c2n/mcp` tool `report_issue` (`packages/tools/mcp/src/feedback.ts`): the `@c2n/skill`
+instructions have the agent ask the developer, once per problem, whether to report a bug, a missing feature or a
+workaround it met, and the developer always reviews and submits. The form's field ids
 and dropdown options are what the tool's pre-filled link uses, so change both together. Triage a labelled issue like
 an entry here: fix it, or move it into this file.
 
