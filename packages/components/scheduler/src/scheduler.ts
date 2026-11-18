@@ -1412,6 +1412,14 @@ export class Scheduler extends LitElement {
       >`
   }
 
+  /**
+   * A press on an editable row moves a bar or draws a booking, so it starts no text selection: WebKit otherwise selects
+   * the row headings a drag crosses, and the next press on that selection starts a native drag instead of a move.
+   */
+  private readonly handleLaneSelectStart = (event: Event) => {
+    if (this.editable) event.preventDefault()
+  }
+
   override render() {
     const view = this.currentView
     const [dayStart, dayEnd] = this.hours
@@ -1491,6 +1499,7 @@ export class Scheduler extends LitElement {
                 class="lane ${this.editable ? 'editable' : ''}"
                 role="gridcell"
                 data-resource=${id}
+                @selectstart=${this.handleLaneSelectStart}
                 tabindex=${tabRow === id ? '0' : '-1'}
                 aria-label=${slot ? this.slotName(row.resource, cursor!) : row.resource.label}
                 @focus=${(event: FocusEvent) => {
