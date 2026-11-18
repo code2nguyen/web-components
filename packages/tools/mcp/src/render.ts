@@ -40,8 +40,17 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   const { include, installed, concrete } = options
   const out: string[] = []
   const primary = concrete ?? { tag: component.elements[0].tag, modulePath: component.elements[0].modulePath, className: component.elements[0].className }
+  // A secondary element of a package (`c2-table-column` in `@c2n/table`) leads with its own API: the package
+  // description is the main element's, and printed in full it pushed the requested tables past the length limit.
+  const requested = component.elements.find((element) => element.tag === primary.tag)
+  const secondary = !!requested && requested !== component.elements[0]
   out.push(`# ${component.title} (${primary.tag})`)
-  out.push(component.description || component.intro || '')
+  if (secondary) {
+    if (requested.description) out.push(requested.description)
+    out.push(
+      `\nPart of \`${component.package}\`, whose main element is \`${component.elements[0].tag}\`: ${firstSentence(component.description || component.intro || '')} Call get_component with \`tag: "${component.elements[0].tag}"\` for its description.`,
+    )
+  } else out.push(component.description || component.intro || '')
   out.push('')
   const status = installed?.via
     ? `(installed ${installed.version} through \`${UMBRELLA}\` ${installed.via.version}: import it from \`${component.install.umbrella ?? UMBRELLA}\`, not \`${component.package}\`)`
@@ -52,15 +61,17 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   out.push(`- Status: ${component.status} · Category: ${component.category}${component.docsUrl ? ` · Docs: ${component.docsUrl}` : ''}`)
   const modulePath = importPath(primary.modulePath, component.package, installed)
   out.push(`- Register: \`import '${modulePath}'\` · Class: \`import { ${primary.className} } from '${modulePath}'\``)
-  if (component.composition.slotted.length)
+  if (component.composition.slotted.length && !secondary)
     out.push(`- Children: put ${component.composition.slotted.map((t) => `\`${t}\``).join(', ')} inside it (see the Composition section and get_examples).`)
   if (component.tagPattern)
     out.push(`- Icon set: tags follow \`${component.tagPattern}\`, ${component.icons?.length} icons (use \`search_components\` with the icon name).`)
-  for (const element of component.elements) {
+  const elements = secondary ? [requested, ...component.elements.filter((element) => element !== requested)] : component.elements
+  for (const element of elements) {
     const api = installed?.elements?.get(element.tag) ?? element
     const heading = component.elements.length > 1 || component.tagPattern ? `\n## ${element.tag}\n` : ''
     out.push(heading)
-    if (element.description && component.elements.length > 1) out.push(element.description)
+    // A secondary element's description already leads the output.
+    if (element.description && component.elements.length > 1 && !(secondary && element === requested)) out.push(element.description)
     if (include.has('attributes') && api.attributes.length) {
       out.push('\n### Attributes\n')
       out.push(
@@ -124,6 +135,11 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     `\nExamples: \`get_examples\` with \`tag: "${primary.tag}"\` (${component.examples.length} available${component.hasGallery ? ', including gallery variants' : ''}).`,
   )
   return out.filter((l) => l !== undefined).join('\n')
+}
+
+function firstSentence(text: string): string {
+  const match = /^[\s\S]*?[.!?](?=\s|$)/.exec(text.trim())
+  return (match?.[0] ?? text.trim()).replace(/\s+/g, ' ')
 }
 
 function withParsedName(p: { name: string; type?: { text?: string } | string; default?: string; description?: string }): CssProperty {

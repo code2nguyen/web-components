@@ -80,3 +80,24 @@ test('get_component markdown prints the type text from an installed manifest, ne
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+test('get_component on a secondary element leads with its own API, not the package description', () => {
+  const table: ComponentEntry = {
+    ...badge,
+    id: 'table',
+    package: '@c2n/table',
+    title: 'Table',
+    description: `A data table. ${'Long description of the table. '.repeat(500)}`,
+    elements: [
+      { ...badge.elements[0], tag: 'c2-table', className: 'Table', description: 'The table.', attributes: [{ name: 'rows', type: 'TableRow[]' }] },
+      { ...badge.elements[0], tag: 'c2-table-column', className: 'TableColumn', description: 'One column.', attributes: [{ name: 'pinned', type: 'boolean' }] },
+    ],
+  }
+  const concrete = { tag: 'c2-table-column', modulePath: '@c2n/table', className: 'TableColumn' }
+  const out = renderComponent(table, { include, installed: null, concrete })
+  assert.ok(out.length < 3000, `the package description is shortened (${out.length} characters)`)
+  assert.match(out, /^# Table \(c2-table-column\)\nOne column\.\n\nPart of `@c2n\/table`, whose main element is `c2-table`: A data table\./)
+  assert.ok(out.indexOf('`pinned`') < out.indexOf('`rows`'), 'the requested element is listed first')
+  // The main element still prints the whole description.
+  assert.ok(renderComponent(table, { include, installed: null }).includes('Long description of the table. Long description'))
+})
