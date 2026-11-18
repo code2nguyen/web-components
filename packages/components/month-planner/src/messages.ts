@@ -8,6 +8,8 @@ const en = {
   chooseMonth: 'Choose a month',
   hasEvents: 'has events',
   noEvents: 'No events',
+  noEventsThisMonth: 'No events this month',
+  eventsByDay: 'Events by day',
 }
 
 const fr: typeof en = {
@@ -18,6 +20,8 @@ const fr: typeof en = {
   chooseMonth: 'Choisir un mois',
   hasEvents: 'contient des événements',
   noEvents: 'Aucun événement',
+  noEventsThisMonth: 'Aucun événement ce mois-ci',
+  eventsByDay: 'Événements par jour',
 }
 
 const de: typeof en = {
@@ -28,6 +32,8 @@ const de: typeof en = {
   chooseMonth: 'Monat auswählen',
   hasEvents: 'hat Termine',
   noEvents: 'Keine Termine',
+  noEventsThisMonth: 'Keine Termine in diesem Monat',
+  eventsByDay: 'Termine nach Tag',
 }
 
 const es: typeof en = {
@@ -38,6 +44,8 @@ const es: typeof en = {
   chooseMonth: 'Elegir un mes',
   hasEvents: 'tiene eventos',
   noEvents: 'Sin eventos',
+  noEventsThisMonth: 'No hay eventos este mes',
+  eventsByDay: 'Eventos por día',
 }
 
 const it: typeof en = {
@@ -48,6 +56,8 @@ const it: typeof en = {
   chooseMonth: 'Scegli un mese',
   hasEvents: 'ha eventi',
   noEvents: 'Nessun evento',
+  noEventsThisMonth: 'Nessun evento questo mese',
+  eventsByDay: 'Eventi per giorno',
 }
 
 const pt: typeof en = {
@@ -58,6 +68,8 @@ const pt: typeof en = {
   chooseMonth: 'Escolher um mês',
   hasEvents: 'tem eventos',
   noEvents: 'Sem eventos',
+  noEventsThisMonth: 'Sem eventos este mês',
+  eventsByDay: 'Eventos por dia',
 }
 
 const nl: typeof en = {
@@ -68,6 +80,8 @@ const nl: typeof en = {
   chooseMonth: 'Kies een maand',
   hasEvents: 'heeft afspraken',
   noEvents: 'Geen afspraken',
+  noEventsThisMonth: 'Geen afspraken deze maand',
+  eventsByDay: 'Afspraken per dag',
 }
 
 const vi: typeof en = {
@@ -78,6 +92,8 @@ const vi: typeof en = {
   chooseMonth: 'Chọn tháng',
   hasEvents: 'có sự kiện',
   noEvents: 'Không có sự kiện',
+  noEventsThisMonth: 'Không có sự kiện trong tháng này',
+  eventsByDay: 'Sự kiện theo ngày',
 }
 
 /**

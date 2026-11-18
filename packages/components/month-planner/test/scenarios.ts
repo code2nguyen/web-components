@@ -54,6 +54,34 @@ if (scenario === 'actions-compact') subject.style.width = '360px'
 if (scenario === 'heading-slot') subject.insertAdjacentHTML('beforeend', '<span slot="heading">Team <em>holidays</em></span>')
 if (scenario === 'editable' || scenario === 'editable-compact') subject.editable = true
 if (scenario === 'editable-compact') subject.style.width = '360px'
+// A change calendar: a freeze and a maintenance window behind the bars, which an app flags where they overlap.
+if (scenario.startsWith('changes') || scenario === 'agenda-changes') {
+  subject.events = [
+    { id: 'freeze', title: 'Change freeze', start: '2026-09-14', end: '2026-09-18', display: 'background' },
+    { id: 'window', title: 'Maintenance window', start: '2026-09-26', display: 'background', color: 'rgba(180, 83, 9, 0.16)' },
+    { id: 'deploy', title: 'Deploy billing API', start: '2026-09-16' },
+    { id: 'upgrade', title: 'Database upgrade', start: '2026-09-08', end: '2026-09-09' },
+  ]
+}
+if (scenario === 'changes-editable') subject.editable = true
+if (scenario === 'changes-compact') subject.style.width = '360px'
+if (scenario === 'agenda-attribute') subject.setAttribute('view', 'agenda')
+else if (scenario.startsWith('agenda')) subject.view = 'agenda'
+if (scenario === 'agenda-compact') subject.style.width = '360px'
+if (scenario === 'agenda-renderer') {
+  subject.renderAgendaEvent = ({ event, date, start, end, background }) => {
+    const span = document.createElement('span')
+    span.className = 'custom'
+    span.textContent = `${event.title} [${date} ${start}..${end}${background ? ' bg' : ''}]`
+    return span
+  }
+}
+if (scenario === 'agenda-empty-slot') {
+  const empty = document.createElement('p')
+  empty.slot = 'empty'
+  empty.textContent = 'Nothing planned'
+  subject.append(empty)
+}
 // Reports what the planner fired; the editable scenarios also apply each change, as an app would.
 subject.addEventListener('day-click', (event) => (output.value = `day:${event.detail.date}`))
 subject.addEventListener('range-select', (event) => (output.value = `range:${event.detail.start}..${event.detail.end}`))
