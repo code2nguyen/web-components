@@ -3,7 +3,8 @@
  * bands drawn on uPlot's canvas, the y range that reaches them, and the text that reads them out. A line chart without
  * reference lines never downloads this module.
  */
-import { formatMessage, localeOf } from '@c2n/core/localize.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import type { ReactiveControllerHost } from 'lit'
 import type uPlot from 'uplot'
 import type { Options } from 'uplot'
 import type { ChartBuildContext } from './chart-adapter.js'
@@ -31,7 +32,7 @@ interface ResolvedReferenceLine {
 }
 
 /** The line chart, as this module reads it: its lines, its fixed bounds and its locale. */
-export interface ReferenceLineHost extends HTMLElement {
+export interface ReferenceLineHost extends HTMLElement, ReactiveControllerHost {
   referenceLines?: ChartReferenceLine[]
   yMin?: number | null
   yMax?: number | null
@@ -193,17 +194,19 @@ function draw(self: uPlot, paint: Paint, labels: boolean): void {
   context.restore()
 }
 
+/** One translator per chart, added the first time it reads its lines out, so a translation added later redraws it too. */
+const translators = new WeakMap<ReferenceLineHost, LocalizeController<(typeof referenceLineMessages)['en']>>()
+
 /** `summary` followed by the labelled rules and bands, which are canvas marks with no text of their own. */
 export function describeReferenceLines(summary: string, host: ReferenceLineHost, format: (value: number) => string): string {
   const named = resolve(host.referenceLines).filter((line) => line.label)
-  const locale = host.locale || localeOf(host)
   if (named.length === 0) return summary
+  let msg = translators.get(host)
+  if (!msg) translators.set(host, (msg = new LocalizeController(host, referenceLineMessages, () => host.locale)))
   const list = named
     .map((line) =>
-      line.band
-        ? formatMessage(referenceLineMessages, locale, 'referenceBand', line.label, format(line.low), format(line.high))
-        : formatMessage(referenceLineMessages, locale, 'referenceLine', line.label, format(line.value)),
+      line.band ? msg.t('referenceBand', line.label, format(line.low), format(line.high)) : msg.t('referenceLine', line.label, format(line.value)),
     )
     .join(', ')
-  return formatMessage(referenceLineMessages, locale, 'withReferenceLines', summary, list)
+  return msg.t('withReferenceLines', summary, list)
 }

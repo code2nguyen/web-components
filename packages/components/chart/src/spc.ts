@@ -55,17 +55,18 @@ export type SpcRule = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 
 /**
  * What each rule tests, in English, for a tooltip or a legend. An app that translates its interface supplies its own.
- * The point a rule flags is the one that completes the pattern.
+ * Zone C is within 1 sigma of the centre line, B from 1 to 2 and A from 2 to the limit (thirds of the way to the limits
+ * set at another width). The point a rule flags is the one that completes the pattern.
  */
 export const SPC_RULES: Readonly<Record<SpcRule, string>> = {
-  1: 'One point beyond 3 sigma',
+  1: 'One point beyond a control limit',
   2: 'A run of points on one side of the centre line (nine, or `sameSideRun`)',
   3: 'Six points in a row steadily increasing or decreasing',
   4: 'Fourteen points in a row alternating up and down',
-  5: 'Two of three points beyond 2 sigma on one side',
-  6: 'Four of five points beyond 1 sigma on one side',
-  7: 'Fifteen points in a row within 1 sigma',
-  8: 'Eight points in a row beyond 1 sigma, on both sides of the centre line',
+  5: 'Two of three points in zone A or beyond, on one side',
+  6: 'Four of five points in zone B or beyond, on one side',
+  7: 'Fifteen points in a row in zone C',
+  8: 'Eight points in a row outside zone C, on both sides of the centre line',
 }
 
 /** One flagged point: its index in the values handed to {@link runRules}, and every rule it breaks. */
@@ -124,8 +125,9 @@ export function controlLimits(values: Values, options: ControlLimitsOptions = {}
 
 /**
  * Evaluates the Nelson rules over `values` against `limits` and returns the flagged points in index order. Rule 1 reads
- * the limits' `ucl` and `lcl`, so limits set by hand are honoured; the zone rules (5 to 8) read `sigma` and are skipped
- * when it is 0. Gaps are skipped, and a run continues across them.
+ * the limits' `ucl` and `lcl`, so limits set by hand are honoured. The zone rules (5 to 8) read the zones
+ * {@link spcReferenceLines} draws, thirds of the distance to each limit (1, 2 and 3 sigma with 3-sigma limits), and are
+ * skipped when sigma is 0. Gaps are skipped, and a run continues across them.
  */
 export function runRules(values: Values, limits: SpcLimits | null, options: RunRulesOptions = {}): SpcViolation[] {
   if (!limits) return []
@@ -133,8 +135,11 @@ export function runRules(values: Values, limits: SpcLimits | null, options: RunR
   const sameSideRun = Math.max(1, options.sameSideRun ?? 9)
   const points = finite(values)
   const { center, sigma, ucl, lcl } = limits
-  const zoned = sigma > 0
-  const z = (value: number) => (value - center) / sigma
+  // A zone is a third of the way to the control limit on its side (1 sigma with 3-sigma limits), as spcReferenceLines draws it.
+  const up = (ucl - center) / 3
+  const down = (center - lcl) / 3
+  const zoned = sigma > 0 && up > 0 && down > 0
+  const z = (value: number) => (value - center) / (value >= center ? up : down)
   const found = new Map<number, Set<SpcRule>>()
   const flag = (position: number, rule: SpcRule) => {
     const index = points[position].index

@@ -11,7 +11,7 @@ import './chart-series.js'
 import type { ChartKindMessage } from './messages.js'
 
 /** The code of `reference-lines`, loaded once, the first time a chart has some. */
-let referenceLines: typeof import('./reference-lines.js') | undefined
+let referenceLinesModule: typeof import('./reference-lines.js') | undefined
 let referenceLinesLoad: Promise<unknown> | undefined
 
 export interface LineChart {
@@ -93,15 +93,17 @@ export class LineChart extends UplotChartBase {
 
   protected override decorateOptions(options: Options, context: ChartBuildContext): Options {
     if (!this.referenceLines?.length) return options
-    if (referenceLines)
-      return referenceLines.decorateReferenceLines(options, context, this, (expression, fallback) => this.themeController.resolveColor(expression, fallback))
+    if (referenceLinesModule)
+      return referenceLinesModule.decorateReferenceLines(options, context, this, (expression, fallback) =>
+        this.themeController.resolveColor(expression, fallback),
+      )
     // First use on the page: draw without them, then rebuild once the module is in.
     referenceLinesLoad ??= import('./reference-lines.js').then(
-      (module) => (referenceLines = module),
-      // A failed load (a chunk gone after a deploy) is retried by the next chart that asks, not cached for the page.
+      (module) => (referenceLinesModule = module),
+      // A failed load (a chunk gone after a deploy) is not cached: the next options rebuild of any chart tries again.
       () => (referenceLinesLoad = undefined),
     )
-    void referenceLinesLoad.then(() => referenceLines && this.requestUpdate('referenceLines', null))
+    void referenceLinesLoad.then(() => referenceLinesModule && this.requestUpdate('referenceLines', null))
     return options
   }
 
@@ -113,8 +115,8 @@ export class LineChart extends UplotChartBase {
 
   protected override accessibleSummary(resolved?: ChartSeriesConfig[]): string {
     const summary = super.accessibleSummary(resolved)
-    return referenceLines && !this.getAttribute('aria-label')?.trim()
-      ? referenceLines.describeReferenceLines(summary, this, (value) => this.formatValue(value))
+    return referenceLinesModule && !this.getAttribute('aria-label')?.trim()
+      ? referenceLinesModule.describeReferenceLines(summary, this, (value) => this.formatValue(value))
       : summary
   }
 }

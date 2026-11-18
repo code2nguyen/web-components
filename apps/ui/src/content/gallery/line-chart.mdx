@@ -239,7 +239,7 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
     x-field="sample"
     points="always"
     legend="bottom"
-    reference-lines='[{"value":10.098,"value2":10.146,"tone":"danger"},{"value":10.05,"value2":10.098,"tone":"warning"},{"value":9.954,"value2":10.05,"tone":"success"},{"value":9.906,"value2":9.954,"tone":"warning"},{"value":9.858,"value2":9.906,"tone":"danger"},{"value":10.147,"label":"UCL","tone":"danger"},{"value":10.002,"label":"CL","tone":"neutral"},{"value":9.857,"label":"LCL","tone":"danger"},{"value":10.2,"label":"USL","tone":"info"},{"value":9.8,"label":"LSL","tone":"info"}]'
+    reference-lines='[{"value":10.099,"value2":10.147,"tone":"danger"},{"value":10.05,"value2":10.099,"tone":"warning"},{"value":9.954,"value2":10.05,"tone":"success"},{"value":9.905,"value2":9.954,"tone":"warning"},{"value":9.857,"value2":9.905,"tone":"danger"},{"value":10.147,"label":"UCL","tone":"danger"},{"value":10.002,"label":"CL","tone":"neutral"},{"value":9.857,"label":"LCL","tone":"danger"},{"value":10.2,"label":"USL","tone":"info"},{"value":9.8,"label":"LSL","tone":"info"}]'
     data='[{"sample":1,"diameter":10.02},{"sample":2,"diameter":9.98},{"sample":3,"diameter":10.05},{"sample":4,"diameter":9.97},{"sample":5,"diameter":10.01},{"sample":6,"diameter":9.95},{"sample":7,"diameter":10.03},{"sample":8,"diameter":10},{"sample":9,"diameter":9.99},{"sample":10,"diameter":10.04},{"sample":11,"diameter":9.96},{"sample":12,"diameter":10.02},{"sample":13,"diameter":10.18,"flagged":10.18},{"sample":14,"diameter":10.01},{"sample":15,"diameter":9.98},{"sample":16,"diameter":10.03},{"sample":17,"diameter":10.04},{"sample":18,"diameter":10.05},{"sample":19,"diameter":10.03},{"sample":20,"diameter":10.06},{"sample":21,"diameter":10.04},{"sample":22,"diameter":10.05},{"sample":23,"diameter":10.07},{"sample":24,"diameter":10.03,"flagged":10.03},{"sample":25,"diameter":10.06,"flagged":10.06},{"sample":26,"diameter":9.97},{"sample":27,"diameter":10},{"sample":28,"diameter":9.98},{"sample":29,"diameter":10.02},{"sample":30,"diameter":9.99}]'
   >
     <c2-chart-series field="diameter" label="Diameter (mm)"></c2-chart-series>
@@ -247,7 +247,7 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
   </c2-line-chart>
   <div slot="footer" class="line-spc__footer">
     <strong>3 points flagged</strong>
-    <span>Sample 13 beyond 3σ (rule 1) · samples 24–25 end a run of nine above the centre line (rule 2)</span>
+    <span>Sample 13 above the UCL (rule 1) · samples 24–25 end a run of nine above the centre line (rule 2)</span>
   </div>
 </c2-card>
 ```

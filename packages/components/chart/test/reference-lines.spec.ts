@@ -14,6 +14,8 @@ const ROWS = JSON.stringify(
 async function paint(page: Page, markup: string, rgb: [number, number, number]): Promise<number> {
   return page.evaluate(
     async ({ markup, rgb }) => {
+      // Load the reference-line module first, from the same URL the chart imports it from, so its rebuild is not left to a network race.
+      if (markup.includes('reference-lines=')) await import(/* @vite-ignore */ '/packages/components/chart/src/reference-lines.ts')
       const main = document.querySelector('main')!
       main.innerHTML = markup
       const chart = main.firstElementChild as HTMLElement
@@ -21,14 +23,13 @@ async function paint(page: Page, markup: string, rgb: [number, number, number]):
         if (chart.matches(':state(ready)')) return resolve()
         chart.addEventListener('chart-ready', () => resolve(), { once: true })
       })
-      // The reference lines arrive with a module loaded on first use, which rebuilds the plot when it lands.
-      const lines = (chart as HTMLElement & { referenceLines?: unknown[] }).referenceLines
-      if (lines?.length) {
-        const started = performance.now()
-        while (!performance.getEntriesByType('resource').some((entry) => entry.name.includes('reference-lines')) && performance.now() - started < 5000)
-          await new Promise((resolve) => setTimeout(resolve, 20))
-        await new Promise((resolve) => setTimeout(resolve, 50))
-        await (chart as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+      // The reference lines arrive with a module loaded on first use, which rebuilds the plot once it lands. The page
+      // loaded it before mounting (see below), so the chart's own import resolves at once; wait for that rebuild.
+      if ((chart as HTMLElement & { referenceLines?: unknown[] }).referenceLines?.length) {
+        for (let tick = 0; tick < 3; tick += 1) {
+          await new Promise((resolve) => setTimeout(resolve))
+          await (chart as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+        }
       }
       for (let frame = 0; frame < 3; frame += 1) await new Promise((resolve) => requestAnimationFrame(resolve))
       let matching = 0

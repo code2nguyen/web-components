@@ -98,6 +98,16 @@ test('rules: indices are those of the input, gaps continue a run, and a point li
   assert.deepEqual(runRules([1, 2, 3], null), [])
 })
 
+test('rules: the zone rules follow limits set at another width, as the drawn zones do', () => {
+  // Limits at 2 sigma: zone A starts at 4/3 sigma, so 1.5 sigma counts for rule 5.
+  const narrow: SpcLimits = { center: 0, sigma: 1, ucl: 2, lcl: -2, count: 0 }
+  assert.deepEqual(
+    runRules([0, 1.5, 0, 1.6], narrow, { rules: [5] }).map((violation) => violation.index),
+    [3],
+  )
+  assert.deepEqual(flagged([0, 1.5, 0, 1.6], 5), [])
+})
+
 test('rules: a zero sigma skips the zone rules but keeps the limits', () => {
   const flat: SpcLimits = { center: 5, sigma: 0, ucl: 5, lcl: 5, count: 3 }
   assert.deepEqual(runRules([5, 5, 6], flat), [{ index: 2, rules: [1] }])
