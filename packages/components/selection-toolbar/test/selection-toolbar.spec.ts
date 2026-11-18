@@ -409,3 +409,21 @@ test('composed reads a selection bounded by the shadow root itself, and works wi
   await expect(inShadow.getByRole('toolbar')).toBeVisible()
   expect(await inShadow.evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('quick')
 })
+
+test('composed also works where getComposedRanges takes the shadow roots as arguments', async ({ page, renderScenario, browserName }) => {
+  // Only WebKit reports a selection in a shadow root as a caret, the case that calls getComposedRanges.
+  test.skip(browserName !== 'webkit', 'Chromium and Firefox report the selection itself')
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  await page.evaluate(() => {
+    // The older signature: shadow roots as arguments; an options object is rejected.
+    const original = Selection.prototype.getComposedRanges
+    Selection.prototype.getComposedRanges = function (this: Selection, ...roots: unknown[]) {
+      if (roots.some((root) => !(root instanceof ShadowRoot))) throw new TypeError('not a ShadowRoot')
+      return original.call(this, { shadowRoots: roots as ShadowRoot[] })
+    } as typeof original
+  })
+  await selectInShadow(page, 'brown fox')
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('brown fox')
+})

@@ -34,16 +34,38 @@ export interface SelectionToolbar {
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), c2-button, c2-icon-button, c2-toggle-button, c2-text-field, c2-textarea, c2-chat-input'
 
-/** Whether `node` is inside `ancestor`, through the hosts of the shadow roots between them. */
-function composedContains(ancestor: Element, node: Node): boolean {
-  const root = ancestor.getRootNode()
+/** `node`, or the host of the shadow root holding it, climbed until it is in `root`'s tree; null when it never is. */
+function retarget(node: Node, root: Node): Node | null {
   let current: Node = node
   while (current.getRootNode() !== root) {
     const own = current.getRootNode()
-    if (!(own instanceof ShadowRoot)) return false
+    if (!(own instanceof ShadowRoot)) return null
     current = own.host
   }
-  return ancestor.contains(current)
+  return current
+}
+
+/** Whether `node` is inside `ancestor`, through the hosts of the shadow roots between them. */
+function composedContains(ancestor: Element, node: Node): boolean {
+  const own = retarget(node, ancestor.getRootNode())
+  return !!own && ancestor.contains(own)
+}
+
+/**
+ * The selection's range with boundaries inside the given shadow roots, or undefined. Takes the options object of the
+ * standard, then the shadow roots as arguments, the form WebKit first shipped.
+ */
+function composedRange(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange | undefined {
+  try {
+    return selection.getComposedRanges({ shadowRoots })[0]
+  } catch {
+    try {
+      const variadic = selection.getComposedRanges as unknown as (...roots: ShadowRoot[]) => StaticRange[]
+      return variadic.apply(selection, shadowRoots)[0]
+    } catch {
+      return undefined
+    }
+  }
 }
 
 /** How long a keyboard selection has to stay still before the toolbar shows. */
@@ -279,13 +301,7 @@ export class SelectionToolbar extends LitElement {
     if (around && !(caret instanceof Element && composedContains(caret, this))) return plain
     const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : caret)]
     if (!shadowRoots.length || typeof selection.getComposedRanges !== 'function') return plain
-    let composed: StaticRange | undefined
-    try {
-      ;[composed] = selection.getComposedRanges({ shadowRoots })
-    } catch {
-      // An engine with the older variadic signature: the selection stays the component's.
-      return plain
-    }
+    const composed = composedRange(selection, shadowRoots)
     // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
     if (!composed || composed.startContainer.getRootNode() !== composed.endContainer.getRootNode()) return plain
     const range = document.createRange()
@@ -294,20 +310,32 @@ export class SelectionToolbar extends LitElement {
     return { range, text: range.toString() }
   }
 
-  /** The open shadow roots under the content's children around a node, nested ones included. */
+  /** The open shadow roots under an element of the content, nested ones included, in one walk. */
   private openShadowRoots(near: Node): ShadowRoot[] {
+    const start = near instanceof Element ? near : near.parentElement
+    if (!start || (start !== this && this.inToolbar(start))) return []
+    const toolbarElements = this.toolbarElements()
     const roots: ShadowRoot[] = []
-    const visit = (element: Element) => {
-      if (element.shadowRoot) {
-        roots.push(element.shadowRoot)
-        for (const inner of element.shadowRoot.querySelectorAll('*')) if (inner.shadowRoot) visit(inner)
+    const walk = (root: Element | ShadowRoot) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+        // A control in the toolbar's slots is not content: skip it and what it holds.
+        acceptNode: (node) => (toolbarElements.has(node as Element) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+      })
+      for (let node = walker.currentNode as Element | null; node; node = walker.nextNode() as Element | null) {
+        if (node.shadowRoot) {
+          roots.push(node.shadowRoot)
+          walk(node.shadowRoot)
+        }
       }
-      for (const child of element.querySelectorAll('*')) if (child.shadowRoot && !this.inToolbar(child)) visit(child)
     }
-    // The caret sits in the parent of the host whose shadow root holds the selection: only that parent's subtree.
-    const parent = near instanceof Element ? near : near.parentElement
-    if (parent && (parent === this || !this.inToolbar(parent))) visit(parent)
-    return [...new Set(roots)]
+    walk(start)
+    return roots
+  }
+
+  /** The elements in the floating panel's slots. */
+  private toolbarElements(): Set<Element> {
+    const slots = [...(this.renderRoot?.querySelectorAll<HTMLSlotElement>('.toolbar slot') ?? [])]
+    return new Set(slots.flatMap((slot) => slot.assignedElements()))
   }
 
   /** The shadow roots this toolbar sits in, innermost first. */
@@ -319,15 +347,8 @@ export class SelectionToolbar extends LitElement {
 
   /** Whether a node is inside the content, through the hosts of the shadow roots it is in. */
   private inContent(node: Node): boolean {
-    const own = this.getRootNode()
-    let current: Node | null = node
-    // Climb from shadow root to host until the node is in this toolbar's own tree (a document or a shadow root).
-    while (current && current.getRootNode() !== own) {
-      const root = current.getRootNode()
-      if (!(root instanceof ShadowRoot)) return false
-      current = root.host
-    }
-    return !!current && current !== this && this.contains(current) && !this.inToolbar(current)
+    const own = retarget(node, this.getRootNode())
+    return !!own && own !== this && this.contains(own) && !this.inToolbar(own)
   }
 
   /** Whether the range lies inside the content (and not in the toolbar). */
