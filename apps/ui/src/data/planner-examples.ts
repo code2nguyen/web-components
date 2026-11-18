@@ -13,7 +13,8 @@ const seeded = new WeakSet<Element>()
 let next = 1
 
 function outputFor(planner: Element): (text: string) => void {
-  const output = planner.parentElement?.querySelector('output')
+  // An MDX example renders the planner as an Astro island: the `output` is next to the island, not inside it.
+  const output = (planner.closest('astro-island') ?? planner).parentElement?.querySelector('output')
   return (text) => {
     if (output) output.textContent = text
   }
