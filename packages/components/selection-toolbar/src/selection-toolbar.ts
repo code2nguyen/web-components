@@ -294,7 +294,7 @@ export class SelectionToolbar extends LitElement {
     const plain = { range: selection.getRangeAt(0).cloneRange(), text: selection.toString() }
     // Chromium and Firefox report a selection inside a shadow root as it is; WebKit as a caret in the host's parent,
     // which `getComposedRanges` resolves. Anything else is read as is.
-    if (!this.composed || !plain.range.collapsed) return plain
+    if (!this.composed || !plain.range.collapsed || typeof selection.getComposedRanges !== 'function') return plain
     // WebKit's caret sits right before the host: anything else (a caret in text, every other caret move) is read as is.
     const host = plain.range.startContainer.childNodes[plain.range.startOffset]
     if (!(host instanceof Element) || !host.shadowRoot) return plain
@@ -302,7 +302,7 @@ export class SelectionToolbar extends LitElement {
     const around = !this.inContent(host)
     if (around && !composedContains(host, this)) return plain
     const shadowRoots = [...this.enclosingShadowRoots(), ...this.openShadowRoots(around ? this : host)]
-    if (!shadowRoots.length || typeof selection.getComposedRanges !== 'function') return plain
+    if (!shadowRoots.length) return plain
     const composed = composedRange(selection, shadowRoots)
     // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
     if (!composed || composed.startContainer.getRootNode() !== composed.endContainer.getRootNode()) return plain
@@ -324,7 +324,8 @@ export class SelectionToolbar extends LitElement {
         acceptNode: (node) => (toolbarElements.has(node as Element) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
       })
       for (let node = walker.currentNode as Element | null; node; node = walker.nextNode() as Element | null) {
-        if (node.shadowRoot) {
+        // The toolbar's own shadow root is its panel, not content.
+        if (node.shadowRoot && node !== this) {
           roots.push(node.shadowRoot)
           walk(node.shadowRoot)
         }
