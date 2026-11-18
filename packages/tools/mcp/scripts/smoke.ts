@@ -37,6 +37,10 @@ assert(tab.includes("import '@c2n/components/tabs/tab'"), 'get_component c2-tab 
 const tabNav = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab-nav' } }))
 assert(tabNav.includes("import '@c2n/components/tabs/tab-nav'"), 'get_component c2-tab-nav must resolve its own entry')
 
+// The largest API is shortened to fit one response rather than cut mid-table.
+const table = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-table' } }))
+assert(table.includes('_Shortened to fit one response') && !table.includes('(truncated at'), 'get_component c2-table must be shortened, not truncated')
+
 // Every component answers get_component and get_presets: a preset with attributes only once threw on 14 of them.
 for (const component of Object.values(loadRegistry().components)) {
   const tag = component.elements[0].tag.replace('{name}', component.icons?.[0] ?? 'x')

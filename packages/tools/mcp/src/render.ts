@@ -4,6 +4,11 @@ import { importPath, typeText, UMBRELLA, type InstalledInfo } from './installed.
 import type { ComponentEntry, CssProperty, ElementEntry, Example, Registry, ThemeEntry } from './registry-types.ts'
 
 export const MAX_CHARS = 12_000
+/**
+ * `get_component`'s own limit: one component's API reference, worth a little more room than a list. The largest
+ * attribute tables (the table family, 60+ attributes) fit it once everything else is shortened.
+ */
+export const COMPONENT_MAX_CHARS = 16_000
 
 export function truncate(text: string, max = MAX_CHARS): string {
   return text.length <= max ? text : `${text.slice(0, max)}\n\n… (truncated at ${max} characters; narrow the request with a filter, limit or offset)`
@@ -29,11 +34,23 @@ export function renderComponentList(components: ComponentEntry[], installed: (pk
   return `${components.length} components\n\n${table(['Tag', 'Package', 'Category', 'Description', 'Installed'], rows)}\n\nNext: \`get_component\` for the API, \`get_examples\` for markup, \`get_theme\` before writing CSS.`
 }
 
+export type ComponentSection = 'attributes' | 'script' | 'slots' | 'events' | 'parts' | 'css' | 'composition' | 'presets'
+
+export const COMPONENT_SECTIONS: ComponentSection[] = ['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']
+
 export interface ComponentRenderOptions {
-  include: Set<'attributes' | 'script' | 'slots' | 'events' | 'parts' | 'css' | 'composition' | 'presets'>
+  include: Set<ComponentSection>
   installed: InstalledInfo | null
   /** Concrete tag / module when the request named an icon. */
   concrete?: { tag: string; modulePath: string; className: string }
+  /** Sections drawn as one summary line instead of a table (`css`, `parts`). */
+  summarize?: Set<ComponentSection>
+  /** Every description cut to its first sentence. */
+  compact?: boolean
+  /** Only the requested element in full; the package's other elements as one line each. */
+  focus?: boolean
+  /** Summaries reduced to counts, and methods to their names. */
+  brief?: boolean
 }
 
 export function renderComponent(component: ComponentEntry, options: ComponentRenderOptions): string {
@@ -67,18 +84,27 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   if (component.tagPattern)
     out.push(`- Icon set: tags follow \`${component.tagPattern}\`, ${component.icons?.length} icons (use \`search_components\` with the icon name).`)
   const elements = secondary ? [requested, ...component.elements.filter((element) => element !== requested)] : component.elements
+  const { summarize, compact, focus, brief } = options
+  const text = (value: string | undefined) => (compact ? firstSentence(value ?? '') : (value ?? ''))
+  const lead = elements[0]
   for (const element of elements) {
     const api = installed?.elements?.get(element.tag) ?? element
+    if (focus && element !== lead) {
+      out.push(`\n## ${element.tag}\n`)
+      out.push(`${[firstSentence(element.description), `Its API: \`get_component\` with \`tag: "${element.tag}"\`.`].filter(Boolean).join(' ')}`)
+      continue
+    }
     const heading = component.elements.length > 1 || component.tagPattern ? `\n## ${element.tag}\n` : ''
     out.push(heading)
     // A secondary element's description already leads the output.
-    if (element.description && component.elements.length > 1 && !(secondary && element === requested)) out.push(element.description)
+    if (element.description && component.elements.length > 1 && !(secondary && element === requested))
+      out.push(compact ? firstParagraph(element.description) : element.description)
     if (include.has('attributes') && api.attributes.length) {
       out.push('\n### Attributes\n')
       out.push(
         table(
           ['Name', 'Type', 'Default', 'Description'],
-          api.attributes.map((a) => [code(a.name), code(typeText(a.type)), code(a.default), a.description ?? '']),
+          api.attributes.map((a) => [code(a.name), code(typeText(a.type)), code(a.default), text(a.description)]),
         ),
       )
     }
@@ -87,7 +113,7 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(
         table(
           ['Slot', 'Description'],
-          api.slots.map((s) => [code(s.name || '(default)'), s.description ?? '']),
+          api.slots.map((s) => [code(s.name || '(default)'), text(s.description)]),
         ),
       )
     }
@@ -96,7 +122,7 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(
         table(
           ['Event', 'Type', 'Description'],
-          api.events.map((e) => [code(e.name), code(typeText(e.type)), e.description ?? '']),
+          api.events.map((e) => [code(e.name), code(typeText(e.type)), text(e.description)]),
         ),
       )
     }
@@ -109,20 +135,28 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
       out.push(
         table(
           ['Property', 'Type', 'Description'],
-          properties.map((p) => [code(p.name) + (p.readonly ? ' (read-only)' : ''), code(p.type), p.description ?? '']),
+          properties.map((p) => [code(p.name) + (p.readonly ? ' (read-only)' : ''), code(p.type), text(p.description)]),
         ),
       )
     }
-    if (include.has('script') && methods.length) {
+    if (include.has('script') && methods.length && brief) {
+      out.push(`\n### Methods\n\n${methods.map((m) => `\`${m.name}()\``).join(', ')}.`)
+    } else if (include.has('script') && methods.length) {
       out.push('\n### Methods\n')
       out.push(
         table(
           ['Method', 'Signature', 'Description'],
-          methods.map((m) => [code(`${m.name}()`), code(m.type), m.description ?? '']),
+          methods.map((m) => [code(`${m.name}()`), code(m.type), text(m.description)]),
         ),
       )
     }
-    if (include.has('parts') && api.cssParts.length) {
+    if (include.has('parts') && api.cssParts.length && summarize?.has('parts')) {
+      out.push(
+        brief
+          ? `\n### CSS parts\n\n${api.cssParts.length} parts for \`::part()\`.`
+          : `\n### CSS parts\n\n${api.cssParts.length} parts for \`::part()\`: ${api.cssParts.map((part) => `\`${part.name}\``).join(', ')}.`,
+      )
+    } else if (include.has('parts') && api.cssParts.length) {
       out.push('\n### CSS parts\n')
       out.push('Use with `::part(name)` when CSS custom properties do not cover the required change.\n')
       out.push(
@@ -132,7 +166,14 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
         ),
       )
     }
-    if (include.has('css') && api.cssProperties.length) {
+    if (include.has('css') && api.cssProperties.length && summarize?.has('css')) {
+      const groups = groupCssProperties(api.cssProperties.map((p) => ('part' in p ? p : withParsedName(p))))
+      if (brief) out.push(`\n### CSS variables\n\n${api.cssProperties.length} variables (\`--c2-…__<part>--<property>\`).`)
+      else
+        out.push(
+          `\n### CSS variables\n\n${api.cssProperties.length} variables, by part: ${groups.map((group) => `${group.part || '(root)'} (${group.states.reduce((n, state) => n + state.properties.length, 0)})`).join(', ')}.`,
+        )
+    } else if (include.has('css') && api.cssProperties.length) {
       out.push('\n### CSS variables\n')
       out.push('Set them on the element, a class or any ancestor. `token` = the `--c2-theme--*` token the base theme maps the variable to.\n')
       out.push(renderCssGroups(api.cssProperties.map((p) => ('part' in p ? p : withParsedName(p)))))
@@ -165,6 +206,66 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
 }
 
 const SUMMARY_MAX = 200
+
+/** A long element description's first paragraph, capped: its later paragraphs are usage notes. */
+function firstParagraph(text: string): string {
+  const first = text
+    .trim()
+    .split(/\n\s*\n/)[0]
+    .replace(/\s+/g, ' ')
+  return first.length > 400 ? `${first.slice(0, 400).replace(/\s+\S*$/, '')}…` : first
+}
+
+/**
+ * The component's API in one response of at most `COMPONENT_MAX_CHARS`. When the full answer is longer, it is shortened step by
+ * step (CSS variables and parts as summaries, then first-sentence descriptions, then the package's other elements as
+ * one line each) and ends with what was left out and how to ask for it. Sections asked for by name are never
+ * summarized.
+ */
+export function renderComponentFitted(component: ComponentEntry, options: ComponentRenderOptions & { requested?: Set<ComponentSection> }): string {
+  const requested = options.requested ?? new Set<ComponentSection>()
+  const summarizable = new Set<ComponentSection>((['css', 'parts'] as ComponentSection[]).filter((section) => !requested.has(section)))
+  const levels: Partial<ComponentRenderOptions>[] = [
+    {},
+    { summarize: summarizable },
+    { summarize: summarizable, compact: true },
+    { summarize: summarizable, compact: true, focus: true },
+    { summarize: summarizable, compact: true, focus: true, brief: true },
+  ]
+  let text = ''
+  for (const [index, level] of levels.entries()) {
+    text = renderComponent(component, { ...options, ...level })
+    if (text.length <= COMPONENT_MAX_CHARS) {
+      if (index === 0) return text
+      return `${text}\n\n${fittedNote(component, options, level)}`
+    }
+  }
+  // Still too long: the note goes first, so the cut the server makes at the limit cannot take it away.
+  return `${fittedNote(component, options, levels.at(-1)!)}\n\n${text}`
+}
+
+function fittedNote(component: ComponentEntry, options: ComponentRenderOptions, level: Partial<ComponentRenderOptions>): string {
+  const tag = options.concrete?.tag ?? component.elements[0].tag
+  const done: string[] = []
+  // Only what the component has: a note about parts it does not have sends an agent after nothing.
+  // Read from what was rendered: the installed API when there is one, else the registry.
+  const has = (key: 'cssProperties' | 'cssParts') =>
+    component.elements.some((element) => ((options.installed?.elements?.get(element.tag) ?? element)[key]?.length ?? 0) > 0)
+  if (level.summarize?.has('css') && options.include.has('css') && has('cssProperties')) done.push('CSS variables summarized by part')
+  if (level.summarize?.has('parts') && options.include.has('parts') && has('cssParts')) done.push('CSS parts listed by name')
+  if (level.compact) done.push('descriptions cut to their first sentence')
+  if (level.focus && component.elements.length > 1) done.push("the package's other elements listed by name")
+  if (level.brief) done.push('CSS variables and parts counted, methods named')
+  // A request that already named its sections is narrowed by element instead: repeating it would return the same.
+  const narrowed = options.include.size < COMPONENT_SECTIONS.length
+  const next =
+    narrowed && component.elements.length > 1
+      ? `ask for one element at a time (\`get_component\` with the \`tag\` of each element listed) or for \`format: "json"\``
+      : narrowed
+        ? `ask for \`format: "json"\``
+        : `ask for one section at a time, e.g. \`get_component\` with \`tag: "${tag}"\` and \`include: ["css"]\``
+  return `_Shortened to fit one response: ${done.join(', ')}. For the full text ${next}._`
+}
 
 function firstSentence(text: string): string {
   const flat = text.trim().replace(/\s+/g, ' ')

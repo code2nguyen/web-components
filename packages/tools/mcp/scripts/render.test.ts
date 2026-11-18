@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { installedPackage, typeText } from '../src/installed.ts'
-import { renderComponent, type ComponentRenderOptions } from '../src/render.ts'
+import { COMPONENT_MAX_CHARS, COMPONENT_SECTIONS, renderComponent, renderComponentFitted, type ComponentRenderOptions } from '../src/render.ts'
 import type { ComponentEntry } from '../src/registry-types.ts'
 
 const badge: ComponentEntry = {
@@ -158,4 +158,76 @@ test('the summary of a secondary element is capped when the description has no s
   const summary = out.split('\n').find((line) => line.startsWith('Part of'))!
   assert.ok(summary.length < 240, `${summary.length} characters`)
   assert.ok(summary.endsWith('…'))
+})
+
+/** A component whose full API is far past one response: long descriptions, many CSS variables, a second element. */
+function large(): ComponentEntry {
+  const long = 'Explains the behaviour in a first sentence. '.repeat(1) + 'Then a long tail of usage notes that an agent can do without. '.repeat(8)
+  const element = (tag: string) => ({
+    tag,
+    className: 'Big',
+    modulePath: '@c2n/big',
+    description: `${long}\n\nA second paragraph of notes.`,
+    attributes: Array.from({ length: 100 }, (_, i) => ({ name: `attr-${i}`, type: 'string', description: long })),
+    slots: [],
+    events: [],
+    cssParts: Array.from({ length: 20 }, (_, i) => ({ name: `part-${i}`, description: long })),
+    cssProperties: Array.from({ length: 80 }, (_, i) => ({
+      name: `--c2-big__part-${i % 8}--color-${i}`,
+      type: 'color',
+      part: `part-${i % 8}`,
+      property: 'color',
+      description: long,
+    })),
+  })
+  return { ...badge, id: 'big', title: 'Big', elements: [element('c2-big'), element('c2-big-item')] }
+}
+
+test('a long answer is shortened to fit one response and says how to ask for the rest', () => {
+  const big = large()
+  assert.ok(renderComponent(big, { include: new Set(COMPONENT_SECTIONS), installed: null }).length > COMPONENT_MAX_CHARS)
+  const text = renderComponentFitted(big, { include: new Set(COMPONENT_SECTIONS), installed: null })
+  assert.ok(text.length <= COMPONENT_MAX_CHARS, `${text.length} characters`)
+  assert.match(text, /_Shortened to fit one response: .*include: \["css"\]/)
+  // The attributes, the most used part, are all still there.
+  for (let i = 0; i < 100; i++) assert.ok(text.includes(`\`attr-${i}\``), `attr-${i}`)
+  // The other element of the package is named with the call that returns it.
+  assert.match(text, /## c2-big-item\n\n.*`get_component` with `tag: "c2-big-item"`/)
+})
+
+test('a short answer is not touched, and a section asked for by name is never summarized', () => {
+  const short = renderComponentFitted(badge, { include: new Set(COMPONENT_SECTIONS), installed: null })
+  assert.equal(short, renderComponent(badge, { include: new Set(COMPONENT_SECTIONS), installed: null }))
+  const css = renderComponentFitted(large(), { include: new Set(['css']), requested: new Set(['css']), installed: null })
+  assert.ok(css.includes('--c2-big__part-0--color-0'), 'the variables are listed, not counted')
+})
+
+test('sections asked for by name are never summarized, and an element left out says how to get its sections', () => {
+  const big = large()
+  const include = new Set(['attributes'] as const)
+  const text = renderComponentFitted(big, { include, requested: include, installed: null })
+  assert.ok(text.length <= COMPONENT_MAX_CHARS, `${text.length} characters`)
+  // The element asked for keeps every attribute row; the other is either there in full or named with its call.
+  for (let i = 0; i < 100; i++) assert.ok(text.includes(`\`attr-${i}\``), `attr-${i}`)
+  assert.match(text, /## c2-big-item[\s\S]*(`attr-0`|`get_component` with `tag: "c2-big-item"`)/)
+})
+
+test('an answer still too long after every step starts with the note, which a cut at the limit keeps', () => {
+  const big = large()
+  const huge = { ...big, elements: Array.from({ length: 6 }, (_, i) => ({ ...big.elements[0], tag: `c2-big-${i}` })) }
+  const text = renderComponentFitted(huge, { include: new Set(['attributes'] as const), requested: new Set(['attributes'] as const), installed: null })
+  if (text.length > COMPONENT_MAX_CHARS) assert.match(text, /^_Shortened to fit one response/)
+})
+
+test('a narrowed answer still too long focuses on the element asked for, and asking by tag returns that element', () => {
+  const big = large()
+  const huge = { ...big, elements: Array.from({ length: 6 }, (_, i) => ({ ...big.elements[0], tag: `c2-big-${i}` })) }
+  const include = new Set(['attributes'] as const)
+  const first = renderComponentFitted(huge, { include, requested: include, installed: null })
+  assert.ok(first.length <= COMPONENT_MAX_CHARS, `${first.length} characters`)
+  assert.match(first, /one element at a time/)
+  // Following the advice: the element asked for comes first, in full, and fits.
+  const third = renderComponentFitted(huge, { include, requested: include, installed: null, concrete: huge.elements[3] })
+  assert.ok(third.length <= COMPONENT_MAX_CHARS, `${third.length} characters`)
+  assert.match(third, /c2-big-3[\s\S]*`attr-99`/)
 })

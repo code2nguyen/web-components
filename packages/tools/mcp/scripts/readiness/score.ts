@@ -10,7 +10,7 @@
  */
 import { searchComponents } from '../../src/search.ts'
 import { validateMarkup } from '../../src/lib/validate.ts'
-import { MAX_CHARS, renderComponent } from '../../src/render.ts'
+import { COMPONENT_MAX_CHARS, COMPONENT_SECTIONS, renderComponentFitted } from '../../src/render.ts'
 import type { ComponentEntry, ElementEntry, Example, Registry } from '../../src/registry-types.ts'
 
 export type DimensionId = 'identity' | 'api' | 'examples' | 'composition' | 'framework' | 'validation'
@@ -196,13 +196,18 @@ function api(c: ComponentEntry): Check[] {
   const script = c.elements.flatMap((e) => (e.scriptApi ?? []).map((m) => ({ ...m, tag: e.tag })))
   const props = script.filter((m) => m.kind === 'property')
   const methods = script.filter((m) => m.kind === 'method')
-  // `get_component` answers in one response of at most MAX_CHARS: past that the agent sees the head only.
-  const size = renderComponent(c, {
-    include: new Set(['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
-    installed: null,
-  }).length
+  // `get_component` answers in one response: shortened when long, cut when even the shortest form does not fit.
+  const answer = renderComponentFitted(c, { include: new Set(COMPONENT_SECTIONS), installed: null })
+  const shortened = answer.includes('_Shortened to fit one response')
+  const fits = answer.length <= COMPONENT_MAX_CHARS
   const checks = [
-    check('fits', 'get_component fits in one response', 1.5, size <= MAX_CHARS ? 1 : MAX_CHARS / size, `${size} characters, truncated at ${MAX_CHARS}`),
+    check(
+      'fits',
+      'get_component answers in full in one response',
+      1.5,
+      !fits ? COMPONENT_MAX_CHARS / answer.length : shortened ? 0.5 : 1,
+      !fits ? `${answer.length} characters even shortened: cut at ${COMPONENT_MAX_CHARS}` : 'shortened to fit: descriptions or CSS tables left out',
+    ),
     share(
       'attributes-described',
       'Attributes described',

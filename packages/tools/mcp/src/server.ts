@@ -10,7 +10,9 @@ import type { GuideTopic, Registry } from './registry-types.ts'
 import {
   MAX_CHARS,
   elementApiNames,
-  renderComponent,
+  COMPONENT_MAX_CHARS,
+  COMPONENT_SECTIONS,
+  renderComponentFitted,
   renderComponentList,
   renderExampleIndex,
   renderExamples,
@@ -23,8 +25,8 @@ import { searchComponents, searchExamples } from './search.ts'
 const GUIDE_TOPICS = ['workflow', 'theming', 'variant-components', 'frameworks'] as const
 const readOnly = { readOnlyHint: true, openWorldHint: false } as const
 
-function text(value: string) {
-  return { content: [{ type: 'text' as const, text: truncate(value) }] }
+function text(value: string, max?: number) {
+  return { content: [{ type: 'text' as const, text: truncate(value, max) }] }
 }
 
 const JSON_MAX_CHARS = MAX_CHARS * 4
@@ -167,7 +169,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Get component API',
       description:
-        'Full API of one component: install/import lines, attributes, script-only properties (renderers, data sources) and methods, slots, events, native CSS parts, CSS variables grouped by semantic target and state (with the theme token each follows), composition and preset names. Examples are served by get_examples.',
+        'Full API of one component: install/import lines, attributes, script-only properties (renderers, data sources) and methods, slots, events, native CSS parts, CSS variables grouped by semantic target and state (with the theme token each follows), composition and preset names. A long answer is shortened to fit one response and says how to ask for the rest; pass `include` for one section in full. Examples are served by get_examples.',
       inputSchema: {
         tag: tagSchema,
         include: z
@@ -191,11 +193,13 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           resolved: { tag: resolved.tag, modulePath: importPath(resolved.modulePath, resolved.component.package, installed), className: resolved.className },
         })
       return text(
-        renderComponent(resolved.component, {
-          include: new Set(include ?? ['attributes', 'script', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
+        renderComponentFitted(resolved.component, {
+          include: new Set(include ?? COMPONENT_SECTIONS),
+          requested: new Set(include ?? []),
           installed,
           concrete: { tag: resolved.tag, modulePath: resolved.modulePath, className: resolved.className },
         }),
+        COMPONENT_MAX_CHARS,
       )
     },
   )
