@@ -83,7 +83,7 @@
     const end = root.querySelector<NumberInput>('[data-end="end"]')
     if (!slider || !start || !end) return
     await hydrated(slider)
-    const typed = (field: NumberInput, fallback: number) => (field.value.trim() !== '' && Number.isFinite(Number(field.value)) ? Number(field.value) : fallback)
+    const typed = (field: NumberInput, fallback: number) => (Number.isNaN(field.valueAsNumber) ? fallback : field.valueAsNumber)
     const showEnds = () => {
       start.value = String(slider.valueStart)
       end.value = String(slider.valueEnd)

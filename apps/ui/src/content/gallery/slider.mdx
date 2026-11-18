@@ -173,8 +173,8 @@ const slider = filter.querySelector<Slider>('c2-slider')!
 const start = filter.querySelector<NumberInput>('[data-end="start"]')!
 const end = filter.querySelector<NumberInput>('[data-end="end"]')!
 
-// An empty or unreadable field falls back to the end of the scale.
-const typed = (field: NumberInput, fallback: number) => (field.value.trim() !== '' && Number.isFinite(Number(field.value)) ? Number(field.value) : fallback)
+// An empty field falls back to the end of the scale.
+const typed = (field: NumberInput, fallback: number) => (Number.isNaN(field.valueAsNumber) ? fallback : field.valueAsNumber)
 const showEnds = () => {
   start.value = String(slider.valueStart)
   end.value = String(slider.valueEnd)
