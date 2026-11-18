@@ -1,7 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { applyRadioSemantics } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './icon-button.scss?inline'
 
@@ -53,7 +52,7 @@ export class IconButton extends LitElement {
   /** Pressed state of a toggle button (`aria-pressed="true"`); styled with the `__selected--*` variables. */
   @property({ type: Boolean, reflect: true }) selected = false
 
-  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
+  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in multiple selection, and in single selection when an item cannot be a radio. */
   @property({ type: Boolean, reflect: true }) toggle = false
 
   /**
@@ -61,15 +60,7 @@ export class IconButton extends LitElement {
    * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
    * keys the group answers to. Set by the group.
    */
-  @property({ type: Boolean }) radio = false
-
-  /**
-   * A hydrating first render keeps the server's attributes, and the server never knows the item is a radio (its group
-   * says so on the client): put the radio semantics on the inner button once. Later renders bind them as usual.
-   */
-  protected override firstUpdated() {
-    if (this.radio) applyRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-icon-button'), this.selected)
-  }
+  @property({ type: Boolean, attribute: false }) radio = false
 
   override render() {
     return html`

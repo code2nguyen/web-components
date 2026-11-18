@@ -2,7 +2,6 @@ import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } f
 import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { applyRadioSemantics } from '@c2n/core/dom-helper.js'
 import styles from './button.scss?inline'
 
 /** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them the target's own fallback runs. */
@@ -92,7 +91,7 @@ export class Button extends LitElement {
   /** Pressed state of a toggle button (`aria-pressed="true"`); styled with the `container__selected--*` variables. */
   @property({ type: Boolean, reflect: true }) selected = false
 
-  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
+  /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in multiple selection, and in single selection when an item cannot be a radio. */
   @property({ type: Boolean, reflect: true }) toggle = false
 
   /**
@@ -100,7 +99,7 @@ export class Button extends LitElement {
    * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
    * keys the group answers to. Set by the group.
    */
-  @property({ type: Boolean }) radio = false
+  @property({ type: Boolean, attribute: false }) radio = false
 
   /** Native button behavior. `submit` submits the nearest form and `reset` restores it. */
   @property({ reflect: true }) type: 'button' | 'submit' | 'reset' = 'button'
@@ -195,14 +194,6 @@ export class Button extends LitElement {
     this.internals?.setFormValue(this.name ? this.value : null)
     HTMLFormElement.prototype.requestSubmit.call(this.form)
     this.internals?.setFormValue(null)
-  }
-
-  /**
-   * A hydrating first render keeps the server's attributes, and the server never knows the item is a radio (its group
-   * says so on the client): put the radio semantics on the inner button once. Later renders bind them as usual.
-   */
-  protected override firstUpdated() {
-    if (this.radio) applyRadioSemantics(this.renderRoot.querySelector<HTMLElement>('button.c2-button'), this.selected)
   }
 
   override render() {

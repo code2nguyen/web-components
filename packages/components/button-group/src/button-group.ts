@@ -331,8 +331,15 @@ export class ButtonGroup extends LitElement {
       if (selectable && !radio) item.setAttribute('toggle', '')
       else item.removeAttribute('toggle')
       if (radio) {
-        ;(item as HTMLElement & { radio: boolean }).radio = true
         this.radioItemsSet.add(item)
+        const element = item as HTMLElement & { radio: boolean; hasUpdated?: boolean; updateComplete?: Promise<unknown> }
+        // Not before the item's first update: a server-rendered item hydrates against the server's markup, which knows
+        // nothing of the group, and a value written before then would not reach its DOM.
+        if (element.hasUpdated === false && element.updateComplete) {
+          element.updateComplete.then(() => {
+            if (element.parentElement === this && this.radioMode) element.radio = true
+          })
+        } else element.radio = true
       } else if ((item as HTMLElement & { radio?: boolean }).radio) {
         // Arrived as a radio from a single-selection group.
         ;(item as HTMLElement & { radio: boolean }).radio = false
