@@ -344,3 +344,32 @@ test('a wrapper is watched for good: its native control is adopted past a later 
   await page.evaluate(() => document.querySelectorAll('c2-form-field')[1].append(document.createElement('span')))
   await expect.poll(() => control(1)).toBe('vendor-control')
 })
+
+test('a display: contents control with no control inside it is still the control, and a hidden input is not one', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Name"><contents-input></contents-input></c2-form-field><c2-form-field label="Email"><div style="display: contents"><input type="hidden" name="token" /><input type="email" id="email" /></div></c2-form-field>`,
+  )
+  await page.evaluate(() => {
+    customElements.define(
+      'contents-input',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          this.style.display = 'contents'
+          this.attachShadow({ mode: 'open' }).append(document.createElement('input'))
+        }
+      },
+    )
+    document.querySelectorAll('c2-form-field')[0].append(document.createElement('span'))
+  })
+  const control = (index: number) =>
+    page
+      .locator('c2-form-field')
+      .nth(index)
+      .evaluate((field) => {
+        const element = (field as unknown as { control: Element | null }).control
+        return element ? `${element.localName}${element.id ? '#' + element.id : ''}` : null
+      })
+  await expect.poll(() => control(0)).toBe('contents-input')
+  expect(await control(1)).toBe('input#email')
+})

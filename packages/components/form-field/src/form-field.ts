@@ -73,8 +73,8 @@ const isFormControl = (element: Element) =>
  */
 const isCandidate = (element: Element) =>
   !!fieldConsumerOf(element as FormFieldControl) ||
-  element.matches('input, select, textarea') ||
-  (isFormControl(element) && !element.localName.endsWith('button'))
+  element.matches('input:not([type="hidden"], [type="submit"], [type="reset"], [type="image"], [type="button"]), select, textarea') ||
+  ((element.constructor as { formAssociated?: boolean }).formAssociated === true && !element.localName.endsWith('button'))
 
 /** Astro's island elements: wrappers by name, whether or not Astro's script has defined them or its style applied. */
 const FRAMEWORK_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
@@ -312,6 +312,9 @@ export class FormField extends LitElement {
         if (isWrapper(child)) {
           const inner = search(child)
           if (inner) return inner
+          // A layout-free element of the page's own with no control inside may be the control itself (a component
+          // whose host is `display: contents`); a framework's island waits for its content.
+          if (parent === this && !FRAMEWORK_WRAPPERS.has(child.localName) && !child.children.length) return child as FormFieldControl
           continue
         }
         // Inside a wrapper only a control counts: a label or prefix next to it is the app's decoration.
@@ -342,7 +345,8 @@ export class FormField extends LitElement {
     const wrappers = [...this.children].filter((child) => !child.hasAttribute('slot') && isWrapper(child))
     if (!wrappers.length || !this.isConnected) return
     this.wrapperObserver ??= new MutationObserver(() => this.adoptControl(this.findControl()))
-    for (const wrapper of wrappers) this.wrapperObserver.observe(wrapper, { childList: true, subtree: true })
+    // The wrapper's own children, not the control's light DOM (a select's options), which never change the control.
+    for (const wrapper of wrappers) this.wrapperObserver.observe(wrapper, { childList: true })
   }
 
   private adoptControl(control: FormFieldControl | null) {
