@@ -67,6 +67,11 @@ function wireScheduler(scheduler: Scheduler): void {
     say(`event-change: ${detail.event.title}, ${resource} ${time(start)}–${time(end)}`)
   })
   scheduler.addEventListener('event-click', ({ detail }) => say(`event-click: ${detail.event.title}`))
+  scheduler.addEventListener('proposal-change', ({ detail }) => {
+    scheduler.proposal = { ...scheduler.proposal, start: detail.start, end: detail.end }
+    const busy = [...detail.busy, ...detail.tentative.map((id) => `${id} (tentative)`)]
+    say(`proposal-change: ${time(detail.start)}–${time(detail.end)}, ${busy.length ? `busy: ${busy.join(', ')}` : 'everyone is free'}`)
+  })
 }
 
 function seedExamples(): void {

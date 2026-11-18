@@ -92,7 +92,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **rich-text-editor-2** · `c2-rich-text-editor` · track changes #278 (lazy) · +0.4 kB on 54.6 kB, 8 kB lazy · risk medium
 - **core-2** · `@c2n/core` · session timeout #399 (core), live region #495 (core)
 - **month-planner-2** · `c2-month-planner` · rate calendar #304 · +0.8 kB on 10.9 kB · risk medium
-- **scheduler-2** · `c2-scheduler` · availability grid #300 · +1 kB on 38.1 kB · risk low
 - **scheduler-3** · `c2-scheduler` · dispatch board #305 · +1.2 kB on 38.1 kB · risk medium
 - **scheduler-4** · `c2-scheduler` · shift board #352 · +0.8 kB on 38.1 kB · risk medium
 - **scheduler-5** · `c2-scheduler` · example: on call schedule #302
