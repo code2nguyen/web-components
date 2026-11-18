@@ -49,7 +49,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     // The installed manifest's description when there is one: the tables below come from it too.
     const description = installed?.declared?.get(requested.tag)?.description || requested.description
     if (description) out.push(description)
-    out.push(`\nPart of \`${component.package}\`: ${firstSentence(component.description || component.intro || '')}`)
+    const summary = firstSentence(component.description || component.intro || '')
+    out.push(summary ? `\nPart of \`${component.package}\`: ${summary}` : `\nPart of \`${component.package}\`.`)
   } else out.push(component.description || component.intro || '')
   out.push('')
   const status = installed?.via
@@ -139,9 +140,13 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
 }
 
 function firstSentence(text: string): string {
-  // A sentence ends where the next one starts with a capital, so `e.g. line, bar` does not cut it short.
-  const match = /^[\s\S]*?[.!?](?=\s+[A-Z(`*]|\s*$)/.exec(text.trim())
-  return (match?.[0] ?? text.trim()).replace(/\s+/g, ' ')
+  const flat = text.trim().replace(/\s+/g, ' ')
+  // A sentence ends at `.`, `!` or `?` before a space and a capital, but not after an abbreviation such as `e.g.`.
+  const end = /[.!?](?= [A-Z(`*]|$)/g
+  for (let match = end.exec(flat); match; match = end.exec(flat)) {
+    if (!/\b(?:e\.g|i\.e|etc|vs|cf)\.$/i.test(flat.slice(0, match.index + 1))) return flat.slice(0, match.index + 1)
+  }
+  return flat
 }
 
 function withParsedName(p: { name: string; type?: { text?: string } | string; default?: string; description?: string }): CssProperty {

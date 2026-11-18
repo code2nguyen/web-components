@@ -108,7 +108,7 @@ test('get_component on a secondary element drops the main element composition an
     id: 'chart',
     package: '@c2n/chart',
     title: 'Chart',
-    description: 'Charts (e.g. line, bar) drawn on a canvas. Second sentence.',
+    description: 'Charts (e.g. Line, bar) drawn on a canvas. Second sentence.',
     composition: { internal: ['c2-overlay'], slotted: ['c2-chart-series'], usedBy: [] },
     elements: [
       { ...badge.elements[0], tag: 'c2-line-chart', className: 'LineChart', description: 'A line chart.' },
@@ -120,7 +120,15 @@ test('get_component on a secondary element drops the main element composition an
     installed: null,
     concrete: { tag: 'c2-chart-series', modulePath: '@c2n/chart', className: 'ChartSeries' },
   })
-  assert.match(out, /Part of `@c2n\/chart`: Charts \(e\.g\. line, bar\) drawn on a canvas\.$/m)
+  assert.match(out, /Part of `@c2n\/chart`: Charts \(e\.g\. Line, bar\) drawn on a canvas\.$/m)
   assert.doesNotMatch(out.split('\n- Package')[0], /c2-line-chart/)
   assert.doesNotMatch(out, /Expects slotted|Renders internally/)
+})
+
+test('get_component on a secondary element of a package with no description prints no empty summary', () => {
+  const out = renderComponent(
+    { ...badge, description: '', elements: [badge.elements[0], { ...badge.elements[0], tag: 'c2-badge-dot', className: 'BadgeDot' }] },
+    { include, installed: null, concrete: { tag: 'c2-badge-dot', modulePath: '@c2n/badge', className: 'BadgeDot' } },
+  )
+  assert.match(out, /^Part of `@c2n\/badge`\.$/m)
 })
