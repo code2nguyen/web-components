@@ -140,6 +140,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   return out.filter((l) => l !== undefined).join('\n')
 }
 
+const SUMMARY_MAX = 200
+
 function firstSentence(text: string): string {
   const flat = text.trim().replace(/\s+/g, ' ')
   // A sentence ends at `.`, `!` or `?` before a space and a capital, but not after `e.g.` or `i.e.` (`etc.` often ends one).
@@ -147,7 +149,8 @@ function firstSentence(text: string): string {
   for (let match = end.exec(flat); match; match = end.exec(flat)) {
     if (!/\b(?:e\.g|i\.e)\.$/i.test(flat.slice(0, match.index + 1))) return flat.slice(0, match.index + 1)
   }
-  return flat
+  // No sentence break found: cap it, so the main element's description never fills the output.
+  return flat.length > SUMMARY_MAX ? `${flat.slice(0, SUMMARY_MAX).replace(/\s+\S*$/, '')}…` : flat
 }
 
 function withParsedName(p: { name: string; type?: { text?: string } | string; default?: string; description?: string }): CssProperty {

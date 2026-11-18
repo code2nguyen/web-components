@@ -145,3 +145,17 @@ test('the summary of a secondary element ends at an etc. that ends a sentence', 
   )
   assert.match(out, /^Part of `@c2n\/badge`: Shows rows, columns, filters, etc\.$/m)
 })
+
+test('the summary of a secondary element is capped when the description has no sentence break', () => {
+  const out = renderComponent(
+    {
+      ...badge,
+      description: `Data grid ${'with sorting and grouping '.repeat(40)}. supports more`,
+      elements: [badge.elements[0], { ...badge.elements[0], tag: 'c2-badge-dot', className: 'BadgeDot' }],
+    },
+    { include, installed: null, concrete: { tag: 'c2-badge-dot', modulePath: '@c2n/badge', className: 'BadgeDot' } },
+  )
+  const summary = out.split('\n').find((line) => line.startsWith('Part of'))!
+  assert.ok(summary.length < 240, `${summary.length} characters`)
+  assert.ok(summary.endsWith('…'))
+})
