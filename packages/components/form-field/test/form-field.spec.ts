@@ -294,3 +294,16 @@ test('a control group upgrading after its children is still the control', async 
   // The child is a consumer already; the group is not defined yet, so it must not be looked through.
   expect(await page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('late-group')
 })
+
+test('inside a wrapper, a button or an undefined icon is decoration, and a control rendered later is adopted', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-form-field label="Price" hint="Before tax"><div style="display: contents" id="island"><c2-button>?</c2-button><icon-not-defined></icon-not-defined></div></c2-form-field>`,
+  )
+  // The island renders its native input after the field connected.
+  await page.evaluate(() => {
+    const input = document.createElement('input')
+    input.setAttribute('aria-describedby', '')
+    document.getElementById('island')!.append(input)
+  })
+  await expect.poll(() => page.locator('c2-form-field').evaluate((field) => (field as unknown as { control: Element | null }).control?.localName)).toBe('input')
+})

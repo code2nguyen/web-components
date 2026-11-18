@@ -66,9 +66,12 @@ const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
 const isFormControl = (element: Element) =>
   element.matches('input, select, textarea, button') || (element.constructor as { formAssociated?: boolean }).formAssociated === true
 
-/** What may be the control inside a wrapper: a control, or a custom element that may become one when it upgrades. */
-const isCandidate = (element: Element) =>
-  isFormControl(element) || !!fieldConsumerOf(element as FormFieldControl) || (element.localName.includes('-') && !element.matches(':defined'))
+/**
+ * What may be the control inside a wrapper: a control of the field protocol or a native text or choice control. A
+ * button, an icon or a custom element not upgraded yet is the app's decoration; a `c2-*` control announces itself when
+ * it upgrades.
+ */
+const isCandidate = (element: Element) => !!fieldConsumerOf(element as FormFieldControl) || element.matches('input, select, textarea')
 
 /** Astro's island elements: wrappers by name, whether or not Astro's script has defined them or its style applied. */
 const FRAMEWORK_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
@@ -257,6 +260,7 @@ export class FormField extends LitElement {
     this.ownerForm?.removeEventListener('reset', this.handleFormReset)
     this.ownerForm = null
     this.adoptControl(null)
+    this.wrapperObserver?.disconnect()
     clearTimeout(this.announceTimer)
   }
 
@@ -293,15 +297,17 @@ export class FormField extends LitElement {
   /**
    * The first unslotted child that draws a box. A child that does not render (`style`, `script`, `template`) is
    * skipped, and a wrapper (a framework's island element, such as Astro's `astro-island`) is looked through to the
-   * first control it holds, past decoration such as a prefix. A wrapper is a defined element laid out with
+   * first control it holds (see `isCandidate`), past decoration such as a prefix or a help button. A wrapper is a defined element laid out with
    * `display: contents` that is not a control itself; a custom element not upgraded yet is never one, since it may be
    * a control group that upgrades after its children.
    */
   private findControl(): FormFieldControl | null {
+    const wrappers: Element[] = []
     const search = (parent: Element): FormFieldControl | null => {
       for (const child of parent.children) {
         if (child.hasAttribute('slot') || NOT_RENDERED.has(child.localName)) continue
         if (isWrapper(child)) {
+          wrappers.push(child)
           const inner = search(child)
           if (inner) return inner
           continue
@@ -311,7 +317,25 @@ export class FormField extends LitElement {
       }
       return null
     }
-    return search(this)
+    const control = search(this)
+    this.watchWrappers(control ? [] : wrappers)
+    return control
+  }
+
+  private wrapperObserver: MutationObserver | undefined
+
+  /**
+   * Watches wrappers that hold no control yet: a framework island renders its content after the field connected, and
+   * a native control it adds announces itself to nobody (a `c2-*` control does, through the field protocol).
+   */
+  private watchWrappers(wrappers: Element[]) {
+    this.wrapperObserver?.disconnect()
+    if (!wrappers.length || !this.isConnected) return
+    this.wrapperObserver ??= new MutationObserver(() => {
+      const control = this.findControl()
+      if (control) this.adoptControl(control)
+    })
+    for (const wrapper of wrappers) this.wrapperObserver.observe(wrapper, { childList: true, subtree: true })
   }
 
   /** Whether an element is a direct child of this field, or reached from one through wrappers only. */
