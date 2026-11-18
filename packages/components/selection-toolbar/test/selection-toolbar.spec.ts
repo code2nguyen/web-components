@@ -314,3 +314,170 @@ test('a caret survives focus moving to a form-associated control in the content 
   expect(caret.text).toBe('')
   above((await prompt(page).boundingBox())!, caret)
 })
+
+/** A component that draws its text in an open shadow root, as `c2-text-annotator` does. */
+const SHADOW_SCENARIO = (composed: boolean) => `<div style="padding-top: 120px"><c2-selection-toolbar ${composed ? 'composed' : ''}>
+  <shadow-text></shadow-text>
+  <button slot="toolbar" data-action="tag">Tag</button>
+</c2-selection-toolbar></div>`
+
+const defineShadowText = (page: Page) =>
+  page.evaluate(() => {
+    if (customElements.get('shadow-text')) return
+    customElements.define(
+      'shadow-text',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          const paragraph = document.createElement('p')
+          paragraph.id = 'inner'
+          paragraph.textContent = 'The quick brown fox jumps over the lazy dog.'
+          this.attachShadow({ mode: 'open' }).append(paragraph)
+        }
+      },
+    )
+  })
+
+/** Selects `word` in the shadow root of `shadow-text`, as a mouse selection there would. */
+const selectInShadow = (page: Page, word: string) =>
+  page.evaluate((word) => {
+    const node = document.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+    const start = node.textContent!.indexOf(word)
+    document.getSelection()!.setBaseAndExtent(node, start, node, start + word.length)
+  }, word)
+
+test('composed shows the toolbar for a selection inside a shadow root of its content', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  await watch(host(page), 'selection-action')
+  await selectInShadow(page, 'brown fox')
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('brown fox')
+  const [bar, word] = await Promise.all([
+    toolbar(page).boundingBox(),
+    page.evaluate(() => {
+      const node = document.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+      const range = document.createRange()
+      range.setStart(node, 10)
+      range.setEnd(node, 19)
+      return range.getBoundingClientRect().top
+    }),
+  ])
+  expect(bar!.y + bar!.height).toBeLessThanOrEqual(word)
+  await page.getByRole('button', { name: 'Tag' }).click()
+  expect(await events(page)).toEqual([{ action: 'tag', text: 'brown fox' }])
+  // Collapsing the selection hides it again.
+  await page.evaluate(() => document.getSelection()!.collapseToStart())
+  await expect(toolbar(page)).toBeHidden()
+})
+
+test('without composed, a selection inside a shadow root of the content is left to that component', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(false))
+  await defineShadowText(page)
+  await selectInShadow(page, 'brown fox')
+  await page.waitForTimeout(500)
+  await expect(toolbar(page)).toBeHidden()
+})
+
+test('composed reads a selection bounded by the shadow root itself, and works with the toolbar inside a shadow root', async ({ page, renderScenario }) => {
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  // Select All in the component: the range's containers are the shadow root.
+  await page.evaluate(() => {
+    const root = document.querySelector('shadow-text')!.shadowRoot!
+    document.getSelection()!.setBaseAndExtent(root, 0, root, root.childNodes.length)
+  })
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('The quick brown fox jumps over the lazy dog.')
+
+  // The same toolbar, moved into an app's shadow root.
+  await page.evaluate(() => {
+    const toolbarElement = document.querySelector('c2-selection-toolbar')!
+    const app = document.createElement('div')
+    app.style.paddingTop = '120px'
+    document.body.append(app)
+    app.attachShadow({ mode: 'open' }).append(toolbarElement)
+    document.getSelection()!.removeAllRanges()
+  })
+  const inShadow = page.locator('div >> c2-selection-toolbar')
+  await expect(inShadow.getByRole('toolbar')).toBeHidden()
+  await page.evaluate(() => {
+    const app = [...document.body.querySelectorAll('div')].find((element) => element.shadowRoot)!
+    const node = app.shadowRoot!.querySelector('shadow-text')!.shadowRoot!.getElementById('inner')!.firstChild!
+    document.getSelection()!.setBaseAndExtent(node, 4, node, 9)
+  })
+  await expect(inShadow.getByRole('toolbar')).toBeVisible()
+  expect(await inShadow.evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('quick')
+})
+
+test('composed also works where getComposedRanges takes the shadow roots as arguments', async ({ page, renderScenario, browserName }) => {
+  // Only WebKit reports a selection in a shadow root as a caret, the case that calls getComposedRanges.
+  test.skip(browserName !== 'webkit', 'Chromium and Firefox report the selection itself')
+  await renderScenario(SHADOW_SCENARIO(true))
+  await defineShadowText(page)
+  await page.evaluate(() => {
+    // The older signature: shadow roots as arguments; an options object is rejected.
+    const original = Selection.prototype.getComposedRanges
+    Selection.prototype.getComposedRanges = function (this: Selection, ...roots: unknown[]) {
+      if (roots.some((root) => !(root instanceof ShadowRoot))) throw new TypeError('not a ShadowRoot')
+      return original.call(this, { shadowRoots: roots as ShadowRoot[] })
+    } as typeof original
+  })
+  await selectInShadow(page, 'brown fox')
+  await expect(toolbar(page)).toBeVisible()
+  expect(await host(page).evaluate((element: SelectionToolbar) => element.selection?.text)).toBe('brown fox')
+})
+
+test('inside a shadow root, the toolbar still leaves text selected in a field of its content to the field', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="app"></div>`)
+  await page.evaluate(() => {
+    const root = document.getElementById('app')!.attachShadow({ mode: 'open' })
+    const toolbar = document.createElement('c2-selection-toolbar')
+    toolbar.setAttribute('composed', '')
+    const input = document.createElement('input')
+    input.value = 'The quick brown fox'
+    const button = document.createElement('button')
+    button.slot = 'toolbar'
+    button.textContent = 'Ask AI'
+    toolbar.append(input, button)
+    root.append(toolbar)
+  })
+  const input = page.locator('#app input')
+  await input.focus()
+  await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(4, 15))
+  await page.waitForTimeout(500)
+  await expect(page.locator('#app c2-selection-toolbar').getByRole('toolbar')).toBeHidden()
+})
+
+test('a toolbar inside a shadow root opens for its own content without composed, and its arrow keys and Escape work', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="app" style="padding-top: 120px"></div>`)
+  await page.evaluate(() => {
+    const root = document.getElementById('app')!.attachShadow({ mode: 'open' })
+    const toolbar = document.createElement('c2-selection-toolbar')
+    const paragraph = document.createElement('p')
+    paragraph.id = 'text'
+    paragraph.textContent = 'The quick brown fox jumps over the lazy dog.'
+    toolbar.append(paragraph)
+    for (const name of ['One', 'Two', 'Three']) {
+      const button = document.createElement('button')
+      button.slot = 'toolbar'
+      button.textContent = name
+      toolbar.append(button)
+    }
+    root.append(toolbar)
+  })
+  await page.evaluate(() => {
+    const node = document.getElementById('app')!.shadowRoot!.getElementById('text')!.firstChild!
+    document.getSelection()!.setBaseAndExtent(node, 4, node, 9)
+  })
+  const bar = page.locator('#app c2-selection-toolbar').getByRole('toolbar')
+  await expect(bar).toBeVisible()
+  await page.keyboard.press('Alt+F10')
+  await expect(page.getByRole('button', { name: 'One' })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('button', { name: 'Two' })).toBeFocused()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('button', { name: 'One' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(bar).toBeHidden()
+})

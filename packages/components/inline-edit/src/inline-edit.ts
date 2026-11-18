@@ -622,7 +622,7 @@ export class InlineEdit extends LitElement {
   private renderDisplay() {
     const text = this.displayText
     const content = html`<span class="text ${classMap({ placeholder: !text })}"
-      ><slot name="preview" @slotchange=${this.syncSlots}>${text || this.placeholder}</slot></span
+      ><slot name="preview" @slotchange=${this.syncSlots}>${text || this.placeholder || nothing}</slot></span
     >`
     if (this.readOnly || this.activation === 'none') {
       // With `activation="none"` the read view takes focus from script only, so focus can come back to it after an edit.

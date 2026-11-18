@@ -60,6 +60,26 @@ interface FieldDefaults {
   validateOn?: FormFieldValidateOn
 }
 
+const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
+
+/**
+ * What may be the control inside an island: a control of the field protocol, a native text or choice control, or a
+ * form-associated element that is not a button. A button, an icon or a custom element not upgraded yet is the app's
+ * decoration; a `c2-*` control announces itself when it upgrades.
+ */
+const isCandidate = (element: Element) =>
+  !!fieldConsumerOf(element as FormFieldControl) ||
+  element.matches('input:not([type="hidden"], [type="submit"], [type="reset"], [type="image"], [type="button"]), select, textarea') ||
+  ((element.constructor as { formAssociated?: boolean }).formAssociated === true && !element.localName.endsWith('button'))
+
+/**
+ * Astro's island elements, which wrap every component of an MDX fence in the docs (and of any Astro page) in a
+ * `display: contents` element. They are the only elements looked through: any other child is the control.
+ */
+const ISLAND_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
+
+const isIsland = (element: Element) => ISLAND_WRAPPERS.has(element.localName)
+
 let warnedNative = false
 
 /**
@@ -229,6 +249,7 @@ export class FormField extends LitElement {
     this.ownerForm?.addEventListener('reset', this.handleFormReset)
     // A control that upgraded before this field announced itself to nobody: claim it now.
     this.adoptControl(this.findControl())
+    this.watchIslands()
   }
 
   override disconnectedCallback(): void {
@@ -236,6 +257,7 @@ export class FormField extends LitElement {
     this.ownerForm?.removeEventListener('reset', this.handleFormReset)
     this.ownerForm = null
     this.adoptControl(null)
+    this.islandObserver?.disconnect()
     clearTimeout(this.announceTimer)
   }
 
@@ -256,11 +278,11 @@ export class FormField extends LitElement {
   private handleConnect = (event: Event) => {
     const { consumer } = (event as CustomEvent<FieldConnectEventDetail>).detail
     const target = event.composedPath()[0]
-    // Only a direct child is this field's control; anything deeper belongs to that control (or a nested field).
-    if (target instanceof HTMLElement && target.parentElement === this) {
-      event.stopPropagation()
-      if (target === this.findControl() && fieldConsumerOf(target) === consumer) this.adoptControl(target)
-    }
+    // Only this field's children (directly, or through islands) are its to claim or contain; anything deeper belongs to
+    // that control (or a nested field).
+    if (!(target instanceof HTMLElement) || !this.ownChild(target)) return
+    event.stopPropagation()
+    if (target === this.findControl() && fieldConsumerOf(target) === consumer) this.adoptControl(target)
   }
 
   private handleFormReset = () => {
@@ -269,11 +291,56 @@ export class FormField extends LitElement {
     requestAnimationFrame(() => this.requestUpdate())
   }
 
+  /**
+   * The first unslotted child that draws a box. A child that does not render (`style`, `script`, `template`) is
+   * skipped, and an Astro island is looked through to the first control it holds (see `isCandidate`), past decoration
+   * such as a prefix or a help button.
+   */
   private findControl(): FormFieldControl | null {
-    for (const child of this.children) {
-      if (!child.hasAttribute('slot')) return child as FormFieldControl
+    const search = (parent: Element): FormFieldControl | null => {
+      for (const child of parent.children) {
+        if (child.hasAttribute('slot') || NOT_RENDERED.has(child.localName)) continue
+        if (isIsland(child)) {
+          const inner = search(child)
+          if (inner) return inner
+          // A control still loading in the island (not upgraded yet) is the field's: adopt nothing until it announces
+          // itself, rather than the decoration after the island.
+          if (child.querySelector(':not(:defined)')) return null
+          continue
+        }
+        // Inside an island only a control counts: a label or prefix next to it is the app's decoration.
+        if (parent === this || isCandidate(child)) return child as FormFieldControl
+      }
+      return null
     }
-    return null
+    return search(this)
+  }
+
+  /** Whether an element is a direct child of this field, or reached from one through islands only. */
+  private ownChild(element: Element): boolean {
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      if (parent === this) return true
+      if (!isIsland(parent)) return false
+    }
+    return false
+  }
+
+  private islandObserver: MutationObserver | undefined
+
+  /**
+   * Watches the field's island children: an island renders, swaps or removes its control after the field
+   * connected, and a native control announces itself to nobody (a `c2-*` control does, through the field protocol).
+   */
+  private watchIslands() {
+    this.islandObserver?.disconnect()
+    // Every island on the way to the control, nested ones (an `astro-slot` around an `astro-island`) included.
+    const islands = [...this.children]
+      .filter((child) => !child.hasAttribute('slot') && isIsland(child))
+      .flatMap((island) => [island, ...island.querySelectorAll([...ISLAND_WRAPPERS].join(', '))])
+    if (!islands.length || !this.isConnected) return
+    this.islandObserver ??= new MutationObserver(() => this.adoptControl(this.findControl()))
+    // The island's own children, not the control's light DOM (a select's options), which never change the control.
+    for (const island of islands) this.islandObserver.observe(island, { childList: true })
   }
 
   private adoptControl(control: FormFieldControl | null) {
@@ -321,7 +388,10 @@ export class FormField extends LitElement {
 
   private handleSlotChange = (event: Event) => {
     this.slots.handleSlotChange(event)
-    if (!(event.target as HTMLSlotElement).name) this.adoptControl(this.findControl())
+    if (!(event.target as HTMLSlotElement).name) {
+      this.adoptControl(this.findControl())
+      this.watchIslands()
+    }
     this.requestUpdate()
   }
 

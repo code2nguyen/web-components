@@ -5,6 +5,7 @@ import { SelectionToolbar } from '@c2n/components/selection-toolbar'
 import { Button } from '@c2n/components/button'
 import { ChatInput } from '@c2n/components/chat-input'
 import { TextField } from '@c2n/components/text-field'
+import { Markdown } from '@c2n/components/markdown'
 import CodeBlock from '../../components/CodeBlock.astro'
 import SelectionToolbarExamplesRuntime from '../../components/SelectionToolbarExamplesRuntime.astro'
 
@@ -153,6 +154,14 @@ A control with `data-prompt` turns the toolbar into a prompt at the same anchor:
   <div class="editor" contenteditable="true">Put the caret anywhere in this note, then press Ctrl+J (⌘J) or the button below.</div>
   <c2-button class="prompt-open" data-open-prompt>Ask AI at the caret</c2-button>
   <c2-chat-input slot="prompt" aria-label="Instruction" placeholder="Write a sentence about…" send-label="Ask"></c2-chat-input>
+</c2-selection-toolbar>
+```
+
+```html tag=MdxCodeBlock,label=Inside a component
+<c2-selection-toolbar composed>
+  <c2-markdown value="The **refund policy** covers orders shipped within 30 days. Select part of this answer: it is drawn in the markdown element's shadow root, which `composed` reaches."></c2-markdown>
+  <c2-button slot="toolbar" data-action="quote">Quote</c2-button>
+  <c2-button slot="toolbar" data-action="follow-up">Ask a follow-up</c2-button>
 </c2-selection-toolbar>
 ```
 

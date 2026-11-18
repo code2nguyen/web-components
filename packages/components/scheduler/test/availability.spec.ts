@@ -262,3 +262,28 @@ test('renderProposal draws the block from who is free', async ({ page, renderSce
   await expect(block(page)).toHaveAccessibleName(/^Team sync, Monday 9 November, 10:00 to 11:00, busy: Ana Ruiz/)
   await accessible(page)
 })
+
+test('dragging the proposal column or block across the row headings selects no text in a scheduler that is not editable', async ({ page, renderScenario }) => {
+  await renderScenario(markup())
+  await applyChanges(page)
+  const selected = () =>
+    page.evaluate(() => {
+      const selection = document.getSelection()!
+      const root = document.querySelector('c2-scheduler')!.shadowRoot!
+      const composed = typeof selection.getComposedRanges === 'function' ? selection.getComposedRanges({ shadowRoots: [root] }) : []
+      return selection.toString() + composed.map((range) => (range.collapsed ? '' : 'range')).join('')
+    })
+  const heading = (await scheduler(page).getByText('Chloé Martin').first().boundingBox())!
+  const start = await at(page, 'chloe', '10:30')
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(heading.x + 4, (await at(page, 'ana', '10:30')).y, { steps: 12 })
+  await page.mouse.up()
+  expect(await selected()).toBe('')
+  const box = (await block(page).boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(heading.x + 4, (await at(page, 'dev', '10:30')).y, { steps: 12 })
+  await page.mouse.up()
+  expect(await selected()).toBe('')
+})

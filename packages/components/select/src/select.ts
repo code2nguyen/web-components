@@ -488,7 +488,9 @@ export class Select extends LitElement {
     const buttonContentClasses = {
       placeholder: !this.displayText,
     }
-    return html`<div class="button-content ${classMap(buttonContentClasses)}">${this.displayText || this.placeholder}</div>`
+    // `nothing`, never '': a server render of an empty string leaves no text node between the part's markers, and the
+    // hydrated part then writes the label into the closing marker comment, so the trigger stays empty.
+    return html`<div class="button-content ${classMap(buttonContentClasses)}">${this.displayText || this.placeholder || nothing}</div>`
   }
 
   private renderButtonSuffixIcon() {
