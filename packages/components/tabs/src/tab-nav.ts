@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { query } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotReplayController } from '@c2n/core/lit-helper.js'
 import styles from './tab-nav.scss?inline'
 // Registers `c2-tab`, the element every link of the strip is.
 import './tab'
@@ -75,6 +76,8 @@ export class TabNav extends LitElement {
 
   constructor() {
     super()
+    // A server-rendered strip assigned its tabs before this element hydrated, so its `slotchange` was never heard.
+    new SlotReplayController(this, () => void this.handleSlotChange(), { always: true, immediate: true })
     this.internals.role = 'navigation'
   }
 
@@ -101,11 +104,6 @@ export class TabNav extends LitElement {
     this.edges?.disconnect()
     this.edges = undefined
     this.currentObserver?.disconnect()
-  }
-
-  override firstUpdated() {
-    // A server-rendered strip assigned its tabs before this element hydrated, so its `slotchange` was never heard.
-    void this.handleSlotChange()
   }
 
   private async handleSlotChange() {
