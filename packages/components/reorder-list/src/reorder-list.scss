@@ -2,6 +2,11 @@
   $prefix: c2-reorder-list,
   $theme: (
     container-border-width: 0px,
+    container__drop-target--outline-color: #0265dc,
+    container__drop-target--outline-style: dashed,
+    container__drop-target--outline-width: 2px,
+    container__drop-target--outline-offset: 2px,
+    container__drop-refused--outline-color: #dc2626,
     container-border-color: #bcbcc6,
     container-border-radius: 8px,
     container-padding: 0px,
@@ -66,6 +71,17 @@
   border-radius: css.cssVar(container-border-radius);
   padding: css.cssVar(container-padding);
   margin: css.cssVar(container-margin);
+}
+
+// Items of the list's `drop-kind` dragged in from outside: accepted, or another kind, refused.
+.c2-reorder-list-container.drop-target,
+.c2-reorder-list-container.drop-refused {
+  outline: css.cssVar(container__drop-target--outline-width) css.cssVar(container__drop-target--outline-style) css.cssVar(container__drop-target--outline-color);
+  outline-offset: css.cssVar(container__drop-target--outline-offset);
+}
+
+.c2-reorder-list-container.drop-refused {
+  outline-color: css.cssVar(container__drop-refused--outline-color);
 }
 
 .list-item {

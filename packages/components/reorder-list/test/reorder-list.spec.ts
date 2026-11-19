@@ -1345,6 +1345,8 @@ async function dropPayload(page: import('@playwright/test').Page, selector: stri
       target.dispatchEvent(new DragEvent('dragenter', init))
       target.dispatchEvent(new DragEvent('dragover', init))
       const host = document.querySelector('c2-reorder-list') as HTMLElement & { updateComplete: Promise<unknown> }
+      // A refusal shows once the event has passed every zone around this one.
+      await new Promise((resolve) => setTimeout(resolve))
       await host.updateComplete
       const container = host.shadowRoot!.querySelector('.c2-reorder-list-container')!
       const lit = container.classList.contains('drop-refused') ? 'refused' : container.classList.contains('drop-target') ? 'target' : 'none'
@@ -1437,8 +1439,8 @@ test('a list nested in another drop zone takes its own kind, and the outer zone 
   // The inner list accepted the drag; the outer one neither refused it nor lit up.
   expect(drops.accepted).toBe(true)
   expect(drops.outerLit).not.toMatch(/drop-(target|refused)/)
-  // The drop reached the inner list only (it bubbles, so the outer listener hears it with the inner list as target).
-  expect(drops.heard).toEqual(['inner heard inner', 'outer heard inner'])
+  // The drop reached the inner list only: item-drop does not bubble to the outer list's listeners.
+  expect(drops.heard).toEqual(['inner heard inner'])
 })
 
 test('a kind the nested list refuses still reaches the zone around it that takes it', async ({ page, renderScenario }) => {
@@ -1449,7 +1451,7 @@ test('a kind the nested list refuses still reaches the zone around it that takes
       </div>
     </c2-reorder-list>
   `)
-  const heard = await page.evaluate(async () => {
+  const { heard, innerLit } = await page.evaluate(async () => {
     const heard: string[] = []
     document.getElementById('outer')!.addEventListener('item-drop', (event) => heard.push(`outer took ${(event as CustomEvent).detail.items.length}`))
     const target = document.getElementById('second')!
@@ -1457,10 +1459,17 @@ test('a kind the nested list refuses still reaches the zone around it that takes
     const transfer = new DataTransfer()
     transfer.setData('application/x-c2n-lane+json', JSON.stringify([{ id: 'lane-2' }]))
     const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
-    for (const type of ['dragenter', 'dragover', 'drop']) target.dispatchEvent(new DragEvent(type, init))
-    return heard
+    for (const type of ['dragenter', 'dragover']) target.dispatchEvent(new DragEvent(type, init))
+    const inner = document.getElementById('inner') as HTMLElement & { updateComplete: Promise<unknown> }
+    await new Promise((resolve) => setTimeout(resolve))
+    await inner.updateComplete
+    const innerLit = inner.shadowRoot!.querySelector('.c2-reorder-list-container')!.className
+    target.dispatchEvent(new DragEvent('drop', init))
+    return { heard, innerLit }
   })
   expect(heard).toEqual(['outer took 1'])
+  // The inner list does not show a refusal over a drop the list around it takes.
+  expect(innerLit).not.toMatch(/drop-refused/)
 })
 
 test('a drop the list takes nothing from reports no move, so the source keeps its items', async ({ page, renderScenario }) => {
@@ -1557,4 +1566,60 @@ test('a drop of its kind whose payload cannot be read reports no move', async ({
     return effects
   }, TASK_TYPE)
   expect(effects).toEqual(['move', 'none'])
+})
+
+test('in a real drag, a nested list shows no refusal over a kind the zone around it takes', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <div id="source" draggable="true" style="height:40px">Lane source</div>
+    <c2-reorder-list id="outer" editable drop-kind="lane" aria-label="Lanes">
+      <div data-reorder-key="lane" data-reorder-label="Lane" style="height:200px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  await page.evaluate(() =>
+    document
+      .getElementById('source')!
+      .addEventListener('dragstart', (event) => event.dataTransfer!.setData('application/x-c2n-lane+json', '[{"id":"lane-2"}]')),
+  )
+  const source = await page.locator('#source').boundingBox()
+  const target = await page.locator('#second').boundingBox()
+  await page.mouse.move(source!.x + 10, source!.y + 10)
+  await page.mouse.down()
+  await page.mouse.move(target!.x + 20, target!.y + 10, { steps: 5 })
+  await page.mouse.move(target!.x + 30, target!.y + 15, { steps: 5 })
+  await page.waitForTimeout(100)
+  const innerClass = await page.locator('#inner').evaluate((element) => element.shadowRoot!.querySelector('.c2-reorder-list-container')!.className)
+  const outerClass = await page.locator('#outer').evaluate((element) => element.shadowRoot!.querySelector('.c2-reorder-list-container')!.className)
+  await page.mouse.up()
+  expect(innerClass).not.toMatch(/drop-refused/)
+  expect(outerClass).toMatch(/drop-target/)
+})
+
+test('the zone around a nested list stays lit when the pointer comes back onto it', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="outer" editable drop-kind="task" aria-label="Board">
+      <div id="lane" data-reorder-key="lane" data-reorder-label="Lane" style="height:260px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  const outerClass = await page.evaluate(async (type) => {
+    const transfer = new DataTransfer()
+    transfer.setData(type, '[]')
+    const fire = (kind: string, target: Element, relatedTarget: Element | null) =>
+      target.dispatchEvent(new DragEvent(kind, { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, relatedTarget }))
+    const row = document.getElementById('first')!
+    const lane = document.getElementById('lane')!
+    fire('dragenter', row, null)
+    await new Promise((resolve) => setTimeout(resolve))
+    // Back onto the outer list: its dragenter comes first, then the row's dragleave bubbles up to it.
+    fire('dragenter', lane, row)
+    fire('dragleave', row, lane)
+    await new Promise((resolve) => setTimeout(resolve))
+    const outer = document.getElementById('outer') as HTMLElement & { updateComplete: Promise<unknown> }
+    await outer.updateComplete
+    return outer.shadowRoot!.querySelector('.c2-reorder-list-container')!.className
+  }, TASK_TYPE)
+  expect(outerClass).toMatch(/drop-target/)
 })

@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { animate, type Options as MotionOptions } from '@lit-labs/motion'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { DropZoneController, type DropZoneItems } from '@c2n/core/controllers/drop-zone.js'
 import { reorderListMessages } from './messages'
 import styles from './reorder-list.scss?inline'
 
@@ -81,11 +82,28 @@ export interface ReorderErrorEventDetail {
   elements: readonly HTMLElement[]
 }
 
+/** Detail of the `item-drop` event: items dropped on the list from outside it, for the application to add as rows. */
+export interface ReorderItemDropEventDetail {
+  /** The payload kind of the drop: the list's `drop-kind`. */
+  kind: string
+  /** The items the source wrote, in its order. */
+  items: unknown[]
+  /** The displayed position the new rows take, from 0: the row the pointer was over, or past it. */
+  index: number
+  /**
+   * The light-DOM row to insert the new rows before (`list.insertBefore(row, detail.before)`), or `null` to append
+   * them. It is not the displayed row at `index` once the user has reordered: the list keeps the light DOM in place and
+   * a row added before this one is shown at `index`.
+   */
+  before: HTMLElement | null
+}
+
 /** Events fired by {@link ReorderList}, keyed for `addEventListener`. */
 export interface ReorderListEventMap {
   reorder: CustomEvent<ReorderEventDetail>
   'reorder-error': CustomEvent<ReorderErrorEventDetail>
   'swipe-action': CustomEvent<ReorderSwipeActionEventDetail>
+  'item-drop': CustomEvent<ReorderItemDropEventDetail>
   input: Event
   /** @deprecated Listen for `reorder`. */
   change: CustomEvent<number[]>
@@ -195,8 +213,14 @@ function parseMotionDuration(value: string): number {
  * @event {CustomEvent<ReorderErrorEventDetail>} reorder-error - Fired when duplicate non-empty item keys prevent pickup.
  * @event {CustomEvent<number[]>} change - Deprecated numeric permutation emitted with `reorder` during the compatibility window.
  * @event {CustomEvent<ReorderSwipeActionEventDetail>} swipe-action - Fired when a swipe action runs, from its button, a full swipe or its key. Bubbles, crosses shadow boundaries and is cancelable: the `delete` action removes the item unless the event is canceled.
+ * @event {CustomEvent<ReorderItemDropEventDetail>} item-drop - Fired when items of the `drop-kind` payload are dropped on the list from outside it. The application adds a row for each, before `detail.before`. Cancelable: `preventDefault()` announces them as not added. Does not bubble: each of `c2-kanban`, `c2-reorder-list` and `c2-tree` sends its own `detail`, so a drop on one nested in another must not reach the outer one's listeners. Listen on the element itself.
  *
  * @cssproperty {length} [--c2-reorder-list--container-border-width=0px] - Container border width.
+ * @cssproperty {color} [--c2-reorder-list__container__drop-target--outline-color=#0265dc] - Outline of the list while items of its `drop-kind` are dragged over it.
+ * @cssproperty {string} [--c2-reorder-list__container__drop-target--outline-style=dashed] - Outline style while a drop is possible.
+ * @cssproperty {length} [--c2-reorder-list__container__drop-target--outline-width=2px] - Outline width while a drag is over the list.
+ * @cssproperty {length} [--c2-reorder-list__container__drop-target--outline-offset=2px] - Outline offset from the list's edge.
+ * @cssproperty {color} [--c2-reorder-list__container__drop-refused--outline-color=#dc2626] - Outline of the list while another kind of item is dragged over it, which it refuses.
  * @cssproperty {color} [--c2-reorder-list--container-border-color=#bcbcc6] - Container border color.
  * @cssproperty {length} [--c2-reorder-list--container-border-radius=8px] - Container corner radius.
  * @cssproperty {length} [--c2-reorder-list--container-padding=0px] - Padding inside the list.
@@ -254,6 +278,15 @@ export class ReorderList extends LitElement {
 
   /** Enables pointer and keyboard reordering. */
   @property({ type: Boolean, reflect: true }) editable = false
+
+  /**
+   * The kind of item payload the list takes from outside (another list, another window), as a source writes it with
+   * `writeItemPayload(dataTransfer, kind, items)` from `@c2n/core/controllers/drop-zone.js` (MIME type
+   * `application/x-c2n-<kind>+json`). Empty (the default) takes none. Needs `editable`. The list draws no rows of its
+   * own: a drop fires `item-drop` with the place under the pointer, the application adds the rows there, and the list
+   * announces how many were added.
+   */
+  @property({ type: String, attribute: 'drop-kind' }) dropKind = ''
 
   /** Minimum summed pointer movement in CSS pixels before pickup. Invalid values use 10. */
   @property({ type: Number, attribute: 'drag-start-threshold' }) dragStartThreshold: number = 10
@@ -333,6 +366,12 @@ export class ReorderList extends LitElement {
   private readonly assignmentIds = new WeakMap<HTMLElement, string>()
   private assignmentCounter = 0
   private readonly msg = new LocalizeController(this, reorderListMessages)
+  private readonly dropZone = new DropZoneController(this, {
+    itemKind: () => this.dropKind,
+    disabled: () => !this.reorderable || !!this.session,
+    onItems: (drop) => this.receiveDrop(drop),
+  })
+  private dropAnnouncement = ''
   private readonly instructionsId = `c2-reorder-list-instructions-${++componentId}`
   private readonly swipeInstructionsId = `c2-reorder-list-swipe-instructions-${componentId}`
   private childListObserver?: MutationObserver
@@ -380,6 +419,12 @@ export class ReorderList extends LitElement {
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     if (changedProperties.has('editable') && !this.editable && this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
+    // What the drop zone announces after a drop from outside goes through the list's one live region, clear included,
+    // so the same sentence twice is read again.
+    if (this.dropZone.announcement !== this.dropAnnouncement) {
+      this.dropAnnouncement = this.dropZone.announcement
+      this.announcement = this.dropAnnouncement
+    }
     if ((changedProperties as PropertyValues).has('formDisabled') && this.formDisabled) {
       if (this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
       this.closeSwipe()
@@ -407,7 +452,11 @@ export class ReorderList extends LitElement {
       ${this.swipeable && this.swipeShortcutText ? html`<p id=${this.swipeInstructionsId} class="visually-hidden">${this.swipeShortcutText}</p>` : nothing}
       <div
         part="container"
-        class="c2-reorder-list-container"
+        class=${classMap({
+          'c2-reorder-list-container': true,
+          'drop-target': this.dropZone.over && this.dropZone.acceptable,
+          'drop-refused': this.dropZone.over && !this.dropZone.acceptable,
+        })}
         role="list"
         aria-describedby=${this.field.describedBy()}
         @pointerdown=${this.handlePointerDown}
@@ -415,6 +464,10 @@ export class ReorderList extends LitElement {
         @pointerup=${this.handlePointerUp}
         @pointercancel=${this.handlePointerCancel}
         @lostpointercapture=${this.handleLostPointerCapture}
+        @dragenter=${this.dropZone.handleDragEnter}
+        @dragover=${this.dropZone.handleDragOver}
+        @dragleave=${this.dropZone.handleDragLeave}
+        @drop=${this.dropZone.handleDrop}
       >
         ${repeat(
           entries,
@@ -594,6 +647,23 @@ export class ReorderList extends LitElement {
       attributeFilter: ['slot', 'data-reorder-key'],
       attributeOldValue: true,
     })
+  }
+
+  /** Asks the application to add the rows of an item payload dropped on the list; returns how many it took. */
+  private receiveDrop({ kind, items, event }: DropZoneItems): number {
+    const wrappers = [...(this.containerElement?.querySelectorAll<HTMLElement>('.list-item[data-assignment-id]') ?? [])]
+    let index = wrappers.findIndex((wrapper) => {
+      const rect = wrapper.getBoundingClientRect()
+      return event.clientY < rect.top + rect.height / 2
+    })
+    if (index === -1) index = wrappers.length
+    // New rows keep their light-DOM position among the rows that stayed, so the row authored at `index` is the one to
+    // insert before for them to show at `index`.
+    const before = this.authoredOrder[index] ?? null
+    const detail: ReorderItemDropEventDetail = { kind, items, index, before }
+    return this.dispatchEvent(new CustomEvent<ReorderItemDropEventDetail>('item-drop', { cancelable: true, detail }))
+      ? items.length
+      : 0
   }
 
   private reconcileAuthoredOrder(): void {
