@@ -17,6 +17,11 @@ test('navigation labels the current page', async ({ page, renderScenario }) => {
   await expect(page.getByRole('link', { name: 'Item', exact: true })).toHaveAttribute('aria-current', 'page')
   await accessible(page)
 })
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-breadcrumb style="width: 150px">${items}</c2-breadcrumb></div>`)
+  await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Afficher \d+ éléments de plus$/ })).toBeVisible()
+})
 test('collapsed trail expands with a named keyboard control', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-breadcrumb style="width: 150px">${items}</c2-breadcrumb>`)
   const expand = page.getByRole('button', { name: /Show \d+ more items/ })

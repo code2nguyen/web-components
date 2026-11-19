@@ -3,9 +3,10 @@ import { query, state } from 'lit/decorators.js'
 import { assignSlot, property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { ifDefined } from 'lit/directives/if-defined.js'
 // Registers `c2-link-button`, the natural item element, and provides the ellipsis control.
 import '@c2n/link-button'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { breadcrumbMessages } from './messages.js'
 import styles from './breadcrumb.scss?inline'
 
 const LINK_BUTTON_TAG = 'c2-link-button'
@@ -63,9 +64,11 @@ export class Breadcrumb extends LitElement {
   /** Upper bound on visible items (the first, then the last ones behind an ellipsis). `0` lets the width decide alone. */
   @property({ type: Number, attribute: 'max-items' }) maxItems = 0
 
-  /** Accessible name of the navigation landmark. */
+  /** Accessible name of the navigation landmark. Unset, it is the `label` message ("Breadcrumb"). */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
+
+  private readonly msg = new LocalizeController(this, breadcrumbMessages)
 
   @state() private itemCount = 0
   @state() private expanded = false
@@ -309,7 +312,7 @@ export class Breadcrumb extends LitElement {
 
   private renderEllipsis(hidden: number) {
     return html`<li class="c2-breadcrumb-item c2-breadcrumb-item--ellipsis" part="item">
-      <c2-link-button class="c2-breadcrumb-ellipsis" part="ellipsis" aria-label=${`Show ${hidden} more items`} @click=${this.expand}>…</c2-link-button>
+      <c2-link-button class="c2-breadcrumb-ellipsis" part="ellipsis" aria-label=${this.msg.t('showMore', hidden)} @click=${this.expand}>…</c2-link-button>
       ${this.renderSeparator()}
     </li>`
   }
@@ -334,7 +337,7 @@ export class Breadcrumb extends LitElement {
       ]
     }
     return html`
-      <nav class="c2-breadcrumb" aria-label=${ifDefined(this.ariaLabel ?? 'Breadcrumb')}>
+      <nav class="c2-breadcrumb" aria-label=${this.ariaLabel || this.msg.t('label')}>
         <ol class=${classMap({ 'c2-breadcrumb-list': true, 'is-measuring': this.measuring, 'is-expanded': this.expanded })} part="list">
           ${content}
         </ol>
