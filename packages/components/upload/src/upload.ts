@@ -568,7 +568,7 @@ export class Upload extends LitElement {
       return html`
         <c2-button class="picker compact-button" ?disabled=${this.effectiveDisabled} @click=${this.browse}>
           <span part="drop-icon" class="compact-icon" slot="prefix-icon"><slot name="drop-icon">${this.renderIcon()}</slot></span>
-          <slot part="action" name="action">${this.defaultActionLabel}</slot>
+          <slot part="action" name="action">${this.defaultActionLabel || nothing}</slot>
         </c2-button>
       `
     }
@@ -600,7 +600,7 @@ export class Upload extends LitElement {
             }
           </slot>
         </div>
-        <div part="hint" class="hint"><slot name="hint">${this.defaultHint}</slot></div>
+        <div part="hint" class="hint"><slot name="hint">${this.defaultHint || nothing}</slot></div>
       </div>
     `
   }
