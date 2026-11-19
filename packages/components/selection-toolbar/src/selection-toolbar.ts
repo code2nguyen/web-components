@@ -4,6 +4,7 @@ import { computePosition, autoUpdate, flip, shift, offset, type VirtualElement }
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { composedSelectionRange, isFormControl } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { selectionToolbarMessages } from './messages'
 import styles from './selection-toolbar.scss?inline'
@@ -49,23 +50,6 @@ function retarget(node: Node, root: Node): Node | null {
 function composedContains(ancestor: Element, node: Node): boolean {
   const own = retarget(node, ancestor.getRootNode())
   return !!own && ancestor.contains(own)
-}
-
-/**
- * The selection's range with boundaries inside the given shadow roots, or undefined. Takes the options object of the
- * standard, then the shadow roots as arguments, the form WebKit first shipped.
- */
-function composedRange(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange | undefined {
-  try {
-    return selection.getComposedRanges({ shadowRoots })[0]
-  } catch {
-    try {
-      const variadic = selection.getComposedRanges as unknown as (...roots: ShadowRoot[]) => StaticRange[]
-      return variadic.apply(selection, shadowRoots)[0]
-    } catch {
-      return undefined
-    }
-  }
 }
 
 /** How long a keyboard selection has to stay still before the toolbar shows. */
@@ -312,7 +296,7 @@ export class SelectionToolbar extends LitElement {
     if (around ? !composedContains(host, this) : !this.composed) return plain
     const shadowRoots = [...this.enclosingShadowRoots(), ...(this.composed ? this.openShadowRoots(around ? this : host) : [])]
     if (!shadowRoots.length) return plain
-    const composed = composedRange(selection, shadowRoots)
+    const composed = composedSelectionRange(selection, shadowRoots)
     // Both ends in one shadow tree: a Range cannot span two, and a selection crossing a boundary is read as is.
     if (!composed || composed.startContainer.getRootNode() !== composed.endContainer.getRootNode()) return plain
     const range = document.createRange()
@@ -376,9 +360,7 @@ export class SelectionToolbar extends LitElement {
     const focused = this.focusedInOwnTree()
     let active = focused
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
-    const field = (element: Element | null) =>
-      !!element && (element.matches('input, textarea') || (element.constructor as { formAssociated?: boolean }).formAssociated === true)
-    if (focused && this.contains(focused) && (field(active) || (strict && field(focused)))) return false
+    if (focused && this.contains(focused) && (isFormControl(active) || (strict && isFormControl(focused)))) return false
     // Both ends inside the content, so a selection across two paragraphs (whose common ancestor is this element) counts.
     if (!this.composed) {
       const inside = (node: Node) => node !== this && this.contains(node) && !this.inToolbar(node)
