@@ -103,6 +103,11 @@ export interface TreeItem {
  * @cssproperty {opacity} [--c2-tree-item__dragging--opacity=0.4] - Opacity of a row, and its subtree, while it is dragged in a `reorderable` tree.
  * @cssproperty {color} [--c2-tree-item__drop-target--background=#edf1fe] - Background of the row a dragged row would land under.
  */
+/** What was assigned to `slot`, through forwarded slots, without any slot's fallback content. */
+function authorNodes(slot: HTMLSlotElement): Node[] {
+  return slot.assignedNodes().flatMap((node) => (node instanceof HTMLSlotElement ? authorNodes(node) : [node]))
+}
+
 @customElement('c2-tree-item')
 export class TreeItem extends LitElement {
   static override styles = unsafeCSS(styles)
@@ -251,7 +256,10 @@ export class TreeItem extends LitElement {
   }
 
   #readLabelSlot() {
-    const assigned = this.labelSlot?.assignedNodes({ flatten: true }) ?? []
+    // Author content only: `flatten` would also return the slot's fallback text, which Lit updates in place
+    // without a `slotchange`, so a later `label` change would never reach the accessible name. A forwarded
+    // `<slot>` is still flattened to what was assigned to it.
+    const assigned = (this.labelSlot?.assignedNodes() ?? []).flatMap((node) => (node instanceof HTMLSlotElement ? authorNodes(node) : [node]))
     this.#resolvedLabel = assigned
       .map((node) => node.textContent ?? '')
       .join('')

@@ -569,3 +569,17 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(itemOf(page, 'readme')).toHaveHostAria('aria-label', 'Read me first')
   await accessible(page)
 })
+
+test('a row named by its label property follows a later label change', async ({ page, renderScenario }) => {
+  await renderScenario(tree())
+  const readme = itemOf(page, 'readme')
+  await expect(readme).toHaveHostAria('aria-label', 'README.md')
+  await readme.evaluate((el) => ((el as HTMLElement & { label: string }).label = 'Published'))
+  await expect(readme.locator('.row').first()).toContainText('Published')
+  await expect(readme).toHaveHostAria('aria-label', 'Published')
+})
+
+test('a slotted label still names the row over the label property', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Files"><c2-tree-item value="a" label="Fallback"><span slot="label">Slotted</span></c2-tree-item></c2-tree>')
+  await expect(itemOf(page, 'a')).toHaveHostAria('aria-label', 'Slotted')
+})
