@@ -1,4 +1,5 @@
 import { html } from 'lit'
+import './translations'
 import '../src/cascader'
 import type { Cascader, CascaderOption } from '../src/cascader'
 
@@ -39,10 +40,12 @@ const main = document.querySelector('main')!
 main.innerHTML =
   scenario === 'form'
     ? '<form><c2-cascader id="subject" name="location" required aria-label="Location"></c2-cascader></form>'
-    : '<c2-cascader id="subject" aria-label="Location"></c2-cascader>'
+    : scenario === 'lang' || scenario === 'lang-empty'
+      ? '<div lang="fr"><c2-cascader id="subject"></c2-cascader></div>'
+      : '<c2-cascader id="subject" aria-label="Location"></c2-cascader>'
 
 const subject = document.querySelector<Cascader>('#subject')!
-subject.options = scenario === 'empty' ? [] : locations
+subject.options = scenario === 'empty' || scenario === 'lang-empty' ? [] : locations
 
 if (scenario === 'disabled') subject.disabled = true
 if (scenario === 'hover') subject.expandTrigger = 'hover'

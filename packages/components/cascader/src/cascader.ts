@@ -6,6 +6,8 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import type { Overlay } from '@c2n/overlay'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { cascaderMessages } from './messages.js'
 import styles from './cascader.scss?inline'
 
 import '@c2n/overlay'
@@ -125,6 +127,7 @@ export class Cascader extends LitElement {
   @state() private activePath: CascaderOption[] = []
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
+  private readonly msg = new LocalizeController(this, cascaderMessages)
 
   /** Nested hierarchy shown in the floating panel. In markup this is a JSON array. */
   @property({ converter: jsonPropertyConverter }) options: CascaderOption[] = []
@@ -135,8 +138,8 @@ export class Cascader extends LitElement {
   /** Name used when the cascader participates in a form. */
   @property({ type: String, reflect: true }) name = ''
 
-  /** Text shown before a path is selected. */
-  @property({ type: String }) placeholder = 'Please select'
+  /** Text shown before a path is selected. Unset, it is the `placeholder` message ("Please select"); `''` shows none. */
+  @property({ type: String }) placeholder?: string
 
   /** String placed between selected labels in the trigger. */
   @property({ type: String }) separator = ' / '
@@ -431,19 +434,23 @@ export class Cascader extends LitElement {
         @keydown=${this.handleTriggerKeydown}
       >
         <slot name="prefix-icon"></slot>
-        <span class=${classMap({ value: true, placeholder: !displayValue })}>${displayValue || this.placeholder || nothing}</span>
+        <span class=${classMap({ value: true, placeholder: !displayValue })}
+          >${displayValue || (this.placeholder ?? this.msg.t('placeholder')) || nothing}</span
+        >
         <slot name="suffix-icon">${this.renderChevron()}</slot>
       </button>
       <c2-overlay id="panel-overlay" popover free-width @toggle=${this.handleOverlayToggle}>
-        <div class="panel" role="tree" aria-label=${label || 'Cascader options'}>
+        <div class="panel" role="tree" aria-label=${label || this.msg.t('panel')}>
           ${
             this.options.length
               ? this.columns.map(
                   (column, level) => html`
-                    <div class="column" role="group" aria-label=${`Level ${level + 1}`}>${column.map((option) => this.renderOption(option, level))}</div>
+                    <div class="column" role="group" aria-label=${this.msg.t('level', level + 1)}>
+                      ${column.map((option) => this.renderOption(option, level))}
+                    </div>
                   `,
                 )
-              : html`<div class="empty" role="status"><slot name="empty">No options available.</slot></div>`
+              : html`<div class="empty" role="status"><slot name="empty">${this.msg.t('empty')}</slot></div>`
           }
         </div>
       </c2-overlay>
