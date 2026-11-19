@@ -50,6 +50,11 @@ test('fieldset disabled state removes the slider from FormData', async ({ page, 
   await expect(page.getByRole('slider')).toBeDisabled()
   await expect.poll(() => page.locator('form').evaluate((element) => new FormData(element as HTMLFormElement).has('volume'))).toBe(false)
 })
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-slider mode="range" aria-label="Prix" value-start="20" value-end="30"></c2-slider></div>')
+  await expect(page.getByRole('slider', { name: 'Prix : Minimum' })).toBeVisible()
+  await expect(page.getByRole('slider', { name: 'Prix : Maximum' })).toBeVisible()
+})
 test('range mode exposes two sliders that cannot cross and publish input and change', async ({ page, renderScenario }) => {
   await renderScenario('<c2-slider mode="range" aria-label="Price" min="0" max="100" step="10" value-start="20" value-end="30" show-value ticks></c2-slider>')
   const host = page.locator('c2-slider')

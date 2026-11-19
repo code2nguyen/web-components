@@ -9,6 +9,8 @@ import { live } from 'lit/directives/live.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { disabledByAncestor, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { sliderMessages } from './messages.js'
 import styles from './slider.scss?inline'
 
 export type SliderOrientation = 'horizontal' | 'vertical'
@@ -145,6 +147,7 @@ export class Slider extends LitElement {
   private customValidityMessage = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
+  private readonly msg = new LocalizeController(this, sliderMessages)
   @state() private disabledByForm = false
   private defaultValue = 0
   private defaultValueStart = 0
@@ -207,11 +210,14 @@ export class Slider extends LitElement {
   /** Formats the value for the bubble and `aria-valuetext`, e.g. `(v) => \`${v}%\``. Property only. */
   @property({ attribute: false }) formatValue: (value: number) => string = (value) => String(value)
 
-  /** Accessible name of the lower thumb in range mode, appended to `aria-label` when that is set ("Price, Minimum"). */
-  @property({ attribute: 'start-label' }) startLabel = 'Minimum'
+  /**
+   * Accessible name of the lower thumb in range mode, appended to `aria-label` when that is set ("Price, Minimum").
+   * Empty, it is the `start` message ("Minimum").
+   */
+  @property({ attribute: 'start-label' }) startLabel = ''
 
-  /** Accessible name of the upper thumb in range mode, appended to `aria-label` when that is set. */
-  @property({ attribute: 'end-label' }) endLabel = 'Maximum'
+  /** Accessible name of the upper thumb in range mode, appended to `aria-label` when that is set. Empty, it is the `end` message ("Maximum"). */
+  @property({ attribute: 'end-label' }) endLabel = ''
 
   /** Accessible name used when no visible label names the slider. */
   @property({ type: String, attribute: 'aria-label' })
@@ -538,7 +544,7 @@ export class Slider extends LitElement {
 
   private rangeLabel(thumbLabel: string) {
     const name = this.ariaLabel || this.field.label
-    return name ? `${name}, ${thumbLabel}` : thumbLabel
+    return name ? this.msg.t('thumb', name, thumbLabel) : thumbLabel
   }
 
   private renderRangeThumb(thumb: RangeThumb, value: number) {
@@ -556,7 +562,7 @@ export class Slider extends LitElement {
       step=${this.step}
       .value=${live(String(value))}
       ?disabled=${this.effectiveDisabled}
-      aria-label=${this.rangeLabel(thumb === 'start' ? this.startLabel : this.endLabel)}
+      aria-label=${this.rangeLabel(thumb === 'start' ? this.startLabel || this.msg.t('start') : this.endLabel || this.msg.t('end'))}
       aria-describedby=${this.field.describedBy()}
       aria-invalid=${this.field.invalid ? 'true' : nothing}
       aria-valuetext=${this.valueText(value, this.formatValue(value))}
