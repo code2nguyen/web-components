@@ -2,7 +2,7 @@ import { LitElement, html, isServer, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { hasSlottedContent } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, isFormControl } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { formListMessages } from './messages'
@@ -508,9 +508,7 @@ const FOCUSABLE =
 
 /** A form control (native or form-associated) or a nested list: what carries a row's values. Not `c2-avatar name`. */
 function isControl(element: Element): boolean {
-  if (element.localName === 'c2-form-list') return true
-  if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) return true
-  return (element.constructor as { formAssociated?: boolean }).formAssociated === true
+  return element.localName === 'c2-form-list' || isFormControl(element)
 }
 
 /** A checkbox or radio: its value counts only while checked. A text `<input>` has a `checked` property too. */
