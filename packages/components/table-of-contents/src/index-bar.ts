@@ -150,7 +150,7 @@ export class IndexBar extends TableOfContents {
               : html`<li aria-hidden="true"><span class="key empty" part="key empty" data-index=${index}>${entry.key}</span></li>`,
           )}
         </ol>
-        <div class="bubble" part="bubble" aria-hidden="true" ?hidden=${!this.bubble} style="--y:${this.bubble?.y ?? 0}px">${this.bubble?.key ?? ''}</div>
+        <div class="bubble" part="bubble" aria-hidden="true" ?hidden=${!this.bubble} style="--y:${this.bubble?.y ?? 0}px">${this.bubble?.key || nothing}</div>
       </nav>
     `
   }

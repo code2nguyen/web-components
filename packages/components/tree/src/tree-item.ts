@@ -312,7 +312,7 @@ export class TreeItem extends LitElement {
       }
       <slot name="icon"></slot>
       <span class="label" part="label">
-        <slot name="label" @slotchange=${this.#readLabelSlot}>${this.label || this.value}</slot>
+        <slot name="label" @slotchange=${this.#readLabelSlot}>${this.label || this.value || nothing}</slot>
       </span>
       <span class="actions" part="actions"><slot name="actions"></slot></span>
     `

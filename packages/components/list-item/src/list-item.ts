@@ -414,7 +414,7 @@ export class ListItem extends LitElement {
     return html`
       <slot name="prefix-icon"></slot>
       <div class="c2-list-item__content">
-        <div class="c2-list-item__text"><slot @slotchange=${this.handleSlotChange}>${this.label ?? this.value}</slot></div>
+        <div class="c2-list-item__text"><slot @slotchange=${this.handleSlotChange}>${(this.label ?? this.value) || nothing}</slot></div>
         <div class="c2-list-item__description" ?hidden=${!this.slotPresence.has('description')}>
           <slot name="description" @slotchange=${this.handleSlotChange}></slot>
         </div>

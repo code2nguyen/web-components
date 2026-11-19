@@ -305,7 +305,7 @@ export class MenuItem extends LitElement {
       ${this.renderIndicator()}
       <slot name="prefix-icon"></slot>
       <div class="content">
-        <div class="text" ?data-hidden=${this.compact}><slot @slotchange=${this.handleLabelChange}>${this.label ?? this.value}</slot></div>
+        <div class="text" ?data-hidden=${this.compact}><slot @slotchange=${this.handleLabelChange}>${(this.label ?? this.value) || nothing}</slot></div>
         <div class="description" ?hidden=${!this.hasDescription}>
           <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
