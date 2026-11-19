@@ -9,7 +9,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import { ListItem } from '@c2n/list-item'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
-import { SlotPresenceController, disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, disabledByAncestor, findWrapped, isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 
 import '@c2n/overlay'
@@ -47,9 +47,14 @@ let warnedUnupgraded = false
 /** Lower case without accents, so `cafe` finds `Café`. */
 const fold = (text: string): string => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase().trim()
 
-/** The `c2-list-item` a slotted element stands for: itself, or the row a framework island wraps. */
-const rowOf = (element: Element): ListItem | undefined =>
-  element instanceof ListItem ? element : element.firstElementChild instanceof ListItem ? element.firstElementChild : undefined
+/**
+ * How deep a row's `c2-list-item` may sit inside its wrapper, as `c2-list` reads its rows: an island around a
+ * `c2-swipe-action` around an island. A list nested in a row owns its own items.
+ */
+const wrappedRow = { depth: 3, skip: (element: Element) => element.localName === 'c2-list' }
+
+/** The `c2-list-item` a slotted element stands for: itself, or the row a framework island (or another wrapper) holds. */
+const rowOf = (element: Element): ListItem | undefined => findWrapped(element, (candidate) => candidate instanceof ListItem, wrappedRow)
 
 /**
  * A dropdown built from a trigger button and a `c2-list` of `c2-list-item` rows inside a `c2-overlay` popover. The
@@ -462,7 +467,7 @@ export class Select extends LitElement {
         const listItem = rowOf(slotItem)
         if (listItem instanceof ListItem) {
           if (this.value.includes(listItem.value)) displayText.push(listItem.displayText)
-        } else if (slotItem.localName === 'c2-list-item' || slotItem.firstElementChild?.localName === 'c2-list-item') {
+        } else if (findWrapped(slotItem, (candidate) => candidate.localName === 'c2-list-item', wrappedRow)) {
           // The tag is there but the class is not: a `c2-list-item` server-rendered without a client directive,
           // or one whose module was never imported. Reading it gives nothing, and the trigger renders empty —
           // which looks like a styling problem rather than the hydration one it is.
