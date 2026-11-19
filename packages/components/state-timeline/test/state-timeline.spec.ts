@@ -41,6 +41,23 @@ test('draws one band per series, sized by time, with the baseline quiet and the 
   baseExpect(failover.x + failover.width <= rollback.x || failover.y + failover.height <= rollback.y || rollback.y + rollback.height <= failover.y).toBe(true)
 })
 
+test('its built-in text follows its language', async ({ page, scenario }) => {
+  await scenario('lang')
+  const subject = page.locator('c2-state-timeline')
+  await expect(subject.getByRole('rowheader', { name: /^Worker\s*, actuellement Aucune donnée, 1 h hors Operational$/ })).toBeVisible()
+  await expect(subject.locator('[part="legend"] li').last()).toHaveText('Aucune donnée 1 h')
+  await expect(subject.locator('[role="gridcell"][aria-label^="Worker : Aucune donnée, "]').first()).toBeAttached()
+})
+
+test('its accessible name follows a language change', async ({ page, scenario }) => {
+  await scenario()
+  const subject = page.locator('c2-state-timeline')
+  await subject.evaluate((element) => element.removeAttribute('aria-label'))
+  await expect(subject).toHaveHostAria('aria-label', 'State timeline')
+  await subject.evaluate((element) => ((element as HTMLElement & { locale: string }).locale = 'fr'))
+  await expect(subject).toHaveHostAria('aria-label', "Chronologie d'états")
+})
+
 test('each band says what it is doing now and how long it spent outside the baseline', async ({ page, scenario }) => {
   await scenario()
   const subject = page.locator('c2-state-timeline')
