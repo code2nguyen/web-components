@@ -2,7 +2,7 @@ import { LitElement, html, nothing, svg, unsafeCSS } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -233,14 +233,15 @@ export class ImageCompare extends LitElement {
     }
   }
 
+  constructor() {
+    super()
+    // `slotchange` does not fire for layers already assigned when a server-rendered shadow root hydrates.
+    new SlotReplayController(this, () => this.readNames(), { always: true, immediate: true })
+  }
+
   override connectedCallback(): void {
     super.connectedCallback()
     if (this.hasUpdated) this.readNames()
-  }
-
-  protected override firstUpdated(): void {
-    // `slotchange` does not fire for layers already assigned when a server-rendered shadow root hydrates.
-    this.readNames()
   }
 
   override disconnectedCallback(): void {
