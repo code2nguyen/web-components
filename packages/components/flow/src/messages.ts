@@ -4,6 +4,8 @@ const en = {
   rename: 'Rename',
   editLabel: 'Edit label',
   delete: 'Delete',
+  /** The Delete key as the menu's shortcut hint shows it. */
+  deleteKey: 'Del',
   addNode: 'Add node',
   zoomIn: 'Zoom in',
   zoomOut: 'Zoom out',

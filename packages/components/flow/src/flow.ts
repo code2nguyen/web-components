@@ -2256,7 +2256,7 @@ export class Flow extends LitElement {
             >`
       }
       <c2-menu-item value="flow:delete" aria-keyshortcuts="Delete"
-        >${this.menuIcon(MENU_ICONS.remove)}${this.msg.t('delete')}<c2-kbd slot="shortcut">Del</c2-kbd></c2-menu-item
+        >${this.menuIcon(MENU_ICONS.remove)}${this.msg.t('delete')}<c2-kbd slot="shortcut">${this.msg.t('deleteKey')}</c2-kbd></c2-menu-item
       >
     `
   }
