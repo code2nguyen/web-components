@@ -70,6 +70,8 @@ for (const module of Object.values(modules)) {
 const SHARED: Record<string, readonly string[]> = {
   chart: ['area-chart', 'bar-chart', 'bubble-chart', 'candlestick-chart', 'line-chart', 'scatter-chart', 'sparkline'],
   'chart-reference-lines': ['area-chart', 'line-chart'],
+  // The map's notices are drawn by the map and the Street View only; a marker or a route shows none.
+  'google-map': ['google-street-view'],
 }
 
 /**

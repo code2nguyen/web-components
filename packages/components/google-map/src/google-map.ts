@@ -16,6 +16,8 @@ export { configureGoogleMaps, isGoogleMapsLoaded, loadGoogleMaps, importGoogleLi
 export type { GoogleMapsConfig, GoogleMapsErrorReason } from './google-maps-loader.js'
 export type { GoogleMapsErrorEventDetail } from './google-maps-element.js'
 export { parseLatLng, parseLocation } from './geo.js'
+export { googleMapMessages } from './messages.js'
+export type { GoogleMapMessageKey } from './messages.js'
 export type { LatLng, Location } from './geo.js'
 export type { GoogleMapMarker, GoogleMapMarkerEventDetail, GoogleMapMarkerEventMap } from './google-map-marker.js'
 export type {
@@ -129,7 +131,7 @@ export class GoogleMap extends GoogleMapsElement {
   /** The view the map reported last, so writing it back to `center`/`zoom` does not move the map again. */
   #reported: { center?: LatLng; zoom?: number } = {}
 
-  protected readonly loadingMessage = 'Loading map…'
+  protected readonly loadingNotice = 'loadingMap'
 
   /** The underlying `google.maps.Map`, once it exists. */
   get map(): google.maps.Map | undefined {
