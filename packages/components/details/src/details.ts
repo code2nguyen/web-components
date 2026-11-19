@@ -411,7 +411,7 @@ export class Details extends LitElement {
           @keydown=${this.handleSummaryKeydown}
         >
           <div class="c2-details-summary-row">
-            <div part="title" class="c2-details-summary-content"><slot name="title">${this.label}</slot></div>
+            <div part="title" class="c2-details-summary-content"><slot name="title">${this.label || nothing}</slot></div>
             ${this.renderIcon()}
           </div>
           <div part="header-content" class="c2-details-header-content" ?hidden=${!this.slotPresence.has('header-content')}>
