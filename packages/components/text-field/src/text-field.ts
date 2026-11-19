@@ -383,7 +383,7 @@ export class TextField extends LitElement {
     }
     return html`<div class="supporting-text ${classMap({ error: this.error && !this.disabled })}">
       <div class="supporting-text__message" id="supporting-text">
-        <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
+        <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message || nothing}</slot>
       </div>
       ${counter ? html`<span class="supporting-text__counter">${counter}</span>` : nothing}
     </div>`
