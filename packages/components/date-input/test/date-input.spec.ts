@@ -232,7 +232,7 @@ test('the native picker stays the default, and a disabled or read-only field ope
 test('the calendar speaks the field language', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr">${calendarField('value="2026-10-12"')}</div>`)
   const host = page.locator('c2-date-input')
-  await host.getByRole('button', { name: 'Open calendar' }).click()
+  await host.getByRole('button', { name: 'Ouvrir le calendrier' }).click()
   await expect(host.getByRole('button', { name: "Aujourd'hui" })).toBeVisible()
   await expect(host.getByRole('button', { name: 'Effacer' })).toBeVisible()
   await expect(host.getByRole('dialog').getByRole('gridcell', { name: /12 octobre 2026/ })).toBeFocused()
