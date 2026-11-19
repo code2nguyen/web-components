@@ -6,6 +6,8 @@ import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { ganttMessages } from './messages.js'
 import styles from './gantt.scss?inline'
 import {
   createFormatters,
@@ -38,6 +40,23 @@ import type {
 } from './gantt-types.js'
 
 import './gantt-task.js'
+
+const percentFormats = new Map<string, Intl.NumberFormat>()
+
+/** A whole-number percent format in `locale`, cached; a malformed `lang` (`en_US`) falls back to English rather than throw. */
+function percentFormat(locale: string): Intl.NumberFormat {
+  let format = percentFormats.get(locale)
+  if (!format) {
+    const options: Intl.NumberFormatOptions = { style: 'percent', maximumFractionDigits: 0 }
+    try {
+      format = new Intl.NumberFormat(locale, options)
+    } catch {
+      format = new Intl.NumberFormat('en', options)
+    }
+    percentFormats.set(locale, format)
+  }
+  return format
+}
 
 export type * from './gantt-types.js'
 export { GanttTask } from './gantt-task.js'
@@ -107,9 +126,9 @@ const chevron = html`<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
  *
  * @slotcomponent c2-gantt-task
  *
- * @slot empty - Shown when there are no tasks. Defaults to "No tasks to show".
- * @slot list-header - Heading of the task list column. Defaults to "Task".
- * @slot duration-header - Heading of the duration column. Defaults to "Days".
+ * @slot empty - Shown when there are no tasks. Defaults to the `empty` message ("No tasks to show").
+ * @slot list-header - Heading of the task list column. Defaults to the `task` message ("Task").
+ * @slot duration-header - Heading of the duration column. Defaults to the `duration` message ("Days").
  *
  * @event {CustomEvent<GanttTaskEventDetail>} task-click - Fired when a bar or a row is clicked, or Enter is pressed on a row, before the selection changes. Cancel it to keep the selection as it is. Bubbles.
  * @event {CustomEvent<GanttSelectionChangeEventDetail>} selection-change - Fired after the user selects a task. `detail.value` is its id. Does not bubble.
@@ -206,6 +225,7 @@ export class Gantt extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, ganttMessages, () => this.locale)
 
   /**
    * The tasks, as an array or a JSON attribute. `null` (the default) reads the `c2-gantt-task` children instead;
@@ -612,16 +632,21 @@ export class Gantt extends LitElement {
     return row.end - row.start + 1
   }
 
+  /** A progress share (0 to 1) as a whole percentage in the chart's language. */
+  #percent(share: number): string {
+    return percentFormat(this.msg.locale).format(Math.round(share * 100) / 100)
+  }
+
   #describe(row: GanttRow): string {
     const format = this.#format
     const date = (day: number) => format.date.format(fromDay(day))
     const days = this.#days(row)
     const parts = [row.label]
-    if (row.milestone) parts.push(`milestone, ${date(row.start)}`)
-    else parts.push(`${date(row.start)} to ${date(row.end)}`, `${days} ${days === 1 ? 'day' : 'days'}`)
-    if (!row.group && !row.milestone && row.progress > 0) parts.push(`${Math.round(row.progress * 100)}% complete`)
+    if (row.milestone) parts.push(this.msg.t('describeMilestone', date(row.start)))
+    else parts.push(this.msg.t('describeRange', date(row.start), date(row.end)), this.msg.t('days', days))
+    if (!row.group && !row.milestone && row.progress > 0) parts.push(this.msg.t('describeProgress', this.#percent(row.progress)))
     const after = row.dependencies.map((id) => this.#model.byId.get(id)?.label).filter(Boolean)
-    if (after.length) parts.push(`after ${after.join(', ')}`)
+    if (after.length) parts.push(this.msg.t('describeAfter', after.join(', ')))
     return parts.join(', ')
   }
 
@@ -867,23 +892,23 @@ export class Gantt extends LitElement {
       <dl>
         ${
           row.milestone
-            ? html`<dt>Date</dt>
+            ? html`<dt>${this.msg.t('date')}</dt>
                 <dd>${date(row.start)}</dd>`
-            : html`<dt>Dates</dt>
+            : html`<dt>${this.msg.t('dates')}</dt>
                 <dd>${date(row.start)} – ${date(row.end)}</dd>
-                <dt>Length</dt>
-                <dd>${days} ${days === 1 ? 'day' : 'days'}</dd>`
+                <dt>${this.msg.t('length')}</dt>
+                <dd>${this.msg.t('days', days)}</dd>`
         }
         ${
           after.length
-            ? html`<dt>After</dt>
+            ? html`<dt>${this.msg.t('after')}</dt>
                 <dd>${after.join(', ')}</dd>`
             : nothing
         }
         ${
           !row.group && !row.milestone
-            ? html`<dt>Done</dt>
-                <dd>${Math.round(row.progress * 100)}%</dd>`
+            ? html`<dt>${this.msg.t('done')}</dt>
+                <dd>${this.#percent(row.progress)}</dd>`
             : nothing
         }
       </dl>`
@@ -915,7 +940,7 @@ export class Gantt extends LitElement {
     // A server cannot read the children, so markup mode renders an empty frame there and fills in on upgrade, after
     // the hydrating render has matched that frame.
     else if ((isServer || this.#hydrating) && this.#modelSource === 'markup') body = nothing
-    else if (!this.#model.rows.length) body = html`<div class="empty" part="empty"><slot name="empty">No tasks to show</slot></div>`
+    else if (!this.#model.rows.length) body = html`<div class="empty" part="empty"><slot name="empty">${this.msg.t('empty')}</slot></div>`
     else {
       const rows = this.#visible()
       const range = this.#range()
@@ -924,8 +949,8 @@ export class Gantt extends LitElement {
         <div class="content" style=${styleMap({ width: `calc(var(--_list) + ${width}px)` })}>
           <div class="head" aria-hidden="true">
             <div class="corner">
-              <span class="corner-name"><slot name="list-header">Task</slot></span>
-              <span class="corner-days"><slot name="duration-header">Days</slot></span>
+              <span class="corner-name"><slot name="list-header">${this.msg.t('task')}</slot></span>
+              <span class="corner-days"><slot name="duration-header">${this.msg.t('duration')}</slot></span>
             </div>
             ${this.#renderScale(range, width)}
           </div>
