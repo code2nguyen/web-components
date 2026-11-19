@@ -176,7 +176,7 @@ export class SecretField extends LitElement {
     return html`
       <div class="c2-secret-field">
         <div id="label" class="label" part="label" ?hidden=${!hasLabel}>
-          <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
+          <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot>
         </div>
         <div class="field" part="field" role="group" aria-labelledby=${hasLabel ? 'label' : nothing} aria-describedby=${hasHelp ? 'help' : nothing}>
           ${this.renderValue()}
