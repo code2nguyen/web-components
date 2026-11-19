@@ -1,6 +1,6 @@
 import { html, LitElement, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { arrayPropertyConverter, assignSlot, property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, assignSlot, property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -390,14 +390,15 @@ export class ReorderList extends LitElement {
   private swipeListening = false
   private lastInputMethod: ReorderInputMethod = 'mouse'
 
+  /**
+   * A declarative shadow root was rendered on the server, which cannot see the light DOM, so it holds no items:
+   * hydrate that empty list first, or Lit finds more items than markers and throws, and only then pick them up.
+   */
+  private readonly hydration = new SlotReplayController(this, () => this.reconcileAuthoredOrder())
+
   override connectedCallback(): void {
-    // A declarative shadow root was rendered on the server, which cannot see the light DOM, so it holds no items:
-    // hydrate that empty list first, or Lit finds more items than markers and throws, and only then pick them up.
-    // Read before `super`, which attaches the shadow root of a client-rendered element.
-    const hydrating = !!this.shadowRoot && !this.hasUpdated
     super.connectedCallback()
-    if (hydrating) void this.updateComplete.then(() => this.reconcileAuthoredOrder())
-    else this.reconcileAuthoredOrder()
+    if (!this.hydration.hydrating) this.reconcileAuthoredOrder()
     this.observeChildren()
     // Moved in the document: its labels may differ, and the observer was dropped on disconnect.
     if (this.hasUpdated) this.syncContainerName()
@@ -661,9 +662,7 @@ export class ReorderList extends LitElement {
     // insert before for them to show at `index`.
     const before = this.authoredOrder[index] ?? null
     const detail: ReorderItemDropEventDetail = { kind, items, index, before }
-    return this.dispatchEvent(new CustomEvent<ReorderItemDropEventDetail>('item-drop', { cancelable: true, detail }))
-      ? items.length
-      : 0
+    return this.dispatchEvent(new CustomEvent<ReorderItemDropEventDetail>('item-drop', { cancelable: true, detail })) ? items.length : 0
   }
 
   private reconcileAuthoredOrder(): void {
