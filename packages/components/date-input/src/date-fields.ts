@@ -309,7 +309,7 @@ export class DateFields extends LitElement {
       </fieldset>
       <div id="supporting-text" part="supporting-text" class="supporting-text ${showError ? 'error' : ''}" ?hidden=${!showSupporting}>
         ${message || nothing}
-        <slot name="supporting-text" ?hidden=${!!message} @slotchange=${this.slotPresence.handleSlotChange}>${message ? nothing : this.help}</slot>
+        <slot name="supporting-text" ?hidden=${!!message} @slotchange=${this.slotPresence.handleSlotChange}>${message ? nothing : this.help || nothing}</slot>
       </div>
       ${this.field.renderDescription()}
     `

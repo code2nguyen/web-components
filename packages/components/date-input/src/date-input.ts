@@ -378,7 +378,7 @@ export class DateInput extends LitElement {
       ${
         showSupporting
           ? html`<div id="supporting-text" class="supporting-text ${classMap({ error: showError })}">
-              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
+              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message || nothing}</slot>
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }
