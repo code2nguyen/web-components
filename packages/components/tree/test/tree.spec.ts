@@ -583,3 +583,70 @@ test('a slotted label still names the row over the label property', async ({ pag
   await renderScenario('<c2-tree aria-label="Files"><c2-tree-item value="a" label="Fallback"><span slot="label">Slotted</span></c2-tree-item></c2-tree>')
   await expect(itemOf(page, 'a')).toHaveHostAria('aria-label', 'Slotted')
 })
+
+test('a row drawn by renderLabel takes its name from the label it shows after the items change', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Files"></c2-tree>')
+  await page.locator('c2-tree').evaluate(async (element) => {
+    const el = element as HTMLElement & { items: unknown; renderLabel: unknown; updateComplete: Promise<boolean> }
+    el.renderLabel = ({ node }: { node: { label: string } }) => node.label
+    el.items = [{ value: 'a', label: 'Draft' }]
+    await el.updateComplete
+  })
+  await expect(itemOf(page, 'a')).toHaveHostAria('aria-label', 'Draft')
+  await page.locator('c2-tree').evaluate((element) => ((element as HTMLElement & { items: unknown }).items = [{ value: 'a', label: 'Published' }]))
+  await expect(itemOf(page, 'a').locator('[slot="label"]')).toHaveText('Published')
+  await expect(itemOf(page, 'a')).toHaveHostAria('aria-label', 'Published')
+})
+
+test("a label forwarded through another component's slot names the row by the text it shows", async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Files"><c2-tree-item value="x"></c2-tree-item></c2-tree>')
+  const item = itemOf(page, 'x')
+  // A wrapper that forwards its own slot, with fallback text, into the row's label slot.
+  await item.evaluate((element) => {
+    const forward = document.createElement('slot')
+    forward.name = 'label'
+    forward.slot = 'label'
+    forward.textContent = 'Untitled'
+    const host = document.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    element.parentElement!.replaceChild(host, element)
+    shadow.append(element)
+    element.append(forward)
+  })
+  await expect(page.locator('c2-tree-item[value="x"]')).toHaveHostAria('aria-label', 'Untitled')
+  await page.locator('c2-tree-item[value="x"]').evaluate((element) => (element.querySelector('slot')!.textContent = 'Renamed'))
+  await expect(page.locator('c2-tree-item[value="x"]')).toHaveHostAria('aria-label', 'Renamed')
+})
+
+test("with checkbox selection, a row's checkbox follows a label renderLabel changes in place", async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tree aria-label="Files" checkbox-selection></c2-tree>')
+  const tree = page.locator('c2-tree')
+  await tree.evaluate(async (element) => {
+    const el = element as HTMLElement & { items: unknown; renderLabel: unknown; updateComplete: Promise<boolean> }
+    el.renderLabel = ({ node }: { node: { label: string } }) => node.label
+    el.items = [{ value: 'a', label: 'Draft' }]
+    await el.updateComplete
+  })
+  await expect(checkboxOf(page, 'a')).toHaveAttribute('aria-label', 'Draft')
+  await tree.evaluate((element) => ((element as HTMLElement & { items: unknown }).items = [{ value: 'a', label: 'Published' }]))
+  await expect(itemOf(page, 'a')).toHaveHostAria('aria-label', 'Published')
+  await expect(checkboxOf(page, 'a')).toHaveAttribute('aria-label', 'Published')
+})
+
+test("with checkboxes, a slotted label names the row's checkbox and follows its text, without a second render", async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(`
+    <c2-tree aria-label="Files" checkbox-selection>
+      <c2-tree-item value="readme"><span slot="label">README.md</span></c2-tree-item>
+    </c2-tree>
+  `)
+  const checkbox = itemOf(page, 'readme').locator('c2-checkbox.checkbox')
+  await expect(checkbox).toHaveAttribute('aria-label', 'README.md')
+  await page.locator('[slot="label"]').evaluate((label) => (label.textContent = 'CHANGELOG.md'))
+  await expect(checkbox).toHaveAttribute('aria-label', 'CHANGELOG.md')
+  await page.waitForTimeout(50)
+  expect(warnings).toEqual([])
+})
