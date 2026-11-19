@@ -109,7 +109,7 @@ export abstract class GoogleMapsElement extends LitElement {
         this.status === 'ready'
           ? nothing
           : html`<div class="message ${this.status}" part="message" role=${this.status === 'error' ? 'alert' : 'status'}>
-              ${this.message || this.loadingMessage}
+              ${this.message || this.loadingMessage /* modern-web-ignore: empty-text-child-part loadingMessage is never empty */}
             </div>`
       }
       <slot></slot>

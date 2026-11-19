@@ -245,6 +245,39 @@ const rules = [
     guide: 'accessibility, natural-interactions',
   },
   {
+    id: 'empty-text-child-part',
+    level: 'warn',
+    ext: 'ts',
+    // A text binding whose fallback chain can still render an empty value: a `||` chain ending in `''` or a plain field
+    // (`${this.label || this.value}`), a `(a ?? b) || c` chain ending the same way, or a `??` chain (no call in it)
+    // ending in a field or a string literal — `??` passes `''` through. Only a binding in text position counts: after
+    // `>`, `}`, a space, `(`, `#`, `/`, `:` or `html`/`svg`'s backtick, and not inside an open attribute quote. Known
+    // gaps: a bare `${this.value}` and `${a ?? nothing}` are not flagged; a plain template string with a `??` is.
+    line: (() => {
+      const tick = '`'
+      const body = String.raw`[^{}${tick}]`
+      const field = String.raw`(?!nothing\b)[A-Za-z_$][\w$.?]*`
+      const empty = String.raw`(?:''|""|${field})`
+      const start = String.raw`(?<=^|[>}\s(#/:]|(?:html|svg)${tick})(?<!=["'][^"'>]*)\$\{`
+      return new RegExp(
+        start +
+          '(?:' +
+          // a `||` chain with no `??`
+          String.raw`(?!${body}*\?\?)${body}*\|\|\s*${empty}\s*\}` +
+          '|' +
+          // `(a ?? b) || c`
+          String.raw`\s*\([^(){}${tick}]*\?\?[^(){}${tick}]*\)\s*\|\|\s*${empty}\s*\}` +
+          '|' +
+          // a `??` chain with no call in it
+          String.raw`[^(){}${tick}]*\?\?\s*(?:${empty}|'[^']+'|"[^"]+")\s*\}` +
+          ')',
+      )
+    })(),
+    message:
+      "A text binding that can render '', undefined or null leaves no text node in a server render. If the element's first render after hydration is the one that fills it, Lit writes the text into the closing marker comment and it never shows. End the chain with `|| nothing` (a `??` chain in parentheses: `${(a ?? b) || nothing}`); for a number, test for null rather than using `||`, which hides 0. Text content only: in an attribute value, `nothing` removes the whole attribute.",
+    guide: 'prerendering-custom-elements',
+  },
+  {
     id: 'fixed-overlay-z-index',
     level: 'warn',
     ext: 'scss',
