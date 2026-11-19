@@ -331,19 +331,24 @@ export function changedComponents(registry: Registry, commit: string, files?: st
 
 /**
  * The commit to compare against: the one that committed the baseline, which holds the changes the baseline measured
- * (a run is committed together with them), unless the baseline was rewritten since and not committed yet; then the
- * commit it measured.
+ * (a run is committed together with them). Without a committed baseline, the commit the baseline measured.
  */
 function referenceCommit(baseline: Baseline): string {
-  const file = 'packages/tools/mcp/readiness/baseline.json'
-  const uncommitted = git(['status', '--porcelain', '--', file]).trim() !== ''
-  const committed = git(['log', '-1', '--format=%H', '--', file]).trim()
-  return uncommitted || !committed ? baseline.commit : committed
+  const committed = git(['log', '-1', '--format=%H', '--', 'packages/tools/mcp/readiness/baseline.json']).trim()
+  return committed || baseline.commit
 }
 
+/**
+ * The last run that was kept: the committed baseline. A run rewrites the working copy, so comparing with that would
+ * hide a regression on the second run; until the baseline is committed, every run compares with the committed one.
+ */
 function readBaseline(): Baseline | undefined {
-  const file = join(outDir, 'baseline.json')
-  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Baseline) : undefined
+  try {
+    return JSON.parse(git(['show', 'HEAD:packages/tools/mcp/readiness/baseline.json'])) as Baseline
+  } catch {
+    const file = join(outDir, 'baseline.json')
+    return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Baseline) : undefined
+  }
 }
 
 function writeBaseline(baseline: Baseline): void {
@@ -368,11 +373,14 @@ function changesMarkdown(
   rows: { c: ComponentReadiness; before?: BaselineComponent; cmp: ReturnType<typeof compare> }[],
   baseline: Baseline,
   previous?: Baseline,
+  full = false,
 ): string {
   const lines = [
     `# AI readiness — changes since ${commit.slice(0, 7)}`,
     '',
-    `Scored ${rows.length} new or modified component${rows.length === 1 ? '' : 's'}; the other ${Object.keys(baseline.components).length - rows.length} keep their last score. Full report: [report.md](report.md).`,
+    full
+      ? `Full run: every component scored; the ${rows.length} whose result moved are listed. Full report: [report.md](report.md).`
+      : `Scored ${rows.length} new or modified component${rows.length === 1 ? '' : 's'}; the other ${Object.keys(baseline.components).length - rows.length} keep their last score. Full report: [report.md](report.md).`,
     '',
     `**AI readiness ${baseline.overall}/100** (${previous ? signed(round(baseline.overall - previous.overall)) : 'new'}) · component readiness ${baseline.score} (${previous ? signed(round(baseline.score - previous.score)) : 'new'}) · discovery ${baseline.discovery.score}${baseline.agent ? ` · agent ${baseline.agent.score}` : ''}`,
     '',
@@ -476,20 +484,22 @@ function main() {
     console.log('\n  Weakest checks (library points lost):')
     for (const w of report.weakest.slice(0, 6))
       console.log(`    ${w.pointsLost.toFixed(2).padStart(5)}  ${w.dimension} · ${w.label} (${w.components} components)`)
-  } else {
-    writeFileSync(join(outDir, 'changes.md'), changesMarkdown(since, rows, merged, previous))
-    if (rows.length === 0) console.log(`\n  No component changed since ${since.slice(0, 7)}.`)
-    for (const { c, cmp } of rows)
-      console.log(
-        `  ${(cmp.delta === null ? 'new' : signed(cmp.delta)).padStart(6)}  ${c.id.padEnd(22)} ${String(c.score).padStart(5)} ${c.grade}${cmp.worse.length ? `  worse: ${cmp.worse.join(', ')}` : ''}${cmp.fixed.length ? `  better: ${cmp.fixed.join(', ')}` : ''}`,
-      )
   }
+  // A full run lists the components whose result moved; a changed run every component it scored.
+  const moved = full ? rows.filter(({ cmp }) => cmp.delta !== 0 || cmp.fixed.length || cmp.worse.length) : rows
+  writeFileSync(join(outDir, 'changes.md'), changesMarkdown(since, moved, merged, previous, !!full))
+  if (moved.length === 0) console.log(`\n  No component ${full ? 'moved' : 'changed'} since ${since.slice(0, 7)}.`)
+  else console.log(`\n  ${full ? 'Moved' : 'Scored'} since ${since.slice(0, 7)}:`)
+  for (const { c, cmp } of moved)
+    console.log(
+      `  ${(cmp.delta === null ? 'new' : signed(cmp.delta)).padStart(6)}  ${c.id.padEnd(22)} ${String(c.score).padStart(5)} ${c.grade}${cmp.worse.length ? `  worse: ${cmp.worse.join(', ')}` : ''}${cmp.fixed.length ? `  better: ${cmp.fixed.join(', ')}` : ''}`,
+    )
   if (previous)
     console.log(
       `\n  Since ${since.slice(0, 7)}: AI readiness ${signed(round(merged.overall - previous.overall))}, component readiness ${signed(round(merged.score - previous.score))}`,
     )
   writeBaseline(merged)
-  console.log(`\n  Written: ${join(outDir, full ? 'report.md' : 'changes.md')}, ${join(outDir, 'baseline.json')}`)
+  console.log(`\n  Written: ${full ? `${join(outDir, 'report.md')}, ` : ''}${join(outDir, 'changes.md')}, ${join(outDir, 'baseline.json')}`)
 
   const regressed = rows.filter(({ cmp }) => (cmp.delta ?? 0) < 0)
   if (args.includes('--fail-on-regression') && regressed.length) {
