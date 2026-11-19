@@ -1380,7 +1380,7 @@ export abstract class ChartBase extends LitElement {
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
     if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
-      return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
+      return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage || nothing}</slot></div>`
     }
     return nothing
   }
