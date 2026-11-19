@@ -292,14 +292,14 @@ export class NavigationMenuItem extends LitElement {
 
   private renderInner() {
     return html`<slot name="prefix-icon"></slot>
-      <span class="label"><slot>${this.label ?? nothing}</slot></span>
+      <span class="label"><slot>${this.label || nothing}</slot></span>
       <slot name="suffix-icon">${this.panelPresent ? this.renderChevron() : nothing}</slot>
       <span class="indicator" aria-hidden="true"></span>`
   }
 
   /** Mobile: a link row, or a heading with the panel's rows listed under it — behind a toggle when collapsible. */
   private renderMobile() {
-    const label = html`<slot name="prefix-icon"></slot> <span class="label"><slot>${this.label ?? nothing}</slot></span>`
+    const label = html`<slot name="prefix-icon"></slot> <span class="label"><slot>${this.label || nothing}</slot></span>`
 
     const heading = this.collapsible
       ? html`<button
