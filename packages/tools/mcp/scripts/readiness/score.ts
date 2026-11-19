@@ -111,6 +111,16 @@ const STANDARD_PROPERTIES: Set<string> = (() => {
 
 const UNWRITTEN = /no `slot` attribute needed|retained for compatibility|server-rendered/i
 
+/** Small content elements that go in any slot, as buttons and icons do: nesting one is not composition to document. */
+const CONTENT_TAGS = new Set(['c2-badge', 'c2-avatar', 'c2-avatar-group', 'c2-kbd', 'c2-separator', 'c2-link-button', 'c2-status-light'])
+
+/** Every element tag of an npm package, over all the docs pages that document it. */
+function packageTags(registry: Registry, pkg: string): string[] {
+  return Object.values(registry.components)
+    .filter((component) => component.package === pkg)
+    .flatMap((component) => component.elements.map((element) => element.tag))
+}
+
 /** `c2-*` tags written in an example. */
 export function exampleTags(example: Example): string[] {
   return example.tags ?? [...new Set([...example.html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((m) => m[1]))]
@@ -351,9 +361,9 @@ function composition(registry: Registry, c: ComponentEntry): Check[] {
   )
   const own = new Set(c.elements.map((e) => e.tag))
   // Components the examples put inside this one: its children and slotted content, not the layout around it.
-  // Buttons and icons are generic slot content (an `actions` slot holds a `c2-button`): no component's docs need to
-  // name them. What counts is a specific child, such as `c2-list-item` in `c2-select`.
-  const generic = (tag: string) => ['Buttons', 'Icons'].includes(registry.components[registry.tagIndex[tag]]?.category ?? '')
+  // Buttons, icons and small content elements are generic slot content (an `actions` slot holds a `c2-button`): no
+  // component's docs need to name them. What counts is a specific child, such as `c2-list-item` in `c2-select`.
+  const generic = (tag: string) => CONTENT_TAGS.has(tag) || ['Buttons', 'Icons'].includes(registry.components[registry.tagIndex[tag]]?.category ?? '')
   const foreign = [...new Set(all.flatMap((e) => nestedTags(e.html, own)))].filter((t) => registry.tagIndex[t] && registry.tagIndex[t] !== c.id && !generic(t))
   const known = new Set([...c.composition.internal, ...c.composition.slotted])
   const text = `${c.description} ${c.intro ?? ''} ${c.elements.map((e) => `${e.description} ${e.slots.map((s) => s.description ?? '').join(' ')}`).join(' ')}`
@@ -373,7 +383,10 @@ function composition(registry: Registry, c: ComponentEntry): Check[] {
           'Child elements say what they belong to',
           2,
           children,
-          (child) => [...own].some((t) => t !== child.tag && child.description.includes(t)) || c.elements[0].description.includes(child.tag),
+          // A child several pages share (`c2-chart-legend` on every chart page) may name any element of its package.
+          (child) =>
+            [...own, ...packageTags(registry, c.package)].some((t) => t !== child.tag && child.description.includes(t)) ||
+            c.elements[0].description.includes(child.tag),
           (e) => e.tag,
         )
       : undefined,

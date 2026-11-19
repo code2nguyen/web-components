@@ -112,7 +112,7 @@ function foldOrder(actions: Action[]): Action[] {
  * @slot title-suffix - Status after the title, such as `c2-badge`s.
  * @slot description - A sentence under the title.
  * @slot meta - Facts about the page: a `c2-description-list`, dates, owners.
- * @slot actions - Page actions. Mark the main one `primary`; set `overflow-priority` on the others to choose which fold first.
+ * @slot actions - Page actions and tools, such as a `c2-search-field`. Mark the main one `primary`; set `overflow-priority` on the others to choose which fold first.
  * @slot navigation - Tabs below the title, usually links with `aria-current="page"` on the current one.
  * @slot toolbar - A row of search and filters at the bottom of the header.
  *

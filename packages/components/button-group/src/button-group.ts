@@ -75,7 +75,7 @@ export interface ButtonGroup {
  *
  * @tag c2-button-group
  *
- * @slot - The buttons, in order.
+ * @slot - The buttons, in order. A toolbar may also hold other controls, such as a `c2-select` of `c2-list-item` options.
  *
  * @event {CustomEvent<{ value: string }>} change - Fired after the user changes the selection. `detail.value` is the new `value`. Not fired for programmatic changes.
  * @event {Event} input - Fired just before `change`, for two-way bindings that listen for `input`. Not fired for programmatic changes.

@@ -44,7 +44,7 @@ function isControl(element: Element): element is Disableable {
  *
  * @tag c2-fieldset
  *
- * @slot - The grouped controls.
+ * @slot - The grouped controls: `c2-checkbox`, `c2-switch` or `c2-radio` options, or `c2-form-field`s around `c2-text-field`s and other controls.
  * @slot legend - Rich legend content; replaces `legend`.
  * @slot legend-action - A link or button at the end of the legend row, e.g. "Same as billing".
  * @slot description - Rich description content shown under the legend; replaces `description`.

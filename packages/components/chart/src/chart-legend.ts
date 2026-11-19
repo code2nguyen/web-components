@@ -8,7 +8,14 @@ import styles from './chart-legend.scss?inline'
 
 /**
  * A legend linked to a chart by id. Place it anywhere in the document to control the legend's layout
- * independently from the chart.
+ * independently from the chart. It works with every c2 chart (`c2-line-chart`, `c2-bar-chart`, `c2-pie-chart`, …):
+ * give the chart an `id` and the legend the same value in `for`, and set `legend="none"` on the chart so the built-in
+ * one does not show as well.
+ *
+ * ```html
+ * <c2-line-chart id="sales" legend="none" data='[{ "month": "Jan", "revenue": 120 }]' label-field="month"></c2-line-chart>
+ * <c2-chart-legend for="sales"></c2-chart-legend>
+ * ```
  *
  * @tag c2-chart-legend
  * @slot - Replaces the generated legend. Use `renderLegend` or `renderLegendItem` for data-driven custom content.

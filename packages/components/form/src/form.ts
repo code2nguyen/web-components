@@ -96,7 +96,7 @@ const SUBMITTERS = 'button:not([type]), button[type="submit"], input[type="submi
  *
  * @tag c2-form
  *
- * @slot default - The native `<form>`.
+ * @slot default - The native `<form>`, holding the controls (`c2-text-field`, `c2-checkbox`, a `c2-select` of `c2-list-item` options, …), usually each in a `c2-form-field`.
  * @slot error-summary-heading - Replaces the summary heading ("There are 2 problems with this form").
  *
  * @event {CustomEvent<ValidSubmitEventDetail>} valid-submit - Every control is valid and `validator` passed. Detail: `{ formData, values, submitter, waitUntil(promise) }`. The page does not navigate.

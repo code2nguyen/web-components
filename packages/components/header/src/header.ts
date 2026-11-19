@@ -27,7 +27,7 @@ export interface Header {
  *
  * @tag c2-header
  * @slot brand - Logo, product name or home link.
- * @slot - Primary navigation.
+ * @slot - Primary navigation, such as a `c2-navigation-menu` of `c2-navigation-menu-item`s and `c2-navigation-menu-link`s.
  * @slot actions - Account and application actions aligned to the end.
  * @slot mobile-trigger - Responsive navigation trigger, placed after the actions.
  * @event {CustomEvent<{ stuck: boolean }>} stuck-change - Fired when a `sticky` header becomes stuck to the top or leaves it.

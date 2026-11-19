@@ -64,9 +64,9 @@ export const MASTER_DETAIL_BACK_ATTRIBUTE = 'master-detail-back'
  *
  * @tag c2-master-detail
  *
- * @slot master - The list: a `c2-list`, `c2-table`, `c2-tree`, anything. Fills the master pane, which scrolls.
+ * @slot master - The list: a `c2-list` of `c2-list-item`s, a `c2-table`, a `c2-tree`, anything. Fills the master pane, which scrolls.
  * @slot detail - The open record. Shown in the detail pane while `open` is true.
- * @slot placeholder - Shown in the detail pane in the split layout while nothing is open; hidden in the other two.
+ * @slot placeholder - Shown in the detail pane in the split layout while nothing is open, such as a `c2-status-panel`; hidden in the other two.
  * @slot toolbar - Extra content after the Back button in the stack and overlay layouts (a title, actions).
  * @slot back-icon - Replaces the chevron of the Back button. Mirrored in a right-to-left context.
  *

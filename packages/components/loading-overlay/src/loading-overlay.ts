@@ -23,7 +23,7 @@ import styles from './loading-overlay.scss?inline'
  *
  * @tag c2-loading-overlay
  *
- * @slot - The region to cover.
+ * @slot - The region to cover, such as a form of `c2-text-field`s or a `c2-table`.
  * @slot indicator - Replaces the spinner.
  * @slot label - Text under the spinner, e.g. "Saving changes…". Also what is announced.
  *

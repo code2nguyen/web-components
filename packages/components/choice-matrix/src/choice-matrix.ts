@@ -78,7 +78,7 @@ type Mixed = 'all' | 'some' | 'none'
  *
  * @tag c2-choice-matrix
  *
- * @slot detail-<row> - Content under the row whose value follows `detail-`, across the matrix: a comment, a note, a photo. Wins over `renderRowDetail`.
+ * @slot detail-<row> - Content under the row whose value follows `detail-`, across the matrix: a comment, a note (a `c2-textarea`), a photo. Wins over `renderRowDetail`.
  *
  * @event {Event} input - Fired when the user changes a choice, before `change`. Read `value`.
  * @event {CustomEvent<{ value: ChoiceMatrixValue }>} change - Fired after the user changes a choice. `detail.value` is the new `value`. Not fired for programmatic changes.

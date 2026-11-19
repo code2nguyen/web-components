@@ -25,7 +25,7 @@ export type TimelineLayout = 'stacked' | 'split'
  *
  * @tag c2-timeline-item
  *
- * @slot - The entry's content, below the label and timestamp.
+ * @slot - The entry's content, below the label and timestamp: text, or a `c2-details` or `c2-accordion` that folds longer notes.
  * @slot label - Replaces the `label` text.
  * @slot timestamp - Replaces the `timestamp` text.
  * @slot marker - An icon drawn inside the marker. Grow `--c2-timeline-item__marker--size` to make room for it.

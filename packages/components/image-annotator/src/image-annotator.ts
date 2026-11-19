@@ -174,7 +174,7 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @event {CustomEvent<AnnotatorErrorEventDetail>} annotator-error - An export failed, for example on a cross-origin image without CORS.
  * @event {CustomEvent<ShapeSelectEventDetail>} shape-select - The active shape changed by click, keyboard, drawing, deleting, `next()` or `previous()`; not when `active` is set. Does not bubble.
  *
- * @slot detail - The app's card for the active shape (a comment thread, an extracted field), shown beside it. Replaces what `renderDetail` draws.
+ * @slot detail - The app's card for the active shape (a `c2-comment-thread`, an extracted field), shown beside it. Replaces what `renderDetail` draws.
  *
  * @csspart toolbar - The toolbar.
  * @csspart stage - The image and its shapes.

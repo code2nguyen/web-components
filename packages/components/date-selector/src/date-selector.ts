@@ -128,7 +128,7 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  * app's own controls, such as a "Compare to" select that sets `compare`.
  *
  * @tag c2-date-selector
- * @slot footer - Row under the months for the app's controls: a "Compare to" select, presets, Apply. Hidden when empty, and
+ * @slot footer - Row under the months for the app's controls: a "Compare to" `c2-select` of `c2-list-item` options, presets, Apply. Hidden when empty, and
  * inert while the selector is disabled. A control's own `input`/`change` stop at the footer, so the selector's events
  * stay its own: listen on the control itself.
  * @event {Event} input - Fired after either endpoint changes, with `from` and `to` already updated.

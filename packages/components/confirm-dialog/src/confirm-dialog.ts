@@ -87,7 +87,7 @@ const loadFieldsModule = () =>
  * @slot - Message; replaces the `message` attribute. The dialog is described by it.
  * @slot heading - Heading; replaces the `heading` attribute. The dialog is labelled by it.
  * @slot icon - Icon shown before the heading, coloured by `--c2-confirm-dialog__icon--color`.
- * @slot input - A form control whose value `prompt()` resolves with, in place of the built-in text field (a `c2-select`, a `c2-number-input`). The dialog names it with `input-label`, or the heading, and checks its validity on confirm.
+ * @slot input - A form control whose value `prompt()` resolves with, in place of the built-in text field (a `c2-select` of `c2-list-item` options, a `c2-number-input`). The dialog names it with `input-label`, or the heading, and checks its validity on confirm.
  * @csspart modal - The inner `c2-modal`.
  * @csspart heading - Row wrapping the `icon` slot and the `heading` slot (or its `heading` attribute fallback).
  * @csspart message - Region wrapping the default slot (or its `message` attribute fallback).

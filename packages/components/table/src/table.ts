@@ -337,7 +337,7 @@ export interface Table {
  * @tag c2-table
  *
  * @slot default - The column definitions: `c2-table-column` elements. They render nothing themselves.
- * @slot toolbar - Bar above the header, for a title, filters or a column menu. Hidden when empty.
+ * @slot toolbar - Bar above the header, for a title, filters (a `c2-text-field` to search) or a column menu. Hidden when empty.
  * @slot footer - Bar below the rows, for a row count or a `c2-pagination`. Hidden when empty.
  * @slot empty - Replaces the built-in "no rows" message.
  * @slot loading - Replaces the built-in spinner shown while the first rows load.
