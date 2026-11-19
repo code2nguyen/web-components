@@ -92,6 +92,7 @@ export function distributionParts(
   }))
   if (folded.length > 0) {
     const value = folded.reduce((sum, item) => sum + item.value, 0)
+    // modern-web-ignore: literal-interface-text the element passes its translated `other` message; this default only serves direct callers of the helper
     parts.push({ key: '__other', label: options.otherLabel ?? 'Other', value, share: value / total, index: parts.length, other: true, items: folded })
   }
   return parts

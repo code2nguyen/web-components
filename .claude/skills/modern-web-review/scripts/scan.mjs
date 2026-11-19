@@ -324,7 +324,7 @@ const rules = [
         .filter((s) => looksLikeEnglish(s.text) && !isComment(s.index))
         .map((s) => s.index)
       // A default-text fallback or return: `|| 'Text'`, `?? 'Text'`, `return 'Two words'`, outside throw/console lines.
-      const fallback = /(?:\|\||\?\?|\breturn)\s*(['"])([A-Z][a-z]+(?:[  ][\w'…,.]+)*[.…]?)\1/
+      const fallback = /(?:\|\||\?\?|\breturn)\s*(['"])([A-Z][a-z]+(?:[ \u00a0](?:(?!\1).)*)?)\1/
       all.forEach((l, i) => {
         if (isComment(i) || /\b(throw|console\.|new Error|warn\(|import |from ')/.test(l)) return
         const m = fallback.exec(l)
