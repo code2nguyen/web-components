@@ -98,7 +98,7 @@ invalid, as a typed one does. If the calendar cannot be loaded, the button falls
 
 ## Limiting the date range
 
-`min` and `max` are inclusive bounds. The platform picker greys out every date outside them, and a date typed outside the range makes the field invalid (`validity.rangeUnderflow` / `rangeOverflow`), which blocks form submission. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:
+`min` and `max` are inclusive bounds. With `picker="calendar"`, as in the examples below, the calendar disables every day outside them, so a click cannot pick one. The field itself is still the browser's date input: a date typed outside the range, or stepped past it with the arrow keys, is kept and makes the field invalid (`validity.rangeUnderflow` / `rangeOverflow`), which blocks form submission. Show that as an error (the examples do on `change`), and validate again on the server. With the default native picker, how the popup treats out-of-range days is the browser's choice. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:
 
 ```html tag=UsageBlock,package=@c2n/date-input
 <style>
@@ -107,13 +107,13 @@ invalid, as a typed one does. If the calendar cannot be loaded, the button falls
   }
 </style>
 <div data-label="From two days ago (d-2 onwards)">
-  <c2-date-input class="date-width" aria-label="Service date" data-min-days="-2" help="Two days ago or later."></c2-date-input>
+  <c2-date-input class="date-width" picker="calendar" aria-label="Service date" data-min-days="-2" help="Two days ago or later."></c2-date-input>
 </div>
 <div data-label="Past dates only (up to d-1)">
-  <c2-date-input class="date-width" aria-label="Date of birth" data-max-days="-1" help="Yesterday or earlier."></c2-date-input>
+  <c2-date-input class="date-width" picker="calendar" aria-label="Date of birth" data-max-days="-1" help="Yesterday or earlier."></c2-date-input>
 </div>
 <div data-label="Rolling window (d-7 to today)">
-  <c2-date-input class="date-width" aria-label="Report date" data-min-days="-7" data-max-days="0" help="Within the last 7 days."></c2-date-input>
+  <c2-date-input class="date-width" picker="calendar" aria-label="Report date" data-min-days="-7" data-max-days="0" help="Within the last 7 days."></c2-date-input>
 </div>
 ```
 
