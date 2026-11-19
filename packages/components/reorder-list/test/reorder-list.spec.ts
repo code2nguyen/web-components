@@ -1325,3 +1325,236 @@ test('moving the focused item into a special slot moves focus to its neighbour',
   await expect.poll(() => visualIds(host)).toEqual(['first'])
   await expect.poll(focusedId).toBe('first')
 })
+
+// ---- drops of rows from outside the list (another list, another window) ----
+
+const TASK_TYPE = 'application/x-c2n-task+json'
+
+/**
+ * Synthesises a drag of an item payload onto `selector`, near its bottom edge: dragenter and dragover, then the drop
+ * (or a dragleave when `drop` is false). Returns how the list was lit while the drag was over it.
+ */
+async function dropPayload(page: import('@playwright/test').Page, selector: string, type: string, payload: unknown, drop = true): Promise<string> {
+  return page.evaluate(
+    async ({ selector, type, payload, drop }) => {
+      const target = document.querySelector<HTMLElement>(selector)!
+      const box = target.getBoundingClientRect()
+      const transfer = new DataTransfer()
+      transfer.setData(type, JSON.stringify(payload))
+      const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+      target.dispatchEvent(new DragEvent('dragenter', init))
+      target.dispatchEvent(new DragEvent('dragover', init))
+      const host = document.querySelector('c2-reorder-list') as HTMLElement & { updateComplete: Promise<unknown> }
+      await host.updateComplete
+      const container = host.shadowRoot!.querySelector('.c2-reorder-list-container')!
+      const lit = container.classList.contains('drop-refused') ? 'refused' : container.classList.contains('drop-target') ? 'target' : 'none'
+      target.dispatchEvent(new DragEvent(drop ? 'drop' : 'dragleave', init))
+      return lit
+    },
+    { selector, type, payload, drop },
+  )
+}
+
+/** Has the page add a row for each dropped item where `item-drop` says, as an application does. */
+async function addRowsOnDrop(host: import('@playwright/test').Locator): Promise<void> {
+  await host.evaluate((element) => {
+    const drops: unknown[] = []
+    ;(window as Window & { drops?: unknown[] }).drops = drops
+    element.addEventListener('item-drop', (event) => {
+      const { kind, items, index, before } = (event as CustomEvent).detail
+      drops.push({ kind, items, index, before: before?.id ?? null })
+      for (const item of items as { id: string; label: string }[]) {
+        const row = document.createElement('div')
+        row.id = item.id
+        row.dataset.reorderKey = item.id
+        row.textContent = item.label
+        row.style.height = '60px'
+        element.insertBefore(row, before)
+      }
+    })
+  })
+}
+
+test('takes rows dropped from outside under its drop-kind at the place under the pointer, and announces them', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await addRowsOnDrop(host)
+  // The displayed order differs from the light DOM: the drop still lands where the pointer was.
+  await host.evaluate((element) => ((element as HTMLElement & { value: string[] }).value = ['third', 'first', 'second']))
+  await expect.poll(() => visualIds(host)).toEqual(['third', 'first', 'second'])
+  expect(await dropPayload(page, '#first', TASK_TYPE, [{ id: 'new', label: 'New task' }])).toBe('target')
+  await expect.poll(() => visualIds(host)).toEqual(['third', 'first', 'new', 'second'])
+  expect(await page.evaluate(() => (window as Window & { drops?: unknown[] }).drops)).toEqual([
+    { kind: 'task', items: [{ id: 'new', label: 'New task' }], index: 2, before: 'third' },
+  ])
+  await expect(host.getByRole('status')).toHaveText('1 item added')
+})
+
+test('refuses another kind of payload and a canceled item-drop, and ignores drops without drop-kind', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  expect(await dropPayload(page, '#first', 'application/x-c2n-kanban-card+json', [{ id: 'x' }])).toBe('refused')
+  expect(await dropPayload(page, '#first', TASK_TYPE, [{ id: 'x' }], false)).toBe('target')
+  await host.evaluate((element) => element.addEventListener('item-drop', (event) => event.preventDefault()))
+  await dropPayload(page, '#first', TASK_TYPE, [{ id: 'x' }, { id: 'y' }])
+  await expect(host.getByRole('status')).toHaveText('2 items not added')
+
+  for (const attributes of ['editable', 'drop-kind="task"']) {
+    await renderScenario(`<c2-reorder-list ${attributes} aria-label="Tasks">${rows}</c2-reorder-list>`)
+    await addRowsOnDrop(page.locator('c2-reorder-list'))
+    expect(await dropPayload(page, '#first', TASK_TYPE, [{ id: 'new', label: 'New task' }])).toBe('none')
+    expect(await page.evaluate(() => (window as Window & { drops?: unknown[] }).drops)).toEqual([])
+  }
+})
+
+test('a list nested in another drop zone takes its own kind, and the outer zone stays out of it', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="outer" editable drop-kind="kanban-card" aria-label="Lanes">
+      <div data-reorder-key="lane" data-reorder-label="Lane" style="height:200px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  const drops = await page.evaluate(async (type) => {
+    const heard: string[] = []
+    for (const id of ['outer', 'inner'])
+      document.getElementById(id)!.addEventListener('item-drop', (event) => heard.push(`${id} heard ${(event.target as Element).id}`))
+    const target = document.getElementById('second')!
+    const box = target.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, JSON.stringify([{ id: 'new' }]))
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+    target.dispatchEvent(new DragEvent('dragenter', init))
+    const over = new DragEvent('dragover', init)
+    target.dispatchEvent(over)
+    const accepted = over.defaultPrevented
+    const outer = document.getElementById('outer') as HTMLElement & { updateComplete: Promise<unknown> }
+    await outer.updateComplete
+    const outerLit = outer.shadowRoot!.querySelector('.c2-reorder-list-container')!.className
+    target.dispatchEvent(new DragEvent('drop', init))
+    return { accepted, outerLit, heard }
+  }, TASK_TYPE)
+  // The inner list accepted the drag; the outer one neither refused it nor lit up.
+  expect(drops.accepted).toBe(true)
+  expect(drops.outerLit).not.toMatch(/drop-(target|refused)/)
+  // The drop reached the inner list only (it bubbles, so the outer listener hears it with the inner list as target).
+  expect(drops.heard).toEqual(['inner heard inner', 'outer heard inner'])
+})
+
+test('a kind the nested list refuses still reaches the zone around it that takes it', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="outer" editable drop-kind="lane" aria-label="Lanes">
+      <div data-reorder-key="lane" data-reorder-label="Lane" style="height:200px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  const heard = await page.evaluate(async () => {
+    const heard: string[] = []
+    document.getElementById('outer')!.addEventListener('item-drop', (event) => heard.push(`outer took ${(event as CustomEvent).detail.items.length}`))
+    const target = document.getElementById('second')!
+    const box = target.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData('application/x-c2n-lane+json', JSON.stringify([{ id: 'lane-2' }]))
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+    for (const type of ['dragenter', 'dragover', 'drop']) target.dispatchEvent(new DragEvent(type, init))
+    return heard
+  })
+  expect(heard).toEqual(['outer took 1'])
+})
+
+test('a drop the list takes nothing from reports no move, so the source keeps its items', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  await page.locator('c2-reorder-list').evaluate((element) => element.addEventListener('item-drop', (event) => event.preventDefault()))
+  const effects = await page.evaluate(async (type) => {
+    const target = document.getElementById('first')!
+    const box = target.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, JSON.stringify([{ id: 'x' }]))
+    // A synthetic DataTransfer keeps no dropEffect: record what the zone writes instead.
+    const effects: string[] = []
+    Object.defineProperty(transfer, 'dropEffect', { configurable: true, get: () => effects.at(-1) ?? 'none', set: (value: string) => effects.push(value) })
+    Object.defineProperty(transfer, 'effectAllowed', { configurable: true, get: () => 'move' })
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+    for (const type of ['dragenter', 'dragover', 'drop']) target.dispatchEvent(new DragEvent(type, init))
+    return effects
+  }, TASK_TYPE)
+  expect(effects).toEqual(['move', 'none'])
+})
+
+test('a nested list that let a drag of another kind pass to the zone around it is unlit after a later drag leaves', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="outer" editable drop-kind="lane" aria-label="Lanes">
+      <div data-reorder-key="lane" data-reorder-label="Lane" style="height:200px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  const lit = await page.evaluate(async () => {
+    const drag = (type: string, kind: string, target: Element) => {
+      const transfer = new DataTransfer()
+      transfer.setData(`application/x-c2n-${kind}+json`, '[]')
+      target.dispatchEvent(new DragEvent(type, { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true }))
+    }
+    const first = document.getElementById('first')!
+    const second = document.getElementById('second')!
+    // A lane crosses the inner list's rows on its way to the outer list, then leaves them.
+    for (const row of [first, second]) drag('dragenter', 'lane', row)
+    for (const row of [first, second]) drag('dragleave', 'lane', row)
+    // Each drag event is its own task in a browser: the refusal check queued for the lane runs before the task's drag.
+    await new Promise((resolve) => setTimeout(resolve))
+    // A task enters the inner list and leaves it again.
+    drag('dragenter', 'task', first)
+    drag('dragleave', 'task', first)
+    await new Promise((resolve) => setTimeout(resolve))
+    const inner = document.getElementById('inner') as HTMLElement & { updateComplete: Promise<unknown> }
+    await inner.updateComplete
+    return inner.shadowRoot!.querySelector('.c2-reorder-list-container')!.className
+  })
+  expect(lit).not.toMatch(/drop-(target|refused)/)
+})
+
+test('a read-only nested list keeps a drop of its own kind from the zone around it', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="outer" editable drop-kind="task" aria-label="Board">
+      <div data-reorder-key="lane" data-reorder-label="Lane" style="height:200px">
+        <c2-reorder-list id="inner" drop-kind="task" aria-label="Archived tasks">${rows}</c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  const { heard, accepted } = await page.evaluate(async (type) => {
+    const heard: string[] = []
+    for (const id of ['outer', 'inner']) document.getElementById(id)!.addEventListener('item-drop', () => heard.push(id))
+    const target = document.getElementById('second')!
+    const box = target.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, JSON.stringify([{ id: 'new' }]))
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+    target.dispatchEvent(new DragEvent('dragenter', init))
+    const over = new DragEvent('dragover', init)
+    target.dispatchEvent(over)
+    target.dispatchEvent(new DragEvent('drop', init))
+    await new Promise((resolve) => setTimeout(resolve))
+    return { heard, accepted: over.defaultPrevented }
+  }, TASK_TYPE)
+  // Cancelled to refuse it (dropEffect none), and taken by nobody.
+  expect(accepted).toBe(true)
+  expect(heard).toEqual([])
+})
+
+test('a drop of its kind whose payload cannot be read reports no move', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const effects = await page.evaluate(async (type) => {
+    const target = document.getElementById('first')!
+    const box = target.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, 'not json')
+    const effects: string[] = []
+    Object.defineProperty(transfer, 'dropEffect', { configurable: true, get: () => effects.at(-1) ?? 'none', set: (value: string) => effects.push(value) })
+    Object.defineProperty(transfer, 'effectAllowed', { configurable: true, get: () => 'move' })
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+    for (const type of ['dragenter', 'dragover', 'drop']) target.dispatchEvent(new DragEvent(type, init))
+    return effects
+  }, TASK_TYPE)
+  expect(effects).toEqual(['move', 'none'])
+})
