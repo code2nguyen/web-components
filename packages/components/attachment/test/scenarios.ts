@@ -13,6 +13,8 @@ const elsewhere = 'http://127.0.0.1:9/'
 const examples: Record<string, string> = {
   default: '<c2-attachment name="project-brief.pdf" type="PDF" size="2.4 MB" removable></c2-attachment>',
   uploading: '<c2-attachment name="video.mp4" type="MP4" size="18 MB" status="uploading" progress="42" removable></c2-attachment>',
+  // A malformed `lang` (an underscore) makes Intl throw: the progress still draws, in English.
+  'uploading-bad-lang': '<div lang="en_US"><c2-attachment name="video.mp4" status="uploading" progress="40"></c2-attachment></div>',
   error: '<c2-attachment name="invoice.csv" type="CSV" size="84 KB" status="error" removable></c2-attachment>',
   disabled: '<c2-attachment name="locked.pdf" status="error" removable disabled></c2-attachment>',
   group: `<c2-attachment-group layout="grid" aria-label="Project files">
@@ -61,6 +63,11 @@ const examples: Record<string, string> = {
   'fp-pdf-elsewhere': `<c2-file-preview name="report.pdf" src="${elsewhere}report.pdf"></c2-file-preview>`,
   'fp-unsafe': `<c2-file-preview name="report.pdf" src="javascript:alert(1)"></c2-file-preview>`,
   'fp-empty': '<c2-file-preview></c2-file-preview>',
+  lang: `<div lang="fr"><c2-attachment-group>
+    <c2-attachment name="video.mp4" status="uploading" progress="42" removable></c2-attachment>
+    <c2-attachment name="invoice.csv" status="error"></c2-attachment>
+    <c2-attachment></c2-attachment>
+  </c2-attachment-group></div>`,
   'fp-lang': `<div lang="fr"><c2-file-preview items='${JSON.stringify([
     { name: 'a.txt', text: 'un' },
     { name: 'b.txt', text: 'deux' },

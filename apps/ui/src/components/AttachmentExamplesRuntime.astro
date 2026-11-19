@@ -1,6 +1,6 @@
 ---
 /**
- * Plays the application's part in the attachment gallery's preview cards: the French of the preview under
+ * Plays the application's part in the attachment gallery's preview cards: the French of the attachments and their preview under
  * `lang="fr"`, the `File` of the Uploaded file card (a property, so it cannot be written in the fence) and the
  * Preview button of the Own preview action card, which calls `openPreview()`.
  */
@@ -12,6 +12,18 @@
 
   addTranslations({
     fr: {
+      attachment: {
+        group: 'Pièces jointes',
+        untitled: 'Pièce jointe sans nom',
+        unnamed: 'pièce jointe',
+        uploadingName: 'Envoi de {0}',
+        uploading: 'Envoi · {0}',
+        uploaded: 'Envoyé',
+        failed: "Échec de l'envoi",
+        retry: 'Réessayer {0}',
+        cancelUpload: "Annuler l'envoi de {0}",
+        remove: 'Retirer {0}',
+      },
       'file-preview': {
         label: 'Aperçu de {0}',
         counter: '{0} sur {1}',

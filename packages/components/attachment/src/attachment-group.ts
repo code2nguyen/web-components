@@ -1,6 +1,8 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { attachmentMessages } from './messages.js'
 import styles from './attachment-group.scss?inline'
 
 export type AttachmentGroupLayout = 'list' | 'grid' | 'mixed'
@@ -25,8 +27,10 @@ export class AttachmentGroup extends LitElement {
   /** List stacks rows, grid fills equal columns, and mixed gives image tiles columns while file rows span the group. */
   @property({ reflect: true }) layout: 'list' | 'grid' | 'mixed' = 'list'
 
-  /** Accessible name for the attachment collection. */
-  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = 'Attachments'
+  /** Accessible name for the attachment collection. Unset, it is the `group` message ("Attachments"). */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
+  private readonly msg = new LocalizeController(this, attachmentMessages)
 
   override disconnectedCallback() {
     this.clearManagedItems()
@@ -61,7 +65,7 @@ export class AttachmentGroup extends LitElement {
   }
 
   override render() {
-    return html`<div part="list" class="group" role="list" aria-label=${this.ariaLabel ?? 'Attachments'}>
+    return html`<div part="list" class="group" role="list" aria-label=${this.ariaLabel || this.msg.t('group')}>
       <slot @slotchange=${this.handleSlotChange}></slot>
     </div>`
   }

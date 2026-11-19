@@ -121,11 +121,12 @@ With `preview`, the name and the thumbnail open the file in a `c2-file-preview` 
 <c2-attachment preview name="expenses.csv" type="CSV" size="1 KB" status="complete" data-attachment-example="file"></c2-attachment>
 ```
 
-```html tag=MdxCodeBlock,label=En français,description=The preview's text in the language of the page,useWhen=The application is translated
+```html tag=MdxCodeBlock,label=En français,description=The attachments' and the preview's text in the language of the page,useWhen=The application is translated
 <div lang="fr">
   <c2-attachment-group>
     <c2-attachment preview name="notes.vtt" type="Texte" size="1 Ko" href="/web-components/media/tour.fr.vtt"></c2-attachment>
     <c2-attachment preview name="montagnes.svg" type="SVG" size="3 Ko" src="/web-components/images/image-mountains.svg" layout="row"></c2-attachment>
+    <c2-attachment name="visite.mp4" type="MP4" size="18 Mo" status="uploading" progress="42" removable></c2-attachment>
   </c2-attachment-group>
 </div>
 ```

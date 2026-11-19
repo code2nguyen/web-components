@@ -30,7 +30,26 @@ import '@c2n/phosphor-icons/icons/file-video.js'
 import '@c2n/phosphor-icons/icons/file-vue.js'
 import '@c2n/phosphor-icons/icons/file-xls.js'
 import '@c2n/phosphor-icons/icons/file-zip.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { attachmentMessages } from './messages.js'
 import styles from './attachment.scss?inline'
+
+const percentFormats = new Map<string, Intl.NumberFormat>()
+
+/** A whole-number percent format in `locale`, cached; a malformed `lang` (`en_US`) falls back to English rather than throw. */
+function percentFormat(locale: string): Intl.NumberFormat {
+  let format = percentFormats.get(locale)
+  if (!format) {
+    const options: Intl.NumberFormatOptions = { style: 'percent', maximumFractionDigits: 0 }
+    try {
+      format = new Intl.NumberFormat(locale, options)
+    } catch {
+      format = new Intl.NumberFormat('en', options)
+    }
+    percentFormats.set(locale, format)
+  }
+  return format
+}
 
 export { AttachmentGroup, type AttachmentGroupLayout } from './attachment-group.js'
 export type { FilePreview, FilePreviewItem, FilePreviewKind, FilePreviewViewerContext, FilePreviewViewerRenderer } from './file-preview.js'
@@ -149,6 +168,7 @@ export class Attachment extends LitElement {
   @property({ type: Boolean, reflect: true }) preview = false
 
   @state() private imageFailed = false
+  private readonly msg = new LocalizeController(this, attachmentMessages)
   /** Set from opening the preview until its dialog closes. */
   private previewing = false
 
@@ -292,14 +312,19 @@ export class Attachment extends LitElement {
     if (this.status === 'uploading') {
       return html`
         <div class="status uploading">
-          <progress class="visually-hidden" max="100" .value=${this.safeProgress} aria-label=${`Uploading ${this.name || 'attachment'}`}></progress>
-          <span>Uploading · ${Math.round(this.safeProgress)}%</span>
+          <progress class="visually-hidden" max="100" .value=${this.safeProgress} aria-label=${this.msg.t('uploadingName', this.nameOrFallback)}></progress>
+          <span>${this.msg.t('uploading', percentFormat(this.msg.locale).format(this.safeProgress / 100))}</span>
         </div>
       `
     }
-    if (this.status === 'complete') return html`<div class="status complete">Uploaded</div>`
-    if (this.status === 'error') return html`<div class="status error" role="status">Upload failed</div>`
+    if (this.status === 'complete') return html`<div class="status complete">${this.msg.t('uploaded')}</div>`
+    if (this.status === 'error') return html`<div class="status error" role="status">${this.msg.t('failed')}</div>`
     return nothing
+  }
+
+  /** The name inside the buttons' accessible names. */
+  private get nameOrFallback(): string {
+    return this.name || this.msg.t('unnamed')
   }
 
   private renderActions() {
@@ -308,7 +333,7 @@ export class Attachment extends LitElement {
       <div class="default-actions">
         ${
           this.status === 'error'
-            ? html`<button type="button" aria-label=${`Retry ${this.name || 'attachment'}`} ?disabled=${this.disabled} @click=${this.emitRetry}>
+            ? html`<button type="button" aria-label=${this.msg.t('retry', this.nameOrFallback)} ?disabled=${this.disabled} @click=${this.emitRetry}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M20 6v5h-5M4 18v-5h5M6.1 9a7 7 0 0 1 11.8-2.6L20 11M4 13l2.1 4.6A7 7 0 0 0 17.9 15" />
                 </svg>
@@ -319,7 +344,7 @@ export class Attachment extends LitElement {
           this.removable
             ? html`<button
                 type="button"
-                aria-label=${`${this.status === 'uploading' ? 'Cancel upload' : 'Remove'} ${this.name || 'attachment'}`}
+                aria-label=${this.msg.t(this.status === 'uploading' ? 'cancelUpload' : 'remove', this.nameOrFallback)}
                 ?disabled=${this.disabled}
                 @click=${this.emitRemove}
               >
@@ -334,7 +359,7 @@ export class Attachment extends LitElement {
   override render() {
     const showImage = !!this.src && !this.imageFailed
     const tile = this.layout === 'tile' || (this.layout === 'auto' && !!this.src)
-    const nameSlot = html`<slot name="name">${this.name || 'Untitled attachment'}</slot>`
+    const nameSlot = html`<slot name="name">${this.name || this.msg.t('untitled')}</slot>`
     return html`
       <article class=${classMap({ attachment: true, 'has-image': showImage, tile })} aria-label=${this.name || nothing}>
         <div part="media" class="media" @click=${this.preview && !this.disabled ? this.openPreview : nothing}>
