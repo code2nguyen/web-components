@@ -53,8 +53,8 @@ export class CandlestickChart extends EchartsChartBase {
   /** Row field containing the highest value. */
   @property({ type: String, attribute: 'high-field' }) highField = 'high'
 
-  /** Name shown by an enabled legend for the complete OHLC series. */
-  @property({ type: String }) name = 'Price'
+  /** Name shown by an enabled legend for the complete OHLC series. Empty, it is the `price` message ("Price"). */
+  @property({ type: String }) name = ''
 
   constructor() {
     super()
@@ -105,7 +105,7 @@ export class CandlestickChart extends EchartsChartBase {
 
   protected override buildOptions(context: ChartBuildContext): EchartsOptions {
     const options = super.buildOptions(context) as EchartsOptions
-    return { ...options, series: [{ name: this.name, ...this.seriesOption(0, context) }] }
+    return { ...options, series: [{ name: this.name || this.chartMsg.t('price'), ...this.seriesOption(0, context) }] }
   }
 
   protected override seriesOption(_index: number, context: ChartBuildContext): Record<string, unknown> {
@@ -129,11 +129,11 @@ export class CandlestickChart extends EchartsChartBase {
     const visible = !this.hiddenSeries.has(0)
     return [
       {
-        label: this.name,
+        label: this.name || this.chartMsg.t('price'),
         color: this.themeController.theme.positive,
         visible,
         ...this.legendEntryState(this.openField, visible, (next) => this.setSeriesVisible(0, next)),
-        series: { field: this.openField, label: this.name },
+        series: { field: this.openField, label: this.name || this.chartMsg.t('price') },
         index: 0,
       },
     ]

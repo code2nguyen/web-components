@@ -129,6 +129,14 @@ test('draws a gradient key with its real bounds and a no-data swatch', async ({ 
   await expect(legend.locator('.scale-no-data')).toHaveText('No data')
 })
 
+test('the key follows the language of the page', async ({ page }) => {
+  await open(page)
+  await page.locator('c2-map-chart').evaluate((element) => element.setAttribute('lang', 'fr'))
+  const legend = page.locator('c2-map-chart [part="scale-legend"]')
+  await expect(legend.locator('.scale-no-data')).toHaveText('Aucune donnée')
+  await expect(legend.locator('.scale-ramp')).toHaveAttribute('aria-label', /^Revenue : de .+ à .+$/)
+})
+
 test('shows the hovered region with its value, and says when a region has no data', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-map-chart')

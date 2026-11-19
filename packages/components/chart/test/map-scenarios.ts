@@ -2,6 +2,7 @@
  * Scenario page for the map chart suite. Kept apart from `scenarios.ts` so the map's cases do not share lines with
  * the other charts' ones.
  */
+import './translations'
 import '../src/map-chart'
 import '../src/map-layer'
 import type { ChartAdapter, ChartAdapterEvents } from '../src/chart-adapter'
