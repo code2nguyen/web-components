@@ -284,7 +284,9 @@ export class DistributionBar extends LitElement {
     const active = this.active === null ? undefined : parts[this.active]
     return html`
       <div class="header" part="header" ?hidden=${!hasLabel && !this.slotPresence.has('header-end')}>
-        <span id="label" class="label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot></span>
+        <span id="label" class="label" part="label" ?hidden=${!hasLabel}
+          ><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot></span
+        >
         <span class="header-end"><slot name="header-end" @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
       </div>
       <div class="track">
