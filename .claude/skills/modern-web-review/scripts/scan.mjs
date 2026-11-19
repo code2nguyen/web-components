@@ -278,6 +278,26 @@ const rules = [
     guide: 'prerendering-custom-elements',
   },
   {
+    id: 'empty-slot-fallback',
+    level: 'warn',
+    ext: 'ts',
+    // The gap `empty-text-child-part` leaves: a slot whose whole fallback is one binding that can still be empty —
+    // a field (`<slot>${this.label}</slot>`), a local (`${message}`), a ternary (`${cond ? nothing : this.help}`) or
+    // `${x ?? nothing}` (which lets `''` through). A binding ending in `|| nothing`, a call (`${this.msg.t('key')}`)
+    // and a template (`html\`…\``) are left alone. The slot's attributes may hold `${…}` bindings (an arrow's `=>`).
+    line: (() => {
+      const attrs = String.raw`(?:[^>$]|\$\{[^}]*\})*`
+      // What can be empty: a field or member path (`this.label`, `texts.middle`), a local named for text, either one as
+      // a ternary's last branch, or anything ending in `?? nothing`.
+      const value = String.raw`(?:this\.[\w$]+(?:\??\.[\w$]+)*|[a-z][\w$]*(?:\??\.[\w$]+)+|(?:message|text|label|hint|help)\b)`
+      const expr = String.raw`(?:(?:[^{}${'`'}?]*\?[^{}${'`'}:]*:\s*)?${value}|[^{}${'`'}]*\?\?\s*nothing)`
+      return new RegExp(String.raw`<slot\b${attrs}>\s*\$\{\s*${expr}\s*\}\s*<\/slot>`)
+    })(),
+    message:
+      "A slot's fallback text bound to a bare field renders nothing on the server while the field is empty, and a value set as the first render after hydration is written into Lit's closing marker comment. End it with `|| nothing`: `<slot>${this.label || nothing}</slot>`, `${cond ? nothing : this.help || nothing}`. For a number, test for null rather than using `||`, which hides 0.",
+    guide: 'prerendering-custom-elements',
+  },
+  {
     id: 'fixed-overlay-z-index',
     level: 'warn',
     ext: 'scss',
