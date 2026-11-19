@@ -97,3 +97,69 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .list-default {
+    height: 280px;
+    width: min(100%, 420px);
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+  }
+</style>
+
+<c2-chat-message-list class="list-default">
+  <c2-chat-message>
+    <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+    <span slot="title">Maya</span>
+    <time slot="header-time">09:12</time>
+    <div>Morning! Did the release go out?</div>
+  </c2-chat-message>
+  <c2-chat-message align="right">
+    <span slot="title">You</span>
+    <time slot="header-time">09:14</time>
+    <div>Yes, v0.0.18 is live. No incidents so far.</div>
+  </c2-chat-message>
+  <c2-chat-message>
+    <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+    <span slot="title">Maya</span>
+    <time slot="header-time">09:15</time>
+    <div>Great, I'll let the support team know.</div>
+  </c2-chat-message>
+  <svg slot="jump-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+</c2-chat-message-list>
+```
+
+```html tag=MdxCodeBlock,label=Loading state
+<style>
+  .chat-message-list-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="chat-message-list-states">
+  <c2-chat-message-list class="list-default" loading>
+    <c2-chat-message>
+      <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+      <span slot="title">Maya</span>
+      <time slot="header-time">09:12</time>
+      <div>Morning! Did the release go out?</div>
+    </c2-chat-message>
+    <c2-chat-message align="right">
+      <span slot="title">You</span>
+      <time slot="header-time">09:14</time>
+      <div>Yes, v0.0.18 is live. No incidents so far.</div>
+    </c2-chat-message>
+    <c2-chat-message>
+      <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+      <span slot="title">Maya</span>
+      <time slot="header-time">09:15</time>
+      <div>Great, I'll let the support team know.</div>
+    </c2-chat-message>
+    <div slot="loading">Loading earlier messages…</div>
+  </c2-chat-message-list>
+</div>
+```
+
+</GalleryGrid>

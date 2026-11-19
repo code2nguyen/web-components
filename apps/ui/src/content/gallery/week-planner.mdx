@@ -254,3 +254,20 @@ copyButton.addEventListener('click', () => planner.copyDay('mon', ['tue', 'wed',
 ```
 
 <WeekPlannerExamplesRuntime />
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-week-planner
+  locale="en-US"
+  start-hour="8"
+  end-hour="13"
+  events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"}]'
+>
+  <strong slot="heading">Sprint 42</strong>
+</c2-week-planner>
+```
+
+</GalleryGrid>

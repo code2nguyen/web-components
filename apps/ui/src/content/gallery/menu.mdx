@@ -189,3 +189,17 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-menu class="default" aria-label="Default" client:only="lit">
+  <c2-button slot="trigger">Open</c2-button><c2-menu-item value="new"><c2-feather-file-plus slot="prefix-icon"></c2-feather-file-plus>New file
+  <span slot="suffix-icon">New</span>
+</c2-menu-item><c2-menu-item value="duplicate"><c2-feather-copy slot="prefix-icon"></c2-feather-copy>Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
+</c2-menu>
+```
+
+</GalleryGrid>

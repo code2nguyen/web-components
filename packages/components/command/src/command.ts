@@ -92,7 +92,7 @@ export interface Command {
  * @cssproperty {font-size} [--c2-command__field--font-size=14px]
  * @cssproperty {color} [--c2-command__placeholder--color=#71717a]
  *
- * @cssproperty {pixel} [--c2-command__icon--size=16px]
+ * @cssproperty {pixel} [--c2-command__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-command__icon--color=#71717a]
  *
  * @cssproperty {pixel} [--c2-command__list--max-height=320px] - The list scrolls past this height. Set `none` to let the list take whatever `--c2-command--max-height` leaves.

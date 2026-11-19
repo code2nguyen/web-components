@@ -41,7 +41,7 @@ its width, format and ranges.
   }
 </style>
 <div data-label="Readings">
-  <c2-flowsheet client:only="lit" class="sheet" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"k","measure":"Potassium","low":3.5,"high":5.1,"critHigh":6.2,"readings":{"2026-11-14T08:00":4.1,"2026-11-14T16:00":6.4}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
+  <c2-flowsheet aria-label="Vital signs" client:only="lit" class="sheet" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"k","measure":"Potassium","low":3.5,"high":5.1,"critHigh":6.2,"readings":{"2026-11-14T08:00":4.1,"2026-11-14T16:00":6.4}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
     <c2-table-column field="measure" header="Measure" width="2fr" min-width="130"></c2-table-column>
     <c2-table-column field="readings" width="100px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
   </c2-flowsheet>
@@ -50,6 +50,12 @@ its width, format and ranges.
   <c2-flowsheet client:only="lit" class="sheet" row-key="id" time-order="desc" time-format="date" rows='[{"id":"glu","test":"Glucose","unit":"mg/dL","low":70,"high":99,"readings":{"2026-11-03T08:00":92,"2026-11-07T08:00":118,"2026-11-11T08:00":131,"2026-11-14T08:00":104}},{"id":"a1c","test":"HbA1c","unit":"%","high":5.6,"readings":{"2026-11-03T08:00":5.4,"2026-11-11T08:00":5.9}},{"id":"ldl","test":"LDL cholesterol","unit":"mg/dL","high":129,"readings":{"2026-11-03T08:00":96,"2026-11-14T08:00":142}},{"id":"tsh","test":"TSH","unit":"mIU/L","low":0.4,"high":4,"readings":{"2026-11-07T08:00":0.3,"2026-11-14T08:00":0.9}}]'>
     <c2-table-column field="test" header="Test" width="2fr" min-width="130"></c2-table-column>
     <c2-table-column field="readings" width="120px" align="end" reference-range="low,high"></c2-table-column>
+  </c2-flowsheet>
+</div>
+<div data-label="The current time marked">
+  <c2-flowsheet now="2026-11-14T12:10" client:only="lit" class="sheet" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"k","measure":"Potassium","low":3.5,"high":5.1,"critHigh":6.2,"readings":{"2026-11-14T08:00":4.1,"2026-11-14T16:00":6.4}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
+    <c2-table-column field="measure" header="Measure" width="2fr" min-width="130"></c2-table-column>
+    <c2-table-column field="readings" width="100px" align="end" reference-range="low,high" critical-range=",critHigh"></c2-table-column>
   </c2-flowsheet>
 </div>
 ```

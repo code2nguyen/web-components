@@ -2,6 +2,7 @@
 title: 'Phone Input'
 description: 'A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.'
 category: 'Inputs'
+keywords: ['telephone', 'phone number', 'country code', 'mobile number']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -35,7 +36,7 @@ import '@c2n/components/phone-input'
   }
 </style>
 <div data-label="Default">
-  <c2-phone-input class="phone" country="US"></c2-phone-input>
+  <c2-phone-input aria-label="Mobile phone" class="phone" country="US"></c2-phone-input>
   <c2-phone-input class="phone" value="+33612345678"></c2-phone-input>
 </div>
 <div data-label="Preferred and allowed countries">

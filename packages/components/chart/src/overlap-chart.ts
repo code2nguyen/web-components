@@ -1067,7 +1067,7 @@ export class OverlapChart extends EchartsChartBase {
   }
 
   #formatShare(share: number): string {
-    return new Intl.NumberFormat(this.locale, { style: 'percent', maximumFractionDigits: 1 }).format(share)
+    return new Intl.NumberFormat(this.intlLocale, { style: 'percent', maximumFractionDigits: 1 }).format(share)
   }
 
   /** Click or Enter: fires `region-click` and, on a selectable chart, toggles the selection. */

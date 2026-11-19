@@ -61,3 +61,35 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<c2-cascader
+  aria-label="Choose a location"
+  placeholder="Choose a district"
+  options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]},{"value":"ningbo","label":"Ningbo"}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing","children":[{"value":"xuanwu","label":"Xuanwu"},{"value":"qinhuai","label":"Qinhuai"}]}]}]'
+>
+  <svg slot="prefix-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.9 7.9"/></svg>
+  <svg slot="suffix-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1"/></svg>
+</c2-cascader>
+```
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .cascader-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="cascader-states">
+  <c2-cascader
+    aria-label="Choose a location"
+    placeholder="Choose a district"
+ 
+  >
+    <div slot="empty">No regions available.</div>
+  </c2-cascader>
+</div>
+```
+
+</GalleryGrid>

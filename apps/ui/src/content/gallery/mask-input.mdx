@@ -114,3 +114,16 @@ The box is one set of variables (`--c2-mask-input--border`, `--c2-mask-input--ba
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<c2-mask-input mask="99/99" placeholder="MM/YY">
+  <svg slot="suffix-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  <span slot="supporting-text">As printed on the card.</span>
+</c2-mask-input>
+```
+
+</GalleryGrid>

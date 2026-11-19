@@ -23,7 +23,7 @@ import styles from './loading-overlay.scss?inline'
  *
  * @tag c2-loading-overlay
  *
- * @slot - The region to cover.
+ * @slot - The region to cover, such as a form of `c2-text-field`s or a `c2-table`.
  * @slot indicator - Replaces the spinner.
  * @slot label - Text under the spinner, e.g. "Saving changes…". Also what is announced.
  *
@@ -38,7 +38,7 @@ import styles from './loading-overlay.scss?inline'
  * @cssproperty {number} [--c2-loading-overlay--z-index=10] - Stacking of the overlay above the content.
  * @cssproperty {time} [--c2-loading-overlay--delay=0ms] - Wait before the overlay shows and is announced, e.g. `300ms` so quick loads go unnoticed.
  * @cssproperty {time} [--c2-loading-overlay--transition-duration=150ms] - Fade in and out.
- * @cssproperty {pixel} [--c2-loading-overlay__spinner--size=32px]
+ * @cssproperty {pixel} [--c2-loading-overlay__spinner--size=32px] - Width and height of the spinner.
  * @cssproperty {color} [--c2-loading-overlay__spinner--color=#0265dc]
  * @cssproperty {pixel} [--c2-loading-overlay__indicator--gap=12px] - Space between the spinner and the label.
  * @cssproperty {color} [--c2-loading-overlay__label--color=#18181b]

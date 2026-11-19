@@ -2,6 +2,7 @@
 title: 'Command'
 description: 'A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette.'
 category: 'Navigation'
+keywords: ['command palette', 'cmd k', 'ctrl k', 'spotlight', 'quick actions']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -58,6 +59,21 @@ Type into any palette below; try `face` (a keyword of "Search emoji") or `zzz`.
     <c2-command-item value="table">Table<span slot="description">Sortable, selectable rows</span></c2-command-item>
     <span slot="empty">No page matches that search.</span>
     <span slot="footer">↑↓ to navigate · ↵ to open</span>
+  </c2-command>
+</div>
+<div data-label="Opened on a search">
+  <c2-command query="pro" class="usage-command" client:only="lit">
+    <c2-command-group heading="Suggestions">
+      <c2-command-item value="calendar">Calendar</c2-command-item>
+      <c2-command-item value="emoji" keywords="smiley face">Search emoji</c2-command-item>
+      <c2-command-item value="calculator" disabled>Calculator</c2-command-item>
+    </c2-command-group>
+    <c2-command-separator></c2-command-separator>
+    <c2-command-group heading="Settings">
+      <c2-command-item value="profile">Profile<c2-kbd slot="shortcut">⌘P</c2-kbd></c2-command-item>
+      <c2-command-item value="billing">Billing<c2-kbd slot="shortcut">⌘B</c2-kbd></c2-command-item>
+      <c2-command-item value="settings">Settings<c2-kbd slot="shortcut">⌘S</c2-kbd></c2-command-item>
+    </c2-command-group>
   </c2-command>
 </div>
 ```

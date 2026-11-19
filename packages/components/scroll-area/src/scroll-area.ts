@@ -80,12 +80,12 @@ const chevron = html`<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke
  * @cssproperty {color} [--c2-scroll-area__thumb__hover--color=rgba(113, 113, 122, 0.4)] - The thumb while the pointer is over the area; with a transparent thumb, the bar fades in on hover.
  * @cssproperty {color} [--c2-scroll-area__track--color=transparent]
  * @cssproperty {color} [--c2-scroll-area__shadow--color=rgba(0, 0, 0, 0.12)] - `transparent` turns the edge shadows off.
- * @cssproperty {pixel} [--c2-scroll-area__shadow--size=12px]
+ * @cssproperty {pixel} [--c2-scroll-area__shadow--size=12px] - Width and height of the shadow.
  * @cssproperty {pixel} [--c2-scroll-area__fade--size=0px] - Above 0, the content fades into each edge with more beyond it.
  * @cssproperty {outline} [--c2-scroll-area__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-scroll-area__control--size=32px] - Width and height of a `controls` button.
  * @cssproperty {pixel} [--c2-scroll-area__control--inset=8px] - Distance from a `controls` button to its edge.
- * @cssproperty {pixel} [--c2-scroll-area__control__icon--size=16px]
+ * @cssproperty {pixel} [--c2-scroll-area__control__icon--size=16px] - Width and height of the control icon.
  * @cssproperty {color} [--c2-scroll-area__control--color=#18181b]
  * @cssproperty {color} [--c2-scroll-area__control--background-color=#ffffff]
  * @cssproperty {color} [--c2-scroll-area__control__hover--background-color=#f4f4f5]

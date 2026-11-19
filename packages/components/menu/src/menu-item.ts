@@ -86,10 +86,10 @@ export interface MenuItem {
  * @cssproperty {font-size} [--c2-menu-item__shortcut--font-size=11px]
  * @cssproperty {letter-spacing} [--c2-menu-item__shortcut--letter-spacing=0.08em]
  *
- * @cssproperty {pixel} [--c2-menu-item__icon--size=16px]
+ * @cssproperty {pixel} [--c2-menu-item__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-menu-item__icon--color=#71717a]
  *
- * @cssproperty {pixel} [--c2-menu-item__indicator--size=16px]
+ * @cssproperty {pixel} [--c2-menu-item__indicator--size=16px] - Width and height of the indicator.
  * @cssproperty {color} --c2-menu-item__indicator--color - The check mark / radio dot. Defaults to the row colour.
  *
  * @cssproperty {color} [--c2-menu-item__destructive--color=#dc2626] - Label and icon colour of a `destructive` row.

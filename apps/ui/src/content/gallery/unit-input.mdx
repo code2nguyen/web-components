@@ -157,7 +157,7 @@ and the equivalent take `--c2-unit-input--*`.
   }
 </style>
 <c2-unit-input class="chevron" aria-label="Water" value="2" unit="l" units='[{"value":"ml","factor":1,"step":"10"},{"value":"l","factor":1000,"step":"0.1"}]'>
-  <svg slot="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg slot="chevron-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="7 15 12 20 17 15"></polyline>
     <polyline points="7 9 12 4 17 9"></polyline>
   </svg>
@@ -278,3 +278,35 @@ addTranslations({
 ```
 
 <UnitInputExamplesRuntime />
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .default {
+    width: 240px;
+  }
+</style>
+<c2-unit-input
+  class="default"
+  aria-label="Eggs"
+  value="2"
+  unit="dozen"
+  units='[{"value":"ea","factor":1},{"value":"dozen","factor":12},{"value":"case","factor":144}]'
+>
+  <svg slot="decrement-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+  <svg slot="increment-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  <span slot="supporting-text">Sold by the dozen or by the case.</span>
+</c2-unit-input>
+```
+
+```html tag=MdxCodeBlock,label=Prefix and suffix
+<c2-unit-input aria-label="Shoulder width" value="46">
+  <span slot="prefix">≈</span>
+  <span slot="suffix">cm</span>
+</c2-unit-input>
+```
+
+</GalleryGrid>

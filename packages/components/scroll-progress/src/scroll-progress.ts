@@ -34,7 +34,7 @@ const LOOKUP_FRAMES = 30
  * @cssproperty {color} [--c2-scroll-progress__track--color=#e4e4e7] - `transparent` hides the unfilled part.
  * @cssproperty {color} [--c2-scroll-progress__fill--color=#0265dc]
  * @cssproperty {border-radius} [--c2-scroll-progress--border-radius=0]
- * @cssproperty {pixel} [--c2-scroll-progress__ring--size=40px]
+ * @cssproperty {pixel} [--c2-scroll-progress__ring--size=40px] - Width and height of the ring.
  * @cssproperty {pixel} [--c2-scroll-progress__ring--stroke-width=3]
  * @cssproperty {color} [--c2-scroll-progress__ring__track--color=#e4e4e7]
  */

@@ -349,7 +349,7 @@ export class HistogramChart extends BarChart {
   #formatEdge(value: number): string {
     const step = this.#computeModel().model.step
     const digits = step > 0 ? Math.min(20, Math.max(2, Math.ceil(-Math.log10(step)) + 1)) : 2
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: digits }).format(value)
+    return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: digits }).format(value)
   }
 
   #marks(): number[] {

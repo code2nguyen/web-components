@@ -108,8 +108,8 @@ export interface Sheet {
  * @cssproperty {justify-content} [--c2-sheet__footer--justify-content=flex-end]
  * @cssproperty {border} --c2-sheet__footer--border-top - Divider above the footer; raise `footer--padding-top` with it.
  *
- * @cssproperty {pixel} [--c2-sheet__close--size=32px]
- * @cssproperty {pixel} [--c2-sheet__close--icon-size=18px]
+ * @cssproperty {pixel} [--c2-sheet__close--size=32px] - Width and height of the close button.
+ * @cssproperty {pixel} [--c2-sheet__close--icon-size=18px] - Width and height of the close button's icon.
  * @cssproperty {border-radius} [--c2-sheet__close--border-radius=8px]
  * @cssproperty {color} [--c2-sheet__close--color=#71717a]
  * @cssproperty {background} [--c2-sheet__close__hover--background=#f4f4f5]

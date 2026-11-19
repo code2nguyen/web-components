@@ -5,6 +5,7 @@ category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-sparkline'
 apiTags: ['c2-sparkline', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+keywords: ['mini chart', 'inline chart', 'tiny trend']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -78,7 +79,7 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
 
 <div data-label="Default">
   <div class="row">
-    <c2-sparkline data="[437.43,403.2,398.36,412.94,399.01,353.83,379.36,294.73,338.2,380.45]" tone="auto"></c2-sparkline>
+    <c2-sparkline aria-label="Nuclear generation trend" data="[437.43,403.2,398.36,412.94,399.01,353.83,379.36,294.73,338.2,380.45]" tone="auto"></c2-sparkline>
     <span>France nuclear generation, 2015–2024</span>
   </div>
 </div>

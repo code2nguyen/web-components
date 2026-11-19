@@ -121,3 +121,46 @@ The "Next round" card's button calls `addTime()`, and the readings are typed str
 ```ts tag=CodeBlock
 button.addEventListener('click', () => sheet.addTime('2026-11-14T16:00'))
 ```
+
+## Slots
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .flowsheet-plain {
+    height: 180px;
+    width: 100%;
+  }
+</style>
+<c2-flowsheet client:only="lit" class="flowsheet-plain" row-key="id" rows='[{"id":"hr","measure":"Heart rate","low":60,"high":100,"readings":{"2026-11-14T08:00":82,"2026-11-14T12:00":104,"2026-11-14T16:00":96}},{"id":"sbp","measure":"Systolic BP","low":90,"high":140,"readings":{"2026-11-14T08:00":128,"2026-11-14T12:00":146,"2026-11-14T16:00":138}},{"id":"spo2","measure":"SpO₂","low":94,"readings":{"2026-11-14T08:00":97,"2026-11-14T12:00":92,"2026-11-14T16:00":95}}]'>
+  <c2-table-column field="measure" header="Measure" width="minmax(130px, 1fr)"></c2-table-column>
+  <c2-table-column field="readings" width="110px" align="end" reference-range="low,high"></c2-table-column>
+  <small slot="footer">Charted by the night shift</small>
+</c2-flowsheet>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .flowsheet-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="flowsheet-states">
+  <c2-flowsheet client:only="lit" class="flowsheet-plain" row-key="id">
+    <c2-table-column field="measure" header="Measure" width="minmax(130px, 1fr)"></c2-table-column>
+    <c2-table-column field="readings" width="110px" align="end" reference-range="low,high"></c2-table-column>
+    <div slot="empty">No observations match these filters.</div>
+  </c2-flowsheet>
+  <c2-flowsheet client:only="lit" class="flowsheet-plain" row-key="id" loading>
+    <c2-table-column field="measure" header="Measure" width="minmax(130px, 1fr)"></c2-table-column>
+    <c2-table-column field="readings" width="110px" align="end" reference-range="low,high"></c2-table-column>
+    <div slot="loading">Loading observations…</div>
+  </c2-flowsheet>
+  <c2-flowsheet client:only="lit" class="flowsheet-plain" row-key="id" error="Request failed">
+    <c2-table-column field="measure" header="Measure" width="minmax(130px, 1fr)"></c2-table-column>
+    <c2-table-column field="readings" width="110px" align="end" reference-range="low,high"></c2-table-column>
+    <div slot="error">The observations could not be loaded. Try again.</div>
+  </c2-flowsheet>
+</div>
+```
+
+</GalleryGrid>

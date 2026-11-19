@@ -202,7 +202,7 @@ const counts = (requirement: PasswordRequirement, builtIn: unknown) => !!(requir
  * @cssproperty {border} [--c2-password-field__error--border=1px solid #dc2626]
  * @cssproperty {opacity} [--c2-password-field__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-password-field__icon--size=16px]
+ * @cssproperty {pixel} [--c2-password-field__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-password-field__icon--color=#71717a]
  * @cssproperty {pixel} [--c2-password-field__toggle--size=24px] - Hit area of the show/hide button, and of the generate button.
  * @cssproperty {color} [--c2-password-field__toggle--color=#71717a]
@@ -234,7 +234,7 @@ const counts = (requirement: PasswordRequirement, builtIn: unknown) => !!(requir
  * @cssproperty {color} [--c2-password-field__requirement--color=#71717a]
  * @cssproperty {color} [--c2-password-field__requirement__met--color=#18181b] - Text of a met requirement.
  * @cssproperty {color} [--c2-password-field__requirement-icon__met--color=#16a34a] - Tick of a met requirement.
- * @cssproperty {pixel} [--c2-password-field__requirement-icon--size=14px]
+ * @cssproperty {pixel} [--c2-password-field__requirement-icon--size=14px] - Width and height of the requirement icon.
  *
  * @cssproperty {pixel} [--c2-password-field__generator--width=340px] - Width of the generator popover (`generator`).
  * @cssproperty {padding} [--c2-password-field__generator--padding=12px]

@@ -26,7 +26,8 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     width: 240px;
   }
 </style>
-<c2-code-viewer class="paired-viewer" language="ts" theme="github-light" dark-theme="github-dark-default" code="const hello = (name) =>\n  `Hi, ${name}!`">
+<c2-code-viewer class="paired-viewer" language="ts" theme="github-light" dark-theme="github-dark-default" code="const hello = (name) =>
+  \n  `Hi, ${name}!`">
   <span slot="title">color-scheme="auto"</span>
 </c2-code-viewer>
 ```
@@ -167,3 +168,22 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
 </GalleryGrid>
 
 Style assigned title and copy-icon nodes directly. Use the `header`, `title`, `body`, and `copy-button` parts for viewer-owned layout and fallback controls.
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .default-viewer {
+    width: 240px;
+  }
+</style>
+<c2-code-viewer class="default-viewer" language="bash" copyable code="npm install\nnpm run ui">
+  <span slot="title">Install and run</span>
+  <svg slot="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  <svg slot="copied-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+</c2-code-viewer>
+```
+
+</GalleryGrid>

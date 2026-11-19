@@ -78,3 +78,20 @@ Looks for `c2-image`. The box is styled through `--c2-image--width`, `--aspect-r
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Before content
+<style>
+  .image-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="image-states">
+  <c2-image width="800" height="600">
+    <div slot="placeholder">Loading the photo…</div>
+  </c2-image>
+</div>
+```
+
+</GalleryGrid>

@@ -93,7 +93,7 @@ const TONES: readonly MeterTone[] = ['optimum', 'suboptimum', 'critical']
  * @cssproperty {color} [--c2-meter__legend--color=#71717a] - Colour of a legend entry's label.
  * @cssproperty {font-size} [--c2-meter__legend--font-size=12px]
  * @cssproperty {color} [--c2-meter__legend-value--color=#18181b] - Colour of a legend entry's value.
- * @cssproperty {pixel} [--c2-meter__swatch--size=8px]
+ * @cssproperty {pixel} [--c2-meter__swatch--size=8px] - Width and height of the swatch.
  * @cssproperty {border-radius} [--c2-meter__swatch--border-radius=999px]
  */
 @customElement('c2-meter')

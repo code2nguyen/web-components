@@ -3,7 +3,10 @@
     "c2n": {
       "type": "stdio",
       "command": "node",
-      "args": ["packages/tools/mcp/src/cli.ts"]
+      "args": ["packages/tools/mcp/src/cli.ts"],
+      "env": {
+        "C2N_MCP_LOG": "lab/.armed/mcp-calls.jsonl"
+      }
     }
   }
 }

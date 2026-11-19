@@ -103,3 +103,51 @@ The navigation surface, the dividers and the widths do most of the work: `--c2-a
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .gallery-page {
+    padding: 16px;
+  }
+</style>
+<c2-app-shell tablet-mode="side">
+  <c2-header slot="header">
+    <c2-app-shell-toggle slot="brand"></c2-app-shell-toggle>
+    <strong slot="brand">Ledgerline</strong>
+  </c2-header>
+  <c2-list slot="navigation" aria-label="Sections">
+    <c2-list-item href="#">Overview</c2-list-item>
+    <c2-list-item href="#" selected>Batches</c2-list-item>
+  </c2-list>
+  <div class="gallery-page">Batches</div>
+  <div slot="banner">Test mode: payments are simulated.</div>
+  <small slot="footer">All systems operational</small>
+</c2-app-shell>
+```
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .gallery-page {
+    padding: 16px;
+  }
+</style>
+<c2-app-shell tablet-mode="side">
+  <c2-header slot="header">
+    <c2-app-shell-toggle slot="brand">
+      <svg slot="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1"/></svg>
+    </c2-app-shell-toggle>
+    <strong slot="brand">Ledgerline</strong>
+  </c2-header>
+  <c2-list slot="navigation" aria-label="Sections">
+    <c2-list-item href="#">Overview</c2-list-item>
+    <c2-list-item href="#" selected>Batches</c2-list-item>
+  </c2-list>
+  <div class="gallery-page">Batches</div>
+</c2-app-shell>
+```
+
+</GalleryGrid>

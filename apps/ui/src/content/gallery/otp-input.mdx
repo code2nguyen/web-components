@@ -61,3 +61,15 @@ The cell size, border and active-state variables do most of the work; `group` an
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-otp-input aria-label="Verification code">
+  <span slot="supporting-text">Sent by SMS to the number ending in 42.</span>
+</c2-otp-input>
+```
+
+</GalleryGrid>

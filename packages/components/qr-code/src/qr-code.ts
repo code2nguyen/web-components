@@ -34,14 +34,14 @@ export interface QrCode {
  *
  * @event {CustomEvent<QrCodeErrorEventDetail>} qr-code-error - Fired when the value cannot be encoded. `detail` contains the error and rejected value.
  *
- * @cssproperty {pixel} [--c2-qr-code--size=200px]
+ * @cssproperty {pixel} [--c2-qr-code--size=200px] - Width and height of the qr code.
  * @cssproperty {color} [--c2-qr-code__module--color=#18181b]
  * @cssproperty {color} [--c2-qr-code__background--color=#ffffff]
  * @cssproperty {border-radius} [--c2-qr-code__container--border-radius=8px]
  * @cssproperty {color} [--c2-qr-code__placeholder--color=#71717a]
  * @cssproperty {border} [--c2-qr-code__placeholder--border=1px dashed #bcbcc6] - Frame drawn while there is no value to encode.
  * @cssproperty {font-size} [--c2-qr-code__placeholder--font-size=12px]
- * @cssproperty {length} [--c2-qr-code__center--size=20%]
+ * @cssproperty {length} [--c2-qr-code__center--size=20%] - Width and height of the logo area in the middle of the code.
  * @cssproperty {color} [--c2-qr-code__center--background-color=#ffffff]
  * @cssproperty {padding} [--c2-qr-code__center--padding=4px]
  * @cssproperty {border-radius} [--c2-qr-code__center--border-radius=6px]

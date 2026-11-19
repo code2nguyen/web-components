@@ -9,6 +9,7 @@ import ExampleModules from '../../components/ExampleModules.astro'
 
 import { BubbleChart } from '@c2n/components/chart/bubble-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 
@@ -46,6 +47,47 @@ The default example plots approximate, rounded 2023 figures after the World Bank
   }
 </style>
 <c2-bubble-chart class="bubble-compact" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" bubble-labels="none" legend="top" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .bubble-slots { width: 100%; }
+  .bubble-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-bubble-chart class="bubble-slots" x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"South Africa","region":"Africa","gdp":6020,"life":62.3,"pop":60},{"country":"Kenya","region":"Africa","gdp":1950,"life":62.7,"pop":55},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"Colombia","region":"Americas","gdp":6980,"life":77.7,"pop":52},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240},{"country":"Bangladesh","region":"Asia","gdp":2530,"life":72.4,"pop":173},{"country":"Vietnam","region":"Asia","gdp":4350,"life":74.6,"pop":99},{"country":"Germany","region":"Europe","gdp":52750,"life":81.0,"pop":84},{"country":"France","region":"Europe","gdp":44460,"life":82.8,"pop":68},{"country":"United Kingdom","region":"Europe","gdp":48870,"life":81.1,"pop":68},{"country":"Italy","region":"Europe","gdp":38370,"life":83.7,"pop":59},{"country":"Poland","region":"Europe","gdp":22110,"life":78.6,"pop":37},{"country":"Russia","region":"Europe","gdp":13820,"life":73.2,"pop":144}]'>
+  <div slot="legend" class="bubble-slots__legend">
+    <strong>Bubble chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-bubble-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .bubble-states { display: grid; gap: 12px; width: 100%; }
+  .bubble-states c2-bubble-chart { --c2-chart--height: 140px; }
+</style>
+<div class="bubble-states">
+  <c2-bubble-chart x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-bubble-chart>
+  <c2-bubble-chart x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-bubble-chart>
+  <c2-bubble-chart x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-bubble-chart>
+</div>
 ```
 
 </GalleryGrid>

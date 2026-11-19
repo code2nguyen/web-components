@@ -46,7 +46,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="KPI scorecard">
-  <c2-bullet-chart
+  <c2-bullet-chart aria-label="KPI scorecard"
     class="bullet-usage"
     label-field="kpi"
     description-field="unit"
@@ -83,6 +83,18 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     data='[{"actual":270}]'
   >
     <c2-chart-series field="actual" label="Revenue"></c2-chart-series>
+  </c2-bullet-chart>
+</div>
+<div data-label="German number format">
+  <c2-bullet-chart locale="de-DE" aria-label="KPI scorecard"
+    class="bullet-usage"
+    label-field="kpi"
+    description-field="unit"
+    target-field="target"
+    bands-field="bands"
+    data='[{"kpi":"Revenue","unit":"US$, thousands","actual":270,"target":250,"bands":[150,225,300]},{"kpi":"Profit","unit":"% of revenue","actual":22.5,"target":27,"bands":[20,25,30]},{"kpi":"New customers","unit":"count","actual":1650,"target":2100,"bands":[1400,2000,2500]},{"kpi":"Satisfaction","unit":"out of 5","actual":4.6,"target":4.2,"bands":[3.5,4.25,5]}]'
+  >
+    <c2-chart-series field="actual" label="Actual"></c2-chart-series>
   </c2-bullet-chart>
 </div>
 ```

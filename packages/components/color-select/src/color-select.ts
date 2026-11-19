@@ -75,7 +75,7 @@ export interface ColorSelect {
  * @cssproperty {border} [--c2-color-select__color__sample--border-bottom=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-color-select__color__sample--border-left=1px solid rgb(177, 177, 177)]
  *
- * @cssproperty {pixel} [--c2-color-select__color__sample--size=48px]
+ * @cssproperty {pixel} [--c2-color-select__color__sample--size=48px] - Width and height of the color sample.
  * @cssproperty {border-radius} [--c2-color-select__color__sample--border-radius=4px]
  *
  * @internalcomponent c2-color-area
@@ -106,12 +106,18 @@ export class ColorSelect extends LitElement {
     }
   }
 
+  /** @internal */
   @state() hue = 0
+  /** @internal */
   @state() saturation = 0
+  /** @internal */
   @state() value = 0
+  /** @internal */
   @state() alpha = 1
 
+  /** @internal */
   @state() inputType = 'HEX'
+  /** @internal */
   @state() open = false
 
   @query('.color-area') colorArea!: ColorArea

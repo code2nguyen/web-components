@@ -97,13 +97,13 @@ const CLOSE = svg`<path d="M18 6 6 18M6 6l12 12" />`
  * @cssproperty {outline} [--c2-find-bar__field__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {color} [--c2-find-bar__count--color=#71717a]
  * @cssproperty {font-size} [--c2-find-bar__count--font-size=12px]
- * @cssproperty {pixel} [--c2-find-bar__button--size=28px]
+ * @cssproperty {pixel} [--c2-find-bar__button--size=28px] - Width and height of the button.
  * @cssproperty {border-radius} [--c2-find-bar__button--border-radius=6px]
  * @cssproperty {color} [--c2-find-bar__button--color=#18181b]
  * @cssproperty {color} [--c2-find-bar__button__hover--background-color=rgba(24, 24, 27, 0.08)]
  * @cssproperty {outline} [--c2-find-bar__button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-find-bar__button__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-find-bar__toggle--size=24px]
+ * @cssproperty {pixel} [--c2-find-bar__toggle--size=24px] - Width and height of the toggle button.
  * @cssproperty {color} [--c2-find-bar__toggle__pressed--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-find-bar__toggle__pressed--background-color=#edf1fe]
  * @cssproperty {padding} [--c2-find-bar__replace-button--padding=0 10px]

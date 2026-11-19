@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { ButterflyChart } from '@c2n/components/chart/butterfly-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -46,6 +47,55 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
   <c2-chart-series field="disagree" label="Disagree %"></c2-chart-series>
   <c2-chart-series field="agree" label="Agree %"></c2-chart-series>
 </c2-butterfly-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .butterfly-slots { width: 100%; }
+  .butterfly-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-butterfly-chart class="butterfly-slots" label-field="age" data='[{"age":"60+","men":1960,"women":2610},{"age":"40–59","men":2480,"women":2530},{"age":"20–39","men":2950,"women":2880},{"age":"0–19","men":2410,"women":2295}]'>
+  <c2-chart-series field="men" label="Men"></c2-chart-series>
+  <c2-chart-series field="women" label="Women"></c2-chart-series>
+  <div slot="legend" class="butterfly-slots__legend">
+    <strong>Men · Women</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-butterfly-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .butterfly-states { display: grid; gap: 12px; width: 100%; }
+  .butterfly-states c2-butterfly-chart { --c2-chart--height: 140px; }
+</style>
+<div class="butterfly-states">
+  <c2-butterfly-chart label-field="age" loading>
+    <c2-chart-series field="men" label="Men"></c2-chart-series>
+    <c2-chart-series field="women" label="Women"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-butterfly-chart>
+  <c2-butterfly-chart label-field="age">
+    <c2-chart-series field="men" label="Men"></c2-chart-series>
+    <c2-chart-series field="women" label="Women"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-butterfly-chart>
+  <c2-butterfly-chart label-field="age" error="Request failed">
+    <c2-chart-series field="men" label="Men"></c2-chart-series>
+    <c2-chart-series field="women" label="Women"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-butterfly-chart>
+</div>
 ```
 
 </GalleryGrid>

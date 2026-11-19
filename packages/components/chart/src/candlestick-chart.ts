@@ -82,7 +82,13 @@ export class CandlestickChart extends EchartsChartBase {
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
       xAxis: { type: 'category', data: this.xLabels(), boundaryGap: true, axisLine, axisLabel },
-      yAxis: { type: 'value', scale: true, axisLine, axisLabel, splitLine: { lineStyle: { color: context.theme.gridColor, width: context.theme.gridWidth } } },
+      yAxis: {
+        type: 'value',
+        scale: true,
+        axisLine,
+        axisLabel: { ...axisLabel, formatter: (tick: number) => this.formatTick(tick) },
+        splitLine: { lineStyle: { color: context.theme.gridColor, width: context.theme.gridWidth } },
+      },
     }
   }
 

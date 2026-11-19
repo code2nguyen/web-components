@@ -118,13 +118,13 @@ const glyphs = {
  * @cssproperty {color} [--c2-share-sheet__link--background=#f4f4f5]
  * @cssproperty {color} [--c2-share-sheet__link--color=#3f3f46]
  * @cssproperty {border-radius} [--c2-share-sheet__link--border-radius=8px]
- * @cssproperty {pixel} [--c2-share-sheet__tile--size=48px]
+ * @cssproperty {pixel} [--c2-share-sheet__tile--size=48px] - Width and height of the tile.
  * @cssproperty {color} [--c2-share-sheet__tile--background=#f4f4f5]
  * @cssproperty {color} [--c2-share-sheet__tile--color=#18181b]
  * @cssproperty {color} [--c2-share-sheet__tile__hover--background=#e4e4e7]
  * @cssproperty {font-size} [--c2-share-sheet__label--font-size=12px]
  * @cssproperty {color} [--c2-share-sheet__label--color=#52525b]
- * @cssproperty {pixel} [--c2-share-sheet__qr--size=160px]
+ * @cssproperty {pixel} [--c2-share-sheet__qr--size=160px] - Width and height of the QR code.
  * @cssproperty {outline} [--c2-share-sheet__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  */
 @customElement('c2-share-sheet')

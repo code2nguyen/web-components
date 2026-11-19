@@ -29,7 +29,7 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
 <c2-page-header>
   <h1 class="page-title">Beneficiaries</h1>
   <p slot="description">People and companies Acme EU pays.</p>
-  <c2-button slot="actions" primary>Add beneficiary</c2-button>
+  <c2-button slot="actions">Add beneficiary</c2-button>
 </c2-page-header>
 ```
 
@@ -56,7 +56,7 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
   <c2-badge slot="title-suffix" tone="success">Verified</c2-badge>
   <span slot="meta">DE89 3704 0044 0532 0130 00 · 214 payouts</span>
   <c2-button slot="actions">Edit</c2-button>
-  <c2-button slot="actions" primary>New payout</c2-button>
+  <c2-button slot="actions">New payout</c2-button>
 </c2-page-header>
 ```
 
@@ -79,7 +79,7 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
 <c2-page-header class="compact-header">
   <h1>Statements</h1>
   <p slot="description">Monthly account statements, ready on the 2nd.</p>
-  <c2-button slot="actions" primary>Download</c2-button>
+  <c2-button slot="actions">Download</c2-button>
 </c2-page-header>
 ```
 
@@ -100,7 +100,7 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
 <c2-page-header class="tinted-header">
   <h1>Payout rules</h1>
   <p slot="description">Limits and approvals that apply to every batch.</p>
-  <c2-button slot="actions" primary>Add rule</c2-button>
+  <c2-button slot="actions">Add rule</c2-button>
 </c2-page-header>
 ```
 
@@ -144,7 +144,7 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
       <c2-link-button>Alerts</c2-link-button>
     </c2-breadcrumb>
     <h1>Alerts</h1>
-    <c2-button slot="actions" primary>Done</c2-button>
+    <c2-button slot="actions">Done</c2-button>
   </c2-page-header>
   <ul class="nav-rows">
     <li>Payout approved</li>
@@ -175,6 +175,30 @@ Each card resets the site's global heading styles on its `h1` (`font: inherit`) 
 <c2-page-header class="large-header" large-title>
   <h1>Today</h1>
   <p slot="description">Three batches need your approval.</p>
+</c2-page-header>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  /* A page that styles headings globally hands the title back to the page header. */
+  .page-title {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+</style>
+<c2-page-header>
+  <h1 class="page-title">Beneficiaries</h1>
+  <p slot="description">People and companies Acme EU pays.</p>
+  <c2-button slot="actions">Add beneficiary</c2-button>
+  <a slot="parent" href="#">Projects</a>
 </c2-page-header>
 ```
 

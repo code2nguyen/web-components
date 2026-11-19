@@ -78,16 +78,16 @@ const MIXEDMARK = html`<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19
  * @cssproperty {opacity} [--c2-checkbox__container__disabled--opacity=0.38]
  * @cssproperty {color} [--c2-checkbox__container__error--border-color=#dc2626] - Border of an unchecked box while an enclosing `c2-form-field` shows an error.
  *
- * @cssproperty {pixel} [--c2-checkbox__checkmark--size=12px]
+ * @cssproperty {pixel} [--c2-checkbox__checkmark--size=12px] - Width and height of the checkmark, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-checkbox__checkmark--color=#ffffff]
  *
- * @cssproperty {pixel} [--c2-checkbox__mixedmark--size=12px]
+ * @cssproperty {pixel} [--c2-checkbox__mixedmark--size=12px] - Width and height of the mixedmark, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-checkbox__mixedmark--color=#ffffff]
  *
- * @cssproperty {pixel} [--c2-checkbox__uncheckmark--size=12px]
+ * @cssproperty {pixel} [--c2-checkbox__uncheckmark--size=12px] - Width and height of the uncheckmark, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-checkbox__uncheckmark--color=#ffffff]
  *
- * @cssproperty {pixel} [--c2-checkbox__state-layer--size=32px]
+ * @cssproperty {pixel} [--c2-checkbox__state-layer--size=32px] - Width and height of the state layer.
  * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-top-left-radius=6px]
  * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-top-right-radius=6px]
  * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-bottom-left-radius=6px]

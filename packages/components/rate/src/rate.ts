@@ -33,7 +33,7 @@ export interface Rate {
  * @event {Event} input - Fired with `rate-change` for form and framework bindings.
  * @event {Event} change - Fired with `rate-change` after the value is committed.
  *
- * @cssproperty {pixel} [--c2-rate__icon--size=24px]
+ * @cssproperty {pixel} [--c2-rate__icon--size=24px] - Width and height of the icon.
  * @cssproperty {pixel} [--c2-rate__container--gap=4px]
  * @cssproperty {color} [--c2-rate__icon--color=#e4e4e7]
  * @cssproperty {color} [--c2-rate__icon__filled--color=#facc15]

@@ -1,3 +1,5 @@
 [mcp_servers.c2n]
 command = "node"
 args = ["packages/tools/mcp/src/cli.ts"]
+# Logs every call while lab/.armed/mcp-calls.jsonl exists (lab/scripts/readiness.mjs --arm), as .mcp.json does.
+env = { C2N_MCP_LOG = "lab/.armed/mcp-calls.jsonl" }

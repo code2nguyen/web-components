@@ -98,7 +98,7 @@ const STORAGE_PREFIX = 'c2n-search-history:'
  * @cssproperty {border} [--c2-search-field__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
  * @cssproperty {opacity} [--c2-search-field__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-search-field__icon--size=16px]
+ * @cssproperty {pixel} [--c2-search-field__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-search-field__icon--color=#71717a]
  * @cssproperty {color} [--c2-search-field__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-search-field__clear-icon__hover--color=#18181b]

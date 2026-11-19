@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { NotificationCenter } from '@c2n/components/notification-center'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -33,6 +34,29 @@ Looks for `c2-notification-center`. The unread background and dot carry the acce
   }
 </style>
 <c2-notification-center class="inbox-quiet" group-by="none" notifications='[{"id":"1","title":"Ticket #4821 assigned to you","time":"2026-10-27T09:40:00Z"},{"id":"2","title":"SLA met for October","time":"2026-10-25T10:00:00Z","read":true}]'></c2-notification-center>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={320}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-notification-center group-by="none" notifications='[{"id":"1","title":"Ana mentioned you","time":"2026-10-27T09:40:00Z","avatar":{"name":"Ana Lima"}},{"id":"2","title":"Build passed","time":"2026-10-27T08:00:00Z","read":true}]'>
+  <c2-button slot="header-actions">Settings</c2-button>
+</c2-notification-center>
+```
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .notification-center-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="notification-center-states">
+  <c2-notification-center group-by="none">
+    <div slot="empty">You are all caught up.</div>
+  </c2-notification-center>
+</div>
 ```
 
 </GalleryGrid>

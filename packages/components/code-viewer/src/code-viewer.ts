@@ -152,8 +152,8 @@ export interface CodeViewer {
  * @cssproperty {padding} [--c2-code-viewer__header--padding-left=16px]
  * @cssproperty {border} [--c2-code-viewer__header--border-bottom=1px solid rgba(127, 127, 127, 0.2)]
  *
- * @cssproperty {pixel} [--c2-code-viewer__copy--size=28px]
- * @cssproperty {pixel} [--c2-code-viewer__copy--icon-size=14px]
+ * @cssproperty {pixel} [--c2-code-viewer__copy--size=28px] - Width and height of the copy button.
+ * @cssproperty {pixel} [--c2-code-viewer__copy--icon-size=14px] - Width and height of the icon in the copy button.
  * @cssproperty {border-radius} [--c2-code-viewer__copy--border-radius=6px]
  * @cssproperty {color} --c2-code-viewer__copy--color - Defaults to the code foreground at 70% opacity.
  * @cssproperty {background} --c2-code-viewer__copy--background

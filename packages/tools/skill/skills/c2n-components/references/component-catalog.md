@@ -5,17 +5,17 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Buttons
 
-- **Button** — `c2-button` · `@c2n/components/button` — Themeable button with slots for text, prefix, suffix and running icons.
-- **Button Group** — `c2-button-group` · `@c2n/components/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`.
-- **Copy Button** — `c2-copy-button` · `@c2n/components/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
-- **Float Button** — `c2-float-button, c2-float-button-action` · `@c2n/components/float-button` — A floating action button for the main action of a screen, which can expand into a speed dial of related actions. Children: `c2-float-button-action`.
-- **Icon Button** — `c2-icon-button` · `@c2n/components/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
-- **Split Button** — `c2-split-button` · `@c2n/components/split-button` — A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method. Children: `c2-menu-item`.
+- **Button** — `c2-button` · `@c2n/components/button` — Themeable button with slots for text, prefix, suffix and running icons. Also: cta, submit, action.
+- **Button Group** — `c2-button-group` · `@c2n/components/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`. Also: segmented control, toggle group, view switcher, radio buttons.
+- **Copy Button** — `c2-copy-button` · `@c2n/components/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string. Also: copy to clipboard, clipboard.
+- **Float Button** — `c2-float-button, c2-float-button-action` · `@c2n/components/float-button` — A floating action button for the main action of a screen, which can expand into a speed dial of related actions. Children: `c2-float-button-action`. Also: fab, floating action button.
+- **Icon Button** — `c2-icon-button` · `@c2n/components/icon-button` — Round, hoverable button wrapping a slotted SVG icon. Also: toolbar button, round button, action icon.
+- **Split Button** — `c2-split-button` · `@c2n/components/split-button` — A main action with a caret menu of alternatives, such as "Send ▾", or a remembered choice like a merge method. Children: `c2-menu-item`. Also: dropdown button, button with menu.
 
 ## Chart
 
-- **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/area-chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity. Children: `c2-chart-series`.
-- **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/bar-chart` — Bars over categories or time buckets, with several series drawn side by side within each band. Children: `c2-chart-series`.
+- **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/area-chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity. Children: `c2-chart-series`. Also: area graph, stacked area, time series.
+- **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/bar-chart` — Bars over categories or time buckets, with several series drawn side by side within each band. Children: `c2-chart-series`. Also: column chart, bar graph.
 - **Box plot chart** — `c2-boxplot-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/boxplot-chart` — The distribution of each category as its median, quartiles, whiskers and outliers: latency per service, test scores, A/B results. Children: `c2-chart-series`.
 - **Bubble chart** — `c2-bubble-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/bubble-chart` — An ECharts scatter plot with a third measure encoded as bubble area, for comparing how two measures relate while showing how much each point weighs. Children: `c2-chart-series`.
 - **Bullet chart** — `c2-bullet-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/bullet-chart` — One measure against a target and qualitative bands, a row per KPI, as Stephen Few drew it for scorecards. Children: `c2-chart-series`.
@@ -23,19 +23,19 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Candlestick chart** — `c2-candlestick-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/candlestick-chart` — An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours. Children: `c2-chart-series`.
 - **Chord chart** — `c2-chord-chart, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/chord-chart` — Flows between groups around a circle, where one row is one flow from a source to a target. Children: `c2-chart-series`.
 - **Depth chart** — `c2-depth-chart` · `@c2n/components/chart/depth-chart` — Cumulative bid and ask size around the mid price of an order book, as trading screens show market depth. Children: `c2-chart-series`.
-- **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/gauge-chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer. Children: `c2-chart-series`.
-- **Heatmap chart** — `c2-heatmap-chart, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/heatmap-chart` — Rows binned into cells by two keys, aggregated, and coloured by a sequential, diverging or stepped scale: a currency matrix, pair × tenor, hour × weekday, or a calendar of days. Drawn by ECharts, with a colour key that counts, marks and filters. Children: `c2-chart-series`.
+- **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/gauge-chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer. Children: `c2-chart-series`. Also: speedometer, dial, meter.
+- **Heatmap chart** — `c2-heatmap-chart, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/heatmap-chart` — Rows binned into cells by two keys, aggregated, and coloured by a sequential, diverging or stepped scale: a currency matrix, pair × tenor, hour × weekday, or a calendar of days. Drawn by ECharts, with a colour key that counts, marks and filters. Children: `c2-chart-series`. Also: heat map, matrix chart, calendar heatmap.
 - **Histogram chart** — `c2-histogram-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/histogram-chart` — Raw numeric samples cut into bins in the browser and drawn as touching bars, with an optional density curve, cumulative share and percentile markers. Children: `c2-chart-series`.
-- **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/line-chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children. Children: `c2-chart-series`.
+- **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/line-chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children. Children: `c2-chart-series`. Also: line graph, trend chart, time series.
 - **Map chart** — `c2-map-chart, c2-map-layer, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/map-chart` — A choropleth and point map on vector outlines, drawn by ECharts: regions shaded by a value, with layers of sized points and flow lines, on the bundled world and US maps or your own GeoJSON, TopoJSON or SVG. Children: `c2-chart-series`, `c2-map-layer`.
 - **Overlap chart** — `c2-overlap-chart, c2-chart-series` · `@c2n/components/chart/overlap-chart` — A Venn diagram of two or three sets, where each circle is a set and each shared area counts the members of exactly that combination. Children: `c2-chart-series`.
-- **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/pie-chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it. Children: `c2-chart-series`.
+- **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/pie-chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it. Children: `c2-chart-series`. Also: donut chart, doughnut, share, proportion.
 - **Pyramid chart** — `c2-pyramid-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/pyramid-chart` — Ranked levels of a whole, stacked from a narrow apex to a wide base, where one row is one level. Children: `c2-chart-series`.
 - **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/components/chart/radar-chart` — Compare several profiles across the same set of normalized indicators. Children: `c2-chart-series`.
 - **Radial bar chart** — `c2-radial-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/radial-bar-chart` — Concentric rings, each filling toward its own goal: activity rings, a readiness score, a budget per category. Children: `c2-chart-series`.
 - **Sankey chart** — `c2-sankey-chart, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sankey-chart` — Quantities moving through stages, where one row is one flow and each band is as wide as what it carries. Children: `c2-chart-series`.
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/scatter-chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`.
-- **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sparkline` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`.
+- **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sparkline` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`. Also: mini chart, inline chart, tiny trend.
 - **State Timeline** — `c2-state-timeline` · `@c2n/components/state-timeline` — One band per series, coloured by the discrete state it was in over time: service health, CI runs, host power.
 - **Sunburst chart** — `c2-sunburst-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/sunburst-chart` — A hierarchy drawn as rings, the whole at the centre and each ring splitting its parent: budgets, disk usage and org spend, with click to zoom. Children: `c2-chart-series`.
 - **Treemap chart** — `c2-treemap-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/components/chart/treemap-chart` — A whole split into nested rectangles, each sized by its value: market maps, budgets and disk usage. Children: `c2-chart-series`.
@@ -43,13 +43,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Chat
 
-- **Chat Input** — `c2-chat-input` · `@c2n/components/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
+- **Chat Input** — `c2-chat-input` · `@c2n/components/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support. Also: message composer, prompt box, chat box.
 - **Chat Message** — `c2-chat-message` · `@c2n/components/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
-- **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
+- **Chat Message List** — `c2-chat-message-list` · `@c2n/components/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`. Also: conversation, chat log, messages.
 - **Citation** — `c2-citation` · `@c2n/components/citation` — A numbered inline marker that names its source, with a hover preview of the page it cites.
 - **Citation List** — `c2-citation-list` · `@c2n/components/citation/citation-list` — The "Used 12 sources" line under an AI answer: a stack of site icons and a count that expands into a card per source, linked to the answer''s citation markers.
 - **Comment Thread** — `c2-comment-thread` · `@c2n/components/comment-thread` — One conversation on a piece of content: the first comment and its replies, a reply box, edit and delete on your own comments, and Resolve.
-- **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams.
+- **Markdown** — `c2-markdown` · `@c2n/components/markdown` — Safe markdown renderer that streams: chat answers and READMEs, with code, math and diagrams. Also: markdown renderer, rich text output, chat answer.
 - **Reaction Bar** — `c2-reaction-bar` · `@c2n/components/reaction-bar` — Emoji reactions with counts under a message or comment, toggled by the current user, with a picker to add more.
 - **Streaming Text** — `c2-streaming-text` · `@c2n/components/streaming-text` — Plain text that arrives in bursts, such as an LLM answer, revealed at a steady pace behind a caret.
 
@@ -58,25 +58,25 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/components/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Audio Player** — `c2-audio-player` · `@c2n/components/audio-player` — Waveform playback for voice notes and recordings: the waveform is the seek bar, with the time, a speed toggle and an optional transcript.
 - **Audio Visualizer** — `c2-audio-visualizer` · `@c2n/components/audio-visualizer` — Live audio level as bars, a waveform or an orb: the mic meter of a call, a voice message, a voice assistant.
-- **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
-- **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
+- **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/components/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`. Also: profile picture, user photo, initials, presence.
+- **Badge** — `c2-badge` · `@c2n/components/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element. Also: pill, label, status label, count, tag.
 - **Bar List** — `c2-bar-list` · `@c2n/components/bar-list` — A ranked list whose rows carry their own bar: top pages, referrers, countries, or the changes between two periods.
 - **Barcode** — `c2-barcode` · `@c2n/components/barcode` — A 1D or 2D barcode drawn as SVG in the browser: Code 128, EAN-13, EAN-8, UPC-A, Code 39 and Data Matrix.
 - **Chip Group** — `c2-chip-group` · `@c2n/components/chip-group` — A single row of chips or badges that collapses whatever does not fit into a +N indicator, recomputed as the row or its items change size.
 - **Comparison Bar** — `c2-comparison-bar` · `@c2n/components/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Countdown** — `c2-countdown` · `@c2n/components/countdown` — Time left until a date, or through a timer, drawn as segments, a clock or a phrase, and kept current to the second.
-- **Delta** — `c2-delta` · `@c2n/components/format-number/delta` — A change formatted for its locale, the delta chip of a dashboard: an up or down arrow, the good or bad colour, and what it is compared with.
+- **Delta** — `c2-delta` · `@c2n/components/format-number/delta` — A change formatted for its locale, the delta chip of a dashboard: an up or down arrow, the good or bad colour, and what it is compared with. Also: change, trend, percentage change, up down.
 - **Description List** — `c2-description-list, c2-description-item, c2-description-value, c2-description-group` · `@c2n/components/description-list` — Read-only label and value pairs for a detail page, in columns that wrap with the available width. Children: `c2-description-group`, `c2-description-item`, `c2-description-value`.
 - **Distribution Bar** — `c2-distribution-bar` · `@c2n/components/distribution-bar` — One 100% stacked bar of a breakdown, with a legend of shares and the hovered part brought forward.
 - **File browser** — `c2-file-browser` · `@c2n/components/file-browser` — Folders and files with a folder tree, breadcrumbs, search, list and grid views, selection, a context menu, renaming and drag and drop.
-- **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone.
-- **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat.
+- **Format Date** — `c2-format-date` · `@c2n/components/format-date` — A date and time formatted for the reader''s language and, optionally, a fixed time zone. Also: date format, localized date.
+- **Format Number** — `c2-format-number` · `@c2n/components/format-number` — A number formatted for its locale: currency, percent, units, compact counts and byte sizes, from Intl.NumberFormat. Also: currency format, number format, percent format.
 - **Google Map** — `c2-google-map, c2-google-map-marker, c2-google-map-route, c2-google-street-view` · `@c2n/components/google-map` — Google Maps with markers, a road route from A to B, and Street View, loaded once per page from a browser key. Children: `c2-google-map-marker`, `c2-google-map-route`.
 - **Highlight** — `c2-highlight, c2-find-bar` · `@c2n/components/highlight` — Marks the parts of a text that match a search query.
 - **Image** — `c2-image` · `@c2n/components/image` — Image with lazy loading, a loading placeholder, an error fallback, click-to-load for untrusted URLs and a full-screen preview.
 - **Image Compare** — `c2-image-compare` · `@c2n/components/image-compare` — A before/after slider: two layers on top of each other, the after layer cut at a divider the reader drags.
 - **Indicator** — `c2-indicator` · `@c2n/components/indicator` — Solid dot or count pinned to an edge or corner of any element, with an accessible name for the count.
-- **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
+- **Kbd** — `c2-kbd` · `@c2n/components/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element. Also: keyboard key, shortcut key, keycap.
 - **List** — `c2-list` · `@c2n/components/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item, c2-list-group` · `@c2n/components/list-item` — Selectable row with icon slots, used on its own, as the option of list and select, as a navigation link with collapsible groups, or as a settings row around a control.
 - **Marker** — `c2-marker` · `@c2n/components/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
@@ -86,36 +86,36 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Order Book** — `c2-order-book` · `@c2n/components/order-book` — Live bids and asks with depth bars, price grouping and a spread row, for a trading screen.
 - **Org Chart** — `c2-org-chart` · `@c2n/components/org-chart` — A hierarchy drawn as connected cards that collapse and expand: an organization chart, a reporting line or a team structure.
 - **Payment Card** — `c2-payment-card` · `@c2n/components/payment-card` — A company card face that stays masked until the reader asks, then shows each detail with a copy button.
-- **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
+- **QR Code** — `c2-qr-code` · `@c2n/components/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics. Also: qr, 2d barcode.
 - **Range Indicator** — `c2-range-indicator` · `@c2n/components/meter/range-indicator` — One value placed on a banded scale — a lab result against its reference ranges, a salary inside its pay band — with labelled bands, a pointer and off-scale ends.
-- **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover.
+- **Relative Time** — `c2-relative-time` · `@c2n/components/relative-time` — Time relative to now, such as "3 minutes ago" or "in 2 days", that keeps itself current and shows the full date on hover. Also: time ago, minutes ago, timeago, humanized time.
 - **Reorder List** — `c2-reorder-list` · `@c2n/components/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
-- **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description.
-- **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed.
-- **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`.
+- **Stat** — `c2-stat` · `@c2n/components/stat` — Displays a KPI with an optional icon, trend and supporting description. Also: kpi, metric, big number, scorecard tile.
+- **Status Light** — `c2-status-light` · `@c2n/components/status-light` — Coloured dot plus a short label for the state of something, such as Live, Building or Failed. Also: status dot, health indicator, online status.
+- **Steps** — `c2-steps, c2-step` · `@c2n/components/steps` — The trace of a task as it runs, or a stepper across the top of a view: statuses, durations, stages that open while they work, and steps the reader can select. Children: `c2-step`. Also: stepper, wizard, progress steps, checkout steps.
 - **Text Annotator** — `c2-text-annotator` · `@c2n/components/highlight/text-annotator` — Labels spans of a text: select words and press a key to tag them, with overlapping spans and a tag per span, or show entities and retrieved passages read-only.
 - **Text Effect** — `c2-text-effect` · `@c2n/components/text-effect` — Animated text for a hero line or a status: rotating words, a typewriter, a scramble, a shimmer or a staggered reveal.
-- **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
+- **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/components/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`. Also: history, activity feed, changelog, events.
 - **Trace Waterfall** — `c2-trace-waterfall` · `@c2n/components/trace-waterfall` — Show the spans of a distributed trace as a tree, each with a duration bar on one shared time axis.
 - **Transcript** — `c2-transcript` · `@c2n/components/transcript` — Speaker-labelled, timestamped segments synced to playback: click to seek, the word playing marked, search built in.
-- **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
+- **Tree** — `c2-tree, c2-tree-item` · `@c2n/components/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`. Also: tree view, hierarchy, folders, nested list, file tree.
 - **Truncate** — `c2-truncate` · `@c2n/components/truncate` — Clamps text to a number of lines, with an optional Show more button.
 - **Video Player** — `c2-video-player` · `@c2n/components/video-player` — Themed controls over a real video: chapters on the seek bar, a thumbnail while scrubbing, captions, speed, picture-in-picture and full screen.
 - **Video Tile** — `c2-video-tile` · `@c2n/components/video-tile` — One participant of a call: their video or avatar, with their name, a live microphone meter and status badges.
-- **Virtual List** — `c2-virtual-list` · `@c2n/components/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
+- **Virtual List** — `c2-virtual-list` · `@c2n/components/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source. Also: infinite list, long list, windowing, virtual scroll.
 
 ## Editors & viewers
 
 - **Change Review** — `c2-change-review` · `@c2n/components/change-review` — Review proposed edits hunk by hunk: accept or reject each change, then take the resulting text.
-- **Code Editor** — `c2-code-editor` · `@c2n/components/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.
+- **Code Editor** — `c2-code-editor` · `@c2n/components/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables. Also: code input, syntax highlighting, ide, monaco.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/components/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
-- **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights.
+- **Diff Viewer** — `c2-diff-viewer` · `@c2n/components/diff-viewer` — Read-only line diff of two texts, unified or side by side, with folded unchanged lines and word highlights. Also: compare, code diff, text diff, changes.
 - **File Preview** — `c2-file-preview` · `@c2n/components/attachment/file-preview` — Previews any file by type in one frame: an image with zoom, video, audio, a PDF, text, or a download, with previous and next across a set.
 - **Flow** — `c2-flow` · `@c2n/components/flow` — A pipeline, dependency graph or database schema on a pannable canvas: steps with a status, smooth edges, rows joined row to row, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
 - **Image annotator** — `c2-image-annotator` · `@c2n/components/image-annotator` — Arrows, boxes, text, numbered steps, blur and redaction over an image, exported as a PNG and as shapes.
 - **Image Cropper** — `c2-image-cropper` · `@c2n/components/image-cropper` — Choose the part of an image to keep by moving and resizing a selection, then read it back as a canvas or a blob.
-- **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value.
-- **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
+- **JSON Viewer** — `c2-json-viewer` · `@c2n/components/json-viewer` — Browse a JSON value as a collapsible tree, search it, and copy any path or value. Also: json tree, inspect json, object viewer.
+- **Log Viewer** — `c2-log-viewer` · `@c2n/components/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes. Also: logs, console output, server logs.
 - **Mind Map** — `c2-mind-map` · `@c2n/components/mind-map` — An idea tree laid out around a central topic, with keyboard editing as in XMind and Miro.
 - **Page Editor** — `c2-page-editor` · `@c2n/components/page-editor` — A Notion-style editor for long text: Markdown shortcuts while you type, a / menu for blocks, a toolbar over selected text, code blocks with syntax colours and eight named colours.
 - **Pan Zoom** — `c2-pan-zoom` · `@c2n/components/pan-zoom` — A viewport that pans and zooms its content: an image, an SVG diagram, a floor plan or a board.
@@ -125,27 +125,27 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Feedback
 
-- **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
+- **Banner** — `c2-banner` · `@c2n/components/banner` — A persistent, full-width message in the page flow for system notices, outages and account status. Also: alert bar, announcement, system notice, callout.
 - **Beacon** — `c2-beacon, c2-tour-step` · `@c2n/components/tour/beacon` — Pulsing hotspots that point at new or unfamiliar features and open a short tip when clicked, dismissed once and remembered. Children: `c2-tour-step`.
 - **Celebration** — `c2-celebration` · `@c2n/components/celebration` — Confetti, a burst of sparks or rising emoji for a moment worth marking, fired from code or a click.
-- **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action.
-- **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
-- **Loading Overlay** — `c2-loading-overlay` · `@c2n/components/loading-overlay` — Covers a region while it loads: the content stays in place, dimmed and blocked, with a spinner and an announced label.
-- **Modal** — `c2-modal` · `@c2n/components/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
-- **Navigation Progress** — `c2-navigation-progress` · `@c2n/components/progress/navigation-progress` — The thin loading bar across the top of the page during a route change or a request: start() trickles it forward, done() fills it and fades it out.
-- **Notification Center** — `c2-notification-center` · `@c2n/components/notification-center` — An inbox panel of notifications grouped by day, with read and unread states and mark all as read.
+- **Confirm Dialog** — `c2-confirm-dialog` · `@c2n/components/confirm-dialog` — Asks the user to confirm an action: await show() or confirm() for a true/false answer, with a destructive variant and an async confirm action. Also: are you sure, confirmation, delete confirmation, alert dialog.
+- **Hover Card** — `c2-hover-card` · `@c2n/components/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer. Also: preview card, user card, popover.
+- **Loading Overlay** — `c2-loading-overlay` · `@c2n/components/loading-overlay` — Covers a region while it loads: the content stays in place, dimmed and blocked, with a spinner and an announced label. Also: blocking loader, busy overlay.
+- **Modal** — `c2-modal` · `@c2n/components/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer. Also: dialog, popup, lightbox, overlay window.
+- **Navigation Progress** — `c2-navigation-progress` · `@c2n/components/progress/navigation-progress` — The thin loading bar across the top of the page during a route change or a request: start() trickles it forward, done() fills it and fades it out. Also: top loading bar, route progress, nprogress.
+- **Notification Center** — `c2-notification-center` · `@c2n/components/notification-center` — An inbox panel of notifications grouped by day, with read and unread states and mark all as read. Also: inbox, bell, notifications list.
 - **Overlay** — `c2-overlay` · `@c2n/components/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
-- **Popconfirm** — `c2-popconfirm` · `@c2n/components/popconfirm` — A small "Are you sure?" popup anchored to the button that asked for it.
-- **Progress** — `c2-progress` · `@c2n/components/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
+- **Popconfirm** — `c2-popconfirm` · `@c2n/components/popconfirm` — A small "Are you sure?" popup anchored to the button that asked for it. Also: inline confirmation, are you sure.
+- **Progress** — `c2-progress` · `@c2n/components/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count. Also: progress bar, percentage, loading bar, completion, progress ring.
 - **Scroll Progress** — `c2-scroll-progress` · `@c2n/components/scroll-progress` — How far the reader got: a bar that fills or a ring that closes as the page or a container scrolls.
 - **Share Sheet** — `c2-share-sheet` · `@c2n/components/share-sheet` — Share a link anywhere: copy it, send it to email or a network, scan it as a QR code, or hand it to the device’s own share sheet.
-- **Sheet** — `c2-sheet` · `@c2n/components/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
-- **Skeleton** — `c2-skeleton` · `@c2n/components/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
-- **Spinner** — `c2-spinner` · `@c2n/components/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
-- **Status Panel** — `c2-status-panel` · `@c2n/components/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps.
-- **Toast** — `c2-toast, c2-toast-region` · `@c2n/components/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
-- **Toggletip** — `c2-toggletip` · `@c2n/components/toggletip` — A small ⓘ button that opens a help bubble on click or tap; the bubble can hold links and is announced to screen readers.
-- **Tooltip** — `c2-tooltip` · `@c2n/components/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
+- **Sheet** — `c2-sheet` · `@c2n/components/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it. Also: drawer, side panel, slide over, bottom sheet, offcanvas.
+- **Skeleton** — `c2-skeleton` · `@c2n/components/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations. Also: placeholder, shimmer, loading state, ghost.
+- **Spinner** — `c2-spinner` · `@c2n/components/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text. Also: loader, loading indicator, busy.
+- **Status Panel** — `c2-status-panel` · `@c2n/components/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps. Also: empty state, no results, error page, 404, success screen.
+- **Toast** — `c2-toast, c2-toast-region` · `@c2n/components/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes. Also: snackbar, notification, flash message, success message, alert.
+- **Toggletip** — `c2-toggletip` · `@c2n/components/toggletip` — A small ⓘ button that opens a help bubble on click or tap; the bubble can hold links and is announced to screen readers. Also: info icon, help bubble, click tooltip.
+- **Tooltip** — `c2-tooltip` · `@c2n/components/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer. Also: hint, hover text, title text, info popup.
 - **Tour** — `c2-tour` · `@c2n/components/tour` — A guided product tour that spotlights one element at a time and explains it in a panel beside it. Children: `c2-tour-step`.
 - **Working Indicator** — `c2-working-indicator` · `@c2n/components/working-indicator` — A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.
 
@@ -161,23 +161,23 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Address field** — `c2-address-field` · `@c2n/components/address-field` — A postal address input with the parts, order and labels of each country, optional autocomplete from your address provider.
 - **Angle Slider** — `c2-angle-slider` · `@c2n/components/angle-slider` — A round knob to pick a direction on a full circle, or a value along an arc like a thermostat or volume dial, by drag or keys.
-- **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Autocomplete** — `c2-autocomplete` · `@c2n/components/autocomplete` — Searchable combobox for local or remote items with customizable list rows. Also: typeahead, combobox, searchable dropdown, suggestions, type ahead.
 - **Barcode Scanner** — `c2-barcode-scanner` · `@c2n/components/barcode-scanner` — Reads barcodes and QR codes with the camera: a scan window, single or continuous scanning, a beep, the camera light, and a scan event with the value and the format.
 - **Camera Capture** — `c2-camera-capture` · `@c2n/components/camera-capture` — A camera viewfinder for documents, cards and faces: a framing guide, quality hints, auto-capture when steady, retake or keep, front/back switch and a list of required shots. Each photo is a Blob.
 - **Card Input** — `c2-card-input` · `@c2n/components/card-input` — Card number, expiry date and security code in one field, formatted as the brand prints them and checked as they are typed.
 - **Cascader** — `c2-cascader` · `@c2n/components/cascader` — Select a value from related, multi-level data in one floating panel.
-- **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
+- **Checkbox** — `c2-checkbox` · `@c2n/components/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer. Also: tick box, check, agree.
 - **Checkbox group** — `c2-checkbox-group, c2-checkbox` · `@c2n/components/checkbox/checkbox-group` — Checkboxes grouped into one form control with a value array, a group label and an at-least-one rule. Children: `c2-checkbox`.
-- **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard.
+- **Chip** — `c2-chip, c2-chip-part` · `@c2n/components/chip` — A compact pill for a filter, a choice or an entered value: selectable as a toggle, removable with a button or the keyboard. Also: tag, filter chip, pill.
 - **Choice Matrix** — `c2-choice-matrix` · `@c2n/components/choice-matrix` — Rows × columns of checkboxes or radio buttons in one form control: permissions, notification settings, agreement scales.
 - **Color Area** — `c2-color-area` · `@c2n/components/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/components/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/components/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
 - **Date Fields** — `c2-date-fields` · `@c2n/components/date-input/date-fields` — A memorable date typed as three labelled fields, day, month and year, in one form control, with errors that name the wrong part.
-- **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
+- **Date Input** — `c2-date-input` · `@c2n/components/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states. Also: date picker, calendar input, birthday.
 - **Date Selector** — `c2-date-selector` · `@c2n/components/date-selector` — Accessible one- or two-month calendar for choosing a date range, one date or several dates.
 - **Date Strip** — `c2-date-strip` · `@c2n/components/date-strip` — A row of days to pick one from, a week at a time, with dots on the days that have something on them.
-- **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone.
+- **Date Time Picker** — `c2-date-time-picker` · `@c2n/components/date-time-picker` — Form-associated date-and-time field with a calendar and time popup, min/max/step constraints and an IANA time zone. Also: datetime, appointment time, date and time.
 - **Document checklist** — `c2-document-checklist` · `@c2n/components/upload/document-checklist` — A list of expected documents, each with a status, a due or expiry date and its own upload target: KYC, mortgage, vendor and HR onboarding portals.
 - **Duration Input** — `c2-duration-input` · `@c2n/components/duration-input` — A text field for an amount of time: reads 1h 30m, 90m, 1.5h or 1:30 and stores seconds.
 - **Emoji Picker** — `c2-emoji-picker` · `@c2n/components/emoji-picker` — A searchable grid of emoji in categories, with skin tones and the emoji used last.
@@ -185,71 +185,71 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Fieldset** — `c2-fieldset` · `@c2n/components/fieldset` — Groups related controls under a legend, with a description, a group-level error and a disabled state that reaches every control inside.
 - **Filter Builder** — `c2-filter-builder` · `@c2n/components/filter-builder` — A filter bar of sentence chips (Status is any of Active), an add-filter picker and an editor for each part; it reports a plain JSON filter tree.
 - **Form** — `c2-form, c2-form-list` · `@c2n/components/form` — Form container with validation timing, an error summary, server errors, dirty tracking and async submit.
-- **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology.
+- **Form Field** — `c2-form-field` · `@c2n/components/form-field` — Label, hint, error, warning and character counter around any form control, wired for assistive technology. Also: label, hint, error message, validation, field wrapper.
 - **FX Converter** — `c2-fx-converter` · `@c2n/components/fx-converter` — Two linked amount and currency fields: type what you send or what arrives, with the fee, a swap and a guaranteed rate.
-- **Image uploader** — `c2-image-uploader` · `@c2n/components/upload/image-uploader` — A grid of image thumbnails with an add tile: per-tile progress, retry and removal, a count, drag or keyboard reordering, a cover, and a single-image mode.
+- **Image uploader** — `c2-image-uploader` · `@c2n/components/upload/image-uploader` — A grid of image thumbnails with an add tile: per-tile progress, retry and removal, a count, drag or keyboard reordering, a cover, and a single-image mode. Also: photo upload, image gallery upload, thumbnails.
 - **Import Mapper** — `c2-import-mapper` · `@c2n/components/import-mapper` — The mapping step of a spreadsheet import: match each column of the file to a field, check the required ones, then preview the rows with their errors.
 - **Inline Edit** — `c2-inline-edit` · `@c2n/components/inline-edit` — Text that turns into a field on click: Enter (Ctrl/⌘+Enter when multiline) commits, Escape cancels, and any control with a value that fires change can be the editor.
 - **Input Matrix** — `c2-input-matrix` · `@c2n/components/choice-matrix/input-matrix` — Rows × columns of typed inputs in one form control, with row, column and grand totals: quantities by size and colour, hours by person and day, SLA targets by priority.
-- **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup.
+- **JSON Form** — `c2-json-form, c2-json-field` · `@c2n/components/json-form` — A form generated from a JSON Schema, laid out by the schema, a UI schema or your own markup. Also: schema form, form generator, dynamic form.
 - **Key Value Editor** — `c2-key-value-editor` · `@c2n/components/key-value-editor` — Editable KEY=value rows for environment variables and headers: paste a .env file to split it into rows, mask secret values, and flag duplicate or malformed keys.
 - **Keypad** — `c2-keypad` · `@c2n/components/keypad` — A phone-style numeric keypad that types an amount, fills PIN dots or drives another field, with a slot for a biometric key.
 - **Label** — `c2-label` · `@c2n/components/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Mask Input** — `c2-mask-input` · `@c2n/components/mask-input` — A text input that fits what is typed to a pattern, for postcodes, IBANs, tax IDs, expiry dates and other fixed formats.
-- **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units.
+- **Money Input** — `c2-money-input` · `@c2n/components/money-input` — Currency amount field that groups digits as you type, follows the locale and stores an integer count of minor units. Also: currency input, price, amount.
 - **Month Picker** — `c2-month-picker` · `@c2n/components/month-picker` — Pick a month, a quarter, a half-year or a year: billing periods, fiscal reports and card expiry.
-- **Native Select** — `c2-native-select` · `@c2n/components/select/native-select` — A field around the browser's own select, themed like the text field: the phone's own picker, the platform's keyboard and typeahead, and no popover code.
-- **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
-- **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
-- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist, a Caps Lock warning and a password generator.
-- **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value.
+- **Native Select** — `c2-native-select` · `@c2n/components/select/native-select` — A field around the browser's own select, themed like the text field: the phone's own picker, the platform's keyboard and typeahead, and no popover code. Also: dropdown, simple select.
+- **Number Input** — `c2-number-input` · `@c2n/components/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states. Also: stepper, spin button, quantity, numeric.
+- **OTP Input** — `c2-otp-input` · `@c2n/components/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking. Also: verification code, one time password, pin code, 2fa, sms code.
+- **Password Field** — `c2-password-field` · `@c2n/components/password-field` — A password input with a show/hide toggle, a strength meter, a requirements checklist, a Caps Lock warning and a password generator. Also: password, show password, password strength.
+- **Phone Input** — `c2-phone-input` · `@c2n/components/phone-input` — A phone number field with a searchable country picker, as-you-type grouping and an E.164 value. Also: telephone, phone number, country code, mobile number.
 - **Promo Code Field** — `c2-promo-code-field` · `@c2n/components/promo-code-field` — Apply a promo code with checking and refusal states; applied codes stay as removable tokens with their saving.
 - **Quantity Picker** — `c2-quantity-picker, c2-quantity` · `@c2n/components/quantity-picker` — Several labelled counters behind one summary ("2 adults, 1 child"), with limits per counter and in total. Children: `c2-quantity`.
 - **Query Input** — `c2-query-input` · `@c2n/components/query-input` — A key:value query field whose filters are chips you can switch off or remove, with syntax highlighting and field and value suggestions, as in Datadog, GitHub and Sentry.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/components/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Quick time menu** — `c2-quick-time-menu` · `@c2n/components/quick-time-menu` — A menu of quick times (Later today, Tomorrow, Next week), each showing when it falls, plus a date and time picker for anything else.
-- **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
-- **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
+- **Radio** — `c2-radio, c2-radio-group` · `@c2n/components/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`. Also: option, radio button, choose one.
+- **Rate** — `c2-rate` · `@c2n/components/rate` — Accessible star rating input with hover preview, keyboard control and optional half values. Also: star rating, stars, review, score, feedback.
 - **Record Merge** — `c2-record-merge` · `@c2n/components/choice-matrix/record-merge` — Duplicate records side by side, one row per field, to pick the value each field keeps: the duplicate merge of a CRM, with a preview of the result.
 - **Recurrence Editor** — `c2-recurrence-editor` · `@c2n/components/recurrence-editor` — Edits how something repeats: every N days, weeks, months or years, weekdays, the third Tuesday, an end; reads and writes RRULE or cron.
 - **Rich Text Editor** — `c2-rich-text-editor` · `@c2n/components/rich-text-editor` — A compact formatted-text field for comments, replies and email bodies: bold, links, lists, quotes and code, a one-tab-stop toolbar, and a Markdown value.
 - **Scorecard** — `c2-scorecard` · `@c2n/components/choice-matrix/scorecard` — A rated form: criteria in categories, each answered on a scale, weighted and totalled as you go, with critical criteria and a verdict. Interview scorecards, QA reviews, rubrics, inspections.
-- **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.
+- **Search Field** — `c2-search-field` · `@c2n/components/search-field` — A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches. Also: search box, search bar, filter input, query.
 - **Secret Field** — `c2-secret-field` · `@c2n/components/secret-field` — Shows an API key or other secret masked, with buttons to reveal it, copy it and ask for a new one.
-- **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
+- **Select** — `c2-select` · `@c2n/components/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`. Also: dropdown, picker, combo box, option list.
 - **Shortcut** — `c2-shortcut` · `@c2n/components/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Shortcut Sheet** — `c2-shortcut-sheet` · `@c2n/components/shortcut/shortcut-sheet` — The keyboard-shortcuts dialog: every shortcut of the page grouped by section, drawn with keys, and searchable, generated from c2-shortcut bindings.
 - **Signature Pad** — `c2-signature-pad` · `@c2n/components/signature-pad` — A box to sign in with a mouse, a pen or a finger, with undo and clear, that exports the signature as SVG or an image.
-- **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
-- **Switch** — `c2-switch` · `@c2n/components/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
-- **Tag Input** — `c2-tag-input` · `@c2n/components/tag-input` — Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation.
-- **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/components/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
-- **Textarea** — `c2-textarea` · `@c2n/components/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
+- **Slider** — `c2-slider` · `@c2n/components/slider` — Range input with a themeable track, thumb, step ticks and value bubble. Also: range, volume, drag value, range slider.
+- **Switch** — `c2-switch` · `@c2n/components/switch` — On/off toggle on a native switch input, with label, description and thumb icons. Also: toggle, on off, toggle switch, enable disable.
+- **Tag Input** — `c2-tag-input` · `@c2n/components/tag-input` — Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation. Also: chips input, tokens, multi value, email recipients, labels input.
+- **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/components/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter. Also: input, text input, textbox, form field.
+- **Textarea** — `c2-textarea` · `@c2n/components/textarea` — Multiline text input with resizing, helper and error text, and a character counter. Also: multiline, comment box, long text.
 - **Theme Select** — `c2-theme-select` · `@c2n/components/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
 - **Tier editor** — `c2-tier-editor` · `@c2n/components/key-value-editor/tier-editor` — Contiguous numeric tiers edited as rows (from, up to, rate) for tiered pricing, commission accelerators and grading schemes, with an open last tier, gap and order checks, and a live preview of what a quantity comes to.
-- **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
-- **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh.
+- **Time Input** — `c2-time-input` · `@c2n/components/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states. Also: time picker, hour minute.
+- **Time Range Picker** — `c2-time-range-picker` · `@c2n/components/time-range-picker` — Dashboard time range control: searchable quick ranges, an absolute range typed or picked on a calendar, time zone, shift and zoom, and auto-refresh. Also: date range, last 15 minutes, relative time range, time window.
 - **Time Slot Picker** — `c2-time-slot-picker` · `@c2n/components/time-slot-picker` — Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening.
 - **TOTP Code** — `c2-totp-code` · `@c2n/components/secret-field/totp-code` — The rotating one-time code of an authenticator app, computed in the browser from a TOTP secret, with a countdown ring, show and copy.
 - **Tree Select** — `c2-tree-select` · `@c2n/components/tree-select` — A dropdown for picking one or several rows from a hierarchy, with checkboxes, search and a form value. Children: `c2-tree-item`.
 - **Unit Input** — `c2-unit-input` · `@c2n/components/number-input/unit-input` — A quantity with its unit of measure: a number field with a unit picker that converts the number on a pick and shows the equivalent in the base unit.
-- **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
+- **Upload** — `c2-upload` · `@c2n/components/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results. Also: file upload, dropzone, drag and drop files, attachment.
 - **View Options** — `c2-view-options, c2-view-field, c2-view-toggle` · `@c2n/components/view-options` — The Display popover of a collection: layout, grouping, ordering on several levels, Show switches and visible properties, reported as one plain value. Children: `c2-view-field`, `c2-view-toggle`.
 - **Wheel Picker** — `c2-wheel-picker` · `@c2n/components/wheel-picker` — iOS-style scroll wheels to pick a time, a height, a weight or any value from a short list, by swipe, scroll, click or keys.
 
 ## Layout
 
-- **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
+- **Accordion** — `c2-accordion` · `@c2n/components/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`. Also: faq, collapsible sections, expand collapse, expansion panel.
 - **Action Bar** — `c2-action-bar` · `@c2n/components/action-bar` — A floating bar for the current selection: the count, the bulk actions and a button that clears it; or, open, a floating toolbar.
-- **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width.
+- **App Shell** — `c2-app-shell, c2-app-shell-toggle` · `@c2n/components/app-shell` — The frame of an application: header, navigation, main, an optional details panel, banner and footer, laid out from its own width. Also: layout, app layout, header sidebar layout.
 - **Backdrop** — `c2-backdrop` · `@c2n/components/backdrop` — A container that draws a decorative pattern behind its content: dots, a grid, stripes, flicker, aurora or meteors.
 - **Beam** — `c2-beam` · `@c2n/components/beam` — An animated line between two elements, for data-flow and integration diagrams.
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
-- **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface.
-- **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
+- **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface. Also: panel, tile, box, container.
+- **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay. Also: slideshow, image carousel.
 - **Chatbot** — `c2-chatbot` · `@c2n/components/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
-- **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary.
+- **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary. Also: disclosure, collapsible, show more, expand, faq.
 - **Device Frame** — `c2-device-frame` · `@c2n/components/device-frame` — A browser window, phone, tablet or laptop drawn around a screenshot or live content.
 - **Floating Panel** — `c2-floating-panel` · `@c2n/components/floating-panel` — A window inside the page that the user drags, resizes, minimises and maximises, without blocking the page.
 - **Header** — `c2-header` · `@c2n/components/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
@@ -259,9 +259,9 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Master Detail** — `c2-master-detail` · `@c2n/components/master-detail` — A list beside the record it opens, one pane at a time with a Back step when the element is narrow.
 - **Overflow List** — `c2-overflow-list` · `@c2n/components/overflow-list` — One row of actions or links that shows what fits and folds the rest into a "More" menu, refitting as its width changes. Children: `c2-menu-item`.
 - **Page Header** — `c2-page-header` · `@c2n/components/page-header` — The top of a page: breadcrumb or parent link, your heading with status badges, description, metadata, page actions that fold into a menu, tabs and a toolbar.
-- **Save Bar** — `c2-save-bar` · `@c2n/components/save-bar` — A floating bar that appears while a form has unsaved changes, with Discard and Save.
+- **Save Bar** — `c2-save-bar` · `@c2n/components/save-bar` — A floating bar that appears while a form has unsaved changes, with Discard and Save. Also: unsaved changes, dirty form, save discard.
 - **Scroll Area** — `c2-scroll-area` · `@c2n/components/scroll-area` — A scroll container with themed scrollbars and shadows on the edges with more content beyond them.
-- **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
+- **Separator** — `c2-separator` · `@c2n/components/separator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars. Also: divider, hr, rule.
 - **Split Panel** — `c2-split-panel` · `@c2n/components/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 - **Sticky** — `c2-sticky` · `@c2n/components/sticky` — Pins content to the top or bottom of its scroll container and tells you when it is stuck, optionally hiding it while the reader scrolls down or while a watched element is on screen.
 - **Swipe Action** — `c2-swipe-action` · `@c2n/components/swipe-action` — A list row that slides sideways to reveal actions behind it, as in a mail or task list on a phone.
@@ -271,29 +271,29 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Navigation
 
 - **Bottom Nav** — `c2-bottom-nav, c2-bottom-nav-item` · `@c2n/components/bottom-nav` — The mobile tab bar: three to five destinations along the bottom of the screen, each an icon over a short label with a count or dot badge. Children: `c2-bottom-nav-item`.
-- **Breadcrumb** — `c2-breadcrumb` · `@c2n/components/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
-- **Command** — `c2-command, c2-command-item, c2-command-group, c2-command-separator` · `@c2n/components/command` — A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette. Children: `c2-command-group`, `c2-command-item`, `c2-command-separator`.
-- **Context Menu** — `c2-context-menu` · `@c2n/components/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.
+- **Breadcrumb** — `c2-breadcrumb` · `@c2n/components/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`. Also: trail, path, location.
+- **Command** — `c2-command, c2-command-item, c2-command-group, c2-command-separator` · `@c2n/components/command` — A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette. Children: `c2-command-group`, `c2-command-item`, `c2-command-separator`. Also: command palette, cmd k, ctrl k, spotlight, quick actions.
+- **Context Menu** — `c2-context-menu` · `@c2n/components/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`. Also: right-click menu, right click, long press menu.
 - **Index Bar** — `c2-index-bar` · `@c2n/components/table-of-contents/index-bar` — The A to Z rail beside a long list: tap or drag along it to jump between sections, a bubble shows the key, empty keys are dimmed.
 - **Link Button** — `c2-link-button` · `@c2n/components/link-button` — Text-styled control for link and navigation actions, rendered as a real anchor or a button.
-- **Menu** — `c2-menu, c2-menu-item, c2-menu-row` · `@c2n/components/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`, `c2-menu-row`.
+- **Menu** — `c2-menu, c2-menu-item, c2-menu-row` · `@c2n/components/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`, `c2-menu-row`. Also: dropdown menu, kebab menu, overflow menu, more actions, action menu, popup menu.
 - **Menubar** — `c2-menubar, c2-menubar-menu` · `@c2n/components/menubar` — Desktop-style File, Edit and View menus in one bar, with the arrow-key and hover movement of an application menu bar. Children: `c2-menu-item`, `c2-menubar-menu`.
 - **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/components/navigation-menu` — Site navigation bar whose triggers open panels of links below the header. Children: `c2-navigation-menu-item`, `c2-navigation-menu-link`.
-- **Pagination** — `c2-pagination` · `@c2n/components/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
-- **Side Nav** — `c2-side-nav` · `@c2n/components/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
+- **Pagination** — `c2-pagination` · `@c2n/components/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page. Also: pager, page numbers, next previous.
+- **Side Nav** — `c2-side-nav` · `@c2n/components/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones. Also: sidebar, drawer navigation, left menu, hamburger menu.
 - **Skip Link** — `c2-skip-link` · `@c2n/components/skip-link` — A "Skip to main content" link that appears when a keyboard user tabs onto it and moves focus into the main content.
-- **Tab Nav** — `c2-tab-nav, c2-tab` · `@c2n/components/tabs/tab-nav` — Tabs that are links: a row of pages with the tabs look, the current one marked, for navigation rather than panels. Children: `c2-tab`.
+- **Tab Nav** — `c2-tab-nav, c2-tab` · `@c2n/components/tabs/tab-nav` — Tabs that are links: a row of pages with the tabs look, the current one marked, for navigation rather than panels. Children: `c2-tab`. Also: navigation tabs, page tabs, route tabs.
 - **Table Of Contents** — `c2-table-of-contents` · `@c2n/components/table-of-contents` — An "On this page" navigation that lists the headings of a document, nests them by level and highlights the section being read.
-- **Tabs** — `c2-tabs, c2-tab` · `@c2n/components/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
+- **Tabs** — `c2-tabs, c2-tab` · `@c2n/components/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`. Also: tab panels, switch panels, segmented views, tab bar.
 
 ## Planning
 
-- **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`.
-- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`.
+- **Gantt** — `c2-gantt, c2-gantt-task` · `@c2n/components/gantt` — A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale. Children: `c2-gantt-task`. Also: project schedule, timeline chart, roadmap.
+- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/components/kanban` — Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem. Children: `c2-kanban-column`. Also: board, trello, swimlanes, task board.
 - **Matrix board** — `c2-matrix-board` · `@c2n/components/kanban/matrix-board` — A grid of cells, rows by columns, whose cards people drag or move with the keyboard between cells: 9-box talent grids, risk matrices, Eisenhower matrices. Children: `c2-kanban-column`.
 - **Month Planner** — `c2-month-planner` · `@c2n/components/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **Notepad** — `c2-notepad` · `@c2n/components/notepad` — A rich-text notepad that looks like paper: handwriting on ruled lines, a formatting toolbar over the selection, checklists and tear-off pages.
-- **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag.
+- **Scheduler** — `c2-scheduler` · `@c2n/components/scheduler` — Resource timeline: people, rooms or machines down the side, time across the top, each booking a bar you can drag. Also: calendar, booking, appointments, resource calendar.
 - **Todo List** — `c2-todo-list` · `@c2n/components/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
 - **Week Planner** — `c2-week-planner` · `@c2n/components/week-planner` — Weekly schedule with time blocks: a typical week with optional odd and even weeks, or a dated week the user edits.
 
@@ -305,5 +305,5 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Group table** — `c2-group-table, c2-table-column` · `@c2n/components/table/group-table` — c2-table with collapsible groups of rows: aggregates per group, group bands, groups kept under the header and a group checkbox that selects its rows. Children: `c2-pagination`, `c2-table-column`.
 - **Pivot table** — `c2-pivot-table` · `@c2n/components/pivot-table` — Summarises flat rows by the fields set on rows and columns, with subtotals, totals, sorting, a heatmap and a field list.
 - **Spreadsheet** — `c2-spreadsheet` · `@c2n/components/spreadsheet` — A small editable grid with basic formulas, for budgets, quotes, price lists and score sheets.
-- **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
+- **Table** — `c2-table, c2-table-column` · `@c2n/components/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`. Also: data grid, datagrid, spreadsheet view, list view, data table.
 - **Tree table** — `c2-tree-table, c2-table-column` · `@c2n/components/table/tree-table` — c2-table with rows nested to any depth: rolled-up figures on parent rows, cascading selection, and children loaded the first time a row opens. Children: `c2-pagination`, `c2-table-column`.

@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { PyramidChart } from '@c2n/components/chart/pyramid-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -60,6 +61,51 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <c2-pyramid-chart class="flat-pyramid" label-field="need" sort="none" labels="inside" label-content="name" legend="none" data='[{"need":"Growth","score":12},{"need":"Esteem","score":18},{"need":"Belonging","score":22},{"need":"Safety","score":24},{"need":"Basics","score":24}]'>
   <c2-chart-series field="score" label="Score"></c2-chart-series>
 </c2-pyramid-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .pyramid-slots { width: 100%; }
+  .pyramid-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-pyramid-chart class="pyramid-slots" label-field="plan" data='[{"plan":"Enterprise","accounts":42},{"plan":"Business","accounts":318},{"plan":"Team","accounts":1260},{"plan":"Starter","accounts":4870}]'>
+  <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+  <div slot="legend" class="pyramid-slots__legend">
+    <strong>Accounts</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .pyramid-states { display: grid; gap: 12px; width: 100%; }
+  .pyramid-states c2-pyramid-chart { --c2-chart--height: 140px; }
+</style>
+<div class="pyramid-states">
+  <c2-pyramid-chart label-field="plan" loading>
+    <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-pyramid-chart>
+  <c2-pyramid-chart label-field="plan">
+    <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-pyramid-chart>
+  <c2-pyramid-chart label-field="plan" error="Request failed">
+    <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-pyramid-chart>
+</div>
 ```
 
 </GalleryGrid>

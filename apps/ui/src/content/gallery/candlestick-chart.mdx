@@ -11,6 +11,7 @@ import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
 import { CandlestickChart } from '@c2n/components/chart/candlestick-chart'
 import { ChartLegend } from '@c2n/components/chart/chart-legend'
 import { ChartTooltip } from '@c2n/components/chart/chart-tooltip'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <ChartFinancialGallery />
@@ -48,6 +49,47 @@ OHLC observations are from the public [Nasdaq AAPL historical-data service](http
   }
 </style>
 <c2-candlestick-chart class="compact-candles" name="AAPL" label-field="date" tooltip="item" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .candlestick-slots { width: 100%; }
+  .candlestick-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-candlestick-chart class="candlestick-slots" label-field="date" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'>
+  <div slot="legend" class="candlestick-slots__legend">
+    <strong>Candlestick chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-candlestick-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .candlestick-states { display: grid; gap: 12px; width: 100%; }
+  .candlestick-states c2-candlestick-chart { --c2-chart--height: 140px; }
+</style>
+<div class="candlestick-states">
+  <c2-candlestick-chart label-field="date" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-candlestick-chart>
+  <c2-candlestick-chart label-field="date">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-candlestick-chart>
+  <c2-candlestick-chart label-field="date" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-candlestick-chart>
+</div>
 ```
 
 </GalleryGrid>

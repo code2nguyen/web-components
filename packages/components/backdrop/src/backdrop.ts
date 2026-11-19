@@ -42,15 +42,15 @@ interface Meteor {
  * @cssproperty {color} [--c2-backdrop--background=transparent] - Behind the pattern.
  * @cssproperty {color} [--c2-backdrop__flicker--color=rgb(2, 101, 220)] - The squares that light up.
  * @cssproperty {number} [--c2-backdrop__flicker--opacity=0.6] - The brightest a square gets.
- * @cssproperty {color} [--c2-backdrop__aurora--color-1=#60a5fa]
- * @cssproperty {color} [--c2-backdrop__aurora--color-2=#c084fc]
- * @cssproperty {color} [--c2-backdrop__aurora--color-3=#34d399]
+ * @cssproperty {color} [--c2-backdrop__aurora--color-1=#60a5fa] - First colour of the aurora gradient.
+ * @cssproperty {color} [--c2-backdrop__aurora--color-2=#c084fc] - Second colour of the aurora gradient.
+ * @cssproperty {color} [--c2-backdrop__aurora--color-3=#34d399] - Third colour of the aurora gradient.
  * @cssproperty {number} [--c2-backdrop__aurora--opacity=0.5]
- * @cssproperty {pixel} [--c2-backdrop__aurora--blur=48px]
+ * @cssproperty {pixel} [--c2-backdrop__aurora--blur=48px] - Blur radius applied to the aurora.
  * @cssproperty {time} [--c2-backdrop__aurora--duration=18s] - One drift of the aurora.
  * @cssproperty {color} [--c2-backdrop__meteor--color=#71717a]
  * @cssproperty {number} [--c2-backdrop__meteor--count=12] - How many meteors there are.
- * @cssproperty {pixel} [--c2-backdrop__meteor--length=80px]
+ * @cssproperty {pixel} [--c2-backdrop__meteor--length=80px] - Length of a meteor trail.
  * @cssproperty {padding} [--c2-backdrop--padding=0px] - Space around the content.
  */
 @customElement('c2-backdrop')

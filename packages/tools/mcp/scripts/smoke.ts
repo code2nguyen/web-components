@@ -5,6 +5,7 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadRegistry } from '../src/registry.ts'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const entry = process.argv[2] ?? join(packageRoot, 'src/cli.ts')
@@ -35,6 +36,19 @@ const tab = textOf(await client.callTool({ name: 'get_component', arguments: { t
 assert(tab.includes("import '@c2n/components/tabs/tab'"), 'get_component c2-tab must resolve @c2n/components/tabs/tab')
 const tabNav = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-tab-nav' } }))
 assert(tabNav.includes("import '@c2n/components/tabs/tab-nav'"), 'get_component c2-tab-nav must resolve its own entry')
+
+// The largest API is shortened to fit one response rather than cut mid-table.
+const table = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-table' } }))
+assert(table.includes('_Shortened to fit one response') && !table.includes('(truncated at'), 'get_component c2-table must be shortened, not truncated')
+
+// Every component answers get_component and get_presets: a preset with attributes only once threw on 14 of them.
+for (const component of Object.values(loadRegistry().components)) {
+  const tag = component.elements[0].tag.replace('{name}', component.icons?.[0] ?? 'x')
+  for (const name of ['get_component', 'get_presets']) {
+    const result = await client.callTool({ name, arguments: { tag } })
+    assert(!result.isError, `${name} ${tag} failed: ${textOf(result).slice(0, 200)}`)
+  }
+}
 
 const chart = textOf(await client.callTool({ name: 'get_component', arguments: { tag: 'c2-line-chart' } }))
 assert(chart.includes("import '@c2n/components/chart/line-chart'"), 'get_component c2-line-chart must resolve its own entry')

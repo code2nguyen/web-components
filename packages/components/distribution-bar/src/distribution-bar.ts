@@ -160,7 +160,7 @@ export function distributionParts(
  * @cssproperty {color} [--c2-distribution-bar__legend--color=#18181b] - Colour of a legend entry's label.
  * @cssproperty {font-size} [--c2-distribution-bar__legend--font-size=12px]
  * @cssproperty {color} [--c2-distribution-bar__legend-value--color=#71717a] - Colour of a legend entry's share or value.
- * @cssproperty {pixel} [--c2-distribution-bar__swatch--size=8px]
+ * @cssproperty {pixel} [--c2-distribution-bar__swatch--size=8px] - Width and height of the swatch.
  * @cssproperty {border-radius} [--c2-distribution-bar__swatch--border-radius=999px]
  * @cssproperty {outline} [--c2-distribution-bar__legend-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of an interactive legend entry.
  * @cssproperty {border-radius} [--c2-distribution-bar__legend-item--border-radius=4px] - Corners of the focus ring and hover fill of an interactive legend entry.

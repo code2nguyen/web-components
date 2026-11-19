@@ -4,7 +4,7 @@ import { syncBuiltinESMExports } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { mock, test } from 'node:test'
-import { installedPackage, publicProperties, withInstalledApi, withInstalledComponents, type InstalledInfo } from '../src/installed.ts'
+import { installedPackage, publicProperties, scriptApi, withInstalledApi, withInstalledComponents, type InstalledInfo } from '../src/installed.ts'
 import { resolveElement } from '../src/registry.ts'
 import type { ComponentEntry, Registry } from '../src/registry-types.ts'
 
@@ -211,6 +211,7 @@ function expectedFromManifest(manifestPath: string, directory: string) {
       elements.set(decl.tagName, {
         className: decl.name ?? '',
         properties: publicProperties(decl.members as Parameters<typeof publicProperties>[0]),
+        scriptApi: scriptApi(decl.members as Parameters<typeof scriptApi>[0], decl.attributes as Parameters<typeof scriptApi>[1]),
         attributes: decl.attributes ?? [],
         slots: decl.slots ?? [],
         events: decl.events ?? [],

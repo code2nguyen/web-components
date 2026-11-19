@@ -14,12 +14,14 @@
  * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
  * remain deterministic.
  */
+import { flowList, parseFrontmatter } from './frontmatter.ts'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { publicProperties } from '../src/installed.ts'
+import { publicProperties, scriptApi, type ManifestMember } from '../src/installed.ts'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
 import { exampleSlug, summarizeExample, themeExampleCss } from './gallery.ts'
+import { dedent, usageRows } from './usage.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, GuideTopic, Preset, Registry, ThemeEntry, ThemeToken } from '../src/registry-types.ts'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -45,12 +47,12 @@ interface Manifest {
       description?: string
       tagName?: string
       customElement?: boolean
-      attributes?: { name: string; type?: { text?: string }; default?: string; description?: string }[]
+      attributes?: { name: string; fieldName?: string; type?: { text?: string }; default?: string; description?: string }[]
       slots?: { name?: string; description?: string }[]
       events?: { name: string; type?: { text?: string }; description?: string }[]
       cssParts?: { name: string; description?: string }[]
       cssProperties?: { name?: string; type?: { text?: string }; default?: string; description?: string }[]
-      members?: { kind: string; name: string; static?: boolean; privacy?: string }[]
+      members?: ManifestMember[]
       internalComponents?: string[]
       slotComponents?: string[]
       superclass?: { name: string; module?: string; package?: string }
@@ -86,19 +88,6 @@ function listDirs(dir: string): string[] {
         .filter((d) => d.isDirectory())
         .map((d) => join(dir, d.name))
     : []
-}
-
-/** Frontmatter is flat `key: 'value'` lines; no YAML library needed. */
-function parseFrontmatter(source: string): { frontmatter: Record<string, string>; body: string } {
-  const match = /^---\n([\s\S]*?)\n---\n?/.exec(source)
-  if (!match) return { frontmatter: {}, body: source }
-  const frontmatter: Record<string, string> = {}
-  for (const line of match[1].split('\n')) {
-    const kv = /^([a-zA-Z_-]+):\s*(.*)$/.exec(line.trim())
-    if (!kv) continue
-    frontmatter[kv[1]] = kv[2].replace(/^(['"])(.*)\1$/, '$2')
-  }
-  return { frontmatter, body: source.slice(match[0].length) }
 }
 
 /** Where a docs page sits in the package's own declaration order, by the element its `tag` frontmatter names. */
@@ -168,38 +157,6 @@ function splitStyle(fence: string): { css?: string; html: string } {
   const style = /<style>([\s\S]*?)<\/style>/.exec(html)
   if (!style) return { html: html.trim() }
   return { css: dedent(style[1]), html: html.replace(style[0], '').trim() }
-}
-
-function dedent(text: string): string {
-  const lines = text.replace(/^\n+|\s+$/g, '').split('\n')
-  const indent = Math.min(...lines.filter((l) => l.trim()).map((l) => /^\s*/.exec(l)![0].length))
-  return lines.map((l) => l.slice(indent)).join('\n')
-}
-
-/** Splits a UsageBlock body into its `<div data-label="…">…</div>` rows (rows may contain nested divs). */
-function usageRows(html: string): { label: string; html: string }[] {
-  const rows: { label: string; html: string }[] = []
-  const open = /<div data-label="([^"]+)">/g
-  let match: RegExpExecArray | null
-  while ((match = open.exec(html))) {
-    let depth = 1
-    let cursor = match.index + match[0].length
-    const tokens = /<div\b|<\/div>/g
-    tokens.lastIndex = cursor
-    let token: RegExpExecArray | null
-    let end = html.length
-    while ((token = tokens.exec(html))) {
-      depth += token[0] === '</div>' ? -1 : 1
-      if (depth === 0) {
-        end = token.index
-        cursor = token.index + token[0].length
-        break
-      }
-    }
-    rows.push({ label: match[1], html: dedent(html.slice(match.index + match[0].length, end)) })
-    open.lastIndex = cursor
-  }
-  return rows
 }
 
 /**
@@ -355,6 +312,7 @@ for (const dir of packageDirs.sort()) {
         cssParts: (decl.cssParts ?? []).map((part) => ({ name: part.name, description: part.description?.trim() || undefined })),
         cssProperties,
         properties: publicProperties(decl.members),
+        scriptApi: scriptApi(decl.members, decl.attributes),
       })
     }
   }
@@ -414,6 +372,12 @@ for (const dir of packageDirs.sort()) {
           const { css, html } = splitStyle(fence.body)
           for (const row of usageRows(html)) examples.push({ kind: 'usage', label: row.label, html: row.html, css })
         }
+        // An icon page has no UsageBlock: its live examples are the usage.
+        else if (doc.section === 'icons' && fence.meta.tag === 'MdxCodeBlock') {
+          const { css, html } = splitStyle(fence.body)
+          const count = examples.filter((example) => example.kind === 'usage').length
+          examples.push({ kind: 'usage', label: fence.meta.label ?? (count ? `Example ${count + 1}` : 'Icons'), html, css })
+        }
       }
     }
     const gallery = galleryPages.get(id)
@@ -467,6 +431,7 @@ for (const dir of packageDirs.sort()) {
       package: pkg.name,
       title: doc?.frontmatter.title ?? shortName,
       description: doc?.frontmatter.description ?? '',
+      keywords: flowList(doc?.frontmatter.keywords ?? ''),
       intro,
       category,
       status: doc ? 'stable' : 'undocumented',
@@ -487,7 +452,11 @@ for (const dir of packageDirs.sort()) {
         umbrella: umbrellaPackages.has(pkg.name) ? `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}` : undefined,
       },
       presets: presetGroup
-        ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }
+        ? // A preset may set attributes only (`appearance="segmented"`); `css` is always an object in the registry.
+          {
+            html: presetGroup.html,
+            items: presetGroup.presets.map((preset) => ({ ...preset, css: preset.css ?? {}, description: describeComponentPreset(preset) })),
+          }
         : undefined,
       examples,
       hasGallery: !!gallery,

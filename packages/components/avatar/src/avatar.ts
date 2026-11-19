@@ -58,7 +58,7 @@ export interface Avatar {
  * @event {CustomEvent<AvatarRemoveDetail>} avatar-remove - Fired after the current local preview or `src` image is removed.
  * @event {CustomEvent<AvatarFileRejection>} file-reject - Fired when an editable avatar rejects a file by type or size.
  *
- * @cssproperty {pixel} [--c2-avatar--size=32px]
+ * @cssproperty {pixel} [--c2-avatar--size=32px] - Width and height of the avatar; the initials scale with it.
  * @cssproperty {pixel} --c2-avatar--width - Falls back to `--c2-avatar--size`.
  * @cssproperty {pixel} --c2-avatar--height - Falls back to `--c2-avatar--size`.
  * @cssproperty {color} [--c2-avatar--color=#ffffff]
@@ -89,8 +89,8 @@ export interface Avatar {
  * @cssproperty {color} [--c2-avatar__editor--color=#ffffff]
  * @cssproperty {outline} [--c2-avatar__editor__focus--outline=2px solid rgba(2, 101, 220, 0.45)]
  * @cssproperty {pixel} [--c2-avatar__editor__focus--outline-offset=2px]
- * @cssproperty {pixel} [--c2-avatar__editor-icon--size=18px]
- * @cssproperty {pixel} [--c2-avatar__remove--size=22px]
+ * @cssproperty {pixel} [--c2-avatar__editor-icon--size=18px] - Width and height of the editor icon.
+ * @cssproperty {pixel} [--c2-avatar__remove--size=22px] - Width and height of the remove button.
  * @cssproperty {color} [--c2-avatar__remove--background=#ffffff]
  * @cssproperty {color} [--c2-avatar__remove--color=#52525b]
  * @cssproperty {border} [--c2-avatar__remove--border=1px solid #e4e4e7]

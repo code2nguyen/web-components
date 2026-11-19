@@ -8,6 +8,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import QuestionnaireExamplesRuntime from '../../components/QuestionnaireExamplesRuntime.astro'
 
 import { Questionnaire } from '@c2n/components/questionnaire'
+import { Button } from '@c2n/components/button'
 
 ## Guided flows
 
@@ -213,3 +214,29 @@ questionnaire.questionItemRender = ({ option, selected }) => html`
   <span class="option-description">${selected ? 'Excellent choice — locked in!' : option.description}</span>
 `
 ```
+
+## Slots
+
+<GalleryGrid min="900">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-questionnaire
+  questions='[{"id":"goal","title":"What are we shipping this week?","description":"Pick the outcome that would make Friday feel successful.","otherPlaceholder":"Describe another win…","options":[{"value":"onboarding","label":"A smoother onboarding","description":"Help new users reach their first success faster."},{"value":"performance","label":"A faster experience","description":"Remove the slow moments people notice most."},{"value":"delight","label":"One memorable detail","description":"Polish a small interaction until it feels exceptional."}]},{"id":"signals","title":"How will we know it worked?","description":"Select every signal the team should watch.","type":"choice","skippable":true,"options":[{"value":"activation","label":"Activation rate"},{"value":"speed","label":"Page speed"},{"value":"feedback","label":"Customer feedback"},{"value":"confetti","label":"Spontaneous confetti"}]},{"id":"celebrate","title":"How should the team celebrate?","options":[{"value":"pastries","label":"Breakfast pastries"},{"value":"playlist","label":"A victory playlist"},{"value":"early","label":"Finish early on Friday"}]}]'
+>
+  <strong slot="header">Customer survey</strong>
+  <small slot="footer">Takes about two minutes.</small>
+  <c2-button slot="next-button">Continue</c2-button>
+  <c2-button slot="previous-button">Back</c2-button>
+</c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Skip and submit controls
+<c2-questionnaire
+  questions='[{"id":"goal","title":"What are we shipping this week?","description":"Pick the outcome that would make Friday feel successful.","otherPlaceholder":"Describe another win…","options":[{"value":"onboarding","label":"A smoother onboarding","description":"Help new users reach their first success faster."},{"value":"performance","label":"A faster experience","description":"Remove the slow moments people notice most."},{"value":"delight","label":"One memorable detail","description":"Polish a small interaction until it feels exceptional."}]},{"id":"signals","title":"How will we know it worked?","description":"Select every signal the team should watch.","type":"choice","skippable":true,"options":[{"value":"activation","label":"Activation rate"},{"value":"speed","label":"Page speed"},{"value":"feedback","label":"Customer feedback"},{"value":"confetti","label":"Spontaneous confetti"}]},{"id":"celebrate","title":"How should the team celebrate?","options":[{"value":"pastries","label":"Breakfast pastries"},{"value":"playlist","label":"A victory playlist"},{"value":"early","label":"Finish early on Friday"}]}]'
+>
+  <c2-button slot="skip-button">Not now</c2-button>
+  <c2-button slot="submit-button">Send answers</c2-button>
+</c2-questionnaire>
+```
+
+</GalleryGrid>

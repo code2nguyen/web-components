@@ -80,7 +80,7 @@ export interface Popconfirm {
  * @cssproperty {pixel} [--c2-popconfirm__arrow--size=8px] - Side of the arrow square; `0px` hides it.
  *
  * @cssproperty {display} [--c2-popconfirm__icon--display=flex] - `none` hides the icon.
- * @cssproperty {pixel} [--c2-popconfirm__icon--size=14px]
+ * @cssproperty {pixel} [--c2-popconfirm__icon--size=14px] - Width and height of the icon.
  * @cssproperty {color} [--c2-popconfirm__icon--color=#fbbf24]
  * @cssproperty {pixel} [--c2-popconfirm__body--gap=6px] - Space between the icon and the text.
  *

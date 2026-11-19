@@ -38,7 +38,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="Where the revenue went">
-  <c2-sankey-chart
+  <c2-sankey-chart aria-label="Where the revenue went"
     class="sankey-plot"
     source-field="from"
     target-field="to"
@@ -56,6 +56,18 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     emphasis="trajectory"
     link-color="gradient"
     data='[{"source":"Search","target":"Landing page","value":5200},{"source":"Paid ads","target":"Landing page","value":3100},{"source":"Referral","target":"Landing page","value":1700},{"source":"Landing page","target":"Signed up","value":3400},{"source":"Landing page","target":"Left","value":6600},{"source":"Signed up","target":"Onboarded","value":2300},{"source":"Signed up","target":"Abandoned","value":1100},{"source":"Onboarded","target":"Activated","value":1500},{"source":"Onboarded","target":"Inactive","value":800}]'
+  ></c2-sankey-chart>
+</div>
+<div data-label="Legend: top">
+  <c2-sankey-chart legend="top"
+    class="sankey-plot"
+    source-field="from"
+    target-field="to"
+    value-field="amount"
+    node-align="left"
+    link-color="target"
+    nodes='[{"id":"Gross profit","color":"#0f766e"},{"id":"Operating profit","color":"#0f766e"},{"id":"Net profit","color":"#0f766e"},{"id":"Cost of revenue","color":"#dc4a26"},{"id":"Operating expenses","color":"#dc4a26"},{"id":"Hosting","color":"#dc4a26"},{"id":"Support","color":"#dc4a26"},{"id":"Tax","color":"#dc4a26"},{"id":"R&D","color":"#dc4a26"},{"id":"Sales & marketing","color":"#dc4a26"},{"id":"G&A","color":"#dc4a26"}]'
+    data='[{"from":"Subscriptions","to":"Revenue","amount":840},{"from":"Services","to":"Revenue","amount":160},{"from":"Interest","to":"Revenue","amount":20},{"from":"Revenue","to":"Gross profit","amount":690},{"from":"Revenue","to":"Cost of revenue","amount":330},{"from":"Cost of revenue","to":"Hosting","amount":210},{"from":"Cost of revenue","to":"Support","amount":120},{"from":"Gross profit","to":"Operating profit","amount":170},{"from":"Gross profit","to":"Operating expenses","amount":520},{"from":"Operating profit","to":"Net profit","amount":130},{"from":"Operating profit","to":"Tax","amount":40},{"from":"Operating expenses","to":"R&D","amount":280},{"from":"Operating expenses","to":"Sales & marketing","amount":170},{"from":"Operating expenses","to":"G&A","amount":70}]'
   ></c2-sankey-chart>
 </div>
 ```

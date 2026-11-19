@@ -87,7 +87,7 @@ export function agingBucket(days: number, bounds: readonly number[]): string {
  *
  * @tag c2-aging-table
  *
- * @slot as-of - Replaces the "As of" line above the grid.
+ * @slot as-of - Replaces the "As of" line above the grid, e.g. with a `c2-date-input` that lets the reader pick the day.
  *
  * @csspart as-of - The region above the grid that wraps the as-of slot: it holds the built-in "As of" text as the slot fallback, or the content assigned to the slot.
  *

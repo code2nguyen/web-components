@@ -33,6 +33,16 @@ The entry registers `c2-record-merge` and `c2-choice-matrix`.
     records='[{"id":"crm-1042","label":"Ada Lovelace · CRM","values":{"name":"Ada Lovelace","email":"ada@example.com","phone":"","company":"Analytical Engines","owner":"Grace"}},{"id":"web-88","label":"A. Lovelace · Web form","values":{"name":"A. Lovelace","email":"ada@analytical.org","phone":"+44 20 7946 0000","company":"Analytical Engines Ltd","owner":"Alan"}}]'
     fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"},{"key":"phone","label":"Phone"},{"key":"company","label":"Company"},{"key":"owner","label":"Owner","description":"Who follows up"}]'></c2-record-merge>
 </div>
+<div data-label="Without the merged result">
+  <c2-record-merge name="merge" label="Merge contacts" row-header="Field"
+    records='[{"id":"crm-1042","label":"Ada Lovelace · CRM","values":{"name":"Ada Lovelace","email":"ada@example.com","phone":"","company":"Analytical Engines","owner":"Grace"}},{"id":"web-88","label":"A. Lovelace · Web form","values":{"name":"A. Lovelace","email":"ada@analytical.org","phone":"+44 20 7946 0000","company":"Analytical Engines Ltd","owner":"Alan"}}]'
+    fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"},{"key":"phone","label":"Phone"},{"key":"company","label":"Company"},{"key":"owner","label":"Owner","description":"Who follows up"}]'></c2-record-merge>
+</div>
+<div data-label="Disabled">
+  <c2-record-merge disabled name="merge" label="Merge contacts" row-header="Field" preview
+    records='[{"id":"crm-1042","label":"Ada Lovelace · CRM","values":{"name":"Ada Lovelace","email":"ada@example.com","phone":"","company":"Analytical Engines","owner":"Grace"}},{"id":"web-88","label":"A. Lovelace · Web form","values":{"name":"A. Lovelace","email":"ada@analytical.org","phone":"+44 20 7946 0000","company":"Analytical Engines Ltd","owner":"Alan"}}]'
+    fields='[{"key":"name","label":"Name"},{"key":"email","label":"Email"},{"key":"phone","label":"Phone"},{"key":"company","label":"Company"},{"key":"owner","label":"Owner","description":"Who follows up"}]'></c2-record-merge>
+</div>
 ```
 
 ### Records and fields

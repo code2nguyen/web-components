@@ -97,3 +97,30 @@ Looks for `c2-master-detail`. `--c2-master-detail__master--width` and `--c2-mast
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .md-default {
+    width: 100%;
+    height: 220px;
+  }
+  .md-default-record {
+    padding: 16px;
+  }
+</style>
+<c2-master-detail class="md-default" open breakpoint="0">
+  <c2-list client:only="lit" slot="master" value="ana" aria-label="Inbox">
+    <c2-list-item value="ana">Ana Ruiz</c2-list-item>
+    <c2-list-item value="kenji">Kenji Watanabe</c2-list-item>
+    <c2-list-item value="priya">Priya Natarajan</c2-list-item>
+  </c2-list>
+  <div slot="detail" class="md-default-record">Invoice 2041 charged twice</div>
+  <svg slot="back-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+</c2-master-detail>
+```
+
+</GalleryGrid>

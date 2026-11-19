@@ -114,15 +114,15 @@ export interface TextField {
  *
  * @cssproperty {opacity} [--c2-text-field__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-text-field__icon--size=16px]
+ * @cssproperty {pixel} [--c2-text-field__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-text-field__icon--color=#71717a]
  *
- * @cssproperty {pixel} [--c2-text-field__clear-icon--size=16px]
+ * @cssproperty {pixel} [--c2-text-field__clear-icon--size=16px] - Width and height of the clear icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-text-field__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-text-field__clear-icon__hover--color=#18181b]
  * @cssproperty {outline} [--c2-text-field__clear-icon__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
  *
- * @cssproperty {pixel} [--c2-text-field__help-icon--size=16px]
+ * @cssproperty {pixel} [--c2-text-field__help-icon--size=16px] - Width and height of the help icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-text-field__help-icon--color=#71717a]
  * @cssproperty {pixel} [--c2-text-field__help-icon--gap=8px] - Space between the field and the help icon.
  *
@@ -268,6 +268,7 @@ export class TextField extends LitElement {
     this.syncFormState()
   }
 
+  /** @internal */
   handleFocus = () => {
     this.focus()
   }

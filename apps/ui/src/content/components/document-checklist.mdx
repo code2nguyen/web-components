@@ -39,6 +39,16 @@ import '@c2n/components/upload/document-checklist'
     requirements='[{"id":"identity","label":"Proof of identity","description":"Passport or national ID card","status":"approved","expires":"2031-03-03"},{"id":"address","label":"Proof of address","description":"A utility bill from the last 3 months","status":"in-review"},{"id":"statements","label":"Bank statements","description":"The last 3 months, every page","due":"2026-11-01","accept":".pdf","multiple":true},{"id":"payslip","label":"Payslip","status":"rejected","reason":"the scan is blurry, upload a sharper copy","due":"2026-11-30"},{"id":"gift","label":"Gift letter","optional":true}]'
   ></c2-document-checklist>
 </div>
+<div data-label="Disabled">
+  <c2-document-checklist disabled
+    client:only="lit"
+    data-upload-demo
+    data-seed="statements:august.pdf"
+    today="2026-11-15"
+    aria-label="Mortgage documents"
+    requirements='[{"id":"identity","label":"Proof of identity","description":"Passport or national ID card","status":"approved","expires":"2031-03-03"},{"id":"address","label":"Proof of address","description":"A utility bill from the last 3 months","status":"in-review"},{"id":"statements","label":"Bank statements","description":"The last 3 months, every page","due":"2026-11-01","accept":".pdf","multiple":true},{"id":"payslip","label":"Payslip","status":"rejected","reason":"the scan is blurry, upload a sharper copy","due":"2026-11-30"},{"id":"gift","label":"Gift letter","optional":true}]'
+  ></c2-document-checklist>
+</div>
 ```
 
 `requirements` lists the documents in order, as a JSON attribute or an array property. Each one has an `id` and a

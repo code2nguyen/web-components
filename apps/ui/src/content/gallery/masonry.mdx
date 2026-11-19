@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Masonry } from '@c2n/components/masonry'
+import { Button } from '@c2n/components/button'
 
 ## Gallery
 
@@ -106,6 +107,124 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
 <c2-masonry client:only="lit" class="masonry-default">
   <c2-masonry-item item-id="throughput" label="Throughput" rows="12" cols="3" cols-sm="4" cols-md="5" cols-lg="6">
     <div class="masonry-default-tile"><h3>Orders processed</h3><strong>18,642</strong><p><span class="positive">↑ 8.2%</span> from last week</p><svg class="sparkline" viewBox="0 0 240 50" preserveAspectRatio="none" aria-hidden="true"><path d="M2 42 27 35 53 39 79 27 104 31 130 18 156 23 183 12 208 16 238 5" /></svg></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="queue" label="Queue" rows="12" cols="2" cols-sm="2" cols-md="2" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Open queue</h3><strong>142</strong><p>Across 7 regions</p><ul class="mini-list"><li><span>Priority</span><b>18</b></li><li><span>On track</span><b>124</b></li></ul></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="health" label="Health" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Service availability</h3><strong>99.9%</strong><p>30-day rolling window</p><div class="progress-track" aria-label="Availability is 99.9 percent"><span></span></div></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="deploys" label="Deploys" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Deployments today</h3><strong>3</strong><p>All checks passing</p><ul class="mini-list"><li><span>North region</span><span>09:42</span></li><li><span>West region</span><span>08:18</span></li></ul></div>
+  </c2-masonry-item>
+</c2-masonry>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .masonry-default {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .masonry-default-tile {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 16px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 10px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 12px;
+  }
+
+  .masonry-default-tile h3 {
+    margin: 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .masonry-default-tile strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 25px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .masonry-default-tile p {
+    margin: 6px 0 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+
+  .masonry-default-tile .positive {
+    color: color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b));
+    font-weight: 600;
+  }
+
+  .masonry-default-tile .sparkline {
+    display: block;
+    width: 100%;
+    height: 48px;
+    margin-top: 14px;
+  }
+
+  .masonry-default-tile .sparkline path {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .masonry-default-tile .progress-track {
+    height: 7px;
+    margin-top: 15px;
+    border-radius: 999px;
+    background: var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+
+  .masonry-default-tile .progress-track span {
+    display: block;
+    width: 99.9%;
+    height: 100%;
+    border-radius: inherit;
+    background: #22c55e;
+  }
+
+  .masonry-default-tile .mini-list {
+    display: grid;
+    gap: 7px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+  }
+
+  .masonry-default-tile .mini-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .masonry-default-tile .mini-list li span {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-masonry client:only="lit" class="masonry-default">
+  <c2-masonry-item item-id="throughput" label="Throughput" rows="12" cols="3" cols-sm="4" cols-md="5" cols-lg="6">
+    <div class="masonry-default-tile"><h3>Orders processed</h3><strong>18,642</strong><p><span class="positive">↑ 8.2%</span> from last week</p><svg class="sparkline" viewBox="0 0 240 50" preserveAspectRatio="none" aria-hidden="true"><path d="M2 42 27 35 53 39 79 27 104 31 130 18 156 23 183 12 208 16 238 5" /></svg></div>
+    <svg slot="move-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+    <c2-button slot="actions">Pin</c2-button>
   </c2-masonry-item>
   <c2-masonry-item item-id="queue" label="Queue" rows="12" cols="2" cols-sm="2" cols-md="2" cols-lg="3">
     <div class="masonry-default-tile"><h3>Open queue</h3><strong>142</strong><p>Across 7 regions</p><ul class="mini-list"><li><span>Priority</span><b>18</b></li><li><span>On track</span><b>124</b></li></ul></div>

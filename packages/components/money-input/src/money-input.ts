@@ -119,7 +119,7 @@ function currencyList(list: readonly string[] | string | null | undefined): stri
  * @cssproperty {font-weight} [--c2-money-input__picker--font-weight=500]
  * @cssproperty {border} [--c2-money-input__picker--border-left=1px solid #e4e4e7] - Line between the amount and the currency picker.
  * @cssproperty {outline} [--c2-money-input__picker__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Keyboard focus ring of the currency picker.
- * @cssproperty {pixel} [--c2-money-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-money-input__icon--size=16px] - Width and height of the icon.
  * @cssproperty {color} [--c2-money-input__icon--color=#71717a]
  * @cssproperty {pixel} [--c2-money-input__supporting-text--gap=4px]
  * @cssproperty {font-size} [--c2-money-input__supporting-text--font-size=12px]

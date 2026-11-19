@@ -58,7 +58,7 @@ export interface Radio {
  * @cssproperty {border} --c2-radio__container__checked--border
  * @cssproperty {background} --c2-radio__container__checked--background
  *
- * @cssproperty {pixel} [--c2-radio__control--size=18px]
+ * @cssproperty {pixel} [--c2-radio__control--size=18px] - Width and height of the control button.
  * @cssproperty {border-radius} [--c2-radio__control--border-radius=999px] - Shape of the ring and its dot; `4px` gives a square control.
  * @cssproperty {border} [--c2-radio__control--border=1px solid #bcbcc6]
  * @cssproperty {color} [--c2-radio__control--background-color=transparent]
@@ -70,7 +70,7 @@ export interface Radio {
  * @cssproperty {pixel} [--c2-radio__control__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-radio__control__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-radio__dot--size=8px]
+ * @cssproperty {pixel} [--c2-radio__dot--size=8px] - Width and height of the dot, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-radio__dot--color=#ffffff] - Fill of the dot, or `currentColor` of a slotted `dot` mark.
  *
  * @cssproperty {pixel} --c2-radio__icon--size - Size of slotted `icon` / `checked-icon` content. Falls back to the control size.

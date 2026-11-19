@@ -127,7 +127,7 @@ interface Group {
  * @cssproperty {color} [--c2-notification-center__item__hover--background-color=#fafafa]
  * @cssproperty {color} [--c2-notification-center__item__unread--background-color=#edf1fe] - An unread item's background.
  * @cssproperty {color} [--c2-notification-center__dot--color=rgb(2, 101, 220)]
- * @cssproperty {pixel} [--c2-notification-center__dot--size=8px]
+ * @cssproperty {pixel} [--c2-notification-center__dot--size=8px] - Width and height of the dot.
  * @cssproperty {font-weight} [--c2-notification-center__item-title__unread--font-weight=600]
  * @cssproperty {color} [--c2-notification-center__body--color=#52525b]
  * @cssproperty {font-size} [--c2-notification-center__body--font-size=13px]

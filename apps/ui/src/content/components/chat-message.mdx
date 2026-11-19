@@ -67,6 +67,12 @@ import '@c2n/components/chat-message'
     </c2-chat-message>
   </section>
 </div>
+<div data-label="The reader's own message">
+  <c2-chat-message align="right">Can you summarize the release notes in two lines?</c2-chat-message>
+</div>
+<div data-label="Plain text, no avatar">
+  <c2-chat-message>Version 4.2 adds dark mode to every page and makes search twice as fast.</c2-chat-message>
+</div>
 ```
 
 Use semantic elements inside the slots when useful—such as `time`, paragraphs, lists and links. The component only owns the message layout, so rich content remains fully under your control.

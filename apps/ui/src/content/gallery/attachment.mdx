@@ -139,3 +139,16 @@ const attachment = document.querySelector('c2-attachment')!
 attachment.file = new File([csv], 'expenses.csv', { type: 'text/csv' })
 attachment.querySelector('c2-button')!.addEventListener('click', () => attachment.openPreview())
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-attachment name="project-brief.pdf" type="PDF" size="2.4 MB" removable>
+  <span slot="name">Q3-report-final.pdf</span>
+  <span slot="metadata">PDF · 2.4 MB · shared by Ada</span>
+</c2-attachment>
+```
+
+</GalleryGrid>

@@ -145,7 +145,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {color} [--c2-step__guide--color=#e4e4e7] - A vertical rule at each ancestor's depth, for a file-tree look. Off by default.
  * @cssproperty {pixel} [--c2-step__guide--width=0px] - Width of that rule. `1px` turns the guides on.
  *
- * @cssproperty {pixel} [--c2-step__marker--size=16px]
+ * @cssproperty {pixel} [--c2-step__marker--size=16px] - Width and height of the marker.
  * @cssproperty {font-size} [--c2-step__marker--font-size=10px] - Size of the dotted path in `marker="number"`.
  * @cssproperty {padding} [--c2-step__marker--padding-inline=3px] - Breathing room either side of a dotted path, which is what turns the circle into a pill when the number is long. Only `marker="number"` uses it.
  * @cssproperty {font-weight} [--c2-step__marker--font-weight=600]

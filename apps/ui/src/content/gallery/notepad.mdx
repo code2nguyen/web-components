@@ -8,6 +8,7 @@ import { Notepad } from '@c2n/components/notepad'
 import { IconButton } from '@c2n/components/icon-button'
 import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
 import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid>
 
@@ -194,6 +195,25 @@ Pick up the dry cleaning"></c2-notepad>
 - [ ] Lit docs: https://lit.dev/docs/
 - [x] www.w3.org/WAI/ARIA/apg (patterns)
 Click an address to open it."></c2-notepad>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .spiral-pad { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad class="spiral-pad" label="Notes" value="Thursday sync
+Ship it **behind a flag**
+- [ ] Ask about night paper">
+  <span slot="header">Notes · Oct 1</span>
+  <span slot="margin">Draft</span>
+  <c2-button slot="toolbar">Summarize</c2-button>
+</c2-notepad>
 ```
 
 </GalleryGrid>

@@ -112,7 +112,7 @@ function foldOrder(actions: Action[]): Action[] {
  * @slot title-suffix - Status after the title, such as `c2-badge`s.
  * @slot description - A sentence under the title.
  * @slot meta - Facts about the page: a `c2-description-list`, dates, owners.
- * @slot actions - Page actions. Mark the main one `primary`; set `overflow-priority` on the others to choose which fold first.
+ * @slot actions - Page actions and tools, such as a `c2-search-field`. Mark the main one `primary`; set `overflow-priority` on the others to choose which fold first.
  * @slot navigation - Tabs below the title, usually links with `aria-current="page"` on the current one.
  * @slot toolbar - A row of search and filters at the bottom of the header.
  *
@@ -150,7 +150,7 @@ function foldOrder(actions: Action[]): Action[] {
  * @cssproperty {font-size} [--c2-page-header__title__narrow--font-size=20px]
  * @cssproperty {font-size} [--c2-page-header__title__large--font-size=32px] - The title of a `large-title` page header, at every width.
  * @cssproperty {number} [--c2-page-header__title__collapsed--scale=0.9] - How far a `large-title` title shrinks as it scrolls under the condensed bar.
- * @cssproperty {pixel} [--c2-page-header__leading--size=40px]
+ * @cssproperty {pixel} [--c2-page-header__leading--size=40px] - Width and height of the leading element before the title, such as an avatar or icon.
  * @cssproperty {color} [--c2-page-header__description--color=#52525b]
  * @cssproperty {font-size} [--c2-page-header__description--font-size=14px]
  * @cssproperty {color} [--c2-page-header__meta--color=#71717a]
@@ -159,7 +159,7 @@ function foldOrder(actions: Action[]): Action[] {
  * @cssproperty {pixel} [--c2-page-header__actions--gap=8px]
  * @cssproperty {color} [--c2-page-header__link--color=rgb(2, 101, 220)] - The parent link.
  * @cssproperty {font-size} [--c2-page-header__link--font-size=14px]
- * @cssproperty {pixel} [--c2-page-header__more--size=36px]
+ * @cssproperty {pixel} [--c2-page-header__more--size=36px] - Width and height of the more button.
  * @cssproperty {border-radius} [--c2-page-header__more--border-radius=8px]
  * @cssproperty {border} [--c2-page-header__more--border=1px solid #bcbcc6]
  * @cssproperty {color} [--c2-page-header__more--background-color=#ffffff]
