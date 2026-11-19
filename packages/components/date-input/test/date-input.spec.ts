@@ -259,3 +259,30 @@ test('the popover is named by its form field, and a field taken out while open r
   await expect(host.getByRole('dialog')).toBeHidden()
   await expect(opener).toHaveAttribute('aria-expanded', 'false')
 })
+
+test('a keyboard edit fires change once by the time focus leaves, in every engine', async ({ page, renderScenario }) => {
+  // Arrow keys and typing step past `min`: the platform allows it and makes the field invalid. Chromium and Firefox
+  // fire `change` as the date changes, WebKit only when focus leaves the field (Tab moves between its segments).
+  await renderScenario('<c2-date-input aria-label="Service date" min="2026-11-17" value="2026-11-17"></c2-date-input><button id="after">After</button>')
+  const host = page.locator('c2-date-input')
+  await host.evaluate((element) => {
+    const field = element as HTMLElement & { checkValidity(): boolean; updateComplete: Promise<unknown>; dataset: DOMStringMap }
+    field.dataset.changes = '0'
+    field.addEventListener('change', async () => {
+      field.dataset.changes = String(Number(field.dataset.changes) + 1)
+      await field.updateComplete
+      field.dataset.validAtChange = String(field.checkValidity())
+    })
+  })
+  await host.locator('input').focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(host).toHaveJSProperty('value', '2026-10-17')
+  await page.locator('#after').focus()
+  await expect(host).toHaveAttribute('data-valid-at-change', 'false')
+  await expect(host).toHaveAttribute('data-changes', '1')
+
+  // Leaving again without an edit fires nothing more.
+  await host.locator('input').focus()
+  await page.locator('#after').focus()
+  await expect(host).toHaveAttribute('data-changes', '1')
+})
