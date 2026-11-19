@@ -7,6 +7,7 @@
   import type { ReorderList } from '@c2n/components/reorder-list'
   import '@c2n/components/reorder-list'
   import { addTranslations } from '@c2n/core/localize.js'
+  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
 
   // The French an app would add for the gallery's French card: the library ships English only.
   addTranslations({
@@ -51,6 +52,55 @@
     form.addEventListener('reset', () => requestAnimationFrame(show))
   }
 
+  interface Task {
+    id: string
+    label: string
+  }
+
+  /** The row a handle is being dragged from, so the list it lands on can take it out of its old list. */
+  let dragged: HTMLElement | null = null
+
+  /** Wires a row's handle: a native drag that writes the row under the `task` kind, kept off the list's own reorder. */
+  function wireHandle(row: HTMLElement) {
+    const handle = row.querySelector<HTMLElement>('[data-drag-handle]')
+    if (!handle || handle.dataset.wired) return
+    handle.dataset.wired = ''
+    handle.draggable = true
+    // The list reorders on pointer events; the handle starts the browser's drag instead.
+    handle.addEventListener('pointerdown', (event) => event.stopPropagation())
+    handle.addEventListener('dragstart', (event) => {
+      if (!event.dataTransfer) return
+      const task: Task = { id: row.dataset.reorderKey ?? '', label: row.dataset.reorderLabel ?? row.textContent?.trim() ?? '' }
+      writeItemPayload(event.dataTransfer, 'task', [task])
+      event.dataTransfer.effectAllowed = 'move'
+      dragged = row
+    })
+    handle.addEventListener('dragend', () => (dragged = null))
+  }
+
+  /** Lists that trade rows: the list fires `item-drop` with the row to insert before; the page adds the row. */
+  function setupTransfer(list: ReorderList) {
+    list.querySelectorAll<HTMLElement>(':scope > [data-reorder-key]').forEach(wireHandle)
+    list.addEventListener('item-drop', ({ detail }) => {
+      for (const task of detail.items as Task[]) {
+        // Moved within the page: take the row out of its old list. Dropped from elsewhere: build a new one.
+        const row = dragged?.dataset.reorderKey === task.id ? dragged : document.createElement('div')
+        if (row !== dragged) {
+          row.dataset.reorderKey = task.id
+          row.dataset.reorderLabel = task.label
+          const handle = document.createElement('span')
+          handle.dataset.dragHandle = ''
+          handle.setAttribute('aria-hidden', 'true')
+          handle.textContent = '⠿'
+          row.append(handle, ` ${task.label}`)
+        }
+        if (row === detail.before) continue
+        list.insertBefore(row, detail.before ?? null)
+        wireHandle(row)
+      }
+    })
+  }
+
   const initialized = new WeakSet<ReorderList>()
 
   function setup() {
@@ -59,6 +109,7 @@
       initialized.add(list)
       if (list.dataset.reorderListExample === 'podium') setupPodium(list)
       if (list.dataset.reorderListExample === 'form') setupForm(list)
+      if (list.dataset.reorderListExample === 'transfer') setupTransfer(list)
     })
   }
 

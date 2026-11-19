@@ -1,0 +1,43 @@
+---
+/** Enhances tree examples whose drag source (a native drag writing an item payload) cannot be expressed as HTML. */
+---
+
+<script>
+  import type { Tree } from '@c2n/components/tree'
+  import '@c2n/components/tree'
+  import '@c2n/components/chip'
+  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+
+  /** Chips beside the tree become new files: each drags a `tree-node` the tree places where it lands. */
+  function setupTransfer(tree: Tree) {
+    const source = tree.closest('[data-tree-transfer]')?.querySelector('[data-tree-source]')
+    if (!source) return
+    source.querySelectorAll<HTMLElement>('c2-chip[data-value]').forEach((chip) => {
+      chip.draggable = true
+      chip.addEventListener('dragstart', (event) => {
+        if (!event.dataTransfer) return
+        writeItemPayload(event.dataTransfer, 'tree-node', [{ value: chip.dataset.value, label: chip.textContent?.trim() }])
+        event.dataTransfer.effectAllowed = 'move'
+      })
+    })
+    // The data-driven tree adds the nodes to `items` itself; the page takes the chips it placed out of the tray.
+    tree.addEventListener('item-drop', ({ detail }) => {
+      for (const node of detail.items) source.querySelector(`c2-chip[data-value="${CSS.escape(node.value)}"]`)?.remove()
+    })
+  }
+
+  const initialized = new WeakSet<Tree>()
+
+  function setup() {
+    document.querySelectorAll<Tree>('c2-tree[data-tree-example]').forEach((tree) => {
+      if (initialized.has(tree)) return
+      initialized.add(tree)
+      if (tree.dataset.treeExample === 'transfer') setupTransfer(tree)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>
