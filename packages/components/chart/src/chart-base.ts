@@ -396,8 +396,8 @@ export abstract class ChartBase extends LitElement {
   /** Shows an error message instead of the plot. */
   @property({ type: String }) error = ''
 
-  /** Replaces the built-in "no data" text. */
-  @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No data'
+  /** Replaces the built-in "no data" text (the translatable `noData` message); an empty string shows none. */
+  @property({ type: String, attribute: 'empty-message' }) emptyMessage?: string
 
   /** Caps how many points a streaming chart keeps; older points fall off the front. `0` keeps everything. */
   @property({ type: Number, attribute: 'max-points' }) maxPoints = 0
@@ -1378,9 +1378,9 @@ export abstract class ChartBase extends LitElement {
     // A client hydrating that markup renders it once as the server did, then validates (see `firstUpdated`).
     const error = this.error || (isServer || this.#hydrating ? '' : this.validationError())
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
-    if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
+    if (this.loading) return html`<div class="state" part="state"><slot name="loading">${this.chartMsg.t('loading')}</slot></div>`
     if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
-      return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage || nothing}</slot></div>`
+      return html`<div class="state" part="state"><slot name="empty">${(this.emptyMessage ?? this.chartMsg.t('noData')) || nothing}</slot></div>`
     }
     return nothing
   }

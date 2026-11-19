@@ -48,6 +48,10 @@ const chordEn = {
 export const chordMessages = defineMessages('chord-chart', chordEn)
 
 const chartEn = {
+  /** Shown when the chart has no data and `empty-message` is not set. */
+  noData: 'No data',
+  /** Shown while `loading` is set, as the `loading` slot's default content. */
+  loading: 'Loading…',
   annotations: 'Annotations',
   annotationAt: (label: string, at: string) => `${label}, ${at}`,
   annotationRange: (label: string, from: string, to: string) => `${label}, ${from} to ${to}`,

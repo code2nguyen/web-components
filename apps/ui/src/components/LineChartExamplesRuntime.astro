@@ -1,0 +1,12 @@
+---
+/**
+ * Registers the French of the line-chart "No data in French" card: the library ships its text in English only, so
+ * an app adds its languages with `addTranslations`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({ fr: { chart: { noData: 'Aucune donnée', loading: 'Chargement…' } } })
+</script>

@@ -68,7 +68,34 @@ for (const module of Object.values(modules)) {
  * annotations with the text of `chart`. A shared catalog is never a prefix parent, so `c2-chart-series` does not get it.
  */
 const SHARED: Record<string, readonly string[]> = {
-  chart: ['area-chart', 'bar-chart', 'bubble-chart', 'candlestick-chart', 'line-chart', 'scatter-chart', 'sparkline'],
+  // Every chart draws its empty and loading states, and the cartesian ones their annotations, with the text of `chart`.
+  chart: [
+    'area-chart',
+    'bar-chart',
+    'boxplot-chart',
+    'bubble-chart',
+    'bullet-chart',
+    'butterfly-chart',
+    'candlestick-chart',
+    'chord-chart',
+    'depth-chart',
+    'gauge-chart',
+    'heatmap-chart',
+    'histogram-chart',
+    'line-chart',
+    'map-chart',
+    'overlap-chart',
+    'pie-chart',
+    'pyramid-chart',
+    'radar-chart',
+    'radial-bar-chart',
+    'sankey-chart',
+    'scatter-chart',
+    'sparkline',
+    'sunburst-chart',
+    'treemap-chart',
+    'waterfall-chart',
+  ],
   'chart-reference-lines': ['area-chart', 'line-chart'],
   // The map's notices are drawn by the map and the Street View only; a marker or a route shows none.
   'google-map': ['google-street-view'],
@@ -80,12 +107,16 @@ const SHARED: Record<string, readonly string[]> = {
  */
 export function componentMessages(tag: string, orParent = true): ComponentMessages | undefined {
   const name = tag.replace(/^c2-/, '')
-  if (byName.has(name)) return byName.get(name)
+  const own = byName.get(name)
+  const shared = orParent
+    ? Object.keys(SHARED)
+        .filter((catalog) => SHARED[catalog].includes(name))
+        .flatMap((catalog) => byName.get(catalog) ?? [])
+    : []
+  // An element with a catalog of its own (`heatmap-chart`) still draws the shared ones (the chart's empty state).
+  const all = own ? [own, ...shared] : shared
+  if (all.length > 0) return all.length === 1 ? all[0] : { ...all[0], more: all.slice(1) }
   if (!orParent) return undefined
-  const shared = Object.keys(SHARED)
-    .filter((catalog) => SHARED[catalog].includes(name))
-    .flatMap((catalog) => byName.get(catalog) ?? [])
-  if (shared.length > 0) return shared.length === 1 ? shared[0] : { ...shared[0], more: shared.slice(1) }
   const parent = [...byName.keys()].filter((candidate) => !(candidate in SHARED) && name.startsWith(`${candidate}-`)).sort((a, b) => b.length - a.length)[0]
   return parent ? byName.get(parent) : undefined
 }
