@@ -38,6 +38,8 @@ export interface RenderContext {
   /** Called while rendering when a lazy element would be used. */
   need(module: LazyModule): void
   renderers?: Partial<Record<string, Renderer>>
+  /** Interface text in the element's language. */
+  text: { table: string }
 }
 
 let taskCount = 0
@@ -283,7 +285,7 @@ function renderTable(table: Tokens.Table, ctx: RenderContext, caret: boolean, bl
   // Alignment through classes rather than inline styles, which a strict style-src CSP would block.
   const align = (value: string | null) => (value ? `align-${value}` : nothing)
   const lastRow = table.rows.length - 1
-  return html`<div class="table-scroll ${block}" role="region" aria-label="Table" tabindex="0">
+  return html`<div class="table-scroll ${block}" role="region" aria-label=${ctx.text.table} tabindex="0">
     <table class="table" part="table">
       <thead>
         <tr>

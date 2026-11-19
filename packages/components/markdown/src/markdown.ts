@@ -11,6 +11,8 @@ import { lexBlocks } from './lex'
 import type { MathMode } from './math-extension'
 import { headingIds, renderBlock, type CodeMode, type ImagePolicy, type LazyModule, type RenderContext, type Renderer } from './render'
 import { isExternal, type UrlTransform } from './safe-url'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { markdownMessages } from './messages.js'
 import styles from './markdown.scss?inline'
 
 export type { RevealMode } from '@c2n/core/stream-reveal.js'
@@ -197,6 +199,7 @@ export class Markdown extends LitElement {
   @state() private textSource = ''
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, markdownMessages)
   private readonly controller = new StreamRevealController(this, {
     maxLag: DEFAULT_MAX_LAG,
     flushDuration: DEFAULT_FLUSH_DURATION,
@@ -282,6 +285,7 @@ export class Markdown extends LitElement {
       ready: this.ready,
       need: (module) => this.needs.add(module),
       renderers: this.renderers,
+      text: { table: this.msg.t('table') },
     }
     // Everything a finished block's template depends on besides its own source.
     const version = JSON.stringify([
@@ -294,6 +298,7 @@ export class Markdown extends LitElement {
       this.ready,
       this.math,
       this.breaks,
+      ctx.text,
     ])
     const caretAt = pending ? blocks.length - 1 : -1
     const body = repeat(
