@@ -248,7 +248,7 @@ test('the clipboard is not read when the browser sent its paste elsewhere, nor f
   const upload = page.locator('c2-upload')
   const zone = upload.locator('.dropzone')
   const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
-  const press = (init: KeyboardEventInit, pasteOnBody = false) =>
+  const press = (init: { key: string; code: string; metaKey: boolean; ctrlKey: boolean }, pasteOnBody = false) =>
     zone.evaluate(
       (element, { init, pasteOnBody }) => {
         element.dispatchEvent(new KeyboardEvent('keydown', { ...init, bubbles: true, composed: true }))
