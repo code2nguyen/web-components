@@ -4,12 +4,13 @@
  * For each requirement of `tasks.json`, starts Claude Code headless (`claude -p`) in an empty directory with the c2n
  * MCP server as its only MCP server and no project instructions, asks it to build the requirement, and grades what it
  * wrote: did it pick an expected component, does `validate_markup` find no error, and does it use the attributes and
- * slots the task needs. Results go to `test-results/ai-readiness/agent.json`, which `npm run readiness` folds into the
+ * slots the task needs. Results go to `packages/tools/mcp/readiness/agent.json` (committed), which `npm run readiness` folds into the
  * report.
  *
  * Opt-in and not part of CI: it calls a model (costs money and takes minutes) and its result varies between runs.
  *
- *   --tasks a,b,c     only these task ids
+ *   --tasks a,b,c     only these task ids (default: the `agentSet` of tasks.json)
+ *   --all             every task
  *   --limit <n>       only the first n tasks
  *   --model <id>      model passed to `claude --model`
  *   --concurrency <n> parallel sessions (default 3)
@@ -28,8 +29,8 @@ import type { Task } from './score.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const packageRoot = resolve(here, '../..')
-const repoRoot = resolve(packageRoot, '../../..')
-const outDir = join(repoRoot, 'test-results/ai-readiness')
+/** Committed beside the readiness baseline, so a run is kept in the repository. */
+const outDir = join(packageRoot, 'readiness')
 
 function option(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`)
@@ -122,8 +123,10 @@ function runClaude(task: Task, claude: string, model: string | undefined): Promi
 
 async function main() {
   const registry = loadRegistry()
-  let tasks = (JSON.parse(readFileSync(join(here, 'tasks.json'), 'utf8')) as { tasks: Task[] }).tasks
-  const only = option('tasks')?.split(',')
+  const file = JSON.parse(readFileSync(join(here, 'tasks.json'), 'utf8')) as { tasks: Task[]; agentSet?: string[] }
+  let tasks = file.tasks
+  // The fixed subset by default, so two runs measure the same thing; `--all` for every task.
+  const only = option('tasks')?.split(',') ?? (process.argv.includes('--all') ? undefined : file.agentSet)
   if (only) tasks = tasks.filter((t) => only.includes(t.id))
   const limit = Number(option('limit') ?? 0)
   if (limit) tasks = tasks.slice(0, limit)
@@ -165,4 +168,11 @@ async function main() {
   )
 }
 
-if (import.meta.url === `file://${process.argv[1]}` && existsSync(join(packageRoot, 'data/registry.json'))) await main()
+// Run as a script: paths compared as paths (a URL would percent-encode a space), and a missing registry said out loud.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (!existsSync(join(packageRoot, 'data/registry.json'))) {
+    console.error('No data/registry.json: run `npm run build:registry -w packages/tools/mcp` first.')
+    process.exit(1)
+  }
+  await main()
+}

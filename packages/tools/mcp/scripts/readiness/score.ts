@@ -146,10 +146,11 @@ function usesAttribute(html: string, name: string): boolean {
   return new RegExp(`<c2-[^>]*\\s${escaped}(?=[\\s=>/])`, 'i').test(html)
 }
 
-/** Form control in the sense the framework adapters use: a `name` plus a `value` or `checked`. */
 export function isFormControl(element: ElementEntry): boolean {
   const names = new Set(element.attributes.map((a) => a.name))
-  return names.has('name') && (names.has('value') || names.has('checked'))
+  // The rule of `formControlModel()` in framework-types, which decides who gets an accessor: a `name`, a `value` or
+  // `checked`, and an `input` or `change` event. A button has a name and a value but is no value control.
+  return names.has('name') && (names.has('value') || names.has('checked')) && element.events.some((e) => e.name === 'input' || e.name === 'change')
 }
 
 /** Rank (1-based) of `id` when the registry is searched for `query`, or Infinity. */

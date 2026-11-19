@@ -1,5 +1,5 @@
 {
-  "$comment": "AI readiness benchmark: requirements as an app developer would write them, without the component's name where possible. `expect` lists the component ids that are a correct answer (the first is the best one). `tags`: the agent run passes when the code uses at least one of them; `attributes`: attributes (or slots, written `slot:<name>`) the code must also use. Add a task whenever an agent picked the wrong component in real use. The last 25 tasks were written after keyword tuning as a held-out check (discovery 54 before the keywords and rarity weighting, 85 after); keep adding requirements you did not tune against.",
+  "$comment": "AI readiness benchmark: requirements as an app developer would write them, without the component's name where possible. `expect` lists the component ids that are a correct answer (the first is the best one). `tags`: the agent run passes when the code uses at least one of them; `attributes`: attributes (or slots, written `slot:<name>`) the code must also use. Add a task whenever an agent picked the wrong component in real use. The last 25 tasks were written after keyword tuning as a held-out check (discovery 54 before the keywords and rarity weighting, 85 after); keep adding requirements you did not tune against. `agentSet` is the fixed subset `readiness:agent` runs by default (about $10), so agent scores stay comparable between runs; pass --all for every task.",
   "tasks": [
     {
       "id": "data-grid",
@@ -513,5 +513,35 @@
       "expect": ["confirm-dialog", "popconfirm", "modal"],
       "tags": ["c2-confirm-dialog", "c2-popconfirm", "c2-modal"]
     }
+  ],
+  "agentSet": [
+    "toast",
+    "country-combobox",
+    "simple-select",
+    "row-actions",
+    "right-click",
+    "empty-state",
+    "price",
+    "stars",
+    "folder-tree",
+    "chat-composer",
+    "upload-progress",
+    "hint",
+    "copy",
+    "tabs",
+    "faq",
+    "toggle",
+    "revenue-trend",
+    "user-avatar",
+    "status-pill",
+    "slider",
+    "segmented",
+    "arrow-icon",
+    "data-grid",
+    "kanban",
+    "wizard",
+    "schema-form",
+    "form-validation",
+    "llm-answer"
   ]
 }

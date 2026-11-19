@@ -190,3 +190,34 @@ test('agent grading checks the tag, the validator and the required attributes', 
   assert.deepEqual([wrong.found, wrong.valid, wrong.correct], [true, false, false])
   assert.ok(wrong.notes.some((n) => n.includes('missing slot:footer')))
 })
+
+test('a changed run scores the components whose package, docs page or gallery changed, and no test file counts', async () => {
+  const { changedComponents } = await import('./readiness.ts')
+  const reg = registry(component('button'), component('badge'), component('stat'))
+  const { ids, full } = changedComponents(reg, 'HEAD', [
+    'packages/components/button/src/button.ts',
+    'packages/components/badge/test/badge.spec.ts',
+    'apps/ui/src/content/gallery/stat.mdx',
+    'README.md',
+  ])
+  assert.deepEqual([...ids].sort(), ['button', 'stat'])
+  assert.equal(full, undefined)
+  // A change to the scoring or to what the MCP server serves moves every score: the run goes full.
+  assert.equal(changedComponents(reg, 'HEAD', ['packages/tools/mcp/src/search.ts']).full, 'packages/tools/mcp/src/search.ts')
+  // The benchmark requirements are not scoring: discovery runs every time anyway.
+  assert.equal(changedComponents(reg, 'HEAD', ['packages/tools/mcp/scripts/readiness/tasks.json']).full, undefined)
+})
+
+test('a component is compared with its last score check by check', async () => {
+  const { compare, aggregate } = await import('./readiness.ts')
+  const before = { score: 90, grade: 'A', dimensions: { api: 80 }, checks: { 'api/slots-described': 50, 'examples/usage': 60 } }
+  const now = { score: 88.5, grade: 'B', dimensions: { api: 70 }, checks: { 'examples/usage': 30, 'composition/slots-shown': 0 } }
+  const result = compare(before, now)
+  assert.equal(result.delta, -1.5)
+  assert.deepEqual(result.fixed, ['api/slots-described'])
+  assert.deepEqual(result.worse.sort(), ['composition/slots-shown', 'examples/usage'])
+  assert.deepEqual(compare(undefined, now), { delta: null, fixed: [], worse: [] })
+  const library = aggregate({ a: before, b: now })
+  assert.equal(library.score, 89.3)
+  assert.deepEqual(library.grades, { A: 1, B: 1, C: 0, D: 0, F: 0 })
+})
