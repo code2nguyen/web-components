@@ -18,6 +18,14 @@ const span = (page: Page, name: string) => page.getByRole('treeitem').filter({ h
 
 const box = async (page: Page, name: string, part: string) => (await span(page, name).locator(`[part="${part}"]`).boundingBox())!
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div lang="fr"><c2-trace-waterfall spans='${JSON.stringify(spans)}'></c2-trace-waterfall><c2-trace-waterfall id="empty"></c2-trace-waterfall></div>`,
+  )
+  await expect(page.locator('c2-trace-waterfall').first().getByRole('img', { name: 'Erreur' }).first()).toBeAttached()
+  await expect(page.locator('#empty .empty')).toHaveText('Aucun span')
+})
+
 test('draws the span tree with every bar placed on one time axis', async ({ page, renderScenario }) => {
   await renderScenario(waterfall())
   await expect(page.getByRole('tree', { name: 'Checkout' })).toBeVisible()
