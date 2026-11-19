@@ -191,3 +191,9 @@ test('count is the number of items loaded during a search, a page grown in place
   await page.getByRole('button', { name: 'Try again' }).click()
   await expect(list(page)).toHaveAttribute('data-retry', 'true')
 })
+
+test('the list name and the search field follow the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-virtual-list searchable items="[]"></c2-virtual-list></div>')
+  await expect(list(page).locator('[role="listbox"]')).toHaveAttribute('aria-label', 'Éléments')
+  await expect(list(page).locator('c2-text-field')).toHaveAttribute('placeholder', 'Rechercher')
+})
