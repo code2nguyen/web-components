@@ -7,6 +7,8 @@ import { disabledByAncestor, isComposingKey, redispatchEvent } from '@c2n/core/d
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { chatInputMessages } from './messages.js'
 import styles from './chat-input.scss?inline'
 
 /** Browsers without `field-sizing` get the textarea's height from script; the others grow it in CSS. */
@@ -103,8 +105,10 @@ export class ChatInput extends LitElement {
   @property({ attribute: 'enter-behavior' }) enterBehavior: 'submit' | 'newline' = 'submit'
   /** Accessible name forwarded to the inner textarea. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
-  /** Accessible name for the send button. */
-  @property({ attribute: 'send-label' }) sendLabel = 'Send message'
+  /** Accessible name for the send button. Empty, it is the `send` message ("Send message"). */
+  @property({ attribute: 'send-label' }) sendLabel = ''
+
+  private readonly msg = new LocalizeController(this, chatInputMessages)
 
   @state() private dirty = false
   @state() private disabledByForm = false
@@ -328,8 +332,8 @@ export class ChatInput extends LitElement {
             class="send-button"
             part="send-button"
             type="button"
-            aria-label=${this.sendLabel}
-            title=${this.sendLabel}
+            aria-label=${this.sendLabel || this.msg.t('send')}
+            title=${this.sendLabel || this.msg.t('send')}
             ?disabled=${!this.canSubmit}
             @click=${this.submitMessage}
           >

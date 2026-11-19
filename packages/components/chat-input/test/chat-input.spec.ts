@@ -35,6 +35,10 @@ test('Shift+Enter and Alt+Enter insert newlines without submitting', async ({ pa
   await expect(input).toHaveValue('First\nSecond\nThird')
   await expect(page.locator('c2-chat-input')).toHaveAttribute('data-events', '[]')
 })
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-chat-input aria-label="Message"></c2-chat-input></div>')
+  await expect(page.getByRole('button', { name: 'Envoyer le message' })).toBeVisible()
+})
 test('send button submits while empty messages and canceled submissions are preserved', async ({ page, renderScenario }) => {
   await renderScenario('<c2-chat-input aria-label="Message"></c2-chat-input>')
   const host = page.locator('c2-chat-input')
