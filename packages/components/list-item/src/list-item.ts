@@ -7,7 +7,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './list-item.scss?inline'
 import { LIST_ITEM_FOCUS_REQUEST_EVENT, selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
-import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController, unwrapContents } from '@c2n/core/dom-helper.js'
 import { FIELD_CONNECT_EVENT } from '@c2n/core/contexts/field.js'
 
 // The settings-row behaviour (naming and activating the control in the `control` slot) loads the first time a row has
@@ -230,10 +230,8 @@ export class ListItem extends LitElement {
 
   /** The element in the `control` slot, or `null`. */
   get controlElement(): HTMLElement | null {
-    let control = this.querySelector(':scope > [slot="control"]')
     // A wrapper around a single element (Astro's `<astro-island>`, a `<label>`) stands for the element it holds.
-    while (control && !control.shadowRoot && control.childElementCount === 1) control = control.firstElementChild
-    return control as HTMLElement | null
+    return unwrapContents(this.querySelector(':scope > [slot="control"]'), { wrapper: (element) => !element.shadowRoot }) as HTMLElement | null
   }
 
   /** The text a `c2-select` shows for this row: `label` when set, otherwise the text content of the default slot. */
