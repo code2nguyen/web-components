@@ -1,6 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import '@c2n/spinner'
@@ -63,12 +63,16 @@ export class LoadingOverlay extends LitElement {
   @query('slot[name="label"]') private labelSlot?: HTMLSlotElement
 
   private readonly msg = new LocalizeController(this, loadingOverlayMessages)
-  /** A declarative shadow root is already there in the constructor: the element was rendered on the server. */
-  private readonly serverRendered = this.shadowRoot !== null
   private announceTimer = 0
   // Text edited inside an element already in the label slot fires no `slotchange`. Browser only: a server render has
   // no MutationObserver.
   private labelObserver?: MutationObserver
+
+  constructor() {
+    super()
+    // A server-rendered element hydrates with its label already assigned, and no `slotchange` follows: read it once.
+    new SlotReplayController(this, () => this.readLabel(), { immediate: true })
+  }
 
   override connectedCallback() {
     super.connectedCallback()
@@ -81,11 +85,6 @@ export class LoadingOverlay extends LitElement {
     super.disconnectedCallback()
     this.labelObserver?.disconnect()
     clearTimeout(this.announceTimer)
-  }
-
-  // A server-rendered element hydrates with its label already assigned, and no `slotchange` follows: read it once.
-  protected override firstUpdated(): void {
-    if (this.serverRendered) this.readLabel()
   }
 
   protected override updated(changed: PropertyValues<this>): void {
