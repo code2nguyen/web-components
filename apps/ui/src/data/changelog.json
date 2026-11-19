@@ -2,6 +2,501 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.29",
+      "date": "2026-11-19",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["mcp"],
+              "text": "Measure AI readiness from component lab builds",
+              "hash": "af0aaf2"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Keep AI readiness runs in the repo, score changed components by default",
+              "hash": "3477a83"
+            },
+            {
+              "scopes": ["icon-button"],
+              "text": "Declare the value a c2-button-group selects it by",
+              "hash": "1daf4ae"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Require CSS variable descriptions only where the name says too little",
+              "hash": "05898bb"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Shorten a long get_component answer to fit one response",
+              "hash": "5b95438"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Leave generic and unwritable slots out of the readiness score",
+              "hash": "b968cc9"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Search by keywords and serve script-only API in get_component",
+              "hash": "2359ec4"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Add an AI readiness score for the components",
+              "hash": "be3ec84"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Add reference lines, marker-only series and SPC helpers for control charts [chart-1]",
+              "hash": "07f1b8d"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Act on selections inside the content's shadow roots with composed",
+              "hash": "b53fa71"
+            },
+            {
+              "scopes": ["card"],
+              "text": "Add --c2-card__hover--border for all four sides on hover",
+              "hash": "b62c16e"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Translate the field's own text through message tokens",
+              "hash": "b7b6a9a"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "Translate built-in text through message tokens",
+              "hash": "e0ee7f6"
+            },
+            {
+              "scopes": ["card"],
+              "text": "Add a --c2-card--border shorthand for all four sides",
+              "hash": "fa15828"
+            },
+            {
+              "scopes": ["format-number"],
+              "text": "Hide c2-delta's arrow with --c2-delta__arrow--display",
+              "hash": "66fbfa8"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Expose single-selection groups as a radio group",
+              "hash": "004c713"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["chart"],
+              "text": "Write SPC rule 2's description as plain text [chart-1]",
+              "hash": "267a616"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Leave the results alone when a readiness run has nothing to score",
+              "hash": "69ed92e"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Compare a readiness run with the committed baseline, and list what a full run moved",
+              "hash": "f082ec7"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Write ECharts value axes in the chart locale",
+              "hash": "d2720ae"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Read every usage row and the icon pages' examples",
+              "hash": "8ad089b"
+            },
+            {
+              "scopes": ["tag-input"],
+              "text": "Show a slotted remove-icon on every tag, not only the first",
+              "hash": "18fbc04"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Render a chart's state, not a series error, on the server",
+              "hash": "3caf23d"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Zone rules follow the drawn zones, reference-line text follows late translations [chart-1]",
+              "hash": "7af899a"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Fit SPC zones to the drawn limits, keep equal rule labels apart [chart-1]",
+              "hash": "4c93458"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Address review findings on reference lines and SPC rules [chart-1]",
+              "hash": "8255462"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Cap a secondary element's package summary when it has no sentence break",
+              "hash": "3543ceb"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Adopt nothing while an island's control is loading, watch nested islands",
+              "hash": "f8b0a07"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Handle focus and WebKit selections for a toolbar inside a shadow root, read the text lazily",
+              "hash": "321ecbc"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Look through Astro's island elements only, not any display: contents element",
+              "hash": "bd3cff8"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "End a secondary element's summary at an etc. that ends the sentence",
+              "hash": "622bf59"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Keep a display: contents control with no inner control, skip hidden and button inputs, watch wrappers' own children",
+              "hash": "f91f37c"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Read focus from the toolbar's own tree, so a toolbar in a shadow root still leaves field selections alone",
+              "hash": "c371e9b"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Print no presets of the main element for a secondary element",
+              "hash": "410eb5a"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Replay the server-render sync only when rows reach the slot",
+              "hash": "5f70e17"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Start no text selection from a movable proposal in a scheduler that is not editable",
+              "hash": "495e2de"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Keep watching wrapper children so a swapped or late native control is adopted, accept other libraries' form controls",
+              "hash": "bb59fb9"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "No empty summary for a secondary element, and no cut after an abbreviation",
+              "hash": "fbd8806"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Keep text in a field a renderer draws in a bar selectable",
+              "hash": "a08803c"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Inside a wrapper adopt only a field control or native input, and watch an empty wrapper for one",
+              "hash": "1015ef2"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Sync a server-rendered list's rows after its first update completes, not inside it",
+              "hash": "4744387"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Name no main element and print no composition for a secondary element",
+              "hash": "d5f91f9"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Fall back to the variadic getComposedRanges, find shadow roots in one walk",
+              "hash": "7924db3"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Take the first control inside a wrapper, contain its siblings' connect events, never look through an undefined group",
+              "hash": "2a9f675"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Describe a secondary element from the installed manifest, without the main element's composition",
+              "hash": "4bded8b"
+            },
+            {
+              "scopes": ["inline-edit"],
+              "text": "Render nothing rather than an empty string in the read view, so a hydrated value lands in its text node",
+              "hash": "c25cc0a"
+            },
+            {
+              "scopes": ["cascader"],
+              "text": "Render nothing rather than an empty string on the trigger, so a hydrated label lands in its text node",
+              "hash": "0e20ed2"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Sync rows on first update only after a server render, so a client render updates once",
+              "hash": "dba4cb8"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Adopt a control laid out with display: contents instead of looking through it",
+              "hash": "13ae33d"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Read composed selections inside a shadow-rooted toolbar and at a shadow root boundary, only where the engine reports a caret",
+              "hash": "898fce1"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Start no text selection from an editable row, which WebKit extended into the row headings",
+              "hash": "45a90c5"
+            },
+            {
+              "scopes": ["select"],
+              "text": "Show the hydrated label on the trigger of a server-rendered select",
+              "hash": "6846af3"
+            },
+            {
+              "scopes": ["list"],
+              "text": "Join rows a server render assigned before the slotchange listener existed",
+              "hash": "f68de78"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Lead get_component with a secondary element's own API",
+              "hash": "958216e"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Find the control inside a display: contents wrapper, past a style element",
+              "hash": "9c27cdf"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Report the move to the visitor's month with month-change",
+              "hash": "d114a0b"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Leave a removed group's items alone, set a hydrating item's radio without a full sync",
+              "hash": "452ba6f"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Format a list in the browser's language when the locale is rejected",
+              "hash": "6976962"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Hydrate on the server's month, then show the visitor's when no month is set",
+              "hash": "51470ab"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Count the same requirements in the checklist, the validity and the generator",
+              "hash": "11f1b5c"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Release removed groups, restore toggle on reset, queue one radio wait per item",
+              "hash": "8d2ef5c"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Cache formatList per locale and fall back on an invalid one",
+              "hash": "737b1ea"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Skip the deferred edge read once disconnected",
+              "hash": "73fc376"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Swap the elements the scroll-time retry watches instead of piling them up",
+              "hash": "7b3cbb2"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Reset radio items when the group is removed, one reset path",
+              "hash": "60fbcb5"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Drop the requirement cache, keep an empty requirements-message meaning valid",
+              "hash": "007ae5f"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "Survive a malformed lang when listing a multiple answer, reuse one formatter per language",
+              "hash": "ec479c7"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Set radio after an item's first update instead of patching its DOM",
+              "hash": "7f1f42c"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "List a multiple answer in the page's language",
+              "hash": "ee29a6a"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Own fieldName message, validity from the requirement check",
+              "hash": "fd06780"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Try scroll-time on every update while a retry waits, and watch the grid as drawn",
+              "hash": "00a4078"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Wait only for c2 items, drop popup ARIA on radio items",
+              "hash": "7fc858b"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Pick the compact layout's day from the client clock only",
+              "hash": "e175027"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Retry scroll-time until the grid is drawn and the timeline has a width",
+              "hash": "1f00800"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "A radiogroup only when every item can be a radio",
+              "hash": "ec77fee"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "One Password message, separators inside the requirement messages",
+              "hash": "b3f77f9"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Open the compact layout on today on the server again",
+              "hash": "fb3f4ed"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Resume a scroll-time retry on reconnect for the current key",
+              "hash": "a96d4b1"
+            },
+            {
+              "scopes": ["format-number"],
+              "text": "Put c2-delta's arrow part back on the visible arrow",
+              "hash": "d7f33bc"
+            },
+            {
+              "scopes": ["card"],
+              "text": "Theme the border shorthand, let a side override it",
+              "hash": "7d8bca0"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Keep non-radio items' toggle state, answer to every arrow in a radio group",
+              "hash": "38c47e7"
+            },
+            {
+              "scopes": ["password-field"],
+              "text": "Keep capsLockText a string that reads as its message",
+              "hash": "9f9961c"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Read the clock on every render once hydrated",
+              "hash": "9a37c0d"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Keep the scroll-time retry across updates and reconnects",
+              "hash": "a66ffb4"
+            },
+            {
+              "scopes": ["button-group"],
+              "text": "Share the radio semantics, reset items that leave the group",
+              "hash": "3b3ad00"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Apply scroll-time once a scheduler drawn without a size is laid out",
+              "hash": "ca6b972"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Draw today from the visitor's clock after hydration",
+              "hash": "d95b61e"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Read the strip's edges after a week change, not inside the update",
+              "hash": "881f911"
+            },
+            {
+              "scopes": ["table"],
+              "text": "No change-in-update warning without virtualization, centre renderer nodes",
+              "hash": "4df08c6"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "title": "Performance",
+          "items": [
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Check for getComposedRanges before walking, never walk the toolbar's own shadow root",
+              "hash": "e86b0a7"
+            },
+            {
+              "scopes": ["selection-toolbar"],
+              "text": "Resolve a composed selection only for a caret right before a shadow host",
+              "hash": "87c05c5"
+            },
+            {
+              "scopes": ["scheduler"],
+              "text": "Read no layout on updates while the scroll-time retry waits",
+              "hash": "1dbcf37"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["gallery"],
+              "text": "Show every named slot in a gallery card",
+              "hash": "7bd72ad"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.28",
       "date": "2026-11-18",
       "sections": [

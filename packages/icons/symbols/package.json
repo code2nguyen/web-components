@@ -1,6 +1,6 @@
 {
   "name": "@c2n/symbols",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "type": "module",
   "main": "dist/index.js",
   "sideEffects": true,
@@ -75,7 +75,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "1.0.28",
+    "@c2n/core": "1.0.29",
     "lit": "3.3.3"
   },
   "devDependencies": {
