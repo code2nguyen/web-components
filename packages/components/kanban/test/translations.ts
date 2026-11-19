@@ -28,3 +28,12 @@ const matrixBoard: typeof matrixBoardMessages.en = {
 }
 
 addTranslations({ fr: { 'matrix-board': matrixBoard } })
+
+addTranslations({
+  fr: {
+    kanban: {
+      empty: 'Aucune carte',
+      instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la avec les flèches, Début ou Fin ; Espace la pose et Échap annule.',
+    },
+  },
+})

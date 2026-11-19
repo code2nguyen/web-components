@@ -356,3 +356,12 @@ test('refuses another kind of payload and a canceled item-drop, and ignores drop
     expect((await layout(page)).done).toEqual([])
   }
 })
+
+test('the built-in text of a column follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div lang="fr"><c2-kanban editable aria-label="Tableau" items='[]'><c2-kanban-column column-id="todo" label="À faire"></c2-kanban-column></c2-kanban></div>`,
+  )
+  const column = page.locator('c2-kanban-column')
+  await expect(column.locator('[part="empty"]')).toHaveText('Aucune carte')
+  await expect(column.locator('p.visually-hidden')).toHaveText(/^\s*Appuyez sur Espace pour prendre une carte\./)
+})

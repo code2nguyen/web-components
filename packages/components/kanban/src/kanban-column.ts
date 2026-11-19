@@ -6,6 +6,8 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { kanbanMessages } from './messages.js'
 import styles from './kanban-column.scss?inline'
 
 /** Internal protocol event: tells the parent board that a column's id, label or limit changed. Not public API. */
@@ -37,7 +39,7 @@ let instanceCount = 0
  *
  * @slot header - Replaces the default header (label, count and limit) above the cards.
  * @slot footer - Content below the cards, such as an add-card control or a summary.
- * @slot empty - Content shown while the column holds no card. Defaults to "No cards".
+ * @slot empty - Content shown while the column holds no card. Defaults to the `empty` message ("No cards").
  *
  * @csspart column - Box of the column: header, cards and footer.
  * @csspart header - Component-owned region wrapping the `header` slot or its default label and count; styles placement, not assigned content.
@@ -143,6 +145,7 @@ export class KanbanColumn extends LitElement {
   @state() instructions = ''
 
   private readonly slotPresence = new SlotPresenceController(this, ['footer'])
+  private readonly msg = new LocalizeController(this, kanbanMessages)
   private readonly instructionsId = `c2-kanban-column-instructions-${++instanceCount}`
 
   /** Number of cards the column currently shows, counting the gap of a card being dragged into it. */
@@ -190,13 +193,7 @@ export class KanbanColumn extends LitElement {
             </span>
           </slot>
         </div>
-        ${
-          this.editable
-            ? html`<p id=${this.instructionsId} class="visually-hidden">
-                ${this.instructions || 'Press Space to pick up a card. Use the arrow keys, Home or End to move it; Space drops it and Escape cancels.'}
-              </p>`
-            : nothing
-        }
+        ${this.editable ? html`<p id=${this.instructionsId} class="visually-hidden">${this.instructions || this.msg.t('instructions')}</p>` : nothing}
         <div part="cards" class=${classMap({ cards: true, 'cards--empty': count === 0 })} role="list" aria-label=${this.label || this.columnId}>
           ${repeat(
             this.cards,
@@ -204,7 +201,7 @@ export class KanbanColumn extends LitElement {
             (card, index) => (card.placeholder ? this.renderPlaceholder(card) : this.renderCard(card, index, count)),
           )}
         </div>
-        <div part="empty" class="empty" ?hidden=${count > 0}><slot name="empty">No cards</slot></div>
+        <div part="empty" class="empty" ?hidden=${count > 0}><slot name="empty">${this.msg.t('empty')}</slot></div>
         <div part="footer" class="footer" ?hidden=${!this.slotPresence.has('footer')}>
           <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
