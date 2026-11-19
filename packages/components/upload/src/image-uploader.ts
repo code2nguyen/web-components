@@ -498,6 +498,7 @@ export class ImageUploader extends Upload {
           aria-describedby=${this.field.describedBy() || nothing}
           @click=${this.browse}
           @paste=${this.dropZone.handlePaste}
+          @keydown=${this.dropZone.handlePasteKeydown}
         >
           <slot name="add-icon"
             ><svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg

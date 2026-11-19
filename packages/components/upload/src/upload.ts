@@ -193,8 +193,9 @@ export class Upload extends LitElement {
   /**
    * Also takes files pasted (Ctrl+V, ⌘V) while the drop zone has focus, a keyboard path for a screenshot or a file
    * copied in the file manager; on `c2-image-uploader`, while its add tile has focus. Files are checked as dropped
-   * ones are, and the number added is announced. Browsers that fire no `paste` on a focused region that is not
-   * editable (Safari) keep the file picker as that path. `c2-document-checklist` ignores it.
+   * ones are, and the number added is announced. Safari fires no `paste` on a focused region that is not editable, so
+   * there the shortcut reads the clipboard instead (Safari asks the visitor to allow it). `c2-document-checklist`
+   * ignores it.
    */
   @property({ type: Boolean }) paste = false
 

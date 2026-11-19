@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { accessible, expect, test } from '../../../../tests/component-fixture'
 import type { Upload } from '../src/upload'
 
@@ -158,4 +158,277 @@ test('a drop or paste on c2-image-uploader adds images even after a Replace whos
   })
   await paste(uploader.locator('[part="add"]'), [{ name: 'c.png', type: 'image/png' }])
   await expect.poll(() => names(uploader)).toEqual(['a.png', 'b.png', 'c.png'])
+})
+
+/** Report a Safari user agent: the clipboard fallback runs only in WebKit, the engine that fires no `paste`. */
+const asSafari = (page: Page) =>
+  page.addInitScript({
+    content: `Object.defineProperty(navigator, 'userAgent', { configurable: true, get: () => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15' })`,
+  })
+
+test('where the browser fires no paste event for the shortcut (Safari), the focused zone reads the clipboard', async ({ page, renderScenario }) => {
+  await asSafari(page)
+  // Stand in for Safari: the shortcut fires no `paste`, and the clipboard holds a screenshot.
+  await page.addInitScript(() => {
+    window.addEventListener('paste', (event) => event.stopImmediatePropagation(), true)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        read: async () => [{ types: ['text/plain', 'image/png'], getType: async (type: string) => new Blob(['png'], { type }) }],
+      },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste auto-upload="false" aria-label="Project files"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  await upload.locator('.dropzone').focus()
+  await page.keyboard.press('ControlOrMeta+V')
+  await expect.poll(() => names(upload)).toEqual(['pasted.png'])
+  await expect(announcer(upload)).toHaveText('1 file added')
+})
+
+test('without paste set, the shortcut reads nothing from the clipboard', async ({ page, renderScenario }) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    ;(window as unknown as { reads: number }).reads = 0
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { read: async () => ((window as unknown as { reads: number }).reads++, []) },
+    })
+  })
+  await renderScenario('<c2-upload multiple auto-upload="false" aria-label="Project files"></c2-upload>')
+  await page.locator('c2-upload').locator('.dropzone').focus()
+  await page.keyboard.press('ControlOrMeta+V')
+  await page.waitForTimeout(100)
+  expect(await page.evaluate(() => (window as unknown as { reads: number }).reads)).toBe(0)
+})
+
+test('the drop prompt and hint follow the page language, the action word where the translation puts it', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-upload multiple max-files="3" auto-upload="false" aria-label="Fichiers"></c2-upload></div>')
+  const upload = page.locator('c2-upload')
+  await expect(upload.locator('[part="prompt"]')).toHaveText('Déposez des fichiers ici ou parcourez')
+  await expect(upload.locator('[part="prompt"] .action')).toHaveText('parcourez')
+  await expect(upload.locator('[part="hint"]')).toHaveText('3 fichiers au maximum')
+})
+
+test("the image uploader's add tile takes the paste shortcut's clipboard fallback too, on any keyboard layout", async ({ page, renderScenario }) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    window.addEventListener('paste', (event) => event.stopImmediatePropagation(), true)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { read: async () => [{ types: ['image/png'], getType: async (type: string) => new Blob(['png'], { type }) }] },
+    })
+  })
+  await renderScenario('<c2-image-uploader paste auto-upload="false" aria-label="Photos"></c2-image-uploader>')
+  const uploader = page.locator('c2-image-uploader')
+  await uploader.locator('[part="add"]').focus()
+  // A Russian layout: the V key reports `м`, and only its physical code says it is the paste shortcut.
+  await uploader.locator('[part="add"]').evaluate((button) => {
+    const mac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'м', code: 'KeyV', metaKey: mac, ctrlKey: !mac, bubbles: true, composed: true }))
+  })
+  await expect.poll(() => names(uploader)).toEqual(['pasted.png'])
+})
+
+test('the clipboard is not read when the browser sent its paste elsewhere, nor for another letter on the V key, nor for a Finder file', async ({
+  page,
+  renderScenario,
+}) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    const scope = window as unknown as { reads: number; clipboardItems: unknown[] }
+    scope.reads = 0
+    scope.clipboardItems = []
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { read: async () => (scope.reads++, scope.clipboardItems) },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste auto-upload="false" aria-label="Project files"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  const zone = upload.locator('.dropzone')
+  const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
+  const press = (init: KeyboardEventInit, pasteOnBody = false) =>
+    zone.evaluate(
+      (element, { init, pasteOnBody }) => {
+        element.dispatchEvent(new KeyboardEvent('keydown', { ...init, bubbles: true, composed: true }))
+        // The browser's own paste, sent to the start of a selection elsewhere on the page.
+        if (pasteOnBody) document.body.dispatchEvent(new Event('paste', { bubbles: true }))
+      },
+      { init, pasteOnBody },
+    )
+  const shortcut = { key: 'v', code: 'KeyV', metaKey: mac, ctrlKey: !mac }
+  const reads = () => page.evaluate(() => (window as unknown as { reads: number }).reads)
+
+  await press(shortcut, true)
+  await page.waitForTimeout(100)
+  expect(await reads()).toBe(0)
+
+  // Dvorak: the V key types `k`, and ⌘K / Ctrl+K is not paste.
+  await press({ ...shortcut, key: 'k' })
+  await page.waitForTimeout(100)
+  expect(await reads()).toBe(0)
+
+  // A file copied in Finder: its URL and the picture of its icon.
+  await page.evaluate(() => {
+    ;(window as unknown as { clipboardItems: unknown[] }).clipboardItems = [
+      {
+        types: ['text/uri-list', 'image/png'],
+        getType: async (type: string) => new Blob([type === 'text/uri-list' ? 'file:///Users/me/Report.pdf' : 'icon'], { type }),
+      },
+    ]
+  })
+  await press(shortcut)
+  await expect.poll(reads).toBe(1)
+  await page.waitForTimeout(100)
+  expect(await names(upload)).toEqual([])
+})
+
+test('outside Safari (WebKit), the paste shortcut never reads the clipboard', async ({ page, renderScenario }) => {
+  await page.addInitScript(() => {
+    const scope = window as unknown as { reads: number; release?: () => void }
+    scope.reads = 0
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        // Holds the read open, as a permission prompt does, until the test lets it go.
+        read: async () => {
+          scope.reads++
+          await new Promise<void>((resolve) => (scope.release = resolve))
+          return [{ types: ['image/png'], getType: async (type: string) => new Blob(['png'], { type }) }]
+        },
+      },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste auto-upload="false" aria-label="Project files"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  const zone = upload.locator('.dropzone')
+  const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
+  const shortcut = { key: 'v', code: 'KeyV', metaKey: mac, ctrlKey: !mac }
+  const press = () =>
+    zone.evaluate((element, init) => element.dispatchEvent(new KeyboardEvent('keydown', { ...init, bubbles: true, composed: true })), shortcut)
+  const reads = () => page.evaluate(() => (window as unknown as { reads: number }).reads)
+
+  // This engine's own user agent: whatever it is in the run, only a WebKit that is not Chrome takes the fallback.
+  const webkitOnly = await page.evaluate(() => /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Edg\//.test(navigator.userAgent))
+  await press()
+  await page.waitForTimeout(100)
+  expect(await reads()).toBe(webkitOnly ? 1 : 0)
+  if (webkitOnly) await page.evaluate(() => (window as unknown as { release: () => void }).release())
+  await page.waitForTimeout(100)
+  expect(await names(upload)).toEqual(webkitOnly ? ['pasted.png'] : [])
+})
+
+test('in Safari, a paste the browser sends late makes the clipboard read moot', async ({ page, renderScenario }) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    const scope = window as unknown as { reads: number; release?: () => void }
+    scope.reads = 0
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        read: async () => {
+          scope.reads++
+          await new Promise<void>((resolve) => (scope.release = resolve))
+          return [{ types: ['image/png'], getType: async (type: string) => new Blob(['png'], { type }) }]
+        },
+      },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste auto-upload="false" aria-label="Project files"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  const zone = upload.locator('.dropzone')
+  const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
+  await zone.evaluate((element, init) => element.dispatchEvent(new KeyboardEvent('keydown', { ...init, bubbles: true, composed: true })), {
+    key: 'v',
+    code: 'KeyV',
+    metaKey: mac,
+    ctrlKey: !mac,
+  })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { reads: number }).reads)).toBe(1)
+  // The browser's own paste, late (as Chrome on macOS sends ⌘V), while the read waits on its prompt.
+  await paste(zone, [{ name: 'shot.png', type: 'image/png' }])
+  await expect.poll(() => names(upload)).toEqual(['shot.png'])
+  await page.evaluate(() => (window as unknown as { release: () => void }).release())
+  await page.waitForTimeout(100)
+  expect(await names(upload)).toEqual(['shot.png'])
+})
+
+test('a drop prompt translated without the action placeholder still shows the action after it', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="de"><c2-upload auto-upload="false" aria-label="Dateien"></c2-upload></div>')
+  const upload = page.locator('c2-upload')
+  await expect(upload.locator('[part="prompt"]')).toHaveText('Dateien hier ablegen durchsuchen')
+  await expect(upload.locator('[part="prompt"] .action')).toHaveText('durchsuchen')
+})
+
+test('in Safari, a held or repeated paste shortcut reads the clipboard once', async ({ page, renderScenario }) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    const scope = window as unknown as { reads: number; release?: () => void }
+    scope.reads = 0
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        // Held open, as Safari's Paste callout holds it, until the test lets it go.
+        read: async () => {
+          scope.reads++
+          await new Promise<void>((resolve) => (scope.release = resolve))
+          return [{ types: ['image/png'], getType: async (type: string) => new Blob(['png'], { type }) }]
+        },
+      },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste auto-upload="false" aria-label="Project files"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  const zone = upload.locator('.dropzone')
+  const mac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
+  const press = (repeat: boolean) =>
+    zone.evaluate((element, init) => element.dispatchEvent(new KeyboardEvent('keydown', { ...init, bubbles: true, composed: true })), {
+      key: 'v',
+      code: 'KeyV',
+      metaKey: mac,
+      ctrlKey: !mac,
+      repeat,
+    })
+  await press(false)
+  await expect.poll(() => page.evaluate(() => (window as unknown as { reads: number }).reads)).toBe(1)
+  await press(true)
+  await press(false)
+  await page.waitForTimeout(100)
+  await page.evaluate(() => (window as unknown as { release: () => void }).release())
+  await expect.poll(() => names(upload)).toEqual(['pasted.png'])
+  await page.waitForTimeout(100)
+  expect(await page.evaluate(() => (window as unknown as { reads: number }).reads)).toBe(1)
+  expect(await names(upload)).toEqual(['pasted.png'])
+})
+
+test('a translation that repeats the action placeholder keeps the text after it', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="nl"><c2-upload auto-upload="false" aria-label="Bestanden"></c2-upload></div>')
+  await expect(page.locator('c2-upload [part="prompt"]')).toHaveText('bladeren: sleep bestanden of bladeren hier')
+})
+
+test('in Safari, an image copied from a web page is taken although it carries its URL, named so an extension rule takes it', async ({
+  page,
+  renderScenario,
+}) => {
+  await asSafari(page)
+  await page.addInitScript(() => {
+    window.addEventListener('paste', (event) => event.stopImmediatePropagation(), true)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        read: async () => [
+          {
+            types: ['image/jpeg', 'text/uri-list'],
+            getType: async (type: string) => new Blob([type === 'text/uri-list' ? 'https://example.com/cat.jpg' : 'jpg'], { type }),
+          },
+        ],
+      },
+    })
+  })
+  await renderScenario('<c2-upload multiple paste accept=".jpg" auto-upload="false" aria-label="Photos"></c2-upload>')
+  const upload = page.locator('c2-upload')
+  await upload.locator('.dropzone').focus()
+  await page.keyboard.press('ControlOrMeta+V')
+  await expect.poll(() => names(upload)).toEqual(['pasted.jpg'])
 })
