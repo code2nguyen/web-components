@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { test } from 'node:test'
+import { fileURLToPath } from 'node:url'
 import { grade as gradeAgent } from './readiness/agent.ts'
 import { scriptApi } from '../src/installed.ts'
 import { grade, nestedTags, needFromDescription, runDiscovery, scoreComponent, type Sources, type Task } from './readiness/score.ts'
@@ -206,6 +209,8 @@ test('a changed run scores the components whose package, docs page or gallery ch
   assert.equal(changedComponents(reg, 'HEAD', ['packages/tools/mcp/src/search.ts']).full, 'packages/tools/mcp/src/search.ts')
   // The benchmark requirements are not scoring: discovery runs every time anyway.
   assert.equal(changedComponents(reg, 'HEAD', ['packages/tools/mcp/scripts/readiness/tasks.json']).full, undefined)
+  // Neither the lab reader nor the call log feeds a component score.
+  assert.equal(changedComponents(reg, 'HEAD', ['packages/tools/mcp/scripts/readiness/lab.ts', 'packages/tools/mcp/src/call-log.ts']).full, undefined)
 })
 
 test('a component is compared with its last score check by check', async () => {
@@ -220,4 +225,160 @@ test('a component is compared with its last score check by check', async () => {
   const library = aggregate({ a: before, b: now })
   assert.equal(library.score, 89.3)
   assert.deepEqual(library.grades, { A: 1, B: 1, C: 0, D: 0, F: 0 })
+})
+
+// The built registry is a build artifact, absent in CI's unit step.
+const builtRegistry = new URL('../data/registry.json', import.meta.url)
+test(
+  'the committed lab reports give tasks with real components, no generic button and no cross-cutting row',
+  { skip: !existsSync(builtRegistry) && 'data/registry.json not built' },
+  async () => {
+    const { labTasks } = await import('./readiness/lab.ts')
+    const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+    const tasks = labTasks(reg, fileURLToPath(new URL('../../../..', import.meta.url)))
+    assert.ok(tasks.length > 0)
+    for (const t of tasks) {
+      assert.match(t.id, /^lab:[a-z0-9-]+\/R\d+$/)
+      for (const id of t.expect) assert.ok(reg.components[id], `${t.id}: ${id}`)
+    }
+    const chips = tasks.find((t) => t.id === 'lab:catalog-filter/R6')
+    assert.deepEqual(chips?.expect, ['chip', 'chip-group'])
+    // R12 is all a11y: a screen reader reads every component, there is nothing to search for.
+    assert.equal(
+      tasks.find((t) => t.id === 'lab:catalog-filter/R12'),
+      undefined,
+    )
+  },
+)
+
+test("a lab-only run replaces report.md's lab section, or adds it before the agent run", async () => {
+  const { withLabSection } = await import('./readiness.ts')
+  const report = '# R\n\n## Discovery misses\n\nx\n\n## Lab requirements\n\nold\n\n## Agent run\n\ny\n'
+  assert.equal(
+    withLabSection(report, ['', '## Lab requirements', '', 'new']),
+    '# R\n\n## Discovery misses\n\nx\n\n## Lab requirements\n\nnew\n\n## Agent run\n\ny\n',
+  )
+  assert.equal(withLabSection('# R\n\n## Agent run\n\ny\n', ['', '## Lab requirements', '', 'new']), '# R\n\n## Lab requirements\n\nnew\n\n## Agent run\n\ny\n')
+})
+
+test('a report.md without the usual headings still gets its lab section, at the end', async () => {
+  const { withLabSection } = await import('./readiness.ts')
+  assert.equal(withLabSection('# R\n', ['', '## Lab requirements', '', 'new']), '# R\n\n## Lab requirements\n\nnew\n')
+})
+
+test('a lab row naming an icon by its own tag expects the icon set', { skip: !existsSync(builtRegistry) && 'data/registry.json not built' }, async () => {
+  const { labTasks } = await import('./readiness/lab.ts')
+  const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+  const root = mkdtempSync(join(tmpdir(), 'c2n-lab-'))
+  mkdirSync(join(root, 'lab/specs/scenarios'), { recursive: true })
+  mkdirSync(join(root, 'lab/reports/s'), { recursive: true })
+  mkdirSync(join(root, 'lab/apps/s/default'), { recursive: true })
+  mkdirSync(join(root, 'lab/apps/s/dense'), { recursive: true })
+  writeFileSync(join(root, 'lab/specs/scenarios/s.md'), '## Requirements\n\n- R1 [input.search] A search icon in the field.\n')
+  writeFileSync(
+    join(root, 'lab/reports/s/default.md'),
+    '## Requirements\n\n| Req | Outcome | Components | Notes |\n| --- | --- | --- | --- |\n| R1 | met | c2-feather-search | |\n',
+  )
+  assert.deepEqual(
+    labTasks(reg, root).map((t) => t.expect),
+    [['feather-icons']],
+  )
+})
+
+test(
+  'a lab row keeps a button group as its answer: only a plain button and glyph icons are generic',
+  { skip: !existsSync(builtRegistry) && 'data/registry.json not built' },
+  async () => {
+    const { labTasks } = await import('./readiness/lab.ts')
+    const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+    const root = mkdtempSync(join(tmpdir(), 'c2n-lab-'))
+    mkdirSync(join(root, 'lab/specs/scenarios'), { recursive: true })
+    mkdirSync(join(root, 'lab/reports/s'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/default'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/dense'), { recursive: true })
+    writeFileSync(join(root, 'lab/specs/scenarios/s.md'), '## Requirements\n\n- R1 [input.choice] Monthly and Yearly, two options shown at once.\n')
+    writeFileSync(
+      join(root, 'lab/reports/s/default.md'),
+      '## Requirements\n\n| Req | Outcome | Components | Notes |\n| --- | --- | --- | --- |\n| R1 | met | c2-button-group, c2-button, c2-card | |\n',
+    )
+    assert.deepEqual(
+      labTasks(reg, root).map((t) => t.expect),
+      [['button-group', 'card']],
+    )
+  },
+)
+
+test(
+  'a requirement built in two directions counts once, with both builds’ components',
+  { skip: !existsSync(builtRegistry) && 'data/registry.json not built' },
+  async () => {
+    const { labTasks } = await import('./readiness/lab.ts')
+    const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+    const root = mkdtempSync(join(tmpdir(), 'c2n-lab-'))
+    mkdirSync(join(root, 'lab/specs/scenarios'), { recursive: true })
+    mkdirSync(join(root, 'lab/reports/s'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/default'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/dense'), { recursive: true })
+    writeFileSync(join(root, 'lab/specs/scenarios/s.md'), '## Requirements\n\n- R1 [input.rating] Rate the product.\n')
+    const row = (tag: string) => `## Requirements\n\n| Req | Outcome | Components | Notes |\n| --- | --- | --- | --- |\n| R1 | met | ${tag} | |\n`
+    writeFileSync(join(root, 'lab/reports/s/default.md'), row('c2-rate'))
+    writeFileSync(join(root, 'lab/reports/s/dense.md'), row('c2-slider'))
+    assert.deepEqual(
+      labTasks(reg, root).map((t) => [t.id, t.expect]),
+      [['lab:s/R1', ['rate', 'slider']]],
+    )
+  },
+)
+
+test(
+  'a package name in a lab row expects the components of it the build uses',
+  { skip: !existsSync(builtRegistry) && 'data/registry.json not built' },
+  async () => {
+    const { labTasks } = await import('./readiness/lab.ts')
+    const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+    const root = mkdtempSync(join(tmpdir(), 'c2n-lab-'))
+    mkdirSync(join(root, 'lab/specs/scenarios'), { recursive: true })
+    mkdirSync(join(root, 'lab/reports/s'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/default'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/dense'), { recursive: true })
+    mkdirSync(join(root, 'lab/apps/s/default'), { recursive: true })
+    writeFileSync(join(root, 'lab/specs/scenarios/s.md'), '## Requirements\n\n- R1 [chart.compare] Share of each plan.\n')
+    writeFileSync(
+      join(root, 'lab/reports/s/default.md'),
+      '## Requirements\n\n| Req | Outcome | Components | Notes |\n| --- | --- | --- | --- |\n| R1 | met | @c2n/chart | |\n',
+    )
+    writeFileSync(join(root, 'lab/apps/s/default/index.html'), '<c2-pie-chart aria-label="Plans"></c2-pie-chart>')
+    assert.deepEqual(
+      labTasks(reg, root).map((t) => t.expect),
+      [['pie-chart']],
+    )
+  },
+)
+
+test('the lab section is found by its heading line, not by a mention of it', async () => {
+  const { withLabSection } = await import('./readiness.ts')
+  const report = '# R\n\n### Lab requirements notes\n\nkeep\n\n## Lab requirements\n\nold\n\n## Agent run\n'
+  assert.equal(
+    withLabSection(report, ['', '## Lab requirements', '', 'new']),
+    '# R\n\n### Lab requirements notes\n\nkeep\n\n## Lab requirements\n\nnew\n\n## Agent run\n',
+  )
+})
+
+test('a spec id used twice is left out, and the other specs still count', { skip: !existsSync(builtRegistry) && 'data/registry.json not built' }, async () => {
+  const { labTasks } = await import('./readiness/lab.ts')
+  const reg = JSON.parse(readFileSync(builtRegistry, 'utf8')) as Registry
+  const root = mkdtempSync(join(tmpdir(), 'c2n-lab-'))
+  for (const dir of ['lab/specs/scenarios', 'lab/specs/features', 'lab/reports/s', 'lab/reports/t', 'lab/apps/s/default', 'lab/apps/t/default'])
+    mkdirSync(join(root, dir), { recursive: true })
+  const spec = '## Requirements\n\n- R1 [input.rating] Rate the product.\n'
+  writeFileSync(join(root, 'lab/specs/scenarios/s.md'), spec)
+  writeFileSync(join(root, 'lab/specs/features/s.md'), spec)
+  writeFileSync(join(root, 'lab/specs/scenarios/t.md'), spec)
+  const report = '## Requirements\n\n| Req | Outcome | Components | Notes |\n| --- | --- | --- | --- |\n| R1 | met | c2-rate | |\n'
+  writeFileSync(join(root, 'lab/reports/s/default.md'), report)
+  writeFileSync(join(root, 'lab/reports/t/default.md'), report)
+  assert.deepEqual(
+    labTasks(reg, root).map((t) => t.id),
+    ['lab:t/R1'],
+  )
 })

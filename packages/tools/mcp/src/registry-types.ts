@@ -26,7 +26,7 @@ export interface ComponentEntry {
   description: string
   /**
    * What a developer may call the need when they do not know the name: synonyms and other libraries' names ("faq",
-   * "snackbar", "segmented control"). From the docs page's `keywords` frontmatter; searched just below the name.
+   * "snackbar", "segmented control"). From the docs page's `keywords` frontmatter; searched with the weight of the name.
    */
   keywords?: string[]
   intro?: string

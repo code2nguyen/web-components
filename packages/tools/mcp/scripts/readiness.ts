@@ -105,10 +105,12 @@ export interface ReadinessReport {
   /** Checks costing the library the most points, summed over components. */
   weakest: { dimension: string; check: string; label: string; components: number; pointsLost: number }[]
   discovery: ReturnType<typeof runDiscovery>
+  /** The same measure over the requirements of the component lab's builds (`readiness/lab.ts`); not in the headline. */
+  lab: ReturnType<typeof runDiscovery>
   agent?: AgentReport
 }
 
-function build(only: string[], subset = false): ReadinessReport {
+function build(only: string[], subset: boolean, labRequirements: Task[]): ReadinessReport {
   const registry = loadRegistry()
   const sources = fileSources()
   const components = Object.values(registry.components)
@@ -144,6 +146,7 @@ function build(only: string[], subset = false): ReadinessReport {
   const agentFile = join(outDir, 'agent.json')
   const agent = existsSync(agentFile) ? (JSON.parse(readFileSync(agentFile, 'utf8')) as AgentReport) : undefined
   const discovery = runDiscovery(registry, tasks)
+  const lab = runDiscovery(registry, labRequirements)
   const overall = Math.round((agent ? score * 0.5 + discovery.score * 0.2 + agent.score * 0.3 : score * 0.7 + discovery.score * 0.3) * 10) / 10
   return {
     c2nVersion: registry.c2nVersion,
@@ -156,6 +159,7 @@ function build(only: string[], subset = false): ReadinessReport {
     grades,
     weakest,
     discovery,
+    lab,
     agent,
   }
 }
@@ -202,7 +206,10 @@ function markdown(report: ReadinessReport): string {
     '',
     '| Requirement | Expected | Rank | Top 3 |',
     '| --- | --- | ---: | --- |',
-    ...report.discovery.tasks.filter((t) => t.rank !== 1).map((t) => `| ${t.requirement} | ${t.expect.join(', ')} | ${t.rank ?? '—'} | ${t.top.join(', ')} |`),
+    ...report.discovery.tasks
+      .filter((t) => t.rank !== 1)
+      .map((t) => `| ${t.requirement.replace(/\|/g, '\\|')} | ${t.expect.join(', ')} | ${t.rank ?? '—'} | ${t.top.join(', ')} |`),
+    ...labMarkdown(report.lab),
   ]
   if (report.agent) {
     lines.push(
@@ -230,6 +237,40 @@ function markdown(report: ReadinessReport): string {
   return lines.join('\n') + '\n'
 }
 
+/** `report.md` with its "Lab requirements" section replaced by `lines` (inserted before the components table when missing). */
+export function withLabSection(text: string, lines: string[]): string {
+  const block = lines.join('\n').replace(/^\n+/, '') + '\n\n'
+  const start = text.search(/^## Lab requirements$/m)
+  if (start >= 0) {
+    const end = text.indexOf('\n## ', start + 1)
+    // The last section of the file ends in one newline, not a blank line.
+    return end >= 0
+      ? text.slice(0, start) + (lines.length ? block : '') + text.slice(end + 1)
+      : `${text.slice(0, start)}${lines.length ? block : ''}`.trimEnd() + '\n'
+  }
+  const agent = text.search(/^## Agent run$/m)
+  const anchor = agent >= 0 ? agent : text.search(/^## Components \(lowest first\)$/m)
+  if (!lines.length) return text
+  return anchor >= 0 ? text.slice(0, anchor) + block + text.slice(anchor) : `${text.trimEnd()}\n\n${block.trimEnd()}\n`
+}
+
+/** The lab discovery section: the requirements of real builds, worded for a product rather than for the benchmark. */
+function labMarkdown(lab: ReturnType<typeof runDiscovery>, afterFullRun = false): string[] {
+  if (lab.tasks.length === 0) return []
+  return [
+    '',
+    '## Lab requirements',
+    '',
+    `The requirements the component lab's builds met with c2n components (\`lab/specs\` for the words, \`lab/reports\` for the components the build used), searched the same way: **${lab.score}/100** (hit@1 ${pct(lab.hitAt1)}, hit@3 ${pct(lab.hitAt3)} over ${lab.tasks.length} requirements). Not part of the headline: nobody tuned the search for these words, so a miss here is a word developers use that the docs do not.${afterFullRun ? " Measured by a later changed run than the rest of this report: a lab file or a component's docs moved it." : ''}`,
+    '',
+    '| Requirement | Build used | Rank | Top 3 |',
+    '| --- | --- | ---: | --- |',
+    ...lab.tasks
+      .filter((t) => t.rank !== 1)
+      .map((t) => `| ${t.id.slice(4)}: ${t.requirement.replace(/\|/g, '\\|')} | ${t.expect.join(', ')} | ${t.rank ?? '—'} | ${t.top.join(', ')} |`),
+  ]
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Baseline: the last run, kept in the repository
 
@@ -251,6 +292,8 @@ export interface Baseline {
   dimensions: Record<string, number>
   grades: Record<string, number>
   discovery: { score: number; hitAt1: number; hitAt3: number; tasks: number }
+  /** Discovery over the component lab's requirements; not in `overall`. */
+  lab?: { score: number; hitAt1: number; hitAt3: number; tasks: number }
   agent?: { score: number; passed: number; tasks: number; date: string; model?: string }
   components: Record<string, BaselineComponent>
 }
@@ -309,7 +352,8 @@ function git(args: string[]): string {
 
 /**
  * The components changed since `commit`, committed or not: their package (outside its tests), docs page or gallery.
- * `full` names the file that makes every score move, when one changed.
+ * `full` names the file that makes every score move, when one changed. The lab requirements are not decided here: the
+ * run compares their result with the committed one, whatever moved it.
  */
 export function changedComponents(registry: Registry, commit: string, files?: string[]): { ids: Set<string>; full?: string } {
   const changed =
@@ -374,6 +418,7 @@ function changesMarkdown(
   baseline: Baseline,
   previous?: Baseline,
   full = false,
+  lab?: ReturnType<typeof runDiscovery>,
 ): string {
   const lines = [
     `# AI readiness — changes since ${commit.slice(0, 7)}`,
@@ -382,7 +427,7 @@ function changesMarkdown(
       ? `Full run: every component scored; the ${rows.length} whose result moved are listed. Full report: [report.md](report.md).`
       : `Scored ${rows.length} new or modified component${rows.length === 1 ? '' : 's'}; the other ${Object.keys(baseline.components).length - rows.length} keep their last score. Full report: [report.md](report.md).`,
     '',
-    `**AI readiness ${baseline.overall}/100** (${previous ? signed(round(baseline.overall - previous.overall)) : 'new'}) · component readiness ${baseline.score} (${previous ? signed(round(baseline.score - previous.score)) : 'new'}) · discovery ${baseline.discovery.score}${baseline.agent ? ` · agent ${baseline.agent.score}` : ''}`,
+    `**AI readiness ${baseline.overall}/100** (${previous ? signed(round(baseline.overall - previous.overall)) : 'new'}) · component readiness ${baseline.score} (${previous ? signed(round(baseline.score - previous.score)) : 'new'}) · discovery ${baseline.discovery.score}${baseline.agent ? ` · agent ${baseline.agent.score}` : ''}${baseline.lab ? ` · lab requirements ${baseline.lab.score} (${previous?.lab ? signed(round(baseline.lab.score - previous.lab.score)) : 'new'}, ${baseline.lab.tasks} requirements)` : ''}`,
     '',
     '| Component | Score | Change | Got better | Got worse |',
     '| --- | ---: | ---: | --- | --- |',
@@ -400,6 +445,7 @@ function changesMarkdown(
     )
     if (missing.length) lines.push(`### ${c.id} — ${c.score} (${c.grade})`, '', ...missing, '')
   }
+  if (lab) lines.push(...labMarkdown(lab).slice(1))
   return lines.join('\n') + '\n'
 }
 
@@ -411,6 +457,10 @@ function printSummary(report: ReadinessReport, merged: Baseline): void {
   console.log(
     `  Discovery            ${bar(report.discovery.score)} ${report.discovery.score}/100 (hit@1 ${pct(report.discovery.hitAt1)}, hit@3 ${pct(report.discovery.hitAt3)}, ${report.discovery.tasks.length} requirements)`,
   )
+  if (report.lab.tasks.length)
+    console.log(
+      `  Lab requirements     ${bar(report.lab.score)} ${report.lab.score}/100 (hit@1 ${pct(report.lab.hitAt1)}, hit@3 ${pct(report.lab.hitAt3)}, ${report.lab.tasks.length} requirements; not in the headline)`,
+    )
   if (report.agent)
     console.log(
       `  Agent                ${bar(report.agent.score)} ${report.agent.score}/100 (${report.agent.passed}/${report.agent.tasks.length} tasks, ${report.agent.date})`,
@@ -425,7 +475,56 @@ function printSummary(report: ReadinessReport, merged: Baseline): void {
   )
 }
 
-function main() {
+/**
+ * The lab requirements (`readiness/lab.ts`), loaded on demand: they are a side measure, so a broken lab tree (a
+ * duplicate spec id, a broken parser module) costs their section, never the run.
+ */
+async function loadLabTasks(registry: Registry): Promise<Task[] | undefined> {
+  try {
+    const { labTasks } = await import('./readiness/lab.ts')
+    return labTasks(registry, repoRoot)
+  } catch (error) {
+    // Undefined, not empty: the committed lab result stands rather than being erased by a broken tree.
+    console.warn(`Lab requirements skipped (the committed lab result is kept): ${(error as Error).message}`)
+    return undefined
+  }
+}
+
+/**
+ * Whether the lab result differs from what the committed files show: its numbers in the baseline, or its table of
+ * misses in `report.md` (a reworded requirement that still misses moves no number).
+ */
+function labResultDiffers(lab: ReturnType<typeof runDiscovery>, previous: Baseline | undefined): boolean {
+  // Numbers and table from the same place, the working tree: a run not yet committed is what the next one compares with.
+  if (JSON.stringify(labSummary(lab)) !== JSON.stringify(labOnDisk(previous))) return true
+  const file = join(outDir, 'report.md')
+  if (!existsSync(file)) return true
+  // Line endings normalised, so a CRLF checkout finds its heading.
+  const current = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
+  const section = (text: string) => {
+    const start = text.search(/^## Lab requirements$/m)
+    return start < 0
+      ? ''
+      : text
+          .slice(start)
+          .split('\n## ')[0]
+          .replace(/ Measured by a later changed run[^:]*: [^.]*\./, '')
+  }
+  return section(withLabSection(current, labMarkdown(lab))) !== section(current)
+}
+
+/** The lab result in the working tree's baseline (a run not yet committed included), else the committed one. */
+function labOnDisk(previous: Baseline | undefined): Baseline['lab'] {
+  const file = join(outDir, 'baseline.json')
+  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Baseline).lab : previous?.lab
+}
+
+/** The lab result as the baseline stores it. */
+function labSummary(lab: ReturnType<typeof runDiscovery>): Baseline['lab'] {
+  return lab.tasks.length ? { score: lab.score, hitAt1: round(lab.hitAt1 * 100), hitAt3: round(lab.hitAt3 * 100), tasks: lab.tasks.length } : undefined
+}
+
+async function main() {
   const args = process.argv.slice(2)
   const value = (name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined)
   const min = value('--min') === undefined ? undefined : Number(value('--min'))
@@ -450,7 +549,12 @@ function main() {
     }
   }
 
-  if (!full && ids && ids.size === 0) {
+  const labRequirements = await loadLabTasks(registry)
+  // Whether the lab result differs from the committed one decides, not which files changed: a lab file can change with
+  // no effect (a note edited), and a registry input outside the components (component-previews.ts, the skill's guides)
+  // can move it with no lab file touched.
+  const labChanged = Boolean(labRequirements) && labResultDiffers(runDiscovery(registry, labRequirements), previous)
+  if (!full && ids && ids.size === 0 && !labChanged) {
     // Nothing to score: the committed results stand, and the working tree stays clean.
     console.log(`AI readiness — c2n ${registry.c2nVersion} — no component changed since ${since.slice(0, 7)}; the committed results stand.`)
     console.log(
@@ -458,7 +562,7 @@ function main() {
     )
     return
   }
-  const report = build(full ? [] : [...(ids ?? [])], !full)
+  const report = build(full ? [] : [...(ids ?? [])], !full, labRequirements ?? [])
   const scored = Object.fromEntries(report.components.map((c) => [c.id, toBaselineComponent(c)]))
   const components = full ? scored : Object.fromEntries(Object.entries({ ...previous!.components, ...scored }).filter(([id]) => registry.components[id]))
   const merged: Baseline = {
@@ -472,12 +576,18 @@ function main() {
       hitAt3: round(report.discovery.hitAt3 * 100),
       tasks: report.discovery.tasks.length,
     },
+    // A lab tree that failed to load keeps the last result.
+    lab: labRequirements ? labSummary(report.lab) : labOnDisk(previous),
     agent: report.agent
       ? { score: report.agent.score, passed: report.agent.passed, tasks: report.agent.tasks.length, date: report.agent.date, model: report.agent.model }
       : undefined,
     components,
   }
   merged.overall = headline(report, merged)
+  // Against the lab result on disk, as every other lab comparison here: an uncommitted full run already measured it.
+  const labNumbersMoved = JSON.stringify(labOnDisk(previous)) !== JSON.stringify(merged.lab)
+  // The table can move with no number moving (a missed requirement's rank or top 3, after a docs edit).
+  const labMoved = Boolean(labRequirements) && (labChanged || labNumbersMoved || (!full && labResultDiffers(report.lab, previous)))
 
   const rows = report.components
     .map((c) => ({ c, before: previous?.components[c.id], cmp: compare(previous?.components[c.id], scored[c.id]) }))
@@ -487,15 +597,51 @@ function main() {
   )
   printSummary(report, merged)
 
+  // report.md is written by a full run, and by a changed run whose lab result moved.
+  let reportRewritten = false
   if (full) {
-    writeFileSync(join(outDir, 'report.md'), markdown({ ...report, overall: merged.overall, overallGrade: grade(merged.overall) }))
+    let text = markdown({ ...report, overall: merged.overall, overallGrade: grade(merged.overall) })
+    // A lab tree that failed to load keeps its last section, as the baseline keeps its last result.
+    const file = join(outDir, 'report.md')
+    if (!labRequirements && existsSync(file)) {
+      const old = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
+      const start = old.search(/^## Lab requirements$/m)
+      if (start >= 0) text = withLabSection(text, ['', ...old.slice(start).split('\n## ')[0].trimEnd().split('\n')])
+    }
+    writeFileSync(file, text)
     console.log('\n  Weakest checks (library points lost):')
     for (const w of report.weakest.slice(0, 6))
       console.log(`    ${w.pointsLost.toFixed(2).padStart(5)}  ${w.dimension} · ${w.label} (${w.components} components)`)
+  } else if (labMoved && existsSync(join(outDir, 'report.md'))) {
+    reportRewritten = true
+    // The lab result moved (a lab file, or a component's docs, changed): report.md's lab section follows baseline.json.
+    const file = join(outDir, 'report.md')
+    const current = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
+    const updated = withLabSection(current, labMarkdown(report.lab, true))
+    if (updated !== current) writeFileSync(file, updated)
   }
   // A full run lists the components whose result moved; a changed run every component it scored.
   const moved = full ? rows.filter(({ cmp }) => cmp.delta !== 0 || cmp.fixed.length || cmp.worse.length) : rows
-  writeFileSync(join(outDir, 'changes.md'), changesMarkdown(since, moved, merged, previous, !!full))
+  // A run that scored no component (only the lab result moved) keeps changes.md's record of the last scored ones.
+  const labOnly = !full && report.components.length === 0
+  if (labOnly && existsSync(join(outDir, 'changes.md'))) {
+    // Its headline still states the lab result, which this run moved: that line follows, the scored components stay.
+    const file = join(outDir, 'changes.md')
+    const current = readFileSync(file, 'utf8')
+    const lab = merged.lab
+      ? ` · lab requirements ${merged.lab.score} (${labOnDisk(previous) ? signed(round(merged.lab.score - labOnDisk(previous)!.score)) : 'new'}, ${merged.lab.tasks} requirements)`
+      : ''
+    // Replace the lab figure, or add it to the headline when an earlier changes.md had none.
+    const updated = / · lab requirements /.test(current)
+      ? current.replace(/ · lab requirements [^\n]*/, lab)
+      : current.replace(/^(\*\*AI readiness [^\n]*)$/m, `$1${lab}`)
+    if (updated !== current) writeFileSync(file, updated)
+  }
+  if (!labOnly)
+    writeFileSync(
+      join(outDir, 'changes.md'),
+      changesMarkdown(since, moved, merged, previous, !!full, labRequirements && (full || labMoved) ? report.lab : undefined),
+    )
   if (moved.length === 0) console.log(`\n  No component ${full ? 'moved' : 'changed'} since ${since.slice(0, 7)}.`)
   else console.log(`\n  ${full ? 'Moved' : 'Scored'} since ${since.slice(0, 7)}:`)
   for (const { c, cmp } of moved)
@@ -507,7 +653,9 @@ function main() {
       `\n  Since ${since.slice(0, 7)}: AI readiness ${signed(round(merged.overall - previous.overall))}, component readiness ${signed(round(merged.score - previous.score))}`,
     )
   writeBaseline(merged)
-  console.log(`\n  Written: ${full ? `${join(outDir, 'report.md')}, ` : ''}${join(outDir, 'changes.md')}, ${join(outDir, 'baseline.json')}`)
+  console.log(
+    `\n  Written: ${full || reportRewritten ? `${join(outDir, 'report.md')}, ` : ''}${labOnly ? '' : `${join(outDir, 'changes.md')}, `}${join(outDir, 'baseline.json')}`,
+  )
 
   const regressed = rows.filter(({ cmp }) => (cmp.delta ?? 0) < 0)
   if (args.includes('--fail-on-regression') && regressed.length) {
@@ -520,4 +668,5 @@ function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+// A path compared as a path: a URL would percent-encode a space and never match.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main()

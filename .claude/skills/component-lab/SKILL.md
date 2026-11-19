@@ -36,18 +36,38 @@ more detail, do this, in order, and stop when the session's budget is spent; wha
 
 ## 0. Build from a spec (when asked to build, or when a spec has no build)
 
-1. Read the spec (`lab/specs/**/<id>.md`) and `lab/capabilities.md`. Build each direction into
+1. Build **one direction at a time**, and arm the MCP call log before each: `node lab/scripts/readiness.mjs --arm <id>/<direction>`.
+   This repository's `.mcp.json` points the `c2n` server's `C2N_MCP_LOG` at `lab/.armed/mcp-calls.jsonl`, and
+   the server appends to it only while it exists, so every search, lookup and validation you make while building is
+   recorded (a server started before that setting existed needs a restart: the report then says no log was recorded).
+   `--arm` also records the build's start, so the report keeps only this build's calls, and refuses while another
+   build holds the log (`--force` when that build was abandoned). Right after arming, mark your own MCP server: call
+   `search_components` with the query `c2n-lab <id>/<direction>` (the report then keeps only that server's calls, and
+   leaves the marker out). Then read the spec (`lab/specs/**/<id>.md`)
+   and `lab/capabilities.md`. Build the direction into
    `lab/apps/<id>/<direction>/` following the spec's builder rules: find every component with the c2n MCP server
    (`search_components`, then `get_component` in **json** for exact attribute types), check the docs gallery for a
    look, and run `validate_markup` on what you wrote.
 2. Keep notes while building, not after: every search that did not find what exists, every `::part` override, every
    line of glue between two components, every plain HTML element. They are the report.
+   When the build is done, before running anything else, close its window: `node lab/scripts/readiness.mjs --end
+<id>/<direction>` (calls after it — the lab run, triage, the report — are not how the build found its components).
 3. Write `lab/targets/<id>.json` with one journey per spec task (`t1-…`), targets taken from the build's accessibility
    tree (`--aria`). A task that only applies to a phone, or only to a desktop, lists its `personas`.
 4. Run the lab (step 1 below) until every journey passes, fixing the build, not the journey, unless the journey is wrong.
 5. Write `lab/reports/<id>/<direction>.md` from `lab/reports/TEMPLATE.md`: one row per requirement, the component the
    note is about listed first. Then run `node lab/scripts/gaps.mjs --check` and read the coverage section: a component
    it lists as unused may be the one you should have found (that is how `c2-chip-group` turned up).
+   Then write the report's **AI readiness** section from the log:
+   `node lab/scripts/readiness.mjs <id>/<direction> --log lab/.armed/mcp-calls.jsonl` (it keeps the calls made
+   since `--arm` by the server your marker search names; if your server restarted during the build, pass every pid it
+   used with `--pid a,b`). It
+   copies the build's calls next to the report (`<direction>.calls.jsonl`, committed) and writes, between markers, the calls per tool, the search that
+   found each component the build used (or **none**: you knew the name, so a developer using the spec's words may not
+   find it), the components used without `get_component`, the searches that found none of them, and what
+   `validate_markup` says about the build now. A component no search returned, for a requirement that needed it, goes
+   to the `ai-readiness` skill as a discovery gap (a `keywords` fix on its docs page), not to `COMPONENT-FEEDBACK.md`. Then disarm the log (`node lab/scripts/readiness.mjs --disarm <id>/<direction>`) and arm it again for the next direction. To refresh a
+   section later (after editing the report), run the script without `--log`: it reads the committed log.
 6. File what the report found (step 3 below): `workaround`, `hand-rolled` and `failed` rows on an existing component
    go to `COMPONENT-FEEDBACK.md`; a missing component goes in the report's "Missing components" for review against
    `COMPONENT-ROADMAP.md`.

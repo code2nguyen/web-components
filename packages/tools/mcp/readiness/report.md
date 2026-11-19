@@ -56,6 +56,21 @@ Requirements where `search_components` did not rank an expected component first.
 | KPI card with this month's signups and the change versus last month | stat, delta | 2 | sankey-chart, delta, bullet-chart |
 | Double-check with the user before they cancel their subscription | confirm-dialog, popconfirm, modal | — | phosphor-icons, floating-panel, group-table |
 
+## Lab requirements
+
+The requirements the component lab's builds met with c2n components (`lab/specs` for the words, `lab/reports` for the components the build used), searched the same way: **56.7/100** (hit@1 47%, hit@3 67% over 15 requirements). Not part of the headline: nobody tuned the search for these words, so a miss here is a word developers use that the docs do not.
+
+| Requirement | Build used | Rank | Top 3 |
+| --- | --- | ---: | --- |
+| catalog-filter/R3: The Brand facet works the same way. Its counts take every other active filter into account (with Tents checked: Alpenfox 2, Northwind 1, Kestrel 0). | facet-list | 3 | highlight, table, facet-list |
+| catalog-filter/R5: "In stock only" hides the products that are out of stock. | switch | — | treemap-chart, candlestick-chart, overlap-chart |
+| catalog-filter/R7: "Clear filters" resets search, facets, price and stock in one action. | button | — | facet-list, autocomplete, tree-select |
+| catalog-filter/R8: Sort by Featured, Price: low to high, Price: high to low, or Name. | select | — | phosphor-icons, order-book, table |
+| catalog-filter/R9: When nothing matches, the results say so and offer "Clear filters". | status-panel | 6 | flowsheet, search-field, autocomplete |
+| pricing-page/R1: Monthly and Yearly are two options shown at once; switching updates every price and billing note. | button-group | — | recurrence-editor, view-options, depth-chart |
+| pricing-page/R2: Prices are currency in the reader's locale. | format-number | 2 | money-input, format-number, depth-chart |
+| pricing-page/R4: On a phone the cards stack, Team first, and the comparison table scrolls sideways in its frame with the feature column kept visible. | table, card | 2 | phosphor-icons, table, group-table |
+
 ## Agent run
 
 default model, 2026-11-19. A task passes when the code uses an expected tag and attribute and `validate_markup` finds no error.

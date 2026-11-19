@@ -25,6 +25,8 @@ scripts/generator/tsconfig.tsbuildinfo
 apps/ui/public/demo/
 /playwright-report/
 /test-results/
+# The armed MCP call log of a lab build (lab/scripts/readiness.mjs --arm): outside test-results/, which Playwright clears
+/lab/.armed/
 **/coverage/
 *.tsbuildinfo
 **/playwright-report/

@@ -21,6 +21,7 @@ import {
   truncate,
 } from './render.ts'
 import { searchComponents, searchExamples } from './search.ts'
+import { deferLog, logCall } from './call-log.ts'
 
 const GUIDE_TOPICS = ['workflow', 'theming', 'variant-components', 'frameworks'] as const
 const readOnly = { readOnlyHint: true, openWorldHint: false } as const
@@ -117,6 +118,35 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
 
   // With the components only the project's installed `@c2n/components` knows: read on each call, as installs change.
   const live = () => withInstalledComponents(registry)
+
+  const INSTALLED_API_TOOLS = new Set(['validate_markup', 'report_issue'])
+  // `C2N_MCP_LOG=<file>` records every call while that file exists (the lab measures how a build found its components).
+  const logFile = process.env.C2N_MCP_LOG
+  if (logFile) {
+    // The SDK calls a tool with an input schema as (args, extra) and one without as (extra).
+    type Handler = (...params: unknown[]) => unknown
+    const register = server.registerTool.bind(server) as unknown as (name: string, config: { inputSchema?: unknown }, handler: Handler) => unknown
+    ;(server as unknown as { registerTool: (name: string, config: { inputSchema?: unknown }, handler: Handler) => unknown }).registerTool = (
+      name,
+      config,
+      handler,
+    ) =>
+      register(name, config, async (...params: unknown[]) => {
+        const started = new Date().toISOString()
+        const args = (config?.inputSchema ? params[0] : undefined) as Record<string, unknown> | undefined
+        try {
+          return await handler(...params)
+        } finally {
+          // A call whose handler threw was still made (one the SDK rejects for its arguments never reaches here). The
+          // entry is written after the answer leaves, so that answer never waits for it (a call made right after may,
+          // while a search or validation is recomputed), and flushed when the
+          // server stops, so the last call of a session is kept. Each tool's view: the installed API for those two,
+          // the live registry for the rest.
+          const view = INSTALLED_API_TOOLS.has(name) ? () => withInstalledApi(registry) : live
+          deferLog(() => logCall(logFile, view, name, args ?? {}, started))
+        }
+      })
+  }
 
   const formatSchema = z.enum(['markdown', 'json']).default('markdown').describe('Output format')
   const tagSchema = z
@@ -294,9 +324,11 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       annotations: readOnly,
     },
     ({ query, tag, limit }) => {
-      const resolved = tag ? resolveElement(live(), tag) : undefined
-      if (tag && !resolved) return notFound(live(), tag)
-      const hits = searchExamples(registry, query, limit, resolved?.component)
+      // One view for the tag and the search, read once.
+      const view = live()
+      const resolved = tag ? resolveElement(view, tag) : undefined
+      if (tag && !resolved) return notFound(view, tag)
+      const hits = searchExamples(view, query, limit, resolved?.component)
       if (hits.length === 0) return text(`No gallery card matches "${query}". Try \`get_examples\` with \`view: "index"\` for one component.`)
       return text(
         `${hits.length} look(s) for "${query}"\n\n` +
