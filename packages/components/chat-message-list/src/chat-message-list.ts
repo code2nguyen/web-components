@@ -4,6 +4,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { chatMessageListMessages } from './messages.js'
 import styles from './chat-message-list.scss?inline'
 
 /** Distance from the bottom, in pixels, that still counts as reading the latest message. */
@@ -82,14 +84,16 @@ export interface ChatMessageList {
 export class ChatMessageList extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** Accessible name of the conversation log. */
-  @property() label = 'Conversation'
+  /** Accessible name of the conversation log. Empty, it is the `label` message ("Conversation"). */
+  @property() label = ''
   /** Whether older messages can be requested; enables the `load-older` event. */
   @property({ type: Boolean, reflect: true, attribute: 'has-more' }) hasMore = false
   /** Shows the `loading` slot, marks the log busy and holds back further `load-older` events. */
   @property({ type: Boolean, reflect: true }) loading = false
-  /** Accessible name of the jump-to-latest button. */
-  @property({ attribute: 'jump-label' }) jumpLabel = 'Jump to latest message'
+  /** Accessible name of the jump-to-latest button. Empty, it is the `jump` message ("Jump to latest message"). */
+  @property({ attribute: 'jump-label' }) jumpLabel = ''
+
+  private readonly msg = new LocalizeController(this, chatMessageListMessages)
 
   /** Whether the list follows new messages, i.e. the reader is at the bottom. */
   @state() private following = true
@@ -235,7 +239,7 @@ export class ChatMessageList extends LitElement {
         class="c2-chat-message-list__scroller"
         part="scroller"
         role="log"
-        aria-label=${this.label}
+        aria-label=${this.label || this.msg.t('label')}
         aria-live="polite"
         aria-relevant="additions"
         aria-busy=${this.loading ? 'true' : 'false'}
@@ -244,15 +248,13 @@ export class ChatMessageList extends LitElement {
       >
         <div class="c2-chat-message-list__content" part="content">
           <slot name="start"></slot>
-          ${
-            this.loading ? html`<div class="c2-chat-message-list__loading" part="loading"><slot name="loading">Loading earlier messages…</slot></div>` : nothing
-          }
+          ${this.loading ? html`<div class="c2-chat-message-list__loading" part="loading"><slot name="loading">${this.msg.t('loading')}</slot></div>` : nothing}
           <slot @slotchange=${this.handleSlotChange}></slot>
           <div class="c2-chat-message-list__empty" part="empty" ?hidden=${!this.empty}><slot name="empty"></slot></div>
         </div>
       </div>
       <button class="c2-chat-message-list__jump-button" part="jump-button" type="button" ?hidden=${this.following} @click=${this.handleJump}>
-        <span class="c2-chat-message-list__visually-hidden">${this.jumpLabel}</span>
+        <span class="c2-chat-message-list__visually-hidden">${this.jumpLabel || this.msg.t('jump')}</span>
         <span class="c2-chat-message-list__jump-icon" aria-hidden="true">
           <slot name="jump-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

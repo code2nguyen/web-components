@@ -40,6 +40,13 @@ const scrollSettled = (list: Locator) =>
       }),
   )
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-chat-message-list loading has-more>${rows(3)}</c2-chat-message-list></div>`)
+  const list = page.locator('c2-chat-message-list')
+  await expect(list.getByText('Chargement des messages précédents…')).toBeVisible()
+  await expect(list.locator('.c2-chat-message-list__visually-hidden').first()).toHaveText('Aller au dernier message')
+})
+
 test('starts at the latest message and follows appended messages', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-chat-message-list>${rows(20)}</c2-chat-message-list>`)
   const list = page.locator('c2-chat-message-list')
