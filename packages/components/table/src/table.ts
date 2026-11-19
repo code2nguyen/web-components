@@ -1591,14 +1591,14 @@ export class Table extends LitElement {
   #renderBody(columns: TableColumnConfig[], pins: Map<string, PinPlacement>, start: number, end: number): unknown {
     if (this.error) {
       return html`<div class="row row--state" role="row">
-        <div class="cell cell--state cell--state-error" role="gridcell" part="state"><slot name="error">${this.error}</slot></div>
+        <div class="cell cell--state cell--state-error" role="gridcell" part="state"><slot name="error">${this.error || nothing}</slot></div>
       </div>`
     }
     if (this.rowCount === 0) {
       const isLoading = this.loading || this.#isBootstrapping
       return html`<div class="row row--state" role="row">
         <div class="cell cell--state" role="gridcell" part="state">
-          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${this.emptyMessage}</slot>`}
+          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${this.emptyMessage || nothing}</slot>`}
         </div>
       </div>`
     }
