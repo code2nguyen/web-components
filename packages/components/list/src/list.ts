@@ -6,7 +6,8 @@ import styles from './list.scss?inline'
 import { LIST_ITEM_FOCUS_REQUEST_EVENT, selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem, isFromInteractiveContent } from '@c2n/list-item'
 import { provide } from '@lit/context'
-import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
+import { findWrapped } from '@c2n/core/dom-helper.js'
 import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
 
 export interface SelectionChangeEventDetail {
@@ -31,15 +32,9 @@ const ROW_WRAPPER_DEPTH = 3
  * The `c2-list-item` a slotted element stands for: itself, or the first one inside it within a few levels, which is
  * how a row is wrapped by a framework island or a `c2-swipe-action`. Text nodes between tags are skipped.
  */
-function rowItem(element: Element, depth = 0): ListItem | undefined {
-  if (element instanceof ListItem) return element
+function rowItem(element: Element): ListItem | undefined {
   // A list nested in a row owns its own items.
-  if (depth >= ROW_WRAPPER_DEPTH || element instanceof List) return undefined
-  for (const child of element.children) {
-    const item = rowItem(child, depth + 1)
-    if (item) return item
-  }
-  return undefined
+  return findWrapped(element, (candidate) => candidate instanceof ListItem, { depth: ROW_WRAPPER_DEPTH, skip: (candidate) => candidate instanceof List })
 }
 
 /**
@@ -179,6 +174,17 @@ export class List extends LitElement {
     }
     this.syncRows()
     this.pushSwipeable()
+  }
+
+  constructor() {
+    super()
+    // A server-rendered list (as inside a hydrating `c2-select`) had its rows assigned before the `slotchange` listener
+    // existed, and no slotchange follows: the rows would never join the list's selection. A client render gets one.
+    // Replayed once the first update completes: the sync updates the list again, and the hydrating render itself had to
+    // match the server's, so it cannot sync first.
+    new SlotReplayController(this, () => {
+      if (this.items.length) this.handleSlotChange()
+    })
   }
 
   override connectedCallback(): void {
@@ -382,17 +388,6 @@ export class List extends LitElement {
     if (changedProperties.has('value') && typeof this.value === 'string') {
       this.value = arrayPropertyConverter.fromAttribute(this.value)
     }
-  }
-
-  /** Whether the shadow root came from the server (a declarative shadow root), which fires no slotchange. */
-  private readonly serverRendered = this.shadowRoot !== null
-
-  protected override firstUpdated(): void {
-    // A server-rendered list (as inside a hydrating `c2-select`) had its rows assigned before the `slotchange` listener
-    // existed, and no slotchange follows: the rows would never join the list's selection. A client render gets one.
-    // After the first update completes: the sync updates the list again, which inside `firstUpdated` Lit flags as an
-    // update scheduled from an update. The hydrating render itself had to match the server's, so it cannot sync first.
-    if (this.serverRendered && this.items.length) void this.updateComplete.then(() => this.handleSlotChange())
   }
 
   protected override updated(changedProperties: PropertyValueMap<this>): void {
