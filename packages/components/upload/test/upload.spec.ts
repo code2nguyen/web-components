@@ -120,7 +120,7 @@ test('validates file type, size and queue limit', async ({ page, scenario }) => 
 
   await expect(upload.locator('c2-attachment')).toHaveCount(1)
   await expect(upload).toHaveAttribute('data-rejections', 'size,type')
-  await expect(page.getByText(/exceeds the 4 B size limit/)).toBeVisible()
+  await expect(page.getByText(/exceeds the 4 bytes size limit/)).toBeVisible()
   await expect(page.getByText(/not an accepted file type/)).toBeVisible()
 
   await input.setInputFiles([pdf('second.pdf', 'ok'), pdf('third.pdf', 'ok')])

@@ -72,6 +72,7 @@ const upload = {
   browse: 'parcourez',
   filesMaximum: { one: '{0} fichier au maximum', other: '{0} fichiers au maximum' },
   rejectType: '{0} n’est pas d’un type accepté.',
+  upTo: "jusqu'à {0}",
 }
 
 addTranslations({ fr: { 'document-checklist': documentChecklist, 'image-uploader': imageUploader, 'drop-zone': dropZone, upload } })
