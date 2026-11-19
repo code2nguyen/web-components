@@ -31,6 +31,11 @@
     drop-indicator--color: rgb(2, 101, 220),
     drop-indicator--height: 2px,
     drop-indicator--border-radius: 999px,
+    drop-target--outline-color: #0265dc,
+    drop-target--outline-style: dashed,
+    drop-target--outline-width: 2px,
+    drop-target--outline-offset: -2px,
+    drop-refused--outline-color: #dc2626,
   )
 );
 
@@ -71,6 +76,17 @@
   overflow: auto;
 }
 
+// Nodes of the tree's `drop-kind` dragged in from outside: accepted, or another kind, refused.
+.c2-tree.drop-target,
+.c2-tree.drop-refused {
+  outline: css.cssVar(drop-target--outline-width) css.cssVar(drop-target--outline-style) css.cssVar(drop-target--outline-color);
+  outline-offset: css.cssVar(drop-target--outline-offset);
+}
+
+.c2-tree.drop-refused {
+  outline-color: css.cssVar(drop-refused--outline-color);
+}
+
 .empty {
   color: css.cssVar(empty--color);
   padding: css.cssVar(empty--padding);
@@ -96,7 +112,8 @@
   display: none;
 }
 
-.live {
+.live,
+.drop-status {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;

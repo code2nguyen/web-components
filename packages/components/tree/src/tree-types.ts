@@ -104,6 +104,27 @@ export interface TreeItemMoveEventDetail {
   previousIndex: number
 }
 
+/** Detail of the `item-drop` event: nodes dropped on the tree from outside it, before the tree changes. */
+export interface TreeItemDropEventDetail {
+  /** The payload kind of the drop: the tree's `drop-kind`. */
+  kind: string
+  /** The nodes the tree adds, in the order of the payload. */
+  items: TreeNode[]
+  /** The dropped entries the tree turns away: not a node with a `value`, or a value the tree already holds. */
+  refused: unknown[]
+  /** The parent the nodes go under, or `null` for the root. */
+  parent: TreeNode | null
+  /** Their index among that parent's children. */
+  index: number
+  /**
+   * In a tree authored in markup, the element to add a `c2-tree-item` per node to (`parentElement.insertBefore(row,
+   * before)`): the parent row, or the tree at the root. A data-driven tree adds the nodes to `items` itself.
+   */
+  parentElement: Element
+  /** The element to insert the new rows before, or `null` to append them. */
+  before: Element | null
+}
+
 /** How a checkbox tick travels between a node and its relatives. */
 export type TreeSelectionPropagation = 'none' | 'descendants' | 'parents' | 'both'
 

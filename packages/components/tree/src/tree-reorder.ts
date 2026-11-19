@@ -208,9 +208,15 @@ export function attachReorder(tree: Tree): void {
   })
 
   // A row that is a link, or holds an image, would otherwise start the browser's own drag and cancel ours. A touch
-  // hold would open the long-press menu partway into the drag.
+  // hold would open the long-press menu partway into the drag. An element the app made draggable on purpose
+  // (`draggable="true"`, a handle that writes an item payload for another tree) keeps its drag.
   tree.addEventListener('dragstart', (event) => {
-    if (tree.reorderable) event.preventDefault()
+    if (!tree.reorderable) return
+    // Only inside the tree: a draggable ancestor (a dashboard pane) must not take the rows' drag away from the reorder.
+    const path = event.composedPath()
+    const inside = path.slice(0, Math.max(0, path.indexOf(tree)))
+    if (inside.some((node) => node instanceof Element && node.getAttribute('draggable') === 'true')) return
+    event.preventDefault()
   })
   tree.addEventListener('contextmenu', (event) => {
     if ((press?.touch || drag) && tree.reorderable) event.preventDefault()

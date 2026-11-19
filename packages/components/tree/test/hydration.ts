@@ -12,7 +12,6 @@ window.hydrate = async (markup) => {
   // `setHTMLUnsafe` parses declarative shadow roots, as the page's own HTML parser does.
   document.querySelector('main')!.setHTMLUnsafe(markup)
   await import('../src/tree')
-  const item = document.querySelector('c2-tree-item') as Element & { updateComplete: Promise<unknown> }
-  await item.updateComplete
+  for (const element of document.querySelectorAll('c2-tree, c2-tree-item')) await (element as Element & { updateComplete: Promise<unknown> }).updateComplete
 }
 document.documentElement.dataset.modulesReady = 'true'

@@ -2,8 +2,9 @@ import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } f
 import { query } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { DropZoneController, type DropZoneItems } from '@c2n/core/controllers/drop-zone.js'
 import styles from './tree.scss?inline'
 // Registers `c2-tree-item` so a consumer of the tree alone gets the row element too (as `c2-tabs` does for
 // `c2-tab`). It is also what lets an MDX `client:only` island render nested rows as plain markup.
@@ -13,6 +14,7 @@ import type {
   TreeChildrenLoader,
   TreeExpansionChangeEventDetail,
   TreeItemClickEventDetail,
+  TreeItemDropEventDetail,
   TreeItemExpandEventDetail,
   TreeItemLoadErrorEventDetail,
   TreeItemMoveEventDetail,
@@ -35,6 +37,7 @@ export interface TreeEventMap {
   'item-expand': CustomEvent<TreeItemExpandEventDetail>
   'item-load-error': CustomEvent<TreeItemLoadErrorEventDetail>
   'item-move': CustomEvent<TreeItemMoveEventDetail>
+  'item-drop': CustomEvent<TreeItemDropEventDetail>
 }
 
 export interface Tree {
@@ -109,6 +112,7 @@ export interface Tree {
  * @event {CustomEvent<TreeItemExpandEventDetail>} item-expand - Fired when a row expands. Call `preventDefault()` to keep it closed. This is where a consumer authoring in markup appends children for a lazily loaded branch.
  * @event {CustomEvent<TreeItemLoadErrorEventDetail>} item-load-error - Fired when `loadChildren` rejects.
  * @event {CustomEvent<TreeItemMoveEventDetail>} item-move - Fired before a `reorderable` tree moves a row, by drag or keyboard. Call `preventDefault()` to keep the row where it is.
+ * @event {CustomEvent<TreeItemDropEventDetail>} item-drop - Fired when nodes of the `drop-kind` payload are dropped on the tree from outside it. A data-driven tree then adds them to `items`; in a tree authored in markup the application adds a `c2-tree-item` per node to `detail.parentElement`. Cancelable: `preventDefault()` adds none of them. Does not bubble: each of `c2-kanban`, `c2-reorder-list` and `c2-tree` sends its own `detail`, so a drop on one nested in another must not reach the outer one's listeners. Listen on the element itself.
  *
  * @cssproperty {color} [--c2-tree--background=#ffffff] - Background of the tree.
  * @cssproperty {padding} [--c2-tree--padding-top=4px] - Space above the first row.
@@ -132,6 +136,11 @@ export interface Tree {
  * @cssproperty {color} [--c2-tree__drop-indicator--color=rgb(2, 101, 220)] - Colour of the line marking where a dragged row will land.
  * @cssproperty {pixel} [--c2-tree__drop-indicator--height=2px] - Thickness of that line.
  * @cssproperty {border-radius} [--c2-tree__drop-indicator--border-radius=999px] - Corner radius of that line.
+ * @cssproperty {color} [--c2-tree__drop-target--outline-color=#0265dc] - Outline of the tree while nodes of its `drop-kind` are dragged over it.
+ * @cssproperty {string} [--c2-tree__drop-target--outline-style=dashed] - Outline style while a drop is possible.
+ * @cssproperty {length} [--c2-tree__drop-target--outline-width=2px] - Outline width while a drag is over the tree.
+ * @cssproperty {length} [--c2-tree__drop-target--outline-offset=-2px] - Outline offset; negative keeps it inside the scrolling area.
+ * @cssproperty {color} [--c2-tree__drop-refused--outline-color=#dc2626] - Outline of the tree while another kind of item is dragged over it, which it refuses.
  */
 @customElement('c2-tree')
 export class Tree extends LitElement {
@@ -174,6 +183,16 @@ export class Tree extends LitElement {
    */
   @property({ type: Boolean, reflect: true }) reorderable = false
 
+  /**
+   * The kind of item payload the tree takes from outside (another tree, another window), as a source writes it with
+   * `writeItemPayload(dataTransfer, kind, nodes)` from `@c2n/core/controllers/drop-zone.js` (MIME type
+   * `application/x-c2n-<kind>+json`), each item a `TreeNode`. Empty (the default) takes none. Needs `reorderable`.
+   * The middle of a row nests the nodes under it, its top or bottom edge puts them before or after it. The tree fires
+   * `item-drop`, adds the nodes to `items` when it is data-driven, and announces how many were added; a node whose
+   * value the tree already holds is not added.
+   */
+  @property({ type: String, attribute: 'drop-kind' }) dropKind = ''
+
   /** Deepest level, `0` at the root, a moved row and its subtree may reach in a `reorderable` tree. Unset: no limit. */
   @property({ type: Number, attribute: 'max-depth' }) maxDepth?: number
 
@@ -197,6 +216,12 @@ export class Tree extends LitElement {
   @property({ attribute: false }) renderActions?: TreeItemRenderer
 
   @query('.c2-tree') private container?: HTMLElement
+
+  #dropZone = new DropZoneController(this, {
+    itemKind: () => this.dropKind,
+    disabled: () => this.disabled || !this.reorderable,
+    onItems: (drop) => this.#receiveDrop(drop),
+  })
 
   @query('slot:not([name])') private rootSlot?: HTMLSlotElement
 
@@ -750,12 +775,137 @@ export class Tree extends LitElement {
     </c2-tree-item>`
   }
 
+  /** Where nodes dropped at a point land: into the row's middle, before its top edge, after its bottom edge. */
+  #dropPlace(y: number): { parent: TreeItem | null; before: TreeItem | null } {
+    const parentOf = (row: TreeItem): TreeItem | null => {
+      const parent = row.parentElement?.closest('c2-tree-item, c2-tree')
+      return parent instanceof TreeItem ? parent : null
+    }
+    const nextOf = (row: TreeItem): TreeItem | null => {
+      const parent = parentOf(row)
+      const siblings = parent ? parent.childItems : this.rootItems
+      return siblings[siblings.indexOf(row) + 1] ?? null
+    }
+    const rows = this.visibleItems
+    const boxOf = (row: TreeItem) => (row.renderRoot.querySelector('.row') ?? row).getBoundingClientRect()
+    // A point between two rows (a row gap, the tree's padding) counts as the nearer row's edge, so the drop stays at
+    // that depth instead of falling to the end of the root.
+    let nearest: { row: TreeItem; distance: number } | undefined
+    for (const row of rows) {
+      const box = boxOf(row)
+      const distance = y < box.top ? box.top - y : y >= box.bottom ? y - box.bottom + 1 : 0
+      if (!nearest || distance < nearest.distance) nearest = { row, distance }
+    }
+    const last = rows[rows.length - 1]
+    // Below the last row is the end of the root; anywhere above it belongs to the nearest row.
+    if (nearest && last && y < boxOf(last).bottom) {
+      const { row } = nearest
+      const box = boxOf(row)
+      const at = Math.min(Math.max((y - box.top) / (box.height || 1), 0), 1)
+      // A branch whose children have not loaded yet cannot take more: they would be lost when it loads.
+      const nestable = !row.disabled && !row.loading && !(row.hasChildren && row.childItems.length === 0)
+      if (at < 0.25) return { parent: parentOf(row), before: row }
+      // The bottom edge of an open branch sits right above its first child: the nodes go there, at the top of it.
+      if (at > 0.75 && nestable && row.expanded && row.childItems.length > 0) return { parent: row, before: row.childItems[0] }
+      if (at > 0.75 || !nestable) return { parent: parentOf(row), before: nextOf(row) }
+      return { parent: row, before: null }
+    }
+    return { parent: null, before: null }
+  }
+
+  /** Adds the nodes of an item payload dropped on the tree at the place under the pointer; returns how many it took. */
+  #receiveDrop({ kind, items: dropped, event }: DropZoneItems): number {
+    const { parent, before } = this.#dropPlace(event.clientY)
+    const siblings = parent ? parent.childItems : this.rootItems
+    const index = before ? Math.max(0, siblings.indexOf(before)) : siblings.length
+    const values = new Set<string>()
+    const walk = (rows: TreeItem[]) => {
+      for (const row of rows) {
+        values.add(row.value)
+        walk(row.childItems)
+      }
+    }
+    walk(this.rootItems)
+    const items: TreeNode[] = []
+    const refused: unknown[] = []
+    // Every value in a dropped node, its children included: one the tree already holds would make two rows answer to it.
+    const valuesOf = (node: unknown, into: string[]): boolean => {
+      const value = node && typeof node === 'object' ? (node as TreeNode).value : undefined
+      if (typeof value !== 'string' || !value) return false
+      // The payload may come from another window: a node of the wrong shape is refused, not read.
+      const { label, children } = node as { label?: unknown; children?: unknown }
+      if ((label !== undefined && typeof label !== 'string') || (children !== undefined && !Array.isArray(children))) return false
+      into.push(value)
+      return ((children as unknown[] | undefined) ?? []).every((child) => valuesOf(child, into))
+    }
+    // `max-depth` holds for drops as for the tree's own moves: the level they land at plus their subtree's height.
+    const level = parent ? parent.level + 1 : 0
+    const heightOf = (node: TreeNode): number => Math.max(0, ...(node.children ?? []).map((child) => heightOf(child) + 1))
+    const tooDeep = (node: unknown) => this.maxDepth != null && level + heightOf(node as TreeNode) > this.maxDepth
+    for (const entry of dropped) {
+      const own: string[] = []
+      let readable: boolean
+      try {
+        readable = valuesOf(entry, own) && !tooDeep(entry)
+      } catch {
+        // Nested past what the stack can walk: not a tree anyone drew.
+        readable = false
+      }
+      if (!readable || own.some((value) => values.has(value)) || new Set(own).size !== own.length) {
+        refused.push(entry)
+        continue
+      }
+      for (const value of own) values.add(value)
+      items.push(entry as TreeNode)
+    }
+    if (!items.length) return 0
+    const reference = parent ?? before ?? this.rootItems[this.rootItems.length - 1]
+    const inData = reference ? reference.getRootNode() === this.renderRoot : !this.#hasAuthoredRows()
+    const parentElement = parent ?? this
+    // A row from data sits in this shadow root; one from markup may be wrapped (an island, a layout `div`): `before` is
+    // the wrapper that is a child of `parentElement`, so `parentElement.insertBefore(row, before)` works.
+    const outer = (row: TreeItem): Element => {
+      if (inData) return row
+      let node: Element = row
+      while (node.parentElement && node.parentElement !== parentElement) node = node.parentElement
+      return node.parentElement === parentElement ? node : row
+    }
+    const detail: TreeItemDropEventDetail = {
+      kind,
+      items,
+      refused,
+      parent: parent?.node ?? null,
+      index,
+      parentElement,
+      before: before ? outer(before) : null,
+    }
+    if (!this.dispatchEvent(new CustomEvent<TreeItemDropEventDetail>('item-drop', { detail, cancelable: true }))) return 0
+    if (inData) this.items = insertNodes(this.items, parent?.value ?? null, index, items)
+    // The new rows show under their parent.
+    if (parent && !parent.expanded) void this.updateComplete.then(() => this.expand(parent.value))
+    return items.length
+  }
+
+  // The hydrating render matched the server's, which drew no empty state; the client draws it once that has completed.
+  readonly #hydration = new SlotReplayController(this, () => this.requestUpdate())
+
+  /** Whether the author wrote rows in markup: a default-slot child, not slotted content (`empty`) or a style or script. */
+  #hasAuthoredRows(): boolean {
+    // A server render has no light DOM to look at (the SSR shim gives the host no `children`).
+    return Array.from(this.children ?? []).some((child) => !child.hasAttribute('slot') && !['style', 'script', 'template'].includes(child.localName))
+  }
+
   override render() {
-    const empty = this.items.length === 0 && this.childElementCount === 0
+    // A server render cannot see the light DOM, so it draws no empty state: hydration would keep it under authored rows.
+    const empty = !isServer && !this.#hydration.hydrating && this.items.length === 0 && !this.#hasAuthoredRows()
     return html`
       <div
-        class="c2-tree"
+        class=${this.#dropZone.over ? (this.#dropZone.acceptable ? 'c2-tree drop-target' : 'c2-tree drop-refused') : 'c2-tree'}
         part="tree"
+        @dragenter=${this.#dropZone.handleDragEnter}
+        @dragover=${this.#dropZone.handleDragOver}
+        @dragleave=${this.#dropZone.handleDragLeave}
+        @drop=${this.#dropZone.handleDrop}
         @click=${this.#handleClick}
         @keydown=${this.#handleKeydown}
         @c2-tree-item-toggle=${this.#handleToggle}
@@ -770,6 +920,7 @@ export class Tree extends LitElement {
         <slot @slotchange=${this.#handleItemChange}></slot>
         ${empty ? html`<div class="empty"><slot name="empty">No items</slot></div>` : nothing}
       </div>
+      <div class="drop-status" role="status" aria-live="polite" aria-atomic="true">${this.#dropZone.announcement}</div>
     `
   }
 }
@@ -782,6 +933,21 @@ function unwrap(element: Element): TreeItem[] {
   if (element instanceof TreeItem) return [element]
   const child = element.firstElementChild
   return child instanceof TreeItem ? [child] : []
+}
+
+/** `items` with `nodes` inserted under `parent` (`null` for the root) at `index`; untouched branches are kept. */
+function insertNodes(items: TreeNode[], parent: string | null, index: number, nodes: TreeNode[]): TreeNode[] {
+  if (parent === null) return [...items.slice(0, index), ...nodes, ...items.slice(index)]
+  const find = (list: TreeNode[]): TreeNode | undefined => {
+    for (const node of list) {
+      if (node.value === parent) return node
+      const found = node.children && find(node.children)
+      if (found) return found
+    }
+    return undefined
+  }
+  const children = find(items)?.children ?? []
+  return replaceChildren(items, parent, [...children.slice(0, index), ...nodes, ...children.slice(index)])
 }
 
 /** Rebuilds only the path down to `value`, leaving every untouched branch identical. */

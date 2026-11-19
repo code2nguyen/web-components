@@ -352,3 +352,296 @@ test('Alt with an arrow inside a row action stays with that control', async ({ p
   await page.keyboard.press('Alt+ArrowUp')
   expect(await shape(page)).toBe('/one /two')
 })
+
+// ---- drops of nodes from outside the tree (another tree, another window) ----
+
+const NODE_TYPE = 'application/x-c2n-tree-node+json'
+
+/**
+ * Synthesises a drag of an item payload onto the row of `value` at `fraction` of its height (0 is its top edge):
+ * dragenter and dragover, then the drop (or a dragleave when `drop` is false). Returns how the tree was lit meanwhile.
+ */
+async function dropPayload(page: Page, value: string, fraction: number, type: string, payload: unknown, drop = true): Promise<string> {
+  return page.evaluate(
+    async ({ value, fraction, type, payload, drop }) => {
+      const host = document.querySelector('c2-tree') as HTMLElement & { updateComplete: Promise<unknown> }
+      const item = host.querySelector(`c2-tree-item[value="${value}"]`) ?? host.shadowRoot!.querySelector(`c2-tree-item[value="${value}"]`)!
+      const row = item.shadowRoot!.querySelector<HTMLElement>('.row')!
+      const box = row.getBoundingClientRect()
+      const transfer = new DataTransfer()
+      transfer.setData(type, JSON.stringify(payload))
+      const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + 20, clientY: box.top + box.height * fraction }
+      row.dispatchEvent(new DragEvent('dragenter', init))
+      row.dispatchEvent(new DragEvent('dragover', init))
+      // A refusal shows once the event has passed every zone around this one.
+      await new Promise((resolve) => setTimeout(resolve))
+      await host.updateComplete
+      const container = host.shadowRoot!.querySelector('.c2-tree')!
+      const lit = container.classList.contains('drop-refused') ? 'refused' : container.classList.contains('drop-target') ? 'target' : 'none'
+      row.dispatchEvent(new DragEvent(drop ? 'drop' : 'dragleave', init))
+      return lit
+    },
+    { value, fraction, type, payload, drop },
+  )
+}
+
+const dropStatus = (page: Page) => page.locator('c2-tree').locator('.drop-status')
+
+test('a data tree takes nodes dropped from outside under its drop-kind, into, before or after the row under the pointer', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node"></c2-tree>`)
+  const host = page.locator('c2-tree')
+  await host.evaluate((element) => {
+    ;(element as Tree).items = [
+      { value: 'src', label: 'src', children: [{ value: 'app', label: 'app.ts' }] },
+      { value: 'docs', label: 'docs', children: [] },
+    ]
+    const drops: unknown[] = []
+    ;(window as Window & { drops?: unknown[] }).drops = drops
+    element.addEventListener('item-drop', (event) => {
+      const { kind, items, refused, parent, index } = (event as CustomEvent).detail
+      drops.push({ kind, items: items.map((node: TreeNode) => node.value), refused: refused.length, parent: parent?.value ?? null, index })
+    })
+  })
+  // The middle of a row nests the nodes under it; a node whose value the tree holds is refused.
+  expect(
+    await dropPayload(page, 'docs', 0.5, NODE_TYPE, [
+      { value: 'guide', label: 'guide.md' },
+      { value: 'app', label: 'app twin' },
+    ]),
+  ).toBe('target')
+  await expect
+    .poll(() => host.evaluate((element) => JSON.stringify((element as Tree).items.map((node) => [node.value, node.children?.map((child) => child.value)]))))
+    .toBe(
+      JSON.stringify([
+        ['src', ['app']],
+        ['docs', ['guide']],
+      ]),
+    )
+  await expect(dropStatus(page)).toHaveText('1 item added. 1 item not added')
+  // The top edge of a row puts the nodes before it, among its siblings.
+  await dropPayload(page, 'docs', 0.1, NODE_TYPE, [{ value: 'notes', label: 'notes' }])
+  await expect.poll(() => host.evaluate((element) => (element as Tree).items.map((node) => node.value).join(' '))).toBe('src notes docs')
+  expect(await page.evaluate(() => (window as Window & { drops?: unknown[] }).drops)).toEqual([
+    { kind: 'tree-node', items: ['guide'], refused: 1, parent: 'docs', index: 0 },
+    { kind: 'tree-node', items: ['notes'], refused: 0, parent: null, index: 1 },
+  ])
+})
+
+test('a tree in markup hands the dropped nodes to the application, with the element to insert them in', async ({ page, renderScenario }) => {
+  await renderScenario(tree('drop-kind="tree-node"'))
+  await page.locator('c2-tree').evaluate((element) =>
+    element.addEventListener('item-drop', (event) => {
+      const { items, parentElement, before } = (event as CustomEvent).detail
+      for (const node of items as TreeNode[]) {
+        const row = document.createElement('c2-tree-item')
+        row.setAttribute('value', node.value)
+        row.setAttribute('label', node.label ?? node.value)
+        ;(parentElement as Element).insertBefore(row, before)
+      }
+    }),
+  )
+  // The bottom edge of a row puts the nodes after it.
+  await dropPayload(page, 'docs', 0.9, NODE_TYPE, [{ value: 'new', label: 'new.md' }])
+  await expect.poll(() => shape(page)).toBe('/src src/app src/main /docs /new /readme')
+  await expect(dropStatus(page)).toHaveText('1 item added')
+})
+
+test('refuses another kind of payload and a canceled item-drop, and ignores drops without drop-kind or reorderable', async ({ page, renderScenario }) => {
+  await renderScenario(tree('drop-kind="tree-node"'))
+  expect(await dropPayload(page, 'docs', 0.5, 'application/x-c2n-kanban-card+json', [{ id: 'x' }])).toBe('refused')
+  expect(await dropPayload(page, 'docs', 0.5, NODE_TYPE, [{ value: 'x' }], false)).toBe('target')
+  await page.locator('c2-tree').evaluate((element) => element.addEventListener('item-drop', (event) => event.preventDefault()))
+  await dropPayload(page, 'docs', 0.5, NODE_TYPE, [{ value: 'x' }])
+  await expect(dropStatus(page)).toHaveText('1 item not added')
+  expect(await shape(page)).toBe('/src src/app src/main /docs /readme')
+
+  for (const markup of [tree(), `<c2-tree aria-label="Files" drop-kind="tree-node">${files}</c2-tree>`]) {
+    await renderScenario(markup)
+    expect(await dropPayload(page, 'docs', 0.5, NODE_TYPE, [{ value: 'x' }])).toBe('none')
+  }
+})
+
+test('an empty data tree with authored empty content shows it, and takes a drop into items', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node" items="[]"><p slot="empty">Drop files here</p></c2-tree>`)
+  const host = page.locator('c2-tree')
+  await expect(host.locator('p[slot="empty"]')).toBeVisible()
+  await page.evaluate(async (type) => {
+    const host = document.querySelector('c2-tree')!
+    const zone = host.shadowRoot!.querySelector<HTMLElement>('.c2-tree')!
+    const box = zone.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, JSON.stringify([{ value: 'guide', label: 'guide.md' }]))
+    const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + 20, clientY: box.top + 10 }
+    for (const type of ['dragenter', 'dragover', 'drop']) zone.dispatchEvent(new DragEvent(type, init))
+  }, NODE_TYPE)
+  await expect.poll(() => host.evaluate((element) => (element as Tree).items.map((node) => node.value))).toEqual(['guide'])
+  await expect(dropStatus(page)).toHaveText('1 item added')
+})
+
+test('a dropped node whose child the tree already holds is refused', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node"></c2-tree>`)
+  const host = page.locator('c2-tree')
+  await host.evaluate((element) => {
+    ;(element as Tree).items = [{ value: 'src', label: 'src', children: [{ value: 'app', label: 'app.ts' }] }]
+  })
+  await dropPayload(page, 'src', 0.9, NODE_TYPE, [{ value: 'lib', label: 'lib', children: [{ value: 'app', label: 'app twin' }] }])
+  await expect(dropStatus(page)).toHaveText('1 item not added')
+  expect(await host.evaluate((element) => (element as Tree).items.map((node) => node.value))).toEqual(['src'])
+})
+
+test("a reorderable tree keeps the browser's drag off its rows, but not off a handle the app made draggable", async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree aria-label="Files" reorderable drop-kind="tree-node">
+      <c2-tree-item value="readme"><span slot="label"><a href="#readme">README.md</a> <span class="handle" draggable="true">⠿</span></span></c2-tree-item>
+    </c2-tree>
+  `)
+  const cancelled = await page.evaluate(() => {
+    const fire = (target: Element) => {
+      const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
+      target.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    return { link: fire(document.querySelector('a')!), handle: fire(document.querySelector('.handle')!) }
+  })
+  expect(cancelled).toEqual({ link: true, handle: false })
+})
+
+test('a drop on the bottom edge of an open folder lands at the top of it, not after its last child', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node" expanded-items="src"></c2-tree>`)
+  const host = page.locator('c2-tree')
+  await host.evaluate((element) => {
+    ;(element as Tree).items = [
+      {
+        value: 'src',
+        label: 'src',
+        children: [
+          { value: 'app', label: 'app.ts' },
+          { value: 'main', label: 'main.ts' },
+        ],
+      },
+      { value: 'docs', label: 'docs' },
+    ]
+  })
+  await expect(host.locator('c2-tree-item[value="main"]')).toHaveCount(1)
+  await dropPayload(page, 'src', 0.9, NODE_TYPE, [{ value: 'guide', label: 'guide.md' }])
+  await expect
+    .poll(() => host.evaluate((element) => JSON.stringify((element as Tree).items.map((node) => [node.value, node.children?.map((child) => child.value)]))))
+    .toBe(
+      JSON.stringify([
+        ['src', ['guide', 'app', 'main']],
+        ['docs', undefined],
+      ]),
+    )
+})
+
+test('a drop in the gap between two rows of an open folder stays in that folder', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <style>c2-tree-item { display: block; margin-block: 10px; }</style>
+    <c2-tree aria-label="Files" reorderable drop-kind="tree-node" expanded-items="src">
+      <c2-tree-item value="src" label="src">
+        <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+        <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+      </c2-tree-item>
+      <c2-tree-item value="docs" label="docs"></c2-tree-item>
+    </c2-tree>
+  `)
+  const host = page.locator('c2-tree')
+  await host.evaluate((element) => {
+    ;(window as Window & { drop?: unknown }).drop = undefined
+    element.addEventListener('item-drop', (event) => {
+      const { parent, before } = (event as CustomEvent).detail
+      ;(window as Window & { drop?: unknown }).drop = { parent: parent?.value ?? null, before: (before as Element | null)?.getAttribute('value') ?? null }
+    })
+  })
+  // Below the `app` row's box, in the margin above `main`.
+  await dropPayload(page, 'app', 1.3, NODE_TYPE, [{ value: 'guide', label: 'guide.md' }])
+  expect(await page.evaluate(() => (window as Window & { drop?: unknown }).drop)).toEqual({ parent: 'src', before: 'main' })
+})
+
+test('a reorderable tree inside a draggable ancestor still keeps the browser drag off its rows', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div draggable="true"><c2-tree aria-label="Files" reorderable><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree></div>`,
+  )
+  const cancelled = await page.evaluate(() => {
+    const row = document.querySelector('c2-tree-item')!
+    const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
+    row.dispatchEvent(event)
+    return event.defaultPrevented
+  })
+  expect(cancelled).toBe(true)
+})
+
+test('a drop that would nest deeper than max-depth is refused', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable max-depth="1" drop-kind="tree-node"></c2-tree>`)
+  const host = page.locator('c2-tree')
+  await host.evaluate((element) => {
+    ;(element as Tree).items = [{ value: 'src', label: 'src', children: [] }]
+  })
+  // Into `src` (level 1), a node with a child (level 2): past the limit.
+  await dropPayload(page, 'src', 0.5, NODE_TYPE, [{ value: 'lib', label: 'lib', children: [{ value: 'deep', label: 'deep.ts' }] }])
+  await expect(dropStatus(page)).toHaveText('1 item not added')
+  // A leaf fits at level 1.
+  await dropPayload(page, 'src', 0.5, NODE_TYPE, [{ value: 'leaf', label: 'leaf.ts' }])
+  await expect(dropStatus(page)).toHaveText('1 item added')
+})
+
+test('a row in a layout wrapper gets the wrapper as before, so the app can insert next to it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-tree aria-label="Files" reorderable drop-kind="tree-node"><div><c2-tree-item value="a" label="a.md"></c2-tree-item><c2-tree-item value="b" label="b.md"></c2-tree-item></div></c2-tree>`,
+  )
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await page.locator('c2-tree').evaluate((element) =>
+    element.addEventListener('item-drop', (event) => {
+      const { items, parentElement, before } = (event as CustomEvent).detail
+      for (const node of items as TreeNode[]) {
+        const row = document.createElement('c2-tree-item')
+        row.setAttribute('value', node.value)
+        row.setAttribute('label', node.label ?? node.value)
+        ;(parentElement as Element).insertBefore(row, before)
+      }
+    }),
+  )
+  await dropPayload(page, 'a', 0.1, NODE_TYPE, [{ value: 'new', label: 'new.md' }])
+  await expect(dropStatus(page)).toHaveText('1 item added')
+  expect(errors).toEqual([])
+  expect(await page.locator('c2-tree').evaluate((element) => [...element.children].map((child) => child.localName))).toEqual(['c2-tree-item', 'div'])
+})
+
+test('a dropped node whose children are not a list is refused', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node"></c2-tree>`)
+  await page.locator('c2-tree').evaluate((element) => ((element as Tree).items = [{ value: 'src', label: 'src' }]))
+  await dropPayload(page, 'src', 0.9, NODE_TYPE, [
+    { value: 'bad', children: 5 },
+    { value: 'ok', label: 'ok.ts' },
+  ])
+  await expect(dropStatus(page)).toHaveText('1 item added. 1 item not added')
+})
+
+test('a payload too deep to read reports no move, so the source keeps it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node"></c2-tree>`)
+  await page.locator('c2-tree').evaluate((element) => ((element as Tree).items = [{ value: 'src', label: 'src' }]))
+  page.on('pageerror', () => {})
+  const effects = await page.evaluate((type) => {
+    const depth = 200_000
+    const json = `[${'{"value":"n","children":['.repeat(depth)}${']}'.repeat(depth)}]`
+    const row = document.querySelector('c2-tree')!.shadowRoot!.querySelector('c2-tree-item')!
+    const box = row.getBoundingClientRect()
+    const transfer = new DataTransfer()
+    transfer.setData(type, json)
+    const effects: string[] = []
+    Object.defineProperty(transfer, 'dropEffect', { configurable: true, get: () => effects.at(-1) ?? 'none', set: (value: string) => effects.push(value) })
+    Object.defineProperty(transfer, 'effectAllowed', { configurable: true, get: () => 'move' })
+    const init = {
+      dataTransfer: transfer,
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+      clientX: box.left + box.width / 2,
+      clientY: box.top + box.height * 0.9,
+    }
+    for (const kind of ['dragenter', 'dragover', 'drop']) row.dispatchEvent(new DragEvent(kind, init))
+    return effects
+  }, NODE_TYPE)
+  expect(effects.at(-1)).toBe('none')
+})

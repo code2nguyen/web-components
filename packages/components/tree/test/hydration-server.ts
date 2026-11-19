@@ -12,3 +12,10 @@ export async function renderTree(): Promise<string> {
   await import('../src/tree')
   return collectResultSync(render(html`<c2-tree aria-label="Files"><c2-tree-item></c2-tree-item></c2-tree>`))
 }
+
+/** A tree with no rows, only its `empty` slot filled: the server draws no empty state, the client draws it after hydration. */
+export async function renderEmptyTree(): Promise<string> {
+  globalThis.customElements ??= customElements
+  await import('../src/tree')
+  return collectResultSync(render(html`<c2-tree aria-label="Files"><div slot="empty">Nothing yet</div></c2-tree>`))
+}
