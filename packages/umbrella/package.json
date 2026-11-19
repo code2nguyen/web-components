@@ -321,6 +321,10 @@
       "types": "./dist/chart/waterfall-chart.d.ts",
       "default": "./dist/chart/waterfall-chart.js"
     },
+    "./chart/spc": {
+      "types": "./dist/chart/spc.d.ts",
+      "default": "./dist/chart/spc.js"
+    },
     "./chat-input": {
       "types": "./dist/chat-input.d.ts",
       "default": "./dist/chat-input.js"

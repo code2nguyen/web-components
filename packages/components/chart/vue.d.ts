@@ -49,6 +49,7 @@ declare module 'vue' {
     'c2-area-chart': DefineComponent<
       C2Props<AreaChart> & {
         'fill-opacity'?: unknown
+        'reference-lines'?: unknown
         'y-min'?: unknown
         'y-max'?: unknown
         'x-field'?: unknown
@@ -390,6 +391,7 @@ declare module 'vue' {
     >
     'c2-line-chart': DefineComponent<
       C2Props<LineChart> & {
+        'reference-lines'?: unknown
         'y-min'?: unknown
         'y-max'?: unknown
         'x-field'?: unknown

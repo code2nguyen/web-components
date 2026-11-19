@@ -13,6 +13,10 @@
       "types": "./types/src/line-chart.d.ts",
       "default": "./dist/line-chart.js"
     },
+    "./spc.js": {
+      "types": "./types/src/spc.d.ts",
+      "default": "./dist/spc.js"
+    },
     "./area-chart.js": {
       "types": "./types/src/area-chart.d.ts",
       "default": "./dist/area-chart.js"
@@ -275,5 +279,10 @@
     "uplot": {
       "optional": true
     }
+  },
+  "c2n": {
+    "separateEntries": [
+      "./spc.js"
+    ]
   }
 }

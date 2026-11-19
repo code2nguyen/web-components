@@ -28,6 +28,16 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
 </c2-area-chart>
 ```
 
+```html tag=MdxCodeBlock,label=Target and range
+<c2-area-chart
+  label-field="month"
+  reference-lines='[{"value":200,"value2":260,"label":"Healthy range","tone":"success"},{"value":250,"label":"Target","tone":"info"}]'
+  data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":173},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'
+>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+</c2-area-chart>
+```
+
 ```html tag=MdxCodeBlock,label=Smooth revenue trend
 <style>
   .area-story {
