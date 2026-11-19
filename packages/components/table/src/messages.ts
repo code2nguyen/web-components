@@ -1,6 +1,8 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
 const en = {
+  /** Shown when the table has no rows and `empty-message` is not set. */
+  empty: 'No rows',
   /** Accessible name of the chevron that opens a row's detail panel. */
   detailToggle: 'Details',
   /** Tooltip of a value of a `status` column: `{0}` is the column's header, `{1}` the value's label. */

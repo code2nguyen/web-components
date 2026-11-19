@@ -1064,3 +1064,15 @@ test('its sticky header and pinned cells stay under a positioned element the pag
   })
   expect(hits).toEqual(['overlay', 'overlay'])
 })
+
+test('the empty message follows the page language, and an empty empty-message shows none', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-table style="height:240px;width:520px" rows='[]'>
+    <c2-table-column field="name" header="Nom"></c2-table-column>
+  </c2-table></div>`)
+  await expect(page.locator('c2-table').locator('slot[name="empty"]')).toHaveText('Aucune ligne')
+
+  await renderScenario(`<c2-table style="height:240px;width:520px" rows='[]' empty-message="">
+    <c2-table-column field="name" header="Name"></c2-table-column>
+  </c2-table>`)
+  await expect(page.locator('c2-table').locator('slot[name="empty"]')).toHaveText('')
+})

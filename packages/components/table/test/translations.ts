@@ -3,6 +3,7 @@ import { tableMessages } from '../src/messages.js'
 
 // The French an app would add: the library ships its text in English only.
 const fr: typeof tableMessages.en = {
+  empty: 'Aucune ligne',
   detailToggle: 'Détails',
   statusTitle: (column, label) => `${column} : ${label}`,
   summaryOffTarget: (target) => `devrait être ${target}`,

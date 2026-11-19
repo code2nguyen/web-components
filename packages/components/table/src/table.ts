@@ -681,8 +681,8 @@ export class Table extends LitElement {
   /** Shows the error state with this message. */
   @property({ type: String }) error = ''
 
-  /** Message shown when there are no rows. */
-  @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No rows'
+  /** Message shown when there are no rows. Defaults to the translatable `empty` message; an empty string shows none. */
+  @property({ type: String, attribute: 'empty-message' }) emptyMessage?: string
 
   /** The page on show, 1-based. Only meaningful while the table is `paginated`; clamped to `pageCount`. */
   @property({ type: Number, reflect: true }) page = 1
@@ -1598,7 +1598,7 @@ export class Table extends LitElement {
       const isLoading = this.loading || this.#isBootstrapping
       return html`<div class="row row--state" role="row">
         <div class="cell cell--state" role="gridcell" part="state">
-          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${this.emptyMessage || nothing}</slot>`}
+          ${isLoading ? html`<slot name="loading"><c2-spinner></c2-spinner></slot>` : html`<slot name="empty">${(this.emptyMessage ?? this.msg.t('empty')) || nothing}</slot>`}
         </div>
       </div>`
     }
