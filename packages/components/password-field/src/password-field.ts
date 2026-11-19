@@ -693,7 +693,7 @@ export class PasswordField extends LitElement {
     const showError = this.error && !this.effectiveDisabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     return html`<div class="supporting-text ${showError ? 'error' : ''}" id="help" ?hidden=${!message && !this.hasSupportingSlot}>
-      <slot name="supporting-text" @slotchange=${this.handleSupportingSlotChange}>${message}</slot>
+      <slot name="supporting-text" @slotchange=${this.handleSupportingSlotChange}>${message || nothing}</slot>
     </div>`
   }
 
