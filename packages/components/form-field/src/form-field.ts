@@ -1,8 +1,8 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { ISLAND_WRAPPER_SELECTOR, isFormControl, isIslandWrapper as isIsland, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import {
   FIELD_CONNECT_EVENT,
@@ -67,18 +67,12 @@ const NOT_RENDERED = new Set(['style', 'script', 'template', 'link', 'meta'])
  * form-associated element that is not a button. A button, an icon or a custom element not upgraded yet is the app's
  * decoration; a `c2-*` control announces itself when it upgrades.
  */
-const isCandidate = (element: Element) =>
-  !!fieldConsumerOf(element as FormFieldControl) ||
-  element.matches('input:not([type="hidden"], [type="submit"], [type="reset"], [type="image"], [type="button"]), select, textarea') ||
-  ((element.constructor as { formAssociated?: boolean }).formAssociated === true && !element.localName.endsWith('button'))
+const isCandidate = (element: Element) => !!fieldConsumerOf(element as FormFieldControl) || isFormControl(element, { entryOnly: true })
 
-/**
- * Astro's island elements, which wrap every component of an MDX fence in the docs (and of any Astro page) in a
- * `display: contents` element. They are the only elements looked through: any other child is the control.
+/*
+ * Astro's island elements (`isIslandWrapper`), which wrap every component of an MDX fence in the docs (and of any
+ * Astro page) in a `display: contents` element, are the only elements looked through: any other child is the control.
  */
-const ISLAND_WRAPPERS = new Set(['astro-island', 'astro-slot', 'astro-static-slot'])
-
-const isIsland = (element: Element) => ISLAND_WRAPPERS.has(element.localName)
 
 let warnedNative = false
 
@@ -195,8 +189,11 @@ export class FormField extends LitElement {
   private appliedCustomError = ''
   private announceTimer: ReturnType<typeof setTimeout> | undefined
   private ownerForm: HTMLFormElement | null = null
-  /** A declarative shadow root is attached before the element upgrades: the field was rendered on the server. */
-  private readonly serverRendered = this.shadowRoot !== null
+  /**
+   * The server cannot see the control, so a server-rendered field drew none (no required marker, no counter): it adopts
+   * its control once the hydrating render, which must match that, is done.
+   */
+  private readonly hydration = new SlotReplayController(this, () => this.adoptControl(this.findControl()))
 
   constructor() {
     super()
@@ -336,7 +333,7 @@ export class FormField extends LitElement {
     // Every island on the way to the control, nested ones (an `astro-slot` around an `astro-island`) included.
     const islands = [...this.children]
       .filter((child) => !child.hasAttribute('slot') && isIsland(child))
-      .flatMap((island) => [island, ...island.querySelectorAll([...ISLAND_WRAPPERS].join(', '))])
+      .flatMap((island) => [island, ...island.querySelectorAll(ISLAND_WRAPPER_SELECTOR)])
     if (!islands.length || !this.isConnected) return
     this.islandObserver ??= new MutationObserver(() => this.adoptControl(this.findControl()))
     // The island's own children, not the control's light DOM (a select's options), which never change the control.
@@ -344,12 +341,8 @@ export class FormField extends LitElement {
   }
 
   private adoptControl(control: FormFieldControl | null) {
-    // The server cannot see the control, so it drew the field without one (no required marker, no counter). The
-    // hydrating render must match that: adopt the control once it is done.
-    if (this.serverRendered && !this.hasUpdated) {
-      void this.updateComplete.then(() => this.adoptControl(this.findControl()))
-      return
-    }
+    // The hydrating render must match the server's, which drew no control: the replay adopts it once that is done.
+    if (this.hydration.hydrating) return
     // The same element again counts as new once it upgraded into a consumer.
     if (control === this.control && fieldConsumerOf(control) === this.consumer) return
     const previous = this.control
