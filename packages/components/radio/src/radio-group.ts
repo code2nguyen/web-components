@@ -18,6 +18,7 @@ export type RadioGroupOrientation = 'vertical' | 'horizontal'
 
 /** Events fired by {@link RadioGroup}, keyed for `addEventListener`. */
 export interface RadioGroupEventMap {
+  input: Event
   change: CustomEvent<{ value: string }>
 }
 
@@ -38,6 +39,7 @@ export interface RadioGroup {
  * @slot label - Group heading, announced as the group's name.
  * @slot description - Supporting text under the heading.
  *
+ * @event {Event} input - Fired with `change` after the user selects another option, `value` already updated. An option's own `input` stays inside the group.
  * @event {CustomEvent<{ value: string }>} change - Fired after the user selects another option. `detail.value` is the new `value`. Not fired for programmatic changes.
  *
  * @cssproperty {pixel} [--c2-radio-group--gap=8px] - Space between options.
@@ -93,6 +95,7 @@ export class RadioGroup extends LitElement {
     super()
     if (!isServer) {
       this.addEventListener('change', this.handleRadioChange)
+      this.addEventListener('input', this.handleRadioInput)
       this.addEventListener('keydown', this.handleKeydown)
     }
   }
@@ -218,6 +221,9 @@ export class RadioGroup extends LitElement {
   private select(radio: Radio) {
     if (this.value === radio.value) return
     this.value = radio.value
+    // The group's own pair, after `value` changed: a two-way binding (`v-model`, `ngModel`, `c2-form-field`) listens for
+    // `input` whose target is the group, and reads the new value.
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value }, bubbles: true, composed: true }))
   }
 
@@ -241,6 +247,13 @@ export class RadioGroup extends LitElement {
     // The group speaks for its options: swallow the option's event and emit one `change` with the group value.
     event.stopImmediatePropagation()
     this.select(radio)
+  }
+
+  /** An option's own `input` is swallowed too: the group fires one from `select()`, with its value already updated. */
+  private handleRadioInput = (event: Event) => {
+    const radio = event.target
+    if (radio === this || !(radio instanceof Radio) || radio.closest('c2-radio-group') !== this) return
+    event.stopImmediatePropagation()
   }
 
   private handleKeydown = (event: KeyboardEvent) => {

@@ -100,3 +100,23 @@ test('fieldset disabled state disables a group and removes its value from FormDa
   for (const radio of await page.getByRole('radio').all()) await expect(radio).toBeDisabled()
   await expect.poll(() => page.locator('form').evaluate((element) => new FormData(element as HTMLFormElement).has('plan'))).toBe(false)
 })
+
+test("the group fires its own input with its new value, and keeps its options' input inside", async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-radio-group name="plan" aria-label="Plan" value="a">
+      <c2-radio value="a">A</c2-radio>
+      <c2-radio value="b">B</c2-radio>
+    </c2-radio-group>
+  `)
+  const group = page.locator('c2-radio-group')
+  await group.evaluate((element) => {
+    const heard: string[] = []
+    ;(window as unknown as { heard: string[] }).heard = heard
+    for (const type of ['input', 'change'])
+      element.addEventListener(type, (event) =>
+        heard.push(`${type}:${(event.target as Element).localName}:${(element as HTMLElement & { value: string }).value}`),
+      )
+  })
+  await page.locator('c2-radio[value="b"]').click()
+  await expect.poll(() => page.evaluate(() => (window as unknown as { heard: string[] }).heard)).toEqual(['input:c2-radio-group:b', 'change:c2-radio-group:b'])
+})
