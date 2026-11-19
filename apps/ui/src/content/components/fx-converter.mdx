@@ -58,6 +58,20 @@ import '@c2n/components/fx-converter'
   ></c2-fx-converter>
   <c2-button onclick="const fx = document.getElementById('fx-live'); const requote = () => { fx.rate = Math.round((1.08 + Math.random() / 100) * 10000) / 10000; fx.rateExpires = String(Date.now() + 10000) }; if (!fx.requote) { fx.requote = requote; fx.addEventListener('rate-refresh', requote) } requote()">Guarantee for 10 seconds</c2-button>
 </div>
+<div data-label="German number format">
+  <c2-fx-converter locale="de-DE"
+    id="fx-live"
+    class="fx-demo"
+    from="EUR"
+    to="USD"
+    currencies="EUR;USD;GBP;JPY"
+    amount="100000"
+    rate="1.0842"
+    fee="413"
+    max="1000000"
+  ></c2-fx-converter>
+  <c2-button onclick="const fx = document.getElementById('fx-live'); const requote = () => { fx.rate = Math.round((1.08 + Math.random() / 100) * 10000) / 10000; fx.rateExpires = String(Date.now() + 10000) }; if (!fx.requote) { fx.requote = requote; fx.addEventListener('rate-refresh', requote) } requote()">Guarantee for 10 seconds</c2-button>
+</div>
 ```
 
 ### Amounts and the rate

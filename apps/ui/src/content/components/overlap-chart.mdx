@@ -52,7 +52,7 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
 </style>
 
 <div data-label="Three sets">
-  <c2-overlap-chart
+  <c2-overlap-chart aria-label="Three sets"
     class="plot"
     data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'
   >
@@ -97,6 +97,16 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
     <c2-chart-series field="design" label="Design"></c2-chart-series>
     <c2-chart-series field="frontend" label="Frontend"></c2-chart-series>
     <c2-chart-series field="backend" label="Backend"></c2-chart-series>
+  </c2-overlap-chart>
+</div>
+<div data-label="German number format">
+  <c2-overlap-chart locale="de-DE" aria-label="Three sets"
+    class="plot"
+    data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'
+  >
+    <c2-chart-series field="web" label="Web app"></c2-chart-series>
+    <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+    <c2-chart-series field="api" label="Public API"></c2-chart-series>
   </c2-overlap-chart>
 </div>
 ```

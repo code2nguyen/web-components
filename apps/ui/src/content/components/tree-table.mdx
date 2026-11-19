@@ -39,7 +39,7 @@ a parent row the aggregate of the leaves under it.
   }
 </style>
 <div data-label="Tree">
-  <c2-tree-table client:only="lit" class="grid" row-key="id" children-field="children" expanded-rows="eng" selection="multiple" checkbox-selection rows='[{"id":"eng","name":"Engineering","children":[{"id":"web","name":"Web platform","headcount":14,"budget":1820000},{"id":"mobile","name":"Mobile","headcount":9,"budget":1160000}]},{"id":"design","name":"Design","children":[{"id":"brand","name":"Brand","headcount":4,"budget":420000},{"id":"product-design","name":"Product design","headcount":7,"budget":810000}]},{"id":"ops","name":"Operations","headcount":5,"budget":390000}]'>
+  <c2-tree-table aria-label="Teams and budgets" client:only="lit" class="grid" row-key="id" children-field="children" expanded-rows="eng" selection="multiple" checkbox-selection rows='[{"id":"eng","name":"Engineering","children":[{"id":"web","name":"Web platform","headcount":14,"budget":1820000},{"id":"mobile","name":"Mobile","headcount":9,"budget":1160000}]},{"id":"design","name":"Design","children":[{"id":"brand","name":"Brand","headcount":4,"budget":420000},{"id":"product-design","name":"Product design","headcount":7,"budget":810000}]},{"id":"ops","name":"Operations","headcount":5,"budget":390000}]'>
     <c2-table-column field="name" header="Team" width="2fr" min-width="160" summary-label="Total"></c2-table-column>
     <c2-table-column field="headcount" header="People" width="90px" align="end" format="number" rollup="sum" summary="sum"></c2-table-column>
     <c2-table-column field="budget" header="Budget" width="130px" align="end" format="currency" rollup="sum" summary="sum"></c2-table-column>

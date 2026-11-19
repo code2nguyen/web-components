@@ -34,7 +34,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="Latency with an SLO">
-  <c2-boxplot-chart
+  <c2-boxplot-chart aria-label="Latency with an SLO"
     class="boxplot-plot"
     label-field="service"
     value-suffix=" ms"
@@ -58,6 +58,17 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </div>
 <div data-label="Horizontal, with the mean">
   <c2-boxplot-chart orientation="horizontal" mean="show"
+    class="boxplot-plot"
+    label-field="service"
+    value-suffix=" ms"
+    reference-lines='[{"value":500,"label":"SLO 500 ms","tone":"danger"}]'
+    data='[{"service":"api-gateway","latency":[38,52,60,66,70,74,78,82,86,92,98,104,112,124,140,166,240,270]},{"service":"auth","latency":[22,30,34,38,40,42,44,46,48,52,56,62,72,86,132]},{"service":"search","latency":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610,655,700]},{"service":"checkout","latency":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905,980,1120,1320]},{"service":"payments","latency":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688]},{"service":"inventory","latency":[44,60,70,74,80,88,94,100,110,122,128,150,180,198]}]'
+  >
+    <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+  </c2-boxplot-chart>
+</div>
+<div data-label="German number format">
+  <c2-boxplot-chart locale="de-DE" aria-label="Latency with an SLO"
     class="boxplot-plot"
     label-field="service"
     value-suffix=" ms"

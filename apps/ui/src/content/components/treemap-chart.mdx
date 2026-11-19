@@ -37,7 +37,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="Market map">
-  <c2-treemap-chart
+  <c2-treemap-chart aria-label="Market map"
     class="treemap-plot"
     label-field="ticker"
     group-field="sector"
@@ -70,6 +70,21 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     data='[{"name":"node_modules","children":[{"name":"echarts","size":52},{"name":"typescript","size":23},{"name":"@astrojs","size":18},{"name":"playwright-core","size":9},{"name":"lit","size":2}]},{"name":"packages","children":[{"name":"components","size":31},{"name":"tools","size":12},{"name":"icons","size":8}]},{"name":"apps","children":[{"name":"ui","size":14},{"name":"examples","size":11}]},{"name":".git","size":38}]'
   >
     <c2-chart-series field="size" label="Size (MB)"></c2-chart-series>
+  </c2-treemap-chart>
+</div>
+<div data-label="German number format">
+  <c2-treemap-chart locale="de-DE" aria-label="Market map"
+    class="treemap-plot"
+    label-field="ticker"
+    group-field="sector"
+    color-field="change"
+    color-label="Change"
+    color-suffix="%"
+    color-max="3"
+    label-content="name-value"
+    data='[{"sector":"Technology","ticker":"AAPL","cap":3400,"change":1.2},{"sector":"Technology","ticker":"MSFT","cap":3100,"change":-0.4},{"sector":"Technology","ticker":"NVDA","cap":2900,"change":3.1},{"sector":"Technology","ticker":"AVGO","cap":800,"change":2.2},{"sector":"Technology","ticker":"ORCL","cap":420,"change":-1.1},{"sector":"Communication","ticker":"GOOGL","cap":2100,"change":0.8},{"sector":"Communication","ticker":"META","cap":1400,"change":-2.3},{"sector":"Communication","ticker":"NFLX","cap":300,"change":0.2},{"sector":"Consumer","ticker":"AMZN","cap":1900,"change":1.6},{"sector":"Consumer","ticker":"TSLA","cap":800,"change":-3.4},{"sector":"Consumer","ticker":"HD","cap":380,"change":0.1},{"sector":"Financials","ticker":"JPM","cap":600,"change":-0.6},{"sector":"Financials","ticker":"V","cap":550,"change":0.3},{"sector":"Financials","ticker":"MA","cap":450,"change":0.5},{"sector":"Health","ticker":"LLY","cap":700,"change":-1.8},{"sector":"Health","ticker":"UNH","cap":480,"change":0.9},{"sector":"Health","ticker":"JNJ","cap":370,"change":-0.2},{"sector":"Energy","ticker":"XOM","cap":480,"change":-1.5},{"sector":"Energy","ticker":"CVX","cap":300,"change":0}]'
+  >
+    <c2-chart-series field="cap" label="Market cap ($bn)"></c2-chart-series>
   </c2-treemap-chart>
 </div>
 ```
