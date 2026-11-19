@@ -1,3 +1,5 @@
+import { composedSelectionRanges } from '@c2n/core/dom-helper.js'
+
 /** Where a popover is anchored: a `DOMRect`, or the edges of a text range. */
 export interface PopoverAnchor {
   left: number
@@ -36,11 +38,14 @@ export function composedSelection(root: Element | ShadowRoot | DocumentFragment)
   const selection = document.getSelection() as (Selection & { direction?: string }) | null
   if (selection && typeof selection.getComposedRanges === 'function' && root instanceof ShadowRoot) {
     if (!selection.rangeCount) return null
-    const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
-    if (!range) return null
-    return selection.direction === 'backward'
-      ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
-      : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
+    // `undefined` is an engine that answers neither form of the call: it falls through to `getSelection()` below.
+    const ranges = composedSelectionRanges(selection, [root])
+    if (ranges && !ranges[0]) return null
+    const range = ranges?.[0]
+    if (range)
+      return selection.direction === 'backward'
+        ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
+        : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
   }
   const fallback = shadow.getSelection?.() ?? selection
   return fallback?.anchorNode && fallback.focusNode ? (fallback as Selection & { anchorNode: Node; focusNode: Node }) : null
