@@ -941,7 +941,7 @@ export class BulletChart extends EchartsChartBase {
 
   #number(value: number): string {
     const precision = typeof this.precision === 'number' && Number.isFinite(this.precision) ? Math.max(0, Math.min(20, Math.trunc(this.precision))) : 2
-    return new Intl.NumberFormat(this.msg.locale || undefined, { maximumFractionDigits: precision }).format(value)
+    return new Intl.NumberFormat(this.canonicalLocale(this.msg.locale), { maximumFractionDigits: precision }).format(value)
   }
 
   #format(value: number, row: BulletRow): string {
@@ -957,7 +957,7 @@ export class BulletChart extends EchartsChartBase {
   }
 
   #percent(share: number): string {
-    return new Intl.NumberFormat(this.msg.locale || undefined, { style: 'percent', maximumFractionDigits: 0 }).format(share)
+    return new Intl.NumberFormat(this.canonicalLocale(this.msg.locale), { style: 'percent', maximumFractionDigits: 0 }).format(share)
   }
 
   #valueText(row: BulletRow): string {
@@ -977,7 +977,7 @@ export class BulletChart extends EchartsChartBase {
   #tick(value: number): string {
     const compact = Math.abs(value) >= 1000
     return new Intl.NumberFormat(
-      this.msg.locale || undefined,
+      this.canonicalLocale(this.msg.locale),
       compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 4 },
     ).format(value)
   }
@@ -986,7 +986,11 @@ export class BulletChart extends EchartsChartBase {
     const rows = this.#computeRows()
     const withTarget = rows.filter((row) => row.onTarget !== null)
     if (withTarget.length === 0) return this.msg.t('summaryNoTargets', rows.length)
-    return this.msg.t('summary', rows.length, new Intl.NumberFormat(this.msg.locale || undefined).format(withTarget.filter((row) => row.onTarget).length))
+    return this.msg.t(
+      'summary',
+      rows.length,
+      new Intl.NumberFormat(this.canonicalLocale(this.msg.locale)).format(withTarget.filter((row) => row.onTarget).length),
+    )
   }
 
   #announcement(row: BulletRow): string {

@@ -350,6 +350,8 @@ export class BubbleChart extends EchartsChartBase {
       xAxis: {
         ...system.xAxis,
         type: xType,
+        // A number axis here even when x-type says category: its ticks take the value axis' locale format.
+        ...(xType === 'time' ? {} : { axisLabel: system.yAxis.axisLabel }),
         data: undefined,
         scale: true,
         // A time axis keeps ECharts' own window: its ticks are dates, not steps of a number.
@@ -499,7 +501,7 @@ export class BubbleChart extends EchartsChartBase {
       .filter((circle, index) => index === 0 || circle.diameter > style.minSize)
     const size = circles[0]?.diameter ?? style.maxSize
     const format = (value: number): string =>
-      this.formatSize?.(value) ?? new Intl.NumberFormat(this.locale, { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+      this.formatSize?.(value) ?? new Intl.NumberFormat(this.intlLocale, { notation: 'compact', maximumFractionDigits: 1 }).format(value)
     const labelX = size + 10
     return html`
       <div class="size-legend" part="size-legend">

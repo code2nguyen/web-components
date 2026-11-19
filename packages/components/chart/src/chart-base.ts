@@ -149,6 +149,9 @@ export interface ChartBase {
   removeEventListener: TypedRemoveEventListener<ChartBase, ChartEventMap>
 }
 
+/** Locale tag → its canonical form, or '' for a malformed one: shared by every chart on the page. */
+const CANONICAL_LOCALES = new Map<string, string>()
+
 /**
  * Shared behaviour of every `c2-*-chart`: the chrome and its slots, the resize observer, theme
  * resolution, data normalisation, and the routing that keeps a realtime update off the expensive path.
@@ -358,6 +361,34 @@ export abstract class ChartBase extends LitElement {
 
   /** BCP 47 locale for the axis and tooltip formatting. Defaults to the browser locale. */
   @property({ type: String }) locale?: string
+
+  /**
+   * `locale` as `Intl` takes it: an empty or malformed tag (`locale=""` from a framework binding) is the browser's
+   * locale instead, since an `Intl` constructor that throws inside a formatter stops the chart from drawing.
+   * @internal
+   */
+  protected get intlLocale(): string | undefined {
+    return this.canonicalLocale(this.locale)
+  }
+
+  /**
+   * A locale tag as `Intl` takes it, or `undefined` (the browser's) for an empty or malformed one. For the locale a
+   * chart resolved from `lang` too (`this.msg.locale`). Worked out once per tag.
+   * @internal
+   */
+  protected canonicalLocale(locale: string | undefined): string | undefined {
+    if (!locale) return undefined
+    let canonical = CANONICAL_LOCALES.get(locale)
+    if (canonical === undefined) {
+      try {
+        canonical = Intl.getCanonicalLocales(locale)[0] ?? ''
+      } catch {
+        canonical = ''
+      }
+      CANONICAL_LOCALES.set(locale, canonical)
+    }
+    return canonical || undefined
+  }
 
   /** Shows the loading state instead of the plot. */
   @property({ type: Boolean, reflect: true }) loading = false
@@ -1155,7 +1186,7 @@ export abstract class ChartBase extends LitElement {
   /** Formats an x value for the tooltip. Time charts get a date, everything else a number. */
   protected formatX(value: number): string {
     if (this.xType === 'time') {
-      return new Intl.DateTimeFormat(this.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+      return new Intl.DateTimeFormat(this.intlLocale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
     }
     return this.formatValue(value)
   }
@@ -1174,7 +1205,7 @@ export abstract class ChartBase extends LitElement {
 
   /** Formats a y value for the tooltip and the built-in labels. */
   protected formatValue(value: number): string {
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 2 }).format(value)
+    return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 2 }).format(value)
   }
 
   // --------------------------------------------------------------- render ---
