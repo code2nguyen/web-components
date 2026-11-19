@@ -2,6 +2,7 @@
 /** stdio entry point: `npx -y @c2n/mcp` or `node dist/cli.js`; `c2n-mcp validate` runs the markup check instead. */
 import { readFileSync } from 'node:fs'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { flushLogs } from './call-log.ts'
 import { createServer } from './server.ts'
 
 const args = process.argv.slice(2)
@@ -18,5 +19,18 @@ if (args[0] === 'validate') {
   console.log(packageJson.version)
 } else {
   const server = createServer()
+  // The call log (C2N_MCP_LOG) writes after each answer: a client stopping the server closes stdin or sends a signal,
+  // and neither lets a pending write run, so flush it then.
+  if (process.env.C2N_MCP_LOG) {
+    process.on('exit', flushLogs)
+    process.stdin.once('close', flushLogs)
+    // Flush, then die of the same signal, so a supervisor still sees how the server stopped.
+    for (const signal of ['SIGTERM', 'SIGINT'] as const)
+      process.once(signal, () => {
+        flushLogs()
+        // Die of the same signal, unless something else listens for it: then its own handler decides.
+        if (process.listenerCount(signal) === 0) process.kill(process.pid, signal)
+      })
+  }
   await server.connect(new StdioServerTransport())
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node scripts/run-changed-component-tests.mjs --project=chromium",
     "test:changed": "node scripts/run-changed-component-tests.mjs",
-    "test:changed:unit": "node --test scripts/*.test.mjs lab/scripts/lib/*.test.mjs apps/ui/plugin/*.test.mjs apps/ui/src/utils/*.test.ts packages/core/src/*.test.ts packages/components/*/src/*.test.ts",
+    "test:changed:unit": "node --test scripts/*.test.mjs lab/scripts/*.test.mjs lab/scripts/lib/*.test.mjs apps/ui/plugin/*.test.mjs apps/ui/src/utils/*.test.ts packages/core/src/*.test.ts packages/components/*/src/*.test.ts",
     "test:button": "playwright test packages/components/button/test --project=chromium",
     "test:all": "playwright test",
     "test:serve": "vite --config tests/vite.config.ts",
@@ -38,6 +38,7 @@
     "gallery:shots": "node apps/ui/scripts/gallery-shots.mjs",
     "gallery:audit": "node apps/ui/scripts/gallery-shots.mjs --audit",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
+    "mcp:readiness": "npm run readiness -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",

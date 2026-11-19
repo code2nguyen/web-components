@@ -78,7 +78,7 @@ type Mixed = 'all' | 'some' | 'none'
  *
  * @tag c2-choice-matrix
  *
- * @slot detail-<row> - Content under the row whose value follows `detail-`, across the matrix: a comment, a note, a photo. Wins over `renderRowDetail`.
+ * @slot detail-<row> - Content under the row whose value follows `detail-`, across the matrix: a comment, a note (a `c2-textarea`), a photo. Wins over `renderRowDetail`.
  *
  * @event {Event} input - Fired when the user changes a choice, before `change`. Read `value`.
  * @event {CustomEvent<{ value: ChoiceMatrixValue }>} change - Fired after the user changes a choice. `detail.value` is the new `value`. Not fired for programmatic changes.
@@ -110,7 +110,7 @@ type Mixed = 'all' | 'some' | 'none'
  * @cssproperty {color} [--c2-choice-matrix__group-header--color=#18181b]
  * @cssproperty {font-weight} [--c2-choice-matrix__group-header--font-weight=600]
  *
- * @cssproperty {pixel} [--c2-choice-matrix__control--size=18px]
+ * @cssproperty {pixel} [--c2-choice-matrix__control--size=18px] - Width and height of the control button.
  * @cssproperty {border} [--c2-choice-matrix__control--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-choice-matrix__control--border-radius=4px] - A checkbox's corners; radio buttons are round.
  * @cssproperty {color} [--c2-choice-matrix__control--background-color=#ffffff]

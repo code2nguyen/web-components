@@ -132,7 +132,7 @@ function toBase(amount: number, factor: number) {
  * @cssproperty {font-weight} [--c2-unit-input__picker--font-weight=500]
  * @cssproperty {border} [--c2-unit-input__picker--border-left=1px solid #e4e4e7] - Line between the step controls and the unit picker.
  * @cssproperty {outline} [--c2-unit-input__picker__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Keyboard focus ring of the unit picker.
- * @cssproperty {pixel} [--c2-unit-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-unit-input__icon--size=16px] - Width and height of the icon.
  * @cssproperty {color} [--c2-unit-input__icon--color=#71717a]
  */
 @customElement('c2-unit-input')

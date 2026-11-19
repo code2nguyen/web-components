@@ -86,3 +86,20 @@ in the studio to start from it.
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="400">
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .trace-waterfall-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="trace-waterfall-states">
+  <c2-trace-waterfall>
+    <div slot="empty">No spans recorded for this trace.</div>
+  </c2-trace-waterfall>
+</div>
+```
+
+</GalleryGrid>

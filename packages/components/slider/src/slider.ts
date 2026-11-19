@@ -106,7 +106,7 @@ export interface Slider {
  * @cssproperty {color} [--c2-slider__fill--color=#0265dc] - Filled part of the track, from the start to the thumb.
  * @cssproperty {color} [--c2-slider__track__error--color=#dc2626] - Unfilled track while an enclosing `c2-form-field` shows an error.
  *
- * @cssproperty {pixel} [--c2-slider__thumb--size=18px]
+ * @cssproperty {pixel} [--c2-slider__thumb--size=18px] - Width and height of the thumb.
  * @cssproperty {border-radius} [--c2-slider__thumb--border-radius=999px]
  * @cssproperty {color} [--c2-slider__thumb--color=#ffffff]
  * @cssproperty {border} [--c2-slider__thumb--border=2px solid #0265dc]
@@ -116,7 +116,7 @@ export interface Slider {
  * @cssproperty {outline} [--c2-slider__thumb__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-slider__thumb__focus--outline-offset=2px]
  *
- * @cssproperty {pixel} [--c2-slider__tick--size=2px]
+ * @cssproperty {pixel} [--c2-slider__tick--size=2px] - Width and height of the tick.
  * @cssproperty {color} [--c2-slider__tick--color=#a1a1aa] - Ticks on the unfilled part of the track.
  * @cssproperty {color} [--c2-slider__tick__filled--color=#ffffff] - Ticks on the filled part.
  *

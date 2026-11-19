@@ -53,6 +53,17 @@ Grace Hopper,grace(at)navy.mil,US Navy,2024-13-01
 Alan Turing,alan@bletchley.org,Bletchley Park,2024-05-17"
   ></c2-import-mapper>
 </div>
+<div data-label="Mapped by hand">
+    <c2-import-mapper manual
+      class="import-demo"
+      label="Import contacts"
+      fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"company","label":"Company","aliases":["organization"]},{"key":"phone","label":"Phone"},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+      csv="Full name,E-mail address,Organization,Signed up,Notes
+  Ada Lovelace,ada@analytical.io,Analytical Engines,2024-03-01,VIP
+  Grace Hopper,grace(at)navy.mil,US Navy,2024-13-01,
+  Alan Turing,alan@bletchley.org,Bletchley Park,2024-05-17,Call back"
+    ></c2-import-mapper>
+</div>
 ```
 
 A typical flow reads the file from `c2-upload`, maps, previews and imports:

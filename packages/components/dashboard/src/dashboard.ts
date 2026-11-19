@@ -233,10 +233,12 @@ export class Dashboard extends LitElement {
     return [...this.rowTracks]
   }
 
+  /** Number of column tracks in the layout right now. */
   get columnCount(): number {
     return this.columnTracks.length
   }
 
+  /** Number of row tracks in the layout right now. */
   get rowCount(): number {
     return this.rowTracks.length
   }

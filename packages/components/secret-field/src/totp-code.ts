@@ -44,7 +44,7 @@ type Text = LocalizeController<(typeof totpCodeMessages)['en']>
  * @csspart countdown - The ring showing the time left.
  *
  * @cssproperty {pixel} [--c2-totp-code__group--gap=8px] - Space between the two halves.
- * @cssproperty {pixel} [--c2-totp-code__countdown--size=18px]
+ * @cssproperty {pixel} [--c2-totp-code__countdown--size=18px] - Width and height of the countdown.
  * @cssproperty {pixel} [--c2-totp-code__countdown--stroke-width=3px]
  * @cssproperty {color} [--c2-totp-code__countdown--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-totp-code__countdown__track--color=#e4e4e7]

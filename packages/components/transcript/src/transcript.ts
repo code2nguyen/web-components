@@ -153,7 +153,7 @@ interface Group {
  * @cssproperty {font-size} [--c2-transcript--font-size=14px]
  * @cssproperty {number} [--c2-transcript--line-height=1.55]
  * @cssproperty {color} [--c2-transcript--color=#18181b]
- * @cssproperty {pixel} [--c2-transcript__avatar--size=28px]
+ * @cssproperty {pixel} [--c2-transcript__avatar--size=28px] - Width and height of each speaker's avatar.
  * @cssproperty {font-weight} [--c2-transcript__speaker--font-weight=600]
  * @cssproperty {color} [--c2-transcript__time--color=#71717a]
  * @cssproperty {font-size} [--c2-transcript__time--font-size=12px]
@@ -162,7 +162,7 @@ interface Group {
  * @cssproperty {border-radius} [--c2-transcript__segment--border-radius=6px]
  * @cssproperty {color} [--c2-transcript__segment__active--background-color=rgba(2, 101, 220, 0.1)]
  * @cssproperty {color} [--c2-transcript__segment__focus--outline-color=rgb(2, 101, 220)]
- * @cssproperty {color} [--c2-transcript__word__active--decoration-color=rgb(2, 101, 220)]
+ * @cssproperty {color} [--c2-transcript__word__active--decoration-color=rgb(2, 101, 220)] - Colour of the underline under the word being spoken.
  * @cssproperty {color} [--c2-transcript__word__upcoming--color=#71717a] - Words of the segment playing that are still to come.
  * @cssproperty {color} [--c2-transcript__interim--color=#71717a]
  * @cssproperty {color} [--c2-transcript__mark--background-color=#fef08a]

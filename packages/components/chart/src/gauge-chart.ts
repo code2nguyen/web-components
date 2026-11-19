@@ -83,7 +83,7 @@ export class GaugeChart extends EchartsChartBase {
   protected override seriesOption(index: number, context: ChartBuildContext): Record<string, unknown> {
     const color = this.colorOf(context.series[index] ?? { field: '' }, index, context.theme)
     const precision = Math.max(0, Math.min(20, Math.trunc(this.precision)))
-    const number = new Intl.NumberFormat(this.locale, { maximumFractionDigits: precision, minimumFractionDigits: precision })
+    const number = new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: precision, minimumFractionDigits: precision })
     const formatValue = (value: number) => `${number.format(value)}${this.valueSuffix}`
     return {
       type: 'gauge',

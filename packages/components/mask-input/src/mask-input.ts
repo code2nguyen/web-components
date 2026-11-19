@@ -89,7 +89,7 @@ const digitsOnly = (parts: MaskPart[]) =>
  * @cssproperty {color} [--c2-mask-input__read-only--background=#fafafa]
  * @cssproperty {opacity} [--c2-mask-input__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-mask-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-mask-input__icon--size=16px] - Width and height of a slotted icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-mask-input__icon--color=#71717a]
  *
  * @cssproperty {pixel} [--c2-mask-input__supporting-text--gap=4px] - Space between the field and the helper line.

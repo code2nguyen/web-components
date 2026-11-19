@@ -352,3 +352,50 @@ test('a radio item drops the popup state its button declares', async ({ page, re
   await expect(radio).not.toHaveAttribute('aria-expanded', /.*/)
   await accessible(page)
 })
+test('a button with an empty value is selected by its index, like one with no value', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-button-group selection="single" aria-label="Pick"><c2-button value="">First</c2-button><c2-button value="">Second</c2-button></c2-button-group>',
+  )
+  await page.getByRole('radio', { name: 'Second', exact: true }).click()
+  await expect(page.locator('c2-button-group')).toHaveJSProperty('value', '1')
+  await expect(page.getByRole('radio', { name: 'Second', exact: true })).toHaveAttribute('aria-checked', 'true')
+})
+test('a value set as a property, before it reflects, names the button', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-button-group selection="single" aria-label="Pick"><c2-button>First</c2-button><c2-button>Second</c2-button></c2-button-group>')
+  await page
+    .locator('c2-button')
+    .nth(1)
+    .evaluate((node) => ((node as HTMLElement & { value: string }).value = 'second'))
+  await page.getByRole('radio', { name: 'Second', exact: true }).click()
+  await expect(page.locator('c2-button-group')).toHaveJSProperty('value', 'second')
+})
+test('a button renamed from one value to another is resynced, and the app keeps the selection', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-button-group selection="single" aria-label="Pick" value="old"><c2-button value="old">First</c2-button><c2-button value="b">Second</c2-button></c2-button-group>',
+  )
+  await expect(page.getByRole('radio', { name: 'First', exact: true })).toHaveAttribute('aria-checked', 'true')
+  // An element may be reused for another option (an unkeyed list): the group does not guess, it resyncs.
+  await page
+    .locator('c2-button')
+    .first()
+    .evaluate((node) => node.setAttribute('value', 'new'))
+  await expect(page.getByRole('radio', { name: 'First', exact: true })).toHaveAttribute('aria-checked', 'false')
+  await page.locator('c2-button-group').evaluate((group) => ((group as HTMLElement & { value: string }).value = 'new'))
+  await expect(page.getByRole('radio', { name: 'First', exact: true })).toHaveAttribute('aria-checked', 'true')
+})
+
+test('a button selected by its position keeps the selection when its value arrives, and a reset restores it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<form><c2-button-group name="view" appearance="segmented" selection="single" aria-label="View"><c2-button>List</c2-button><c2-button>Grid</c2-button></c2-button-group><button type="reset">Reset</button></form>',
+  )
+  const group = page.locator('c2-button-group')
+  await expect(group).toHaveJSProperty('value', '0')
+  await page
+    .locator('c2-button')
+    .first()
+    .evaluate((node) => node.setAttribute('value', 'list'))
+  await expect(group).toHaveJSProperty('value', 'list')
+  await page.locator('c2-button').nth(1).click()
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect(group).toHaveJSProperty('value', 'list')
+})

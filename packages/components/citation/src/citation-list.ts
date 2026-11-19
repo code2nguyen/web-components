@@ -89,7 +89,7 @@ export interface CitationList {
  * @cssproperty {font-weight} [--c2-citation-list__summary--font-weight=500]
  * @cssproperty {color} [--c2-citation-list__summary__hover--background-color=#f4f4f5]
  * @cssproperty {outline} [--c2-citation-list__summary__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {pixel} [--c2-citation-list__icon--size=20px]
+ * @cssproperty {pixel} [--c2-citation-list__icon--size=20px] - Width and height of the icon.
  * @cssproperty {pixel} [--c2-citation-list__icon--overlap=6px] - How far each icon of the stack slides under the one before.
  * @cssproperty {color} [--c2-citation-list__icon--background-color=#f4f4f5] - Behind an icon, and the fill of a site's letter.
  * @cssproperty {color} [--c2-citation-list__icon--border-color=#ffffff] - The ring that separates the icons of the stack.

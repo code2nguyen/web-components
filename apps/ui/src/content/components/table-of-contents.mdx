@@ -87,6 +87,25 @@ import '@c2n/components/table-of-contents'
     items='[{"id":"toc-demo-overview","label":"Overview","level":1},{"id":"toc-demo-install","label":"Installation","level":1},{"id":"toc-demo-npm","label":"With npm","level":2},{"id":"toc-demo-cdn","label":"From a CDN","level":2},{"id":"toc-demo-theming","label":"Theming","level":1}]'
   ></c2-table-of-contents>
 </div>
+<div data-label="Top-level sections only">
+  <div class="toc-demo">
+    <article id="toc-demo-article">
+      <h4 id="toc-demo-overview">Overview</h4>
+      <p>A table of contents gives a long page a map. Readers skim it to decide whether the page answers their question, then jump straight to the part that does.</p>
+      <h4 id="toc-demo-install">Installation</h4>
+      <p>Install the package once, then import each element where it is used. Nothing else has to be configured.</p>
+      <h5 id="toc-demo-npm">With npm</h5>
+      <p>Run the install command at the root of the project, next to its package.json.</p>
+      <h5 id="toc-demo-cdn">From a CDN</h5>
+      <p>A module script pointing at a CDN works as well for a prototype or a static page.</p>
+      <h4 id="toc-demo-theming">Theming</h4>
+      <p>Every colour, size and spacing value is a CSS custom property, so the look follows the application theme.</p>
+      <h4 id="toc-demo-faq">FAQ</h4>
+      <p>Headings without an id are not listed. Give each heading a stable id so links to it keep working.</p>
+    </article>
+    <c2-table-of-contents selector="h2" for="toc-demo-article" keep-url></c2-table-of-contents>
+  </div>
+</div>
 ```
 
 The first row reads the `h4` and `h5` headings of the scrolling article next to it (`for="toc-demo-article" selector="h4, h5"`); levels are relative, so the outermost heading level found is the top of the list. On a page, place the list in a sticky column and leave `for` out: it reads the page's `<main>`.

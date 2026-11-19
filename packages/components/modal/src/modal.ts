@@ -85,8 +85,8 @@ export interface Modal {
  * @cssproperty {justify-content} [--c2-modal__footer--justify-content=flex-end]
  * @cssproperty {border} --c2-modal__footer--border-top - Divider above the footer; raise `footer--padding-top` with it.
  *
- * @cssproperty {pixel} [--c2-modal__close--size=32px]
- * @cssproperty {pixel} [--c2-modal__close--icon-size=18px]
+ * @cssproperty {pixel} [--c2-modal__close--size=32px] - Width and height of the close button.
+ * @cssproperty {pixel} [--c2-modal__close--icon-size=18px] - Width and height of the close button's icon.
  * @cssproperty {border-radius} [--c2-modal__close--border-radius=8px]
  * @cssproperty {color} [--c2-modal__close--color=#71717a]
  * @cssproperty {background} [--c2-modal__close__hover--background=#f4f4f5]

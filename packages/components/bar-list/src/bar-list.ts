@@ -87,7 +87,7 @@ function opensElsewhere(target: string): boolean {
  * @cssproperty {padding} [--c2-bar-list__label--padding=0 8px] - Space around the label inside its bar.
  * @cssproperty {color} [--c2-bar-list__label--color=#18181b]
  * @cssproperty {font-size} [--c2-bar-list__label--font-size=14px]
- * @cssproperty {pixel} [--c2-bar-list__icon--size=16px]
+ * @cssproperty {pixel} [--c2-bar-list__icon--size=16px] - Width and height of the icon.
  * @cssproperty {border-radius} [--c2-bar-list__icon--border-radius=4px]
  * @cssproperty {color} [--c2-bar-list__value--color=#18181b]
  * @cssproperty {font-size} [--c2-bar-list__value--font-size=14px]

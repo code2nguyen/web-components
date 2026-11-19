@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { PaymentCard } from '@c2n/components/payment-card'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -60,6 +61,19 @@ Looks for `c2-payment-card`. The face background takes any gradient; the display
   }
 </style>
 <c2-payment-card class="card-mini" label="Subscriptions" last4="0042"></c2-payment-card>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-payment-card label="Marketing team · Virtual" holder="Ada Lovelace" last4="4242">
+  <strong slot="brand">ACME BANK</strong>
+  <c2-button slot="actions">Freeze</c2-button>
+</c2-payment-card>
 ```
 
 </GalleryGrid>

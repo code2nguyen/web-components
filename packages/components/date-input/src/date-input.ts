@@ -67,7 +67,7 @@ export interface DateInput {
  * @cssproperty {outline} [--c2-date-input__error__focus--outline=none]
  * @cssproperty {color} [--c2-date-input__read-only--background=#fafafa]
  * @cssproperty {opacity} [--c2-date-input__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-date-input__calendar-icon--size=18px]
+ * @cssproperty {pixel} [--c2-date-input__calendar-icon--size=18px] - Width and height of the calendar icon.
  * @cssproperty {color} [--c2-date-input__calendar-icon--color=#71717a]
  * @cssproperty {color} [--c2-date-input__calendar-icon__hover--color=#18181b]
  * @cssproperty {pixel} [--c2-date-input__supporting-text--gap=4px]

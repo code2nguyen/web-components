@@ -37,7 +37,7 @@ export interface ColorArea {
  *
  * @cssproperty {pixel} [--c2-color-area--width=240px]
  * @cssproperty {pixel} [--c2-color-area--height=240px]
- * @cssproperty {pixel} [--c2-color-area__color-handle--size=12px]
+ * @cssproperty {pixel} [--c2-color-area__color-handle--size=12px] - Width and height of the color handle.
  * @cssproperty {outline} [--c2-color-area__color-handle__focus--outline=2px solid #476ef9] - The ring around the thumb while it has keyboard focus.
  *
  * @cssproperty {border-radius} --c2-color-area--border-top-left-radius
@@ -56,14 +56,18 @@ export class ColorArea extends LitElement {
   /** Selected brightness value from 0 to 1. */
   @property({ type: Number }) value = 1
 
+  /** @internal */
   public get tinyColor(): TinyColor {
     return new TinyColor({ h: this.hue, s: this.saturation, v: this.value })
   }
 
+  /** @internal */
   @query('.color-handle', true) colorHandle?: HTMLElement
   @query('.gradient', true) private gradient?: HTMLElement
+  /** @internal */
   @query('.c2-color-area', true) rootElement?: HTMLElement
 
+  /** @internal */
   currentMousePosition: Point = { x: 0, y: 0 }
 
   /** The gradient's box while a drag is in progress: the pointer is measured against it. */

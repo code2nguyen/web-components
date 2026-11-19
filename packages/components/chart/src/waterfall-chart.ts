@@ -546,7 +546,7 @@ export class WaterfallChart extends EchartsChartBase {
   /** A step's change with its sign, so a rise reads as one without its colour. The locale places the sign. */
   #signed(value: number): string {
     const format = (this.resolvedSeries[0] as ChartSeriesConfig | undefined)?.format
-    if (!format) return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value)
+    if (!format) return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value)
     // A series' own format takes the magnitude; the sign is put in front of what it returns.
     const text = format(Math.abs(value))
     return value < 0 ? `-${text}` : value > 0 ? `+${text}` : text

@@ -109,7 +109,7 @@ function rowText(item: MenuItem): string {
  * @cssproperty {color} [--c2-split-button__caret__active--background-color=rgb(1, 70, 154)]
  * @cssproperty {color} [--c2-split-button__caret__open--background-color=rgb(1, 70, 154)] - The caret while the menu is open.
  * @cssproperty {border-radius} --c2-split-button__caret__open--border-radius - The caret's corners while open, e.g. the outer radius for a split caret that becomes a pill.
- * @cssproperty {pixel} [--c2-split-button__caret__icon--size=16px]
+ * @cssproperty {pixel} [--c2-split-button__caret__icon--size=16px] - Width and height of the caret icon, also given to a slotted c2 icon.
  * @cssproperty {angle} [--c2-split-button__caret__icon__open--rotate=180deg] - Turn of the caret icon while open. `0deg` for an icon that should not turn.
  *
  * @cssproperty {pixel} [--c2-split-button__divider--width=1px] - Hidden when the halves have a gap.

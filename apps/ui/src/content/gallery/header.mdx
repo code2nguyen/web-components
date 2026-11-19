@@ -111,3 +111,25 @@ Each example gets a full gallery row so the complete brand, navigation and actio
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={720}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .default-header { width: 100%; }
+</style>
+<c2-header class="default-header">
+  <c2-link-button slot="brand" href="#home">Northstar</c2-link-button>
+  <c2-navigation-menu client:only="lit" aria-label="Primary">
+    <c2-navigation-menu-item value="products" href="#products" current>Products</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="company" href="#company">Company</c2-navigation-menu-item>
+  </c2-navigation-menu>
+  <c2-link-button slot="actions" href="#docs">Docs</c2-link-button>
+  <c2-button slot="actions">Sign in</c2-button>
+  <c2-button slot="mobile-trigger">Menu</c2-button>
+</c2-header>
+```
+
+</GalleryGrid>

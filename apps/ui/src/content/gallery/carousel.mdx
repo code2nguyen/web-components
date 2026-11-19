@@ -136,3 +136,51 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .slide {
+    display: grid;
+    place-items: center;
+    height: 160px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+</style>
+<c2-carousel client:only="lit" label="Default carousel">
+  <div class="slide">Slide 1</div>
+  <div class="slide">Slide 2</div>
+  <div class="slide">Slide 3</div>
+  <svg slot="previous-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+  <svg slot="next-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+</c2-carousel>
+```
+
+```html tag=MdxCodeBlock,label=Autoplay icons
+<style>
+  .slide {
+    display: grid;
+    place-items: center;
+    height: 160px;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-weight: 600;
+  }
+</style>
+<c2-carousel client:only="lit" label="Default carousel" autoplay>
+  <div class="slide">Slide 1</div>
+  <div class="slide">Slide 2</div>
+  <div class="slide">Slide 3</div>
+  <svg slot="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 14 8-14 8z"/></svg>
+  <svg slot="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+</c2-carousel>
+```
+
+</GalleryGrid>

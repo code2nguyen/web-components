@@ -335,7 +335,7 @@ class MergeFieldView implements NodeView {
  *
  * @tag c2-rich-text-editor
  *
- * @slot toolbar-end - The app's own tools at the end of the toolbar (attach, mention, emoji). Each is a tab stop of its own.
+ * @slot toolbar-end - The app's own tools at the end of the toolbar (attach, mention, emoji, a `c2-menu` of `c2-menu-item`s). Each is a tab stop of its own.
  * @slot footer-start - Content at the start of the footer, such as a Send button. With `toolbar-position="bottom"` the toolbar follows it.
  * @slot footer-end - Content at the end of the footer, after the character counter, such as Cancel and Comment buttons.
  *

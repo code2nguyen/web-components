@@ -132,7 +132,7 @@ function stripIndent(text: string): string {
  * @cssproperty {padding} [--c2-markdown__blockquote--padding-left=12px]
  *
  * @cssproperty {padding} [--c2-markdown__list--padding-left=24px]
- * @cssproperty {pixel} [--c2-markdown__list--item-gap=4px]
+ * @cssproperty {pixel} [--c2-markdown__list--item-gap=4px] - Space between the items of a list.
  * @cssproperty {color} [--c2-markdown__list__marker--color=#71717a]
  * @cssproperty {border} [--c2-markdown__task--border=1px solid #bcbcc6]
  * @cssproperty {color} [--c2-markdown__task__checked--background=rgb(2, 101, 220)]

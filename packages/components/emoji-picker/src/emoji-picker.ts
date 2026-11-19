@@ -127,10 +127,10 @@ interface Section {
  * @cssproperty {color} [--c2-emoji-picker__search__hover--border-color=#a1a1aa]
  * @cssproperty {border-radius} [--c2-emoji-picker__search--border-radius=6px]
  * @cssproperty {color} [--c2-emoji-picker__search--background-color=#ffffff]
- * @cssproperty {color} [--c2-emoji-picker__search--placeholder-color=#71717a]
+ * @cssproperty {color} [--c2-emoji-picker__search--placeholder-color=#71717a] - Colour of the search field's placeholder text.
  * @cssproperty {outline} [--c2-emoji-picker__search__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  *
- * @cssproperty {pixel} [--c2-emoji-picker__category--size=32px]
+ * @cssproperty {pixel} [--c2-emoji-picker__category--size=32px] - Width and height of the category.
  * @cssproperty {color} [--c2-emoji-picker__category__hover--background-color=#f4f4f5]
  * @cssproperty {color} [--c2-emoji-picker__category__active--indicator-color=rgb(2, 101, 220)] - The line under the category in view.
  * @cssproperty {number} [--c2-emoji-picker__category--opacity=0.55] - Opacity of the categories not in view, which are also drawn in grey.

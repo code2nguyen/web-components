@@ -200,7 +200,7 @@ export abstract class UplotChartBase extends ChartBase {
     const span = this.xSpan()
     const options: Intl.DateTimeFormatOptions =
       span > 0 && span < DAY ? { hour: 'numeric', minute: '2-digit' } : span < YEAR ? { month: 'short', day: 'numeric' } : { month: 'short', year: 'numeric' }
-    return new Intl.DateTimeFormat(this.locale, options).format(new Date(value))
+    return new Intl.DateTimeFormat(this.intlLocale, options).format(new Date(value))
   }
 
   /** The row whose x value is `value`, or `-1`. Label axes are short, so a scan is cheaper than an index. */

@@ -8,6 +8,7 @@ import ExampleModules from '../../components/ExampleModules.astro'
 
 import { Tree } from '@c2n/components/tree'
 import { TreeItem } from '@c2n/components/tree/tree-item'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 
@@ -160,6 +161,25 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
   expanded-items="intro;setup"
   items='[{"value":"intro","label":"Introduction","children":[{"value":"why","label":"Why it matters"},{"value":"who","label":"Who it is for"}]},{"value":"setup","label":"Setting up","children":[{"value":"install","label":"Install"},{"value":"config","label":"Configure"}]},{"value":"next","label":"Next steps"}]'
 ></c2-tree>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<c2-tree client:only="lit" aria-label="Files" expanded-items="src" value="app">
+  <c2-tree-item value="src" label="src">
+    <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+    <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+    <c2-button slot="actions">Rename</c2-button>
+    <svg slot="toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    <span slot="label"><strong>src</strong> · 12 files</span>
+  </c2-tree-item>
+  <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+</c2-tree>
 ```
 
 </GalleryGrid>

@@ -2,6 +2,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { QuickTimeMenu } from '@c2n/components/quick-time-menu'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -75,6 +76,18 @@ Looks for `c2-quick-time-menu`. The trigger variables (`__trigger--*`, `__trigge
   }
 </style>
 <c2-quick-time-menu class="qtm-compact" label="Due"></c2-quick-time-menu>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-quick-time-menu>
+  <c2-button slot="trigger">Last 24 hours</c2-button>
+</c2-quick-time-menu>
 ```
 
 </GalleryGrid>

@@ -37,7 +37,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="Transfers between wallets">
-  <c2-chord-chart
+  <c2-chord-chart aria-label="Transfers between wallets"
     class="chord-plot"
     source-field="from"
     target-field="to"
@@ -52,6 +52,15 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     layout="bipartite"
     ribbon-color="target"
     data='[{"source":"Q1","target":"Canada","value":4.1},{"source":"Q1","target":"France","value":2.8},{"source":"Q1","target":"Japan","value":2.2},{"source":"Q2","target":"Canada","value":3.6},{"source":"Q2","target":"France","value":3.3},{"source":"Q2","target":"Japan","value":2.9},{"source":"Q3","target":"Canada","value":4.8},{"source":"Q3","target":"France","value":3.9},{"source":"Q3","target":"Japan","value":3.4},{"source":"Q4","target":"Canada","value":5.5},{"source":"Q4","target":"France","value":4.6},{"source":"Q4","target":"Japan","value":3}]'
+  ></c2-chord-chart>
+</div>
+<div data-label="Gradient ribbons, largest first, with a legend">
+  <c2-chord-chart ribbon-color="gradient" sort="desc" labels="none" legend="bottom"
+    class="chord-plot"
+    source-field="from"
+    target-field="to"
+    value-field="amount"
+    data='[{"from":"EUR","to":"USD","amount":42.1},{"from":"EUR","to":"GBP","amount":18.4},{"from":"EUR","to":"CHF","amount":9.7},{"from":"EUR","to":"JPY","amount":6.2},{"from":"USD","to":"EUR","amount":31.6},{"from":"USD","to":"GBP","amount":12.2},{"from":"USD","to":"JPY","amount":14.8},{"from":"GBP","to":"EUR","amount":21},{"from":"GBP","to":"USD","amount":15.5},{"from":"CHF","to":"EUR","amount":11.3},{"from":"CHF","to":"USD","amount":4.6},{"from":"JPY","to":"USD","amount":9.9},{"from":"JPY","to":"EUR","amount":3.8}]'
   ></c2-chord-chart>
 </div>
 ```

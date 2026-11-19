@@ -1073,12 +1073,12 @@ export class SunburstChart extends EchartsChartBase {
 
   #formatColor(value: number): string {
     if (this.formatColor) return this.formatColor(value)
-    const text = new Intl.NumberFormat(this.locale, { maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value)
+    const text = new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value)
     return `${text}${this.colorSuffix}`
   }
 
   #percent(share: number): string {
-    return new Intl.NumberFormat(this.locale, { style: 'percent', maximumFractionDigits: 1 }).format(share)
+    return new Intl.NumberFormat(this.intlLocale, { style: 'percent', maximumFractionDigits: 1 }).format(share)
   }
 }
 

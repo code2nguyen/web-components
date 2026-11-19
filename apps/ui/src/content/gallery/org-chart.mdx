@@ -125,3 +125,20 @@ Curated looks for `c2-org-chart`. Open any card in the studio to start from it. 
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid columns="2">
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .org-chart-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="org-chart-states">
+  <c2-org-chart client:only="lit" collapsed-items="li" aria-label="Leadership team">
+    <div slot="empty">No reporting lines yet.</div>
+  </c2-org-chart>
+</div>
+```
+
+</GalleryGrid>

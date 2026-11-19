@@ -157,7 +157,7 @@ export interface ListItem {
  *
  * @cssproperty {opacity} [--c2-list-item__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-list-item__icon--size=16px]
+ * @cssproperty {pixel} [--c2-list-item__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-list-item__icon--color - Defaults to the row text colour.
  */
 @customElement('c2-list-item')

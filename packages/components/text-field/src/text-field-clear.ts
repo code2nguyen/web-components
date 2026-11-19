@@ -14,13 +14,14 @@ import { TextField } from './text-field'
  *
  * @slot clear-icon - Replaces the default cross icon.
  *
- * @cssproperty {pixel} [--c2-text-field-clear__clear-icon--size=24px]
+ * @cssproperty {pixel} [--c2-text-field-clear__clear-icon--size=24px] - Width of the clear button's icon.
  * @cssproperty {color} [--c2-text-field-clear__clear-icon--color=rgb(70, 70, 70)]
  */
 @customElement('c2-text-field-clear')
 export class TextFieldClear extends TextField {
   static override styles: CSSResult | CSSResult[] = [unsafeCSS(styles), TextField.styles as CSSResult]
 
+  /** @internal */
   @state() showClear = false
 
   protected override handleInput(event: InputEvent) {

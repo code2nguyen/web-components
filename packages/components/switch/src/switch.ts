@@ -69,7 +69,7 @@ export interface Switch {
  * @cssproperty {box-shadow} [--c2-switch__thumb--box-shadow=0 1px 2px rgba(0, 0, 0, 0.2)]
  * @cssproperty {pixel} [--c2-switch__thumb__active--stretch=4px] - Extra thumb width while pressed, for a squishy feel; `0px` disables it.
  *
- * @cssproperty {pixel} [--c2-switch__icon--size=10px]
+ * @cssproperty {pixel} [--c2-switch__icon--size=10px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-switch__icon--color=#71717a] - Colour of the `unchecked-icon`.
  * @cssproperty {color} [--c2-switch__icon__checked--color=#0265dc] - Colour of the `checked-icon`.
  *

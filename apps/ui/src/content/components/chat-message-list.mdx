@@ -2,6 +2,7 @@
 title: 'Chat Message List'
 description: 'Scrolling conversation log that follows new messages, counts unread ones and loads older history.'
 category: 'Chat'
+keywords: ['conversation', 'chat log', 'messages']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -89,5 +90,26 @@ import '@c2n/components/chat-message-list'
   <c2-chat-message-list class="chat-room-empty">
     <span slot="empty">No messages yet. Say hello!</span>
   </c2-chat-message-list>
+</div>
+<div data-label="Loading">
+  <section class="chat-room" data-chat-demo>
+    <c2-chat-message-list loading has-more label="Conversation with Nova">
+      <c2-chat-message>
+        <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+        <span slot="title">Nova</span>
+        <div>Hi! Ask me anything. Scroll up to load older messages.</div>
+      </c2-chat-message>
+      <c2-chat-message class="chat-demo-outgoing" align="right">
+        <span slot="title">You</span>
+        <div>How does the list decide when to scroll?</div>
+      </c2-chat-message>
+      <c2-chat-message>
+        <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+        <span slot="title">Nova</span>
+        <div>It follows new messages only while you are at the bottom. Send one and see.</div>
+      </c2-chat-message>
+    </c2-chat-message-list>
+    <c2-chat-input aria-label="Message" placeholder="Send a message…"></c2-chat-input>
+  </section>
 </div>
 ```

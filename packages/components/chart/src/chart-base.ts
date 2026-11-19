@@ -149,6 +149,9 @@ export interface ChartBase {
   removeEventListener: TypedRemoveEventListener<ChartBase, ChartEventMap>
 }
 
+/** Locale tag → its canonical form, or '' for a malformed one: shared by every chart on the page. */
+const CANONICAL_LOCALES = new Map<string, string>()
+
 /**
  * Shared behaviour of every `c2-*-chart`: the chrome and its slots, the resize observer, theme
  * resolution, data normalisation, and the routing that keeps a realtime update off the expensive path.
@@ -285,6 +288,9 @@ export interface ChartBase {
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
 
+  /** Whether the first render hydrates server-rendered markup (a declarative shadow root was there on construction). */
+  #hydrating = !isServer && this.shadowRoot !== null
+
   // State is exposed as custom states, never as host attributes: an attribute written on the host after the engine
   // loads is one the server never rendered, which a hydrating framework reports as a mismatch.
   protected readonly internals = this.attachInternals()
@@ -355,6 +361,34 @@ export abstract class ChartBase extends LitElement {
 
   /** BCP 47 locale for the axis and tooltip formatting. Defaults to the browser locale. */
   @property({ type: String }) locale?: string
+
+  /**
+   * `locale` as `Intl` takes it: an empty or malformed tag (`locale=""` from a framework binding) is the browser's
+   * locale instead, since an `Intl` constructor that throws inside a formatter stops the chart from drawing.
+   * @internal
+   */
+  protected get intlLocale(): string | undefined {
+    return this.canonicalLocale(this.locale)
+  }
+
+  /**
+   * A locale tag as `Intl` takes it, or `undefined` (the browser's) for an empty or malformed one. For the locale a
+   * chart resolved from `lang` too (`this.msg.locale`). Worked out once per tag.
+   * @internal
+   */
+  protected canonicalLocale(locale: string | undefined): string | undefined {
+    if (!locale) return undefined
+    let canonical = CANONICAL_LOCALES.get(locale)
+    if (canonical === undefined) {
+      try {
+        canonical = Intl.getCanonicalLocales(locale)[0] ?? ''
+      } catch {
+        canonical = ''
+      }
+      CANONICAL_LOCALES.set(locale, canonical)
+    }
+    return canonical || undefined
+  }
 
   /** Shows the loading state instead of the plot. */
   @property({ type: Boolean, reflect: true }) loading = false
@@ -562,6 +596,11 @@ export abstract class ChartBase extends LitElement {
    * well, so a chart whose initial layout is zero-sized still draws when its container becomes measurable.
    */
   protected override firstUpdated(): void {
+    if (this.#hydrating) {
+      this.#hydrating = false
+      // After the hydrating render matched the server's: a chart that really is misconfigured shows its error now.
+      if (this.validationError()) queueMicrotask(() => this.requestUpdate())
+    }
     if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
     // The canvas says nothing: the plot is one image, named in `#renderAccessibleView`. Set on the shadow node, never the host.
     if (this.usesSharedAccessibleView) this.plotElement?.setAttribute('role', 'img')
@@ -1147,7 +1186,7 @@ export abstract class ChartBase extends LitElement {
   /** Formats an x value for the tooltip. Time charts get a date, everything else a number. */
   protected formatX(value: number): string {
     if (this.xType === 'time') {
-      return new Intl.DateTimeFormat(this.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+      return new Intl.DateTimeFormat(this.intlLocale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
     }
     return this.formatValue(value)
   }
@@ -1166,7 +1205,7 @@ export abstract class ChartBase extends LitElement {
 
   /** Formats a y value for the tooltip and the built-in labels. */
   protected formatValue(value: number): string {
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 2 }).format(value)
+    return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 2 }).format(value)
   }
 
   // --------------------------------------------------------------- render ---
@@ -1333,7 +1372,11 @@ export abstract class ChartBase extends LitElement {
   }
 
   private renderState(): TemplateResult | typeof nothing {
-    const error = this.error || this.validationError()
+    // A server cannot see the `c2-chart-series` children, so it cannot tell a chart missing a series from one whose
+    // series are declared in markup: validating there rendered "needs two series" for a correct chart, and the
+    // client then failed to hydrate it. The client reads the children before its first render and validates then.
+    // A client hydrating that markup renders it once as the server did, then validates (see `firstUpdated`).
+    const error = this.error || (isServer || this.#hydrating ? '' : this.validationError())
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
     if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {

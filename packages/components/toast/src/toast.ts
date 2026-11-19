@@ -60,7 +60,7 @@ export interface Toast {
  * @cssproperty {pixel} [--c2-toast__progress--height=3px]
  * @cssproperty {color} [--c2-toast__progress--color=#2563eb]
  * @cssproperty {color} [--c2-toast__progress--background=rgba(37, 99, 235, 0.15)]
- * @cssproperty {pixel} [--c2-toast__icon--size=20px]
+ * @cssproperty {pixel} [--c2-toast__icon--size=20px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-toast__icon--color=#71717a]
  * @cssproperty {color} [--c2-toast__icon__info--color=#2563eb]
  * @cssproperty {color} [--c2-toast__icon__success--color=#15803d]

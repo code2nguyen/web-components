@@ -81,7 +81,7 @@ export interface CopyButton {
  * @cssproperty {color} --c2-copy-button__container__copied--background-color
  * @cssproperty {border} --c2-copy-button__container__copied--border
  *
- * @cssproperty {pixel} [--c2-copy-button__icon--size=16px]
+ * @cssproperty {pixel} [--c2-copy-button__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-copy-button__icon--color - Defaults to the button's text colour.
  * @cssproperty {color} --c2-copy-button__icon__copied--color
  *

@@ -175,7 +175,7 @@ export interface Pagination {
  * @cssproperty {color} [--c2-pagination__nav__hover--background-color=#f4f4f5]
  * @cssproperty {border} [--c2-pagination__nav__hover--border=1px solid transparent]
  *
- * @cssproperty {pixel} [--c2-pagination__icon--size=16px]
+ * @cssproperty {pixel} [--c2-pagination__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-pagination__icon--color - Defaults to the colour of the control it sits in.
  *
  * @cssproperty {color} [--c2-pagination__ellipsis--color=#71717a]

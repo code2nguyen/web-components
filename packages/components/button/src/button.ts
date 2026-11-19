@@ -60,10 +60,10 @@ const elementReflection = !isServer && 'ariaControlsElements' in Element.prototy
  *
  * @cssproperty {opacity} [--c2-button__container__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-button__icon--size=18px]
+ * @cssproperty {pixel} [--c2-button__icon--size=18px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-button__icon--color
  *
- * @cssproperty {pixel} [--c2-button__running-icon--size=18px]
+ * @cssproperty {pixel} [--c2-button__running-icon--size=18px] - Width and height of the running icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-button__running-icon--color
  * @cssproperty {duration} [--c2-button__running-icon--animation-duration=800ms]
  */

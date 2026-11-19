@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { WaterfallChart } from '@c2n/components/chart/waterfall-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -51,6 +52,51 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <c2-waterfall-chart class="waterfall-price" label-field="part" total-label="Shelf price" legend="none" value-labels data='[{"part":"Materials","usd":12.4},{"part":"Labour","usd":6.1},{"part":"Freight","usd":2.3},{"part":"Duty","usd":1.7},{"part":"Margin","usd":9.5}]'>
   <c2-chart-series field="usd" label="USD"></c2-chart-series>
 </c2-waterfall-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .waterfall-slots { width: 100%; }
+  .waterfall-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-waterfall-chart class="waterfall-slots" label-field="item" total-field="total" total-label="Net income" data='[{"item":"Revenue","amount":420,"total":true},{"item":"Cost of sales","amount":-180},{"item":"Services","amount":35},{"item":"Gross profit","total":true},{"item":"Opex","amount":-95},{"item":"Tax","amount":-40}]'>
+  <c2-chart-series field="amount" label="Amount"></c2-chart-series>
+  <div slot="legend" class="waterfall-slots__legend">
+    <strong>Amount</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-waterfall-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .waterfall-states { display: grid; gap: 12px; width: 100%; }
+  .waterfall-states c2-waterfall-chart { --c2-chart--height: 140px; }
+</style>
+<div class="waterfall-states">
+  <c2-waterfall-chart label-field="item" total-field="total" total-label="Net income" loading>
+    <c2-chart-series field="amount" label="Amount"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-waterfall-chart>
+  <c2-waterfall-chart label-field="item" total-field="total" total-label="Net income">
+    <c2-chart-series field="amount" label="Amount"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-waterfall-chart>
+  <c2-waterfall-chart label-field="item" total-field="total" total-label="Net income" error="Request failed">
+    <c2-chart-series field="amount" label="Amount"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-waterfall-chart>
+</div>
 ```
 
 </GalleryGrid>

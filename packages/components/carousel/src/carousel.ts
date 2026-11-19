@@ -111,7 +111,7 @@ const pauseIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" stroke="none
  * @cssproperty {length} [--c2-carousel__control__zone--width=20%] - Width of the zone along each edge of the track that reveals that edge's control; a percentage is of the track width. Never narrower than the control and its inset.
  * @cssproperty {time} [--c2-carousel__control--transition-duration=240ms] - How long the previous/next buttons take to fade and slide in and out.
  * @cssproperty {pixel} [--c2-carousel__control__hidden--translate=8px] - How far towards its edge a hidden previous/next button sits; it slides in from there as it fades in. `0px` only fades.
- * @cssproperty {pixel} [--c2-carousel__control--size=36px]
+ * @cssproperty {pixel} [--c2-carousel__control--size=36px] - Width and height of the control button.
  * @cssproperty {pixel} [--c2-carousel__control--inset=12px] - Distance from a control to the edge of the track.
  * @cssproperty {color} [--c2-carousel__control--color=#18181b]
  * @cssproperty {color} [--c2-carousel__control--background-color=#ffffff]
@@ -122,7 +122,7 @@ const pauseIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" stroke="none
  * @cssproperty {outline} [--c2-carousel__control__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-carousel__control__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-carousel__control__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-carousel__icon--size=16px]
+ * @cssproperty {pixel} [--c2-carousel__icon--size=16px] - Width and height of the icon.
  * @cssproperty {color} [--c2-carousel__rotation--color=#71717a] - Colour of the play/pause control in the indicator row.
  * @cssproperty {color} [--c2-carousel__rotation__hover--color=#18181b]
  *

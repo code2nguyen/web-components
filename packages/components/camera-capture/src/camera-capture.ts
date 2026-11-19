@@ -173,7 +173,7 @@ const alertIcon = svg`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
  * @cssproperty {font-size} [--c2-camera-capture__screen--font-size=14px] - Text of the idle, starting and error screens.
  * @cssproperty {length} [--c2-camera-capture__controls--padding=12px 0 0]
  * @cssproperty {length} [--c2-camera-capture__controls--gap=12px]
- * @cssproperty {pixel} [--c2-camera-capture__shutter--size=60px]
+ * @cssproperty {pixel} [--c2-camera-capture__shutter--size=60px] - Width and height of the shutter.
  * @cssproperty {background} [--c2-camera-capture__shutter--background=rgb(2, 101, 220)]
  * @cssproperty {background} [--c2-camera-capture__shutter__hover--background=rgb(1, 84, 184)]
  * @cssproperty {color} [--c2-camera-capture__shutter--ring-color=#ffffff] - The inner ring of the shutter.

@@ -73,6 +73,21 @@ The entry registers `c2-matrix-board` and `c2-kanban-column`, which draws each c
     items='[{"id":"r1","likelihood":2,"impact":3,"title":"Payment provider outage"},{"id":"r2","likelihood":3,"impact":1,"title":"Slow search"},{"id":"r3","likelihood":1,"impact":3,"title":"Data center fire"}]'
   ></c2-matrix-board>
 </div>
+<div data-label="Risk matrix, editable">
+  <c2-matrix-board editable
+    client:only="lit"
+    class="usage-matrix"
+    aria-label="Risk register"
+    row-title="Likelihood"
+    column-title="Impact"
+    row-field="likelihood"
+    column-field="impact"
+    rows='[{"id":3,"label":"Likely"},{"id":2,"label":"Possible"},{"id":1,"label":"Rare"}]'
+    columns='[{"id":1,"label":"Minor"},{"id":2,"label":"Major"},{"id":3,"label":"Severe"}]'
+    cells='[{"row":3,"column":1,"band":3},{"row":3,"column":2,"band":4},{"row":3,"column":3,"band":5},{"row":2,"column":1,"band":2},{"row":2,"column":2,"band":3},{"row":2,"column":3,"band":4},{"row":1,"column":1,"band":1},{"row":1,"column":2,"band":2},{"row":1,"column":3,"band":3}]'
+    items='[{"id":"r1","likelihood":2,"impact":3,"title":"Payment provider outage"},{"id":"r2","likelihood":3,"impact":1,"title":"Slow search"},{"id":"r3","likelihood":1,"impact":3,"title":"Data center fire"}]'
+  ></c2-matrix-board>
+</div>
 ```
 
 <KanbanExamplesRuntime />

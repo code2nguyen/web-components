@@ -32,7 +32,7 @@ import '@c2n/tooltip'
  * @cssproperty {color} --c2-icon-button__icon__hover--color
  * @cssproperty {color} --c2-icon-button__icon__selected--color
  *
- * @cssproperty {pixel} [--c2-icon-button__state-layer--size=48px]
+ * @cssproperty {pixel} [--c2-icon-button__state-layer--size=48px] - Width and height of the state layer.
  */
 @customElement('c2-icon-button')
 export class IconButton extends LitElement {
@@ -54,6 +54,12 @@ export class IconButton extends LitElement {
 
   /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in multiple selection, and in single selection when an item cannot be a radio. */
   @property({ type: Boolean, reflect: true }) toggle = false
+
+  /**
+   * Stable identity of the button inside a `c2-button-group`, whose `value` lists the selected buttons by it. Without
+   * one, the group names the button by its position.
+   */
+  @property({ reflect: true }) value = ''
 
   /**
    * Declares the item a radio button of a single-selection `c2-button-group`: the `radio` role with `aria-checked`

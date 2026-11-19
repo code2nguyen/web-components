@@ -33,6 +33,11 @@ export const componentSchema = z.object({
    * Defaults to the page's tag followed by every other tag of its package.
    */
   apiTags: z.array(z.string()).optional(),
+  /**
+   * Other names a developer may search for when they do not know this component's ("faq", "snackbar",
+   * "segmented control"): read by the `@c2n/mcp` search and scored by `npm run mcp:readiness`.
+   */
+  keywords: z.array(z.string()).optional(),
 })
 
 export const iconSetSchema = z.object({

@@ -98,3 +98,23 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<c2-pagination client:only="lit" total-pages="9" page="3">
+  <svg slot="previous-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+  <svg slot="next-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+</c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=First and last icons
+<c2-pagination client:only="lit" total-pages="9" page="3" show-first-last>
+  <svg slot="first-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
+  <svg slot="last-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
+</c2-pagination>
+```
+
+</GalleryGrid>

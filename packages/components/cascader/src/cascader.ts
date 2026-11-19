@@ -82,7 +82,7 @@ export interface Cascader {
  * @cssproperty {pixel} [--c2-cascader__trigger__focus--outline-offset=0px]
  * @cssproperty {opacity} [--c2-cascader__trigger__disabled--opacity=0.38]
  * @cssproperty {color} [--c2-cascader__placeholder--color=#71717a]
- * @cssproperty {pixel} [--c2-cascader__icon--size=16px]
+ * @cssproperty {pixel} [--c2-cascader__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-cascader__icon--color=#71717a]
  * @cssproperty {color} [--c2-cascader__panel--background=#ffffff]
  * @cssproperty {border} [--c2-cascader__panel--border=1px solid #e4e4e7]
@@ -165,7 +165,9 @@ export class Cascader extends LitElement {
   /** Replaces an option row's content while interaction and hierarchy controls remain owned by the cascader. */
   @property({ attribute: false }) itemRenderer: CascaderItemRenderer | undefined
 
+  /** @internal */
   @query('#trigger', true) public trigger!: HTMLButtonElement
+  /** @internal */
   @query('#panel-overlay', true) public panel!: Overlay
 
   /** The resolved option path for the current `value`. Invalid trailing values are omitted. */

@@ -106,7 +106,10 @@ export class Tooltip extends LitElement {
   /** Visible state. Set it to show or hide the tooltip programmatically. */
   @property({ type: Boolean, reflect: true }) open = false
 
-  /** @deprecated Use `open`. */
+  /**
+   * Whether the tooltip is shown: the same as `open`.
+   * @deprecated Use `open`.
+   */
   get showing() {
     return this.open
   }

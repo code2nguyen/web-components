@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { RadialBarChart } from '@c2n/components/chart/radial-bar-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="300">
 
@@ -98,6 +99,51 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 <c2-radial-bar-chart class="rings-goals" label-field="team" max-field="target" data='[{"team":"Sales","won":128,"target":150},{"team":"Support","won":96,"target":90},{"team":"Product","won":41,"target":60},{"team":"Design","won":18,"target":30}]'>
   <c2-chart-series field="won" label="Done"></c2-chart-series>
 </c2-radial-bar-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .radial-bar-slots { width: 100%; }
+  .radial-bar-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-radial-bar-chart class="radial-bar-slots" label-field="ring" max-field="goal" data='[{"ring":"Move","value":420,"goal":600},{"ring":"Exercise","value":24,"goal":30},{"ring":"Stand","value":11,"goal":12}]'>
+  <c2-chart-series field="value" label="Today"></c2-chart-series>
+  <div slot="legend" class="radial-bar-slots__legend">
+    <strong>Today</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-radial-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .radial-bar-states { display: grid; gap: 12px; width: 100%; }
+  .radial-bar-states c2-radial-bar-chart { --c2-chart--height: 140px; }
+</style>
+<div class="radial-bar-states">
+  <c2-radial-bar-chart label-field="ring" max-field="goal" loading>
+    <c2-chart-series field="value" label="Today"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-radial-bar-chart>
+  <c2-radial-bar-chart label-field="ring" max-field="goal">
+    <c2-chart-series field="value" label="Today"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-radial-bar-chart>
+  <c2-radial-bar-chart label-field="ring" max-field="goal" error="Request failed">
+    <c2-chart-series field="value" label="Today"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-radial-bar-chart>
+</div>
 ```
 
 </GalleryGrid>

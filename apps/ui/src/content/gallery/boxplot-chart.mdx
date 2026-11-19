@@ -8,6 +8,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { BoxplotChart } from '@c2n/components/chart/boxplot-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -91,6 +92,51 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
   <c2-chart-series field="control" label="Control"></c2-chart-series>
   <c2-chart-series field="variant" label="Variant"></c2-chart-series>
 </c2-boxplot-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .boxplot-slots { width: 100%; }
+  .boxplot-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-boxplot-chart class="boxplot-slots" label-field="service" value-suffix=" ms" data='[{"service":"api","latency":[38,52,60,66,70,74,78,82,86,92,98,104,112,124,140,166,240,270]},{"service":"search","latency":[96,130,150,168,180,196,214,230,250,270,276,300,340,440,610,655]},{"service":"checkout","latency":[150,175,195,210,228,240,256,270,284,298,310,334,352,371,396,420,680,905,980]},{"service":"payments","latency":[118,150,180,190,205,218,228,240,260,282,292,330,380,446,688]}]'>
+  <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+  <div slot="legend" class="boxplot-slots__legend">
+    <strong>p50 latency</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-boxplot-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .boxplot-states { display: grid; gap: 12px; width: 100%; }
+  .boxplot-states c2-boxplot-chart { --c2-chart--height: 140px; }
+</style>
+<div class="boxplot-states">
+  <c2-boxplot-chart label-field="service" value-suffix=" ms" loading>
+    <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-boxplot-chart>
+  <c2-boxplot-chart label-field="service" value-suffix=" ms">
+    <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-boxplot-chart>
+  <c2-boxplot-chart label-field="service" value-suffix=" ms" error="Request failed">
+    <c2-chart-series field="latency" label="p50 latency"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-boxplot-chart>
+</div>
 ```
 
 </GalleryGrid>

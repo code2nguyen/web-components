@@ -44,7 +44,7 @@ export interface SideNav {
  *
  * @tag c2-side-nav
  *
- * @slot side-nav-content - The drawer content: a `c2-list` of links, a logo, anything.
+ * @slot side-nav-content - The drawer content: a `c2-list` of `c2-list-item` links, a logo, anything.
  * @slot default - The page content beside the drawer.
  *
  * @event {CustomEvent<OpenedChangeEventDetail>} opened-change - Fired when the user or a breakpoint change opens or closes the drawer (not when `opened` is set from code). `detail.opened` is the new state.

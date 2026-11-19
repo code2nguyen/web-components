@@ -5,6 +5,7 @@ category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-gauge-chart'
 apiTags: ['c2-gauge-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+keywords: ['speedometer', 'dial', 'meter']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -55,7 +56,7 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
 </style>
 
 <div data-label="Default">
-  <c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+  <c2-gauge-chart aria-label="Services share of revenue" min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
     <c2-chart-series field="value" label="Services mix"></c2-chart-series>
   </c2-gauge-chart>
 </div>
@@ -80,6 +81,11 @@ This chart draws with [ECharts](https://echarts.apache.org), a peer dependency i
       <span data-advanced-status>FY 2021 · 18.7% of revenue</span>
     </div>
   </div>
+</div>
+<div data-label="German number format">
+  <c2-gauge-chart locale="de-DE" aria-label="Services share of revenue" min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+    <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+  </c2-gauge-chart>
 </div>
 ```
 

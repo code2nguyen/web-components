@@ -25,7 +25,7 @@ export type TimelineLayout = 'stacked' | 'split'
  *
  * @tag c2-timeline-item
  *
- * @slot - The entry's content, below the label and timestamp.
+ * @slot - The entry's content, below the label and timestamp: text, or a `c2-details` or `c2-accordion` that folds longer notes.
  * @slot label - Replaces the `label` text.
  * @slot timestamp - Replaces the `timestamp` text.
  * @slot marker - An icon drawn inside the marker. Grow `--c2-timeline-item__marker--size` to make room for it.
@@ -38,7 +38,7 @@ export type TimelineLayout = 'stacked' | 'split'
  *
  * @cssproperty {pixel} [--c2-timeline-item--gap=12px] - Space between the rail and the text, and between the timestamp column and the rail in the split layout.
  * @cssproperty {pixel} [--c2-timeline-item--padding-bottom=24px] - Space below an entry before the next one. The connector runs through it; the last entry drops it.
- * @cssproperty {pixel} [--c2-timeline-item__marker--size=12px]
+ * @cssproperty {pixel} [--c2-timeline-item__marker--size=12px] - Width and height of the marker.
  * @cssproperty {color} [--c2-timeline-item__marker--background=#ffffff]
  * @cssproperty {border} [--c2-timeline-item__marker--border=2px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-timeline-item__marker--border-radius=999px]

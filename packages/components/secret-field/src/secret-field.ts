@@ -79,7 +79,7 @@ const MASK_LENGTH = 12
  * @cssproperty {color} [--c2-secret-field__mask--color=#71717a] - Colour of the bullets.
  *
  * @cssproperty {pixel} [--c2-secret-field__action--size=28px] - Width and height of each button.
- * @cssproperty {pixel} [--c2-secret-field__action--icon-size=16px]
+ * @cssproperty {pixel} [--c2-secret-field__action--icon-size=16px] - Width and height of the icons in the reveal and copy buttons.
  * @cssproperty {border-radius} [--c2-secret-field__action--border-radius=6px]
  * @cssproperty {color} [--c2-secret-field__action--color=#71717a] - Icon colour of the buttons.
  * @cssproperty {color} [--c2-secret-field__action__hover--color=#18181b]

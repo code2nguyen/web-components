@@ -638,7 +638,7 @@ export class ChordChart extends EchartsChartBase {
   }
 
   #formatShare(share: number): string {
-    return new Intl.NumberFormat(this.msg.locale || undefined, { style: 'percent', maximumFractionDigits: 1 }).format(share)
+    return new Intl.NumberFormat(this.canonicalLocale(this.msg.locale), { style: 'percent', maximumFractionDigits: 1 }).format(share)
   }
 }
 

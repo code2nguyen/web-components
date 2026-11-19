@@ -56,7 +56,7 @@ import styles from './command-item.scss?inline'
  * @cssproperty {color} [--c2-command-item__shortcut--color=#71717a]
  * @cssproperty {font-size} [--c2-command-item__shortcut--font-size=12px]
  *
- * @cssproperty {pixel} [--c2-command-item__icon--size=16px]
+ * @cssproperty {pixel} [--c2-command-item__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-command-item__icon--color=#71717a]
  *
  * @cssproperty {opacity} [--c2-command-item__disabled--opacity=0.38]

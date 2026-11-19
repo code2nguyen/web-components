@@ -214,7 +214,11 @@ input {
     cursor: default;
   }
 
+  // The built-in icon (also the add button's fallback inside its slot), a copy of a slotted row icon (`remove-icon`,
+  // `show-icon`, `hide-icon`) or the slotted `add-icon` — never the add button's text label.
   svg,
+  &:not(.add) > :not(slot),
+  &.add > :not(span, slot),
   ::slotted(*) {
     width: css.cssVar(button__icon--size);
     height: css.cssVar(button__icon--size);
