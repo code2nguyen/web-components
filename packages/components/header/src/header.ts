@@ -3,6 +3,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { StickyController, type StickyEventMap } from '@c2n/core/controllers/sticky.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { headerMessages } from './messages.js'
 import styles from './header.scss?inline'
 
 /** Events fired by {@link Header}, keyed for `addEventListener`. */
@@ -68,10 +70,11 @@ export class Header extends LitElement {
   /** Uses a translucent background and backdrop filter. */
   @property({ type: Boolean, reflect: true }) blurred = false
 
-  /** Accessible name for the primary navigation landmark. */
-  @property({ attribute: 'navigation-label' }) navigationLabel = 'Primary'
+  /** Accessible name for the primary navigation landmark. Empty, it is the `navigation` message ("Primary"). */
+  @property({ attribute: 'navigation-label' }) navigationLabel = ''
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, headerMessages)
 
   // Only a sticky header observes scrolling; any other header attaches no listener.
   private readonly stickiness = new StickyController(this, {
@@ -101,7 +104,7 @@ export class Header extends LitElement {
       <header class="c2-header" part="header">
         <div class="content" part="content">
           <div class="brand" part="brand"><slot name="brand"></slot></div>
-          <nav class="navigation" part="navigation" aria-label=${this.navigationLabel}><slot></slot></nav>
+          <nav class="navigation" part="navigation" aria-label=${this.navigationLabel || this.msg.t('navigation')}><slot></slot></nav>
           <div class="actions" part="actions"><slot name="actions"></slot></div>
           <div class="mobile-trigger" part="mobile-trigger"><slot name="mobile-trigger"></slot></div>
         </div>
