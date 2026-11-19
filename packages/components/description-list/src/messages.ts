@@ -1,6 +1,8 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
 const en = {
+  /** Shown in an item whose value is empty, when `empty-text` is not set. */
+  empty: '—',
   /** The button beside an editable item's value, and its tooltip. */
   edit: (label: string) => `Edit ${label}`,
 }

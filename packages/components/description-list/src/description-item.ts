@@ -149,8 +149,8 @@ export class DescriptionItem extends LitElement {
   /** The label. The `label` slot takes its place when it has content. */
   @property() label = ''
 
-  /** Text shown while the value is empty. An empty string shows nothing. */
-  @property({ attribute: 'empty-text' }) emptyText = '—'
+  /** Text shown while the value is empty. Defaults to the translatable `empty` message (`—`); an empty string shows nothing. */
+  @property({ attribute: 'empty-text' }) emptyText?: string
 
   /** Overrides the list's `highlight` for this item, such as `min` for a price in a list that highlights `max`. `none` marks nothing. */
   @property() highlight: DescriptionHighlight = ''
@@ -394,7 +394,8 @@ export class DescriptionItem extends LitElement {
 
   override render() {
     const group = this.valueCount > 0
-    const showEmpty = !group && !this.hasValue && this.emptyText !== ''
+    const emptyText = this.emptyText ?? this.msg.t('empty')
+    const showEmpty = !group && !this.hasValue && emptyText !== ''
     const editing = this.editing && !!this.#renderEditor
     return html`
       <div
@@ -411,8 +412,7 @@ export class DescriptionItem extends LitElement {
         >
           ${editing ? this.renderEditing() : nothing}
           <span class="content" ?hidden=${editing}
-            ><slot @slotchange=${this.handleValueSlotChange}></slot
-            ><span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText || nothing}</span></span
+            ><slot @slotchange=${this.handleValueSlotChange}></slot><span class="empty" part="empty" ?hidden=${!showEmpty}>${emptyText || nothing}</span></span
           >
         </div>
         <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions') && (!this.editor || editing)}>
