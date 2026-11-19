@@ -331,7 +331,10 @@ const rules = [
         if (m && (m[2].includes(' ') || /\|\||\?\?/.test(m[0]))) hits.push(i)
         // A public property whose default is English text: `@property() label = 'Close'`. It keeps an empty default
         // (or `undefined`) and falls back to its message at render time.
-        else if (/@property\(/.test(l + (all[i - 1] ?? '')) && /^\s*(?:@property\([^)]*\)\s*)?(?:override\s+|declare\s+)*\w+(?:\s*:[^=]+)?\s*=\s*(['"])([A-Z][^'"]*)\1\s*$/.test(l)) {
+        else if (
+          /@property\(/.test(l + (all[i - 1] ?? '')) &&
+          /^\s*(?:@property\([^)]*\)\s*)?(?:override\s+|declare\s+)*\w+(?:\s*:[^=]+)?\s*=\s*(['"])([A-Z][^'"]*)\1\s*$/.test(l)
+        ) {
           const value = /=\s*(['"])(.*)\1\s*$/.exec(l)[2]
           if (looksLikeEnglish(value)) hits.push(i)
         }
@@ -435,7 +438,7 @@ function templateTextSegments(text) {
       }
       if (text[i] === '$' && text[i + 1] === '{') {
         if (state === 'text') flush()
-        if (attr) attr.value += '\u0000' // an expression inside the value
+        if (attr) attr.value += '\uE000' // an expression inside the value
         i = skipExpression(i + 2)
         bufferStart = i
         continue
@@ -475,7 +478,7 @@ function templateTextSegments(text) {
       if (attr) {
         if (c === attr.quote) {
           if (TEXT_ATTRIBUTES.test(attr.name)) {
-            const literal = attr.value.split('\u0000').join(' ').trim()
+            const literal = attr.value.split('\uE000').join(' ').trim()
             if (literal) out.push({ index: lineAt(attr.start), text: literal, attribute: attr.name })
           }
           attr = null
@@ -508,7 +511,7 @@ const UI_WORDS =
 function looksLikeEnglish(literal) {
   const clean = literal
     .replace(/&[a-z]+;|&#\d+;/gi, ' ')
-    .replace(/\u0000/g, ' ')
+    .replace(/\uE000/g, ' ')
     .trim()
   const words = clean.match(/[A-Za-z][A-Za-z']*/g) ?? []
   if (!words.length) return false
