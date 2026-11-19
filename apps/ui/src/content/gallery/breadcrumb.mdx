@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import BreadcrumbExamplesRuntime from '../../components/BreadcrumbExamplesRuntime.astro'
 
 import { Breadcrumb } from '@c2n/components/breadcrumb'
 
@@ -140,3 +142,26 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
 ```
 
 </GalleryGrid>
+
+## Language
+
+<BreadcrumbExamplesRuntime />
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The landmark and the ellipsis named in the language of the page,useWhen=The application is translated
+<c2-breadcrumb client:only="lit" lang="fr" max-items="3">
+  <c2-link-button href="#">Accueil</c2-link-button>
+  <c2-link-button href="#">Équipe</c2-link-button>
+  <c2-link-button href="#">Projets</c2-link-button>
+  <c2-link-button href="#">Lancement</c2-link-button>
+</c2-breadcrumb>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({ fr: { breadcrumb: { label: "Fil d'Ariane", showMore: 'Afficher {0} éléments de plus' } } })
+```
