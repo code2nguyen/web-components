@@ -2,7 +2,7 @@ import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } f
 import { query, state as reactive } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController, deepActiveElement } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -411,8 +411,8 @@ export class FloatingPanel extends LitElement {
   private returnFocus: Element | null = null
   private announceTimer: ReturnType<typeof setTimeout> | undefined
   private titleObserver: MutationObserver | undefined
-  /** Rendered from a declarative shadow root: the light DOM is read only after hydration. */
-  private readonly hydrating = !isServer && this.shadowRoot !== null
+  /** Rendered from a declarative shadow root: the light DOM (the title) is read only after hydration. */
+  private readonly hydration = new SlotReplayController(this, () => this.readTitle(), { immediate: true })
 
   override connectedCallback() {
     super.connectedCallback()
@@ -843,12 +843,11 @@ export class FloatingPanel extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>) {
     // A client-created panel reads its title before the first render; a server-rendered one after it, so the first
     // client render matches the server's.
-    if (!this.hasUpdated && !this.hydrating && !isServer) this.readTitle()
+    if (!this.hasUpdated && !this.hydration.serverRendered && !isServer) this.readTitle()
     if (changed.has('state') && this.state !== 'minimized') this.collapseAnchor = undefined
   }
 
   protected override firstUpdated() {
-    if (this.hydrating) this.readTitle()
     // The saved place applies in the second render, so the first one matches what a server rendered.
     this.restoreSaved()
   }
