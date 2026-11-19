@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
@@ -119,14 +119,14 @@ export class TimelineItem extends LitElement {
   override render() {
     const hasLabel = !!this.label || this.slotPresence.has('label')
     const hasTimestamp = !!this.timestamp || this.slotPresence.has('timestamp')
-    const timestamp = html`<slot name="timestamp" @slotchange=${this.slotPresence.handleSlotChange}>${this.timestamp}</slot>`
+    const timestamp = html`<slot name="timestamp" @slotchange=${this.slotPresence.handleSlotChange}>${this.timestamp || nothing}</slot>`
     return html`
       <div class="rail" aria-hidden="true">
         <span class="marker" part="marker"><slot name="marker"></slot></span>
         <span class="connector" part="connector"></span>
       </div>
       <div class="label" part="label" ?hidden=${!hasLabel}>
-        <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
+        <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot>
       </div>
       <div class="timestamp" part="timestamp" ?hidden=${!hasTimestamp}>
         ${this.datetime ? html`<time datetime=${this.datetime}>${timestamp}</time>` : timestamp}
