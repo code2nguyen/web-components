@@ -66,4 +66,18 @@ const dropZone = {
   rejected: { one: '{0} fichier refusé', other: '{0} fichiers refusés' },
 }
 
-addTranslations({ fr: { 'document-checklist': documentChecklist, 'image-uploader': imageUploader, 'drop-zone': dropZone } })
+// JSON-style, as an app loading translations from a file writes them: `{0}` placeholders and plural objects.
+const upload = {
+  drop: 'Déposez des fichiers ici ou {0}',
+  browse: 'parcourez',
+  filesMaximum: { one: '{0} fichier au maximum', other: '{0} fichiers au maximum' },
+  rejectType: '{0} n’est pas d’un type accepté.',
+}
+
+addTranslations({ fr: { 'document-checklist': documentChecklist, 'image-uploader': imageUploader, 'drop-zone': dropZone, upload } })
+
+// A translation whose sentence leaves out the action's `{0}`: the action still follows it.
+addTranslations({ de: { upload: { drop: 'Dateien hier ablegen', browse: 'durchsuchen' } } })
+
+// A translation that uses the action's `{0}` twice.
+addTranslations({ nl: { upload: { drop: '{0}: sleep bestanden of {0} hier', browse: 'bladeren' } } })

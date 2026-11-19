@@ -194,7 +194,8 @@ export class Upload extends LitElement {
    * Also takes files pasted (Ctrl+V, ⌘V) while the drop zone has focus, a keyboard path for a screenshot or a file
    * copied in the file manager; on `c2-image-uploader`, while its add tile has focus. Files are checked as dropped
    * ones are, and the number added is announced. Safari fires no `paste` on a focused region that is not editable, so
-   * there the shortcut reads the clipboard instead (Safari asks the visitor to allow it). `c2-document-checklist`
+   * there the shortcut reads the clipboard instead (Safari asks the visitor to allow it); that covers copied images and
+   * screenshots, while a file copied in Finder still goes through the picker. `c2-document-checklist`
    * ignores it.
    */
   @property({ type: Boolean }) paste = false
@@ -337,10 +338,10 @@ export class Upload extends LitElement {
 
   /** The message shown for a rejected file. Companions with a message catalog of their own translate it. */
   protected rejectionMessage(reason: UploadRejectionReason, file: File): string {
-    if (reason === 'multiple') return 'Only one file can be selected.'
-    if (reason === 'limit') return `A maximum of ${this.maxFiles} files is allowed.`
-    if (reason === 'type') return `${file.name} is not an accepted file type.`
-    return `${file.name} exceeds the ${this.formatBytes(this.maxSize)} size limit.`
+    if (reason === 'multiple') return this.msg.t('rejectMultiple')
+    if (reason === 'limit') return this.msg.t('rejectLimit', this.maxFiles)
+    if (reason === 'type') return this.msg.t('rejectType', file.name)
+    return this.msg.t('rejectSize', file.name, this.formatBytes(this.maxSize))
   }
 
   /** The form-data name a queued file is appended under. */
@@ -548,19 +549,39 @@ export class Upload extends LitElement {
     return svg`<svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 16l-4-4-4 4M12 12v9"></path><path d="M20.4 17.5A5 5 0 0 0 18 8.2 7 7 0 0 0 4.3 10.8 4.5 4.5 0 0 0 5.5 19H7"></path></svg>`
   }
 
+  /** The drop prompt, its action word (the message's `{0}`) drawn as a link-like span wherever the language puts it. */
+  private renderPrompt(sentence: 'drop' | 'dropMore', action: 'browse' | 'uploadMoreAction') {
+    const marker = '\u0001'
+    const text = this.msg.t(sentence, marker)
+    // A translation that leaves out `{0}` still gets the action, after its sentence.
+    const at = text.indexOf(marker)
+    // Split at the first `{0}` only: a translation that repeats it keeps its text after the second one.
+    const [before, after] =
+      at < 0
+        ? [`${text} `, '']
+        : [
+            text.slice(0, at),
+            text
+              .slice(at + marker.length)
+              .split(marker)
+              .join(this.msg.t(action)),
+          ]
+    return html`${before || nothing}<span class="action">${this.msg.t(action)}</span>${after || nothing}`
+  }
+
   private get defaultHint(): string {
     const parts: string[] = []
     if (this.accept) parts.push(this.accept)
-    if (this.maxSize > 0) parts.push(`up to ${this.formatBytes(this.maxSize)}`)
+    if (this.maxSize > 0) parts.push(this.msg.t('upTo', this.formatBytes(this.maxSize)))
     if (this.multiple && this.uploadItems.length > 0 && this.remainingCapacity !== undefined) {
-      parts.push(`${this.remainingCapacity} file${this.remainingCapacity === 1 ? '' : 's'} remaining`)
-    } else if (this.maxFiles > 0) parts.push(`${this.maxFiles} file${this.maxFiles === 1 ? '' : 's'} maximum`)
-    return parts.join(' · ') || (this.multiple ? 'Select one or more files' : 'Select one file')
+      parts.push(this.msg.t('filesRemaining', this.remainingCapacity))
+    } else if (this.maxFiles > 0) parts.push(this.msg.t('filesMaximum', this.maxFiles))
+    return parts.join(' · ') || this.msg.t(this.multiple ? 'selectFiles' : 'selectFile')
   }
 
   private get defaultActionLabel(): string {
-    if (!this.multiple || this.uploadItems.length === 0) return this.multiple ? 'Upload files' : 'Upload file'
-    return this.remainingCapacity === undefined ? 'Upload more' : `Upload more (${this.remainingCapacity} remaining)`
+    if (!this.multiple || this.uploadItems.length === 0) return this.msg.t(this.multiple ? 'uploadFiles' : 'uploadFile')
+    return this.remainingCapacity === undefined ? this.msg.t('uploadMore') : this.msg.t('uploadMoreRemaining', this.remainingCapacity)
   }
 
   protected renderPicker() {
@@ -594,11 +615,7 @@ export class Upload extends LitElement {
         <slot part="drop-icon" name="drop-icon">${this.renderIcon()}</slot>
         <div part="prompt" class="prompt">
           <slot name="prompt">
-            ${
-              this.multiple && this.uploadItems.length
-                ? html`Drop more files here or <span class="action">upload more</span>`
-                : html`Drop files here or <span class="action">browse</span>`
-            }
+            ${this.multiple && this.uploadItems.length ? this.renderPrompt('dropMore', 'uploadMoreAction') : this.renderPrompt('drop', 'browse')}
           </slot>
         </div>
         <div part="hint" class="hint"><slot name="hint">${this.defaultHint || nothing}</slot></div>

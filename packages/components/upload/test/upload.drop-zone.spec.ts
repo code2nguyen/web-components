@@ -432,3 +432,10 @@ test('in Safari, an image copied from a web page is taken although it carries it
   await page.keyboard.press('ControlOrMeta+V')
   await expect.poll(() => names(upload)).toEqual(['pasted.jpg'])
 })
+
+test('a refused file is reported in the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-upload multiple paste accept=".pdf" auto-upload="false" aria-label="Fichiers"></c2-upload></div>')
+  const upload = page.locator('c2-upload')
+  await paste(upload.locator('.dropzone'), [{ name: 'photo.png', type: 'image/png' }])
+  await expect(upload.locator('[part="errors"]')).toContainText('photo.png n’est pas d’un type accepté.')
+})
