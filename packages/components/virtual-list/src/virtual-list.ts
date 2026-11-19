@@ -639,7 +639,7 @@ export class VirtualList extends LitElement {
 
   #renderState(count: number) {
     if (this.error) {
-      return html`<div class="state state--error" part="state"><slot name="error">${this.error}</slot></div>`
+      return html`<div class="state state--error" part="state"><slot name="error">${this.error || nothing}</slot></div>`
     }
     if (count > 0) return nothing
     // An empty list with more to come is waiting for its first page: the row under it says so.
@@ -650,9 +650,9 @@ export class VirtualList extends LitElement {
       </div>`
     }
     if (this.searching) {
-      return html`<div class="state" part="state"><slot name="no-results">${this.noResultsMessage}</slot></div>`
+      return html`<div class="state" part="state"><slot name="no-results">${this.noResultsMessage || nothing}</slot></div>`
     }
-    return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
+    return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage || nothing}</slot></div>`
   }
 
   #renderRows(start: number, end: number): unknown {
