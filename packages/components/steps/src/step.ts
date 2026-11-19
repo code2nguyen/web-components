@@ -446,10 +446,10 @@ export class Step extends LitElement {
       <span class="c2-step__body">
         <span class="c2-step__text">
           <span class="c2-step__label" part="label">
-            <slot name="label">${this.label}</slot>
+            <slot name="label">${this.label || nothing}</slot>
           </span>
           <span class="c2-step__detail" part="detail" ?hidden=${!detail}>
-            <slot name="detail" @slotchange=${(event: Event) => this.handleSlotChange('detail', event)}>${this.detail}</slot>
+            <slot name="detail" @slotchange=${(event: Event) => this.handleSlotChange('detail', event)}>${this.detail || nothing}</slot>
           </span>
         </span>
         ${
@@ -467,11 +467,11 @@ export class Step extends LitElement {
             : nothing
         }
         <span class="c2-step__reason" part="reason" ?hidden=${!reason}>
-          <slot name="reason" @slotchange=${(event: Event) => this.handleSlotChange('reason', event)}>${this.reason}</slot>
+          <slot name="reason" @slotchange=${(event: Event) => this.handleSlotChange('reason', event)}>${this.reason || nothing}</slot>
         </span>
       </span>
       <span class="c2-step__trailing" part="trailing" ?hidden=${!trailing}>
-        <slot name="trailing" @slotchange=${(event: Event) => this.handleSlotChange('trailing', event)}>${this.trailing}</slot>
+        <slot name="trailing" @slotchange=${(event: Event) => this.handleSlotChange('trailing', event)}>${this.trailing || nothing}</slot>
       </span>
       <!-- The marker is a glyph, so the state is spelled out for assistive technology. -->
       <span class="c2-step__status-text"
