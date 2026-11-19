@@ -401,7 +401,7 @@ export class DescriptionItem extends LitElement {
         class=${classMap({ 'c2-description-item': true, [`is-${this.kind}`]: this.kind === 'subtotal' || this.kind === 'total', 'is-editable': !!this.editor })}
       >
         <div class="label" part="label" role="term">
-          <slot name="label">${this.label}</slot>
+          <slot name="label">${this.label || nothing}</slot>
         </div>
         <div
           class=${classMap({ value: true, 'is-group': group })}
@@ -411,7 +411,8 @@ export class DescriptionItem extends LitElement {
         >
           ${editing ? this.renderEditing() : nothing}
           <span class="content" ?hidden=${editing}
-            ><slot @slotchange=${this.handleValueSlotChange}></slot><span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText}</span></span
+            ><slot @slotchange=${this.handleValueSlotChange}></slot
+            ><span class="empty" part="empty" ?hidden=${!showEmpty}>${this.emptyText || nothing}</span></span
           >
         </div>
         <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions') && (!this.editor || editing)}>
