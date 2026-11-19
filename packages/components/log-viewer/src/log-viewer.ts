@@ -2,6 +2,7 @@ import { LitElement, html, nothing, unsafeCSS, type PropertyDeclaration, type Pr
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { composedSelectionRange } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { SearchField } from '@c2n/search-field'
 import { columnOrder, matchesFilter, validateEntries, validateFilter } from './log-model.js'
@@ -770,8 +771,8 @@ export class LogViewer extends LitElement {
     else {
       // WebKit and Firefox: the document's selection, read through the shadow root with getComposedRanges; it may lie
       // anywhere on the page, so only a range inside this viewer counts.
-      const selection = document.getSelection() as (Selection & { getComposedRanges?: (options: { shadowRoots: ShadowRoot[] }) => StaticRange[] }) | null
-      const composed = selection?.getComposedRanges?.({ shadowRoots: [root] })[0]
+      const selection = document.getSelection()
+      const composed = selection ? composedSelectionRange(selection, [root]) : undefined
       if (composed && root.contains(composed.startContainer) && root.contains(composed.endContainer)) {
         const range = document.createRange()
         range.setStart(composed.startContainer, composed.startOffset)
