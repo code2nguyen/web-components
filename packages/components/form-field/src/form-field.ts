@@ -396,6 +396,9 @@ export class FormField extends LitElement {
   }
 
   private handleInput = (event: Event) => {
+    // A control's own edit targets the control (a shadow root retargets its inner input's event to the host). One that
+    // bubbled from a control in its action zone (a select in a footer slot) targets that control: not this field's edit.
+    if (event.target !== this.control) return
     if (event.type === 'input') this.edited = true
     if (this.serverError) {
       this.serverError = ''

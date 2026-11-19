@@ -124,3 +124,23 @@ test('a control that writes its own bounds names them in the range message: an h
     .poll(() => page.locator('c2-form-field').evaluate((field) => (field as HTMLElement & { errorMessage: string }).errorMessage))
     .toBe('Enter 1h or less.')
 })
+
+test("a control in another control's slot does not mark the field edited", async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-form-field label="Search" validate-on="input">
+      <c2-text-field required>
+        <label slot="suffix-icon"><input type="checkbox" /> Exact match</label>
+      </c2-text-field>
+    </c2-form-field>
+  `)
+  const field = page.locator('c2-form-field')
+  // The checkbox's input and change bubble through the text field: they are not the text field's edits.
+  await page.getByRole('checkbox', { name: 'Exact match' }).click()
+  await page.locator('body').click({ position: { x: 1, y: 1 } })
+  await expect(field).not.toHaveState('user-invalid')
+  // An edit of the text field itself still counts.
+  await page.locator('c2-text-field').getByRole('textbox').fill('a')
+  await page.locator('c2-text-field').getByRole('textbox').fill('')
+  await page.locator('body').click({ position: { x: 1, y: 1 } })
+  await expect(field).toHaveState('user-invalid')
+})
