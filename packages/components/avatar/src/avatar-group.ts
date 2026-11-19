@@ -3,6 +3,8 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { avatarMessages } from './messages.js'
 import styles from './avatar-group.scss?inline'
 import type { Avatar } from './avatar'
 
@@ -63,7 +65,9 @@ export class AvatarGroup extends LitElement {
   @property({ reflect: true, attribute: 'count-mode' }) countMode: AvatarGroupCountMode = 'hidden'
 
   /** Accessible name for the group. */
-  @property({ attribute: 'aria-label' }) override ariaLabel = 'Avatar group'
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
+  private readonly msg = new LocalizeController(this, avatarMessages)
 
   @state() private renderedVisibleCount = 0
   @state() private renderedTotalCount = 0
@@ -179,10 +183,10 @@ export class AvatarGroup extends LitElement {
   override render() {
     const hidden = this.hiddenCount
     const count = this.countMode === 'total' ? this.total : hidden
-    const label = this.countMode === 'total' ? `${this.total} avatars total` : `${hidden} more avatar${hidden === 1 ? '' : 's'}`
+    const label = this.countMode === 'total' ? this.msg.t('total', this.total) : this.msg.t('hidden', hidden)
 
     return html`
-      <div class="group" role="group" aria-label=${this.ariaLabel || nothing}>
+      <div class="group" role="group" aria-label=${this.ariaLabel || this.msg.t('group')}>
         <slot @slotchange=${this.handleSlotChange}></slot>
         <span
           class="overflow"
