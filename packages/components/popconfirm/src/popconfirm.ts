@@ -4,6 +4,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { computePosition, autoUpdate, flip, shift, offset, arrow, type Placement } from '@floating-ui/dom'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { popconfirmMessages } from './messages.js'
 import styles from './popconfirm.scss?inline'
 
 export type { Placement }
@@ -122,11 +124,13 @@ export class Popconfirm extends LitElement {
   /** The question the popup asks. The `heading` slot overrides it. */
   @property() heading = ''
 
-  /** Text of the button that confirms. */
-  @property({ attribute: 'confirm-label' }) confirmLabel = 'OK'
+  /** Text of the button that confirms. Empty, it is the `confirm` message ("OK"). */
+  @property({ attribute: 'confirm-label' }) confirmLabel = ''
 
-  /** Text of the button that cancels. */
-  @property({ attribute: 'cancel-label' }) cancelLabel = 'Cancel'
+  /** Text of the button that cancels. Empty, it is the `cancel` message ("Cancel"). */
+  @property({ attribute: 'cancel-label' }) cancelLabel = ''
+
+  private readonly msg = new LocalizeController(this, popconfirmMessages)
 
   /** Preferred side of the trigger; flips when there is no room. */
   @property({ reflect: true }) placement: Placement = 'top'
@@ -378,7 +382,7 @@ export class Popconfirm extends LitElement {
           </div>
         </div>
         <div class="actions">
-          <button class="button cancel" part="cancel" type="button" @click=${() => this.dismiss(true)}>${this.cancelLabel}</button>
+          <button class="button cancel" part="cancel" type="button" @click=${() => this.dismiss(true)}>${this.cancelLabel || this.msg.t('cancel')}</button>
           <button
             class="button confirm"
             part="confirm"
@@ -387,7 +391,7 @@ export class Popconfirm extends LitElement {
             aria-busy=${this.pending ? 'true' : nothing}
             @click=${this.handleConfirm}
           >
-            ${this.confirmLabel}
+            ${this.confirmLabel || this.msg.t('confirm')}
           </button>
         </div>
       </div>
