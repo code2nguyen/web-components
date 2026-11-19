@@ -106,12 +106,18 @@ export class ColorSelect extends LitElement {
     }
   }
 
+  /** @internal */
   @state() hue = 0
+  /** @internal */
   @state() saturation = 0
+  /** @internal */
   @state() value = 0
+  /** @internal */
   @state() alpha = 1
 
+  /** @internal */
   @state() inputType = 'HEX'
+  /** @internal */
   @state() open = false
 
   @query('.color-area') colorArea!: ColorArea

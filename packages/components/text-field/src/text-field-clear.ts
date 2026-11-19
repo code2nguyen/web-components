@@ -21,6 +21,7 @@ import { TextField } from './text-field'
 export class TextFieldClear extends TextField {
   static override styles: CSSResult | CSSResult[] = [unsafeCSS(styles), TextField.styles as CSSResult]
 
+  /** @internal */
   @state() showClear = false
 
   protected override handleInput(event: InputEvent) {

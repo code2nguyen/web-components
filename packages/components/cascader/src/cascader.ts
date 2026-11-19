@@ -165,7 +165,9 @@ export class Cascader extends LitElement {
   /** Replaces an option row's content while interaction and hierarchy controls remain owned by the cascader. */
   @property({ attribute: false }) itemRenderer: CascaderItemRenderer | undefined
 
+  /** @internal */
   @query('#trigger', true) public trigger!: HTMLButtonElement
+  /** @internal */
   @query('#panel-overlay', true) public panel!: Overlay
 
   /** The resolved option path for the current `value`. Invalid trailing values are omitted. */

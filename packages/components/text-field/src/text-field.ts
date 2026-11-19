@@ -268,6 +268,7 @@ export class TextField extends LitElement {
     this.syncFormState()
   }
 
+  /** @internal */
   handleFocus = () => {
     this.focus()
   }

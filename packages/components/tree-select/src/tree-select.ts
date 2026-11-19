@@ -256,7 +256,9 @@ export class TreeSelect extends LitElement {
   /** Resolves the children of a branch the first time it is expanded; see `c2-tree`'s `loadChildren`. */
   @property({ attribute: false }) loadChildren?: TreeChildrenLoader
 
+  /** @internal */
   @query('#button') public button!: HTMLButtonElement
+  /** @internal */
   @query('#menu-overlay') public menu!: HTMLElement
   @query('c2-tree') private tree?: Tree
   @query('.search-input') private searchInput?: HTMLInputElement

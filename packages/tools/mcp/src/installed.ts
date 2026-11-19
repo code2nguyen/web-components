@@ -246,6 +246,8 @@ export function scriptApi(members: ManifestMember[] = [], attributes: { name?: s
   const result: ScriptMember[] = []
   for (const m of members) {
     if (!m.name || m.static || (m.privacy && m.privacy !== 'public') || /^[_#]/.test(m.name) || NOT_COMPONENT_API.has(m.name)) continue
+    // `role` and `ariaValueMin` are the platform's ARIA reflection, overridden to state the host's semantics.
+    if (m.name === 'role' || /^aria[A-Z]/.test(m.name)) continue
     if (m.inheritedFrom?.package && !m.inheritedFrom.package.startsWith('@c2n')) continue
     if (seen.has(m.name)) continue
     if (m.kind === 'field') {
