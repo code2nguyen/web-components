@@ -56,6 +56,12 @@ export class IconButton extends LitElement {
   @property({ type: Boolean, reflect: true }) toggle = false
 
   /**
+   * Stable identity of the button inside a `c2-button-group`, whose `value` lists the selected buttons by it. Without
+   * one, the group names the button by its position.
+   */
+  @property({ reflect: true }) value = ''
+
+  /**
    * Declares the item a radio button of a single-selection `c2-button-group`: the `radio` role with `aria-checked`
    * (from `selected`) in place of `aria-pressed`, so a screen reader announces "radio button, 2 of 3" and the arrow
    * keys the group answers to. Set by the group.

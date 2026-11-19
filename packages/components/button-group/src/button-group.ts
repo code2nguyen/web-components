@@ -55,6 +55,9 @@ export interface ButtonGroup {
   removeEventListener: TypedRemoveEventListener<ButtonGroup, ButtonGroupEventMap>
 }
 
+/** The items whose `value` property names them in the group. */
+const BUTTONS = new Set(['c2-button', 'c2-icon-button'])
+
 /**
  * Attaches related buttons into one control: shared borders, outside corners only, a divider between items. Children
  * are `c2-button` or `c2-icon-button` elements (any element works for layout). With `selection="single"` the group is
@@ -160,6 +163,7 @@ export class ButtonGroup extends LitElement {
   private activeItem?: HTMLElement
   /** `value` as the page first set it, restored by a form reset. */
   private defaultValue?: string
+  private readonly identities = new WeakMap<HTMLElement, string>()
   /** Disabled by an ancestor `<fieldset>`, which the group treats like its own `disabled`. */
   @state() private formDisabled = false
 
@@ -183,8 +187,20 @@ export class ButtonGroup extends LitElement {
     this.internals.role = this.groupRole
     this.defaultValue ??= this.value
     if (!isServer) {
-      this.observer ??= new MutationObserver(() => this.syncItems())
-      this.observer.observe(this, { childList: true })
+      // Items coming and going, and an item whose value changes after the group synced: not changes inside an item.
+      this.observer ??= new MutationObserver((records) => {
+        let changed = false
+        for (const record of records) {
+          if (record.type === 'childList') changed ||= record.target === this
+          // A button renamed: other items (a slider in a toolbar) reflect a live form value there, not an identity.
+          else if (record.target.parentNode === this && BUTTONS.has((record.target as Element).localName)) {
+            changed = true
+            this.renameSelected(record.target as HTMLElement, record.oldValue)
+          }
+        }
+        if (changed) this.syncItems()
+      })
+      this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['value'], attributeOldValue: true })
       this.resizeObserver ??= new ResizeObserver(() => this.queueIndicatorUpdate())
       this.resizeObserver.observe(this)
       this.syncItems()
@@ -216,8 +232,35 @@ export class ButtonGroup extends LitElement {
     return this.value ? this.value.split(',').filter(Boolean) : []
   }
 
+  /**
+   * A selected button named by its position (no value yet, or an empty one) keeps its selection when its value
+   * arrives, and a form reset restores it under that value too.
+   */
+  private renameSelected(item: HTMLElement, oldValue: string | null): void {
+    const index = this.items.indexOf(item)
+    if (index < 0) return
+    // Only a button that had no value of its own (named by its position) and gets one is carried over: when a value
+    // changes from one name to another, the app may be reusing the element for another option (an unkeyed list), so
+    // the app sets the group's value itself.
+    if (oldValue) return
+    const previous = this.identities.get(item) ?? String(index)
+    const next = this.itemValue(item, index)
+    if (previous === next) return
+    const rename = (value: string | undefined) => {
+      const tokens = String(value ?? '').split(',')
+      // De-duplicated: renaming onto a token already selected keeps one.
+      return tokens.includes(previous) ? [...new Set(tokens.map((token) => (token === previous ? next : token)))].join(',') : value
+    }
+    this.value = rename(this.value) ?? ''
+    this.defaultValue = rename(this.defaultValue)
+  }
+
   private itemValue(item: HTMLElement, index: number): string {
-    return item.getAttribute('value') ?? String(index)
+    // An empty value (a framework binding `value={id ?? ''}`) names nothing: the index stands in, as for no value.
+    // A button's value property first, which a framework may set before it reflects; any other item (a select in a
+    // toolbar) has a live form value there, not an identity.
+    const property = BUTTONS.has(item.localName) ? (item as HTMLElement & { value?: unknown }).value : undefined
+    return (typeof property === 'string' && property) || item.getAttribute('value') || String(index)
   }
 
   /** Form reset: back to the value the page started with. */
@@ -376,6 +419,8 @@ export class ButtonGroup extends LitElement {
         ;(item as HTMLElement & { radio: boolean }).radio = false
         this.radioItemsSet.delete(item)
       }
+      // The identity each item was last synced under: what a later rename of the item is a rename from.
+      this.identities.set(item, this.itemValue(item, index))
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
 
