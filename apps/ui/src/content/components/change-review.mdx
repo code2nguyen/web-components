@@ -84,6 +84,55 @@ export const ttl = 600
     <c2-button class="review-apply" slot="actions">Apply</c2-button>
   </c2-change-review>
 </div>
+<div data-label="Changed lines only">
+    <c2-change-review context="0"
+      class="review-demo"
+      label="Suggested edit"
+      file-name="src/billing/invoice.ts"
+      original="import { formatMoney } from './money'
+  import type { Invoice } from './types'
+
+  export function total(invoice: Invoice): number {
+    let sum = 0
+    for (const item of invoice.items) sum += item.price * item.qty
+    return sum
+  }
+
+  export function label(invoice: Invoice): string {
+    return 'Invoice ' + invoice.id
+  }
+
+  export function due(invoice: Invoice): Date {
+    return invoice.dueDate
+  }
+
+  // Totals are cached for an hour.
+  export const ttl = 3_600
+  "
+      modified="import { formatMoney, roundHalfEven } from './money'
+  import type { Invoice } from './types'
+
+  export function total(invoice: Invoice): bigint {
+    let sum = 0n
+    for (const line of invoice.lines) sum += line.unitCents * BigInt(line.quantity)
+    return roundHalfEven(sum)
+  }
+
+  export function label(invoice: Invoice): string {
+    return 'Invoice ' + invoice.id
+  }
+
+  export function due(invoice: Invoice): Date {
+    return invoice.dueDate
+  }
+
+  // Totals are cached for ten minutes.
+  export const ttl = 600
+  "
+    >
+      <c2-button class="review-apply" slot="actions">Apply</c2-button>
+    </c2-change-review>
+</div>
 ```
 
 ## Hunks and decisions

@@ -335,8 +335,11 @@ export class Select extends LitElement {
     return this.internals.willValidate
   }
 
+  /** @internal */
   @query('#button', true) public button!: HTMLButtonElement
+  /** @internal */
   @query('#menu-overlay', true) public menu!: HTMLElement
+  /** @internal */
   @query('slot:not([name])', true) public listItemSlot?: HTMLSlotElement
   @query('#search') private searchInput?: HTMLInputElement
   @query('#create') private createButton?: HTMLButtonElement
@@ -348,6 +351,7 @@ export class Select extends LitElement {
   /** Times the display text was looked up again because a selected item had no label yet. */
   private displayRetries = 0
 
+  /** The `data` of each selected row, in the order of `value`, as the last `selection-change` reported it. */
   data: unknown[] = []
 
   override connectedCallback() {

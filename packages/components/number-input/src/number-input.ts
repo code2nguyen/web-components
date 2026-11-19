@@ -63,7 +63,7 @@ export interface NumberInput {
  * @cssproperty {color} [--c2-number-input__stepper--color=#71717a]
  * @cssproperty {color} [--c2-number-input__stepper__hover--color=#18181b]
  * @cssproperty {color} [--c2-number-input__stepper__hover--background=#f4f4f5]
- * @cssproperty {pixel} [--c2-number-input__stepper-icon--size=14px]
+ * @cssproperty {pixel} [--c2-number-input__stepper-icon--size=14px] - Width and height of the stepper icon.
  * @cssproperty {color} [--c2-number-input__adornment--color=#71717a]
  * @cssproperty {font-size} [--c2-number-input__adornment--font-size=14px]
  * @cssproperty {pixel} [--c2-number-input__supporting-text--gap=4px]

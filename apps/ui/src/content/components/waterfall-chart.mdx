@@ -38,7 +38,7 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
 </style>
 
 <div data-label="Income statement">
-  <c2-waterfall-chart
+  <c2-waterfall-chart aria-label="Income statement"
     class="waterfall-plot"
     label-field="item"
     total-field="total"
@@ -60,6 +60,30 @@ This chart draws with [ECharts](https://echarts.apache.org) 6, a peer dependency
     data='[{"month":"Opening cash","net":240,"opening":true},{"month":"Jan","net":38},{"month":"Feb","net":-22},{"month":"Mar","net":51},{"month":"Apr","net":-64},{"month":"May","net":17},{"month":"Jun","net":29}]'
   >
     <c2-chart-series field="net" label="Net cash flow"></c2-chart-series>
+  </c2-waterfall-chart>
+</div>
+<div data-label="Value over every bar">
+  <c2-waterfall-chart value-labels
+    class="waterfall-plot"
+    label-field="month"
+    total-field="opening"
+    total-label="Closing cash"
+    legend="none"
+    data='[{"month":"Opening cash","net":240,"opening":true},{"month":"Jan","net":38},{"month":"Feb","net":-22},{"month":"Mar","net":51},{"month":"Apr","net":-64},{"month":"May","net":17},{"month":"Jun","net":29}]'
+  >
+    <c2-chart-series field="net" label="Net cash flow"></c2-chart-series>
+  </c2-waterfall-chart>
+</div>
+<div data-label="German number format">
+  <c2-waterfall-chart locale="de-DE" aria-label="Income statement"
+    class="waterfall-plot"
+    label-field="item"
+    total-field="total"
+    total-label="Net income"
+    value-labels
+    data='[{"item":"Revenue","amount":1020,"total":true},{"item":"Cost of revenue","amount":-330},{"item":"Gross profit","total":true},{"item":"R&D","amount":-280},{"item":"Sales & marketing","amount":-170},{"item":"G&A","amount":-70},{"item":"Other income","amount":20},{"item":"Tax","amount":-40}]'
+  >
+    <c2-chart-series field="amount" label="Amount ($k)"></c2-chart-series>
   </c2-waterfall-chart>
 </div>
 ```

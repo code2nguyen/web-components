@@ -8,6 +8,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { disabledByAncestor, isComposingKey } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SlotCopies } from '@c2n/core/controllers/slot-copies.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { formatEnv, parseEnv, type KeyValueEntry } from './dotenv.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -65,9 +66,9 @@ let nextRowId = 0
  * @slot empty - Shown instead of the rows when there are none to show: in view mode, or with `lock-keys`. Defaults to "No variables".
  * @slot hint - Help text under the rows, e.g. "Paste a .env file into a key field to add several variables at once."
  * @slot add-icon - Replaces the plus of the add button.
- * @slot remove-icon - Replaces the cross of each row's remove button.
- * @slot show-icon - Replaces the eye of the reveal toggle while a value is hidden.
- * @slot hide-icon - Replaces the crossed eye of the reveal toggle while a value is shown.
+ * @slot remove-icon - Replaces the cross of each row's remove button. Drawn as a copy in each place (a page-level SVG symbol it uses comes along): style it with inline styles, attributes or inherited custom properties; page class rules, listeners and properties set on the slotted element do not reach the copies.
+ * @slot show-icon - Replaces the eye of the reveal toggle while a value is hidden. Drawn as a copy in each place (a page-level SVG symbol it uses comes along): style it with inline styles, attributes or inherited custom properties; page class rules, listeners and properties set on the slotted element do not reach the copies.
+ * @slot hide-icon - Replaces the crossed eye of the reveal toggle while a value is shown. Drawn as a copy in each place (a page-level SVG symbol it uses comes along): style it with inline styles, attributes or inherited custom properties; page class rules, listeners and properties set on the slotted element do not reach the copies.
  *
  * @event {Event} input - Fired on every edit: typing in a field, adding, removing or pasting rows.
  * @event {Event} change - Fired when an edit is committed: a field loses focus after a change, or rows are added, removed or pasted.
@@ -104,7 +105,7 @@ let nextRowId = 0
  * @cssproperty {font-size} [--c2-key-value-editor__error--font-size=12px]
  *
  * @cssproperty {pixel} [--c2-key-value-editor__button--size=32px] - Size of the remove button.
- * @cssproperty {pixel} [--c2-key-value-editor__button__icon--size=16px]
+ * @cssproperty {pixel} [--c2-key-value-editor__button__icon--size=16px] - Width and height of the button icon.
  * @cssproperty {border-radius} [--c2-key-value-editor__button--border-radius=6px]
  * @cssproperty {color} [--c2-key-value-editor__button--color=#71717a]
  * @cssproperty {color} [--c2-key-value-editor__button__hover--color=#18181b]
@@ -297,6 +298,19 @@ export class KeyValueEditor extends LitElement {
   protected get rows(): KeyValueEntry[] {
     const rows = this.realRows
     return rows.length || this.lockKeys ? rows : [this.blankRow]
+  }
+
+  /**
+   * The slotted row icons, drawn in every row: a slot shows its content in one place only, so a `<slot>` per row put
+   * the author's icon in the first row and the built-in one in every other.
+   */
+  protected readonly removeIcon = new SlotCopies(this, 'remove-icon')
+  protected readonly showIcon = new SlotCopies(this, 'show-icon')
+  protected readonly hideIcon = new SlotCopies(this, 'hide-icon')
+
+  /** The hidden slots that collect the row icons; rendered once in every mode. */
+  protected renderIconSources() {
+    return html`${this.removeIcon.source()}${this.showIcon.source()}${this.hideIcon.source()}`
   }
 
   protected idOf(entry: KeyValueEntry): number {
@@ -500,6 +514,15 @@ export class KeyValueEditor extends LitElement {
     this.revealed = revealed
   }
 
+  protected override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed)
+    // Row ids only grow: when the rows change, drop the icon copies of rows that are gone, as the tag input does.
+    if (changed.has('entries') || changed.has('lockKeys') || changed.has('mode') || changed.has('masked')) {
+      const ids = this.rows.map((entry) => String(this.idOf(entry)))
+      for (const copies of [this.removeIcon, this.showIcon, this.hideIcon]) copies.retain(ids)
+    }
+  }
+
   protected override updated(changed: PropertyValues): void {
     super.updated(changed)
     const rows = this.realRows
@@ -534,22 +557,20 @@ export class KeyValueEditor extends LitElement {
     }
   }
 
-  private renderRevealIcon(hidden: boolean) {
+  private renderRevealIcon(id: number, hidden: boolean) {
+    if (hidden && this.showIcon.assigned) return this.showIcon.copy(String(id))
+    if (!hidden && this.hideIcon.assigned) return this.hideIcon.copy(String(id))
     return hidden
-      ? html`<slot name="show-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-        </slot>`
-      : html`<slot name="hide-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-            ></path>
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-          </svg>
-        </slot>`
+      ? html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>`
+      : html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+          ></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>`
   }
 
   /** The show/hide toggle of a masked value, named after the key when it is known. */
@@ -562,7 +583,7 @@ export class KeyValueEditor extends LitElement {
       ?disabled=${this.isDisabled}
       @click=${() => this.toggleReveal(id)}
     >
-      ${this.renderRevealIcon(hidden)}
+      ${this.renderRevealIcon(id, hidden)}
     </button>`
   }
 
@@ -678,12 +699,14 @@ export class KeyValueEditor extends LitElement {
               ?disabled=${this.isDisabled}
               @click=${() => this.handleRemove(index)}
             >
-              <slot name="remove-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </slot>
+              ${
+                this.removeIcon.assigned
+                  ? this.removeIcon.copy(String(id))
+                  : html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>`
+              }
             </button>`
       }
       ${error ? html`<span class="error" id=${errorId}>${this.keyErrorMessage(error)}</span>` : nothing}
@@ -731,7 +754,7 @@ export class KeyValueEditor extends LitElement {
         aria-describedby=${this.formField.describedBy()}
       >
         ${this.realRows.some((entry) => this.isFilled(entry)) ? header : nothing} ${this.renderView()} ${this.renderBelowRows()} ${this.renderFooter(false)}
-        ${this.renderHint()} ${this.formField.renderDescription()}
+        ${this.renderHint()} ${this.formField.renderDescription()} ${this.renderIconSources()}
       </div>`
     }
     return html`<div
@@ -753,7 +776,7 @@ export class KeyValueEditor extends LitElement {
             </div>`
           : this.renderEmpty()
       }
-      ${this.renderBelowRows()} ${this.renderFooter(!this.lockKeys)} ${this.renderHint()} ${this.formField.renderDescription()}
+      ${this.renderBelowRows()} ${this.renderFooter(!this.lockKeys)} ${this.renderHint()} ${this.formField.renderDescription()} ${this.renderIconSources()}
     </div>`
   }
 }

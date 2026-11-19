@@ -4,6 +4,7 @@ description: 'Editorial line-chart cards for revenue, investment, services and p
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
@@ -13,6 +14,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 import { ChartLegend } from '@c2n/components/chart/chart-legend'
 import { ChartTooltip } from '@c2n/components/chart/chart-tooltip'
 import { Card } from '@c2n/components/card'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <ChartFinancialGallery />
@@ -218,6 +220,93 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
     <span>Hover the plot for year-over-year context</span>
   </div>
 </c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Control chart
+<style>
+  .line-spc { width: 100%; --c2-card--border-top: 1px solid var(--c2-theme--color-outline-variant); --c2-card--border-right: 1px solid var(--c2-theme--color-outline-variant); --c2-card--border-bottom: 1px solid var(--c2-theme--color-outline-variant); --c2-card--border-left: 1px solid var(--c2-theme--color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--c2-theme--color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .line-spc__heading, .line-spc__footer { display: grid; gap: 4px; }
+  .line-spc__heading strong { font-size: 15px; }
+  .line-spc__heading span, .line-spc__footer span { color: var(--c2-theme--color-on-surface-variant); font-size: 12px; }
+  .line-spc__footer { font-size: 12px; }
+  .line-spc c2-line-chart { width: 100%; --c2-chart--height: 280px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--c2-theme--color-outline-variant); --c2-chart__series-1--color: #2563eb; --c2-chart__annotation-range--opacity: 0.08; --c2-chart__line--width: 1.5px; }
+</style>
+<c2-card class="line-spc">
+  <div slot="header" class="line-spc__heading">
+    <strong>Shaft diameter, individuals chart</strong>
+    <span>Limits from the first 12 samples · Nelson rules</span>
+  </div>
+  <c2-line-chart
+    x-field="sample"
+    points="always"
+    legend="bottom"
+    reference-lines='[{"value":10.099,"value2":10.147,"tone":"danger"},{"value":10.05,"value2":10.099,"tone":"warning"},{"value":9.954,"value2":10.05,"tone":"success"},{"value":9.905,"value2":9.954,"tone":"warning"},{"value":9.857,"value2":9.905,"tone":"danger"},{"value":10.147,"label":"UCL","tone":"danger"},{"value":10.002,"label":"CL","tone":"neutral"},{"value":9.857,"label":"LCL","tone":"danger"},{"value":10.2,"label":"USL","tone":"info"},{"value":9.8,"label":"LSL","tone":"info"}]'
+    data='[{"sample":1,"diameter":10.02},{"sample":2,"diameter":9.98},{"sample":3,"diameter":10.05},{"sample":4,"diameter":9.97},{"sample":5,"diameter":10.01},{"sample":6,"diameter":9.95},{"sample":7,"diameter":10.03},{"sample":8,"diameter":10},{"sample":9,"diameter":9.99},{"sample":10,"diameter":10.04},{"sample":11,"diameter":9.96},{"sample":12,"diameter":10.02},{"sample":13,"diameter":10.18,"flagged":10.18},{"sample":14,"diameter":10.01},{"sample":15,"diameter":9.98},{"sample":16,"diameter":10.03},{"sample":17,"diameter":10.04},{"sample":18,"diameter":10.05},{"sample":19,"diameter":10.03},{"sample":20,"diameter":10.06},{"sample":21,"diameter":10.04},{"sample":22,"diameter":10.05},{"sample":23,"diameter":10.07},{"sample":24,"diameter":10.03,"flagged":10.03},{"sample":25,"diameter":10.06,"flagged":10.06},{"sample":26,"diameter":9.97},{"sample":27,"diameter":10},{"sample":28,"diameter":9.98},{"sample":29,"diameter":10.02},{"sample":30,"diameter":9.99}]'
+  >
+    <c2-chart-series field="diameter" label="Diameter (mm)"></c2-chart-series>
+    <c2-chart-series field="flagged" label="Out of control" points="only" color="#dc2626"></c2-chart-series>
+  </c2-line-chart>
+  <div slot="footer" class="line-spc__footer">
+    <strong>3 points flagged</strong>
+    <span>Sample 13 above the UCL (rule 1) · samples 24–25 end a run of nine above the centre line (rule 2)</span>
+  </div>
+</c2-card>
+```
+
+</GalleryGrid>
+
+The control chart is a line chart with `reference-lines` for the limits and zones, and a second series drawn with `points="only"` for the flagged samples. The numbers come from the functions of `@c2n/components/chart/spc`, which run when the data changes, never while the chart draws:
+
+```ts tag=CodeBlock
+import { controlLimits, runRules, spcReferenceLines, markViolations } from '@c2n/components/chart/spc'
+
+const values = rows.map((row) => row.diameter)
+const limits = controlLimits(values.slice(0, 12)) // phase I: the in-control baseline
+chart.referenceLines = spcReferenceLines(limits, { spec: { lsl: 9.8, usl: 10.2 } })
+chart.data = markViolations(rows, 'diameter', runRules(values, limits), 'flagged')
+```
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .line-slots { width: 100%; }
+  .line-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-line-chart class="line-slots" label-field="month" data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":73},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+  <div slot="legend" class="line-slots__legend">
+    <strong>Visitors</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-line-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .line-states { display: grid; gap: 12px; width: 100%; }
+  .line-states c2-line-chart { --c2-chart--height: 140px; }
+</style>
+<div class="line-states">
+  <c2-line-chart label-field="month" loading>
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-line-chart>
+  <c2-line-chart label-field="month">
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-line-chart>
+  <c2-line-chart label-field="month" error="Request failed">
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-line-chart>
+</div>
 ```
 
 </GalleryGrid>

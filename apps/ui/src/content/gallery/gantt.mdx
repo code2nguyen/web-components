@@ -104,3 +104,31 @@ swaps the hue. Density comes from `__row--height` and `__bar--height`, and the z
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-gantt aria-label="Docs relaunch" today="2026-10-01">
+  <c2-gantt-task task-id="design" label="Design">
+    <c2-gantt-task task-id="ia" start="2026-09-28" end="2026-10-02" progress="0.8">Information architecture</c2-gantt-task>
+    <c2-gantt-task task-id="vis" start="2026-10-05" end="2026-10-16" progress="0.35" dependencies="ia">Visual design</c2-gantt-task>
+    <c2-gantt-task task-id="review" start="2026-10-16" milestone dependencies="vis">Design review</c2-gantt-task>
+  </c2-gantt-task>
+  <c2-gantt-task task-id="build" label="Build">
+    <c2-gantt-task task-id="pages" start="2026-10-12" end="2026-10-30" dependencies="ia">Component pages</c2-gantt-task>
+    <c2-gantt-task task-id="search" start="2026-10-19" end="2026-11-03" dependencies="review">Search and navigation</c2-gantt-task>
+  </c2-gantt-task>
+  <span slot="list-header">Workstream</span>
+  <span slot="duration-header">Weeks</span>
+</c2-gantt>
+```
+
+```html tag=MdxCodeBlock,label=Empty state
+<c2-gantt aria-label="Docs relaunch" today="2026-10-01">
+  <div slot="empty">No tasks planned yet.</div>
+</c2-gantt>
+```
+
+</GalleryGrid>

@@ -242,3 +242,53 @@ test('widens both axes to rounded ticks so no bubble spills over the plot edge',
   expect(result.y.max).toBeGreaterThan(9.6)
   for (const value of [result.x.min, result.x.max, result.y.min, result.y.max]) expect(Number.isInteger(value)).toBe(true)
 })
+
+test('writes the value axes in the chart locale, a log axis included', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveState('engine-echarts')
+  const ticks = await chart.evaluate(async (element) => {
+    const bubble = element as unknown as BubbleInternals & { locale?: string; updateComplete: Promise<unknown> }
+    bubble.locale = 'de-DE'
+    await bubble.updateComplete
+    type Axis = { axisLabel: { formatter: (tick: number) => string } }
+    const options = bubble.buildOptions(bubble.buildContext()) as unknown as { xAxis: Axis; yAxis: Axis }
+    return [options.xAxis.axisLabel.formatter(10000), options.yAxis.axisLabel.formatter(1234.5)]
+  })
+  // ECharts' own tick text is English whatever `locale` says ("10,000"): the axes follow the tooltip's format.
+  expect(ticks).toEqual(['10.000', '1.234,5'])
+})
+
+test('an empty or malformed locale falls back to the browser format instead of failing the draw', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveState('engine-echarts')
+  const ticks = await chart.evaluate(async (element) => {
+    const bubble = element as unknown as BubbleInternals & { locale?: string; updateComplete: Promise<unknown> }
+    const results: string[] = []
+    for (const locale of ['', 'not a locale!']) {
+      bubble.locale = locale
+      await bubble.updateComplete
+      type Axis = { axisLabel: { formatter: (tick: number) => string } }
+      results.push((bubble.buildOptions(bubble.buildContext()) as unknown as { yAxis: Axis }).yAxis.axisLabel.formatter(2.5))
+    }
+    return results
+  })
+  expect(ticks.every((tick) => /2[.,]5/.test(tick))).toBe(true)
+})
+
+test('keeps the digits that tell neighbouring ticks apart, small or close together', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveState('engine-echarts')
+  const ticks = await chart.evaluate(async (element) => {
+    const bubble = element as unknown as BubbleInternals & { locale?: string; updateComplete: Promise<unknown> }
+    bubble.locale = 'en-US'
+    await bubble.updateComplete
+    type Axis = { axisLabel: { formatter: (tick: number) => string } }
+    const options = bubble.buildOptions(bubble.buildContext()) as unknown as { yAxis: Axis }
+    return [0, 0.001, 0.002, 0.0125, 2.5, 1.085, 1.0855, 0.1 + 0.2, 10000, 1e-7, 1.5e-7, 2e-25].map((tick) => options.yAxis.axisLabel.formatter(tick))
+  })
+  // The tooltip's two fraction digits would write 0.001 and 0.002 as "0", and 1.085 and 1.0855 both as "1.09".
+  expect(ticks).toEqual(['0', '0.001', '0.002', '0.0125', '2.5', '1.085', '1.0855', '0.3', '10,000', '0.0000001', '0.00000015', '2E-25'])
+})

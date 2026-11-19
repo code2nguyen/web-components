@@ -82,13 +82,13 @@ export interface Attachment {
  * @cssproperty {border-radius} [--c2-attachment--border-radius=14px]
  * @cssproperty {box-shadow} --c2-attachment--box-shadow
  * @cssproperty {color} [--c2-attachment--color=#18181b]
- * @cssproperty {pixel} [--c2-attachment__media--size=48px]
+ * @cssproperty {pixel} [--c2-attachment__media--size=48px] - Width and height of the media.
  * @cssproperty {color} [--c2-attachment__media--background=#f4f4f5]
  * @cssproperty {color} [--c2-attachment__media--color=#71717a]
  * @cssproperty {border-radius} [--c2-attachment__media--border-radius=10px]
  * @cssproperty {object-fit} [--c2-attachment__media--object-fit=cover]
  * @cssproperty {pixel} [--c2-attachment__tile--width=220px]
- * @cssproperty {ratio} [--c2-attachment__tile--media-aspect-ratio=1]
+ * @cssproperty {ratio} [--c2-attachment__tile--media-aspect-ratio=1] - Aspect ratio of the media area of a tile, such as `1` or `4 / 3`.
  * @cssproperty {font-size} [--c2-attachment__name--font-size=14px]
  * @cssproperty {font-weight} [--c2-attachment__name--font-weight=500]
  * @cssproperty {color} [--c2-attachment__metadata--color=#71717a]
@@ -98,7 +98,7 @@ export interface Attachment {
  * @cssproperty {color} [--c2-attachment__status__error--color=#dc2626]
  * @cssproperty {color} [--c2-attachment__progress--background=#e4e4e7]
  * @cssproperty {color} [--c2-attachment__progress--color=rgb(2, 101, 220)]
- * @cssproperty {pixel} [--c2-attachment__action--size=28px]
+ * @cssproperty {pixel} [--c2-attachment__action--size=28px] - Width and height of the action button.
  * @cssproperty {color} [--c2-attachment__action--color=#71717a]
  * @cssproperty {color} [--c2-attachment__action__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-attachment__action__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

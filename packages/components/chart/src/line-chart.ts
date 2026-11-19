@@ -1,13 +1,18 @@
-import { property } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import type { Options } from 'uplot'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { UplotChartBase, type UplotSeriesStyle } from './uplot-chart-base.js'
 import { linePaths } from './engines/uplot-paths.js'
 import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
-import type { ChartSeriesConfig } from './chart-types.js'
+import type { ChartReferenceLine, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
 import './chart-series.js'
 import type { ChartKindMessage } from './messages.js'
+
+/** The code of `reference-lines`, loaded once, the first time a chart has some. */
+let referenceLinesModule: typeof import('./reference-lines.js') | undefined
+let referenceLinesLoad: Promise<unknown> | undefined
 
 export interface LineChart {
   addEventListener: TypedAddEventListener<LineChart, ChartEventMap>
@@ -29,6 +34,10 @@ export interface LineChart {
  * Realtime feeds should call `appendPoint()` rather than reassigning `data`: it writes into the frame's
  * spare capacity and redraws without a Lit update.
  *
+ * `reference-lines` draws horizontal rules and bands behind the series (a target, control limits, sigma zones), and
+ * a series with `points="only"` draws markers without a line, which flags a few points of another. Together with the
+ * functions of `@c2n/chart/spc.js` they make a control chart.
+ *
  * @tag c2-line-chart
  *
  * @slotcomponent c2-chart-series
@@ -48,18 +57,67 @@ export class LineChart extends UplotChartBase {
   /** When point markers are drawn. `auto` lets uPlot show them once points are far enough apart. */
   @property({ type: String }) points: 'auto' | 'always' | 'none' = 'auto'
 
+  /**
+   * Horizontal rules at a y value, or bands between `value` and `value2`, each `{ value, value2?, label?, tone? }`, drawn
+   * behind the series in the annotation tones and read out in the chart's accessible name. The y scale stretches to
+   * show them unless `y-min`/`y-max` fix it. A band's fill uses `--c2-chart__annotation-range--opacity`, a rule the
+   * `--c2-chart__annotation-line--*` width and style.
+   */
+  @property({ converter: jsonPropertyConverter, attribute: 'reference-lines' }) referenceLines?: ChartReferenceLine[]
+
   protected override seriesStyle(series: ChartSeriesConfig, index: number, context: ChartBuildContext): UplotSeriesStyle {
     const { theme } = context
+    const stroke = this.colorOf(series, index, theme)
+    const points = series.points ?? this.points
+    if (points === 'only') {
+      // Solid dots a little larger than a line's, so a flagged point reads over the line it sits on.
+      return {
+        stroke,
+        width: series.lineWidth ?? theme.lineWidth,
+        paths: () => null,
+        spanGaps: false,
+        points: { show: true, size: theme.pointRadius * 3.2, fill: stroke },
+      }
+    }
     return {
-      stroke: this.colorOf(series, index, theme),
+      stroke,
       width: series.lineWidth ?? theme.lineWidth,
       paths: linePaths(this.curve),
       spanGaps: series.spanGaps ?? false,
       points: {
-        show: this.points === 'none' ? false : this.points === 'always' ? true : undefined,
+        show: points === 'none' ? false : points === 'always' ? true : undefined,
         size: theme.pointRadius * 2,
       },
     }
+  }
+
+  protected override decorateOptions(options: Options, context: ChartBuildContext): Options {
+    if (!this.referenceLines?.length) return options
+    if (referenceLinesModule)
+      return referenceLinesModule.decorateReferenceLines(options, context, this, (expression, fallback) =>
+        this.themeController.resolveColor(expression, fallback),
+      )
+    // First use on the page: draw without them, then rebuild once the module is in.
+    referenceLinesLoad ??= import('./reference-lines.js').then(
+      (module) => (referenceLinesModule = module),
+      // A failed load (a chunk gone after a deploy) is not cached: the next options rebuild of any chart tries again.
+      () => (referenceLinesLoad = undefined),
+    )
+    void referenceLinesLoad.then(() => referenceLinesModule && this.requestUpdate('referenceLines', null))
+    return options
+  }
+
+  /** A marker-only series has nothing to say at a row it does not mark, so it leaves the tooltip there. */
+  protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
+    const context = super.tooltipContextAt(detail)
+    return { ...context, entries: context.entries.filter((entry) => entry.value !== null || (entry.series.points ?? this.points) !== 'only') }
+  }
+
+  protected override accessibleSummary(resolved?: ChartSeriesConfig[]): string {
+    const summary = super.accessibleSummary(resolved)
+    return referenceLinesModule && !this.getAttribute('aria-label')?.trim()
+      ? referenceLinesModule.describeReferenceLines(summary, this, (value) => this.formatValue(value))
+      : summary
   }
 }
 

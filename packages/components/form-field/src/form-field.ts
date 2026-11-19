@@ -109,7 +109,7 @@ let warnedNative = false
  *
  * @tag c2-form-field
  *
- * @slot default - The control: one form-associated `c2-*` element or a native input, select or textarea.
+ * @slot default - The control: one form-associated `c2-*` element (`c2-text-field`, `c2-textarea`, a `c2-select` of `c2-list-item` options, `c2-checkbox`, `c2-switch`, …) or a native input, select or textarea.
  * @slot label - Rich label content; replaces `label`.
  * @slot label-action - A link or button at the end of the label row, e.g. "Forgot password?".
  * @slot hint - Rich hint content shown under the control; replaces `hint`.

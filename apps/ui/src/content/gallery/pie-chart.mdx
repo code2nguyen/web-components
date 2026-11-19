@@ -13,6 +13,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 import { ChartLegend } from '@c2n/components/chart/chart-legend'
 import { ChartTooltip } from '@c2n/components/chart/chart-tooltip'
 import { Card } from '@c2n/components/card'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <ChartFinancialGallery />
@@ -213,6 +214,51 @@ Figures are USD billions from the product, service, and gross-margin tables in A
     <span>Legend entries can toggle individual slices</span>
   </div>
 </c2-card>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .pie-slots { width: 100%; }
+  .pie-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-pie-chart class="pie-slots" label-field="browser" data='[{"browser":"Chrome","visitors":275},{"browser":"Safari","visitors":200},{"browser":"Firefox","visitors":187},{"browser":"Edge","visitors":173},{"browser":"Other","visitors":90}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+  <div slot="legend" class="pie-slots__legend">
+    <strong>Visitors</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-pie-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .pie-states { display: grid; gap: 12px; width: 100%; }
+  .pie-states c2-pie-chart { --c2-chart--height: 140px; }
+</style>
+<div class="pie-states">
+  <c2-pie-chart label-field="browser" loading>
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-pie-chart>
+  <c2-pie-chart label-field="browser">
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-pie-chart>
+  <c2-pie-chart label-field="browser" error="Request failed">
+    <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-pie-chart>
+</div>
 ```
 
 </GalleryGrid>

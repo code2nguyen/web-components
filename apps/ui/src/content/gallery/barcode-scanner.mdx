@@ -213,3 +213,16 @@ scanner.decoder = decoder
 
 scanner.addEventListener('scan', (event) => count(event.detail.value))
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<c2-barcode-scanner>
+  <svg slot="torch-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+  <svg slot="switch-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg>
+</c2-barcode-scanner>
+```
+
+</GalleryGrid>

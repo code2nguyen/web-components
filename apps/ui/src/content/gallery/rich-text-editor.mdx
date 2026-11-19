@@ -231,3 +231,18 @@ editor.addEventListener('merge-field-activate', async ({ detail }) => {
 editor.renderMergeField = ({ label, fallback }) =>
   html`${label}${fallback ? html`<span part="merge-field-fallback"> · ${fallback}</span>` : nothing}`
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .default-editor { width: 320px; }
+</style>
+<c2-rich-text-editor class="default-editor" label="Comment" placeholder="Leave a comment…" value="Release notes go out **Friday**.">
+  <c2-button slot="footer-start">Send</c2-button>
+</c2-rich-text-editor>
+```
+
+</GalleryGrid>

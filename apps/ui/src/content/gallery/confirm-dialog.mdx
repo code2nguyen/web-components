@@ -37,7 +37,7 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
 </style>
 <c2-button onclick="document.getElementById('cdg-3').show()">Open</c2-button>
 <c2-confirm-dialog id="cdg-3" class="icon-heading" destructive heading="Remove member?" message="Ana Ng loses access to every project in this workspace." confirm-label="Remove">
-  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg slot="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 11h-6"></path>
   </svg>
 </c2-confirm-dialog>
@@ -93,7 +93,7 @@ Curated looks for `c2-confirm-dialog`. Each card shows a trigger; open the dialo
 </style>
 <c2-button onclick="document.getElementById('cdg-6').show()">Open</c2-button>
 <c2-confirm-dialog id="cdg-6" class="soft-warning" heading="Leave without saving?" message="Your edits to this page have not been saved yet." confirm-label="Leave" cancel-label="Keep editing">
-  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg slot="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="12" cy="12" r="10"></circle>
     <path d="M12 8v4M12 16h.01"></path>
   </svg>
@@ -212,3 +212,16 @@ import { addTranslations } from '@c2n/core/localize.js'
 
 addTranslations({ fr: { 'confirm-dialog': { cancel: 'Annuler', typeToConfirm: 'Saisissez {0} pour confirmer' } } })
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-button onclick="document.getElementById('cdg-1').show()">Open</c2-button>
+<c2-confirm-dialog id="cdg-1" heading="Publish changes?" message="Everyone with the link will see the new version." confirm-label="Publish">
+  <span slot="heading">Delete <strong>Q3 report</strong>?</span>
+</c2-confirm-dialog>
+```
+
+</GalleryGrid>

@@ -13,6 +13,7 @@ import { ChartSeries } from '@c2n/components/chart/chart-series'
 import { ChartLegend } from '@c2n/components/chart/chart-legend'
 import { ChartTooltip } from '@c2n/components/chart/chart-tooltip'
 import { Card } from '@c2n/components/card'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 <ChartFinancialGallery />
@@ -167,6 +168,51 @@ Values are derived from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/
     <span>Legend and tooltip stay synchronized</span>
   </div>
 </c2-card>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .gauge-slots { width: 100%; }
+  .gauge-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-gauge-chart class="gauge-slots" data='[{"metric":"Progress","value":68}]'>
+  <c2-chart-series field="value" label="Progress"></c2-chart-series>
+  <div slot="legend" class="gauge-slots__legend">
+    <strong>Progress</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-gauge-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .gauge-states { display: grid; gap: 12px; width: 100%; }
+  .gauge-states c2-gauge-chart { --c2-chart--height: 140px; }
+</style>
+<div class="gauge-states">
+  <c2-gauge-chart loading>
+    <c2-chart-series field="value" label="Progress"></c2-chart-series>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-gauge-chart>
+  <c2-gauge-chart>
+    <c2-chart-series field="value" label="Progress"></c2-chart-series>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-gauge-chart>
+  <c2-gauge-chart error="Request failed">
+    <c2-chart-series field="value" label="Progress"></c2-chart-series>
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-gauge-chart>
+</div>
 ```
 
 </GalleryGrid>

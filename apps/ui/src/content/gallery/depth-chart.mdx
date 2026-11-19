@@ -7,6 +7,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { DepthChart } from '@c2n/components/chart/depth-chart'
+import { Button } from '@c2n/components/button'
 
 The book is a made-up BTC-USD snapshot with large resting orders at 67,000 and 68,000.
 
@@ -52,6 +53,47 @@ The book is a made-up BTC-USD snapshot with large resting orders at 67,000 and 6
   }
 </style>
 <c2-depth-chart class="depth-notional" unit="quote" curve="linear" legend="bottom" quote-label="USD" bids='[[67410.5,0.153],[67408.5,0.729],[67406,0.055],[67402.5,0.288],[67402,0.059],[67392.5,1.795],[67385,0.431],[67375,0.74],[67356,1.221],[67343,0.492],[67310,0.321],[67287,0.075],[67244.5,1.562],[67220.5,0.132],[67143.5,0.101],[67102,0.581],[67090.5,0.101],[67017.5,1.652],[67006,1.053],[67000,14.464],[66902.5,0.44],[66845.5,0.874],[66702.5,0.41],[66667.5,2.686],[66517,0.637],[66500,10.584],[66449.5,0.355],[66167.5,1.666]]' asks='[[67414.5,0.105],[67415.5,0.108],[67416,0.915],[67419,0.088],[67422.5,1.053],[67431,0.305],[67436.5,0.806],[67452,0.53],[67464,1.232],[67493.5,0.262],[67528,0.145],[67541.5,1.93],[67582,0.154],[67585.5,0.248],[67650,1.397],[67669,0.674],[67747.5,0.508],[67786.5,0.395],[67814,2.089],[67844.5,1.33],[67960,0.658],[68000,13.723],[68068,0.121],[68153,0.828],[68333.5,2.9],[68400,7.818],[68594.5,1.6],[68618,2.533]]'></c2-depth-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .depth-slots { width: 100%; }
+  .depth-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-depth-chart class="depth-slots" base-label="BTC" quote-label="USD" bids='[[67410.5,0.153],[67408.5,0.729],[67406,0.055],[67402.5,0.288],[67402,0.059],[67392.5,1.795],[67385,0.431],[67375,0.74],[67356,1.221],[67343,0.492],[67310,0.321],[67287,0.075],[67244.5,1.562],[67220.5,0.132],[67143.5,0.101],[67102,0.581],[67090.5,0.101],[67017.5,1.652],[67006,1.053],[67000,14.464],[66902.5,0.44],[66845.5,0.874],[66702.5,0.41],[66667.5,2.686],[66517,0.637],[66500,10.584],[66449.5,0.355],[66167.5,1.666]]' asks='[[67414.5,0.105],[67415.5,0.108],[67416,0.915],[67419,0.088],[67422.5,1.053],[67431,0.305],[67436.5,0.806],[67452,0.53],[67464,1.232],[67493.5,0.262],[67528,0.145],[67541.5,1.93],[67582,0.154],[67585.5,0.248],[67650,1.397],[67669,0.674],[67747.5,0.508],[67786.5,0.395],[67814,2.089],[67844.5,1.33],[67960,0.658],[68000,13.723],[68068,0.121],[68153,0.828],[68333.5,2.9],[68400,7.818],[68594.5,1.6],[68618,2.533]]'>
+  <div slot="legend" class="depth-slots__legend">
+    <strong>Depth chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-depth-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .depth-states { display: grid; gap: 12px; width: 100%; }
+  .depth-states c2-depth-chart { --c2-chart--height: 140px; }
+</style>
+<div class="depth-states">
+  <c2-depth-chart base-label="BTC" quote-label="USD" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-depth-chart>
+  <c2-depth-chart base-label="BTC" quote-label="USD">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-depth-chart>
+  <c2-depth-chart base-label="BTC" quote-label="USD" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-depth-chart>
+</div>
 ```
 
 </GalleryGrid>

@@ -458,7 +458,7 @@ export class PyramidChart extends EchartsChartBase {
   #labelText(datum: PyramidDatum): string {
     const series = this.resolvedSeries[0]
     const value = series?.format?.(datum.real) ?? this.formatValue(datum.real)
-    const percent = `${new Intl.NumberFormat(this.locale, { maximumFractionDigits: 1 }).format(datum.share * 100)}%`
+    const percent = `${new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 1 }).format(datum.share * 100)}%`
     switch (this.labelContent) {
       case 'name':
         return datum.name

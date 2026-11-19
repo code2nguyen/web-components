@@ -474,3 +474,21 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .default {
+    width: 220px;
+  }
+</style>
+<c2-text-field placeholder="Your email" class="default">
+  <svg slot="clear-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  <span slot="supporting-text">We send the receipt to this address.</span>
+</c2-text-field>
+```
+
+</GalleryGrid>

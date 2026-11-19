@@ -156,3 +156,17 @@ addTranslations({ fr: { tour: { dismiss: 'Compris', beacon: 'Voir l’astuce : {
 
 resetButton.addEventListener('click', () => document.querySelector('c2-beacon')!.reset())
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-button id="gallery-beacon-default">Reports</c2-button>
+<c2-beacon client:only="lit">
+  <c2-tour-step target="#gallery-beacon-default" heading="Reports moved here">Every saved report now lives in one place.</c2-tour-step>
+  <c2-button slot="trigger">Take the tour</c2-button>
+</c2-beacon>
+```
+
+</GalleryGrid>

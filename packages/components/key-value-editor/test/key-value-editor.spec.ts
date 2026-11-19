@@ -259,3 +259,26 @@ test('parseEnv and formatEnv round-trip quoting and escapes', () => {
   expect(parseEnv('not an env file\nA=1')).toBeNull()
   expect(parseEnv('A=1\nA=2')).toEqual([{ key: 'A', value: '2' }])
 })
+
+test('slotted row icons replace the built-in ones in every row, not only the first', async ({ page, renderScenario }) => {
+  const icon = (slot: string) => `<svg slot="${slot}" class="custom-${slot}" viewBox="0 0 24 24"><path d="M3 6h18"></path></svg>`
+  await renderScenario(
+    editor(
+      `masked entries='[{"key":"A","value":"1"},{"key":"B","value":"2"},{"key":"C","value":"3"}]'`,
+      `${icon('remove-icon')}${icon('show-icon')}${icon('hide-icon')}`,
+    ),
+  )
+  const host = page.locator('c2-key-value-editor')
+  // A slot shows its content once: before the copies, only the first row had the author's icons.
+  await expect(host.locator('.remove .custom-remove-icon')).toHaveCount(3)
+  await expect(host.locator('.reveal .custom-show-icon')).toHaveCount(3)
+  await expect(host.locator('.remove .custom-remove-icon').first()).toHaveAttribute('aria-hidden', 'true')
+  // Revealing one value swaps that row's copy for the hide icon.
+  await page.getByRole('button', { name: 'Show value 1' }).click()
+  await expect(host.locator('.reveal .custom-hide-icon')).toHaveCount(1)
+  await expect(host.locator('.reveal .custom-show-icon')).toHaveCount(2)
+  // A new row gets its own copy; the name of the button is still its message.
+  await page.getByRole('button', { name: 'Add another' }).click()
+  await expect(host.locator('.remove .custom-remove-icon')).toHaveCount(4)
+  await expect(page.getByRole('button', { name: 'Remove B' })).toBeVisible()
+})

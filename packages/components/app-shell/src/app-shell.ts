@@ -89,7 +89,7 @@ function isNavigation(path: EventTarget[]): boolean {
  * @slot banner - A strip above everything, such as a `c2-banner` for test mode or impersonation.
  * @slot header - The application header, usually a `c2-header`. Kept outside `<main>` in both layouts, so it stays the banner landmark.
  * @slot navigation-header - Above the navigation: a logo or a workspace switcher.
- * @slot navigation - The navigation itself, such as a `c2-list` of links with their icons in the prefix slot.
+ * @slot navigation - The navigation itself, such as a `c2-list` of `c2-list-item` links with their icons in the prefix slot.
  * @slot navigation-footer - Pinned to the bottom of the navigation: settings, help, the user.
  * @slot - The main content, rendered inside `<main>`.
  * @slot aside - A details panel or inspector beside main.

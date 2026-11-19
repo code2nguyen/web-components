@@ -27,8 +27,8 @@ const CLOSE = svg`<path d="M18 6 6 18M6 6l12 12" />`
  *
  * @csspart button - The native button.
  *
- * @cssproperty {pixel} [--c2-app-shell-toggle--size=40px]
- * @cssproperty {pixel} [--c2-app-shell-toggle__icon--size=20px]
+ * @cssproperty {pixel} [--c2-app-shell-toggle--size=40px] - Width and height of the app shell toggle button.
+ * @cssproperty {pixel} [--c2-app-shell-toggle__icon--size=20px] - Width and height of the icon.
  * @cssproperty {border-radius} [--c2-app-shell-toggle--border-radius=8px]
  * @cssproperty {color} [--c2-app-shell-toggle--color=#18181b]
  * @cssproperty {color} [--c2-app-shell-toggle--background-color=transparent]

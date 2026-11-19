@@ -105,9 +105,9 @@ function hostOf(src: string): string {
  * @cssproperty {pixel} [--c2-image__placeholder--min-height=120px] - Height of the placeholder, fallback and click-to-load surfaces when no ratio is known.
  * @cssproperty {pixel} [--c2-image__placeholder--min-width=200px]
  * @cssproperty {color} [--c2-image__shimmer--color=rgba(255, 255, 255, 0.6)]
- * @cssproperty {time} [--c2-image__shimmer--duration=1.2s]
+ * @cssproperty {time} [--c2-image__shimmer--duration=1.2s] - Length of one pass of the loading shimmer.
  * @cssproperty {pixel} [--c2-image__blur--radius=16px] - Blur applied to `placeholder-src`.
- * @cssproperty {pixel} [--c2-image__icon--size=20px]
+ * @cssproperty {pixel} [--c2-image__icon--size=20px] - Width and height of the icon.
  *
  * @cssproperty {background} [--c2-image__fallback--background=#fafafa]
  * @cssproperty {color} [--c2-image__fallback--color=#71717a]

@@ -1,0 +1,625 @@
+{
+  "date": "2026-11-19",
+  "score": 100,
+  "passed": 28,
+  "tasks": [
+    {
+      "id": "data-grid",
+      "requirement": "Show 10,000 orders in a sortable grid with row selection and a pinned first column",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-table",
+        "c2-table-column"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.4070424
+    },
+    {
+      "id": "toast",
+      "requirement": "Show a short success notification in the corner after saving that disappears by itself",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-button",
+        "c2-toast-region"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_examples",
+        "get_examples",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.4568632
+    },
+    {
+      "id": "country-combobox",
+      "requirement": "A searchable dropdown to pick a country from 250 options as you type",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-autocomplete"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.47057079999999996
+    },
+    {
+      "id": "simple-select",
+      "requirement": "Let the user pick a shipping speed from a dropdown with three options inside a form",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-form",
+        "c2-form-field",
+        "c2-select",
+        "c2-list-item",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "get_component",
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.428164
+    },
+    {
+      "id": "kanban",
+      "requirement": "A task board with To do, In progress and Done columns where cards can be dragged between columns",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-kanban",
+        "c2-kanban-column"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "get_examples",
+        "validate_markup",
+        "get_examples"
+      ],
+      "costUsd": 0.39041859999999995
+    },
+    {
+      "id": "row-actions",
+      "requirement": "A dropdown of actions (Edit, Duplicate, Delete) opened from a kebab button",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-menu",
+        "c2-icon-button",
+        "c2-feather-more-vertical",
+        "c2-menu-item",
+        "c2-feather-edit-2",
+        "c2-feather-copy",
+        "c2-feather-trash-2"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.4162518
+    },
+    {
+      "id": "right-click",
+      "requirement": "Show a menu when the user right-clicks a file in the list",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-context-menu",
+        "c2-list",
+        "c2-list-item",
+        "c2-menu",
+        "c2-menu-item"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_examples",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.4388926
+    },
+    {
+      "id": "wizard",
+      "requirement": "A checkout stepper showing Cart, Shipping, Payment and Review with the current step highlighted",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-steps",
+        "c2-step",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_examples",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.3921668
+    },
+    {
+      "id": "empty-state",
+      "requirement": "An empty state for a search with no results, with an illustration and a 'Clear filters' button",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-status-panel",
+        "c2-symbol-no-results",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "search_components",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.3583816
+    },
+    {
+      "id": "price",
+      "requirement": "An amount field for a price in euros that formats the number as you type",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-money-input"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "validate_markup"
+      ],
+      "costUsd": 0.2222326
+    },
+    {
+      "id": "stars",
+      "requirement": "Let customers leave a 1 to 5 star review",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-banner",
+        "c2-form",
+        "c2-form-field",
+        "c2-rate",
+        "c2-textarea",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "search_components",
+        "get_component",
+        "get_theme",
+        "get_component",
+        "get_component",
+        "search_components",
+        "get_component",
+        "validate_markup",
+        "validate_markup"
+      ],
+      "costUsd": 0.5081244
+    },
+    {
+      "id": "folder-tree",
+      "requirement": "Show a folder hierarchy that can be expanded and collapsed, with lazy-loaded children",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-tree",
+        "c2-tree-item",
+        "c2-feather-folder",
+        "c2-feather-file-text"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_examples",
+        "get_examples",
+        "get_examples",
+        "get_component",
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.7106406000000001
+    },
+    {
+      "id": "llm-answer",
+      "requirement": "Render an assistant's answer written in markdown as it streams in, with code blocks",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-markdown",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.3419972
+    },
+    {
+      "id": "chat-composer",
+      "requirement": "A chat message box that grows as you type and sends on Enter",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-chat-input",
+        "c2-feather-arrow-up"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.33963840000000006
+    },
+    {
+      "id": "upload-progress",
+      "requirement": "Show how much of the import has finished as a percentage bar",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-progress"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.2006612
+    },
+    {
+      "id": "hint",
+      "requirement": "Show a short hint when hovering an icon button",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-icon-button",
+        "c2-feather-edit",
+        "c2-feather-share",
+        "c2-feather-trash"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "search_components",
+        "get_component",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.28258220000000006
+    },
+    {
+      "id": "copy",
+      "requirement": "A button that copies the API key to the clipboard",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-copy-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.36197619999999997
+    },
+    {
+      "id": "tabs",
+      "requirement": "Switch between Overview, Settings and Billing panels on the same page",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-tabs",
+        "c2-tab"
+      ],
+      "notes": [],
+      "tools": [
+        "get_component",
+        "get_examples",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.34261780000000003
+    },
+    {
+      "id": "faq",
+      "requirement": "An FAQ where each question expands to reveal its answer",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-accordion",
+        "c2-details"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.3203346000000001
+    },
+    {
+      "id": "toggle",
+      "requirement": "An on/off setting for email notifications",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-switch"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "validate_markup"
+      ],
+      "costUsd": 0.26571540000000005
+    },
+    {
+      "id": "revenue-trend",
+      "requirement": "Plot daily revenue over the last 30 days as a line",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-line-chart",
+        "c2-chart-series"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_examples",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.3601502
+    },
+    {
+      "id": "user-avatar",
+      "requirement": "Show the user's profile picture with an online status dot",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-avatar"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "validate_markup"
+      ],
+      "costUsd": 0.207773
+    },
+    {
+      "id": "status-pill",
+      "requirement": "A small coloured label showing an order's status, like 'Shipped'",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-badge"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "validate_markup"
+      ],
+      "costUsd": 0.2022452
+    },
+    {
+      "id": "slider",
+      "requirement": "Choose a volume level between 0 and 100 by dragging",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-slider"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "validate_markup",
+        "get_theme"
+      ],
+      "costUsd": 0.2639194
+    },
+    {
+      "id": "segmented",
+      "requirement": "A segmented control to switch the view between Day, Week and Month",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-button-group",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "validate_markup"
+      ],
+      "costUsd": 0.36317520000000003
+    },
+    {
+      "id": "arrow-icon",
+      "requirement": "An arrow-right icon at the end of a 'Continue' button",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-button",
+        "c2-feather-arrow-right"
+      ],
+      "notes": [],
+      "tools": [
+        "get_component",
+        "search_components",
+        "get_component",
+        "validate_markup"
+      ],
+      "costUsd": 0.1915418
+    },
+    {
+      "id": "form-validation",
+      "requirement": "A labelled email field with a hint and an error message under it",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-label",
+        "c2-text-field"
+      ],
+      "notes": [],
+      "tools": [
+        "get_component",
+        "get_component",
+        "get_examples",
+        "validate_markup",
+        "get_theme"
+      ],
+      "costUsd": 0.419767
+    },
+    {
+      "id": "schema-form",
+      "requirement": "Render a settings form directly from a JSON Schema",
+      "found": true,
+      "valid": true,
+      "correct": true,
+      "tags": [
+        "c2-json-form",
+        "c2-button"
+      ],
+      "notes": [],
+      "tools": [
+        "search_components",
+        "get_component",
+        "get_examples",
+        "get_component",
+        "get_theme",
+        "get_component",
+        "generate_variant",
+        "validate_markup"
+      ],
+      "costUsd": 0.45960439999999997
+    }
+  ]
+}

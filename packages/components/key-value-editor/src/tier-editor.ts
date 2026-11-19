@@ -433,12 +433,14 @@ export class TierEditor extends KeyValueEditor {
               ?disabled=${this.isDisabled}
               @click=${() => this.handleRemove(index)}
             >
-              <slot name="remove-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </slot>
+              ${
+                this.removeIcon.assigned
+                  ? this.removeIcon.copy(String(id))
+                  : html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>`
+              }
             </button>`
       }
       ${error ? html`<span class="error" id=${errorId}>${error}</span>` : nothing}

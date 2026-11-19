@@ -849,7 +849,7 @@ export class BoxplotChart extends EchartsChartBase {
 
   #formatNumber(value: number): string {
     const precision = Math.max(0, Math.min(20, Math.trunc(this.precision) || 0))
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: precision }).format(value)
+    return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: precision }).format(value)
   }
 
   #format(value: number, series?: ChartSeriesConfig): string {
@@ -857,7 +857,7 @@ export class BoxplotChart extends EchartsChartBase {
   }
 
   #formatCount(value: number): string {
-    return new Intl.NumberFormat(this.locale, { maximumFractionDigits: 0 }).format(value)
+    return new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: 0 }).format(value)
   }
 }
 

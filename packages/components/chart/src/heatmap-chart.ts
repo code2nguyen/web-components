@@ -568,7 +568,7 @@ export class HeatmapChart extends EchartsChartBase {
   }
 
   #locale(): string | undefined {
-    return this.msg.locale || undefined
+    return this.canonicalLocale(this.msg.locale)
   }
 
   #model(): HeatmapModel {

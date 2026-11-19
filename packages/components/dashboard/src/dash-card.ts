@@ -100,7 +100,7 @@ function parseDuration(value: string): number {
  *
  * @tag c2-dash-card
  *
- * @slot - Pane content. It fills the pane: the body is a column flex box and every slotted child is a `flex: 1`
+ * @slot - Pane content (a `c2-table` with its `c2-table-column`s, a chart such as `c2-line-chart` with `c2-chart-series`, a `c2-list` of `c2-list-item`s, …). It fills the pane: the body is a column flex box and every slotted child is a `flex: 1`
  * item with `min-height: 0`, so a chart or an editor follows the row track without a `height: 100%` chain.
  * @slot header - Title area of the header row; filling it turns the row on.
  * @slot actions - Your own controls at the end of the header row, before the built-in expand buttons and separated
@@ -171,8 +171,8 @@ function parseDuration(value: string): number {
  * @cssproperty {pixel} [--c2-dash-card__controls--offset=4px] - Inset of the floating control group from the
  * top-right corner, used only while the header row is off.
  *
- * @cssproperty {pixel} [--c2-dash-card__control--size=24px]
- * @cssproperty {pixel} [--c2-dash-card__control--icon-size=16px]
+ * @cssproperty {pixel} [--c2-dash-card__control--size=24px] - Width and height of the control button.
+ * @cssproperty {pixel} [--c2-dash-card__control--icon-size=16px] - Width and height of the icons in the expand controls.
  * @cssproperty {border-radius} [--c2-dash-card__control--border-radius=6px]
  * @cssproperty {color} [--c2-dash-card__control--color=#71717a]
  * @cssproperty {background} [--c2-dash-card__control--background=transparent]

@@ -107,7 +107,7 @@ import { LinkButton } from '@c2n/components/link-button'
   }
 </style>
 <c2-banner class="cookie-banner" heading="We use cookies" message="to keep you signed in and to understand how the product is used.">
-  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg slot="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-3-3Z"></path>
     <path d="M8.5 12.5h.01M12 16h.01M15.5 14.5h.01M9 8h.01"></path>
   </svg>
@@ -221,6 +221,24 @@ import { LinkButton } from '@c2n/components/link-button'
     <c2-link-button slot="actions" href="#">Export first</c2-link-button>
   </c2-banner>
 </div>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .default-banner {
+    width: 100%;
+    max-width: 720px;
+  }
+</style>
+<c2-banner class="default-banner" variant="info" heading="Heads up" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC." dismissible>
+  <svg slot="close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</c2-banner>
 ```
 
 </GalleryGrid>

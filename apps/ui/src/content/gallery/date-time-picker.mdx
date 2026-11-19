@@ -75,3 +75,22 @@ Each treatment changes only the public CSS variables. The field's `background`, 
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid columns="2">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .default {
+    width: 100%;
+    max-width: 280px;
+  }
+</style>
+<c2-date-time-picker class="default" aria-label="Meeting" value="2026-10-14T09:30">
+  <svg slot="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  <span slot="supporting-text">Times are shown in your time zone.</span>
+</c2-date-time-picker>
+```
+
+</GalleryGrid>

@@ -3,6 +3,7 @@ title: 'Kanban'
 description: 'Board layout and card movement by pointer or keyboard, with cards drawn by your own renderItem.'
 category: 'Planning'
 apiTags: ['c2-kanban', 'c2-kanban-column']
+keywords: ['board', 'trello', 'swimlanes', 'task board']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -52,6 +53,17 @@ import '@c2n/components/kanban'
 </div>
 <div data-label="Default cards, read-only">
   <c2-kanban
+    client:only="lit"
+    class="usage-board"
+    aria-label="Released"
+    items='[{"id":"1","column":"shipped","title":"Masonry layout","description":"Shipped in 0.0.17"},{"id":"2","column":"shipped","title":"QR code error levels"}]'
+  >
+    <c2-kanban-column column-id="shipped" label="Shipped"></c2-kanban-column>
+    <c2-kanban-column column-id="blocked" label="Blocked"><span slot="empty">Nothing is blocked</span></c2-kanban-column>
+  </c2-kanban>
+</div>
+<div data-label="Default cards, editable">
+  <c2-kanban editable
     client:only="lit"
     class="usage-board"
     aria-label="Released"

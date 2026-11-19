@@ -94,9 +94,9 @@ const KEYBOARD_SETTLE = 300
  *
  * @tag c2-selection-toolbar
  *
- * @slot - The content whose selections the toolbar acts on.
+ * @slot - The content whose selections the toolbar acts on: text, a `c2-markdown` answer, a `c2-text-field`.
  * @slot toolbar - The toolbar's controls: `c2-button`, `c2-icon-button` or any focusable element. Give one `data-action` to have it fire `selection-action`.
- * @slot prompt - Shown while `prompting`: the field and quick actions.
+ * @slot prompt - Shown while `prompting`: the field (a `c2-chat-input` or `c2-text-field`) and quick actions.
  * @slot result - Shown while `prompting`: the answer and its actions (Replace, Retry…).
  *
  * @event {CustomEvent<{ text: string }>} selection-change - Fired when the toolbar shows for a selection or its selection changes. Does not bubble.

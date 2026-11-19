@@ -80,7 +80,7 @@ const deleteIcon = svg`<path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-
  * @cssproperty {color} [--c2-keypad__display__error--color=#dc2626] - While an enclosing `c2-form-field` shows an error.
  * @cssproperty {font-size} [--c2-keypad__display--font-size=40px]
  * @cssproperty {font-weight} [--c2-keypad__display--font-weight=600]
- * @cssproperty {pixel} [--c2-keypad__dot--size=14px]
+ * @cssproperty {pixel} [--c2-keypad__dot--size=14px] - Width and height of the dot.
  * @cssproperty {pixel} [--c2-keypad__dot--gap=16px]
  * @cssproperty {border} [--c2-keypad__dot--border=2px solid #71717a] - An empty dot.
  * @cssproperty {color} [--c2-keypad__dot__filled--color=#18181b] - A dot that holds a digit.

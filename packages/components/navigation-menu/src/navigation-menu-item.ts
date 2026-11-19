@@ -100,7 +100,7 @@ export interface NavigationMenuItem {
  * @cssproperty {pixel} [--c2-navigation-menu-item__indicator--inset=0px] - How far the line stops short of the item on each side; `0` spans its whole width.
  * @cssproperty {border-radius} [--c2-navigation-menu-item__indicator--border-radius=999px]
  *
- * @cssproperty {pixel} [--c2-navigation-menu-item__icon--size=16px]
+ * @cssproperty {pixel} [--c2-navigation-menu-item__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-navigation-menu-item__icon--color - Defaults to the label colour.
  *
  * @cssproperty {outline} [--c2-navigation-menu-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

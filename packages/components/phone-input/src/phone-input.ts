@@ -111,7 +111,7 @@ function isoList(list: readonly string[] | string | null | undefined): string[] 
  * @cssproperty {pixel} [--c2-phone-input__flag--font-size=18px]
  * @cssproperty {display} [--c2-phone-input__flag--display=inline] - `none` hides the flags (where the platform does not draw flag emoji, for instance).
  * @cssproperty {color} [--c2-phone-input__dial-code--color=#52525b]
- * @cssproperty {pixel} [--c2-phone-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-phone-input__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-phone-input__icon--color=#71717a]
  *
  * @cssproperty {padding} [--c2-phone-input__input--padding=0 10px]

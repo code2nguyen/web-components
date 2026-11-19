@@ -6,6 +6,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { DeviceFrame } from '@c2n/components/device-frame'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -188,6 +189,31 @@ The content is the screen; the variables shape the device around it. Each device
     <nav>Notes</nav>
     <p>Meeting notes, Thursday</p>
   </div>
+</c2-device-frame>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .frame-default {
+    width: min(100%, 360px);
+  }
+  .frame-default p {
+    margin: 0;
+    padding: 24px 16px;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 14px;
+  }
+</style>
+<c2-device-frame class="frame-default" url="example.com">
+  <p>Your product, in a browser window.</p>
+  <span slot="address">🔒 app.example.com/settings</span>
+  <c2-button slot="actions">Reload</c2-button>
 </c2-device-frame>
 ```
 

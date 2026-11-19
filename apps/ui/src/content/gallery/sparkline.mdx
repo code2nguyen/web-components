@@ -124,6 +124,12 @@ The starting watchlist is a fixed illustrative snapshot for a repeatable demo. S
     --c2-table__row--height: 56px;
     --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant);
   }
+  .market-pause {
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 12px;
+  }
   .market-controls {
     display: flex;
     align-items: center;
@@ -136,7 +142,7 @@ The starting watchlist is a fixed illustrative snapshot for a repeatable demo. S
 <div class="market-watchlist" data-market-table>
   <c2-table client:only="lit" row-key="symbol" animate-updates update-duration="720"></c2-table>
   <div class="market-controls">
-    <c2-button size="sm">Pause</c2-button>
+    <c2-button class="market-pause">Pause</c2-button>
     <span data-market-status>Preparing replay…</span>
   </div>
 </div>
@@ -161,3 +167,44 @@ table.rowStyle = ({ row }) => ({
 // The snapshot may add, remove, or modify rows. The table owns every transition.
 table.rows = nextMarketTick(table.rows)
 ```
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .sparkline-slots { width: 100%; --c2-chart--height: 140px; }
+  .sparkline-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-sparkline class="sparkline-slots" data="[365.817,394.328,383.285,391.035,416.161]">
+  <div slot="legend" class="sparkline-slots__legend">
+    <strong>Sparkline</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-sparkline>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .sparkline-states { display: grid; gap: 12px; width: 100%; }
+  .sparkline-states c2-sparkline { --c2-chart--height: 140px; --c2-chart--width: 100%; }
+</style>
+<div class="sparkline-states">
+  <c2-sparkline loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-sparkline>
+  <c2-sparkline>
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-sparkline>
+  <c2-sparkline error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-sparkline>
+</div>
+```
+
+</GalleryGrid>

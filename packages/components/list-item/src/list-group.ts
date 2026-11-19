@@ -65,10 +65,10 @@ export interface ListGroup {
  * @cssproperty {outline} [--c2-list-group__header__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-list-group__header__focus--outline-offset=-2px]
  *
- * @cssproperty {pixel} [--c2-list-group__icon--size=16px]
+ * @cssproperty {pixel} [--c2-list-group__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} --c2-list-group__icon--color - Defaults to the header text colour.
  *
- * @cssproperty {pixel} [--c2-list-group__toggle-icon--size=16px]
+ * @cssproperty {pixel} [--c2-list-group__toggle-icon--size=16px] - Width and height of the toggle icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-list-group__toggle-icon--color=#71717a]
  * @cssproperty {angle} [--c2-list-group__toggle-icon--rotate=0deg] - Chevron angle while closed.
  * @cssproperty {angle} [--c2-list-group__toggle-icon__open--rotate=90deg] - Chevron angle while open.

@@ -97,7 +97,6 @@ Steps on different tracks edit different packages, but a few generated files are
 - **scheduler-5** · `c2-scheduler` · example: on call schedule #302
 - **button-1** · `c2-button` · hold button #325 (companion), progress button #448 · +0.3 kB on 2.4 kB, 1.2 kB new entry · risk low · needs the success and error states listed for `c2-button` in the roadmap
 - **format-number-1** · `c2-format-number` · live value #338 (lazy) · +0.2 kB on 3.2 kB, 1.5 kB lazy · risk medium · needs the rolling-digit mode listed for `c2-format-number` in the roadmap (#37): build both in one module
-- **chart-1** · `@c2n/chart` · spc chart #366 · +0.2 kB on 34.0 kB, 2 kB lazy · risk low
 - **chart-2** · `@c2n/chart` · combo chart #524 · +1 kB on 37.2 kB · risk medium
 - **chart-4** · `@c2n/chart` · small multiples #526 (companion) · 3 kB new entry · risk medium
 - **chart-5** · `@c2n/chart` · chart navigator #527 (companion), forecast chart #528 · +1 kB on 34.0 kB, 4 kB new entry · risk low

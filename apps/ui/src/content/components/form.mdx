@@ -141,6 +141,35 @@ import '@c2n/components/form-field'
     </form>
   </c2-form>
 </div>
+<div data-label="Optional fields marked instead">
+  <c2-form necessity="optional" class="account">
+    <form>
+      <c2-form-field label="Full name">
+        <c2-text-field name="fullName" required autocomplete="name"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field label="Email" hint="We'll send a confirmation link.">
+        <c2-text-field name="email" type="email" required value="ada@" autocomplete="email"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field label="Country">
+        <c2-select name="country" required placeholder="Select a country">
+          <c2-list-item value="GB">United Kingdom</c2-list-item>
+          <c2-list-item value="FR">France</c2-list-item>
+          <c2-list-item value="VN">Vietnam</c2-list-item>
+        </c2-select>
+      </c2-form-field>
+      <c2-form-field label="Handle" necessity="optional">
+        <c2-text-field name="handle" value="ada"></c2-text-field>
+      </c2-form-field>
+      <c2-form-field class="wide">
+        <c2-checkbox name="terms" value="accepted" required>I agree to the terms of service</c2-checkbox>
+      </c2-form-field>
+      <div class="actions">
+        <c2-button class="secondary" type="reset">Discard</c2-button>
+        <c2-button type="submit">Save changes</c2-button>
+      </div>
+    </form>
+  </c2-form>
+</div>
 ```
 
 ### Saving

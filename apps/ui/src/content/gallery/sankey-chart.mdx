@@ -7,6 +7,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { SankeyChart } from '@c2n/components/chart/sankey-chart'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -40,6 +41,47 @@ import { SankeyChart } from '@c2n/components/chart/sankey-chart'
   .sankey-tickets { width: 100%; --c2-chart--height: 300px; --c2-chart__node--width: 20px; --c2-chart__node--gap: 12px; --c2-chart__node--border-radius: 4px; }
 </style>
 <c2-sankey-chart class="sankey-tickets" labels="inside" link-color="target" data='[{"source":"Email","target":"Tier 1","value":420},{"source":"Chat","target":"Tier 1","value":610},{"source":"Phone","target":"Tier 1","value":170},{"source":"Tier 1","target":"Solved","value":880},{"source":"Tier 1","target":"Tier 2","value":320},{"source":"Tier 2","target":"Solved","value":210},{"source":"Tier 2","target":"Refunded","value":80},{"source":"Tier 2","target":"Churned","value":30}]'></c2-sankey-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .sankey-slots { width: 100%; }
+  .sankey-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-sankey-chart class="sankey-slots" source-field="from" target-field="to" value-field="amount" data='[{"from":"Subscriptions","to":"Revenue","amount":840},{"from":"Services","to":"Revenue","amount":160},{"from":"Revenue","to":"Gross profit","amount":690},{"from":"Revenue","to":"Cost of revenue","amount":310},{"from":"Gross profit","to":"Operating expenses","amount":520},{"from":"Gross profit","to":"Net profit","amount":170}]'>
+  <div slot="legend" class="sankey-slots__legend">
+    <strong>Sankey chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-sankey-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .sankey-states { display: grid; gap: 12px; width: 100%; }
+  .sankey-states c2-sankey-chart { --c2-chart--height: 140px; }
+</style>
+<div class="sankey-states">
+  <c2-sankey-chart source-field="from" target-field="to" value-field="amount" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-sankey-chart>
+  <c2-sankey-chart source-field="from" target-field="to" value-field="amount">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-sankey-chart>
+  <c2-sankey-chart source-field="from" target-field="to" value-field="amount" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-sankey-chart>
+</div>
 ```
 
 </GalleryGrid>

@@ -9,6 +9,7 @@ import ExampleModules from '../../components/ExampleModules.astro'
 
 import { MapChart } from '@c2n/components/chart/map-chart'
 import { MapLayer } from '@c2n/components/chart/map-layer'
+import { Button } from '@c2n/components/button'
 
 <ExampleModules />
 
@@ -72,6 +73,47 @@ The figures are illustrative. The data hall card draws an SVG floor plan whose r
   }
 </style>
 <c2-map-chart class="map-compact" legend="none" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .map-slots { width: 100%; }
+  .map-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-map-chart class="map-slots" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'>
+  <div slot="legend" class="map-slots__legend">
+    <strong>Map chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .map-states { display: grid; gap: 12px; width: 100%; }
+  .map-states c2-map-chart { --c2-chart--height: 140px; }
+</style>
+<div class="map-states">
+  <c2-map-chart region-field="country" value-field="revenue" value-label="Revenue ($M)" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-map-chart>
+  <c2-map-chart region-field="country" value-field="revenue" value-label="Revenue ($M)">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-map-chart>
+  <c2-map-chart region-field="country" value-field="revenue" value-label="Revenue ($M)" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-map-chart>
+</div>
 ```
 
 </GalleryGrid>

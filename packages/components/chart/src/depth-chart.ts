@@ -301,7 +301,7 @@ export class DepthChart extends UplotChartBase {
   #format(key: string, options: Intl.NumberFormatOptions): Intl.NumberFormat {
     let format = this.#formats.get(key)
     if (!format) {
-      format = new Intl.NumberFormat(this.locale, options)
+      format = new Intl.NumberFormat(this.intlLocale, options)
       this.#formats.set(key, format)
     }
     return format

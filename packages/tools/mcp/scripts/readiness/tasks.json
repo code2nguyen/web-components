@@ -1,0 +1,547 @@
+{
+  "$comment": "AI readiness benchmark: requirements as an app developer would write them, without the component's name where possible. `expect` lists the component ids that are a correct answer (the first is the best one). `tags`: the agent run passes when the code uses at least one of them; `attributes`: attributes (or slots, written `slot:<name>`) the code must also use. Add a task whenever an agent picked the wrong component in real use. The last 25 tasks were written after keyword tuning as a held-out check (discovery 54 before the keywords and rarity weighting, 85 after); keep adding requirements you did not tune against. `agentSet` is the fixed subset `readiness:agent` runs by default (about $10), so agent scores stay comparable between runs; pass --all for every task.",
+  "tasks": [
+    {
+      "id": "data-grid",
+      "requirement": "Show 10,000 orders in a sortable grid with row selection and a pinned first column",
+      "expect": ["table"],
+      "tags": ["c2-table"],
+      "attributes": ["sortable", "selection"]
+    },
+    {
+      "id": "confirm-delete",
+      "requirement": "Ask the user to confirm before deleting a project, with a red destructive button",
+      "expect": ["confirm-dialog", "popconfirm", "modal"],
+      "tags": ["c2-confirm-dialog", "c2-popconfirm", "c2-modal"]
+    },
+    {
+      "id": "are-you-sure",
+      "requirement": "A small 'Are you sure?' popup anchored next to the archive button",
+      "expect": ["popconfirm"],
+      "tags": ["c2-popconfirm"]
+    },
+    {
+      "id": "toast",
+      "requirement": "Show a short success notification in the corner after saving that disappears by itself",
+      "expect": ["toast"],
+      "tags": ["c2-toast", "c2-toast-region"]
+    },
+    {
+      "id": "outage-notice",
+      "requirement": "A persistent full-width notice at the top of the page about a scheduled maintenance window",
+      "expect": ["banner"],
+      "tags": ["c2-banner"]
+    },
+    {
+      "id": "side-panel",
+      "requirement": "Open the record's details in a panel that slides in from the right edge of the screen",
+      "expect": ["sheet", "floating-panel", "master-detail"],
+      "tags": ["c2-sheet"]
+    },
+    {
+      "id": "dialog",
+      "requirement": "A modal dialog with a title, a form in the body and Cancel / Save buttons in the footer",
+      "expect": ["modal"],
+      "tags": ["c2-modal"],
+      "attributes": ["slot:footer"]
+    },
+    {
+      "id": "country-combobox",
+      "requirement": "A searchable dropdown to pick a country from 250 options as you type",
+      "expect": ["autocomplete", "select"],
+      "tags": ["c2-autocomplete", "c2-select"]
+    },
+    {
+      "id": "simple-select",
+      "requirement": "Let the user pick a shipping speed from a dropdown with three options inside a form",
+      "expect": ["select", "native-select"],
+      "tags": ["c2-select", "c2-native-select"]
+    },
+    {
+      "id": "recipients",
+      "requirement": "An email recipients field that turns typed addresses into removable tags",
+      "expect": ["tag-input"],
+      "tags": ["c2-tag-input"]
+    },
+    {
+      "id": "kpi",
+      "requirement": "A dashboard KPI tile showing monthly revenue with a trend arrow versus last month",
+      "expect": ["stat", "delta"],
+      "tags": ["c2-stat"]
+    },
+    {
+      "id": "kanban",
+      "requirement": "A task board with To do, In progress and Done columns where cards can be dragged between columns",
+      "expect": ["kanban"],
+      "tags": ["c2-kanban"]
+    },
+    {
+      "id": "datetime",
+      "requirement": "A form field to choose a meeting date and time in a specific time zone",
+      "expect": ["date-time-picker"],
+      "tags": ["c2-date-time-picker"]
+    },
+    {
+      "id": "date-only",
+      "requirement": "A birth date field in a signup form",
+      "expect": ["date-input", "date-fields"],
+      "tags": ["c2-date-input", "c2-date-fields"]
+    },
+    {
+      "id": "time-range",
+      "requirement": "A Grafana-style time range control with quick ranges like 'last 15 minutes' and auto-refresh",
+      "expect": ["time-range-picker"],
+      "tags": ["c2-time-range-picker"]
+    },
+    {
+      "id": "cmdk",
+      "requirement": "A ⌘K command palette to search and run actions",
+      "expect": ["command"],
+      "tags": ["c2-command"]
+    },
+    {
+      "id": "row-actions",
+      "requirement": "A dropdown of actions (Edit, Duplicate, Delete) opened from a kebab button",
+      "expect": ["menu"],
+      "tags": ["c2-menu"]
+    },
+    {
+      "id": "right-click",
+      "requirement": "Show a menu when the user right-clicks a file in the list",
+      "expect": ["context-menu"],
+      "tags": ["c2-context-menu"]
+    },
+    {
+      "id": "wizard",
+      "requirement": "A checkout stepper showing Cart, Shipping, Payment and Review with the current step highlighted",
+      "expect": ["steps"],
+      "tags": ["c2-steps"]
+    },
+    {
+      "id": "activity-feed",
+      "requirement": "An order history with dated events on a vertical line",
+      "expect": ["timeline"],
+      "tags": ["c2-timeline"]
+    },
+    {
+      "id": "empty-state",
+      "requirement": "An empty state for a search with no results, with an illustration and a 'Clear filters' button",
+      "expect": ["status-panel", "symbols"],
+      "tags": ["c2-status-panel"]
+    },
+    {
+      "id": "otp",
+      "requirement": "Enter the 6-digit verification code we sent by SMS",
+      "expect": ["otp-input", "totp-code"],
+      "tags": ["c2-otp-input"]
+    },
+    {
+      "id": "price",
+      "requirement": "An amount field for a price in euros that formats the number as you type",
+      "expect": ["money-input", "number-input"],
+      "tags": ["c2-money-input"]
+    },
+    {
+      "id": "file-drop",
+      "requirement": "Drag and drop files to upload them, with a progress bar per file",
+      "expect": ["upload"],
+      "tags": ["c2-upload"]
+    },
+    {
+      "id": "gallery-upload",
+      "requirement": "Let a seller upload up to 8 product photos as reorderable thumbnails",
+      "expect": ["image-uploader"],
+      "tags": ["c2-image-uploader"]
+    },
+    {
+      "id": "stars",
+      "requirement": "Let customers leave a 1 to 5 star review",
+      "expect": ["rate"],
+      "tags": ["c2-rate"]
+    },
+    {
+      "id": "folder-tree",
+      "requirement": "Show a folder hierarchy that can be expanded and collapsed, with lazy-loaded children",
+      "expect": ["tree", "file-browser"],
+      "tags": ["c2-tree"]
+    },
+    {
+      "id": "long-list",
+      "requirement": "Render a scrollable list of 50,000 contacts without slowing down the page",
+      "expect": ["virtual-list"],
+      "tags": ["c2-virtual-list"]
+    },
+    {
+      "id": "logs",
+      "requirement": "Display server logs with timestamps and levels, scrolling through millions of lines",
+      "expect": ["log-viewer"],
+      "tags": ["c2-log-viewer"]
+    },
+    {
+      "id": "diff",
+      "requirement": "Compare two versions of a config file side by side",
+      "expect": ["diff-viewer", "change-review"],
+      "tags": ["c2-diff-viewer"]
+    },
+    {
+      "id": "llm-answer",
+      "requirement": "Render an assistant's answer written in markdown as it streams in, with code blocks",
+      "expect": ["markdown", "streaming-text"],
+      "tags": ["c2-markdown"]
+    },
+    {
+      "id": "chat-composer",
+      "requirement": "A chat message box that grows as you type and sends on Enter",
+      "expect": ["chat-input"],
+      "tags": ["c2-chat-input"]
+    },
+    {
+      "id": "loading-placeholder",
+      "requirement": "Grey placeholder blocks while the profile card is loading",
+      "expect": ["skeleton"],
+      "tags": ["c2-skeleton"]
+    },
+    {
+      "id": "upload-progress",
+      "requirement": "Show how much of the import has finished as a percentage bar",
+      "expect": ["progress"],
+      "tags": ["c2-progress"]
+    },
+    {
+      "id": "hint",
+      "requirement": "Show a short hint when hovering an icon button",
+      "expect": ["tooltip", "icon-button"],
+      "tags": ["c2-tooltip", "c2-icon-button"]
+    },
+    {
+      "id": "copy",
+      "requirement": "A button that copies the API key to the clipboard",
+      "expect": ["copy-button"],
+      "tags": ["c2-copy-button"]
+    },
+    {
+      "id": "pager",
+      "requirement": "Page through search results 20 at a time with numbered pages",
+      "expect": ["pagination"],
+      "tags": ["c2-pagination"]
+    },
+    {
+      "id": "app-nav",
+      "requirement": "A collapsible left navigation drawer that becomes an overlay on mobile",
+      "expect": ["side-nav", "app-shell"],
+      "tags": ["c2-side-nav", "c2-app-shell"]
+    },
+    {
+      "id": "tabs",
+      "requirement": "Switch between Overview, Settings and Billing panels on the same page",
+      "expect": ["tabs"],
+      "tags": ["c2-tabs"]
+    },
+    {
+      "id": "faq",
+      "requirement": "An FAQ where each question expands to reveal its answer",
+      "expect": ["accordion", "details"],
+      "tags": ["c2-accordion", "c2-details"]
+    },
+    {
+      "id": "unsaved",
+      "requirement": "Warn that the form has unsaved changes with Discard and Save actions floating at the bottom",
+      "expect": ["save-bar"],
+      "tags": ["c2-save-bar"]
+    },
+    {
+      "id": "toggle",
+      "requirement": "An on/off setting for email notifications",
+      "expect": ["switch", "checkbox"],
+      "tags": ["c2-switch", "c2-checkbox"]
+    },
+    {
+      "id": "password",
+      "requirement": "A password field with a show/hide toggle and a strength indicator",
+      "expect": ["password-field"],
+      "tags": ["c2-password-field"]
+    },
+    {
+      "id": "phone",
+      "requirement": "A phone number field with a country code selector",
+      "expect": ["phone-input"],
+      "tags": ["c2-phone-input"]
+    },
+    {
+      "id": "revenue-trend",
+      "requirement": "Plot daily revenue over the last 30 days as a line",
+      "expect": ["line-chart", "area-chart"],
+      "tags": ["c2-line-chart", "c2-area-chart"]
+    },
+    {
+      "id": "share-chart",
+      "requirement": "A donut chart of traffic sources",
+      "expect": ["pie-chart"],
+      "tags": ["c2-pie-chart"]
+    },
+    {
+      "id": "inline-trend",
+      "requirement": "A tiny trend line inside a table cell",
+      "expect": ["sparkline"],
+      "tags": ["c2-sparkline"]
+    },
+    {
+      "id": "gantt",
+      "requirement": "A project schedule with task bars over weeks and dependencies between tasks",
+      "expect": ["gantt"],
+      "tags": ["c2-gantt"]
+    },
+    {
+      "id": "calendar",
+      "requirement": "A weekly calendar where users book appointments into time slots",
+      "expect": ["scheduler", "week-planner", "time-slot-picker"],
+      "tags": ["c2-scheduler", "c2-week-planner"]
+    },
+    {
+      "id": "code",
+      "requirement": "An editable code field with syntax highlighting for JSON",
+      "expect": ["code-editor"],
+      "tags": ["c2-code-editor"]
+    },
+    {
+      "id": "json-tree",
+      "requirement": "Inspect an API response as a collapsible JSON tree",
+      "expect": ["json-viewer"],
+      "tags": ["c2-json-viewer"]
+    },
+    {
+      "id": "user-avatar",
+      "requirement": "Show the user's profile picture with an online status dot",
+      "expect": ["avatar"],
+      "tags": ["c2-avatar"]
+    },
+    {
+      "id": "status-pill",
+      "requirement": "A small coloured label showing an order's status, like 'Shipped'",
+      "expect": ["badge", "status-light", "chip"],
+      "tags": ["c2-badge", "c2-status-light", "c2-chip"]
+    },
+    {
+      "id": "relative",
+      "requirement": "Show '3 minutes ago' next to a comment and keep it updating",
+      "expect": ["relative-time"],
+      "tags": ["c2-relative-time"]
+    },
+    {
+      "id": "currency-format",
+      "requirement": "Format 1234.5 as a localized currency amount in a sentence",
+      "expect": ["format-number"],
+      "tags": ["c2-format-number"]
+    },
+    {
+      "id": "slider",
+      "requirement": "Choose a volume level between 0 and 100 by dragging",
+      "expect": ["slider"],
+      "tags": ["c2-slider"]
+    },
+    {
+      "id": "segmented",
+      "requirement": "A segmented control to switch the view between Day, Week and Month",
+      "expect": ["button-group"],
+      "tags": ["c2-button-group"]
+    },
+    {
+      "id": "arrow-icon",
+      "requirement": "An arrow-right icon at the end of a 'Continue' button",
+      "expect": ["feather-icons", "phosphor-icons", "button"],
+      "tags": ["c2-button"]
+    },
+    {
+      "id": "form-validation",
+      "requirement": "A labelled email field with a hint and an error message under it",
+      "expect": ["form-field", "text-field"],
+      "tags": ["c2-text-field", "c2-form-field"]
+    },
+    {
+      "id": "schema-form",
+      "requirement": "Render a settings form directly from a JSON Schema",
+      "expect": ["json-form"],
+      "tags": ["c2-json-form"]
+    },
+    {
+      "id": "snackbar",
+      "requirement": "Pop up a snackbar saying 'Message archived' with an Undo action",
+      "expect": ["toast"],
+      "tags": ["c2-toast"]
+    },
+    {
+      "id": "drawer",
+      "requirement": "A drawer with filters that slides over the page on phones",
+      "expect": ["sheet", "side-nav"],
+      "tags": ["c2-sheet", "c2-side-nav"]
+    },
+    {
+      "id": "typeahead",
+      "requirement": "Typeahead for picking a user by name from the API",
+      "expect": ["autocomplete"],
+      "tags": ["c2-autocomplete"]
+    },
+    {
+      "id": "wizard-2",
+      "requirement": "Onboarding wizard with 4 steps and a progress indicator",
+      "expect": ["steps", "tour"],
+      "tags": ["c2-steps", "c2-tour"]
+    },
+    {
+      "id": "dots-menu",
+      "requirement": "Three-dots overflow menu at the end of each table row",
+      "expect": ["menu"],
+      "tags": ["c2-menu"]
+    },
+    {
+      "id": "collapse",
+      "requirement": "Collapsible section titled 'Advanced options' in a settings page",
+      "expect": ["details", "accordion"],
+      "tags": ["c2-details", "c2-accordion"]
+    },
+    {
+      "id": "loader",
+      "requirement": "Loading indicator while the request is in flight",
+      "expect": ["spinner", "progress", "skeleton", "working-indicator"],
+      "tags": ["c2-spinner", "c2-progress", "c2-skeleton", "c2-working-indicator"]
+    },
+    {
+      "id": "avatar-stack",
+      "requirement": "Show the initials of each team member in a circle",
+      "expect": ["avatar"],
+      "tags": ["c2-avatar"]
+    },
+    {
+      "id": "pill",
+      "requirement": "Small pill showing the number of unread messages",
+      "expect": ["badge", "indicator"],
+      "tags": ["c2-badge", "c2-indicator"]
+    },
+    {
+      "id": "graph",
+      "requirement": "Graph of website visitors per week",
+      "expect": ["line-chart", "area-chart", "bar-chart"],
+      "tags": ["c2-line-chart", "c2-area-chart", "c2-bar-chart"]
+    },
+    {
+      "id": "donut",
+      "requirement": "Doughnut showing how the budget is split by department",
+      "expect": ["pie-chart", "sunburst-chart"],
+      "tags": ["c2-pie-chart", "c2-sunburst-chart"]
+    },
+    {
+      "id": "grid",
+      "requirement": "Editable grid of invoices with filtering and CSV-like cells",
+      "expect": ["table", "spreadsheet"],
+      "tags": ["c2-table", "c2-spreadsheet"]
+    },
+    {
+      "id": "cal",
+      "requirement": "Calendar to book a meeting room by the hour",
+      "expect": ["scheduler", "time-slot-picker", "week-planner"],
+      "tags": ["c2-scheduler", "c2-time-slot-picker", "c2-week-planner"]
+    },
+    {
+      "id": "2fa",
+      "requirement": "Two-factor authentication code entry",
+      "expect": ["otp-input", "totp-code"],
+      "tags": ["c2-otp-input", "c2-totp-code"]
+    },
+    {
+      "id": "dropzone",
+      "requirement": "Dropzone to attach a PDF to the expense report",
+      "expect": ["upload"],
+      "tags": ["c2-upload"]
+    },
+    {
+      "id": "palette",
+      "requirement": "Ctrl+K quick switcher to jump to any page",
+      "expect": ["command"],
+      "tags": ["c2-command"]
+    },
+    {
+      "id": "ago",
+      "requirement": "Display when each comment was posted, like '2 hours ago'",
+      "expect": ["relative-time"],
+      "tags": ["c2-relative-time"]
+    },
+    {
+      "id": "trend",
+      "requirement": "KPI card with this month's signups and the change versus last month",
+      "expect": ["stat", "delta"],
+      "tags": ["c2-stat", "c2-delta"]
+    },
+    {
+      "id": "help",
+      "requirement": "An info icon next to a field label that explains the field when clicked",
+      "expect": ["toggletip", "tooltip"],
+      "tags": ["c2-toggletip", "c2-tooltip"]
+    },
+    {
+      "id": "divider",
+      "requirement": "A horizontal divider between two sections",
+      "expect": ["separator"],
+      "tags": ["c2-separator"]
+    },
+    {
+      "id": "hamburger",
+      "requirement": "Hamburger navigation menu for the mobile layout",
+      "expect": ["side-nav", "app-shell", "navigation-menu"],
+      "tags": ["c2-side-nav", "c2-app-shell", "c2-navigation-menu"]
+    },
+    {
+      "id": "sort-list",
+      "requirement": "Let users reorder their favourite playlists by dragging",
+      "expect": ["reorder-list"],
+      "tags": ["c2-reorder-list"]
+    },
+    {
+      "id": "volume",
+      "requirement": "Range control for picking a minimum and maximum price",
+      "expect": ["slider"],
+      "tags": ["c2-slider"]
+    },
+    {
+      "id": "search",
+      "requirement": "Search bar at the top of the product list",
+      "expect": ["search-field"],
+      "tags": ["c2-search-field"]
+    },
+    {
+      "id": "confirm",
+      "requirement": "Double-check with the user before they cancel their subscription",
+      "expect": ["confirm-dialog", "popconfirm", "modal"],
+      "tags": ["c2-confirm-dialog", "c2-popconfirm", "c2-modal"]
+    }
+  ],
+  "agentSet": [
+    "toast",
+    "country-combobox",
+    "simple-select",
+    "row-actions",
+    "right-click",
+    "empty-state",
+    "price",
+    "stars",
+    "folder-tree",
+    "chat-composer",
+    "upload-progress",
+    "hint",
+    "copy",
+    "tabs",
+    "faq",
+    "toggle",
+    "revenue-trend",
+    "user-avatar",
+    "status-pill",
+    "slider",
+    "segmented",
+    "arrow-icon",
+    "data-grid",
+    "kanban",
+    "wizard",
+    "schema-form",
+    "form-validation",
+    "llm-answer"
+  ]
+}

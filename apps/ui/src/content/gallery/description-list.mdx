@@ -524,3 +524,26 @@ app does.
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .dl-default {
+    width: 100%;
+  }
+</style>
+<c2-description-list class="dl-default" aria-label="Customer">
+  <c2-description-item label="Name">
+    Ada Lovelace
+    <span slot="label">Plan <small>(billed yearly)</small></span>
+  </c2-description-item>
+  <c2-description-item label="Email">ada@example.com</c2-description-item>
+  <c2-description-item label="Plan">Business</c2-description-item>
+  <c2-description-item label="Phone"></c2-description-item>
+</c2-description-list>
+```
+
+</GalleryGrid>

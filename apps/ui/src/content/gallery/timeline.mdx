@@ -370,12 +370,12 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
 </style>
 <c2-timeline class="activity-timeline" aria-label="Activity">
   <c2-timeline-item tone="primary" timestamp="10 min ago">
-    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    <svg slot="marker" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
     <span slot="label"><strong>Ana</strong> commented</span>
     <blockquote>Looks good, ship it once CI is green.</blockquote>
   </c2-timeline-item>
   <c2-timeline-item tone="success" label="Merged into develop" timestamp="1 hour ago">
-    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+    <svg slot="marker" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
   </c2-timeline-item>
 </c2-timeline>
 ```
@@ -396,6 +396,23 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
   <c2-timeline-item label="Research" timestamp="Q1 · done" tone="success"></c2-timeline-item>
   <c2-timeline-item label="Design system" timestamp="Q2 · in progress" tone="primary"></c2-timeline-item>
   <c2-timeline-item label="Launch" timestamp="Q4 · planned"></c2-timeline-item>
+</c2-timeline>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-timeline aria-label="Order history">
+  <c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">
+    Paid with a card ending 4242.
+    <time slot="timestamp" datetime="2026-09-12T09:14">Sep 12 · 09:14</time>
+  </c2-timeline-item>
+  <c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item>
+  <c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item>
 </c2-timeline>
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -83,6 +83,10 @@
     "./controllers/drawer-controller.js": {
       "types": "./dist/controllers/drawer-controller.d.ts",
       "default": "./dist/controllers/drawer-controller.js"
+    },
+    "./controllers/slot-copies.js": {
+      "types": "./dist/controllers/slot-copies.d.ts",
+      "default": "./dist/controllers/slot-copies.js"
     },
     "./controllers/drop-zone.js": {
       "types": "./dist/controllers/drop-zone.d.ts",

@@ -232,7 +232,7 @@ interface Animation {
  * @cssproperty {box-shadow} [--c2-pan-zoom__controls--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {color} [--c2-pan-zoom__controls--color=#18181b] - Icons and the zoom percent.
  * @cssproperty {pixel} [--c2-pan-zoom__controls--font-size=12px]
- * @cssproperty {pixel} [--c2-pan-zoom__button--size=28px]
+ * @cssproperty {pixel} [--c2-pan-zoom__button--size=28px] - Height and minimum width of the button.
  * @cssproperty {border-radius} [--c2-pan-zoom__button--border-radius=6px]
  * @cssproperty {background} [--c2-pan-zoom__button__hover--background=#f4f4f5]
  * @cssproperty {opacity} [--c2-pan-zoom__button__disabled--opacity=0.38] - Zoom in and zoom out at the zoom limits.

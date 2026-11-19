@@ -167,3 +167,24 @@ Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see 
 </GalleryGrid>
 
 Assigned title, body, and footer nodes take ordinary classes. Use the documented `panel`, `header`, `title`, `close-button`, `body`, and conditional `footer` parts when a preset needs to change modal-owned structure.
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .default p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-default').show()">Open</c2-button>
+<c2-modal id="mg-default" class="default">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+  <svg slot="close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</c2-modal>
+```
+
+</GalleryGrid>

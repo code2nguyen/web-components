@@ -1,6 +1,6 @@
 ---
 name: new-component
-description: Scaffold a new c2-* Lit web component with the repo's plop generator (scripts/generator), then implement it and wire the UI app (apps/ui, the docs site) (manifest, gallery preview, module import, doc page). Use when asked to create, add, scaffold or generate a new component or package.
+description: Scaffold a new c2-* Lit web component with the repo's plop generator (scripts/generator), then implement it and wire the UI app (apps/ui, the docs site) (manifest, gallery preview, module import, doc page), and score it for AI readiness. Use when asked to create, add, scaffold or generate a new component or package.
 argument-hint: <Component Name> [npm|open] [category] [one-line description]
 ---
 
@@ -107,6 +107,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - **Data** (foundation rule 3, collection components): the declarative form (child elements read on `slotchange`, and/or a `jsonPropertyConverter` attribute) and the in-memory property feed one internal model; `@property({ attribute: false }) dataSource?: <Class>DataSource` (one async `get<Things>(request)` returning the items and `total`) replaces it for remote or paged data, with `loading`/`empty`/`error` slots and superseded responses dropped. Say in the JSDoc which form wins. See `TableDataSource` in `packages/components/table/src/table-types.ts`.
 - Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
+- **An API an agent can read** (AI readiness, below): the class JSDoc says what the element is and when to use it; every public member a consumer may set from script (`render<Part>`, `dataSource`, methods, public getters) has a JSDoc description and a type, and an internal that is public only for TypeScript's sake (a `@query` handle, a handler, internal state) gets `/** @internal */` so the manifest and `get_component` leave it out. A `@cssproperty` whose last segment is not a CSS property (`--size`, `--icon-size`, `--visible-rows`) gets a `- description` saying what it sets (`Width and height of the thumb`). A `@slot` description names the components it typically holds (`a c2-list of c2-list-item links`); a child element's JSDoc names its parent.
 - **Modern platform** (CLAUDE.md, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
 - Replace the scaffold's `<c2-<name>>` in `index.html` with a few hand-written usage examples (states, slots, themed variant).
 
@@ -134,6 +135,7 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 - **Every feature gets a gallery card** (foundation rule 4): each slot, each renderer, each data form and each variable group worth restyling. Markup-reachable features are plain fences. For a property-only feature (`renderItem`, `dataSource`), put `data-<name>-example="<case>"` on the element in the fence, assign the property from a new `apps/ui/src/components/<Name>ExamplesRuntime.astro` (copy `KanbanExamplesRuntime.astro`), render `<<Name>ExamplesRuntime />` once in the gallery MDX, and add a ` ```ts tag=CodeBlock ` fence with the consumer's code. A `dataSource` card uses a delayed in-page source, never the network.
 - Optional but encouraged: 2–3 curated presets under `'c2-<name>'` in `apps/ui/src/data/component-presets.ts` (they feed the inspector's Presets tab and the MCP `get_presets` tool).
 - Landing gallery, sidebar and search pick the page up automatically from the collection.
+- **For agents** (AI readiness, below): the frontmatter `description` says what the component is in one sentence a developer's need would match; `keywords: ['…']` lists the other names developers use for it (`snackbar`, `segmented control`, `kebab menu`), which `search_components` weighs like its name. The usage card has at least three rows, each showing a state or option a reader can see (copy the first row and change one attribute; a row that looks like its neighbour misleads). Name canvas-like elements and icon-only buttons with `aria-label` in the examples: agents copy them. Use every named slot in a gallery card.
 
 **Open-package caveat:** `apps/ui/src/content/oepn-components/` is not an Astro collection, so that stub is not served. To document an open package, move the mdx into `apps/ui/src/content/components/`, set `package: '@c2n/<name>'` in its frontmatter, and add the manifest import + `normalizedManifests` entry to `component-manifests.ts` by hand.
 
@@ -156,6 +158,29 @@ npm run ui:dev                                # open /components/<name>; check e
 `build:tools` rewrites the dependency keys of `packages/umbrella/package.json` from what the bundle imports. The generator already added the `@c2n/<name>` devDependency, which the first `npm install` recorded; a third-party library the new package imports lands in the umbrella's `dependencies` only now. Whenever that file changed, run `npm install` again and commit `package-lock.json` with it, or the lockfile disagrees with `package.json` and `npm ci` in CI rejects the install. `build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
+
+### AI readiness
+
+The component is done when an agent can find it, read its API and use it correctly. After `npm run build:tools`, score it
+(the `ai-readiness` skill has the details and a fix for every check):
+
+```bash
+npm run mcp:readiness                         # scores what changed since the committed baseline: the new component shows as "new"
+```
+
+- **Grade A (≥ 90)**, and no check lost that has an honest fix: read the component's section of
+  `packages/tools/mcp/readiness/changes.md` ("What is still missing") and fix it in the component's JSDoc, its docs
+  page or its gallery. A check that only filler would satisfy (a usage row with no visible effect, a description that
+  repeats a CSS property name) is not a gap: leave it and say so.
+- **Discovery:** add one or two requirements for it to `packages/tools/mcp/scripts/readiness/tasks.json`, written as a
+  developer would ask without naming it (`"Let customers leave a 1 to 5 star review"`, `expect: ["rate"]`,
+  `tags: ["c2-rate"]`), and check the run's discovery misses: the component should rank first, or at least in the top 3,
+  for them. If not, sharpen its `description` or add `keywords`, not the requirement.
+- **No regression elsewhere:** a sibling the new component changed (a shared base class, a parent it slots into) shows
+  up in the same run; `--fail-on-regression` makes it an error.
+- Commit `packages/tools/mcp/readiness/` with the component. The agent run (`npm run readiness:agent -w
+packages/tools/mcp`, about $10) is not part of adding a component; offer it, with its cost, for a component agents
+  will reach for often.
 
 ## 8. Review it in the docs app by screenshot
 
@@ -198,6 +223,7 @@ that the review was done and what it caught.
 - `npm run build:tools` run (then `npm install` again if it changed `packages/umbrella/package.json`, with `package-lock.json` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
 - the component's row deleted from `COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
+- AI readiness: `npm run mcp:readiness` scores the component A (≥ 90) with no honestly fixable check left, its discovery requirements in `tasks.json` rank it in the top 3, nothing else regressed, and `packages/tools/mcp/readiness/` is committed
 - `apps/ui/src/store/component-manifests.ts` import + entry
 - `apps/ui/package.json` dependency on `@c2n/<name>`, and `npm install` run so the workspace is linked
 - `apps/ui/src/data/component-modules.ts`, `component-previews.ts` (+ `component-presets.ts` if presets)

@@ -282,3 +282,19 @@ planner.renderAgendaEvent = ({ event, date, start, end, background }: MonthPlann
 ```
 
 <MonthPlannerExamplesRuntime />
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-month-planner
+  month="2026-09"
+  locale="en-US"
+  events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18"},{"title":"Review","start":"2026-09-24"}]'
+>
+  <strong slot="heading">Release calendar</strong>
+</c2-month-planner>
+```
+
+</GalleryGrid>

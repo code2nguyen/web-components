@@ -2,6 +2,7 @@
 title: 'Search Field'
 description: 'A search box with a debounced search event, a clear button, a keyboard shortcut hint and recent searches.'
 category: 'Inputs'
+keywords: ['search box', 'search bar', 'filter input', 'query']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -32,7 +33,7 @@ import '@c2n/components/search-field'
   }
 </style>
 <div data-label="Default">
-  <c2-search-field class="search" placeholder="Search issues"></c2-search-field>
+  <c2-search-field aria-label="Search issues" class="search" placeholder="Search issues"></c2-search-field>
 </div>
 <div data-label="Shortcut">
   <c2-search-field class="search" placeholder="Search docs" shortcut="mod+j"></c2-search-field>

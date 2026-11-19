@@ -58,7 +58,7 @@ export interface Toggletip {
  * @cssproperty {color} [--c2-toggletip__button__expanded--color=#0265dc] - Colour while the bubble is open.
  * @cssproperty {outline} [--c2-toggletip__button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-toggletip__button__focus--outline-offset=2px]
- * @cssproperty {pixel} [--c2-toggletip__icon--size=16px]
+ * @cssproperty {pixel} [--c2-toggletip__icon--size=16px] - Width and height of the icon.
  *
  * @cssproperty {color} [--c2-toggletip--background-color=#ffffff] - Surface of the bubble.
  * @cssproperty {color} [--c2-toggletip--color=#18181b] - Text colour in the bubble.

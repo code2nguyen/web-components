@@ -128,3 +128,25 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .spg-default {
+    height: 160px;
+  }
+  .spg-default [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-default">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+  <span slot="handle" aria-hidden="true">⋮</span>
+</c2-split-panel>
+```
+
+</GalleryGrid>

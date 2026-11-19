@@ -61,7 +61,7 @@ export interface ChatInput {
  * @cssproperty {color} [--c2-chat-input__textarea--caret-color=currentColor]
  * @cssproperty {color} [--c2-chat-input__placeholder--color=#71717a]
  * @cssproperty {pixel} [--c2-chat-input__actions--gap=6px]
- * @cssproperty {pixel} [--c2-chat-input__send-button--size=32px]
+ * @cssproperty {pixel} [--c2-chat-input__send-button--size=32px] - Width and height of the send button.
  * @cssproperty {border-radius} [--c2-chat-input__send-button--border-radius=10px]
  * @cssproperty {color} [--c2-chat-input__send-button--background=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-chat-input__send-button--color=#ffffff]
@@ -69,7 +69,7 @@ export interface ChatInput {
  * @cssproperty {color} [--c2-chat-input__send-button__active--background=rgb(1, 70, 154)]
  * @cssproperty {outline} [--c2-chat-input__send-button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-chat-input__send-button__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-chat-input__send-icon--size=18px]
+ * @cssproperty {pixel} [--c2-chat-input__send-icon--size=18px] - Width and height of the send icon, also given to a slotted c2 icon.
  */
 @customElement('c2-chat-input')
 export class ChatInput extends LitElement {

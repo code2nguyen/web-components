@@ -49,7 +49,7 @@ import styles from './navigation-menu-link.scss?inline'
  * @cssproperty {font-weight} [--c2-navigation-menu-link__description--font-weight=400]
  * @cssproperty {pixel} [--c2-navigation-menu-link__description--margin-top=2px]
  *
- * @cssproperty {pixel} [--c2-navigation-menu-link__icon--size=18px]
+ * @cssproperty {pixel} [--c2-navigation-menu-link__icon--size=18px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-navigation-menu-link__icon--color=#71717a]
  *
  * @cssproperty {outline} [--c2-navigation-menu-link__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

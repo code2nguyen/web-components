@@ -234,3 +234,22 @@ import { addTranslations } from '@c2n/core/localize.js'
 
 addTranslations({ fr: { 'import-mapper': { skip: 'Ne pas importer', auto: 'Associée', pickerLabel: 'Importer la colonne « {0} » comme' /* … */ } } })
 ```
+
+## Slots
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-import-mapper
+  label="Import contacts"
+  fields='[{"key":"name","label":"Name","required":true},{"key":"email","label":"Email","required":true,"type":"email","aliases":["mail"]},{"key":"phone","label":"Phone"},{"key":"since","label":"Customer since","type":"date","aliases":["signed up"]}]'
+  csv="Full name,E-mail address,Phone #,Signed up,Notes
+Ada Lovelace,ada@analytical.io,+44 20 7946 0000,2024-03-01,VIP
+Grace Hopper,grace@navy.mil,,2024-04-12,
+Alan Turing,alan@bletchley.org,+44 161 496 0000,2024-05-17,Call back"
+>
+  <small slot="footer">Columns you leave unmapped are skipped.</small>
+</c2-import-mapper>
+```
+
+</GalleryGrid>

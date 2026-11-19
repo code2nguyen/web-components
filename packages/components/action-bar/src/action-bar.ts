@@ -70,13 +70,13 @@ export interface ActionBar {
  * @cssproperty {pixel} [--c2-action-bar__actions--gap=8px]
  * @cssproperty {string} [--c2-action-bar__actions--flex-wrap=nowrap] - `nowrap` keeps the actions on one line, scrolling sideways when the bar is narrower than they are; `wrap` stacks them onto further lines instead.
  * @cssproperty {pixel} [--c2-action-bar__actions__fade--size=24px] - How far the fade reaches in from an edge that has more actions scrolled past it.
- * @cssproperty {pixel} [--c2-action-bar__clear--size=28px]
+ * @cssproperty {pixel} [--c2-action-bar__clear--size=28px] - Width and height of the clear button.
  * @cssproperty {border-radius} [--c2-action-bar__clear--border-radius=6px]
  * @cssproperty {color} [--c2-action-bar__clear--color=#71717a]
  * @cssproperty {color} [--c2-action-bar__clear__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-action-bar__clear__hover--color=#18181b]
  * @cssproperty {outline} [--c2-action-bar__clear__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {pixel} [--c2-action-bar__clear-icon--size=16px]
+ * @cssproperty {pixel} [--c2-action-bar__clear-icon--size=16px] - Width and height of the clear icon.
  */
 @customElement('c2-action-bar')
 export class ActionBar extends LitElement {

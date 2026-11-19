@@ -49,3 +49,20 @@ A project drive, a media library, a single-pane picker and a branded workspace. 
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Empty state
+<style>
+  .file-browser-states { display: grid; gap: 12px; width: 100%; }
+</style>
+<div class="file-browser-states">
+  <c2-file-browser folder="q4" locale="en-US">
+    <div slot="empty">This folder is empty. Drop files here to upload.</div>
+  </c2-file-browser>
+</div>
+```
+
+</GalleryGrid>

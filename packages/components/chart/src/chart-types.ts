@@ -83,6 +83,11 @@ export interface ChartSeriesConfig {
   axis?: 'left' | 'right'
   /** Joins across gaps instead of breaking the line. */
   spanGaps?: boolean
+  /**
+   * When this series' point markers are drawn, overriding the chart's `points` (line chart only). `only` draws the
+   * markers without the line, for a series that flags a few points of another, such as a control chart's violations.
+   */
+  points?: 'auto' | 'always' | 'none' | 'only'
   /** Leaves the series out without removing the definition. */
   hidden?: boolean
   /** Formats a value for the tooltip and the axis. Property only — no attribute equivalent. */
@@ -195,6 +200,21 @@ export interface ChartAnnotation {
   tone?: ChartAnnotationTone
   /** An application key handed back in `annotation-click`. */
   id?: string
+}
+
+/**
+ * A horizontal rule at a y value, or a shaded band between `value` and `value2`: a target, a threshold, a control limit
+ * or a zone. Drawn behind the series by the line chart's `reference-lines`, in the annotation tones.
+ */
+export interface ChartReferenceLine {
+  /** Where the rule sits, or where the band starts. */
+  value: number
+  /** Where the band ends. Without it the entry is a single rule. */
+  value2?: number
+  /** Drawn at the right end of a rule, and read out in the chart's accessible name. A band's label is read out only. */
+  label?: string
+  /** The colour family. Defaults to `neutral`. */
+  tone?: ChartAnnotationTone
 }
 
 /** Detail of the `annotation-click` event. */

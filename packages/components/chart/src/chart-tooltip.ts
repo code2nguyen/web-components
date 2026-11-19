@@ -8,7 +8,13 @@ import styles from './chart-tooltip.scss?inline'
 
 /**
  * A tooltip linked to a chart by id. It can float beside the hovered point or render inline wherever it is
- * placed in the document.
+ * placed in the document. It works with every c2 chart (`c2-line-chart`, `c2-bar-chart`, `c2-pie-chart`, …): give
+ * the chart an `id` and the tooltip the same value in `for`.
+ *
+ * ```html
+ * <c2-bar-chart id="visits" data='[{ "day": "Mon", "visits": 42 }]' label-field="day"></c2-bar-chart>
+ * <c2-chart-tooltip for="visits" position="inline"></c2-chart-tooltip>
+ * ```
  *
  * It is shown only while its chart has a hovered point, and says so through the custom state `:state(open)` rather
  * than by toggling `hidden` on itself: the host keeps exactly the attributes it was authored with, so a

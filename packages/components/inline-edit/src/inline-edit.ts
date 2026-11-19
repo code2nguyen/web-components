@@ -98,7 +98,7 @@ const supportsFieldSizing = !isServer && typeof CSS !== 'undefined' && CSS.suppo
  * @cssproperty {color} [--c2-inline-edit__hover--background=#f4f4f5] - Read view background under the pointer.
  * @cssproperty {outline} [--c2-inline-edit__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the read view and the buttons.
  *
- * @cssproperty {pixel} [--c2-inline-edit__edit-icon--size=14px]
+ * @cssproperty {pixel} [--c2-inline-edit__edit-icon--size=14px] - Width and height of the edit icon.
  * @cssproperty {color} [--c2-inline-edit__edit-icon--color=#71717a]
  * @cssproperty {pixel} [--c2-inline-edit__edit-icon--gap=6px] - Space between the value and the pencil.
  * @cssproperty {opacity} [--c2-inline-edit__edit-icon--opacity=0] - Pencil opacity at rest. Set `1` to always show it.
@@ -109,8 +109,8 @@ const supportsFieldSizing = !isServer && typeof CSS !== 'undefined' && CSS.suppo
  * @cssproperty {border} [--c2-inline-edit__editor__error--border=1px solid #dc2626] - Field border while the draft is refused (`required` and empty); drawn as an outline around a slotted `editor`.
  *
  * @cssproperty {pixel} [--c2-inline-edit__controls--gap=4px] - Space between the field and the save and cancel buttons.
- * @cssproperty {pixel} [--c2-inline-edit__control--size=24px]
- * @cssproperty {pixel} [--c2-inline-edit__control__icon--size=16px]
+ * @cssproperty {pixel} [--c2-inline-edit__control--size=24px] - Width and height of the control button.
+ * @cssproperty {pixel} [--c2-inline-edit__control__icon--size=16px] - Width and height of the control icon.
  * @cssproperty {border-radius} [--c2-inline-edit__control--border-radius=4px]
  * @cssproperty {color} [--c2-inline-edit__control--color=#71717a]
  * @cssproperty {color} [--c2-inline-edit__control__hover--color=#18181b]

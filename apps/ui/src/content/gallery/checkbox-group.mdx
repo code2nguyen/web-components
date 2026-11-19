@@ -147,3 +147,21 @@ Curated looks for `c2-checkbox-group`. Variables set on the group inherit into e
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<c2-checkbox-group client:only="lit" value="email;push">
+  <span slot="label">Notify me by</span>
+  <c2-checkbox value="email">
+    Email
+    <svg slot="checkmark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  </c2-checkbox>
+  <c2-checkbox value="sms">SMS</c2-checkbox>
+  <c2-checkbox value="push">Push notification</c2-checkbox>
+</c2-checkbox-group>
+```
+
+</GalleryGrid>

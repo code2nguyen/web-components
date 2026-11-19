@@ -121,7 +121,7 @@ const chevron = svg`<svg viewBox="0 0 16 16" width="12" height="12" fill="none" 
  * @cssproperty {opacity} [--c2-org-chart__card__disabled--opacity=0.38]
  * @cssproperty {time} [--c2-org-chart__card--transition-duration=150ms]
  * @cssproperty {display} [--c2-org-chart__avatar--display=flex] - `none` hides the avatars, for a chart of teams rather than people.
- * @cssproperty {pixel} [--c2-org-chart__avatar--size=40px]
+ * @cssproperty {pixel} [--c2-org-chart__avatar--size=40px] - Width and height of each person's avatar.
  * @cssproperty {color} [--c2-org-chart__label--color=#18181b]
  * @cssproperty {font-size} [--c2-org-chart__label--font-size=14px]
  * @cssproperty {font-weight} [--c2-org-chart__label--font-weight=600]

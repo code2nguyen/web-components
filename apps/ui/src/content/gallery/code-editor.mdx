@@ -134,3 +134,27 @@ export function debounce(fn, wait = 200) {
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-code-editor
+  language="javascript"
+  line-numbers
+  value="// The default palette, on the default surface.
+export function debounce(fn, wait = 200) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), wait)
+  }
+}"
+>
+  <span slot="label">Request body <small>(JSON)</small></span>
+  <span slot="supporting-text">Sent as <code>application/json</code>.</span>
+</c2-code-editor>
+```
+
+</GalleryGrid>

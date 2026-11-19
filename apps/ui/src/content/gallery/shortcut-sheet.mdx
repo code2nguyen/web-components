@@ -147,3 +147,19 @@ addTranslations({
   },
 })
 ```
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<c2-shortcut-sheet
+  inline
+  no-bindings
+  shortcuts='[{"keys":"mod+k","description":"Open search"},{"keys":"j","description":"Next item","group":"Navigation"},{"keys":"k","description":"Previous item","group":"Navigation"},{"keys":"mod+b","description":"Bold","group":"Editing"}]'
+>
+  <span slot="title">Editor shortcuts</span>
+</c2-shortcut-sheet>
+```
+
+</GalleryGrid>

@@ -11,6 +11,7 @@ import { FeatherDownloadCloudIcon as FeatherDownloadCloud } from '@c2n/feather-i
 import { FeatherWifiOffIcon as FeatherWifiOff } from '@c2n/feather-icons/icons/wifi-off.js'
 import { FeatherShieldIcon as FeatherShield } from '@c2n/feather-icons/icons/shield.js'
 import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid>
 
@@ -67,7 +68,7 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
   }
 </style>
 <c2-toast class="celebration" heading="A little milestone" message="You completed your first project.">
-  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg slot="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="m12 3 2.6 5.3 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.2 5.9-.9Z"></path>
   </svg>
 </c2-toast>
@@ -200,6 +201,23 @@ These cards show static remaining-time previews. The manager animates the bar fr
   }
 </style>
 <c2-toast class="countdown" variant="success" heading="Changes saved" message="This notification will close shortly." show-progress progress="0.65"></c2-toast>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .default-toast {
+    width: 320px;
+  }
+</style>
+<c2-toast class="default-toast" heading="Notification" message="Your changes have been saved.">
+  <c2-button slot="action">Undo</c2-button>
+</c2-toast>
 ```
 
 </GalleryGrid>

@@ -7,6 +7,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { ChordChart } from '@c2n/components/chart/chord-chart'
+import { Button } from '@c2n/components/button'
 
 <GalleryGrid min="340">
 
@@ -33,6 +34,47 @@ import { ChordChart } from '@c2n/components/chart/chord-chart'
   .chord-legend { width: 100%; --c2-chart--height: 320px; --c2-chart__arc--width: 16px; --c2-chart__ribbon--opacity: 0.65; }
 </style>
 <c2-chord-chart class="chord-legend" labels="none" legend="bottom" legend-action="toggle" sort="desc" data='[{"source":"Africa","target":"Europe","value":3.2},{"source":"Asia","target":"Europe","value":4.1},{"source":"Asia","target":"North America","value":5.6},{"source":"Asia","target":"Oceania","value":1.9},{"source":"Europe","target":"North America","value":1.4},{"source":"Latin America","target":"North America","value":6.3},{"source":"Latin America","target":"Europe","value":1.7},{"source":"Europe","target":"Oceania","value":0.6}]'></c2-chord-chart>
+```
+
+</GalleryGrid>
+
+## Slots and states
+
+The `legend` slot replaces the built-in legend, `tooltip` the tooltip body (the hovered point reaches `renderTooltip` and the `tooltip-change` event when the content depends on it) and `actions` holds controls pinned to the plot's top-right corner. While `loading` or `error` is set, or when there is no data, the chart shows a built-in message that the `loading`, `error` and `empty` slots replace.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Legend · tooltip · actions
+<style>
+  .chord-slots { width: 100%; }
+  .chord-slots__legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 12px; color: var(--c2-theme--color-on-surface-variant, #52525b); }
+</style>
+<c2-chord-chart class="chord-slots" source-field="from" target-field="to" value-field="amount" data='[{"from":"EUR","to":"USD","amount":42.1},{"from":"EUR","to":"GBP","amount":18.4},{"from":"USD","to":"EUR","amount":31.6},{"from":"USD","to":"JPY","amount":14.8},{"from":"GBP","to":"EUR","amount":21},{"from":"GBP","to":"USD","amount":15.5},{"from":"JPY","to":"USD","amount":9.9}]'>
+  <div slot="legend" class="chord-slots__legend">
+    <strong>Chord chart</strong>
+    <span>Updated hourly</span>
+  </div>
+  <div slot="tooltip">Exact figures are in the export</div>
+  <c2-button slot="actions">Export</c2-button>
+</c2-chord-chart>
+```
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .chord-states { display: grid; gap: 12px; width: 100%; }
+  .chord-states c2-chord-chart { --c2-chart--height: 140px; }
+</style>
+<div class="chord-states">
+  <c2-chord-chart source-field="from" target-field="to" value-field="amount" loading>
+    <span slot="loading">Fetching the latest figures…</span>
+  </c2-chord-chart>
+  <c2-chord-chart source-field="from" target-field="to" value-field="amount">
+    <span slot="empty">Nothing recorded for this period yet.</span>
+  </c2-chord-chart>
+  <c2-chord-chart source-field="from" target-field="to" value-field="amount" error="Request failed">
+    <span slot="error">The figures could not be loaded. Try again in a minute.</span>
+  </c2-chord-chart>
+</div>
 ```
 
 </GalleryGrid>

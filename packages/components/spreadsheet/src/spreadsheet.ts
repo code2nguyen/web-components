@@ -355,7 +355,7 @@ const ARROWS: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: 
  *
  * @cssproperty {pixel} [--c2-spreadsheet__resizer--width=9px] - Width of a column's resize grab area, not of the visible line.
  * @cssproperty {color} [--c2-spreadsheet__resizer__hover--color=rgb(2, 101, 220)] - The line drawn at a column's edge while its handle is hovered or dragged.
- * @cssproperty {pixel} [--c2-spreadsheet__resizer__hover--line-width=2px]
+ * @cssproperty {pixel} [--c2-spreadsheet__resizer__hover--line-width=2px] - Width of the resize line while the pointer is over it or a column is being resized.
  *
  * @cssproperty {color} [--c2-spreadsheet__editor--background-color=#ffffff] - The input over a cell being edited.
  * @cssproperty {font-family} [--c2-spreadsheet__editor--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace] - A formula being edited in its cell; text keeps the cell's font.

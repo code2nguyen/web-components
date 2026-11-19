@@ -82,3 +82,22 @@ addTranslations({ fr: { 'number-input': { decrease: 'Diminuer la valeur', increa
 ```
 
 <NumberInputExamplesRuntime />
+
+## Slots
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Custom icons and slotted content
+<style>
+  .default {
+    width: 190px;
+  }
+</style>
+<c2-number-input class="default" aria-label="Quantity" value="4" min="0">
+  <svg slot="decrement-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+  <svg slot="increment-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  <span slot="supporting-text">Up to 99 per order.</span>
+</c2-number-input>
+```
+
+</GalleryGrid>

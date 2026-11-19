@@ -97,7 +97,7 @@ function deepActiveElement(): HTMLElement | null {
  * @tag c2-context-menu
  *
  * @slot default - The area that opens the menu.
- * @slot menu - A `c2-menu` shown when `renderContextMenu` is not set or returns nothing.
+ * @slot menu - A `c2-menu` of `c2-menu-item` rows, shown when `renderContextMenu` is not set or returns nothing.
  *
  * @event {CustomEvent<ContextMenuContext>} context-menu-open - Fired before the menu opens, with the context as `detail`. Cancelable: `preventDefault()` keeps the menu closed and lets the browser's menu show.
  * @event {CustomEvent<ContextMenuSelectEventDetail>} context-menu-select - Fired when a row is activated: the row's `value`, `checked` and `data`, plus the `context` the menu was opened on. The row's own `menu-select` still bubbles as well.

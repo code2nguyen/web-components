@@ -5,6 +5,7 @@ category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-bar-chart'
 apiTags: ['c2-bar-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+keywords: ['column chart', 'bar graph']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -62,7 +63,7 @@ This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer depende
 </style>
 
 <div data-label="Default">
-  <c2-bar-chart
+  <c2-bar-chart aria-label="Renewable generation by year"
     class="plot"
     label-field="year"
     x-type="category"

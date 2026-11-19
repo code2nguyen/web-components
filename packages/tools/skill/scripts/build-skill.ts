@@ -22,6 +22,7 @@ interface Registry {
       package: string
       title: string
       description: string
+      keywords?: string[]
       category: string
       tagPattern?: string
       elements: {
@@ -60,7 +61,9 @@ function renderCatalog(): string {
       // The module to import: `@c2n/components/<name>` (or one element's own entry) for a component, the package
       // itself for an icon set, whose elements each have their own module.
       const from = c.tagPattern ? c.package : (c.elements[0]?.modulePath ?? c.package)
-      out.push(`- **${c.title}** — \`${tags}\` · \`${from}\` — ${description}${holds}`)
+      // The names a developer may use instead of the component's own ("snackbar", "faq"), so a text search finds it.
+      const aka = c.keywords?.length ? ` Also: ${c.keywords.join(', ')}.` : ''
+      out.push(`- **${c.title}** — \`${tags}\` · \`${from}\` — ${description}${holds}${aka}`)
     }
     out.push(``)
   }

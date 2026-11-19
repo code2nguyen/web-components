@@ -58,3 +58,20 @@ Looks for `c2-fx-converter`. The amount size, the rail and the rate colour do mo
 ```
 
 </GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Custom icons
+<style>
+  .fx-box {
+    width: 100%;
+  }
+</style>
+<c2-fx-converter class="fx-box" from="EUR" to="USD" currencies="EUR;USD;GBP" amount="100000" rate="1.0842" fee="413">
+  <svg slot="swap-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 1 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+</c2-fx-converter>
+```
+
+</GalleryGrid>

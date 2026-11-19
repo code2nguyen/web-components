@@ -167,7 +167,7 @@ interface Suggestion {
  * @cssproperty {opacity} [--c2-query-input__disabled--opacity=0.38]
  * @cssproperty {color} [--c2-query-input__selection--background=rgba(2, 101, 220, 0.2)] - Background of selected text.
  *
- * @cssproperty {pixel} [--c2-query-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-query-input__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-query-input__icon--color=#71717a]
  * @cssproperty {color} [--c2-query-input__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-query-input__clear-icon__hover--color=#18181b]

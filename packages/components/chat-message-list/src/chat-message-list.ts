@@ -61,7 +61,7 @@ export interface ChatMessageList {
  * @cssproperty {font-size} [--c2-chat-message-list__loading--font-size=12px]
  * @cssproperty {color} [--c2-chat-message-list__empty--color=#71717a]
  * @cssproperty {font-size} [--c2-chat-message-list__empty--font-size=14px]
- * @cssproperty {pixel} [--c2-chat-message-list__jump-button--size=32px]
+ * @cssproperty {pixel} [--c2-chat-message-list__jump-button--size=32px] - Height and minimum width of the jump button.
  * @cssproperty {pixel} [--c2-chat-message-list__jump-button--bottom=16px]
  * @cssproperty {border} [--c2-chat-message-list__jump-button--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-chat-message-list__jump-button--border-radius=999px]
@@ -70,7 +70,7 @@ export interface ChatMessageList {
  * @cssproperty {box-shadow} [--c2-chat-message-list__jump-button--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
  * @cssproperty {color} [--c2-chat-message-list__jump-button__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-chat-message-list__jump-button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {pixel} [--c2-chat-message-list__jump-icon--size=18px]
+ * @cssproperty {pixel} [--c2-chat-message-list__jump-icon--size=18px] - Width and height of the jump icon.
  * @cssproperty {color} [--c2-chat-message-list__badge--background=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-chat-message-list__badge--color=#ffffff]
  * @cssproperty {font-size} [--c2-chat-message-list__badge--font-size=12px]

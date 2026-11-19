@@ -108,7 +108,7 @@ const daysIn = ({ year, month }: Month) => new Date(Date.UTC(year, month, 0)).ge
  * @cssproperty {outline} [--c2-date-time-picker__error__focus--outline=none]
  * @cssproperty {color} [--c2-date-time-picker__read-only--background=#fafafa]
  * @cssproperty {opacity} [--c2-date-time-picker__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-date-time-picker__calendar-icon--size=18px]
+ * @cssproperty {pixel} [--c2-date-time-picker__calendar-icon--size=18px] - Width and height of the calendar icon.
  * @cssproperty {color} [--c2-date-time-picker__calendar-icon--color=#71717a]
  * @cssproperty {color} [--c2-date-time-picker__calendar-icon__hover--color=#18181b]
  * @cssproperty {color} [--c2-date-time-picker__time-zone--color=#71717a] - The zone abbreviation shown in the field.
@@ -128,13 +128,13 @@ const daysIn = ({ year, month }: Month) => new Date(Date.UTC(year, month, 0)).ge
  * @cssproperty {border} [--c2-date-time-picker__picker-divider--border=1px solid #e4e4e7]
  * @cssproperty {font-size} [--c2-date-time-picker__month-title--font-size=14px]
  * @cssproperty {font-weight} [--c2-date-time-picker__month-title--font-weight=600]
- * @cssproperty {pixel} [--c2-date-time-picker__navigation--size=28px]
+ * @cssproperty {pixel} [--c2-date-time-picker__navigation--size=28px] - Width and height of the navigation.
  * @cssproperty {border-radius} [--c2-date-time-picker__navigation--border-radius=6px]
  * @cssproperty {color} [--c2-date-time-picker__navigation--color=#71717a]
  * @cssproperty {color} [--c2-date-time-picker__navigation__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-date-time-picker__weekday--color=#71717a]
  * @cssproperty {font-size} [--c2-date-time-picker__weekday--font-size=12px]
- * @cssproperty {pixel} [--c2-date-time-picker__day--size=32px]
+ * @cssproperty {pixel} [--c2-date-time-picker__day--size=32px] - Width and height of the day.
  * @cssproperty {font-size} [--c2-date-time-picker__day--font-size=14px]
  * @cssproperty {border-radius} [--c2-date-time-picker__day--border-radius=999px]
  * @cssproperty {color} [--c2-date-time-picker__day__hover--background=#f4f4f5]

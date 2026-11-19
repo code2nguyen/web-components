@@ -6,6 +6,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { FloatingPanel } from '@c2n/components/floating-panel'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -330,6 +331,35 @@ Curated looks for `c2-floating-panel`, each in a positioned box with `boundary="
     <span slot="title">Ada Lovelace · 04:12</span>
     <div class="video">AL</div>
   </c2-floating-panel>
+</div>
+```
+
+</GalleryGrid>
+
+## Slots
+
+<GalleryGrid min="320">
+
+```html tag=MdxCodeBlock,label=Slotted content
+<style>
+  .fpg-default {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+  }
+  .fpg-default p {
+    margin: 0;
+  }
+</style>
+<div class="fpg-default">
+  <c2-floating-panel open boundary="parent">
+  <span slot="title">Panel</span>
+  <p>Drag the title bar to move the panel, or an edge to resize it.</p>
+  <c2-button slot="actions">Pin</c2-button>
+</c2-floating-panel>
 </div>
 ```
 

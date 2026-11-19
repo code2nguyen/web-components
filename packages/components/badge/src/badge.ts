@@ -44,7 +44,7 @@ export type BadgeOverlap = 'rectangular' | 'circular'
  * @cssproperty {pixel} --c2-badge--letter-spacing
  * @cssproperty {text-transform} [--c2-badge--text-transform=none]
  *
- * @cssproperty {pixel} [--c2-badge__icon--size=12px]
+ * @cssproperty {pixel} [--c2-badge__icon--size=12px] - Width and height of the icon.
  *
  * @cssproperty {background} [--c2-badge__neutral--background=#f4f4f5]
  * @cssproperty {color} [--c2-badge__neutral--color=#52525b]

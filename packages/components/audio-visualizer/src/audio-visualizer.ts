@@ -148,7 +148,7 @@ const FLAT_WAVE = wavePath(Array.from({ length: WAVE_POINTS }, () => 0))
  * @cssproperty {border-radius} [--c2-audio-visualizer__bar--border-radius=999px]
  * @cssproperty {color} [--c2-audio-visualizer__wave--color=rgb(2, 101, 220)]
  * @cssproperty {pixel} [--c2-audio-visualizer__wave--stroke-width=2px]
- * @cssproperty {pixel} [--c2-audio-visualizer__orb--size=96px]
+ * @cssproperty {pixel} [--c2-audio-visualizer__orb--size=96px] - Width and height of the orb.
  * @cssproperty {color} [--c2-audio-visualizer__orb--color=rgb(2, 101, 220)] - The orb's body; its highlight and shade are mixed from it.
  * @cssproperty {pixel} [--c2-audio-visualizer__orb--glow=32px] - The glow at full level.
  * @cssproperty {color} [--c2-audio-visualizer__muted--color=#a1a1aa] - The bars, wave or orb of a muted source.

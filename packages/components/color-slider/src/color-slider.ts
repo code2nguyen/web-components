@@ -61,7 +61,9 @@ export class ColorSlider extends LitElement {
   /** Accessible name forwarded to the inner range input. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
+  /** @internal */
   @query('.color-handle') colorHandle!: HTMLElement
+  /** @internal */
   @query('.input-slider') inputSlider!: HTMLElement
 
   private colorHandleRect?: DOMRect

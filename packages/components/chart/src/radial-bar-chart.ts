@@ -376,7 +376,7 @@ export class RadialBarChart extends EchartsChartBase {
 
   private format(value: number): string {
     const precision = Math.max(0, Math.min(20, Math.trunc(this.precision) || 0))
-    return `${new Intl.NumberFormat(this.locale, { maximumFractionDigits: precision }).format(value)}${this.valueSuffix}`
+    return `${new Intl.NumberFormat(this.intlLocale, { maximumFractionDigits: precision }).format(value)}${this.valueSuffix}`
   }
 
   /** The tooltip names the ring, its value against its goal and the share, whichever part is hovered. */
@@ -384,7 +384,7 @@ export class RadialBarChart extends EchartsChartBase {
     const context = super.tooltipContextAt({ ...detail, seriesIndex: 0 })
     const ring = this.rings()[detail.index]
     if (!ring) return context
-    const percent = new Intl.NumberFormat(this.locale, { style: 'percent', maximumFractionDigits: 0 }).format(ring.share)
+    const percent = new Intl.NumberFormat(this.intlLocale, { style: 'percent', maximumFractionDigits: 0 }).format(ring.share)
     return {
       ...context,
       entries: context.entries.map((entry) => ({
@@ -475,7 +475,7 @@ export class RadialBarChart extends EchartsChartBase {
               ${
                 ring.value === null
                   ? '—'
-                  : `${this.format(ring.value)} / ${this.format(ring.goal)}, ${new Intl.NumberFormat(this.locale, { style: 'percent', maximumFractionDigits: 0 }).format(ring.share)}`
+                  : `${this.format(ring.value)} / ${this.format(ring.goal)}, ${new Intl.NumberFormat(this.intlLocale, { style: 'percent', maximumFractionDigits: 0 }).format(ring.share)}`
               }
             </li>`,
         )}

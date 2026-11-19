@@ -126,3 +126,20 @@ test('the built registry ranks the component each need describes in the top five
     assert.ok(position !== -1 && position < 5, `"${query}" ranks ${id} at ${position}: ${searchComponents(reg, query, 8).map((h) => h.component.id)}`)
   }
 })
+
+test('keywords and rare words find a component its description does not name', () => {
+  const rate = {
+    ...component('rate', 'Rate', 'Accessible rating input with hover preview and half values.', {}, 'Inputs'),
+    keywords: ['star rating', 'review'],
+  }
+  const chart = component('overlap-chart', 'Overlap chart', 'Shows which customers start in several sets and leave together.', {}, 'Chart')
+  const menu = { ...component('context-menu', 'Context menu', 'A menu opened on an area.', {}, 'Navigation'), keywords: ['right click'] }
+  const list = component('list', 'List', 'Shows a list of files the user can open from the list.', {}, 'Data display')
+  // Words most components use ("show", "user", "list", "file") weigh less than the ones few do ("star", "click").
+  const filler = Object.fromEntries(
+    Array.from({ length: 20 }, (_, i) => [`filler-${i}`, component(`filler-${i}`, `Filler ${i}`, 'Shows the user a list of files to open.')]),
+  )
+  const registry = { components: { rate, chart, menu, list, ...filler } } as unknown as Registry
+  assert.equal(searchComponents(registry, 'Let customers leave a 5 star review')[0].component.id, 'rate')
+  assert.equal(searchComponents(registry, 'Show a menu when the user right-clicks a file in the list')[0].component.id, 'context-menu')
+})

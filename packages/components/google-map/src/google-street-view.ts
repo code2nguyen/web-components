@@ -37,7 +37,7 @@ export interface GoogleStreetView {
 const NO_IMAGERY = 'Street View has no imagery near this place.'
 
 /**
- * A Google Street View panorama. Give it a `position` to look around a place, or link it to a map with `for`: the
+ * A Google Street View panorama. Give it a `position` to look around a place, or link it to a `c2-google-map` with `for`: the
  * map's pegman then opens Street View here instead of over the map, and the map's markers show in the panorama.
  *
  * ```html

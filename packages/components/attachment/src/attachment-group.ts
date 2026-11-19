@@ -14,7 +14,7 @@ export type AttachmentGroupLayout = 'list' | 'grid' | 'mixed'
  * @csspart list - List region wrapping the default attachment slot.
  *
  * @cssproperty {pixel} [--c2-attachment-group--gap=8px]
- * @cssproperty {pixel} [--c2-attachment-group--min-column-width=240px]
+ * @cssproperty {pixel} [--c2-attachment-group--min-column-width=240px] - Narrowest a column of the tile grid may be before the grid drops a column.
  */
 @customElement('c2-attachment-group')
 export class AttachmentGroup extends LitElement {

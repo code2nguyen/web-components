@@ -4,22 +4,17 @@
 //
 //   node lab/scripts/gaps.mjs           write lab/GAPS.md and print it
 //   node lab/scripts/gaps.mjs --check   also exit 1 on a warning (unknown tag, missing report row, unknown outcome)
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { labMarkdownFiles } from './lib/lab-files.mjs'
 import { OUTCOMES, capabilityVocabulary, frontMatter, reportRows, specRequirements } from './lib/markdown.mjs'
 
 const LAB = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ROOT = resolve(LAB, '..')
 const warnings = []
 
-function walk(dir) {
-  if (!existsSync(dir)) return []
-  return readdirSync(dir).flatMap((name) => {
-    const path = join(dir, name)
-    return statSync(path).isDirectory() ? walk(path) : name.endsWith('.md') && name !== 'TEMPLATE.md' && name !== 'README.md' ? [path] : []
-  })
-}
+const walk = labMarkdownFiles
 
 function loadCapabilities() {
   return capabilityVocabulary(readFileSync(join(LAB, 'capabilities.md'), 'utf8'))
@@ -28,7 +23,7 @@ function loadCapabilities() {
 function loadSpecs(capabilities) {
   const specs = new Map()
   for (const file of walk(join(LAB, 'specs'))) {
-    const { data, body } = frontMatter(readFileSync(file, 'utf8'))
+    const { data, body } = frontMatter(readFileSync(file, 'utf8').replace(/\r\n/g, '\n'))
     if (!data.id) {
       warnings.push(`${relative(ROOT, file)}: no id in front matter`)
       continue
@@ -38,7 +33,7 @@ function loadSpecs(capabilities) {
       for (const tag of requirement.tags) if (!capabilities.has(tag)) warnings.push(`${relative(ROOT, file)} ${requirement.id}: unknown capability \`${tag}\``)
       requirements.set(requirement.id, requirement)
     }
-    specs.set(data.id, { ...data, file: relative(ROOT, file), requirements, directions: data.directions ?? ['default'] })
+    specs.set(data.id, { ...data, file: relative(ROOT, file), requirements, directions: [].concat(data.directions ?? ['default']).filter(Boolean) })
   }
   return specs
 }
@@ -46,7 +41,7 @@ function loadSpecs(capabilities) {
 function loadReports(specs) {
   const reports = []
   for (const file of walk(join(LAB, 'reports'))) {
-    const { data, body } = frontMatter(readFileSync(file, 'utf8'))
+    const { data, body } = frontMatter(readFileSync(file, 'utf8').replace(/\r\n/g, '\n'))
     const spec = specs.get(data.spec)
     if (!spec) {
       warnings.push(`${relative(ROOT, file)}: unknown spec \`${data.spec}\``)

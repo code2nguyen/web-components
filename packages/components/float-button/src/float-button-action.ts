@@ -25,7 +25,7 @@ import styles from './float-button-action.scss?inline'
  * @cssproperty {outline} [--c2-float-button-action__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-float-button-action__focus--outline-offset=2px]
  * @cssproperty {opacity} [--c2-float-button-action__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-float-button-action__icon--size=20px]
+ * @cssproperty {pixel} [--c2-float-button-action__icon--size=20px] - Width and height of the icon, also given to a slotted c2 icon.
  *
  * @cssproperty {display} [--c2-float-button-action__label--display=block] - `none` for icon-only actions.
  * @cssproperty {color} [--c2-float-button-action__label--background-color=#ffffff]

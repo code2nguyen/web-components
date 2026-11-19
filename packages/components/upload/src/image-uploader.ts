@@ -97,14 +97,14 @@ interface PointerDrag {
  * @cssproperty {border} [--c2-image-uploader__add__hover--border=1px dashed #a1a1aa]
  * @cssproperty {color} [--c2-image-uploader__add__drag--background=#e8f2ff]
  * @cssproperty {border} [--c2-image-uploader__add__drag--border=1px dashed rgb(2, 101, 220)]
- * @cssproperty {pixel} [--c2-image-uploader__add-icon--size=24px]
+ * @cssproperty {pixel} [--c2-image-uploader__add-icon--size=24px] - Width and height of the add icon.
  * @cssproperty {color} [--c2-image-uploader__add-icon--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-image-uploader__add-label--color=#18181b]
  * @cssproperty {font-weight} [--c2-image-uploader__add-label--font-weight=500]
  * @cssproperty {color} [--c2-image-uploader__overlay--background=rgba(24, 24, 27, 0.55)]
  * @cssproperty {color} [--c2-image-uploader__overlay__error--background=rgba(127, 29, 29, 0.78)]
  * @cssproperty {color} [--c2-image-uploader__overlay--color=#fafafa]
- * @cssproperty {pixel} [--c2-image-uploader__action--size=24px]
+ * @cssproperty {pixel} [--c2-image-uploader__action--size=24px] - Height and minimum width of the action button.
  * @cssproperty {color} [--c2-image-uploader__action--background=rgba(24, 24, 27, 0.72)]
  * @cssproperty {color} [--c2-image-uploader__action__hover--background=rgba(24, 24, 27, 0.9)]
  * @cssproperty {color} [--c2-image-uploader__action--color=#fafafa]

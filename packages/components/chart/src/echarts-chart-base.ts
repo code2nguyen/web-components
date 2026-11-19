@@ -24,6 +24,31 @@ export function dimSeries(option: Record<string, unknown>, opacity: number): Rec
  * Defines no tag and is never registered.
  */
 export abstract class EchartsChartBase extends ChartBase {
+  #tickFormats = new Map<string, Intl.NumberFormat>()
+
+  /**
+   * An axis tick in the chart locale, with every decimal the tick itself has: ECharts places ticks on round steps
+   * (0.001, 1.0855, 2500), so their own digits are what tells neighbours apart; the tooltip's two fraction digits would
+   * write 1.0850 and 1.0855 alike. One formatter per locale and precision is reused.
+   */
+  protected formatTick(tick: number): string {
+    // An axis ECharts cannot settle may hand over NaN or Infinity: no digits to count.
+    if (!Number.isFinite(tick)) return String(tick)
+    // Rounded to 12 significant digits first, so float noise (0.30000000000000004) adds no digits; read from the
+    // exponential form, so 1e-7 counts 7 decimals rather than none.
+    const [mantissa, exponent] = Number(tick.toPrecision(12)).toExponential().split('e')
+    const decimals = Math.max(0, (mantissa.split('.')[1] ?? '').length - Number(exponent))
+    // Past what a fixed format can write (Intl stops at 20 decimals): scientific, rather than a row of zeros.
+    const options: Intl.NumberFormatOptions = decimals > 20 ? { notation: 'scientific', maximumFractionDigits: 6 } : { maximumFractionDigits: decimals }
+    const key = `${this.intlLocale ?? ''}|${decimals > 20 ? 'sci' : decimals}`
+    let format = this.#tickFormats.get(key)
+    if (!format) {
+      format = new Intl.NumberFormat(this.intlLocale, options)
+      this.#tickFormats.set(key, format)
+    }
+    return format.format(tick)
+  }
+
   protected override readonly engineName = 'echarts' as const
 
   /** Which ECharts renderer to use. SVG prints and scales crisply; canvas is faster with many marks. */
@@ -43,12 +68,15 @@ export abstract class EchartsChartBase extends ChartBase {
     const { theme } = context
     const axisLine = { lineStyle: { color: theme.gridColor } }
     const axisLabel = { color: theme.axisColor, fontSize: theme.axisFontSize }
+    // ECharts writes a number tick its own way, in English whatever `locale` says: format it as the tooltip does.
+    const valueLabel = { ...axisLabel, formatter: (tick: number) => this.formatTick(tick) }
     // ECharts draws split lines on a value or time x axis by default, in its own light grey: theme them too.
     const splitLine = { lineStyle: { color: theme.gridColor, width: theme.gridWidth } }
+    const xType = this.xType === 'time' ? 'time' : this.xType === 'category' ? 'category' : 'value'
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
-      xAxis: { type: this.xType === 'time' ? 'time' : this.xType === 'category' ? 'category' : 'value', axisLine, axisLabel, splitLine, data: context.labels },
-      yAxis: { type: 'value', axisLine, axisLabel, splitLine },
+      xAxis: { type: xType, axisLine, axisLabel: xType === 'value' ? valueLabel : axisLabel, splitLine, data: context.labels },
+      yAxis: { type: 'value', axisLine, axisLabel: valueLabel, splitLine },
     }
   }
 
