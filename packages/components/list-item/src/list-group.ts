@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -125,7 +125,7 @@ export class ListGroup extends LitElement {
           <span class="prefix-icon" part="prefix-icon" ?hidden=${!this.slotPresence.has('prefix-icon')}
             ><slot name="prefix-icon" @slotchange=${slotChange}></slot
           ></span>
-          <span class="label" part="label" id="label"><slot name="label">${this.label}</slot></span>
+          <span class="label" part="label" id="label"><slot name="label">${this.label || nothing}</slot></span>
         </button>
         <span class="suffix" part="suffix" ?hidden=${!this.slotPresence.has('suffix')}><slot name="suffix" @slotchange=${slotChange}></slot></span>
         <span class="toggle-icon" part="toggle-icon" aria-hidden="true"
