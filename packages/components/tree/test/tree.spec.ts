@@ -650,3 +650,8 @@ test("with checkboxes, a slotted label names the row's checkbox and follows its 
   await page.waitForTimeout(50)
   expect(warnings).toEqual([])
 })
+
+test('the empty text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-tree aria-label="Fichiers"></c2-tree></div>')
+  await expect(page.locator('c2-tree .empty')).toHaveText('Aucun élément')
+})

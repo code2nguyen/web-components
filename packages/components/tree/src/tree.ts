@@ -5,6 +5,8 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { DropZoneController, type DropZoneItems } from '@c2n/core/controllers/drop-zone.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { treeMessages } from './messages.js'
 import styles from './tree.scss?inline'
 // Registers `c2-tree-item` so a consumer of the tree alone gets the row element too (as `c2-tabs` does for
 // `c2-tab`). It is also what lets an MDX `client:only` island render nested rows as plain markup.
@@ -99,7 +101,7 @@ export interface Tree {
  * @tag c2-tree
  *
  * @slot - The root `c2-tree-item` rows, when authoring in markup.
- * @slot empty - Shown instead of the rows when the tree holds nothing.
+ * @slot empty - Shown instead of the rows when the tree holds nothing. Defaults to the `empty` message ("No items").
  *
  * @slotcomponent c2-tree-item
  *
@@ -149,6 +151,7 @@ export class Tree extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, treeMessages)
 
   /** Nodes to render. Leave empty and nest `c2-tree-item` elements instead to author the tree in markup. */
   @property({ converter: jsonPropertyConverter }) items: TreeNode[] = []
@@ -918,7 +921,7 @@ export class Tree extends LitElement {
           (node) => this.#renderNode(node, 0),
         )}
         <slot @slotchange=${this.#handleItemChange}></slot>
-        ${empty ? html`<div class="empty"><slot name="empty">No items</slot></div>` : nothing}
+        ${empty ? html`<div class="empty"><slot name="empty">${this.msg.t('empty')}</slot></div>` : nothing}
       </div>
       <div class="drop-status" role="status" aria-live="polite" aria-atomic="true">${this.#dropZone.announcement}</div>
     `
