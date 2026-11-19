@@ -85,8 +85,8 @@ function splitColors(value: string): string[] {
  * @cssproperty {number} [--c2-celebration--count=80] - Particles per confetti fire; a burst throws a third, emoji a tenth.
  * @cssproperty {angle} [--c2-celebration--spread=70deg] - How wide the confetti is thrown.
  * @cssproperty {time} [--c2-celebration--duration=2500ms] - How long a particle lives.
- * @cssproperty {pixel} [--c2-celebration__emoji--size=28px]
- * @cssproperty {pixel} [--c2-celebration__confetti--size=8px]
+ * @cssproperty {pixel} [--c2-celebration__emoji--size=28px] - Size of each emoji particle.
+ * @cssproperty {pixel} [--c2-celebration__confetti--size=8px] - Size of each confetti piece.
  */
 @customElement('c2-celebration')
 export class Celebration extends LitElement {

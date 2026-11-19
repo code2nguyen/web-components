@@ -144,7 +144,7 @@ function escapeForCharacterClass(characters: string) {
  *
  * @cssproperty {opacity} [--c2-tag-input__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-tag-input__icon--size=16px]
+ * @cssproperty {pixel} [--c2-tag-input__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-tag-input__icon--color=#71717a]
  *
  * @cssproperty {pixel} [--c2-tag-input__tag--height=24px]
@@ -163,7 +163,7 @@ function escapeForCharacterClass(characters: string) {
  * @cssproperty {color} [--c2-tag-input__tag__invalid--background=#ffffff]
  * @cssproperty {color} [--c2-tag-input__tag__invalid--color=#dc2626]
  *
- * @cssproperty {pixel} [--c2-tag-input__remove-icon--size=14px]
+ * @cssproperty {pixel} [--c2-tag-input__remove-icon--size=14px] - Width and height of the remove icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-tag-input__remove-icon--color=#71717a]
  * @cssproperty {color} [--c2-tag-input__remove-icon__hover--color=#18181b]
  */

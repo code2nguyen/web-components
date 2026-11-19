@@ -128,7 +128,7 @@ const toNumber = (key: string) => parseFloat(/-?\d[\d,]*(\.\d+)?/.exec(key)?.[0]
  * @cssproperty {font-weight} [--c2-description-item__total--font-weight=700]
  * @cssproperty {pixel} [--c2-description-item__total--font-size=16px] - The value of a total.
  *
- * @cssproperty {pixel} [--c2-description-item__edit-button--size=24px]
+ * @cssproperty {pixel} [--c2-description-item__edit-button--size=24px] - Width and height of the edit button.
  * @cssproperty {color} [--c2-description-item__edit-button--color=#71717a]
  * @cssproperty {color} [--c2-description-item__edit-button__hover--background-color=#f4f4f5]
  * @cssproperty [--c2-description-item__edit-button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

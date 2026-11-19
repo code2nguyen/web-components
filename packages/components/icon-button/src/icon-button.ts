@@ -32,7 +32,7 @@ import '@c2n/tooltip'
  * @cssproperty {color} --c2-icon-button__icon__hover--color
  * @cssproperty {color} --c2-icon-button__icon__selected--color
  *
- * @cssproperty {pixel} [--c2-icon-button__state-layer--size=48px]
+ * @cssproperty {pixel} [--c2-icon-button__state-layer--size=48px] - Width and height of the state layer.
  */
 @customElement('c2-icon-button')
 export class IconButton extends LitElement {

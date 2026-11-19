@@ -105,12 +105,12 @@ export interface FacetList {
  * @cssproperty {color} [--c2-facet-list__value__hover--background-color=#f4f4f5]
  * @cssproperty {color} [--c2-facet-list__count--color=#71717a]
  * @cssproperty {font-size} [--c2-facet-list__count--font-size=12px]
- * @cssproperty {pixel} [--c2-facet-list__checkbox--size=16px]
+ * @cssproperty {pixel} [--c2-facet-list__checkbox--size=16px] - Width and height of the checkbox.
  * @cssproperty {border} [--c2-facet-list__checkbox--border=1px solid #bcbcc6]
  * @cssproperty {color} [--c2-facet-list__checkbox__selected--background-color=#476ef9]
  * @cssproperty {color} [--c2-facet-list__checkbox__mark--color=#ffffff] - The check and the dash drawn on a selected checkbox.
  * @cssproperty {color} [--c2-facet-list__excluded--color=#dc2626] - The excluded value's checkbox and label.
- * @cssproperty {pixel} [--c2-facet-list__action--size=24px]
+ * @cssproperty {pixel} [--c2-facet-list__action--size=24px] - Height and minimum width of the action button.
  * @cssproperty {color} [--c2-facet-list__action--color=#71717a]
  * @cssproperty {color} [--c2-facet-list__action__hover--background-color=#e4e4e7]
  * @cssproperty {border} [--c2-facet-list__search--border=1px solid #bcbcc6]

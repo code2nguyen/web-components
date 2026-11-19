@@ -48,7 +48,7 @@ export interface Header {
  * @cssproperty {box-shadow} [--c2-header--box-shadow=none]
  * @cssproperty {box-shadow} [--c2-header__stuck--box-shadow=none] - Shadow of a `sticky` header while content scrolls beneath it; falls back to `--c2-header--box-shadow`.
  * @cssproperty {time} [--c2-header--transition-duration=200ms] - Duration of the stuck and `hide-on-scroll` transitions.
- * @cssproperty {pixel} [--c2-header--sticky-top=0px]
+ * @cssproperty {pixel} [--c2-header--sticky-top=0px] - Distance from the top of the viewport at which a sticky header stays.
  * @cssproperty {backdrop-filter} [--c2-header--backdrop-filter=blur(16px)]
  * @cssproperty {color} [--c2-header__blurred--background=rgba(255, 255, 255, 0.82)]
  * @cssproperty {max-width} [--c2-header__content--max-width=none] - Constrains the inner content while the header surface remains full-width.

@@ -119,7 +119,7 @@ const clearIcon = svg`<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"></path>`
  * @cssproperty {outline} [--c2-quick-time-menu__trigger__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-quick-time-menu__trigger__focus--outline-offset=2px]
  * @cssproperty {color} [--c2-quick-time-menu__icon--color=#71717a]
- * @cssproperty {pixel} [--c2-quick-time-menu__icon--size=16px]
+ * @cssproperty {pixel} [--c2-quick-time-menu__icon--size=16px] - Width and height of the icon.
  * @cssproperty {color} [--c2-quick-time-menu__clear--color=#71717a]
  * @cssproperty {color} [--c2-quick-time-menu__clear__hover--background-color=#f4f4f5]
  * @cssproperty {pixel} [--c2-quick-time-menu__menu--width=300px]

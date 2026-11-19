@@ -245,9 +245,9 @@ function flatParent(node: Element): Element | null {
  * @cssproperty {color} [--c2-floating-panel__title--color=#18181b]
  * @cssproperty {color} [--c2-floating-panel__title__inactive--color=#71717a] - Title of a panel behind another one.
  * @cssproperty {color} [--c2-floating-panel__icon--color=#71717a]
- * @cssproperty {pixel} [--c2-floating-panel__icon--size=16px]
+ * @cssproperty {pixel} [--c2-floating-panel__icon--size=16px] - Width and height of the icon.
  * @cssproperty {pixel} [--c2-floating-panel__button--size=28px] - Width and height of each window button.
- * @cssproperty {pixel} [--c2-floating-panel__button--icon-size=16px]
+ * @cssproperty {pixel} [--c2-floating-panel__button--icon-size=16px] - Width and height of the icons in the title-bar buttons.
  * @cssproperty {border-radius} [--c2-floating-panel__button--border-radius=6px]
  * @cssproperty {color} [--c2-floating-panel__button--color=#71717a]
  * @cssproperty {color} [--c2-floating-panel__button__hover--background=#f4f4f5]

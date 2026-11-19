@@ -94,7 +94,7 @@ function addDays(date: Date, amount: number): Date {
  * @cssproperty {font-size} [--c2-date-strip--font-size=14px]
  * @cssproperty {color} [--c2-date-strip--color=#18181b]
  * @cssproperty {font-weight} [--c2-date-strip__title--font-weight=600]
- * @cssproperty {pixel} [--c2-date-strip__navigation--size=32px]
+ * @cssproperty {pixel} [--c2-date-strip__navigation--size=32px] - Width and height of the navigation.
  * @cssproperty {color} [--c2-date-strip__navigation__hover--background=#f4f4f5]
  * @cssproperty {pixel} [--c2-date-strip__day--min-width=40px] - The narrowest a day gets before the row scrolls.
  * @cssproperty {padding} [--c2-date-strip__day--padding=8px 0]
@@ -110,7 +110,7 @@ function addDays(date: Date, amount: number): Date {
  * @cssproperty {font-size} [--c2-date-strip__weekday--font-size=12px]
  * @cssproperty {font-size} [--c2-date-strip__date--font-size=16px]
  * @cssproperty {font-weight} [--c2-date-strip__date--font-weight=600]
- * @cssproperty {pixel} [--c2-date-strip__marker--size=4px]
+ * @cssproperty {pixel} [--c2-date-strip__marker--size=4px] - Width and height of the marker.
  * @cssproperty {color} [--c2-date-strip__marker--color=#0265dc]
  * @cssproperty {outline} [--c2-date-strip__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {border} [--c2-date-strip__error--border=1px solid #dc2626] - Around the days while an enclosing `c2-form-field` shows an error.

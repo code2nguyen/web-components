@@ -251,7 +251,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @cssproperty {font-size} [--c2-month-planner__heading--font-size=14px] - The `heading`.
  * @cssproperty {font-weight} [--c2-month-planner__heading--font-weight=600]
  * @cssproperty {pixel} [--c2-month-planner__actions--gap=8px] - Space between the controls in the `actions` slot.
- * @cssproperty {pixel} [--c2-month-planner__navigation--size=32px]
+ * @cssproperty {pixel} [--c2-month-planner__navigation--size=32px] - Height and minimum width of the navigation.
  * @cssproperty {border-radius} [--c2-month-planner__navigation--border-radius=6px]
  * @cssproperty {color} [--c2-month-planner__navigation__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-month-planner__weekday--color=#71717a]
@@ -293,7 +293,7 @@ function byDayOrder(a: DatedEvent, b: DatedEvent): number {
  * @cssproperty {color} [--c2-month-planner__month__marked--background=rgba(2, 101, 220, 0.1)] - Soft tint behind a month that has events.
  * @cssproperty {color} [--c2-month-planner__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
  * @cssproperty {color} [--c2-month-planner__marker--color=rgb(2, 101, 220)] - Dot on a month that has events.
- * @cssproperty {pixel} [--c2-month-planner__marker--size=6px]
+ * @cssproperty {pixel} [--c2-month-planner__marker--size=6px] - Width and height of the marker.
  * @cssproperty {color} [--c2-month-planner__date__selected--background=#18181b] - Circle behind the selected day, in the compact layout.
  * @cssproperty {color} [--c2-month-planner__date__selected--color=#ffffff]
  * @cssproperty {color} [--c2-month-planner__date__today__selected--background=rgb(2, 101, 220)] - Circle behind today when it is selected.

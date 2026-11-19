@@ -114,7 +114,7 @@ const isMouse = (event: PointerEvent) => event.pointerType === 'mouse' && event.
  * @cssproperty {pixel} [--c2-float-button__focus--outline-offset=3px]
  * @cssproperty {opacity} [--c2-float-button__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-float-button__icon--size=24px]
+ * @cssproperty {pixel} [--c2-float-button__icon--size=24px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {transform} [--c2-float-button__icon__open--transform=rotate(45deg)] - The icon's turn while open; `none` to keep it still.
  *
  * @cssproperty {display} [--c2-float-button__label--display=none] - `inline` shows `label` next to the icon (an extended button).

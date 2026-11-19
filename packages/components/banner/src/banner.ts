@@ -57,7 +57,7 @@ export interface Banner {
  * @cssproperty {percentage} [--c2-banner__container__variant--border-mix=32%] - Share of the variant colour in the border colour.
  * @cssproperty {font-weight} [--c2-banner__heading--font-weight=600]
  * @cssproperty {pixel} [--c2-banner__heading__callout--margin-block-end=2px] - Space between a callout's heading and its body.
- * @cssproperty {pixel} [--c2-banner__icon--size=20px]
+ * @cssproperty {pixel} [--c2-banner__icon--size=20px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-banner__icon--color=#71717a]
  * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0px` removes the disc's padding (a unit-less `0` also leaves a callout's first line top-aligned).
  * @cssproperty {border-radius} [--c2-banner__icon--border-radius=999px]

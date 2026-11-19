@@ -186,7 +186,7 @@ function arrowHead(shape: AnnotatorShape): [number, number][] {
  * @cssproperty {border-radius} [--c2-image-annotator--border-radius=8px]
  * @cssproperty {color} [--c2-image-annotator__stage--background-color=#f4f4f5] - Behind the image, seen through transparent pixels.
  * @cssproperty {color} [--c2-image-annotator__selection--color=rgb(2, 101, 220)] - The selected shape's outline and handles.
- * @cssproperty {pixel} [--c2-image-annotator__handle--size=8px]
+ * @cssproperty {pixel} [--c2-image-annotator__handle--size=8px] - Width and height of the resize handles on a selected box.
  * @cssproperty {color} [--c2-image-annotator__swatch__selected--outline-color=rgb(2, 101, 220)]
  * @cssproperty {font-family} [--c2-image-annotator__text--font-family=system-ui, sans-serif] - Text shapes, on screen and in the export.
  * @cssproperty {color} [--c2-image-annotator__number--color=#ffffff] - The digit in a number badge.

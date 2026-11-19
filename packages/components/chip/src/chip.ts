@@ -107,7 +107,7 @@ function labelText(parent: Node): string {
  * @cssproperty {color} --c2-chip__icon--color - Colour of the `prefix` and `selected-icon` content. Defaults to the text colour.
  * @cssproperty {display} [--c2-chip__selected-icon--display=inline-flex] - `none` hides the check mark and relies on the colours alone.
  *
- * @cssproperty {pixel} [--c2-chip__remove-button--size=18px]
+ * @cssproperty {pixel} [--c2-chip__remove-button--size=18px] - Width and height of the remove button.
  * @cssproperty {pixel} [--c2-chip__remove-button--margin-right=-4px] - Pulls the remove button towards the edge so the padding looks even.
  * @cssproperty {border-radius} [--c2-chip__remove-button--border-radius=999px]
  * @cssproperty {color} [--c2-chip__remove-button--color=#71717a]

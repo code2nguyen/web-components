@@ -135,7 +135,7 @@ const changeEvent = { bubbles: true, composed: true, cancelable: true }
  * @cssproperty {color} [--c2-comment-thread__submit--background=#0265dc]
  * @cssproperty {color} [--c2-comment-thread__submit--color=#ffffff]
  * @cssproperty {color} [--c2-comment-thread__resolved--color=#15803d] - The Resolved line and its check.
- * @cssproperty {pixel} [--c2-comment-thread__avatar--size=28px]
+ * @cssproperty {pixel} [--c2-comment-thread__avatar--size=28px] - Width and height of each comment author's avatar.
  * @cssproperty {outline} [--c2-comment-thread__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  */
 @customElement('c2-comment-thread')

@@ -37,7 +37,7 @@ export interface ColorArea {
  *
  * @cssproperty {pixel} [--c2-color-area--width=240px]
  * @cssproperty {pixel} [--c2-color-area--height=240px]
- * @cssproperty {pixel} [--c2-color-area__color-handle--size=12px]
+ * @cssproperty {pixel} [--c2-color-area__color-handle--size=12px] - Width and height of the color handle.
  * @cssproperty {outline} [--c2-color-area__color-handle__focus--outline=2px solid #476ef9] - The ring around the thumb while it has keyboard focus.
  *
  * @cssproperty {border-radius} --c2-color-area--border-top-left-radius

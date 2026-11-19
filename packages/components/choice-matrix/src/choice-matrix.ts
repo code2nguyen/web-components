@@ -110,7 +110,7 @@ type Mixed = 'all' | 'some' | 'none'
  * @cssproperty {color} [--c2-choice-matrix__group-header--color=#18181b]
  * @cssproperty {font-weight} [--c2-choice-matrix__group-header--font-weight=600]
  *
- * @cssproperty {pixel} [--c2-choice-matrix__control--size=18px]
+ * @cssproperty {pixel} [--c2-choice-matrix__control--size=18px] - Width and height of the control button.
  * @cssproperty {border} [--c2-choice-matrix__control--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-choice-matrix__control--border-radius=4px] - A checkbox's corners; radio buttons are round.
  * @cssproperty {color} [--c2-choice-matrix__control--background-color=#ffffff]

@@ -131,7 +131,7 @@ export interface Tour {
  * @cssproperty {color} [--c2-tour__body--color=#71717a]
  * @cssproperty {pixel} [--c2-tour__body--margin-top=4px]
  *
- * @cssproperty {pixel} [--c2-tour__close--size=24px]
+ * @cssproperty {pixel} [--c2-tour__close--size=24px] - Width and height of the close button.
  * @cssproperty {color} [--c2-tour__close--color=#71717a]
  * @cssproperty {border-radius} [--c2-tour__close--border-radius=4px]
  * @cssproperty {background-color} [--c2-tour__close__hover--background-color=#f4f4f5]

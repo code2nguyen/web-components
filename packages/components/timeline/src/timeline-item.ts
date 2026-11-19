@@ -38,7 +38,7 @@ export type TimelineLayout = 'stacked' | 'split'
  *
  * @cssproperty {pixel} [--c2-timeline-item--gap=12px] - Space between the rail and the text, and between the timestamp column and the rail in the split layout.
  * @cssproperty {pixel} [--c2-timeline-item--padding-bottom=24px] - Space below an entry before the next one. The connector runs through it; the last entry drops it.
- * @cssproperty {pixel} [--c2-timeline-item__marker--size=12px]
+ * @cssproperty {pixel} [--c2-timeline-item__marker--size=12px] - Width and height of the marker.
  * @cssproperty {color} [--c2-timeline-item__marker--background=#ffffff]
  * @cssproperty {border} [--c2-timeline-item__marker--border=2px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-timeline-item__marker--border-radius=999px]

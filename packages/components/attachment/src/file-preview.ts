@@ -154,7 +154,7 @@ const icon = (path: string) => html`<svg viewBox="0 0 24 24" aria-hidden="true">
  * @cssproperty {font-size} [--c2-file-preview__text--font-size=12px]
  * @cssproperty {color} [--c2-file-preview__text--background=#ffffff]
  * @cssproperty {color} [--c2-file-preview__message--color=#71717a] - Loading, empty, error and no-preview text.
- * @cssproperty {pixel} [--c2-file-preview__action--size=32px]
+ * @cssproperty {pixel} [--c2-file-preview__action--size=32px] - Height and minimum width of the action button.
  * @cssproperty {color} [--c2-file-preview__action--color=#71717a]
  * @cssproperty {color} [--c2-file-preview__action__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-file-preview__action__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

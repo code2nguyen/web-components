@@ -105,7 +105,7 @@ let nextRowId = 0
  * @cssproperty {font-size} [--c2-key-value-editor__error--font-size=12px]
  *
  * @cssproperty {pixel} [--c2-key-value-editor__button--size=32px] - Size of the remove button.
- * @cssproperty {pixel} [--c2-key-value-editor__button__icon--size=16px]
+ * @cssproperty {pixel} [--c2-key-value-editor__button__icon--size=16px] - Width and height of the button icon.
  * @cssproperty {border-radius} [--c2-key-value-editor__button--border-radius=6px]
  * @cssproperty {color} [--c2-key-value-editor__button--color=#71717a]
  * @cssproperty {color} [--c2-key-value-editor__button__hover--color=#18181b]

@@ -103,7 +103,7 @@ export interface TimeInput {
  * @cssproperty {outline} [--c2-time-input__error__focus--outline=none]
  * @cssproperty {color} [--c2-time-input__read-only--background=#fafafa]
  * @cssproperty {opacity} [--c2-time-input__disabled--opacity=0.38]
- * @cssproperty {pixel} [--c2-time-input__clock-icon--size=18px]
+ * @cssproperty {pixel} [--c2-time-input__clock-icon--size=18px] - Width and height of the clock icon.
  * @cssproperty {color} [--c2-time-input__clock-icon--color=#71717a]
  * @cssproperty {color} [--c2-time-input__clock-icon__hover--color=#18181b]
  * @cssproperty {pixel} [--c2-time-input__supporting-text--gap=4px]
@@ -123,7 +123,7 @@ export interface TimeInput {
  * @cssproperty {color} [--c2-time-input__picker-readout__empty--color=#a1a1aa]
  * @cssproperty {color} [--c2-time-input__picker-readout-period--color=#71717a]
  * @cssproperty {pixel} [--c2-time-input__picker-column--width=38px]
- * @cssproperty {number} [--c2-time-input__picker-column--visible-rows=5]
+ * @cssproperty {number} [--c2-time-input__picker-column--visible-rows=5] - How many options each column of the picker shows at once.
  * @cssproperty {pixel} [--c2-time-input__picker-option--height=28px]
  * @cssproperty {font-size} [--c2-time-input__picker-option--font-size=13px]
  * @cssproperty {color} [--c2-time-input__picker-option--color=#71717a]

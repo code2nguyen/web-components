@@ -97,18 +97,18 @@ export interface CodeEditor {
  * @cssproperty {color} [--c2-code-editor__matching-bracket--background=rgba(2, 101, 220, 0.16)]
  * @cssproperty {color} [--c2-code-editor__placeholder--color=#71717a]
  *
- * @cssproperty {color} [--c2-code-editor__theme--token-keyword=#cf222e]
- * @cssproperty {color} [--c2-code-editor__theme--token-string=#032f62]
- * @cssproperty {color} [--c2-code-editor__theme--token-comment=#636c76]
- * @cssproperty {color} [--c2-code-editor__theme--token-constant=#0550ae]
- * @cssproperty {color} [--c2-code-editor__theme--token-function=#6f42c1]
- * @cssproperty {color} [--c2-code-editor__theme--token-type=#953800]
- * @cssproperty {color} [--c2-code-editor__theme--token-property=#0550ae]
- * @cssproperty {color} [--c2-code-editor__theme--token-variable=#24292e]
- * @cssproperty {color} [--c2-code-editor__theme--token-tag=#116329]
- * @cssproperty {color} [--c2-code-editor__theme--token-punctuation=#24292e]
- * @cssproperty {color} [--c2-code-editor__theme--token-link=#032f62]
- * @cssproperty {color} [--c2-code-editor__theme--token-invalid=#cf222e]
+ * @cssproperty {color} [--c2-code-editor__theme--token-keyword=#cf222e] - Text colour of keywords (`if`, `return`, `const`).
+ * @cssproperty {color} [--c2-code-editor__theme--token-string=#032f62] - Text colour of string literals.
+ * @cssproperty {color} [--c2-code-editor__theme--token-comment=#636c76] - Text colour of comments.
+ * @cssproperty {color} [--c2-code-editor__theme--token-constant=#0550ae] - Text colour of numbers, booleans and other constants.
+ * @cssproperty {color} [--c2-code-editor__theme--token-function=#6f42c1] - Text colour of function names.
+ * @cssproperty {color} [--c2-code-editor__theme--token-type=#953800] - Text colour of type and class names.
+ * @cssproperty {color} [--c2-code-editor__theme--token-property=#0550ae] - Text colour of property names and object keys.
+ * @cssproperty {color} [--c2-code-editor__theme--token-variable=#24292e] - Text colour of variable names.
+ * @cssproperty {color} [--c2-code-editor__theme--token-tag=#116329] - Text colour of HTML and XML tag names.
+ * @cssproperty {color} [--c2-code-editor__theme--token-punctuation=#24292e] - Text colour of punctuation and operators.
+ * @cssproperty {color} [--c2-code-editor__theme--token-link=#032f62] - Text colour of URLs and links.
+ * @cssproperty {color} [--c2-code-editor__theme--token-invalid=#cf222e] - Text colour of invalid or unparsable code.
  *
  * @cssproperty {color} [--c2-code-editor__label--color=#18181b]
  * @cssproperty {font-size} [--c2-code-editor__label--font-size=12px]

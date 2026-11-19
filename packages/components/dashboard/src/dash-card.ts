@@ -171,8 +171,8 @@ function parseDuration(value: string): number {
  * @cssproperty {pixel} [--c2-dash-card__controls--offset=4px] - Inset of the floating control group from the
  * top-right corner, used only while the header row is off.
  *
- * @cssproperty {pixel} [--c2-dash-card__control--size=24px]
- * @cssproperty {pixel} [--c2-dash-card__control--icon-size=16px]
+ * @cssproperty {pixel} [--c2-dash-card__control--size=24px] - Width and height of the control button.
+ * @cssproperty {pixel} [--c2-dash-card__control--icon-size=16px] - Width and height of the icons in the expand controls.
  * @cssproperty {border-radius} [--c2-dash-card__control--border-radius=6px]
  * @cssproperty {color} [--c2-dash-card__control--color=#71717a]
  * @cssproperty {background} [--c2-dash-card__control--background=transparent]

@@ -20,7 +20,7 @@ export type SeparatorOrientation = 'horizontal' | 'vertical'
  * @csspart line - Each line segment on either side of the optional label.
  * @csspart label - Container for the optional default slot.
  *
- * @cssproperty {pixel} [--c2-separator--thickness=1px]
+ * @cssproperty {pixel} [--c2-separator--thickness=1px] - Thickness of the line.
  * @cssproperty {color} [--c2-separator--color=#e4e4e7]
  * @cssproperty {border-style} [--c2-separator--style=solid] - `dashed` or `dotted` for a broken line.
  * @cssproperty {pixel} [--c2-separator--spacing=0px] - Margin on both sides across the line (above and below a horizontal rule).

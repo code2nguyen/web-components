@@ -140,10 +140,10 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  * @cssproperty {box-shadow} [--c2-date-selector--box-shadow=0 12px 32px rgba(24, 24, 27, 0.08)]
  * @cssproperty {pixel} [--c2-date-selector--min-width=312px] - Prevents the seven day columns and container padding from collapsing.
  * @cssproperty {padding} [--c2-date-selector--padding=16px]
- * @cssproperty {pixel} [--c2-date-selector--month-gap=40px]
+ * @cssproperty {pixel} [--c2-date-selector--month-gap=40px] - Space between two months shown side by side, or stacked.
  * @cssproperty {font-family} [--c2-date-selector--font-family=inherit]
  * @cssproperty {font-size} [--c2-date-selector--font-size=14px]
- * @cssproperty {pixel} [--c2-date-selector__day--size=40px]
+ * @cssproperty {pixel} [--c2-date-selector__day--size=40px] - Width and height of the day.
  * @cssproperty {border-radius} [--c2-date-selector__day--border-radius=999px]
  * @cssproperty {color} [--c2-date-selector__day__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-date-selector__day__today--color=#0265dc]
@@ -156,7 +156,7 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  * @cssproperty {color} [--c2-date-selector__weekday--color=#71717a]
  * @cssproperty {font-size} [--c2-date-selector__weekday--font-size=12px]
  * @cssproperty {font-weight} [--c2-date-selector__month-title--font-weight=600]
- * @cssproperty {pixel} [--c2-date-selector__navigation--size=32px]
+ * @cssproperty {pixel} [--c2-date-selector__navigation--size=32px] - Width and height of the navigation.
  * @cssproperty {color} [--c2-date-selector__navigation__hover--background=#f4f4f5]
  * @cssproperty {outline} [--c2-date-selector__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-date-selector__focus--outline-offset=2px]
@@ -164,7 +164,7 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  * @cssproperty {border} [--c2-date-selector__error--border=1px solid #dc2626] - Shown while an enclosing `c2-form-field` shows an error.
  * @cssproperty {color} [--c2-date-selector__marker--color=#0265dc] - Dot under a `marked` day.
  * @cssproperty {color} [--c2-date-selector__marker__selected--color=#ffffff] - Dot under a `marked` day that is selected.
- * @cssproperty {pixel} [--c2-date-selector__marker--size=4px]
+ * @cssproperty {pixel} [--c2-date-selector__marker--size=4px] - Width and height of the marker.
  * @cssproperty {font-size} [--c2-date-selector__day-content--font-size=10px] - Text drawn by `renderDay`.
  * @cssproperty {color} [--c2-date-selector__day-content--color=#71717a] - Text drawn by `renderDay`.
  * @cssproperty {color} [--c2-date-selector__compare--background=#ea580c] - Band under the days of the comparison range.

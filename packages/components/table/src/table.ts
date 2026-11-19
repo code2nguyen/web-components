@@ -438,10 +438,10 @@ export interface Table {
  *
  * @cssproperty {pixel} [--c2-table__resizer--width=9px] - Width of the grab area, not of the visible line.
  * @cssproperty {pixel} [--c2-table__resizer--height=56%] - Height of the resting divider, as a share of the header.
- * @cssproperty {pixel} [--c2-table__resizer--line-width=1px]
+ * @cssproperty {pixel} [--c2-table__resizer--line-width=1px] - Width of the line drawn at a column edge where it can be resized.
  * @cssproperty {color} [--c2-table__resizer--color=#e4e4e7] - The divider drawn at a resizable column's edge.
  * @cssproperty {pixel} [--c2-table__resizer__hover--height=100%]
- * @cssproperty {pixel} [--c2-table__resizer__hover--line-width=2px]
+ * @cssproperty {pixel} [--c2-table__resizer__hover--line-width=2px] - Width of the resize line while the pointer is over it or a column is being resized.
  * @cssproperty {color} [--c2-table__resizer__hover--color=rgb(2, 101, 220)]
  *
  * @cssproperty {pixel} [--c2-table__row--height=36px] - Row height; virtualization measures it, so keep it uniform.
@@ -467,7 +467,7 @@ export interface Table {
  * @cssproperty {pixel} [--c2-table__cell__focus--outline-offset=-2px]
  *
  * @cssproperty {color} [--c2-table__cell__dirty--color=rgb(2, 101, 220)] - The corner mark of an edited cell.
- * @cssproperty {pixel} [--c2-table__cell__dirty--size=6px]
+ * @cssproperty {pixel} [--c2-table__cell__dirty--size=6px] - Size of the corner triangle that marks an edited cell.
  * @cssproperty {color} [--c2-table__cell__invalid--background=rgba(220, 38, 38, 0.06)]
  * @cssproperty {box-shadow} [--c2-table__cell__invalid--box-shadow=inset 0 0 0 1px rgb(211, 21, 16)]
  * @cssproperty {color} [--c2-table__editor--background=#ffffff]
@@ -527,7 +527,7 @@ export interface Table {
  * @cssproperty {color} [--c2-table__summary__off-target--color=rgb(211, 21, 16)] - Text of a summary that misses its `summary-target`.
  * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
  *
- * @cssproperty {pixel} [--c2-table__group-toggle--size=16px]
+ * @cssproperty {pixel} [--c2-table__group-toggle--size=16px] - Width and height of the group toggle button.
  * @cssproperty {color} [--c2-table__group-toggle--color=#71717a]
  * @cssproperty {time} [--c2-table__group-toggle--transition-duration=150ms] - Chevron turn when a group opens or closes; respects reduced motion.
  *

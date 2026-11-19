@@ -86,12 +86,12 @@ export interface NavigationMenu {
  * @cssproperty {border} --c2-navigation-menu--border-left
  * @cssproperty {box-shadow} --c2-navigation-menu--box-shadow
  *
- * @cssproperty {pixel} [--c2-navigation-menu__mobile-trigger--size=40px]
+ * @cssproperty {pixel} [--c2-navigation-menu__mobile-trigger--size=40px] - Width and height of the mobile trigger button.
  * @cssproperty {color} [--c2-navigation-menu__mobile-trigger--color=#18181b]
  * @cssproperty {color} [--c2-navigation-menu__mobile-trigger--background=transparent]
  * @cssproperty {border} [--c2-navigation-menu__mobile-trigger--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-navigation-menu__mobile-trigger--border-radius=8px]
- * @cssproperty {pixel} [--c2-navigation-menu__mobile-trigger__icon--size=20px]
+ * @cssproperty {pixel} [--c2-navigation-menu__mobile-trigger__icon--size=20px] - Width and height of the mobile trigger icon.
  * @cssproperty {color} [--c2-navigation-menu__mobile-trigger__hover--background=#f4f4f5]
  * @cssproperty {color} --c2-navigation-menu__mobile-trigger__hover--color
  * @cssproperty {outline} [--c2-navigation-menu__mobile-trigger__focus--outline=2px solid rgba(2, 101, 220, 0.4)]

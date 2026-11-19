@@ -49,7 +49,7 @@ import styles from './link-button.scss?inline'
  *
  * @cssproperty {opacity} [--c2-link-button__container__disabled--opacity=0.38]
  *
- * @cssproperty {pixel} [--c2-link-button__icon--size=16px]
+ * @cssproperty {pixel} [--c2-link-button__icon--size=16px] - Width and height of the icon, also given to a slotted c2 icon.
  * @cssproperty {color} [--c2-link-button__icon--color=currentColor]
  */
 @customElement('c2-link-button')

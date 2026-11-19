@@ -183,7 +183,7 @@ const BUILT_IN_ICONS: Record<string, TemplateResult> = { system: MONITOR_ICON, l
  * @cssproperty {color} [--c2-theme-select__menu-item__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-theme-select__menu-item__selected--color=rgb(2, 101, 220)]
  * @cssproperty {color} --c2-theme-select__menu-item__selected--background - Fill of the selected row; transparent by default.
- * @cssproperty {pixel} [--c2-theme-select__check--size=14px]
+ * @cssproperty {pixel} [--c2-theme-select__check--size=14px] - Width and height of the check mark beside the selected row.
  * @cssproperty {color} --c2-theme-select__check--color - Falls back to the selected row's colour.
  *
  * @cssproperty {time} [--c2-theme-select--transition-duration=150ms] - Icon cross-fade and trigger colour change.

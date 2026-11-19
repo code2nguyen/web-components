@@ -108,7 +108,7 @@ const loadFieldsModule = () =>
  *
  * @cssproperty {pixel} [--c2-confirm-dialog--width=min(420px, calc(100vw - 32px))] - Sets the inner modal's width.
  * @cssproperty {pixel} [--c2-confirm-dialog__heading--gap=12px] - Space between the icon and the heading.
- * @cssproperty {pixel} [--c2-confirm-dialog__icon--size=24px]
+ * @cssproperty {pixel} [--c2-confirm-dialog__icon--size=24px] - Width and height of the icon.
  * @cssproperty {color} [--c2-confirm-dialog__icon--color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-confirm-dialog__icon__destructive--color=#dc2626]
  * @cssproperty {color} [--c2-confirm-dialog__message--color=#71717a]
