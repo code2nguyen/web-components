@@ -8,6 +8,7 @@
  *
  * Pure functions over a `Sources` object, so the unit tests can stub the file system.
  */
+import { readFileSync } from 'node:fs'
 import { searchComponents } from '../../src/search.ts'
 import { validateMarkup } from '../../src/lib/validate.ts'
 import { COMPONENT_MAX_CHARS, COMPONENT_SECTIONS, renderComponentFitted } from '../../src/render.ts'
@@ -95,6 +96,19 @@ function check(id: string, label: string, weight: number, score: number, detail?
  * A slot the author never fills by hand in a page: assigned by the component, kept for compatibility, or server-rendered
  * content hidden once the element upgrades. Its description tells an agent all it needs; a gallery card cannot show it.
  */
+/**
+ * Standard CSS property names, from the `mdn-data` the CSS tooling installs. Without it every variable counts as one
+ * that needs a description.
+ */
+const STANDARD_PROPERTIES: Set<string> = (() => {
+  try {
+    const file = new URL('../../../../../node_modules/mdn-data/css/properties.json', import.meta.url)
+    return new Set(Object.keys(JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>))
+  } catch {
+    return new Set()
+  }
+})()
+
 const UNWRITTEN = /no `slot` attribute needed|retained for compatibility|server-rendered/i
 
 /** `c2-*` tags written in an example. */
@@ -280,12 +294,13 @@ function api(c: ComponentEntry): Check[] {
       (s) => described(s.description),
       (s) => s.name || '(default)',
     ),
-    // A variable's name already says its part, state and property (`__header__hover--color`): a description adds less.
+    // A variable named after a CSS property says what it sets (`__header__hover--background-color`), and get_component
+    // groups it by part and state: only a name that is not one (`--size`, `--token-keyword`, `--visible-rows`) needs words.
     share(
       'css-described',
-      'CSS variables described',
+      'CSS variables whose name is not a CSS property are described',
       0.75,
-      css,
+      css.filter((p) => !STANDARD_PROPERTIES.has(p.property)),
       (p) => described(p.description),
       (p) => p.name,
     ),
