@@ -60,7 +60,7 @@ export type SpcRule = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
  */
 export const SPC_RULES: Readonly<Record<SpcRule, string>> = {
   1: 'One point beyond a control limit',
-  2: 'A run of points on one side of the centre line (nine, or `sameSideRun`)',
+  2: 'A run of points on one side of the centre line (nine by default)',
   3: 'Six points in a row steadily increasing or decreasing',
   4: 'Fourteen points in a row alternating up and down',
   5: 'Two of three points in zone A or beyond, on one side',
