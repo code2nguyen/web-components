@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -74,10 +74,12 @@ export class Stat extends LitElement {
         ></span>
         <div class="content">
           <div class="value-row">
-            <div class="value" part="value"><slot name="value">${this.value ?? html`<span class="placeholder">--</span>`}</slot></div>
+            <div class="value" part="value">
+              <slot name="value">${this.value == null ? html`<span class="placeholder">--</span>` : this.value === '' ? nothing : this.value}</slot>
+            </div>
             <div class="trend" part="trend"><slot name="trend"></slot></div>
           </div>
-          <div class="label" part="label"><slot name="label">${this.label}</slot></div>
+          <div class="label" part="label"><slot name="label">${this.label || nothing}</slot></div>
           <div class="description" part="description" ?hidden=${!this.slotPresence.has('description')}>
             <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </div>

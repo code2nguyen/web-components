@@ -240,7 +240,7 @@ export class Textarea extends LitElement {
       ></textarea>
       <div id="supporting-text" part="supporting-text" class="supporting-text" ?hidden=${!supporting}>
         <span class="message">
-          <slot name="supporting-text" ?hidden=${showError} @slotchange=${this.slotPresence.handleSlotChange}>${this.help}</slot>
+          <slot name="supporting-text" ?hidden=${showError} @slotchange=${this.slotPresence.handleSlotChange}>${this.help || nothing}</slot>
           ${showError ? html`<span role="alert">${this.errorText}</span>` : nothing}
         </span>
         ${this.maxLength >= 0 ? html`<span class="counter">${this.value.length} / ${this.maxLength}</span>` : nothing}

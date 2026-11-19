@@ -618,7 +618,7 @@ export class ImportMapper extends LitElement {
   }
 
   private renderState(name: 'empty' | 'loading' | 'error', text: string) {
-    return html`<div class="state state--${name}" part="state"><slot name=${name}>${text}</slot></div>`
+    return html`<div class="state state--${name}" part="state"><slot name=${name}>${text || nothing}</slot></div>`
   }
 
   private renderSummary() {

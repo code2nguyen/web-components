@@ -726,3 +726,50 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(products).toHaveHostAria('role', 'listitem')
   expect(await hostSemantics()).toEqual(['c2-navigation-menu[aria-label]'])
 })
+
+test('hovering the open item again does not restart the grace that keeps a click from closing it', async ({ page, renderScenario }) => {
+  await renderScenario(bar())
+  const trigger = page.getByRole('button', { name: 'Products' })
+  const panel = page.getByRole('group', { name: 'Products' })
+
+  await trigger.click()
+  await expect(panel).toBeVisible()
+  // Well past the grace of that first click: the panel is simply open now.
+  await page.waitForTimeout(300)
+  // The pointer crossing into the trigger's own content fires `pointerover` again on the open item.
+  await trigger.dispatchEvent('pointerover', { pointerType: 'mouse', bubbles: true, composed: true })
+  await trigger.click()
+  await expect(panel).not.toBeVisible()
+})
+
+test('a click that opens the panel after a hover-open has closed is not taken for that hover', async ({ page, renderScenario }) => {
+  await renderScenario(bar())
+  const trigger = page.getByRole('button', { name: 'Products' })
+  const panel = page.getByRole('group', { name: 'Products' })
+  const host = page.locator('c2-navigation-menu')
+
+  // Hover opens the panel, and leaving the bar closes it again, all within the click grace.
+  await trigger.hover()
+  await expect(panel).toBeVisible()
+  await page.mouse.move(0, 0)
+  await expect(host).toHaveJSProperty('value', '')
+  // The click opens it, and the next one, still within the grace of that old hover, closes it.
+  await trigger.click()
+  await expect(panel).toBeVisible()
+  await trigger.click()
+  await expect(panel).not.toBeVisible()
+})
+
+test('a click in the first moments of the page is not taken for the second half of a hover-open', async ({ page, renderScenario }) => {
+  // `performance.now()` starts at 0 with the page: frozen at 100 ms, every click lands inside the hover grace of a
+  // panel that hover never opened (the open delay is far away).
+  await page.addInitScript(() => (performance.now = () => 100))
+  await renderScenario(bar('open-delay="100000" close-delay="0"'))
+  const trigger = page.getByRole('button', { name: 'Products' })
+  const panel = page.getByRole('group', { name: 'Products' })
+
+  await trigger.click()
+  await expect(panel).toBeVisible()
+  await trigger.click()
+  await expect(panel).not.toBeVisible()
+})

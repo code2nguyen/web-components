@@ -635,7 +635,7 @@ export class FormField extends LitElement {
     const hidden = !error && !warning && !hasHint && !counter
     return html`<div class="supporting-text" part="supporting-text" ?hidden=${hidden}>
       ${message}
-      <span class="message hint" ?hidden=${!!error || !!warning}><slot name="hint" @slotchange=${this.handleSlotChange}>${this.hint}</slot></span>
+      <span class="message hint" ?hidden=${!!error || !!warning}><slot name="hint" @slotchange=${this.handleSlotChange}>${this.hint || nothing}</slot></span>
       ${
         counter
           ? html`<span class="counter ${counter.near ? 'near' : ''}" part="counter" aria-hidden="true">${counter.length} / ${counter.max}</span>`
@@ -651,7 +651,7 @@ export class FormField extends LitElement {
     return html`<div class="field">
       <div class="label-row" part="label-row" ?hidden=${!showLabelRow}>
         <span class="label" part="label" @click=${this.focusControl}
-          ><slot name="label" @slotchange=${this.handleSlotChange}>${this.label}</slot>${hasLabel ? this.renderMarker() : nothing}</span
+          ><slot name="label" @slotchange=${this.handleSlotChange}>${this.label || nothing}</slot>${hasLabel ? this.renderMarker() : nothing}</span
         >
         <span class="label-action"><slot name="label-action" @slotchange=${this.handleSlotChange}></slot></span>
       </div>

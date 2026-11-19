@@ -176,6 +176,12 @@ export class TreeItem extends LitElement {
   /** Cached so the accessible name is not recomputed from slotted nodes on every sync. */
   #resolvedLabel = ''
 
+  /**
+   * Watches the label slot's author content: text rewritten in place (a `renderLabel` result after `items` change,
+   * an app updating a slotted span) fires no `slotchange`, and the accessible name must follow it.
+   */
+  #labelObserver?: MutationObserver
+
   /** The row as a {@link TreeNode}, so both authoring modes produce the same event details and renderer input. */
   get node(): TreeNode {
     // `children` is deliberately left off: synthesizing it would walk the whole subtree on every dispatch, and
@@ -203,10 +209,12 @@ export class TreeItem extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.#notify()
+    if (this.hasUpdated) this.#readLabelSlot()
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.#labelObserver?.disconnect()
     this.#notify()
   }
 
@@ -251,11 +259,28 @@ export class TreeItem extends LitElement {
   }
 
   #readLabelSlot() {
-    const assigned = this.labelSlot?.assignedNodes({ flatten: true }) ?? []
-    this.#resolvedLabel = assigned
+    // Author content only: `flatten` would also return the slot's fallback text, which Lit updates in place
+    // without a `slotchange`, so a later `label` change would never reach the accessible name. A forwarded
+    // `<slot>` is flattened as the browser draws it, its own fallback included; the observer below follows that text.
+    const assigned = (this.labelSlot?.assignedNodes() ?? []).flatMap((node) =>
+      node instanceof HTMLSlotElement ? node.assignedNodes({ flatten: true }) : [node],
+    )
+    const resolved = assigned
       .map((node) => node.textContent ?? '')
       .join('')
       .trim()
+    if (resolved !== this.#resolvedLabel) {
+      this.#resolvedLabel = resolved
+      // The checkbox's `aria-label` is rendered from it. This runs from `slotchange` and the observer, often right after
+      // an update, so write the label on the checkbox (in this shadow root) rather than schedule a second render; the
+      // next render binds the same value.
+      this.renderRoot.querySelector('c2-checkbox.checkbox')?.setAttribute('aria-label', resolved || this.label || this.value)
+    }
+    this.#labelObserver?.disconnect()
+    if (assigned.length > 0) {
+      this.#labelObserver ??= new MutationObserver(() => this.#readLabelSlot())
+      for (const node of assigned) this.#labelObserver.observe(node, { characterData: true, childList: true, subtree: true })
+    }
     this.#syncAria()
   }
 

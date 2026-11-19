@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -163,7 +163,7 @@ export class ComparisonBar extends LitElement {
     return html`
       <div class="c2-comparison-bar" role="img" aria-label=${name}>
         <span class="c2-comparison-bar-value is-start" part="start-value" aria-hidden="true" ?hidden=${!shows('start')}>
-          <slot name="start" @slotchange=${this.slotPresence.handleSlotChange}>${texts.start}</slot>
+          <slot name="start" @slotchange=${this.slotPresence.handleSlotChange}>${texts.start || nothing}</slot>
         </span>
         <div class="c2-comparison-bar-track" part="track">
           ${this.segment('start', start)} ${middle === undefined ? '' : this.segment('middle', middle)} ${this.segment('end', end)}
@@ -174,13 +174,13 @@ export class ComparisonBar extends LitElement {
             : html`<div class="c2-comparison-bar-track c2-comparison-bar-legend" aria-hidden="true" ?hidden=${!showMiddle}>
                 <div class=${classMap({ 'c2-comparison-bar-cell': true, 'is-empty': start === 0 })} style=${styleMap({ flexGrow: String(start) })}></div>
                 <span class="c2-comparison-bar-value is-middle" part="middle-value" style=${styleMap({ flexGrow: String(middle) })}>
-                  <slot name="middle" @slotchange=${this.slotPresence.handleSlotChange}>${texts.middle}</slot>
+                  <slot name="middle" @slotchange=${this.slotPresence.handleSlotChange}>${texts.middle || nothing}</slot>
                 </span>
                 <div class=${classMap({ 'c2-comparison-bar-cell': true, 'is-empty': end === 0 })} style=${styleMap({ flexGrow: String(end) })}></div>
               </div>`
         }
         <span class="c2-comparison-bar-value is-end" part="end-value" aria-hidden="true" ?hidden=${!shows('end')}>
-          <slot name="end" @slotchange=${this.slotPresence.handleSlotChange}>${texts.end}</slot>
+          <slot name="end" @slotchange=${this.slotPresence.handleSlotChange}>${texts.end || nothing}</slot>
         </span>
       </div>
     `

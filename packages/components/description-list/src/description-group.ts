@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -97,7 +97,7 @@ export class DescriptionGroup extends LitElement {
 
   override render() {
     const level = Math.min(6, Math.max(2, Math.round(this.level) || 3))
-    const label = html`<slot name="label">${this.label}</slot>`
+    const label = html`<slot name="label">${this.label || nothing}</slot>`
     const grid = html`<div class=${classMap({ grid: true, 'is-single': this.valueColumns })} part="grid" role="list"><slot></slot></div>`
     // The heading row stays outside the disclosure: a heading inside a button loses its role, and an action inside it
     // would be a button within a button.

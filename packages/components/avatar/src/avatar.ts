@@ -307,7 +307,7 @@ export class Avatar extends LitElement {
                 loading="lazy"
                 @error=${this.handleImageError}
               />`
-            : html`<slot>${this.initial}</slot>`
+            : html`<slot>${this.initial || nothing}</slot>`
         }
       </div>
     `

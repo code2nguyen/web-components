@@ -433,7 +433,7 @@ export class MaskInput extends LitElement {
     const showError = this.error && !this.effectiveDisabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     return html`<div class="supporting-text ${showError ? 'error' : ''}" id="help" ?hidden=${!message && !this.slotPresence.has('supporting-text')}>
-      <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
+      <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message || nothing}</slot>
     </div>`
   }
 

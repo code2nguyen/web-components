@@ -1,6 +1,10 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
 const en = {
+  /** Shown when the list has no items and `empty-message` is not set. */
+  empty: 'No items',
+  /** Shown when a search matches nothing and `no-results-message` is not set. */
+  noResults: 'No matches',
   /** Shown under the last item while the next page loads (`has-more`). */
   loadingMore: 'Loading more…',
   /** Shown under the last item when loading the next page failed and `load-more-error` holds no message of its own. */

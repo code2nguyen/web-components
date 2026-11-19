@@ -51,7 +51,7 @@ export class CommandGroup extends LitElement {
 
   override render() {
     if (this.filtered) return nothing
-    return html`<div class="heading" part="heading" aria-hidden="true"><slot name="heading">${this.heading}</slot></div>
+    return html`<div class="heading" part="heading" aria-hidden="true"><slot name="heading">${this.heading || nothing}</slot></div>
       <div class="items"><slot></slot></div>`
   }
 }

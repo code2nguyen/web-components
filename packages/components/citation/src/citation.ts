@@ -130,9 +130,9 @@ export class Citation extends LitElement {
           target=${this.target || nothing}
           rel=${opensElsewhere(this.target) ? 'noopener noreferrer' : nothing}
           aria-label=${name}
-          ><slot>${text}</slot></a
+          ><slot>${text || nothing}</slot></a
         >`
-      : html`<button slot="trigger" type="button" class=${markerClass} part="marker" aria-label=${name}><slot>${text}</slot></button>`
+      : html`<button slot="trigger" type="button" class=${markerClass} part="marker" aria-label=${name}><slot>${text || nothing}</slot></button>`
     return html`<c2-hover-card class="card" part="card" placement=${this.placement} open-delay=${String(this.openDelay)}>
       ${marker}
       <div class="preview">

@@ -1304,3 +1304,10 @@ test('a chart tooltip can be created with createElement, which rejects an elemen
   })
   expect(result).toEqual({ attributes: [], display: 'none' })
 })
+
+test('the no-data and loading texts follow the page language', async ({ page, scenario }) => {
+  await scenario('states-fr')
+  const state = (id: string) => page.locator(`#${id}`).evaluate((element) => element.shadowRoot?.querySelector('.state')?.textContent?.trim())
+  await expect.poll(() => state('chart')).toBe('Aucune donnée')
+  await expect.poll(() => state('loading-chart')).toBe('Chargement…')
+})

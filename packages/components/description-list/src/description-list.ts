@@ -214,7 +214,7 @@ export class DescriptionList extends LitElement {
     // A plain header repeats what every value already announces as its caption, so only buttons are exposed.
     return html`
       <div class=${classMap({ 'value-header': true, 'is-stacked': this.valuesStacked })} part="value-header" aria-hidden=${selectable ? nothing : 'true'}>
-        <div class="value-header__label" aria-hidden="true">${this.labelHeading}</div>
+        <div class="value-header__label" aria-hidden="true">${this.labelHeading || nothing}</div>
         <div class="value-header__values" style=${styleMap({ '--_count': String(labels.length) })}>
           ${labels.map((label, index) => {
             const selected = this.selectedColumn === index

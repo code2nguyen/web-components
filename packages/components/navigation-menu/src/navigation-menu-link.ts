@@ -97,7 +97,7 @@ export class NavigationMenuLink extends LitElement {
     >
       <slot name="prefix-icon"></slot>
       <span class="content">
-        <span class="title"><slot>${this.label ?? nothing}</slot></span>
+        <span class="title"><slot>${this.label || nothing}</slot></span>
         <span class="description" ?hidden=${!this.slotPresence.has('description')}>
           <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </span>

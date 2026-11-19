@@ -468,7 +468,7 @@ export class CodeEditor extends LitElement {
         part="container"
       >
         <label class="c2-code-editor__label" part="label" ?hidden=${!this.label && !this.slotPresence.has('label')}>
-          <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
+          <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot>
         </label>
         <!-- Always in the template, so switching engine state never recreates the node CodeMirror owns. -->
         <div
@@ -481,7 +481,7 @@ export class CodeEditor extends LitElement {
         ${this.engineState === 'basic' ? this.renderFallback() : nothing}
         ${this.engineState === 'pending' ? html`<pre class="c2-code-editor__pending" aria-hidden="true">${this.value}</pre>` : nothing}
         <div class="c2-code-editor__supporting-text" part="supporting-text" ?hidden=${!supporting}>
-          ${showError ? html`<span role="alert">${this.errorText}</span>` : html`<slot name="supporting-text">${this.help}</slot>`}
+          ${showError ? html`<span role="alert">${this.errorText || nothing}</span>` : html`<slot name="supporting-text">${this.help || nothing}</slot>`}
         </div>
       </div>
       ${this.field.renderDescription()}

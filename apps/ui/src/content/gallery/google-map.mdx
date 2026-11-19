@@ -4,11 +4,15 @@ description: 'Map frames, pin colours and route lines styled through their CSS v
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 
 import { GoogleMap } from '@c2n/components/google-map'
 import { GoogleMapMarker } from '@c2n/components/google-map/google-map-marker'
 import { GoogleMapRoute } from '@c2n/components/google-map/google-map-route'
 import { GoogleStreetView } from '@c2n/components/google-map/google-street-view'
+import GoogleMapExamplesRuntime from '../../components/GoogleMapExamplesRuntime.astro'
+
+<GoogleMapExamplesRuntime />
 
 ## Maps
 
@@ -73,4 +77,42 @@ their colours are read from `--c2-google-map-marker__*` and `--c2-google-map-rou
 </c2-google-map>
 ```
 
+```html tag=MdxCodeBlock,label=Street View in French
+<style>
+  .map-fr {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    --c2-google-map__container--height: 180px;
+    --c2-google-street-view__container--height: 180px;
+  }
+</style>
+<div class="map-fr" lang="fr">
+  <c2-google-map id="paris-map" center="48.8584,2.2945" zoom="15"></c2-google-map>
+  <c2-google-street-view for="paris-map"></c2-google-street-view>
+</div>
+```
+
 </GalleryGrid>
+
+The notices shown in place of a map (loading, a missing key, no imagery, the pegman hint) are message tokens. An app
+translates them once with `addTranslations`; each element shows the language of its nearest `lang`. The `map-error`
+event keeps the English text for the developer.
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'google-map': {
+      loadingMap: 'Chargement de la carte…',
+      loadingStreetView: 'Chargement de Street View…',
+      missingKey: 'Définissez une clé API Google Maps pour afficher cette carte.',
+      loadFailed: 'La carte n’a pas pu être chargée.',
+      authFailed: 'Google Maps a refusé la clé API. Vérifiez ses restrictions de référent HTTP et d’API.',
+      noImagery: 'Street View n’a pas d’images près de ce lieu.',
+      pegman: 'Déposez le bonhomme sur la carte pour regarder autour.',
+    },
+  },
+})
+```

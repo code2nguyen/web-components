@@ -149,7 +149,7 @@ export class Banner extends LitElement {
       ${this.noIcon ? nothing : html`<span class="icon" part="icon" aria-hidden="true"><slot name="icon">${this.renderIcon()}</slot></span>`}
       <div class="content" part="content" role=${role}>
         ${this.heading ? html`<span class="heading" part="heading">${this.heading}</span>` : nothing}
-        <span class="message" part="message"><slot>${this.message}</slot></span>
+        <span class="message" part="message"><slot>${this.message || nothing}</slot></span>
       </div>
       <div class="actions" part="actions" ?hidden=${!this.hasActions}>
         <slot name="actions" @slotchange=${(event: Event) => (this.hasActions = (event.target as HTMLSlotElement).assignedNodes().length > 0)}></slot>

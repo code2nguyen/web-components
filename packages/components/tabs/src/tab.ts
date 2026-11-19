@@ -134,7 +134,7 @@ export class Tab extends LitElement {
   }
 
   override render() {
-    const label = html`<slot>${this.label}</slot>`
+    const label = html`<slot>${this.label || nothing}</slot>`
     return this.href ? html`<a part="link" href=${this.href} aria-current=${this.current ? 'page' : nothing}>${label}</a>` : label
   }
 }

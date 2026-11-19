@@ -93,10 +93,20 @@ export interface DropZoneOptions {
  * ```
  *
  * Only drags that carry files light the zone up; dragged text and links pass through. Pasting needs the zone to have
- * focus, and works where the browser fires `paste` on a focused element that is not editable (Chromium, Firefox);
- * elsewhere the file picker remains the keyboard path.
+ * focus and `handleKeydown` bound. Chromium and Firefox fire `paste` on a focused element that is not editable; Safari
+ * fires none, so a ⌘V/Ctrl+V that no `paste` event follows reads the clipboard with `navigator.clipboard.read()`
+ * (the browser asks the visitor to allow it). Where neither works, the file picker remains the keyboard path.
  */
 export class DropZoneController implements ReactiveController {
+  /** A paste shortcut was pressed and no `paste` event has followed it yet. */
+  private pastePending = false
+  /** How many `paste` events the page has seen since a shortcut armed the fallback: a later one makes its read moot. */
+  private pastes = 0
+  /** The window the fallback listens on for the browser's own `paste`, while it waits. */
+  private pasteOwner?: Window
+  /** A clipboard read is running (Safari may be showing its Paste callout): another shortcut waits for it. */
+  private reading = false
+  private pasteTimer?: ReturnType<typeof setTimeout>
   /** Whether files are being dragged over the zone. */
   over = false
   /**
@@ -132,6 +142,13 @@ export class DropZoneController implements ReactiveController {
 
   hostDisconnected(): void {
     this.unlisten()
+    // A paste shortcut still waiting for its clipboard fallback belongs to the zone that left, and a read already
+    // running is dropped: the zone no longer hears the `paste` that would make it moot.
+    this.pastes += 1
+    this.reading = false
+    this.pastePending = false
+    clearTimeout(this.pasteTimer)
+    this.stopWatchingPastes()
     clearTimeout(this.announceTimer)
     this.depth = 0
     this.over = false
@@ -151,7 +168,8 @@ export class DropZoneController implements ReactiveController {
     target.addEventListener('dragleave', this.handleDragLeave as EventListener)
     target.addEventListener('drop', this.handleDrop as EventListener)
     target.addEventListener('paste', this.handlePaste as EventListener)
-    if (this.options.onActivate) target.addEventListener('keydown', this.handleKeydown as EventListener)
+    // The keyboard path to the picker, and the paste shortcut's clipboard fallback.
+    if (this.options.onActivate || this.options.paste) target.addEventListener('keydown', this.handleKeydown as EventListener)
     this.listening = target
   }
 
@@ -230,6 +248,8 @@ export class DropZoneController implements ReactiveController {
   }
 
   readonly handlePaste = (event: ClipboardEvent): void => {
+    // The browser fired its own `paste`: the clipboard fallback of the shortcut is not needed.
+    this.handleAnyPaste()
     if (this.disabled || !(this.options.paste?.() ?? false)) return
     const files = [...(event.clipboardData?.files ?? [])]
     // Text pasted here is none of the zone's business.
@@ -239,13 +259,103 @@ export class DropZoneController implements ReactiveController {
   }
 
   readonly handleKeydown = (event: KeyboardEvent): void => {
-    if (!this.options.onActivate || this.disabled || isComposingKey(event)) return
+    if (this.handlePasteKeydown(event) || this.disabled || isComposingKey(event)) return
+    if (!this.options.onActivate) return
     if (event.key !== 'Enter' && event.key !== ' ') return
     // A key pressed in a control inside the zone (a link in a slotted prompt) belongs to that control.
     // The path's first node, not `target`, which a shadow root retargets to its host.
     if (event.currentTarget !== null && event.composedPath()[0] !== event.currentTarget) return
     event.preventDefault()
     this.options.onActivate()
+  }
+
+  /**
+   * The paste shortcut alone, for a zone whose Enter and Space already open the picker natively (a `<button>`), where
+   * `handleKeydown` would activate it twice. Returns whether the key was the shortcut and was taken.
+   *
+   * Safari fires no `paste` on a focused element that is not editable. The browser dispatches its own `paste` right
+   * after this keydown, so the fallback waits one task: if none came, it reads the clipboard while the keystroke still
+   * counts as the visitor's gesture.
+   */
+  readonly handlePasteKeydown = (event: KeyboardEvent): boolean => {
+    if (this.disabled || isComposingKey(event) || !isPasteShortcut(event) || !(this.options.paste?.() ?? false)) return false
+    // Only WebKit fires no `paste` here. Elsewhere the browser's own `paste` may come late (Chrome on macOS sends ⌘V
+    // through its Edit menu), and a clipboard read would both prompt the visitor and add the files a second time.
+    if (!firesNoPasteOnFocusedElement()) return false
+    // A key pressed in a control inside the zone (a link in a slotted prompt) belongs to that control.
+    if (event.currentTarget !== null && event.composedPath()[0] !== event.currentTarget) return false
+    // A held ⌘V repeats, and a second press may come while Safari asks to paste: one read is enough.
+    if (event.repeat || this.reading) return true
+    this.pastePending = true
+    // The browser may send its `paste` elsewhere (to a selection on the page) or a listener may stop it before it
+    // reaches the zone: any `paste` anywhere, until the read is done, means the browser handled the shortcut.
+    this.stopWatchingPastes()
+    // On the window, in the capture phase, so a listener that stops the `paste` further on cannot hide it. One the app
+    // registered on the window before this one still can: an app that handles paste itself leaves `paste` off.
+    this.pasteOwner = (event.currentTarget as Node | null)?.ownerDocument?.defaultView ?? globalThis.window
+    this.pasteOwner?.addEventListener('paste', this.handleAnyPaste, { capture: true })
+    const seen = this.pastes
+    clearTimeout(this.pasteTimer)
+    this.pasteTimer = setTimeout(() => {
+      // An app that took over the shortcut (cancelled the keydown) also cancelled the browser's paste.
+      if (!this.pastePending || event.defaultPrevented) {
+        this.pastePending = false
+        this.stopWatchingPastes()
+        return
+      }
+      this.pastePending = false
+      this.reading = true
+      void this.readClipboard(seen).finally(() => {
+        this.reading = false
+        this.stopWatchingPastes()
+      })
+    })
+    return true
+  }
+
+  private readonly handleAnyPaste = (): void => {
+    this.pastePending = false
+    this.pastes += 1
+  }
+
+  private stopWatchingPastes(): void {
+    this.pasteOwner?.removeEventListener('paste', this.handleAnyPaste, { capture: true })
+    this.pasteOwner = undefined
+  }
+
+  /**
+   * Reads the clipboard (Safari's ⌘V path), each item once, in its first type that is not text. Safari exposes copied
+   * images and screenshots this way, not a file copied in Finder, which keeps the file picker as its path.
+   */
+  private async readClipboard(seen: number): Promise<void> {
+    const clipboard = globalThis.navigator?.clipboard
+    if (typeof clipboard?.read !== 'function') return
+    const files: File[] = []
+    try {
+      for (const item of await clipboard.read()) {
+        const type = item.types.find((candidate) => !candidate.startsWith('text/'))
+        if (!type) continue
+        try {
+          // A file copied in Finder comes with its `file:` URL and a picture of its icon: that picture is not the file.
+          // An image copied from a web page carries its `https:` URL, and is taken.
+          if (item.types.includes('text/uri-list') && (await copiedFileUrl(item))) continue
+          const blob = await item.getType(type)
+          files.push(new File([blob], `pasted.${extensionOf(type)}`, { type }))
+        } catch {
+          // One unreadable item does not lose the others.
+        }
+      }
+    } catch {
+      // The visitor refused, or nothing readable was there.
+      return
+    }
+    // The visitor may have answered the browser's prompt after the zone left the page or turned paste off, and a
+    // `paste` that arrived meanwhile already brought these files.
+    if (this.pastes !== seen || !this.host.isConnected || this.disabled || !(this.options.paste?.() ?? false)) return
+    // Several items get numbered names, so code that keys on the name does not take one for another.
+    const named =
+      files.length > 1 ? files.map((file, index) => new File([file], file.name.replace(/^pasted\./, `pasted-${index + 1}.`), { type: file.type })) : files
+    this.receive(named, 'paste')
   }
 
   /** Runs the files of a drop or paste through the rules and the host, then announces the result. */
@@ -272,6 +382,46 @@ export class DropZoneController implements ReactiveController {
       this.host.requestUpdate()
     }, 150)
   }
+}
+
+/** Whether a clipboard item is a file copied in the file manager: its `text/uri-list` names `file:` URLs only, or none. */
+async function copiedFileUrl(item: ClipboardItem): Promise<boolean> {
+  try {
+    const uris = (await (await item.getType('text/uri-list')).text())
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'))
+    return uris.every((uri) => uri.toLowerCase().startsWith('file:'))
+  } catch {
+    return true
+  }
+}
+
+/** The usual file extension of a MIME type, so an `accept` written as `.jpg` or `.svg` takes the pasted file. */
+function extensionOf(type: string): string {
+  const subtype = type.split('/')[1]?.split(/[+;]/)[0]?.toLowerCase() || 'bin'
+  return ({ jpeg: 'jpg', tiff: 'tif', 'x-icon': 'ico' } as Record<string, string>)[subtype] ?? subtype
+}
+
+/** WebKit (Safari, and every browser on iOS) fires no `paste` on a focused element that is not editable. */
+function firesNoPasteOnFocusedElement(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const agent = navigator.userAgent
+  return /AppleWebKit/.test(agent) && !/Chrome|Chromium|Edg\//.test(agent)
+}
+
+const isApple = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)
+
+/**
+ * The platform's paste shortcut with no other modifier: ⌘V on Apple platforms, Ctrl+V elsewhere. Matched on the
+ * physical key as well as the character, so a non-Latin layout (where `key` is 'м') still counts.
+ */
+function isPasteShortcut(event: KeyboardEvent): boolean {
+  const command = isApple ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey
+  // The physical key only stands in when the layout types no Latin letter there: on Dvorak the V key types `k`, and ⌘K
+  // there is another shortcut.
+  const v = event.key.toLowerCase() === 'v' || (!/^[a-z]$/i.test(event.key) && event.code === 'KeyV')
+  return command && !event.altKey && !event.shiftKey && v
 }
 
 /** Whether a drag carries files: `types` lists `Files` for those, during the drag as on the drop. */

@@ -370,7 +370,7 @@ export class Popconfirm extends LitElement {
           </span>
           <div class="text">
             <div class="heading" part="heading" id="heading" ?hidden=${!labelled}>
-              <slot name="heading" @slotchange=${this.handleHeadingSlotChange}>${this.heading}</slot>
+              <slot name="heading" @slotchange=${this.handleHeadingSlotChange}>${this.heading || nothing}</slot>
             </div>
             <div class="description" part="description" id="description" ?hidden=${!this.hasDescription}>
               <slot @slotchange=${this.handleDescriptionSlotChange}></slot>

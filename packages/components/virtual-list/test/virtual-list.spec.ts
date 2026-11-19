@@ -379,3 +379,8 @@ test('a part on what renderItem returns is reachable as c2-virtual-list::part()'
   await expect(badges.last()).toHaveCSS('color', 'rgb(200, 0, 0)')
   await expect(badges.first()).not.toHaveCSS('color', 'rgb(200, 0, 0)')
 })
+
+test('the empty and no-results messages follow the page language', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-virtual-list aria-label="Personnes" items="[]"></c2-virtual-list></div>`)
+  await expect(page.locator('c2-virtual-list')).toContainText('Aucun élément')
+})

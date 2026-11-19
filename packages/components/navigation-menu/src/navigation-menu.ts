@@ -185,8 +185,10 @@ export class NavigationMenu extends LitElement {
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
 
-  /** When hover last opened a panel, so the click that usually follows the pointer does not close it again. */
-  private hoverOpenedAt = 0
+  /**
+   * When hover last opened a panel, so the click that usually follows the pointer does not close it again; `-Infinity`
+   * when it did not. Not 0: `performance.now()` starts at 0 with the page. */
+  private hoverOpenedAt = -Infinity
 
   /** The item a click just closed: hover leaves it shut until the pointer moves to another item or leaves the bar. */
   private hoverSuppressed?: NavigationMenuItem
@@ -443,6 +445,9 @@ export class NavigationMenu extends LitElement {
 
   private scheduleOpen(item: NavigationMenuItem) {
     this.clearTimers()
+    // Already open: `pointerover` bubbles up from the trigger's own content, and opening it "again" would restart the
+    // grace that keeps a click from closing a panel hover just opened, swallowing the visitor's next deliberate click.
+    if (item.expanded) return
     if (!item.hasPanel || item.disabled) {
       // Moving onto a plain link closes whatever was open, with the same grace period.
       if (this.value) this.scheduleClose()
@@ -510,13 +515,16 @@ export class NavigationMenu extends LitElement {
     if (item.disabled || !item.hasPanel) return
     event.preventDefault()
     if (!item.expanded) {
+      // The click opened it, not hover: a stamp left by an earlier hover-open that has since closed must not make the
+      // next deliberate click look like the second half of a point-and-click.
+      this.hoverOpenedAt = -Infinity
       this.setValue(item.value)
       return
     }
     // A click on the open trigger closes it. The one exception is the click that lands just after hover opened the
     // panel: that visitor pointed and clicked in one motion and meant to open it, so the panel stays.
     const justOpenedByHover = performance.now() - this.hoverOpenedAt < HOVER_CLICK_GRACE
-    this.hoverOpenedAt = 0
+    this.hoverOpenedAt = -Infinity
     if (justOpenedByHover) return
     // The pointer is still on the item, so keep hover from reopening what the click just closed.
     this.hoverSuppressed = item

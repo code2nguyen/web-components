@@ -1066,7 +1066,7 @@ export class FloatingPanel extends LitElement {
               @dblclick=${this.handleDoubleClick}
             >
               <span part="icon" class="icon" ?hidden=${!this.slots.has('icon')}><slot name="icon" @slotchange=${this.slots.handleSlotChange}></slot></span>
-              <span part="title" class="title" id="title"><slot name="title" @slotchange=${this.slots.handleSlotChange}>${this.label}</slot></span>
+              <span part="title" class="title" id="title"><slot name="title" @slotchange=${this.slots.handleSlotChange}>${this.label || nothing}</slot></span>
             </div>
             <div part="actions" class="actions" ?hidden=${docked || !this.slots.has('actions')}>
               <slot name="actions" @slotchange=${this.slots.handleSlotChange}></slot>
