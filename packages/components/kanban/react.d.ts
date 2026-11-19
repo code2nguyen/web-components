@@ -30,6 +30,7 @@ declare module 'react' {
         'column-field'?: Attribute
         'label-field'?: Attribute
         'description-field'?: Attribute
+        'drop-kind'?: Attribute
         items?: Kanban['items'] | string
       }
       'c2-kanban-column': C2Props<KanbanColumn> & {
@@ -43,6 +44,7 @@ declare module 'react' {
         'column-field'?: Attribute
         'label-field'?: Attribute
         'description-field'?: Attribute
+        'drop-kind'?: Attribute
         rows?: MatrixBoard['rows'] | string
         columns?: MatrixBoard['columns'] | string
         cells?: MatrixBoard['cells'] | string

@@ -4,6 +4,8 @@ description: 'Task, support and hiring boards styled through the column and card
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KanbanExamplesRuntime from '../../components/KanbanExamplesRuntime.astro'
 
 import { Kanban } from '@c2n/components/kanban'
 
@@ -148,3 +150,71 @@ the board to reach every column. Give the board a `renderItem` for richer card c
 ```
 
 </GalleryGrid>
+
+## Drops from another board
+
+A board with `drop-kind` takes cards dropped from outside it: another board, a list elsewhere in the page, another
+window. The source writes them with `writeItemPayload` from `@c2n/core/controllers/drop-zone.js` under the same kind;
+the board lights up while they are over it (red for another kind), adds them where they land, fires `item-drop` and
+announces how many it added. Drag a card by its handle to the other board.
+
+<KanbanExamplesRuntime />
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Drag between boards
+<style>
+  .transfer-boards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    --c2-kanban-column--width: 170px;
+    --c2-kanban-column__card--font-size: 13px;
+  }
+</style>
+<div class="transfer-boards">
+  <c2-kanban
+    client:only="lit"
+    editable
+    drop-kind="kanban-card"
+    data-kanban-example="transfer"
+    aria-label="Backlog"
+    items='[{"id":"B-1","column":"backlog","title":"Dark mode for charts"},{"id":"B-2","column":"backlog","title":"Export as PDF"},{"id":"B-3","column":"backlog","title":"Keyboard shortcuts"}]'
+  >
+    <c2-kanban-column column-id="backlog" label="Backlog"></c2-kanban-column>
+  </c2-kanban>
+  <c2-kanban
+    client:only="lit"
+    editable
+    drop-kind="kanban-card"
+    data-kanban-example="transfer"
+    aria-label="Sprint 43"
+    items='[{"id":"S-1","column":"todo","title":"Fix the login redirect"}]'
+  >
+    <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+    <c2-kanban-column column-id="doing" label="In progress"></c2-kanban-column>
+  </c2-kanban>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+
+// The source: a drag handle in each card writes the card under the board's drop-kind.
+backlog.renderItem = ({ item }) => html`
+  <span
+    draggable="true"
+    aria-hidden="true"
+    @dragstart=${(event: DragEvent) => {
+      writeItemPayload(event.dataTransfer!, 'kanban-card', [item])
+      event.dataTransfer!.effectAllowed = 'move'
+    }}
+    @dragend=${(event: DragEvent) => {
+      // The target adds the cards itself and reports a move only when it took them: then the source lets go.
+      if (event.dataTransfer?.dropEffect === 'move') backlog.items = backlog.items.filter((card) => card !== item)
+    }}
+  >⠿</span>
+  ${item.title}`
+```

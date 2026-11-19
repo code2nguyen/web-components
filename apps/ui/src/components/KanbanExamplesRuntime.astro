@@ -1,5 +1,8 @@
 ---
-/** Enhances kanban and matrix board examples whose property-only API (`renderItem`) cannot be expressed as an HTML attribute. */
+/**
+ * Enhances kanban and matrix board examples whose property-only API (`renderItem`, and the drag source of a card moved
+ * between boards) cannot be expressed as an HTML attribute.
+ */
 ---
 
 <script>
@@ -11,6 +14,7 @@
   import '@c2n/components/avatar'
   import '@c2n/components/badge'
   import { addTranslations } from '@c2n/core/localize.js'
+  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
 
   addTranslations({
     fr: {
@@ -30,7 +34,8 @@
         atEnd: '{0} est déjà dans la dernière colonne.',
         readOnly: 'Déplacement annulé : le tableau n’est plus modifiable.',
         itemsChanged: 'Les cartes ont changé. Déplacement annulé.',
-        instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la entre les cases avec les flèches, dans une case avec Début ou Fin ; Espace la pose et Échap annule.',
+        instructions:
+          'Appuyez sur Espace pour prendre une carte. Déplacez-la entre les cases avec les flèches, dans une case avec Début ou Fin ; Espace la pose et Échap annule.',
         axisValue: '{0} : {1}',
         cell: '{0}, {1}',
         namedCell: '{0} ({1}, {2})',
@@ -70,6 +75,32 @@
     })
   }
 
+  /** Boards that trade cards: each card has a handle that drags it out, and each board takes `kanban-card` drops. */
+  function setupTransfer(board: Kanban) {
+    board.renderItem = ({ item }) => html`
+      <span style="display:flex;align-items:center;gap:8px">
+        <span
+          draggable="true"
+          title="Drag to the other board"
+          aria-hidden="true"
+          style="cursor:grab;opacity:0.55;font-size:14px;line-height:1"
+          @pointerdown=${(event: PointerEvent) => event.stopPropagation()}
+          @dragstart=${(event: DragEvent) => {
+            if (!event.dataTransfer) return
+            writeItemPayload(event.dataTransfer, 'kanban-card', [item])
+            event.dataTransfer.effectAllowed = 'move'
+          }}
+          @dragend=${(event: DragEvent) => {
+            // The board it landed on took it (a refused or cancelled drop reports no move): take it out of this one.
+            if (event.dataTransfer?.dropEffect === 'move') board.items = board.items.filter((card) => card !== item)
+          }}
+          >⠿</span
+        >
+        <span>${item.title}</span>
+      </span>
+    `
+  }
+
   interface Person extends KanbanItem {
     id: string
     name: string
@@ -107,6 +138,7 @@
       if (initialized.has(board)) return
       initialized.add(board)
       if (board.dataset.kanbanExample === 'sprint') setupSprint(board)
+      if (board.dataset.kanbanExample === 'transfer') setupTransfer(board)
     })
   }
 

@@ -270,3 +270,89 @@ test('the dragged card stays under the pointer inside a transformed ancestor', a
     .toBe(true)
   await page.mouse.up()
 })
+
+// ---- drops of cards from outside the board (another board, another list in the page, another window) ----
+
+/**
+ * Synthesises a drag of an item payload onto `selector`, near its bottom edge: dragenter and dragover, then the drop
+ * (or a dragleave when `drop` is false). Returns how the board was lit while the drag was over it.
+ */
+async function dropPayload(page: Page, selector: string, type: string, payload: unknown, drop = true): Promise<string> {
+  return page.evaluate(
+    async ({ selector, type, payload, drop }) => {
+      const target = document.querySelector<HTMLElement>(selector)!
+      const box = target.getBoundingClientRect()
+      const transfer = new DataTransfer()
+      transfer.setData(type, JSON.stringify(payload))
+      const init = { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: box.left + box.width / 2, clientY: box.bottom - 4 }
+      target.dispatchEvent(new DragEvent('dragenter', init))
+      target.dispatchEvent(new DragEvent('dragover', init))
+      const host = document.querySelector('c2-kanban') as HTMLElement & { updateComplete: Promise<unknown> }
+      // A refusal shows once the event has passed every zone around this one.
+      await new Promise((resolve) => setTimeout(resolve))
+      await host.updateComplete
+      const board = host.shadowRoot!.querySelector('.board')!
+      const lit = board.classList.contains('board--drop-refused') ? 'refused' : board.classList.contains('board--drop-target') ? 'target' : 'none'
+      target.dispatchEvent(new DragEvent(drop ? 'drop' : 'dragleave', init))
+      return lit
+    },
+    { selector, type, payload, drop },
+  )
+}
+
+const dropBoard = (attributes = 'editable drop-kind="kanban-card"') => `
+  <c2-kanban ${attributes} aria-label="Sprint board" items='${JSON.stringify(items)}'>
+    <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+    <c2-kanban-column column-id="doing" label="In progress"></c2-kanban-column>
+    <c2-kanban-column column-id="done" label="Done"></c2-kanban-column>
+  </c2-kanban>
+`
+const CARD_TYPE = 'application/x-c2n-kanban-card+json'
+const DONE = 'c2-kanban-column[column-id="done"]'
+
+test('takes cards dropped from outside under its drop-kind, lights up and announces them', async ({ page, renderScenario }) => {
+  await renderScenario(dropBoard())
+  const host = page.locator('c2-kanban')
+  await host.evaluate((element) => {
+    const drops: unknown[] = []
+    ;(window as Window & { drops?: unknown[] }).drops = drops
+    element.addEventListener('item-drop', (event) => {
+      const { added, refused, toColumn, toIndex, kind, items } = (event as CustomEvent).detail
+      drops.push({ added: added.map((item: { id: string }) => item.id), refused: refused.length, toColumn, toIndex, kind, count: items.length })
+    })
+  })
+  const lit = await dropPayload(page, DONE, CARD_TYPE, [
+    { id: 'n1', column: 'elsewhere', title: 'New one' },
+    { id: 'a', column: 'todo', title: 'Alpha twin' },
+  ])
+  expect(lit).toBe('target')
+  expect(await layout(page)).toEqual({ todo: ['Alpha', 'Bravo'], doing: ['Charlie'], done: ['New one'] })
+  expect((await itemColumns(host)).n1).toBe('done')
+  expect(await page.evaluate(() => (window as Window & { drops?: unknown[] }).drops)).toEqual([
+    { added: ['n1'], refused: 1, toColumn: 'done', toIndex: 0, kind: 'kanban-card', count: 5 },
+  ])
+  await expect(host.getByRole('status')).toHaveText('1 item added. 1 item not added')
+  // A second card dropped near the bottom of the column lands after the first.
+  await dropPayload(page, DONE, CARD_TYPE, [{ id: 'n2', title: 'Newer one' }])
+  expect((await layout(page)).done).toEqual(['New one', 'Newer one'])
+})
+
+test('refuses another kind of payload and a canceled item-drop, and ignores drops without drop-kind', async ({ page, renderScenario }) => {
+  await renderScenario(dropBoard())
+  const host = page.locator('c2-kanban')
+  expect(await dropPayload(page, DONE, 'application/x-c2n-tree-node+json', [{ value: 'x' }])).toBe('refused')
+  expect(await dropPayload(page, DONE, CARD_TYPE, [{ id: 'n1' }], false)).toBe('target')
+  expect(await layout(page)).toEqual({ todo: ['Alpha', 'Bravo'], doing: ['Charlie'], done: [] })
+
+  await host.evaluate((element) => element.addEventListener('item-drop', (event) => event.preventDefault()))
+  await dropPayload(page, DONE, CARD_TYPE, [{ id: 'n1', title: 'New one' }])
+  expect(await layout(page)).toEqual({ todo: ['Alpha', 'Bravo'], doing: ['Charlie'], done: [] })
+  await expect(host.getByRole('status')).toHaveText('1 item not added')
+
+  // Without drop-kind, or read-only, the board takes nothing and stays unlit.
+  for (const attributes of ['editable', 'drop-kind="kanban-card"']) {
+    await renderScenario(dropBoard(attributes))
+    expect(await dropPayload(page, DONE, CARD_TYPE, [{ id: 'n1', title: 'New one' }])).toBe('none')
+    expect((await layout(page)).done).toEqual([])
+  }
+})
