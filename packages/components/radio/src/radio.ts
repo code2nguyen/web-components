@@ -322,7 +322,7 @@ export class Radio extends LitElement {
           <span class="c2-radio-state-layer"></span>
         </span>
         <span class="c2-radio-text">
-          <span class="c2-radio-label" part="label"><slot>${this.label}</slot></span>
+          <span class="c2-radio-label" part="label"><slot>${this.label || nothing}</slot></span>
           <span class="c2-radio-description" part="description" ?hidden=${!this.slotPresence.has('description')}>
             <slot name="description" @slotchange=${this.handleSlotChange}></slot>
           </span>
