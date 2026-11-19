@@ -1,4 +1,4 @@
-# AI readiness — changes since c0ae54b
+# AI readiness — changes since ecd1f48
 
 Full run: every component scored; the 0 whose result moved are listed. Full report: [report.md](report.md).
 

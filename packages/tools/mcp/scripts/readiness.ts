@@ -450,6 +450,14 @@ function main() {
     }
   }
 
+  if (!full && ids && ids.size === 0) {
+    // Nothing to score: the committed results stand, and the working tree stays clean.
+    console.log(`AI readiness — c2n ${registry.c2nVersion} — no component changed since ${since.slice(0, 7)}; the committed results stand.`)
+    console.log(
+      `AI readiness ${previous!.overall}/100 · component readiness ${previous!.score} · discovery ${previous!.discovery.score}${previous!.agent ? ` · agent ${previous!.agent.score}` : ''}`,
+    )
+    return
+  }
   const report = build(full ? [] : [...(ids ?? [])], !full)
   const scored = Object.fromEntries(report.components.map((c) => [c.id, toBaselineComponent(c)]))
   const components = full ? scored : Object.fromEntries(Object.entries({ ...previous!.components, ...scored }).filter(([id]) => registry.components[id]))
