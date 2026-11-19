@@ -55,6 +55,16 @@ test('a chip switches off and on, and is left out of the query while off', async
   expect((await events(page)).map((event: { trigger: string }) => event.trigger)).toEqual(['toggle', 'toggle'])
 })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-query-input value="service:web env:prod" fields='${FIELDS}'></c2-query-input></div>`)
+  await expect(page.getByRole('combobox', { name: 'Requête de recherche' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retirer le filtre service:web' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Effacer la requête' })).toBeAttached()
+  await page.getByRole('combobox', { name: 'Requête de recherche' }).click()
+  await page.keyboard.type(' s')
+  await expect(page.locator('c2-query-input .panel-header')).toHaveText('Champs')
+})
+
 test('the cross removes a chip and keeps focus in the field', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-query-input value="service:web env:prod" aria-label="Query"></c2-query-input>`)
   const host = page.locator('c2-query-input')
