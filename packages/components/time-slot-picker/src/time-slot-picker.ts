@@ -378,8 +378,9 @@ export class TimeSlotPicker extends LitElement {
 
   /** A value on a closed day is kept (the day may reopen) but neither submitted nor counted as an answer. */
   private get valueClosed(): boolean {
-    const found = this.findValue()
-    return !!found && this.closed.has(found.day)
+    // Its day comes from the value itself: an app paging through weeks replaces `slots`, so its slot may be gone.
+    const start = this.value ? Date.parse(this.value) : NaN
+    return !Number.isNaN(start) && this.closed.has(formatDate(wallClockAt(start, this.zone)))
   }
 
   /** The strip's dots, labelled for screen readers; kept while the days and the language stay the same. */

@@ -165,7 +165,11 @@ test('closed days stay closed in the row of days while loading', async ({ page, 
   await expect(page.getByRole('option', { name: /^Thursday,? 15 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
 })
 
-test('a standalone picker is announced as invalid once reportValidity() reported it, and not after a time is picked', async ({ page, renderScenario, browserName }) => {
+test('a standalone picker is announced as invalid once reportValidity() reported it, and not after a time is picked', async ({
+  page,
+  renderScenario,
+  browserName,
+}) => {
   test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
   await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
   await picker(page).evaluate((element: Picker & { reportValidity(): boolean }) => element.reportValidity())
@@ -183,4 +187,22 @@ test('a standalone picker is announced as invalid once reportValidity() reported
   await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void }) => element.setCustomValidity(''))
   await expect(page.getByRole('listbox', { name: /^Morning/ })).not.toHaveAttribute('aria-invalid', 'true')
   await expect.poll(() => axInvalid(page, 'group', 'Time')).not.toBe('true')
+})
+
+test('a value whose slot is no longer loaded is still dropped when its day closes', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker name="when" required time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  // The app pages on and loads that week only, then closes the 14th.
+  await picker(page).evaluate((element: Picker & { slots: unknown; disabledDates: string[] }) => {
+    element.slots = [{ start: '2026-10-21T09:00:00Z' }]
+    element.disabledDates = ['2026-10-14']
+  })
+  await expect
+    .poll(() =>
+      picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => ({
+        valid: element.checkValidity(),
+        submitted: new FormData(element.closest('form')!).get('when'),
+      })),
+    )
+    .toEqual({ valid: false, submitted: null })
 })
