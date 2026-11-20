@@ -2,6 +2,355 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.30",
+      "date": "2026-11-20",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["tree"],
+              "text": "Let rows leave the tree under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo",
+              "hash": "a841d77"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Let rows leave the list under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo",
+              "hash": "5e81b30"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Let cards leave the board under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo",
+              "hash": "b545fb3"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Share an in-page item drag session and a registry of item drop targets",
+              "hash": "0e808b1"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Add wrapper, form-control and composed-selection helpers to dom-helper",
+              "hash": "76d59f9"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Add SlotReplayController, which replays a slot handler once after a server-rendered host hydrates",
+              "hash": "78c0782"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Take nodes dropped from another tree under a drop-kind",
+              "hash": "3ef097f"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Take rows dropped from outside the list under a drop-kind",
+              "hash": "2946930"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Take cards dropped from another board under a drop-kind",
+              "hash": "1f08305"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Let a drop zone take the app's own items as a typed payload besides files",
+              "hash": "af2af6a"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Read the clipboard for a paste shortcut that fires no paste event, so a drop zone takes pasted files in Safari",
+              "hash": "78fb187"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["chatbot"],
+              "text": "Keep the class JSDoc on the class, so the manifest keeps its slot, parts and variables",
+              "hash": "0b5a434"
+            },
+            {
+              "scopes": ["terminal"],
+              "text": "Set the translated accessible name after the language is resolved, so it follows a language change",
+              "hash": "79c04d2"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Translate the board's move announcements through the kanban message catalog",
+              "hash": "d868a77"
+            },
+            {
+              "scopes": ["radio"],
+              "text": "Fire the group's own input with its new value, and keep the options' input inside",
+              "hash": "b2c6d58"
+            },
+            {
+              "scopes": ["upload"],
+              "text": "Write file sizes with Intl.NumberFormat units in the element's language",
+              "hash": "c7cff3f"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Translate the Delete key's shortcut hint through message tokens",
+              "hash": "b04a3ca"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Translate the Venn diagram's and the map's text and the candlestick's series name through message tokens",
+              "hash": "0bc4509"
+            },
+            {
+              "scopes": ["state-timeline"],
+              "text": "Translate the timeline name, the band and segment names, the tooltip and the empty text through message tokens",
+              "hash": "578f170"
+            },
+            {
+              "scopes": ["gantt"],
+              "text": "Translate the column headings, row names, tooltip terms and empty text through message tokens",
+              "hash": "a82e6c0"
+            },
+            {
+              "scopes": ["spreadsheet"],
+              "text": "Translate the cell editors' names and the row header through message tokens",
+              "hash": "e5c6ae3"
+            },
+            {
+              "scopes": ["trace-waterfall"],
+              "text": "Translate the tree name, the empty text and the error mark through message tokens",
+              "hash": "955c7ec"
+            },
+            {
+              "scopes": ["markdown"],
+              "text": "Translate the table region's name through message tokens",
+              "hash": "9c82ccc"
+            },
+            {
+              "scopes": ["rate"],
+              "text": "Translate the default accessible name through message tokens",
+              "hash": "a7847f9"
+            },
+            {
+              "scopes": ["query-input"],
+              "text": "Translate the field name, suggestions heading, chip remove and clear buttons through message tokens",
+              "hash": "29858a1"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Translate the calendar button's name through message tokens",
+              "hash": "1fe171d"
+            },
+            {
+              "scopes": ["avatar"],
+              "text": "Translate the edit buttons' names and the group's labels through message tokens",
+              "hash": "8aba0d2"
+            },
+            {
+              "scopes": ["chip-group"],
+              "text": "Translate the overflow indicator and collapse button through message tokens",
+              "hash": "2fd22c3"
+            },
+            {
+              "scopes": ["navigation-menu"],
+              "text": "Translate the mobile button's default name through message tokens",
+              "hash": "c0387c7"
+            },
+            {
+              "scopes": ["header"],
+              "text": "Translate the navigation landmark's default name through message tokens",
+              "hash": "d426565"
+            },
+            {
+              "scopes": ["virtual-list"],
+              "text": "Translate the list name and the search field's placeholder through message tokens",
+              "hash": "7998879"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Translate the empty text through message tokens",
+              "hash": "52bc302"
+            },
+            {
+              "scopes": ["kanban"],
+              "text": "Translate a column's empty text and keyboard instructions through message tokens",
+              "hash": "e45ff1a"
+            },
+            {
+              "scopes": ["key-value-editor"],
+              "text": "Translate the column names, placeholders, add button, key errors and empty text through message tokens",
+              "hash": "a9c9dc3"
+            },
+            {
+              "scopes": ["slider"],
+              "text": "Translate the range thumbs' names through message tokens",
+              "hash": "746432b"
+            },
+            {
+              "scopes": ["phone-input"],
+              "text": "Translate the country search label and its empty text through message tokens",
+              "hash": "1c9498a"
+            },
+            {
+              "scopes": ["cascader"],
+              "text": "Translate the placeholder, the panel and column names and the empty text through message tokens",
+              "hash": "af9c688"
+            },
+            {
+              "scopes": ["chat-message-list"],
+              "text": "Translate the log name, the jump button and the loading text through message tokens",
+              "hash": "8bf31a0"
+            },
+            {
+              "scopes": ["chat-input"],
+              "text": "Translate the send button's name through message tokens",
+              "hash": "00e59e3"
+            },
+            {
+              "scopes": ["popconfirm"],
+              "text": "Translate the default button labels through message tokens",
+              "hash": "7588dc6"
+            },
+            {
+              "scopes": ["command"],
+              "text": "Translate the placeholder, the field name and the empty text through message tokens",
+              "hash": "99cfc67"
+            },
+            {
+              "scopes": ["breadcrumb"],
+              "text": "Translate the landmark name and the ellipsis label through message tokens",
+              "hash": "18284d7"
+            },
+            {
+              "scopes": ["pagination"],
+              "text": "Translate the default labels and status templates through message tokens",
+              "hash": "08ff876"
+            },
+            {
+              "scopes": ["attachment"],
+              "text": "Translate the upload status and action names through message tokens",
+              "hash": "1dc5307"
+            },
+            {
+              "scopes": ["angular"],
+              "text": "Ignore an input or change that bubbled from a control in the element's action zone",
+              "hash": "7215656"
+            },
+            {
+              "scopes": ["form-field"],
+              "text": "Ignore an input or change that bubbled from a control in its control's action zone",
+              "hash": "34194fc"
+            },
+            {
+              "scopes": ["upload"],
+              "text": "Translate the drop prompt, hint and button labels through message tokens",
+              "hash": "bc2e77d"
+            },
+            {
+              "scopes": ["navigation-menu"],
+              "text": "Let a click close the panel in the page's first moments, after a closed hover-open, and after the pointer re-enters the open item",
+              "hash": "8b66726"
+            },
+            {
+              "scopes": ["description-list"],
+              "text": "Translate an empty value's placeholder through a message token",
+              "hash": "de6f98e"
+            },
+            {
+              "scopes": ["chart"],
+              "text": "Translate the no-data and loading texts through message tokens",
+              "hash": "ad9a40b"
+            },
+            {
+              "scopes": ["virtual-list"],
+              "text": "Translate the empty and no-results messages through message tokens",
+              "hash": "24c451f"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Translate the empty message through a message token",
+              "hash": "5e01ea0"
+            },
+            {
+              "scopes": ["time-input"],
+              "text": "End empty text bindings with nothing so a value set after hydration shows",
+              "hash": "ca3feb7"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Follow a slotted label's text when it changes in place, as renderLabel's does",
+              "hash": "9a1144c"
+            },
+            {
+              "scopes": ["command"],
+              "text": "Show a group heading set after hydration when the server rendered none",
+              "hash": "2331b0c"
+            },
+            {
+              "scopes": ["google-map"],
+              "text": "Translate the map notices, and show an error notice for an error with no message",
+              "hash": "694ce7e"
+            },
+            {
+              "scopes": ["google-map"],
+              "text": "Resolve @c2n/core to the workspace package instead of a stale 0.0.19 copy",
+              "hash": "136b27e"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Name a row from its live label when no label is slotted",
+              "hash": "4cccdd8"
+            },
+            {
+              "scopes": ["table-of-contents"],
+              "text": "Render nothing rather than an empty string in the index bar's bubble",
+              "hash": "8575b1c"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Render nothing rather than an empty string for an unlabelled menu item, so a hydrated label lands in its text node",
+              "hash": "efd2e04"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Render nothing rather than an empty string for an unlabelled item, so a hydrated label lands in its text node",
+              "hash": "53e0c6b"
+            },
+            {
+              "scopes": ["tree"],
+              "text": "Render nothing rather than an empty string for an unlabelled row, so a label set after hydration shows",
+              "hash": "da98b25"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["examples"],
+              "text": "Keep the observability alerts page within a 768px viewport while its tabs and table lay out",
+              "hash": "6d5be46"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Let a slotted child of an island stay an island, dropping the image annotator special case",
+              "hash": "a10d11e"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Bound the date-input range examples with the themed calendar, and say what typing still allows",
+              "hash": "afb63d1"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.29",
       "date": "2026-11-19",
       "sections": [
