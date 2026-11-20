@@ -3,6 +3,11 @@ title: 'Meter'
 description: 'A measurement inside a known range — storage, quota, strength — with native meter thresholds and an optional segmented breakdown.'
 category: 'Data display'
 apiTags: ['c2-meter']
+intents:
+  - 'Show how much storage or quota has been used out of a limit.'
+  - 'Indicate password strength as a level within a range.'
+  - 'Break down usage by category in a segmented bar.'
+  - 'Display a measurement with low, high and optimum thresholds, not task progress.'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'

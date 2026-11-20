@@ -5,6 +5,11 @@ category: 'Inputs'
 package: '@c2n/secret-field'
 tag: 'c2-totp-code'
 apiTags: ['c2-totp-code']
+intents:
+  - 'Show a rotating one-time code generated from a TOTP secret.'
+  - 'Display a two-factor code with a countdown until it expires.'
+  - 'Let users copy the current authenticator code.'
+  - 'Compute verification codes in the browser for a shared account.'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
