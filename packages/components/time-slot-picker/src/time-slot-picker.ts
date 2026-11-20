@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter, itemListPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, itemListPropertyConverter, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -201,6 +201,10 @@ export class TimeSlotPicker extends LitElement {
   @state() private disabledByForm = false
   @state() private announcement = ''
 
+  /** Set once the validity was reported (a failed submit); until then an invalid value is not announced. */
+  @state() private validityShown = false
+  private checkingValidity = false
+
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, timeSlotPickerMessages)
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
@@ -223,6 +227,10 @@ export class TimeSlotPicker extends LitElement {
   constructor() {
     super()
     this.internals.role = 'group'
+    // A failed submit or `reportValidity()` shows the error, as it does for a native control.
+    this.addEventListener('invalid', () => {
+      if (!this.checkingValidity) this.validityShown = true
+    })
   }
 
   get form() {
@@ -246,7 +254,13 @@ export class TimeSlotPicker extends LitElement {
   }
 
   checkValidity() {
-    return this.internals.checkValidity()
+    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
+    this.checkingValidity = true
+    try {
+      return this.internals.checkValidity()
+    } finally {
+      this.checkingValidity = false
+    }
   }
 
   reportValidity() {
@@ -260,6 +274,7 @@ export class TimeSlotPicker extends LitElement {
 
   formResetCallback() {
     this.value = this.defaultValue ?? ''
+    this.validityShown = false
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -303,9 +318,6 @@ export class TimeSlotPicker extends LitElement {
       this.defaultDate = picked?.day ?? this.freeDays.find((day) => day >= today) ?? this.freeDays[0] ?? today
     }
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
-    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
-    // picker would be announced as invalid on load. Invalid is the error the field shows, as for a native control.
-    this.internals.ariaInvalid = this.field.invalid && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   protected override updated(): void {
@@ -339,12 +351,7 @@ export class TimeSlotPicker extends LitElement {
       else this.byDay.set(day, [placed])
     }
     for (const list of this.byDay.values()) list.sort((a, b) => a.start - b.start)
-    this.closedDays = []
-    for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
-      const entry = typeof item === 'string' ? { date: item } : item
-      const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
-      if (date) this.closedDays.push({ date, label: entry.label })
-    }
+    this.closedDays = [...readDisabledDates(this.disabledDates)].map(([date, label]) => (label ? { date, label } : { date }))
     this.closed = new Set(this.closedDays.map((entry) => entry.date))
     this.freeDays = [...this.byDay.keys()].filter((day) => !this.closed.has(day) && this.byDay.get(day)!.some((slot) => slot.available)).sort()
     this.stripDisabled = [
@@ -414,6 +421,11 @@ export class TimeSlotPicker extends LitElement {
     const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.slot[tabindex="0"]') ?? undefined
     this.internals.setValidity(flags, message, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
+    // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
+    // validity once a submit reported it, as for a native control.
+    const shown = this.field.invalid || (this.validityShown && !this.internals.validity.valid)
+    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   private longDate(day: string): string {

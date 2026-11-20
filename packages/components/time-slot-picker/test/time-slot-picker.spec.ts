@@ -158,3 +158,12 @@ test('closed days stay closed in the row of days while loading', async ({ page, 
   await renderScenario(scenario(`loading disabled-dates='[{"date":"2026-10-15","label":"Closed for training"}]'`))
   await expect(page.getByRole('option', { name: /^Thursday,? 15 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
 })
+
+test('a standalone picker is announced as invalid once a submit reported it, and not after a time is picked', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await picker(page).evaluate((element: Picker & { reportValidity(): boolean }) => element.reportValidity())
+  await expect.poll(() => axInvalid(page, 'group', 'Time')).toBe('true')
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  await expect.poll(() => axInvalid(page, 'group', 'Time')).not.toBe('true')
+})
