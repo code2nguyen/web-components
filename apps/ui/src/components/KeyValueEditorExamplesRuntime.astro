@@ -1,0 +1,31 @@
+---
+/**
+ * Plays the application's part in the key-value-editor gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'key-value-editor': {
+        show: 'Afficher {0}',
+        hide: 'Masquer {0}',
+        remove: 'Retirer {0}',
+        removeRow: 'Retirer la ligne {0}',
+        valueMissing: 'Ajoutez au moins une variable.',
+        key: 'Clé',
+        value: 'Valeur',
+        field: '{0} {1}',
+        keyPlaceholder: 'CLÉ',
+        valuePlaceholder: 'valeur',
+        add: 'Ajouter une ligne',
+        duplicate: 'Cette clé est déjà utilisée.',
+        pattern: "Cette clé n'est pas valide.",
+        empty: 'Aucune variable',
+        hiddenValue: 'Valeur masquée',
+      },
+    },
+  })
+</script>

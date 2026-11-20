@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-chip-group: the default +N pill, a solid c
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChipGroupExamplesRuntime from '../../components/ChipGroupExamplesRuntime.astro'
 
 import { ChipGroup } from '@c2n/components/chip-group'
 import { Chip } from '@c2n/components/chip'
@@ -73,3 +75,44 @@ The group itself only owns the gap and the `+N` indicator: `--c2-chip-group__ove
 ```
 
 </GalleryGrid>
+
+## Language
+
+<ChipGroupExamplesRuntime />
+
+The name of the `+N` indicator and the collapse button are message tokens: an app translates them once with `addTranslations`, and each group speaks the language of its nearest `lang`. `more-label` and `collapse-label` still override one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The collapse button and the indicator in the language of the page,useWhen=The application is translated
+<style>
+  .chip-group-fr {
+    width: 180px;
+  }
+</style>
+<div lang="fr">
+  <c2-chip-group client:only="lit" class="chip-group-fr" expandable expanded aria-label="Sujets">
+    <c2-chip>Design</c2-chip>
+    <c2-chip>Ingénierie</c2-chip>
+    <c2-chip>Produit</c2-chip>
+    <c2-chip>Marketing</c2-chip>
+    <c2-chip>Ventes</c2-chip>
+    <c2-chip>Support</c2-chip>
+  </c2-chip-group>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'chip-group': {
+      more: '{0} de plus',
+      collapse: 'Afficher moins',
+    },
+  },
+})
+```

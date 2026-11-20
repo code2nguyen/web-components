@@ -218,3 +218,51 @@ backlog.renderItem = ({ item }) => html`
   >⠿</span>
   ${item.title}`
 ```
+
+## Language
+
+The empty column, the keyboard instructions and the announcements of a moving card are message tokens: an app translates them once with `addTranslations`, and each board speaks the language of its nearest `lang`.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=En français,description=The empty column and the move announcements in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-kanban
+    client:only="lit"
+    editable
+    aria-label="Tâches"
+    items='[{"id":"1","column":"todo","title":"Rédiger les notes de version"},{"id":"2","column":"todo","title":"Mettre à jour les captures"}]'
+  >
+    <c2-kanban-column column-id="todo" label="À faire"></c2-kanban-column>
+    <c2-kanban-column column-id="done" label="Terminé"></c2-kanban-column>
+  </c2-kanban>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    kanban: {
+      card: 'Carte',
+      pickedUp: '{0} prise dans {1}, position {2} sur {3}. Déplacez-la avec les flèches, posez-la avec Espace, annulez avec Échap.',
+      dragStarted: '{0} prise.',
+      moved: '{0} déplacée dans {1}, position {2} sur {3}.',
+      dropped: '{0} posée dans {1}, position {2} sur {3}.',
+      droppedInPlace: '{0} reposée à sa place.',
+      returned: '{0} revenue dans {1}, position {2}.',
+      returnedInPlace: '{0} revenue à sa place.',
+      refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
+      atStart: '{0} est déjà dans la première colonne.',
+      atEnd: '{0} est déjà dans la dernière colonne.',
+      readOnly: 'Déplacement annulé : le tableau n’est plus modifiable.',
+      itemsChanged: 'Les cartes ont changé. Déplacement annulé.',
+      empty: 'Aucune carte',
+      instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la avec les flèches, Début ou Fin ; Espace la pose et Échap annule.',
+    },
+  },
+})
+```

@@ -7,6 +7,20 @@
   import '@c2n/components/tree'
   import '@c2n/components/chip'
   import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the En français card, under `lang="fr"`.
+  addTranslations({
+    fr: {
+      tree: {
+        moved: '{0} déplacé en position {1} sur {2}.',
+        movedInto: '{0} déplacé dans {1}, position {2} sur {3}.',
+        cannotMove: '{0} ne peut pas aller là.',
+        cancelled: 'Déplacement de {0} annulé.',
+        empty: 'Aucun élément',
+      },
+    },
+  })
 
   /** Chips beside the tree become new files: each drags a `tree-node` the tree places where it lands. */
   function setupTransfer(tree: Tree) {

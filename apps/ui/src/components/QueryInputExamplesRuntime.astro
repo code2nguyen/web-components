@@ -1,0 +1,20 @@
+---
+/**
+ * Plays the application's part in the query-input gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'query-input': {
+        label: 'Requête de recherche',
+        fields: 'Champs',
+        removeFilter: 'Retirer le filtre',
+        clear: 'Effacer la requête',
+      },
+    },
+  })
+</script>

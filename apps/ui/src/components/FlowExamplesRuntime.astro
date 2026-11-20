@@ -1,0 +1,70 @@
+---
+/**
+ * Plays the application's part in the flow gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      flow: {
+        rename: 'Renommer',
+        editLabel: 'Modifier le libellé',
+        delete: 'Supprimer',
+        deleteKey: 'Suppr',
+        addNode: 'Ajouter un nœud',
+        zoomIn: 'Zoom avant',
+        zoomOut: 'Zoom arrière',
+        fitView: 'Ajuster à la vue',
+        layout: 'Disposition',
+        leftToRight: 'De gauche à droite',
+        topToBottom: 'De haut en bas',
+        autoLayout: 'Disposition automatique',
+        lockLayout: 'Verrouiller la disposition',
+        alreadyConnected: '{0} est déjà relié à tous les autres nœuds.',
+        connectPrompt: 'Relier {0} à {1}. Les flèches ou Tab choisissent un autre nœud, Entrée relie, Échap annule.',
+        connectTarget: '{0}, {1} sur {2}',
+        connected: '{0} relié à {1}.',
+        connectionCancelled: 'Liaison annulée.',
+        edgeSelected: (source: string, target: string, label: string, position: number, total: number) =>
+            `Lien de ${source} vers ${target}${label ? `, libellé « ${label} »` : ''}${total ? `, ${position} sur ${total},` : ''} sélectionné. Suppr le supprime, F2 modifie son libellé.`,
+        noEdges: '{0} n’a aucun lien.',
+        renameNode: 'Renommer {0}',
+        edgeLabelField: 'Libellé du lien de {0} vers {1}',
+        after: (items: string[], labelled: boolean) => `Après ${items.join(labelled ? ' ; ' : ', ')}.`,
+        before: (items: string[], labelled: boolean) => `Avant ${items.join(labelled ? ' ; ' : ', ')}.`,
+        throughRow: '{0} par {1}',
+        rows: (items: string[]) => `Lignes : ${items.join(', ')}.`,
+        moreRows: '+ {0} de plus',
+        fewerRows: 'Afficher moins',
+        showAllRows: 'Afficher toutes les lignes',
+        showFewerRows: 'Afficher moins de lignes',
+        rowsHidden: '{0} lignes de plus, Maj+Entrée les affiche.',
+        rowsShown: 'Toutes les lignes de {0} affichées.',
+        rowsFolded: 'Lignes de {0} repliées.',
+        dragToReorder: 'Glisser pour réordonner',
+        moveRowUp: 'Monter la ligne',
+        moveRowDown: 'Descendre la ligne',
+        rowMovePrompt: 'Réordonner les lignes de {0}. {1}, {2} sur {3}. Les flèches haut et bas choisissent une ligne, Alt avec une flèche la déplace, Entrée ou Échap termine.',
+        rowPicked: '{0}, {1} sur {2}',
+        rowMoved: '{0} déplacée en {1} sur {2}.',
+        rowMoveEnded: 'Lignes réordonnées.',
+        duration: 'Durée',
+        dragToConnect: 'Glisser pour relier',
+        flowActions: 'Actions du flux',
+        flowMenu: 'Flux',
+        emptyFlow: 'Flux vide',
+        emptyHint: 'Appuyez sur N ou Entrée pour ajouter un nœud.',
+        statusPending: 'À venir',
+        statusCurrent: 'En attente',
+        statusRunning: 'En cours',
+        statusSuccess: 'Réussi',
+        statusError: 'Échec',
+        statusWarning: 'Réussi avec avertissements',
+        statusSkipped: 'Ignoré',
+      },
+    },
+  })
+</script>

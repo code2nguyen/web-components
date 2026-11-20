@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import SpreadsheetExamplesRuntime from '../../components/SpreadsheetExamplesRuntime.astro'
 
 import { Spreadsheet } from '@c2n/components/spreadsheet'
 
@@ -91,3 +93,49 @@ header colours and the active-cell outline do most of the work. Open any card in
 ```
 
 </GalleryGrid>
+
+## Language
+
+<SpreadsheetExamplesRuntime />
+
+The totals bar, the context menu, the formula help and the names of the cells are message tokens: an app translates them once with `addTranslations`, and each spreadsheet speaks the language of its nearest `lang`; `locale` and `currency` format its numbers. This card translates the totals bar and the cell names.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=En français,description=The totals bar and the cell names in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-spreadsheet
+    client:only="lit"
+    label="Devis"
+    locale="fr-FR"
+    currency="EUR"
+    rows="5"
+    summary
+    columns='[{"label":"Poste","width":180},{"label":"Heures","width":80,"format":"number"},{"label":"Taux","width":110,"format":"currency"},{"label":"Total","width":130,"format":"currency"}]'
+    data='[["Conception",8,120,"=B1*C1"],["Réalisation",24,95,"=B2*C2"],["Tests",6,80,"=B3*C3"]]'
+  ></c2-spreadsheet>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    spreadsheet: {
+      selectToSum: 'Sélectionnez des cellules pour voir leur somme',
+      sum: 'Somme',
+      average: 'Moyenne',
+      count: 'Nombre',
+      minimum: 'Minimum',
+      maximum: 'Maximum',
+      insertTotal: 'Insérer {0} dans {1}',
+      editCell: 'Modifier {0}',
+      formulaBar: 'Barre de formule, {0}',
+      rowHeader: 'Ligne',
+    },
+  },
+})
+```

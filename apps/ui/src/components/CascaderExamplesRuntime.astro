@@ -1,0 +1,20 @@
+---
+/**
+ * Plays the application's part in the cascader gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      cascader: {
+        placeholder: 'Sélectionner',
+        panel: 'Options',
+        level: 'Niveau {0}',
+        empty: 'Aucune option disponible.',
+      },
+    },
+  })
+</script>

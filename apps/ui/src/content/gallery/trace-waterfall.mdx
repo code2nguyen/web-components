@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import TraceWaterfallExamplesRuntime from '../../components/TraceWaterfallExamplesRuntime.astro'
 
 import { TraceWaterfall } from '@c2n/components/trace-waterfall'
 
@@ -103,3 +105,33 @@ in the studio to start from it.
 ```
 
 </GalleryGrid>
+
+## Language
+
+<TraceWaterfallExamplesRuntime />
+
+The empty state and the names of the span tree and of a failed span's mark are message tokens: an app translates them once with `addTranslations`, and each waterfall speaks the language of its nearest `lang`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The empty state in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-trace-waterfall client:only="lit" spans="[]"></c2-trace-waterfall>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'trace-waterfall': {
+      label: 'Trace',
+      empty: 'Aucun span',
+      error: 'Erreur',
+    },
+  },
+})
+```

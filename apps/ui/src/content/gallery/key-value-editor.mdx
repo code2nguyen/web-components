@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-key-value-editor: environment variables, H
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KeyValueEditorExamplesRuntime from '../../components/KeyValueEditorExamplesRuntime.astro'
 
 import { KeyValueEditor } from '@c2n/components/key-value-editor'
 import { Button } from '@c2n/components/button'
@@ -139,3 +141,49 @@ The key and value columns share one grid with the headers, so `--c2-key-value-ed
 ```
 
 </GalleryGrid>
+
+## Language
+
+<KeyValueEditorExamplesRuntime />
+
+The column headings, the placeholders, the add button, the empty state and the validation messages are message tokens: an app translates them once with `addTranslations`, and each editor speaks the language of its nearest `lang`. The `*-label`, `*-placeholder` and `*-message` attributes still override one instance.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=En français,description=The headings and placeholders and messages in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-key-value-editor
+    client:only="lit"
+    label="Variables d'environnement"
+    entries='[{"key":"API_URL","value":"https://api.example.com"},{"key":"API_URL","value":"https://api.example.fr"},{"key":"","value":""}]'
+  ></c2-key-value-editor>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'key-value-editor': {
+      show: 'Afficher {0}',
+      hide: 'Masquer {0}',
+      remove: 'Retirer {0}',
+      removeRow: 'Retirer la ligne {0}',
+      valueMissing: 'Ajoutez au moins une variable.',
+      key: 'Clé',
+      value: 'Valeur',
+      field: '{0} {1}',
+      keyPlaceholder: 'CLÉ',
+      valuePlaceholder: 'valeur',
+      add: 'Ajouter une ligne',
+      duplicate: 'Cette clé est déjà utilisée.',
+      pattern: "Cette clé n'est pas valide.",
+      empty: 'Aucune variable',
+      hiddenValue: 'Valeur masquée',
+    },
+  },
+})
+```

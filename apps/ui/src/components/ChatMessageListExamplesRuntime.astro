@@ -1,0 +1,19 @@
+---
+/**
+ * Plays the application's part in the chat-message-list gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'chat-message-list': {
+        label: 'Conversation',
+        jump: 'Aller au dernier message',
+        loading: 'Chargement des messages précédents…',
+      },
+    },
+  })
+</script>
