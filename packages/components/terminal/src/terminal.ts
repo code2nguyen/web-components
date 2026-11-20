@@ -246,9 +246,11 @@ export class Terminal extends LitElement {
     else super.focus(options)
   }
 
-  protected override willUpdate(_changed: PropertyValues<this>): void {
-    // Also follows a language change, which re-renders without a property change.
+  protected override update(changed: PropertyValues<this>): void {
+    // Also follows a language change, which re-renders without a property change. Here, not in `willUpdate`: the
+    // localize controller picks the new language between the two.
     this.internals.ariaLabel = this.heading || this.msg.t('terminal')
+    super.update(changed)
   }
 
   override connectedCallback(): void {
