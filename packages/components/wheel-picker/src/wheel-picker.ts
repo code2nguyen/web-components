@@ -239,6 +239,9 @@ export class WheelPicker extends LitElement {
     if (next.length !== values.length || next.some((value, at) => value !== values[at])) this.value = next
     if (this.defaultValue === undefined && this.wheels.some((wheel) => wheel.options.length)) this.defaultValue = [...this.value]
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a custom
+    // validity message would be announced before it is shown. Invalid is the error the field shows.
+    this.internals.ariaInvalid = this.field.invalid && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   protected override updated(changed: PropertyValues<this>): void {

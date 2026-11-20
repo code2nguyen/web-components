@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, axInvalid } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 type Picker = HTMLElement & { value: string[] }
@@ -106,4 +106,12 @@ test('a picker without a value writes none on its host', async ({ page, renderSc
   await renderScenario(`<c2-wheel-picker options="S;M;L"></c2-wheel-picker>`)
   expect(await value(page)).toEqual(['S'])
   expect(await picker(page).getAttribute('value')).toBeNull()
+})
+
+test('a custom validity message is not announced as invalid before a field shows it', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en"><c2-wheel-picker label="Height" columns='${HEIGHT}'></c2-wheel-picker></form>`)
+  await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void }) => element.setCustomValidity('Too short'))
+  expect(await picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => element.checkValidity())).toBe(false)
+  expect(await axInvalid(page, 'group', 'Height')).not.toBe('true')
 })
