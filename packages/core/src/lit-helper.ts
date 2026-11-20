@@ -77,6 +77,34 @@ export const arrayPropertyConverter = {
 } satisfies StringTolerantConverter & Record<string, unknown>
 
 /**
+ * Converter for a list whose items are strings or small objects (`disabled-dates`: a day, or `{ date, label }`). The
+ * attribute is `;`-separated strings, as for {@link arrayPropertyConverter}, or a JSON array whose items may be
+ * objects. A string assigned to the property is read the same way.
+ */
+export const itemListPropertyConverter = {
+  toAttribute: (value: unknown[]) => {
+    if (!Array.isArray(value)) return ''
+    return value.every((item) => typeof item === 'string' && !item.includes(';')) ? value.join(';') : JSON.stringify(value)
+  },
+  fromAttribute: (value: string | null) => parseItemList(value),
+  fromProperty: (value: unknown) => (typeof value === 'string' ? parseItemList(value) : value),
+} satisfies StringTolerantConverter & Record<string, unknown>
+
+function parseItemList(value: string | null | undefined): unknown[] {
+  if (!value) return []
+  const trimmed = value.trim()
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed: unknown = JSON.parse(trimmed)
+      if (Array.isArray(parsed)) return parsed
+    } catch {
+      // Not JSON: a plain `;`-separated value that happens to start with a bracket.
+    }
+  }
+  return value.split(';')
+}
+
+/**
  * Converter for properties whose value is a plain object or array and whose attribute is JSON, so data-driven
  * components (a table's rows and columns, for instance) can be authored in markup as well as from script.
  * Invalid JSON parses to `undefined` rather than throwing, and never round-trips back to the attribute.
