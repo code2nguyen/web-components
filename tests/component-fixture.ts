@@ -266,8 +266,11 @@ export async function selectBack(page: Page, text: string) {
 /** Chrome's own accessibility tree: the only place a validity-derived `invalid` shows, since no DOM attribute carries it. */
 export async function axInvalid(page: Page, role: string, name: string): Promise<string | undefined> {
   const session = await page.context().newCDPSession(page)
-  const { nodes } = (await session.send('Accessibility.getFullAXTree')) as {
-    nodes: { role?: { value: string }; name?: { value: string }; properties?: { name: string; value: { value: unknown } }[] }[]
+  let nodes: { role?: { value: string }; name?: { value: string }; properties?: { name: string; value: { value: unknown } }[] }[]
+  try {
+    ;({ nodes } = (await session.send('Accessibility.getFullAXTree')) as { nodes: typeof nodes })
+  } finally {
+    await session.detach()
   }
   const node = nodes.find((candidate) => candidate.role?.value === role && candidate.name?.value === name)
   if (!node) throw new Error(`no ${role} "${name}" in the accessibility tree`)
