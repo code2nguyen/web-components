@@ -25,6 +25,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-reorder-list': Omit<C2Props<ReorderList>, 'swipeActions' | 'value'> & {
         'drop-kind'?: Attribute
+        'drag-kind'?: Attribute
         'drag-start-threshold'?: Attribute
         'auto-scroll-disabled'?: Attribute
         'swipe-actions'?: Attribute

@@ -30,6 +30,8 @@ export const kanbanText = {
   atStart: (card: string) => `${card} is already in the first column.`,
   /** The arrow key points after the last column. */
   atEnd: (card: string) => `${card} is already in the last column.`,
+  /** A card another board, list or tree took (`drag-kind`). */
+  movedOut: (card: string) => `${card} moved off the board.`,
   /** The board stopped being editable during a move. */
   readOnly: 'Moving canceled because the board is no longer editable.',
   /** The application replaced `items` during a move. */

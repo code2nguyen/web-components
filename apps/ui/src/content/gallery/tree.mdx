@@ -249,6 +249,79 @@ tree.addEventListener('item-drop', ({ detail }) => {
 })
 ```
 
+A tree with `drag-kind` lets its rows leave, each with its subtree: a pointer drag carried off the tree drops the row
+on the tree under the pointer, each row's handle starts a drag the browser carries (dropped back on its own tree it moves the row there; a drop outside c2n, in another window too, takes a copy), and
+`moveItemTo(target, value)` is the keyboard path an application wires to a command. The tree the row left fires
+`item-move-out` and, when built from `items`, takes it out itself. Drag a row to the other tree, or use its arrow button.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Move rows between trees
+<style>
+  .tree-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+    --c2-button__container--height: 22px;
+    --c2-button__container--padding-left: 6px;
+    --c2-button__container--padding-right: 6px;
+  }
+  .tree-pair c2-tree {
+    flex: 1 1 220px;
+    min-block-size: 120px;
+    /* Two boxes, so the two trees read as two. */
+    --c2-tree--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-top-left-radius: 8px;
+    --c2-tree--border-top-right-radius: 8px;
+    --c2-tree--border-bottom-left-radius: 8px;
+    --c2-tree--border-bottom-right-radius: 8px;
+    --c2-tree--padding-top: 6px;
+    --c2-tree--padding-bottom: 6px;
+    /* The move button is the keyboard path: keep it shown, not only on hover. */
+    --c2-tree-item__actions--opacity: 1;
+  }
+</style>
+<div class="tree-pair" data-tree-pair>
+  <c2-tree
+    client:only="lit"
+    aria-label="Drafts"
+    reorderable
+    drag-kind="tree-node"
+    drop-kind="tree-node"
+    data-tree-example="trees"
+    expanded-items="ideas"
+    items='[{"value":"ideas","label":"ideas","children":[{"value":"pricing","label":"pricing.md"},{"value":"roadmap","label":"roadmap.md"}]},{"value":"notes","label":"notes.md"}]'
+  ></c2-tree>
+  <c2-tree
+    client:only="lit"
+    aria-label="Published"
+    reorderable
+    drag-kind="tree-node"
+    drop-kind="tree-node"
+    data-tree-example="trees"
+    items='[{"value":"welcome","label":"welcome.md"}]'
+  ></c2-tree>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+// <c2-tree reorderable drag-kind="tree-node" drop-kind="tree-node" items="…"> on both trees: rows move by pointer or
+// handle, and each tree updates its own `items`.
+
+// The keyboard path: a command in each row's actions.
+drafts.renderActions = ({ node }) => html`<c2-button aria-label="Publish ${node.label}" @click=${() => drafts.moveItemTo(published, node.value)}>→</c2-button>`
+
+// Save both sides of a move.
+published.addEventListener('item-drop', () => queueMicrotask(() => save(published.items)))
+drafts.addEventListener('item-move-out', () => queueMicrotask(() => save(drafts.items)))
+```
+
 ## Language
 
 The empty state and the announcements of a moved row are message tokens: an app translates them once with `addTranslations`, and each tree speaks the language of its nearest `lang`.
@@ -273,6 +346,7 @@ addTranslations({
       movedInto: '{0} déplacé dans {1}, position {2} sur {3}.',
       cannotMove: '{0} ne peut pas aller là.',
       cancelled: 'Déplacement de {0} annulé.',
+      movedOut: '{0} a quitté l’arbre.',
       empty: 'Aucun élément',
     },
   },

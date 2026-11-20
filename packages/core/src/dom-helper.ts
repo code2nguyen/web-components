@@ -340,3 +340,27 @@ export function composedSelectionRanges(selection: Selection, shadowRoots: Shado
 export function composedSelectionRange(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange | undefined {
   return composedSelectionRanges(selection, shadowRoots)?.[0]
 }
+
+/**
+ * Makes `detail[key]` a getter that records being read, and returns whether it was. For an event that asks the
+ * application to act on a field (`item-drop`: add `items`; `item-move-out`: remove `rows`): a listener that does
+ * reads it, so an event nobody acted on can be told apart, whenever and however the listener was added.
+ */
+export function trackRead<T extends object, K extends keyof T>(detail: T, key: K): () => boolean {
+  let value = detail[key]
+  let read = false
+  Object.defineProperty(detail, key, {
+    get() {
+      read = true
+      return value
+    },
+    // A listener may replace the field (normalise the items in place): that is acting on it too.
+    set(next: T[K]) {
+      read = true
+      value = next
+    },
+    enumerable: true,
+    configurable: true,
+  })
+  return () => read
+}

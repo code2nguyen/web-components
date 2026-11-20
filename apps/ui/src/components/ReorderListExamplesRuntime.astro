@@ -7,7 +7,7 @@
   import type { ReorderList } from '@c2n/components/reorder-list'
   import '@c2n/components/reorder-list'
   import { addTranslations } from '@c2n/core/localize.js'
-  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+  import '@c2n/components/button'
 
   // The French an app would add for the gallery's French card: the library ships English only.
   addTranslations({
@@ -21,6 +21,7 @@
         atLast: '{0} est déjà à la dernière position permise.',
         moved: '{0} déplacé à la position {1} sur {2}.',
         dropped: '{0} déplacé de la position {1} à {2}.',
+        movedOut: '{0} a quitté la liste.',
         canceled: "Réorganisation annulée. L'élément est revenu à sa position d'origine.",
         canceledNotEditable: "Réorganisation annulée : la modification n'est plus disponible.",
         canceledItemsChanged: 'Les éléments ont changé. Réorganisation annulée.',
@@ -55,50 +56,65 @@
   interface Task {
     id: string
     label: string
+    /** The list the row came from, which `dragData` adds to what a row carries. */
+    from?: string
   }
 
-  /** The row a handle is being dragged from, so the list it lands on can take it out of its old list. */
-  let dragged: HTMLElement | null = null
-
-  /** Wires a row's handle: a native drag that writes the row under the `task` kind, kept off the list's own reorder. */
-  function wireHandle(row: HTMLElement) {
-    const handle = row.querySelector<HTMLElement>('[data-drag-handle]')
-    if (!handle || handle.dataset.wired) return
-    handle.dataset.wired = ''
-    handle.draggable = true
-    // The list reorders on pointer events; the handle starts the browser's drag instead.
-    handle.addEventListener('pointerdown', (event) => event.stopPropagation())
-    handle.addEventListener('dragstart', (event) => {
-      if (!event.dataTransfer) return
-      const task: Task = { id: row.dataset.reorderKey ?? '', label: row.dataset.reorderLabel ?? row.textContent?.trim() ?? '' }
-      writeItemPayload(event.dataTransfer, 'task', [task])
-      event.dataTransfer.effectAllowed = 'move'
-      dragged = row
-    })
-    handle.addEventListener('dragend', () => (dragged = null))
-  }
-
-  /** Lists that trade rows: the list fires `item-drop` with the row to insert before; the page adds the row. */
+  /**
+   * Lists that trade rows (`drag-kind` and `drop-kind`): the list a row lands on fires `item-drop` with the row to insert
+   * before, and the page adds one; the list it left fires `item-move-out`, and the page removes the old one. The arrow
+   * button is the keyboard path: `moveItemTo` on the list the row is in.
+   */
   function setupTransfer(list: ReorderList) {
-    list.querySelectorAll<HTMLElement>(':scope > [data-reorder-key]').forEach(wireHandle)
+    // What a row carries: the default `{ id, label }`, plus the list it leaves.
+    list.dragData = ({ key, element }) => ({ id: key, label: element.dataset.reorderLabel ?? '', from: list.getAttribute('aria-label') ?? '' })
     list.addEventListener('item-drop', ({ detail }) => {
-      for (const task of detail.items as Task[]) {
-        // Moved within the page: take the row out of its old list. Dropped from elsewhere: build a new one.
-        const row = dragged?.dataset.reorderKey === task.id ? dragged : document.createElement('div')
-        if (row !== dragged) {
-          row.dataset.reorderKey = task.id
-          row.dataset.reorderLabel = task.label
-          const handle = document.createElement('span')
-          handle.dataset.dragHandle = ''
-          handle.setAttribute('aria-hidden', 'true')
-          handle.textContent = '⠿'
-          row.append(handle, ` ${task.label}`)
-        }
-        if (row === detail.before) continue
-        list.insertBefore(row, detail.before ?? null)
-        wireHandle(row)
-      }
+      for (const task of detail.items as Task[]) list.insertBefore(rowFor(list, task), detail.before ?? null)
     })
+    list.addEventListener('item-move-out', ({ detail }) => {
+      for (const row of detail.rows) row.remove()
+    })
+    list.querySelectorAll<HTMLElement>(':scope > [data-reorder-key]').forEach((row) => wireMove(list, row))
+  }
+
+  /** A row as the page builds one, with its "move to the other list" button. */
+  function rowFor(list: ReorderList, task: Task): HTMLElement {
+    const row = document.createElement('div')
+    row.dataset.reorderKey = task.id
+    row.dataset.reorderLabel = task.label
+    const label = document.createElement('span')
+    label.textContent = task.label
+    if (task.from) {
+      const from = document.createElement('small')
+      from.className = 'transfer-from'
+      from.textContent = ` · from ${task.from}`
+      label.append(from)
+    }
+    row.append(label)
+    wireMove(list, row)
+    return row
+  }
+
+  function otherList(list: ReorderList): ReorderList | undefined {
+    // The card's container, not the parent: each list sits in its own island wrapper on the docs site.
+    const lists = list.closest('.task-lists')?.querySelectorAll<ReorderList>('c2-reorder-list[data-reorder-list-example="transfer"]') ?? []
+    return [...lists].find((candidate) => candidate !== list)
+  }
+
+  /** Adds the keyboard path to a row: a button that moves it to the other list, from whichever list it is in now. */
+  function wireMove(list: ReorderList, row: HTMLElement) {
+    row.querySelector('c2-button')?.remove()
+    const target = otherList(list)
+    const button = document.createElement('c2-button')
+    button.className = 'transfer-move'
+    button.textContent = '→'
+    button.setAttribute('aria-label', `Move ${row.dataset.reorderLabel} to ${target?.getAttribute('aria-label') ?? 'the other list'}`)
+    button.addEventListener('click', () => {
+      const from = row.closest<ReorderList>('c2-reorder-list')
+      const to = from && otherList(from)
+      if (from && to && row.dataset.reorderKey) from.moveItemTo(to, row.dataset.reorderKey)
+    })
+    row.append(button)
   }
 
   const initialized = new WeakSet<ReorderList>()
@@ -106,6 +122,9 @@
   function setup() {
     document.querySelectorAll<ReorderList>('c2-reorder-list[data-reorder-list-example]').forEach((list) => {
       if (initialized.has(list)) return
+      // A pair is wired once both lists are in the page: each is an island of its own, and the move buttons name the
+      // other one.
+      if (list.dataset.reorderListExample === 'transfer' && !otherList(list)) return
       initialized.add(list)
       if (list.dataset.reorderListExample === 'podium') setupPodium(list)
       if (list.dataset.reorderListExample === 'form') setupForm(list)

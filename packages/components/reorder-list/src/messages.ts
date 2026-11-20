@@ -16,6 +16,8 @@ const en = {
   deleted: (label: string) => `${label} deleted.`,
   actionDone: (action: string, label: string) => `${action}: ${label}.`,
   duplicateKey: (key: string) => `Reordering is unavailable because the item key ${key} is used more than once.`,
+  /** A row another list, board or tree took (`drag-kind`). */
+  movedOut: (label: string) => `${label} moved out of the list.`,
   canceled: 'Reordering canceled. The item returned to its original position.',
   canceledNotEditable: 'Reordering canceled because editing is no longer available.',
   canceledItemsChanged: 'Items changed. Reordering canceled.',

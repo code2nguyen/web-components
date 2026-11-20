@@ -31,6 +31,7 @@ declare module 'react' {
         'children-outline'?: Attribute
         'expand-on-click'?: Attribute
         'drop-kind'?: Attribute
+        'drag-kind'?: Attribute
         'max-depth'?: Attribute
         items?: Tree['items'] | string
         value?: Tree['value'] | string

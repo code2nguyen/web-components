@@ -1,7 +1,7 @@
 ---
 /**
- * Enhances kanban and matrix board examples whose property-only API (`renderItem`, and the drag source of a card moved
- * between boards) cannot be expressed as an HTML attribute.
+ * Enhances kanban and matrix board examples whose property-only API (`renderItem`, and the `moveItemTo` button of a card
+ * moved between boards) cannot be expressed as an HTML attribute.
  */
 ---
 
@@ -14,7 +14,7 @@
   import '@c2n/components/avatar'
   import '@c2n/components/badge'
   import { addTranslations } from '@c2n/core/localize.js'
-  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+  import '@c2n/components/button'
 
   addTranslations({
     fr: {
@@ -27,6 +27,7 @@
         droppedInPlace: '{0} reposée à sa place.',
         returned: '{0} revenue dans {1}, position {2}.',
         returnedInPlace: '{0} revenue à sa place.',
+        movedOut: '{0} a quitté le tableau.',
         refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
         atTop: '{0} est déjà sur la première ligne.',
         atBottom: '{0} est déjà sur la dernière ligne.',
@@ -49,6 +50,7 @@
         droppedInPlace: '{0} reposée à sa place.',
         returned: '{0} revenue dans {1}, position {2}.',
         returnedInPlace: '{0} revenue à sa place.',
+        movedOut: '{0} a quitté le tableau.',
         refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
         atStart: '{0} est déjà dans la première colonne.',
         atEnd: '{0} est déjà dans la dernière colonne.',
@@ -92,28 +94,29 @@
     })
   }
 
-  /** Boards that trade cards: each card has a handle that drags it out, and each board takes `kanban-card` drops. */
+  /**
+   * Boards that trade cards: `drag-kind` lets a card leave by a pointer drag or its handle; the "Move to" button is the
+   * keyboard path, `moveItemTo` on the board the card is on.
+   */
   function setupTransfer(board: Kanban) {
+    const other = () =>
+      // The card's container, not the parent: each board sits in its own island wrapper on the docs site.
+      [...(board.closest('.transfer-boards')?.querySelectorAll<Kanban>('c2-kanban[data-kanban-example="transfer"]') ?? [])].find(
+        (candidate) => candidate !== board,
+      )
+    const name = other()?.getAttribute('aria-label') ?? ''
     board.renderItem = ({ item }) => html`
-      <span style="display:flex;align-items:center;gap:8px">
-        <span
-          draggable="true"
-          title="Drag to the other board"
-          aria-hidden="true"
-          style="cursor:grab;opacity:0.55;font-size:14px;line-height:1"
-          @pointerdown=${(event: PointerEvent) => event.stopPropagation()}
-          @dragstart=${(event: DragEvent) => {
-            if (!event.dataTransfer) return
-            writeItemPayload(event.dataTransfer, 'kanban-card', [item])
-            event.dataTransfer.effectAllowed = 'move'
-          }}
-          @dragend=${(event: DragEvent) => {
-            // The board it landed on took it (a refused or cancelled drop reports no move): take it out of this one.
-            if (event.dataTransfer?.dropEffect === 'move') board.items = board.items.filter((card) => card !== item)
-          }}
-          >⠿</span
-        >
+      <span style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <span>${item.title}</span>
+        <c2-button
+          class="transfer-move"
+          aria-label=${`Move ${item.title} to ${name}`}
+          @click=${() => {
+            const target = other()
+            if (target) board.moveItemTo(target, String(item.id))
+          }}
+          >→</c2-button
+        >
       </span>
     `
   }
@@ -153,6 +156,9 @@
     })
     document.querySelectorAll<Kanban>('c2-kanban[data-kanban-example]').forEach((board) => {
       if (initialized.has(board)) return
+      // A pair is wired once both boards are in the page: each is an island of its own, and the move buttons name the
+      // other one.
+      if (board.dataset.kanbanExample === 'transfer' && (board.closest('.transfer-boards')?.querySelectorAll('c2-kanban').length ?? 0) < 2) return
       initialized.add(board)
       if (board.dataset.kanbanExample === 'sprint') setupSprint(board)
       if (board.dataset.kanbanExample === 'transfer') setupTransfer(board)
