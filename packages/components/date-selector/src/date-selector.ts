@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { queryAll, state } from 'lit/decorators.js'
-import { arrayPropertyConverter, itemListPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, itemListPropertyConverter, property, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -201,6 +201,8 @@ export class DateSelector extends LitElement {
   private defaultCompareFrom = ''
   private defaultCompareTo = ''
   private markedDates = new Set<string>()
+  /** Whether a day button had the focus when the update started. */
+  private dayHadFocus = false
   /** `disabledDates` by day, each with its reason (`''` for none), rebuilt when it changes. */
   private disabledMap = new Map<string, string>()
   @state() private disabledByForm = false
@@ -241,7 +243,10 @@ export class DateSelector extends LitElement {
    * read with the day. As an attribute, a `;`-separated list of days, or a JSON array of either form.
    */
   @property({ attribute: 'disabled-dates', converter: itemListPropertyConverter }) disabledDates: (DateSelectorDisabledDate | string)[] = []
-  /** Closes the days it returns `true` for, as a rule (`(date) => new Date(date).getDay() === 0` for every Sunday). Given a `YYYY-MM-DD` day. */
+  /**
+   * Closes the days it returns `true` for, as a rule. Given a `YYYY-MM-DD` day; read it at local noon, so every time
+   * zone gets the same weekday: `` (date) => new Date(`${date}T12:00:00`).getDay() === 0 `` closes every Sunday.
+   */
   @property({ attribute: false }) isDateDisabled?: (date: string) => boolean
   /** Adds content under each day's number. The day button, its label and its selection stay the component's. */
   @property({ attribute: false }) renderDay?: DateSelectorDayRenderer
@@ -329,6 +334,7 @@ export class DateSelector extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    this.dayHadFocus = !!this.shadowRoot?.activeElement?.classList.contains('day')
     if (!this.defaultsCaptured) {
       this.defaultFrom = this.from
       this.defaultTo = this.to
@@ -346,18 +352,14 @@ export class DateSelector extends LitElement {
     // A preset wins over a comparison range set by hand, so any change to either pair derives it again.
     if (['from', 'to', 'compare', 'mode', 'compareFrom', 'compareTo'].some((key) => changed.has(key as keyof DateSelector))) this.deriveCompare()
     if (!this.isRange && (changed.has('value') || changed.has('mode'))) this.normalizeValue()
-    if (changed.has('disabledDates')) {
-      this.disabledMap = new Map()
-      for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
-        const entry = typeof item === 'string' ? { date: item } : item
-        const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
-        if (date && !this.disabledMap.get(date)) this.disabledMap.set(date, entry.label ?? '')
-      }
-    }
+    if (changed.has('disabledDates')) this.disabledMap = readDisabledDates(this.disabledDates)
     if (changed.has('marked')) this.markedDates = new Set(Array.isArray(this.marked) ? this.marked.map((date) => date.trim()) : [])
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // The focused day was closed under the user (disabled-dates arriving late): its button went disabled and lost the
+    // focus, which goes to the day now holding the tab stop rather than to the page.
+    if (this.dayHadFocus && !this.shadowRoot?.activeElement) this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus()
     if (
       changed.has('from') ||
       changed.has('to') ||
@@ -369,6 +371,8 @@ export class DateSelector extends LitElement {
       changed.has('endName') ||
       changed.has('required') ||
       changed.has('disabled') ||
+      changed.has('disabledDates') ||
+      changed.has('isDateDisabled') ||
       // The validation message is translated: a new language, or translations added later, write it again.
       (!this.internals.validity.valid && this.internals.validationMessage !== this.missingMessage())
     )
@@ -430,8 +434,9 @@ export class DateSelector extends LitElement {
   }
 
   private syncFormState() {
+    // A selected day closed afterwards (disabled-dates arriving late) is kept, but neither submitted nor an answer.
     if (!this.isRange) {
-      const dates = this.selectedDates
+      const dates = this.selectedDates.filter((date) => !this.isClosed(date))
       if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null)
       else {
         const data = new FormData()
@@ -443,7 +448,8 @@ export class DateSelector extends LitElement {
       return
     }
     const compared = !!this.compareFrom && !!this.compareTo
-    if (this.effectiveDisabled || !this.name || !this.from) this.internals.setFormValue(null)
+    const closedEnd = (!!this.from && this.isClosed(this.from)) || (!!this.to && this.isClosed(this.to))
+    if (this.effectiveDisabled || !this.name || !this.from || closedEnd) this.internals.setFormValue(null)
     else if (this.to || compared) {
       const data = new FormData()
       data.append(this.name, this.from)
@@ -456,7 +462,7 @@ export class DateSelector extends LitElement {
       }
       this.internals.setFormValue(data, state)
     } else this.internals.setFormValue(this.from, `${this.from}/`)
-    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
+    if (this.required && (!this.from || !this.to || closedEnd)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
     else this.internals.setValidity({})
   }
 
@@ -519,7 +525,9 @@ export class DateSelector extends LitElement {
     let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
     const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1)
     const limit = withinWeek ? Math.abs(offset) : 366
-    for (let guard = 0; guard < limit && !this.effectiveDisabled && !this.outOfRange(toIso(target)) && this.isClosed(toIso(target)); guard++) {
+    // Home and End also step back over days outside min/max, landing on the nearest day inside them.
+    const blocked = (day: string) => this.isClosed(day) || (withinWeek && this.outOfRange(day))
+    for (let guard = 0; guard < limit && !this.effectiveDisabled && (withinWeek || !this.outOfRange(toIso(target))) && blocked(toIso(target)); guard++) {
       target = addDays(target, step)
     }
     const value = toIso(target)

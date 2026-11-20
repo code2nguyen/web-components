@@ -446,3 +446,34 @@ test('the grid keeps exactly one tab stop, on a day that can be picked', async (
   await scenario('multiple-empty')
   await expect(stops()).toHaveCount(1)
 })
+
+test('a selected day closed afterwards is not submitted and does not answer required', async ({ page, scenario }) => {
+  await scenario('single')
+  const selector = page.locator('c2-date-selector')
+  const state = () =>
+    selector.evaluate((element: HTMLElement & { checkValidity(): boolean }) => ({
+      valid: element.checkValidity(),
+      submitted: new FormData(element.closest('form')!).get('trip'),
+    }))
+  expect(await state()).toEqual({ valid: true, submitted: '2026-09-10' })
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
+  await expect.poll(state).toEqual({ valid: false, submitted: null })
+})
+
+test('the focus stays in the grid when the focused day is closed under it', async ({ page, scenario }) => {
+  await scenario('single')
+  await page.getByRole('gridcell', { name: /September 15, 2026/ }).focus()
+  await page.locator('c2-date-selector').evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-15']))
+  await expect(page.getByRole('gridcell', { name: /September 15, 2026/ })).toBeDisabled()
+  await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
+})
+
+test('Home lands on the nearest day inside min', async ({ page, scenario }) => {
+  await scenario('constrained')
+  // min is Tuesday 8 September: Home from Friday 11 stops there, not on the Monday before it.
+  await page.getByRole('gridcell', { name: /September 11, 2026/ }).focus()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('gridcell', { name: /September 8, 2026/ })).toBeFocused()
+})
