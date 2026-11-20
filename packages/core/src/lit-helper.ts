@@ -90,6 +90,20 @@ export const itemListPropertyConverter = {
   fromProperty: (value: unknown) => (typeof value === 'string' ? parseItemList(value) : value),
 } satisfies StringTolerantConverter & Record<string, unknown>
 
+/**
+ * Reads a `disabled-dates` list (days as `YYYY-MM-DD`, or `{ date, label }` objects) into the closed days, each with
+ * its reason (`''` for none). Days are trimmed; when a day is listed twice, a reason wins over none, then the first.
+ */
+export function readDisabledDates(list: unknown): Map<string, string> {
+  const days = new Map<string, string>()
+  for (const item of Array.isArray(list) ? list : []) {
+    const entry = (typeof item === 'string' ? { date: item } : item) as { date?: unknown; label?: unknown } | null
+    const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
+    if (date && !days.get(date)) days.set(date, typeof entry!.label === 'string' ? entry!.label : '')
+  }
+  return days
+}
+
 function parseItemList(value: string | null | undefined): unknown[] {
   if (!value) return []
   const trimmed = value.trim()
