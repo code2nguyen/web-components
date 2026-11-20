@@ -303,9 +303,11 @@ export class CardInput extends LitElement {
 
   /** The error `reportValidity()` reported, when no part has one of its own. */
   private reportedError(): { segment: Segment; message: string } | null {
-    if (!this.validityShown) return null
+    if (!this.validityShown || this.effectiveDisabled) return null
     if (this.customValidityMessage) return { segment: 'number', message: this.customValidityMessage }
-    return this.required && !this.anyFilled() ? { segment: 'number', message: this.msg.t('valueMissing') } : null
+    // A started card reports its first problem, untouched parts included, as the validity does.
+    if (this.anyFilled()) return this.firstError(true)
+    return this.required ? { segment: 'number', message: this.msg.t('valueMissing') } : null
   }
 
   /**

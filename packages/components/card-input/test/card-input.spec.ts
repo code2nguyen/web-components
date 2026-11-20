@@ -156,3 +156,20 @@ test('a reported missing card marks and describes the number, where the focus go
   await expect(number(page)).toHaveAttribute('aria-invalid', 'true')
   await expect(number(page)).toHaveAccessibleDescription(/Please enter your card details/)
 })
+
+test('a reported started card shows the problem of a part not left yet', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await number(page).fill('4242424242424242')
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(expiry(page)).toHaveAttribute('aria-invalid', 'true')
+  await expect(card(page).locator('[part="error"]')).toBeVisible()
+})
+
+test('a disabled card shows no reported error', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => {
+    element.reportValidity()
+    element.disabled = true
+  })
+  await expect(card(page).locator('[part="error"]')).toHaveCount(0)
+})
