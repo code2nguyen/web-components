@@ -1,5 +1,7 @@
 .page {
   display: grid;
+  /* An implicit auto column takes its children's min-content width, which the tabs and table briefly exceed while they lay out. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
 }
 
