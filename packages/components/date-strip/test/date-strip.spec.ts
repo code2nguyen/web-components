@@ -102,6 +102,30 @@ test('disabled dates cannot be picked and the arrows step over them; paging fire
   expect(JSON.parse((await strip(page).getAttribute('data-events'))!)).toEqual([{ start: '2026-10-18', end: '2026-10-24' }])
 })
 
+test('a disabled date given with a reason is read with it, from the attribute or the property', async ({ page, renderScenario }) => {
+  // An en-US week: Sunday 11 to Saturday 17 October.
+  const closed = JSON.stringify([{ date: '2026-10-11', label: 'Closed on Sundays' }, '2026-10-15'])
+  await renderScenario(
+    `<div lang="en-US"><c2-date-strip value="2026-10-13" disabled-dates='${closed}' markers='[{"date":"2026-10-11","label":"2 events"}]'></c2-date-strip></div>`,
+  )
+  await expect(page.getByRole('option', { name: 'Sunday, October 11, 2026, 2 events, Closed on Sundays' })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('option', { name: 'Thursday, October 15, 2026' })).toHaveAttribute('aria-disabled', 'true')
+  await page.getByRole('option', { name: /October 14, 2026/ }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('option', { name: /October 16, 2026/ })).toBeFocused()
+  await strip(page).evaluate((element: DateStrip) => (element.disabledDates = [{ date: '2026-10-16', label: 'Holiday' }]))
+  await expect(page.getByRole('option', { name: 'Friday, October 16, 2026, Holiday' })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('option', { name: 'Thursday, October 15, 2026' })).not.toHaveAttribute('aria-disabled', 'true')
+})
+
+test('a disabled date reason follows the language', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<div lang="fr"><c2-date-strip value="2026-10-13" disabled-dates='[{"date":"2026-10-18","label":"Fermé le dimanche"}]'></c2-date-strip></div>`,
+  )
+  // A French week runs Monday 12 to Sunday 18 October.
+  await expect(page.getByRole('option', { name: /^dimanche 18 octobre 2026, Fermé le dimanche$/ })).toHaveAttribute('aria-disabled', 'true')
+})
+
 test('Home and End land on the nearest day inside min and max', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="en-GB"><c2-date-strip value="2026-10-15" min="2026-10-14" max="2026-10-16"></c2-date-strip></div>`)
   await page.getByRole('option', { name: /15 October 2026/ }).focus()
