@@ -489,8 +489,13 @@ export class DateSelector extends LitElement {
     return this.disabledMap.has(value) || !!this.isDateDisabled?.(value)
   }
 
+  /** Closed for what a click picks now: a comparison range is a past reference, not a booking, so it may use any day. */
+  private blocksPicking(value: string) {
+    return this.isClosed(value) && !(this.isRange && this.editing === 'compare')
+  }
+
   private isUnavailable(value: string) {
-    return this.effectiveDisabled || this.outOfRange(value) || this.isClosed(value)
+    return this.effectiveDisabled || this.outOfRange(value) || this.blocksPicking(value)
   }
 
   /** A selected day closed afterwards, in `multiple` mode: it stays clickable so the user can take it out. */
@@ -509,9 +514,10 @@ export class DateSelector extends LitElement {
       if (this.compare && this.compare !== 'custom') this.compare = 'custom'
       ;[this.compareFrom, this.compareTo] = nextRange(this.compareFrom, this.compareTo, value)
     } else {
-      // A range end closed afterwards does not count: the click starts a new range.
-      const open = (date: string) => (date && !this.isClosed(date) ? date : '')
-      ;[this.from, this.to] = nextRange(open(this.from), open(this.from) ? open(this.to) : '', value)
+      // A range start closed afterwards does not anchor the click, which starts a new range; otherwise as usual (a click
+      // after a complete range, closed end or not, starts a new one).
+      const from = this.from && !this.isClosed(this.from) ? this.from : ''
+      ;[this.from, this.to] = nextRange(from, from ? this.to : '', value)
       // Derived now rather than in the next update, so the events below carry the new comparison range.
       this.deriveCompare()
     }
@@ -544,7 +550,7 @@ export class DateSelector extends LitElement {
     const date = fromIso(current)
     if (!date || offset === 0) return
     let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
-    const closed = (day: string) => this.isClosed(day) && !this.removableClosed(day)
+    const closed = (day: string) => this.blocksPicking(day) && !this.removableClosed(day)
     if (byMonth) {
       // Page Up and Page Down stay in the month asked for: the nearest day that can be picked after the target, else
       // before it (a day past `max` or before `min` counts as closed here).
