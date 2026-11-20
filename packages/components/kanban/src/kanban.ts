@@ -5,7 +5,9 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { KanbanColumn, KANBAN_COLUMN_CHANGE_EVENT, type KanbanCardView } from './kanban-column'
 import { DropZoneController, type DropZoneItems } from '@c2n/core/controllers/drop-zone.js'
-import { kanbanText, type KanbanTextArgs, type KanbanTextKey } from './kanban-text'
+import type { KanbanTextArgs, KanbanTextKey } from './kanban-text'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { kanbanMessages } from './messages.js'
 import styles from './kanban.scss?inline'
 
 export { KanbanColumn } from './kanban-column'
@@ -139,6 +141,9 @@ const EDGE_SCROLL_STEP = 10
  */
 @customElement('c2-kanban')
 export class Kanban extends LitElement {
+  /** ES-private, so a variant may keep a `msg` of its own. */
+  readonly #msg = new LocalizeController(this, kanbanMessages)
+
   static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The cards' data, in display order within each column. An array in the property, JSON in the attribute. */
@@ -254,10 +259,9 @@ export class Kanban extends LitElement {
     return html`<slot @slotchange=${this.handleSlotChange}></slot>`
   }
 
-  /** An announcement in English; a variant overrides it to translate. */
+  /** An announcement in the page's language, from the `kanban` catalog; a variant overrides it to read its own. */
   protected text<K extends KanbanTextKey>(key: K, ...args: KanbanTextArgs<K>): string {
-    const value = kanbanText[key]
-    return typeof value === 'function' ? (value as (...values: unknown[]) => string)(...args) : value
+    return (this.#msg.t as (key: string, ...values: unknown[]) => string)(key, ...args)
   }
 
   // ---- data ----

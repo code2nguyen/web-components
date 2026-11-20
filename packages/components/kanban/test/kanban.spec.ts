@@ -365,3 +365,12 @@ test('the built-in text of a column follows the language of the page', async ({ 
   await expect(column.locator('[part="empty"]')).toHaveText('Aucune carte')
   await expect(column.locator('p.visually-hidden')).toHaveText(/^\s*Appuyez sur Espace pour prendre une carte\./)
 })
+
+test("the board's move announcements follow the language of the page", async ({ page, renderScenario, tab }) => {
+  await renderScenario(`<div lang="fr">${board()}</div>`)
+  const host = page.locator('c2-kanban')
+  await tab()
+  await expect(card(page, 'Alpha')).toBeFocused()
+  await page.keyboard.press('Space')
+  await expect(host.getByRole('status')).toContainText('Alpha prise dans To do, position 1 sur 2')
+})

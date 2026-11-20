@@ -1,7 +1,6 @@
 /**
- * What `c2-kanban` announces while a card moves, in English. The board itself is not translated yet; a variant built on
- * it (`c2-matrix-board`) registers these keys in its own message catalog, so its announcements follow the page
- * language. Positions arrive counted from 1.
+ * What `c2-kanban` announces while a card moves, in English. The board registers these keys in the `kanban` catalog
+ * (`messages.ts`); a variant built on it (`c2-matrix-board`) registers them in its own. Positions arrive counted from 1.
  */
 export const kanbanText = {
   /** Name of a card whose label field is empty. */
