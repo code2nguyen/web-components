@@ -143,3 +143,58 @@ test('keywords and rare words find a component its description does not name', (
   assert.equal(searchComponents(registry, 'Let customers leave a 5 star review')[0].component.id, 'rate')
   assert.equal(searchComponents(registry, 'Show a menu when the user right-clicks a file in the list')[0].component.id, 'context-menu')
 })
+
+test('icon names are searched only when the query asks for an icon', () => {
+  const icons = { ...component('phosphor-icons', 'Phosphor icons', 'An icon set.', {}, 'Icons'), icons: ['bell', 'user', 'calendar'] }
+  const avatar = component('avatar', 'Avatar', 'A picture or the initials of a person.', {}, 'Data display')
+  const registry = { components: { icons, avatar } } as unknown as Registry
+  // "user" is an icon name; without the gate the icon set ranked first for a requirement about people.
+  assert.equal(searchComponents(registry, 'Show the initials of each user')[0].component.id, 'avatar')
+  assert.ok(!searchComponents(registry, 'Show the initials of each user').some((h) => h.component.id === 'phosphor-icons'))
+  assert.equal(searchComponents(registry, 'a bell icon in the header')[0].component.id, 'phosphor-icons')
+})
+
+test('intents find a component from what the requirement wants done, and the best one is reported', () => {
+  const sw = {
+    ...component('switch', 'Switch', 'A labelled control with a sliding thumb.', {}, 'Inputs'),
+    intents: ['Let users turn a setting on or off with immediate effect.', 'Enable or disable a feature from a settings list.'],
+  }
+  const checkbox = component('checkbox', 'Checkbox', 'A box the user ticks in a form.', {}, 'Inputs')
+  const registry = { components: { sw, checkbox } } as unknown as Registry
+  const [hit] = searchComponents(registry, 'Admins can disable the feature for their workspace')
+  assert.equal(hit.component.id, 'switch')
+  assert.equal(hit.intent, 'Enable or disable a feature from a settings list.')
+  assert.ok(hit.matches.includes('intents'))
+  // A hit found by other fields reports no intent.
+  assert.equal(searchComponents(registry, 'tick box')[0].intent, undefined)
+})
+
+test('a query that is an icon name finds the icon sets; "arrow keys" and icon-name phrases do not', () => {
+  const icons = {
+    ...component('phosphor-icons', 'Phosphor icons', 'An icon set for buttons and menus.', {}, 'Icons'),
+    icons: ['trash', 'user-plus', 'arrow-left'],
+  }
+  const tabs = component('tabs', 'Tabs', 'Panels the user moves between with the arrow keys.', {}, 'Navigation')
+  const menu = component('menu', 'Menu', 'A list of actions the user picks from.', {}, 'Navigation')
+  const registry = { components: { icons, tabs, menu } } as unknown as Registry
+  assert.equal(searchComponents(registry, 'trash')[0]?.component.id, 'phosphor-icons')
+  assert.ok(!searchComponents(registry, 'Navigate with arrow keys').some((h) => h.matches.some((m) => m.startsWith('icon:'))))
+  // "user plus" is an icon's name but the query is not about icons: no phrase bonus for it.
+  const hit = searchComponents(registry, 'Pick a user plus action in the menu').find((h) => h.component.id === 'phosphor-icons')
+  assert.ok(!hit?.matches.includes('phrase'))
+  assert.equal(searchComponents(registry, 'Pick a user plus action in the menu')[0].component.id, 'menu')
+})
+
+test('an icon name that is also a component name, in either number, is not an icon query', () => {
+  const icons = { ...component('feather-icons', 'Feather icons', 'An icon set.', {}, 'Icons'), icons: ['star', 'terminal', 'sliders'] }
+  const rate = { ...component('rate', 'Rate', 'A rating input.', {}, 'Inputs'), keywords: ['stars'] }
+  const terminal = component('terminal', 'Terminal', 'A command-line view.', {}, 'Data display')
+  const slider = component('slider', 'Slider', 'Pick a value along a track.', {}, 'Inputs')
+  const registry = { components: { icons, rate, terminal, slider } } as unknown as Registry
+  for (const query of ['star', 'terminal', 'sliders'])
+    assert.ok(!searchComponents(registry, query).some((h) => h.component.id === 'feather-icons'), `"${query}" found the icon set`)
+  // Only the plural is folded: an icon named "book" is not the keyword "booking".
+  const book = { ...icons, icons: ['book'] }
+  const scheduler = { ...component('scheduler', 'Scheduler', 'Resource bookings.', {}, 'Data display'), keywords: ['booking'] }
+  assert.ok(searchComponents({ components: { book, scheduler } } as unknown as Registry, 'book').some((h) => h.component.id === 'feather-icons'))
+})

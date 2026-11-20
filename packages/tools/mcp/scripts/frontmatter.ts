@@ -31,3 +31,10 @@ export function parseFrontmatter(source: string): { frontmatter: Record<string, 
 export function flowList(value: string): string[] {
   return [...value.matchAll(/'((?:[^']|'')*)'|"([^"]*)"|([^,[\]'"\s][^,\]]*)/g)].map((m) => (m[1]?.replace(/''/g, "'") ?? m[2] ?? m[3]).trim()).filter(Boolean)
 }
+
+/**
+ * The generator's placeholder for an unwritten intent (`'TODO: …'`): not an intent, and counted as missing. Only that
+ * shape (`TBD:`, or the bare word): guessing at other spellings dropped real sentences ("Todo–list items…"), so a
+ * hand-written "TODO - …" is the author's text.
+ */
+export const PLACEHOLDER_INTENT = /^(todo|tbd)\s*(:|$)/i
