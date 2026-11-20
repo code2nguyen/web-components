@@ -13,6 +13,8 @@ const en = {
   disabledReason: (day: string, reason: string) => `${day}, ${reason}`,
   /** The validation message of a required strip. */
   valueMissing: 'Please choose a day.',
+  /** The validation message of a required strip whose day was closed after it was picked (`disabled-dates`). */
+  closedValue: 'The chosen day is no longer available. Please choose another.',
 }
 
 /** The date strip's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

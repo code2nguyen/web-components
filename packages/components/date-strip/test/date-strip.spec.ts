@@ -139,3 +139,16 @@ test('Home and End land on the nearest day inside min and max', async ({ page, r
   await page.keyboard.press('End')
   await expect(page.getByRole('option', { name: /16 October 2026/ })).toBeFocused()
 })
+
+test('a day closed after it was picked is not submitted and does not answer required', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-date-strip name="day" required value="2026-10-15"></c2-date-strip></form>`)
+  const state = () =>
+    strip(page).evaluate((element: DateStrip) => ({
+      valid: element.checkValidity(),
+      submitted: new FormData(element.closest('form')!).get('day'),
+      message: element.validationMessage,
+    }))
+  expect(await state()).toEqual({ valid: true, submitted: '2026-10-15', message: '' })
+  await strip(page).evaluate((element: DateStrip) => (element.disabledDates = ['2026-10-15']))
+  await expect.poll(state).toEqual({ valid: false, submitted: null, message: 'The chosen day is no longer available. Please choose another.' })
+})

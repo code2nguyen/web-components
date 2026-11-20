@@ -345,10 +345,12 @@ export class DateStrip extends LitElement {
   }
 
   private syncFormState(): void {
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value ? null : this.value, this.value)
-    const missing = this.required && !this.value
+    // A day closed after it was picked (disabled-dates arriving late) is kept, but neither submitted nor an answer.
+    const closed = !!this.value && this.disabledMap.has(this.value)
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
+    const missing = this.required && (!this.value || closed)
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t(closed ? 'closedValue' : 'valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.day[tabindex="0"]') ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
