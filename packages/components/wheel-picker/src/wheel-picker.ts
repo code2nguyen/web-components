@@ -310,8 +310,8 @@ export class WheelPicker extends LitElement {
     const flags = this.customValidityMessage ? { customError: true } : {}
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.wheel') ?? undefined
     this.internals.setValidity(flags, this.customValidityMessage, anchor)
-    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
-    // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a custom-invalid
+    // control would be announced as invalid on load. Invalid is the error the field shows, or the
     // failed constraint once `reportValidity()` reported it (see `errorShown`).
     this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
