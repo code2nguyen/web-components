@@ -458,6 +458,9 @@ test('a selected day closed afterwards is not submitted and does not answer requ
   expect(await state()).toEqual({ valid: true, submitted: '2026-09-10' })
   await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
   await expect.poll(state).toEqual({ valid: false, submitted: null })
+  expect(await selector.evaluate((element: HTMLElement & { validationMessage: string }) => element.validationMessage)).toBe(
+    'The chosen date is no longer available',
+  )
 })
 
 test('the focus stays in the grid when the focused day is closed under it', async ({ page, scenario }) => {

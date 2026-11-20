@@ -434,15 +434,23 @@ export class DateSelector extends LitElement {
     if (value !== this.value) this.value = value
   }
 
+  /** A selection is made but closed afterwards (disabled-dates arriving late): a range end, or every selected day. */
+  private selectionClosed() {
+    if (this.isRange) return (!!this.from && this.isClosed(this.from)) || (!!this.to && this.isClosed(this.to))
+    const dates = this.selectedDates
+    return dates.length > 0 && dates.every((date) => this.isClosed(date))
+  }
+
   private missingMessage() {
-    return this.msg.t(missingMessages[this.isRange ? 'range' : this.mode])
+    return this.selectionClosed() ? this.msg.t('closedSelection') : this.msg.t(missingMessages[this.isRange ? 'range' : this.mode])
   }
 
   private syncFormState() {
     // A selected day closed afterwards (disabled-dates arriving late) is kept, but neither submitted nor an answer.
     if (!this.isRange) {
       const dates = this.selectedDates.filter((date) => !this.isClosed(date))
-      if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null)
+      // The restore state keeps a closed selection, so it comes back with the page if the day reopens.
+      if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null, this.value || null)
       else {
         const data = new FormData()
         for (const date of dates) data.append(this.name, date)
@@ -453,8 +461,9 @@ export class DateSelector extends LitElement {
       return
     }
     const compared = !!this.compareFrom && !!this.compareTo
-    const closedEnd = (!!this.from && this.isClosed(this.from)) || (!!this.to && this.isClosed(this.to))
-    if (this.effectiveDisabled || !this.name || !this.from || closedEnd) this.internals.setFormValue(null)
+    const closedEnd = this.selectionClosed()
+    if (this.effectiveDisabled || !this.name || !this.from) this.internals.setFormValue(null)
+    else if (closedEnd) this.internals.setFormValue(null, `${this.from}/${this.to}`)
     else if (this.to || compared) {
       const data = new FormData()
       data.append(this.name, this.from)

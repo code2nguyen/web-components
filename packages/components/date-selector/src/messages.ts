@@ -15,6 +15,8 @@ const en = {
   missingDate: 'Choose a date',
   /** Validation message of a `required` selector in `multiple` mode with no date. */
   missingDates: 'Choose at least one date',
+  /** Validation message of a `required` selector whose chosen day was closed afterwards (`disabled-dates`). */
+  closedSelection: 'The chosen date is no longer available',
   /** Description of each day inside the comparison range (`compare-from` to `compare-to`). */
   inComparison: 'In the comparison period',
   /** A day given in `disabled-dates` with a reason: the date, then the reason. */
