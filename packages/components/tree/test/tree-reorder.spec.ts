@@ -495,6 +495,8 @@ test("a reorderable tree keeps the browser's drag off its rows, but not off a ha
       <c2-tree-item value="readme"><span slot="label"><a href="#readme">README.md</a> <span class="handle" draggable="true">⠿</span></span></c2-tree-item>
     </c2-tree>
   `)
+  // The reorder module loads on demand: wait for it, as a user's first drag comes long after.
+  await expect(page.locator('c2-tree').locator('.drop-indicator')).toHaveCount(1)
   const cancelled = await page.evaluate(() => {
     const fire = (target: Element) => {
       const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
