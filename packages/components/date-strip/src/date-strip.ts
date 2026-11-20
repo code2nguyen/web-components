@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter, itemListPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, itemListPropertyConverter, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -234,14 +234,7 @@ export class DateStrip extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') && this.value && !fromIso(this.value)) this.value = ''
     if (this.defaultValue === undefined) this.defaultValue = this.value
-    if (changed.has('disabledDates')) {
-      this.disabledMap = new Map()
-      for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
-        const entry = typeof item === 'string' ? { date: item } : item
-        const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
-        if (date && !this.disabledMap.get(date)) this.disabledMap.set(date, entry.label ?? '')
-      }
-    }
+    if (changed.has('disabledDates')) this.disabledMap = readDisabledDates(this.disabledDates)
     if (changed.has('markers')) {
       this.markerMap = new Map()
       for (const marker of Array.isArray(this.markers) ? this.markers : []) {
