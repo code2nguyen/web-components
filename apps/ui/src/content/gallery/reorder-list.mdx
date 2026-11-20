@@ -202,39 +202,55 @@ import { ReorderList } from '@c2n/components/reorder-list'
 
 </GalleryGrid>
 
-## Drops from another list
+## Moving rows between lists
 
-A list with `drop-kind` takes rows dropped from outside it. The source writes them with `writeItemPayload` from
-`@c2n/core/controllers/drop-zone.js` under the same kind; the list lights up while they are over it (red for another
-kind), fires `item-drop` with the row to insert before, and announces how many were added. The page adds the rows. Drag
-a task by its handle to the other list.
+A list with `drop-kind` takes rows from outside it; a list with `drag-kind` lets its rows leave: a pointer drag carried
+off the list drops the row on the list under the pointer, each row's handle starts a drag the browser carries (a
+drop back on its own list reorders it; a drop outside c2n, in another window too, takes a copy), and `moveItemTo(target, key)` is the keyboard path an application wires to a command. The list
+under the row lights up (red for another kind, under a handle drag) and fires `item-drop` with the row to insert before; the list the row
+left fires `item-move-out`. The lists draw no rows of their own: the page adds and removes them. Drag a task to the
+other list, or use its arrow button.
 
 <GalleryGrid columns="1">
 
-```html tag=MdxCodeBlock,label=Drag between lists
+```html tag=MdxCodeBlock,label=Move rows between lists
 <style>
   .task-lists {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+    --c2-button__container--height: 24px;
+    --c2-button__container--padding-left: 6px;
+    --c2-button__container--padding-right: 6px;
   }
   .task-lists c2-reorder-list {
-    flex: 1 1 200px;
+    flex: 1 1 220px;
     --c2-reorder-list--container-gap: 6px;
+    /* Two boxes, so the two lists read as two. */
+    --c2-reorder-list--container-border-width: 1px;
+    --c2-reorder-list--container-border-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-reorder-list--container-border-radius: 8px;
+    --c2-reorder-list--container-padding: 8px;
   }
-  .task-lists [data-drag-handle] {
-    cursor: grab;
-    opacity: 0.55;
+  .task-lists .transfer-from {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 12px;
+  }
+  .task-lists [data-reorder-key] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
 </style>
 <div class="task-lists">
-  <c2-reorder-list client:only="lit" editable drop-kind="task" data-reorder-list-example="transfer" aria-label="Inbox">
-    <div data-reorder-key="invoice" data-reorder-label="Send the invoice"><span data-drag-handle aria-hidden="true">⠿</span> Send the invoice</div>
-    <div data-reorder-key="review" data-reorder-label="Review the contract"><span data-drag-handle aria-hidden="true">⠿</span> Review the contract</div>
-    <div data-reorder-key="call" data-reorder-label="Call the supplier"><span data-drag-handle aria-hidden="true">⠿</span> Call the supplier</div>
+  <c2-reorder-list client:only="lit" editable drag-kind="task" drop-kind="task" data-reorder-list-example="transfer" aria-label="Inbox">
+    <div data-reorder-key="invoice" data-reorder-label="Send the invoice"><span>Send the invoice</span></div>
+    <div data-reorder-key="review" data-reorder-label="Review the contract"><span>Review the contract</span></div>
+    <div data-reorder-key="call" data-reorder-label="Call the supplier"><span>Call the supplier</span></div>
   </c2-reorder-list>
-  <c2-reorder-list client:only="lit" editable drop-kind="task" data-reorder-list-example="transfer" aria-label="Today">
-    <div data-reorder-key="standup" data-reorder-label="Team stand-up"><span data-drag-handle aria-hidden="true">⠿</span> Team stand-up</div>
+  <c2-reorder-list client:only="lit" editable drag-kind="task" drop-kind="task" data-reorder-list-example="transfer" aria-label="Today">
+    <div data-reorder-key="standup" data-reorder-label="Team stand-up"><span>Team stand-up</span></div>
   </c2-reorder-list>
 </div>
 ```
@@ -242,17 +258,19 @@ a task by its handle to the other list.
 </GalleryGrid>
 
 ```ts tag=CodeBlock
-import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+// <c2-reorder-list editable drag-kind="task" drop-kind="task"> on both lists. A row carries { id, label }, or what
+// dragData returns: here also the list it leaves, which the row shows where it lands.
+inbox.dragData = ({ key, element }) => ({ id: key, label: element.dataset.reorderLabel, from: inbox.getAttribute('aria-label') })
 
-// The source: a handle in each row writes the row under the list's drop-kind.
-handle.draggable = true
-handle.addEventListener('pointerdown', (event) => event.stopPropagation()) // keep the list's own reorder off it
-handle.addEventListener('dragstart', (event) => writeItemPayload(event.dataTransfer!, 'task', [{ id: row.dataset.reorderKey, label: 'Send the invoice' }]))
-
-// The target hands the place over; the page adds (or moves) the row.
+// The page adds the row where it landed, and removes it from the list it left. Read detail.items and detail.rows in
+// the listener itself: a list counts the move only once they are read, not later in a state update.
 today.addEventListener('item-drop', ({ detail }) => {
   for (const task of detail.items) today.insertBefore(rowFor(task), detail.before)
 })
+inbox.addEventListener('item-move-out', ({ detail }) => detail.rows.forEach((row) => row.remove()))
+
+// The keyboard path: a command in each row.
+moveButton.addEventListener('click', () => inbox.moveItemTo(today, row.dataset.reorderKey))
 ```
 
 <ReorderListExamplesRuntime />

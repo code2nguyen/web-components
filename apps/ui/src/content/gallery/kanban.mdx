@@ -151,31 +151,37 @@ the board to reach every column. Give the board a `renderItem` for richer card c
 
 </GalleryGrid>
 
-## Drops from another board
+## Moving cards between boards
 
-A board with `drop-kind` takes cards dropped from outside it: another board, a list elsewhere in the page, another
-window. The source writes them with `writeItemPayload` from `@c2n/core/controllers/drop-zone.js` under the same kind;
-the board lights up while they are over it (red for another kind), adds them where they land, fires `item-drop` and
-announces how many it added. Drag a card by its handle to the other board.
+A board with `drop-kind` takes cards from outside it: another board, a list elsewhere in the page, another window. A
+board with `drag-kind` lets its cards leave: a pointer drag carried off the board drops the card on the board under the
+pointer, each card's handle starts a drag the browser carries (dropped back on its own board it moves the card there; a drop outside c2n, in another window too, takes a copy), and `moveItemTo(target, key)`
+is the keyboard path an application wires to a command. The board under the card lights up (red for another kind, under a handle drag),
+adds it where it lands and fires `item-drop`; the card then leaves its own board, which fires `item-move-out`. Each
+board announces what it did. Drag a card to the other board, or use its arrow button.
 
 <KanbanExamplesRuntime />
 
 <GalleryGrid columns="1">
 
-```html tag=MdxCodeBlock,label=Drag between boards
+```html tag=MdxCodeBlock,label=Move cards between boards
 <style>
   .transfer-boards {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    --c2-kanban-column--width: 170px;
+    --c2-kanban-column--width: 190px;
     --c2-kanban-column__card--font-size: 13px;
+    --c2-button__container--height: 24px;
+    --c2-button__container--padding-left: 6px;
+    --c2-button__container--padding-right: 6px;
   }
 </style>
 <div class="transfer-boards">
   <c2-kanban
     client:only="lit"
     editable
+    drag-kind="kanban-card"
     drop-kind="kanban-card"
     data-kanban-example="transfer"
     aria-label="Backlog"
@@ -186,6 +192,7 @@ announces how many it added. Drag a card by its handle to the other board.
   <c2-kanban
     client:only="lit"
     editable
+    drag-kind="kanban-card"
     drop-kind="kanban-card"
     data-kanban-example="transfer"
     aria-label="Sprint 43"
@@ -200,23 +207,15 @@ announces how many it added. Drag a card by its handle to the other board.
 </GalleryGrid>
 
 ```ts tag=CodeBlock
-import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+// <c2-kanban editable drag-kind="kanban-card" drop-kind="kanban-card"> on both boards: cards move by pointer or handle.
 
-// The source: a drag handle in each card writes the card under the board's drop-kind.
-backlog.renderItem = ({ item }) => html`
-  <span
-    draggable="true"
-    aria-hidden="true"
-    @dragstart=${(event: DragEvent) => {
-      writeItemPayload(event.dataTransfer!, 'kanban-card', [item])
-      event.dataTransfer!.effectAllowed = 'move'
-    }}
-    @dragend=${(event: DragEvent) => {
-      // The target adds the cards itself and reports a move only when it took them: then the source lets go.
-      if (event.dataTransfer?.dropEffect === 'move') backlog.items = backlog.items.filter((card) => card !== item)
-    }}
-  >⠿</span>
-  ${item.title}`
+// The keyboard path: a command in each card moves it to the other board.
+backlog.renderItem = ({ item }) => html`${item.title}
+  <c2-button aria-label="Move ${item.title} to the sprint" @click=${() => backlog.moveItemTo(sprint, String(item.id))}>→</c2-button>`
+
+// Save both sides of a move.
+sprint.addEventListener('item-drop', ({ detail }) => save(detail.items))
+backlog.addEventListener('item-move-out', ({ detail }) => save(detail.items))
 ```
 
 ## Language
@@ -255,6 +254,7 @@ addTranslations({
       droppedInPlace: '{0} reposée à sa place.',
       returned: '{0} revenue dans {1}, position {2}.',
       returnedInPlace: '{0} revenue à sa place.',
+      movedOut: '{0} a quitté le tableau.',
       refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
       atStart: '{0} est déjà dans la première colonne.',
       atEnd: '{0} est déjà dans la dernière colonne.',
