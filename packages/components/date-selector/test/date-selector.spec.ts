@@ -415,12 +415,12 @@ test('disabled-dates and isDateDisabled close days: read with their reason, not 
   await expect(page.getByRole('gridcell', { name: /September 14, 2026/ })).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('gridcell', { name: /September 16, 2026/ })).toBeFocused()
-  // Back over the same days; down a week onto a closed day lands on the next open one.
+  // Back over the same days; down a week onto a closed day keeps the column and lands a week further.
   await page.keyboard.press('ArrowLeft')
   await expect(page.getByRole('gridcell', { name: /September 14, 2026/ })).toBeFocused()
   await page.getByRole('gridcell', { name: /September 8, 2026/ }).focus()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('gridcell', { name: /September 16, 2026/ })).toBeFocused()
+  await expect(page.getByRole('gridcell', { name: /September 22, 2026/ })).toBeFocused()
   await page.getByRole('gridcell', { name: /September 7, 2026/ }).focus()
   await page.keyboard.press('ArrowLeft')
   await expect(page.getByRole('gridcell', { name: /September 5, 2026/ })).toBeFocused()
@@ -527,4 +527,15 @@ test('in multiple mode the keyboard reaches a selected day closed afterwards, an
   await page.getByRole('gridcell', { name: /September 30, 2026/ }).focus()
   await page.keyboard.press('PageDown')
   await expect(page.getByRole('gridcell', { name: /October 28, 2026/ })).toBeFocused()
+})
+
+test('Page Down lands on the nearest day inside max in the month asked for', async ({ page, scenario }) => {
+  await scenario('constrained')
+  // max is 20 September: Page Down from 25 August would be 25 September, past max; it lands on 20 September.
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { min: string }) => (element.min = '2026-08-01'))
+  await page.getByRole('button', { name: 'Previous month' }).click()
+  await page.getByRole('gridcell', { name: /August 25, 2026/ }).focus()
+  await page.keyboard.press('PageDown')
+  await expect(page.getByRole('gridcell', { name: /September 20, 2026/ })).toBeFocused()
 })

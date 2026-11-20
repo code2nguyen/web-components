@@ -546,17 +546,20 @@ export class DateSelector extends LitElement {
     let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
     const closed = (day: string) => this.isClosed(day) && !this.removableClosed(day)
     if (byMonth) {
-      // Page Up and Page Down stay in the month asked for: the nearest open day after the target, else before it.
+      // Page Up and Page Down stay in the month asked for: the nearest day that can be picked after the target, else
+      // before it (a day past `max` or before `min` counts as closed here).
+      const pickable = (day: string) => !closed(day) && !this.outOfRange(day)
       const month = target.getMonth()
       const inMonth = (day: Date) => day.getMonth() === month
       let found: Date | undefined
-      for (let day = target; !found && inMonth(day); day = addDays(day, 1)) if (!closed(toIso(day))) found = day
-      for (let day = addDays(target, -1); !found && inMonth(day); day = addDays(day, -1)) if (!closed(toIso(day))) found = day
+      for (let day = target; !found && inMonth(day); day = addDays(day, 1)) if (pickable(toIso(day))) found = day
+      for (let day = addDays(target, -1); !found && inMonth(day); day = addDays(day, -1)) if (pickable(toIso(day))) found = day
       if (!found) return
       target = found
     } else {
-      const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1)
-      const limit = withinWeek ? Math.abs(offset) : 366
+      // Up and Down keep the weekday column, stepping a week at a time; the other moves step a day at a time.
+      const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1) * (Math.abs(offset) === 7 && !withinWeek ? 7 : 1)
+      const limit = withinWeek ? Math.abs(offset) : Math.abs(step) === 7 ? 53 : 366
       // Home and End also step back over days outside min/max, landing on the nearest day inside them.
       const blocked = (day: string) => closed(day) || (withinWeek && this.outOfRange(day))
       for (let guard = 0; guard < limit && !this.effectiveDisabled && (withinWeek || !this.outOfRange(toIso(target))) && blocked(toIso(target)); guard++) {
