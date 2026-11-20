@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, axInvalid } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 import type { CardInput } from '../src/card-input'
 
@@ -126,4 +126,12 @@ test('with brands limited, a number of a network the field does not know is refu
   await number(page).fill('9000000000000001')
   await expiry(page).focus()
   await expect(card(page).locator('[part="error"]')).toHaveText('This card type is not accepted.')
+})
+
+test('a required empty card is not announced as invalid before the user does anything', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await expect(number(page)).toBeVisible()
+  expect(await card(page).evaluate((element: CardInput) => element.checkValidity())).toBe(false)
+  expect(await axInvalid(page, 'group', 'Card')).not.toBe('true')
 })

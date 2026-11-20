@@ -258,6 +258,9 @@ export class CardInput extends LitElement {
 
   protected override willUpdate(): void {
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
+    // empty card would be announced as invalid on load. Invalid is the error shown, as for a native control.
+    this.internals.ariaInvalid = (!!this.firstError() || this.field.invalid) && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   protected override updated(): void {
