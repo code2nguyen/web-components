@@ -138,9 +138,8 @@ export class CardInput extends LitElement {
   @state() private cvcDigits = ''
   /** Parts that lost focus once: only their problems show. */
   @state() private touched = new Set<Segment>()
-  /** Set by a failed submit or `reportValidity()`: from then on a missing card is announced too. */
+  /** Set by `reportValidity()`: from then on a missing card is announced too. */
   @state() private validityShown = false
-  private checkingValidity = false
   @state() private disabledByForm = false
   /** The detected brand's name, in a polite live region: announced once per change. */
   @state() private brandAnnouncement = ''
@@ -154,10 +153,7 @@ export class CardInput extends LitElement {
     super()
     this.internals.role = 'group'
     // A failed submit shows every problem, as if each part had been left.
-    this.addEventListener('invalid', () => {
-      this.touched = new Set<Segment>(['number', 'expiry', 'cvc'])
-      if (!this.checkingValidity) this.validityShown = true
-    })
+    this.addEventListener('invalid', () => (this.touched = new Set<Segment>(['number', 'expiry', 'cvc'])))
   }
 
   /** A page kept in the back/forward cache must not keep the card: it is cleared as the page is stored. */
@@ -232,22 +228,20 @@ export class CardInput extends LitElement {
   }
 
   checkValidity() {
-    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
-    this.checkingValidity = true
-    try {
-      return this.internals.checkValidity()
-    } finally {
-      this.checkingValidity = false
-    }
+    return this.internals.checkValidity()
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {

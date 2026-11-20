@@ -133,10 +133,11 @@ test('a required empty card is not announced as invalid before the user does any
   await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
   await expect(number(page)).toBeVisible()
   expect(await card(page).evaluate((element: CardInput) => element.checkValidity())).toBe(false)
+  expect(await page.locator('form').evaluate((form: HTMLFormElement) => form.checkValidity())).toBe(false)
   expect(await axInvalid(page, 'group', 'Card')).not.toBe('true')
 })
 
-test('a required empty card is announced as invalid once a submit reported it', async ({ page, renderScenario, browserName }) => {
+test('a required empty card is announced as invalid once reportValidity() reported it', async ({ page, renderScenario, browserName }) => {
   test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
   await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
   await card(page).evaluate((element: CardInput) => element.reportValidity())
