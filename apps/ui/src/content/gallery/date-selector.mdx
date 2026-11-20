@@ -104,6 +104,12 @@ the days that carry something, and `renderDay` draws content of your own under t
 ></c2-date-selector>
 ```
 
+```html tag=MdxCodeBlock,label=Closed days
+<c2-date-selector mode="single" months="1" value="2026-09-17" locale="en-US" aria-label="Choose an appointment day"
+  disabled-dates='[{"date":"2026-09-11","label":"Holiday"},{"date":"2026-09-24","label":"Staff training"}]'
+  data-closed-example="sundays"></c2-date-selector>
+```
+
 ```html tag=MdxCodeBlock,label=Prices per day
 <style>
   .fare-calendar {
@@ -127,6 +133,14 @@ import type { DateSelector } from '@c2n/components/date-selector'
 const fares: Record<string, number> = { '2026-09-15': 129, '2026-09-16': 98 /* … */ }
 const calendar = document.querySelector<DateSelector>('.fare-calendar')!
 calendar.renderDay = ({ date, disabled }) => (disabled || !(date in fares) ? undefined : `$${fares[date]}`)
+```
+
+The closed-days card names its holidays in `disabled-dates` (each reason is read with the day) and closes every Sunday
+by rule with `isDateDisabled`; the arrow keys step over both:
+
+```ts tag=CodeBlock
+const calendar = document.querySelector<DateSelector>('c2-date-selector')!
+calendar.isDateDisabled = (date) => new Date(`${date}T12:00:00`).getDay() === 0
 ```
 
 ## Comparing two periods

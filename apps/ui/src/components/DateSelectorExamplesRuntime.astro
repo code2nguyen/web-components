@@ -3,6 +3,7 @@
  * Resolves relative date bounds for date-selector documentation examples. `data-min-days` / `data-max-days` are day
  * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates.
  * `data-render-day-example="fares"` gets a `renderDay` that draws a made-up fare under each day.
+ * `data-closed-example="sundays"` gets an `isDateDisabled` that closes every Sunday.
  * `data-compare-example="toggle"` wires the `c2-select` in its footer to `compare` and writes the comparison range
  * into the footer's `output`. The French date-selector messages are registered here, as an app would.
  */
@@ -25,6 +26,7 @@
         missingDate: 'Choisissez une date',
         missingDates: 'Choisissez au moins une date',
         inComparison: 'Dans la période de comparaison',
+        disabledReason: (date: string, reason: string) => `${date}, ${reason}`,
       },
     },
   })
@@ -68,18 +70,19 @@
   function setup(selector: DateSelector) {
     if (initialized.has(selector)) return
     initialized.add(selector)
-    const { minDays, maxDays, renderDayExample, compareExample } = selector.dataset
+    const { minDays, maxDays, renderDayExample, compareExample, closedExample } = selector.dataset
     if (minDays !== undefined) selector.min = isoDaysFromToday(Number(minDays))
     if (maxDays !== undefined) selector.max = isoDaysFromToday(Number(maxDays))
     // A made-up but deterministic fare per day of the month, so the card reads like a fare calendar.
     if (renderDayExample === 'fares') selector.renderDay = ({ day, disabled }) => (disabled ? undefined : `$${80 + ((day * 37) % 90)}`)
     if (compareExample === 'toggle') setupCompareToggle(selector)
+    if (closedExample === 'sundays') selector.isDateDisabled = (date) => new Date(`${date}T12:00:00`).getDay() === 0
   }
 
   function setupAll() {
     document
       .querySelectorAll<DateSelector>(
-        'c2-date-selector[data-min-days], c2-date-selector[data-max-days], c2-date-selector[data-render-day-example], c2-date-selector[data-compare-example]',
+        'c2-date-selector[data-min-days], c2-date-selector[data-max-days], c2-date-selector[data-render-day-example], c2-date-selector[data-compare-example], c2-date-selector[data-closed-example]',
       )
       .forEach(setup)
   }

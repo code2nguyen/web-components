@@ -6,6 +6,7 @@ addTranslations({
     'date-selector': {
       previousMonth: 'Mois précédent',
       inComparison: 'Dans la période de comparaison',
+      disabledReason: (date: string, reason: string) => `${date}, ${reason}`,
       missingRange: 'Choisissez une date de début et de fin',
     },
   },

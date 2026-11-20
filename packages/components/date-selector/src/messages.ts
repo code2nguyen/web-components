@@ -17,6 +17,8 @@ const en = {
   missingDates: 'Choose at least one date',
   /** Description of each day inside the comparison range (`compare-from` to `compare-to`). */
   inComparison: 'In the comparison period',
+  /** A day given in `disabled-dates` with a reason: the date, then the reason. */
+  disabledReason: (date: string, reason: string) => `${date}, ${reason}`,
 }
 
 /** The date selector's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
