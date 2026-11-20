@@ -143,3 +143,9 @@ test('a required empty card is announced as invalid once reportValidity() report
   await card(page).evaluate((element: CardInput) => element.reportValidity())
   await expect.poll(() => axInvalid(page, 'group', 'Card')).toBe('true')
 })
+
+test('a reported missing card shows its error as well as announcing it', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(card(page).locator('[part="field"]')).toHaveClass(/field--invalid/)
+})

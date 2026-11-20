@@ -301,6 +301,15 @@ export class CardInput extends LitElement {
     return !!(this.numberDigits || this.expiryDigits || this.cvcDigits)
   }
 
+  /**
+   * Whether the error is shown, on the host and on the field alike: a part's error, an enclosing field's error, or a
+   * missing card or custom message once `reportValidity()` reported it.
+   */
+  private get errorShown(): boolean {
+    const reported = this.validityShown && ((this.required && !this.anyFilled()) || !!this.customValidityMessage)
+    return (!!this.firstError() || this.field.invalid || reported) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
     const filled = this.anyFilled()
     if (this.effectiveDisabled || !this.name || !filled) this.internals.setFormValue(null)
@@ -320,8 +329,7 @@ export class CardInput extends LitElement {
     this.internals.setValidity(flags, message, anchor)
     // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
     // empty card would be announced as invalid on load. Invalid is the error shown, or the validity once reported.
-    const shown = !!this.firstError() || this.field.invalid || (this.validityShown && (missing || !!this.customValidityMessage))
-    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   private input(segment: Segment): HTMLInputElement | null {
@@ -460,7 +468,7 @@ export class CardInput extends LitElement {
   override render() {
     const disabled = this.effectiveDisabled
     const error = this.firstError()
-    const invalid = (!!error || this.field.invalid) && !disabled
+    const invalid = this.errorShown
     const errorId = 'card-error'
     const describedBy = this.field.describedBy(...(error && !this.field.managed ? [errorId] : []))
     const segmentInvalid = (segment: Segment) => (error?.segment === segment || (this.field.invalid && !error) ? 'true' : nothing)
