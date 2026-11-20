@@ -639,7 +639,7 @@ export class DateSelector extends LitElement {
       type="button"
       role="gridcell"
       data-date=${value}
-      aria-label=${this.disabledMap.get(value) ? this.msg.t('disabledReason', dateLabel.format(date), this.disabledMap.get(value)!) : dateLabel.format(date)}
+      aria-label=${disabled && this.disabledMap.get(value) ? this.msg.t('disabledReason', dateLabel.format(date), this.disabledMap.get(value)!) : dateLabel.format(date)}
       aria-describedby=${describedBy || nothing}
       aria-selected=${selected ? 'true' : 'false'}
       aria-current=${value === today ? 'date' : nothing}

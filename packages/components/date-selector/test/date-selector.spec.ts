@@ -548,6 +548,9 @@ test('a comparison range may start or end on a closed day', async ({ page, scena
   )
   await page.getByRole('gridcell', { name: /September 6, 2026/ }).click()
   await page.getByRole('gridcell', { name: /September 13, 2026/ }).click()
+  // Pickable here, so read without a closed reason.
+  await selector.evaluate((element: HTMLElement & { disabledDates: unknown }) => (element.disabledDates = [{ date: '2026-09-11', label: 'Holiday' }]))
+  await expect(page.getByRole('gridcell', { name: /^Friday, September 11, 2026$/ })).toBeEnabled()
   await expect(selector).toHaveJSProperty('compareFrom', '2026-09-06')
   await expect(selector).toHaveJSProperty('compareTo', '2026-09-13')
 })
