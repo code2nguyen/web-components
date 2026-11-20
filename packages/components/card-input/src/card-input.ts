@@ -138,6 +138,9 @@ export class CardInput extends LitElement {
   @state() private cvcDigits = ''
   /** Parts that lost focus once: only their problems show. */
   @state() private touched = new Set<Segment>()
+  /** Set by a failed submit or `reportValidity()`: from then on a missing card is announced too. */
+  @state() private validityShown = false
+  private checkingValidity = false
   @state() private disabledByForm = false
   /** The detected brand's name, in a polite live region: announced once per change. */
   @state() private brandAnnouncement = ''
@@ -151,7 +154,10 @@ export class CardInput extends LitElement {
     super()
     this.internals.role = 'group'
     // A failed submit shows every problem, as if each part had been left.
-    this.addEventListener('invalid', () => (this.touched = new Set<Segment>(['number', 'expiry', 'cvc'])))
+    this.addEventListener('invalid', () => {
+      this.touched = new Set<Segment>(['number', 'expiry', 'cvc'])
+      if (!this.checkingValidity) this.validityShown = true
+    })
   }
 
   /** A page kept in the back/forward cache must not keep the card: it is cleared as the page is stored. */
@@ -196,6 +202,7 @@ export class CardInput extends LitElement {
     this.expiryDigits = ''
     this.cvcDigits = ''
     this.touched = new Set()
+    this.validityShown = false
     this.brandAnnouncement = ''
     this.emitCardChange()
   }
@@ -225,7 +232,13 @@ export class CardInput extends LitElement {
   }
 
   checkValidity() {
-    return this.internals.checkValidity()
+    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
+    this.checkingValidity = true
+    try {
+      return this.internals.checkValidity()
+    } finally {
+      this.checkingValidity = false
+    }
   }
 
   reportValidity() {
@@ -258,9 +271,6 @@ export class CardInput extends LitElement {
 
   protected override willUpdate(): void {
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
-    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
-    // empty card would be announced as invalid on load. Invalid is the error shown, as for a native control.
-    this.internals.ariaInvalid = (!!this.firstError() || this.field.invalid) && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   protected override updated(): void {
@@ -314,6 +324,10 @@ export class CardInput extends LitElement {
     const flags = this.customValidityMessage || error ? { customError: true } : missing ? { valueMissing: true } : {}
     const anchor = this.input(error?.segment ?? 'number') ?? undefined
     this.internals.setValidity(flags, message, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
+    // empty card would be announced as invalid on load. Invalid is the error shown, or the validity once reported.
+    const shown = !!this.firstError() || this.field.invalid || (this.validityShown && (missing || !!this.customValidityMessage))
+    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   private input(segment: Segment): HTMLInputElement | null {
