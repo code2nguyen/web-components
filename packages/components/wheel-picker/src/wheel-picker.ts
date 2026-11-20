@@ -143,9 +143,8 @@ export class WheelPicker extends LitElement {
 
   @state() private disabledByForm = false
 
-  /** Set once the validity was reported (a failed submit); until then an invalid value is not announced. */
+  /** Set by `reportValidity()`; until then a failed constraint is not announced (an enclosing field's error still is). */
   @state() private validityShown = false
-  private checkingValidity = false
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, wheelPickerMessages)
@@ -166,10 +165,6 @@ export class WheelPicker extends LitElement {
   constructor() {
     super()
     this.internals.role = 'group'
-    // A failed submit or `reportValidity()` shows the error, as it does for a native control.
-    this.addEventListener('invalid', () => {
-      if (!this.checkingValidity) this.validityShown = true
-    })
   }
 
   get form() {
@@ -189,22 +184,20 @@ export class WheelPicker extends LitElement {
   }
 
   checkValidity() {
-    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
-    this.checkingValidity = true
-    try {
-      return this.internals.checkValidity()
-    } finally {
-      this.checkingValidity = false
-    }
+    return this.internals.checkValidity()
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {
@@ -305,7 +298,7 @@ export class WheelPicker extends LitElement {
 
   /**
    * Whether the error is shown, on the host and on the wheels alike: an enclosing field's error, or a custom validity
-   * message once a submit or `reportValidity()` reported it, as for a native control.
+   * message once `reportValidity()` reported it, as for a native control.
    */
   private get errorShown(): boolean {
     return (this.field.invalid || (this.validityShown && !!this.customValidityMessage)) && !this.effectiveDisabled

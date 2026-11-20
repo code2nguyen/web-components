@@ -113,6 +113,7 @@ test('a custom validity message is not announced as invalid before a field shows
   await renderScenario(`<form lang="en"><c2-wheel-picker label="Height" columns='${HEIGHT}'></c2-wheel-picker></form>`)
   await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void }) => element.setCustomValidity('Too short'))
   expect(await picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => element.checkValidity())).toBe(false)
+  expect(await page.locator('form').evaluate((form: HTMLFormElement) => form.checkValidity())).toBe(false)
   expect(await axInvalid(page, 'group', 'Height')).not.toBe('true')
 })
 
