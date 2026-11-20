@@ -463,8 +463,7 @@ export class DateSelector extends LitElement {
     const compared = !!this.compareFrom && !!this.compareTo
     const closedEnd = this.selectionClosed()
     if (this.effectiveDisabled || !this.name || !this.from) this.internals.setFormValue(null)
-    else if (closedEnd) this.internals.setFormValue(null, `${this.from}/${this.to}`)
-    else if (this.to || compared) {
+    else if (closedEnd || this.to || compared) {
       const data = new FormData()
       data.append(this.name, this.from)
       if (this.to) data.append(this.endName || `${this.name}-end`, this.to)
@@ -474,7 +473,8 @@ export class DateSelector extends LitElement {
         data.append(`${this.name}-compare-end`, this.compareTo)
         state += `/${this.compareFrom}/${this.compareTo}/${this.compare}`
       }
-      this.internals.setFormValue(data, state)
+      // A closed end keeps the whole state for a restore, but nothing is submitted.
+      this.internals.setFormValue(closedEnd ? null : data, state)
     } else this.internals.setFormValue(this.from, `${this.from}/`)
     if (this.required && (!this.from || !this.to || closedEnd)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
     else this.internals.setValidity({})
@@ -493,8 +493,13 @@ export class DateSelector extends LitElement {
     return this.effectiveDisabled || this.outOfRange(value) || this.isClosed(value)
   }
 
+  /** A selected day closed afterwards, in `multiple` mode: it stays clickable so the user can take it out. */
+  private removableClosed(value: string) {
+    return this.mode === 'multiple' && !this.effectiveDisabled && !this.outOfRange(value) && this.isClosed(value) && this.selectedDates.includes(value)
+  }
+
   private select(value: string) {
-    if (this.isUnavailable(value)) return
+    if (this.isUnavailable(value) && !this.removableClosed(value)) return
     if (this.mode === 'single') this.value = value
     else if (this.mode === 'multiple') {
       const dates = this.selectedDates
@@ -504,7 +509,9 @@ export class DateSelector extends LitElement {
       if (this.compare && this.compare !== 'custom') this.compare = 'custom'
       ;[this.compareFrom, this.compareTo] = nextRange(this.compareFrom, this.compareTo, value)
     } else {
-      ;[this.from, this.to] = nextRange(this.from, this.to, value)
+      // A range end closed afterwards does not count: the click starts a new range.
+      const open = (date: string) => (date && !this.isClosed(date) ? date : '')
+      ;[this.from, this.to] = nextRange(open(this.from), open(this.from) ? open(this.to) : '', value)
       // Derived now rather than in the next update, so the events below carry the new comparison range.
       this.deriveCompare()
     }
@@ -588,7 +595,7 @@ export class DateSelector extends LitElement {
 
   private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, tabStop: string) {
     const value = toIso(date)
-    const disabled = this.isUnavailable(value)
+    const disabled = this.isUnavailable(value) && !this.removableClosed(value)
     const selected = selection ? selection.has(value) : value === this.from || value === this.to
     const range = !selection && !!this.to
     const inRange = range && value > this.from && value < this.to
@@ -665,7 +672,7 @@ export class DateSelector extends LitElement {
     const first = toIso(this.visibleMonth)
     const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
     const usable = (date: string) => !!date && date >= first && date < after && !this.isUnavailable(date)
-    let candidates = [this.focusDate, this.from]
+    let candidates = [this.focusDate, this.from, this.to]
     if (!this.isRange) {
       const dates = this.selectedDates
       selection = new Set(dates)
