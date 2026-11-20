@@ -564,6 +564,8 @@ test('a reorderable tree inside a draggable ancestor still keeps the browser dra
   await renderScenario(
     `<div draggable="true"><c2-tree aria-label="Files" reorderable><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree></div>`,
   )
+  // The reorder module loads on demand: wait for it, as a user's first drag comes long after.
+  await expect(page.locator('c2-tree').locator('.drop-indicator')).toHaveCount(1)
   const cancelled = await page.evaluate(() => {
     const row = document.querySelector('c2-tree-item')!
     const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
