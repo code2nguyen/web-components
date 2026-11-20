@@ -448,6 +448,8 @@ test('a tree in markup hands the dropped nodes to the application, with the elem
 
 test('refuses another kind of payload and a canceled item-drop, and ignores drops without drop-kind or reorderable', async ({ page, renderScenario }) => {
   await renderScenario(tree('drop-kind="tree-node"'))
+  // What an application does for a tree in markup with a `drop-kind`: read `detail.items` on `item-drop` to add them.
+  await page.locator('c2-tree').evaluate((element) => element.addEventListener('item-drop', (event) => void (event as CustomEvent).detail.items))
   expect(await dropPayload(page, 'docs', 0.5, 'application/x-c2n-kanban-card+json', [{ id: 'x' }])).toBe('refused')
   expect(await dropPayload(page, 'docs', 0.5, NODE_TYPE, [{ value: 'x' }], false)).toBe('target')
   await page.locator('c2-tree').evaluate((element) => element.addEventListener('item-drop', (event) => event.preventDefault()))
@@ -625,7 +627,8 @@ test('a dropped node whose children are not a list is refused', async ({ page, r
 test('a payload too deep to read reports no move, so the source keeps it', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-tree aria-label="Files" reorderable drop-kind="tree-node"></c2-tree>`)
   await page.locator('c2-tree').evaluate((element) => ((element as Tree).items = [{ value: 'src', label: 'src' }]))
-  page.on('pageerror', () => {})
+  // The zone's error reaches the page: handled there, as an app's error reporting would.
+  await page.evaluate(() => window.addEventListener('error', (event) => event.preventDefault()))
   const effects = await page.evaluate((type) => {
     const depth = 200_000
     const json = `[${'{"value":"n","children":['.repeat(depth)}${']}'.repeat(depth)}]`
@@ -648,4 +651,496 @@ test('a payload too deep to read reports no move, so the source keeps it', async
     return effects
   }, NODE_TYPE)
   expect(effects.at(-1)).toBe('none')
+})
+
+// ---- rows leaving the tree (drag-kind) ----
+
+const twoTrees = (sourceAttributes = 'drag-kind="tree-node"') => `
+  <c2-tree id="left" aria-label="Left" reorderable ${sourceAttributes}>${files}</c2-tree>
+  <div style="height:40px"></div>
+  <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+`
+const rightValues = (page: Page) =>
+  page.locator('#right').evaluate((element) => {
+    const walk = (nodes: TreeNode[]): string[] => nodes.flatMap((node) => [node.value, ...walk(node.children ?? [])])
+    return walk((element as Tree).items)
+  })
+const leftValues = (page: Page) => page.locator('#left c2-tree-item').evaluateAll((rows) => rows.map((row) => row.getAttribute('value')))
+
+async function setUpRight(page: Page): Promise<void> {
+  await expect(page.locator('#left').locator('.drop-indicator')).toHaveCount(1)
+  await page.locator('#right').evaluate((element) => ((element as Tree).items = [{ value: 'notes', label: 'notes' }]))
+  await page.locator('#left').evaluate((element) =>
+    element.addEventListener('item-move-out', (event) => {
+      const { rows, target } = (event as CustomEvent).detail
+      ;(window as Window & { out?: unknown[] }).out = [...((window as Window & { out?: unknown[] }).out ?? []), (target as Element | null)?.id ?? null]
+      for (const row of rows as Element[]) row.remove()
+    }),
+  )
+}
+
+test('a pointer drag carried off the tree drops the row with its subtree on the tree under the pointer', async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await setUpRight(page)
+  // On the label: the handle and the toggle at the start of the row have drags of their own.
+  const source = (await itemOf(page, 'src').locator('[part="label"]').first().boundingBox())!
+  const target = (await page.locator('#right').boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 20, source.y + source.height / 2 + 10, { steps: 3 })
+  await page.mouse.move(target.x + 40, target.y + target.height - 4, { steps: 10 })
+  await page.mouse.up()
+  await expect.poll(() => rightValues(page)).toEqual(['notes', 'src', 'app', 'main'])
+  expect(await leftValues(page)).toEqual(['docs', 'readme'])
+  expect(await page.evaluate(() => (window as Window & { out?: unknown[] }).out)).toEqual(['right'])
+})
+
+test('moveItemTo moves a row to the end of another tree; a data-driven source takes it out of items itself', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node"></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await page.locator('#left').evaluate((element) => {
+    ;(element as Tree).items = [
+      { value: 'a', label: 'a', children: [{ value: 'a1', label: 'a1' }] },
+      { value: 'b', label: 'b' },
+    ]
+  })
+  await page.locator('#right').evaluate((element) => ((element as Tree).items = [{ value: 'r', label: 'r' }]))
+  const moved = await page.locator('#left').evaluate((element) => {
+    const source = element as Tree & { moveItemTo(target: Element, value: string): boolean }
+    return [source.moveItemTo(document.getElementById('right')!, 'a1'), source.moveItemTo(document.body, 'b')]
+  })
+  expect(moved).toEqual([true, false])
+  expect(await page.locator('#left').evaluate((element) => JSON.stringify((element as Tree).items))).toBe(
+    JSON.stringify([
+      { value: 'a', label: 'a', children: [] },
+      { value: 'b', label: 'b' },
+    ]),
+  )
+  expect(await rightValues(page)).toEqual(['r', 'a1'])
+})
+
+test("a row's drag handle carries it to another tree as a browser drag", async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await setUpRight(page)
+  const handle = itemOf(page, 'readme').locator('[part="drag-handle"]')
+  await expect(handle).toHaveAttribute('draggable', 'true')
+  await handle.dragTo(page.locator('#right'), { targetPosition: { x: 40, y: 24 } })
+  await expect.poll(() => rightValues(page)).toContain('readme')
+  expect(await leftValues(page)).toEqual(['src', 'app', 'main', 'docs'])
+})
+
+test('without drag-kind a row carried off the tree goes nowhere and shows no handle', async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees(''))
+  await setUpRight(page)
+  await expect(page.locator('#left [part="drag-handle"]')).toHaveCount(0)
+  const source = (await itemOf(page, 'docs').locator('[part="label"]').boundingBox())!
+  const target = (await page.locator('#right').boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(target.x + 40, target.y + target.height - 4, { steps: 10 })
+  await page.mouse.up()
+  expect(await rightValues(page)).toEqual(['notes'])
+  expect(await page.evaluate(() => (window as Window & { out?: unknown[] }).out)).toBeUndefined()
+})
+
+test('a data-driven tree forgets the selection and expansion of a node that left, and reports the new selection', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node"></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await page.locator('#left').evaluate((element) => {
+    const tree = element as Tree
+    tree.items = [
+      { value: 'a', label: 'a', children: [{ value: 'a1', label: 'a1' }] },
+      { value: 'b', label: 'b' },
+    ]
+    tree.value = ['a1', 'b']
+    tree.expandedItems = ['a']
+    tree.addEventListener('selection-change', (event) => ((window as Window & { picked?: unknown }).picked = (event as CustomEvent).detail.value))
+  })
+  await page
+    .locator('#left')
+    .evaluate((element) => (element as Tree & { moveItemTo(target: Element, value: string): boolean }).moveItemTo(document.getElementById('right')!, 'a'))
+  expect(await page.locator('#left').evaluate((element) => [(element as Tree).value, (element as Tree).expandedItems])).toEqual([['b'], []])
+  expect(await page.evaluate(() => (window as Window & { picked?: unknown }).picked)).toEqual(['b'])
+})
+
+test('a row carried off the tree onto no target is announced as cancelled, and moveItemTo waits for the drag', async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await setUpRight(page)
+  const source = (await itemOf(page, 'docs').locator('[part="label"]').boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 20, source.y + source.height / 2 + 10, { steps: 3 })
+  await page.mouse.move(source.x + 600, source.y + 400, { steps: 10 })
+  // Mid-drag, a command may not move the dragged row away.
+  const moved = await page
+    .locator('#left')
+    .evaluate((element) => (element as Tree & { moveItemTo(target: Element, value: string): boolean }).moveItemTo(document.getElementById('right')!, 'docs'))
+  expect(moved).toBe(false)
+  await page.mouse.up()
+  await expect(page.locator('#left').locator('.live')).toHaveText('Move of docs cancelled.')
+  expect(await leftValues(page)).toEqual(['src', 'app', 'main', 'docs', 'readme'])
+})
+
+test('a node that cannot be copied is not taken, and a click on the drag handle neither selects nor expands', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node" expand-on-click></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  const moved = await page.locator('#left').evaluate((element) => {
+    const data: Record<string, unknown> = {}
+    data.self = data
+    ;(element as Tree).items = [
+      { value: 'a', label: 'a', data },
+      { value: 'b', label: 'b', children: [{ value: 'b1', label: 'b1' }] },
+    ]
+    return (element as Tree & { moveItemTo(target: Element, value: string): boolean }).moveItemTo(document.getElementById('right')!, 'a')
+  })
+  expect(moved).toBe(false)
+  expect(await rightValues(page)).toEqual([])
+  await itemOf(page, 'b').locator('[part="drag-handle"]').first().click()
+  expect(await page.locator('#left').evaluate((element) => [(element as Tree).value, (element as Tree).expandedItems])).toEqual([[], []])
+})
+
+test('a branch crossed on the way off the tree does not open once the row is off it', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="padding-top:120px">${twoTrees()}</div>`)
+  await setUpRight(page)
+  await page.locator('#left').evaluate((element) => ((element as Tree).expandedItems = []))
+  const source = (await itemOf(page, 'readme').locator('[part="label"]').boundingBox())!
+  const branch = (await itemOf(page, 'src').locator('[part="label"]').first().boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(branch.x + 20, branch.y + branch.height / 2, { steps: 6 })
+  // Straight off the top edge of the tree, past the margin that is still the tree's, crossing no other row.
+  const top = (await page.locator('#left').boundingBox())!.y
+  await page.mouse.move(branch.x + 20, top - 80, { steps: 2 })
+  await page.waitForTimeout(1000)
+  expect(await page.locator('#left').evaluate((element) => (element as Tree).expandedItems)).toEqual([])
+  await page.mouse.up()
+})
+
+test('a tree taken out of the page mid-drag gives nothing away', async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await setUpRight(page)
+  const source = (await itemOf(page, 'docs').locator('[part="label"]').boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 20, source.y + source.height / 2 + 10, { steps: 3 })
+  // Detached in place: the right tree stays where it was.
+  await page.locator('#left').evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    const spacer = document.createElement('div')
+    spacer.style.height = `${box.height}px`
+    element.replaceWith(spacer)
+  })
+  const target = (await page.locator('#right').boundingBox())!
+  await page.mouse.move(target.x + 40, target.y + target.height - 4, { steps: 10 })
+  await page.mouse.up()
+  expect(await rightValues(page)).toEqual(['notes'])
+})
+
+test('a tree nested in a row drags its own rows by their handles, and a zone around a source takes nothing dropped back on it', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`
+    <c2-tree id="outer" aria-label="Outer" reorderable drag-kind="tree-node" drop-kind="tree-node">
+      <c2-tree-item value="holder"><span slot="label">Holder
+        <c2-tree id="inner" aria-label="Inner" reorderable drag-kind="tree-node">
+          <c2-tree-item value="leaf" label="leaf"></c2-tree-item>
+        </c2-tree>
+      </span></c2-tree-item>
+    </c2-tree>
+  `)
+  await expect(page.locator('#inner').locator('.drop-indicator')).toHaveCount(1)
+  const source = await itemOf(page, 'leaf')
+    .locator('[part="drag-handle"]')
+    .evaluate((element) => {
+      const transfer = new DataTransfer()
+      ;(window as Window & { transfer?: DataTransfer }).transfer = transfer
+      const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: transfer })
+      element.dispatchEvent(event)
+      const registry = (globalThis as unknown as Record<symbol, { drag: { source: Element } | null }>)[Symbol.for('c2n.item-drag')]
+      return { cancelled: event.defaultPrevented, source: registry.drag?.source.id }
+    })
+  expect(source).toEqual({ cancelled: false, source: 'inner' })
+  // Back over the inner tree, which takes nothing back itself: the outer one claims it as its source's own and stays dark.
+  const claimed = await page.locator('#inner').evaluate((element) => {
+    // The drag's own transfer, as the browser carries it.
+    const transfer = (window as Window & { transfer?: DataTransfer }).transfer!
+    const event = new DragEvent('dragover', { bubbles: true, composed: true, cancelable: true, dataTransfer: transfer })
+    element.dispatchEvent(event)
+    return transfer.dropEffect
+  })
+  expect(claimed).toBe('none')
+})
+
+test('an unloaded branch keeps its expander where it lands, and a move from code is announced before the reorder module loads', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+    <div id="slot"></div>
+  `)
+  await page.locator('#right').evaluate((element) => ((element as Tree).items = [{ value: 'r', label: 'r' }]))
+  const moved = await page.evaluate(() => {
+    const left = document.createElement('c2-tree') as Tree & { moveItemTo(target: Element, value: string): boolean }
+    left.id = 'left'
+    left.setAttribute('aria-label', 'Left')
+    left.setAttribute('reorderable', '')
+    left.setAttribute('drag-kind', 'tree-node')
+    left.innerHTML = '<c2-tree-item value="docs" label="docs" has-children></c2-tree-item><c2-tree-item value="b" label="b"></c2-tree-item>'
+    left.addEventListener('item-move-out', (event) => (event as CustomEvent).detail.rows.forEach((row: Element) => row.remove()))
+    document.getElementById('slot')!.append(left)
+    return left.updateComplete.then(() => left.moveItemTo(document.getElementById('right')!, 'docs'))
+  })
+  expect(moved).toBe(true)
+  expect(await page.locator('#right').evaluate((element) => (element as Tree).items.map((node) => [node.value, !!node.hasChildren]))).toEqual([
+    ['r', false],
+    ['docs', true],
+  ])
+  await expect(page.locator('#left').locator('.live')).toHaveText('docs moved out of the tree.')
+})
+
+test("a row's drag handle dropped back on its own tree moves the row there", async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await setUpRight(page)
+  const readme = (await itemOf(page, 'readme').locator('[part="label"]').boundingBox())!
+  const tree = (await page.locator('#left').boundingBox())!
+  // Onto the top quarter of the first row: before `src`, at the root.
+  const src = (await itemOf(page, 'src').locator('.row').first().boundingBox())!
+  await itemOf(page, 'readme')
+    .locator('[part="drag-handle"]')
+    .dragTo(page.locator('#left'), { targetPosition: { x: readme.x - tree.x + 10, y: src.y - tree.y + 2 } })
+  await expect.poll(() => leftValues(page)).toEqual(['readme', 'src', 'app', 'main', 'docs'])
+  expect(await page.evaluate(() => (window as Window & { out?: unknown[] }).out)).toBeUndefined()
+})
+
+test('a row named by its label slot leaves with that label, and a closed target takes nothing', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node">
+      <c2-tree-item value="a1"><span slot="label">Quarterly report</span></c2-tree-item>
+      <c2-tree-item value="b" label="b"></c2-tree-item>
+    </c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  const moved = await page.evaluate(() => {
+    const left = document.getElementById('left') as HTMLElement & { moveItemTo(target: Element, value: string): boolean }
+    // Rows in markup leave when the application removes them.
+    left.addEventListener('item-move-out', (event) => (event as CustomEvent).detail.rows.forEach((row: Element) => row.remove()))
+    const right = document.getElementById('right')!
+    const parent = right.parentElement!
+    // A target taken out of the page takes nothing.
+    right.remove()
+    const detached = left.moveItemTo(right, 'b')
+    parent.append(right)
+    return [detached, left.moveItemTo(right, 'a1')]
+  })
+  expect(moved).toEqual([false, true])
+  expect(await page.locator('#right').evaluate((element) => (element as Tree).items.map((node) => node.label))).toEqual(['Quarterly report'])
+})
+
+test('a command in a row that moves it away hands focus to the next row', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node"></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await page.locator('#left').evaluate((element) => {
+    const tree = element as Tree & { renderActions: (context: { node: TreeNode }) => unknown; moveItemTo(target: Element, value: string): boolean }
+    tree.renderActions = ({ node }) => {
+      const button = document.createElement('button')
+      button.textContent = `Move ${node.value}`
+      button.addEventListener('click', () => tree.moveItemTo(document.getElementById('right')!, node.value))
+      return button
+    }
+    tree.items = [
+      { value: 'a', label: 'a' },
+      { value: 'b', label: 'b' },
+    ]
+  })
+  const button = page.locator('#left').getByRole('button', { name: 'Move a' })
+  await button.focus()
+  await button.evaluate((element) => (element as HTMLButtonElement).click())
+  await expect.poll(() => rightValues(page)).toEqual(['a'])
+  await expect.poll(() => page.locator('#left').evaluate((element) => element.matches(':focus-within'))).toBe(true)
+})
+
+test('a drag just past the edge of a tree with a drag-kind is still a move within it', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="padding-top:120px">${twoTrees()}</div>`)
+  await setUpRight(page)
+  const source = (await itemOf(page, 'docs').locator('[part="label"]').boundingBox())!
+  const top = (await page.locator('#left').boundingBox())!.y
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 20, source.y + source.height / 2 - 10, { steps: 3 })
+  await page.mouse.move(source.x + 10, top - 10, { steps: 8 })
+  await page.mouse.up()
+  await expect.poll(() => leftValues(page)).toEqual(['docs', 'src', 'app', 'main', 'readme'])
+})
+
+test('moving the last row out keeps focus in the tree', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node"></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await page.locator('#left').evaluate((element) => {
+    const tree = element as Tree & { renderActions: (context: { node: TreeNode }) => unknown; moveItemTo(target: Element, value: string): boolean }
+    tree.renderActions = ({ node }) => {
+      const button = document.createElement('button')
+      button.textContent = `Move ${node.value}`
+      button.addEventListener('click', () => tree.moveItemTo(document.getElementById('right')!, node.value))
+      return button
+    }
+    tree.items = [{ value: 'only', label: 'only' }]
+  })
+  const button = page.locator('#left').getByRole('button', { name: 'Move only' })
+  await button.focus()
+  await button.evaluate((element) => (element as HTMLButtonElement).click())
+  await expect.poll(() => rightValues(page)).toEqual(['only'])
+  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe('left')
+  expect(await page.locator('#left').evaluate((element) => [element.hasAttribute('tabindex'), element.shadowRoot!.activeElement?.className])).toEqual([
+    false,
+    'empty',
+  ])
+})
+
+test('a command in a markup row that the app removes hands focus to the next row; a grip dropped on its own row says nothing', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node">
+      <c2-tree-item value="a" label="a"><button slot="actions">Move a</button></c2-tree-item>
+      <c2-tree-item value="b" label="b"></c2-tree-item>
+    </c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await expect(page.locator('#left').locator('.drop-indicator')).toHaveCount(1)
+  // A grip dropped on the middle of its own row: no move, and no "cannot move there".
+  await itemOf(page, 'b').locator('[part="drag-handle"]').dragTo(itemOf(page, 'b').locator('[part="label"]'))
+  await page.waitForTimeout(200)
+  await expect(page.locator('#left').locator('.live')).not.toHaveText(/cannot/)
+  await page.evaluate(() => {
+    const left = document.getElementById('left') as HTMLElement & { moveItemTo(target: Element, value: string): boolean }
+    left.addEventListener('item-move-out', (event) => (event as CustomEvent).detail.rows.forEach((row: Element) => row.remove()))
+    left.querySelector('button')!.addEventListener('click', () => left.moveItemTo(document.getElementById('right')!, 'a'))
+  })
+  const button = page.getByRole('button', { name: 'Move a' })
+  await button.focus()
+  await button.evaluate((element) => (element as HTMLButtonElement).click())
+  await expect.poll(() => rightValues(page)).toEqual(['a'])
+  await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute('value'))).toBe('b')
+})
+
+test('a row the app itself moves into the target tree stays there: the source does not take it back out', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node">
+      <c2-tree-item value="a" label="a"></c2-tree-item>
+      <c2-tree-item value="b" label="b"></c2-tree-item>
+    </c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node">
+      <c2-tree-item value="r" label="r"></c2-tree-item>
+    </c2-tree>
+  `)
+  const result = await page.evaluate(() => {
+    const left = document.getElementById('left') as HTMLElement & { moveItemTo(target: Element, value: string): boolean }
+    const right = document.getElementById('right')!
+    let movedOut = 0
+    // The application moves the element itself rather than building a copy.
+    right.addEventListener('item-drop', (event) => {
+      const { items, parentElement, before } = (event as CustomEvent).detail
+      for (const node of items as { value: string }[]) (parentElement as Element).insertBefore(left.querySelector(`[value="${node.value}"]`)!, before)
+    })
+    left.addEventListener('item-move-out', () => movedOut++)
+    return { moved: left.moveItemTo(right, 'a'), movedOut }
+  })
+  expect(result).toEqual({ moved: true, movedOut: 0 })
+  expect(await page.locator('#right c2-tree-item').evaluateAll((rows) => rows.map((row) => row.getAttribute('value')))).toEqual(['r', 'a'])
+  expect(await leftValues(page)).toEqual(['b'])
+})
+
+test('a row that can no longer leave, released off the tree, moves nowhere', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-tree id="left" aria-label="Left" reorderable style="width:240px">${files}</c2-tree>`)
+  await expect(page.locator('#left').locator('.drop-indicator')).toHaveCount(1)
+  const before = await leftValues(page)
+  const source = (await itemOf(page, 'readme').locator('[part="label"]').first().boundingBox())!
+  const tree = (await page.locator('#left').boundingBox())!
+  await page.mouse.move(source.x + 10, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 20, tree.y + 4, { steps: 6 })
+  // A drag-kind given mid-drag to a tree that lets no row leave just then; the pointer then goes far off it.
+  await page.locator('#left').evaluate((element) => {
+    element.setAttribute('drag-kind', 'tree-node')
+    ;(element as Tree).disabled = true
+  })
+  await page.mouse.move(tree.x + tree.width + 200, tree.y + 4, { steps: 6 })
+  await page.locator('#left').evaluate((element) => ((element as Tree).disabled = false))
+  await page.mouse.up()
+  await page.waitForTimeout(100)
+  expect(await leftValues(page)).toEqual(before)
+})
+
+test('a tree in markup that nobody handles item-drop on refuses a drop, so the row stays in its source', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node"></c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node">
+      <c2-tree-item value="r" label="r"></c2-tree-item>
+    </c2-tree>
+  `)
+  await page.locator('#left').evaluate((element) => ((element as Tree).items = [{ value: 'a', label: 'a' }]))
+  const moved = await page
+    .locator('#left')
+    .evaluate((element) => (element as Tree & { moveItemTo(target: Element, value: string): boolean }).moveItemTo(document.getElementById('right')!, 'a'))
+  expect(moved).toBe(false)
+  expect(await page.locator('#left').evaluate((element) => (element as Tree).items.map((node) => node.value))).toEqual(['a'])
+})
+
+test('rows in markup that nobody removes on item-move-out stay, and moveItemTo says they did not move', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-tree id="left" aria-label="Left" reorderable drag-kind="tree-node">
+      <c2-tree-item value="a" label="a"></c2-tree-item>
+    </c2-tree>
+    <c2-tree id="right" aria-label="Right" reorderable drop-kind="tree-node"></c2-tree>
+  `)
+  await page.locator('#right').evaluate((element) => ((element as Tree).items = [{ value: 'r', label: 'r' }]))
+  const moved = await page
+    .locator('#left')
+    .evaluate((element) => (element as Tree & { moveItemTo(target: Element, value: string): boolean }).moveItemTo(document.getElementById('right')!, 'a'))
+  expect(moved).toBe(false)
+  expect(await leftValues(page)).toEqual(['a'])
+})
+
+test("a finger held on a row's grip starts the tree's own drag", async ({ page, renderScenario }) => {
+  await renderScenario(twoTrees())
+  await expect(page.locator('#left').locator('.drop-indicator')).toHaveCount(1)
+  const handle = itemOf(page, 'readme').locator('[part="drag-handle"]')
+  const grip = (await handle.boundingBox())!
+  const src = (await itemOf(page, 'src').locator('.row').first().boundingBox())!
+  await handle.evaluate(
+    async (element, { grip, top }) => {
+      const at = (x: number, y: number) => ({
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+        isPrimary: true,
+        pointerId: 9,
+        button: 0,
+        pointerType: 'touch',
+        clientX: x,
+        clientY: y,
+      })
+      const [x, y] = [grip.x + grip.width / 2, grip.y + grip.height / 2]
+      element.dispatchEvent(new PointerEvent('pointerdown', at(x, y)))
+      // Held, then moved up onto the top edge of the first row.
+      await new Promise((resolve) => setTimeout(resolve, 700))
+      for (let step = 1; step <= 8; step++) document.dispatchEvent(new PointerEvent('pointermove', at(x, y + ((top - y) * step) / 8)))
+      document.dispatchEvent(new PointerEvent('pointerup', at(x, top)))
+    },
+    { grip, top: src.y + 2 },
+  )
+  await expect.poll(() => leftValues(page)).toEqual(['readme', 'src', 'app', 'main', 'docs'])
 })

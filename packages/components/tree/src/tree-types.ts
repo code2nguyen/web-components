@@ -125,6 +125,24 @@ export interface TreeItemDropEventDetail {
   before: Element | null
 }
 
+/** Detail of the `item-move-out` event: nodes another place took, before they leave the tree. */
+export interface TreeItemMoveOutEventDetail {
+  /** The payload kind they left as: the tree's `drag-kind`. */
+  kind: string
+  /** The nodes that leave, each with its subtree. */
+  items: TreeNode[]
+  /**
+   * Their rows. A data-driven tree takes the nodes out of `items` itself; in a tree authored in markup the
+   * application removes these elements (`row.remove()`).
+   */
+  rows: Element[]
+  /**
+   * The c2n element that took them (another tree, a list, a board). A drop anywhere else (a text field, a page's own drop area,
+   * another window) takes a copy, and they stay.
+   */
+  target: Element
+}
+
 /** How a checkbox tick travels between a node and its relatives. */
 export type TreeSelectionPropagation = 'none' | 'descendants' | 'parents' | 'both'
 

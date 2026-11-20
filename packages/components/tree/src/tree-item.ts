@@ -59,12 +59,17 @@ export interface TreeItem {
  * @slot toggle-icon - Replaces the default chevron. It is rotated by the component, so supply the collapsed orientation.
  *
  * @csspart row - The clickable row, excluding any nested children.
+ * @csspart drag-handle - The grip at the start of the row in a tree with a `drag-kind`: the browser carries the row from it, to another tree, a list or a board; elsewhere, another window too, the drop is a copy.
  * @csspart toggle - The disclosure toggle.
  * @csspart label - Text box containing the `label` slot or label-property fallback.
  * @csspart actions - Trailing box wrapping the assigned `actions` slot.
  * @csspart group - The container holding the nested children.
  * @csspart checkbox - The selection checkbox rendered when checkbox selection is enabled.
  *
+ * @cssproperty {length} [--c2-tree-item__drag-handle--size=16px] - Size of the drag handle's grip (`drag-kind` on the tree).
+ * @cssproperty {color} [--c2-tree-item__drag-handle--color=#a1a1aa] - Colour of the drag handle.
+ * @cssproperty {color} [--c2-tree-item__drag-handle__hover--color=#52525b] - Colour of the drag handle under the pointer.
+ * @cssproperty {string} [--c2-tree-item__drag-handle--cursor=grab] - Cursor over the drag handle.
  * @cssproperty {pixel} [--c2-tree-item__row--min-height=28px] - Height of a row.
  * @cssproperty {pixel} [--c2-tree-item__row--indent=16px] - Extra inset added per level of depth.
  * @cssproperty {padding} [--c2-tree-item__row--padding-top=0px] - Space above the row's content. `row--min-height` is a floor, so this only grows the row once content plus padding passes it.
@@ -167,6 +172,9 @@ export class TreeItem extends LitElement {
 
   /** Whether the row is being dragged. Written by a `reorderable` parent `c2-tree`. */
   @property({ attribute: false }) dragging = false
+
+  /** Set by the tree: shows the drag handle that carries the row off a tree with a `drag-kind`. */
+  @property({ attribute: false }) dragHandle = false
 
   /** Whether a dragged row would land under this one. Written by a `reorderable` parent `c2-tree`. */
   @property({ attribute: false }) dropTarget = false
@@ -305,6 +313,20 @@ export class TreeItem extends LitElement {
   override render() {
     const branch = this.isBranch
     const content = html`
+      ${
+        this.dragHandle && !this.disabled
+          ? html`<span class="drag-handle" part="drag-handle" draggable="true" aria-hidden="true">
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <circle cx="6" cy="4" r="1.25" />
+                <circle cx="10" cy="4" r="1.25" />
+                <circle cx="6" cy="8" r="1.25" />
+                <circle cx="10" cy="8" r="1.25" />
+                <circle cx="6" cy="12" r="1.25" />
+                <circle cx="10" cy="12" r="1.25" />
+              </svg>
+            </span>`
+          : nothing
+      }
       ${
         this.loading
           ? html`<c2-spinner class="spinner" part="toggle" aria-hidden="true"></c2-spinner>`
