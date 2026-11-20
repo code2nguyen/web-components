@@ -95,3 +95,8 @@ test('a tint that is exactly a theme role stays that role, so an app theme still
     '.a { --c2-x__tag--background: var(--c2-theme--color-primary-container, #edf1fe); }',
   )
 })
+
+test('a literal equal to a status role stays the card accent: those roles are for text, and a fill would wash out', () => {
+  const tokens = [{ name: '--c2-theme--color-success', light: '#15803d', dark: '#4ade80' }]
+  assert.equal(themeExampleCss('.a { --c2-switch__track__checked--color: #15803d; }', tokens).css, '.a { --c2-switch__track__checked--color: #15803d; }')
+})
