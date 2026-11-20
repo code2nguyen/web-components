@@ -77,9 +77,6 @@ function dayInstant(day: string): Date {
   return new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12))
 }
 
-/** One empty list, so the strip does not see a new `disabledDates` on every render while loading. */
-const noDays: (DateStripDisabledDate | string)[] = []
-
 function periodOf(minutes: number): Period {
   return minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening'
 }
@@ -215,8 +212,10 @@ export class TimeSlotPicker extends LitElement {
   private freeDays: string[] = []
   /** The days `disabledDates` closes, rebuilt with `byDay`. */
   private closed = new Set<string>()
-  /** What the row of days disables: the closed days with their reasons, then the booked ones; rebuilt with `byDay`. */
-  private stripDisabled: (DateStripDisabledDate | string)[] = []
+  /** The closed days with their reasons, as the row of days takes them; rebuilt with `byDay`. */
+  private closedDays: DateStripDisabledDate[] = []
+  /** What the row of days disables once loaded: the closed days, then the booked ones; rebuilt with `byDay`. */
+  private stripDisabled: DateStripDisabledDate[] = []
   /** The day shown while `date` is not set. */
   private defaultDate = ''
   private announcementTimer: ReturnType<typeof setTimeout> | undefined
@@ -340,12 +339,20 @@ export class TimeSlotPicker extends LitElement {
       else this.byDay.set(day, [placed])
     }
     for (const list of this.byDay.values()) list.sort((a, b) => a.start - b.start)
-    const closed = (Array.isArray(this.disabledDates) ? this.disabledDates : []).filter(
-      (item): item is DateStripDisabledDate | string => typeof item === 'string' || (!!item && typeof item.date === 'string'),
-    )
-    this.closed = new Set(closed.map((item) => (typeof item === 'string' ? item : item.date)))
+    this.closedDays = []
+    for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
+      const entry = typeof item === 'string' ? { date: item } : item
+      const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
+      if (date) this.closedDays.push({ date, label: entry.label })
+    }
+    this.closed = new Set(this.closedDays.map((entry) => entry.date))
     this.freeDays = [...this.byDay.keys()].filter((day) => !this.closed.has(day) && this.byDay.get(day)!.some((slot) => slot.available)).sort()
-    this.stripDisabled = [...closed, ...this.bookedDays().filter((day) => !this.closed.has(day))]
+    this.stripDisabled = [
+      ...this.closedDays,
+      ...this.bookedDays()
+        .filter((day) => !this.closed.has(day))
+        .map((date) => ({ date })),
+    ]
   }
 
   /** The slots of a day, sorted by time; none on a closed day. */
@@ -353,13 +360,26 @@ export class TimeSlotPicker extends LitElement {
     return this.closed.has(day) ? [] : (this.byDay.get(day) ?? [])
   }
 
-  private placedValue(): PlacedSlot | undefined {
+  /** The value's slot, wherever it is, closed days included. */
+  private findValue(): PlacedSlot | undefined {
     if (!this.value) return undefined
     for (const list of this.byDay.values()) {
       const found = list.find((placed) => placed.slot.start === this.value)
       if (found) return found
     }
     return undefined
+  }
+
+  /** The value's slot, unless its day is closed. */
+  private placedValue(): PlacedSlot | undefined {
+    const found = this.findValue()
+    return found && !this.closed.has(found.day) ? found : undefined
+  }
+
+  /** A value on a closed day is kept (the day may reopen) but neither submitted nor counted as an answer. */
+  private get valueClosed(): boolean {
+    const found = this.findValue()
+    return !!found && this.closed.has(found.day)
   }
 
   /** The strip's dots, labelled for screen readers; kept while the days and the language stay the same. */
@@ -387,8 +407,9 @@ export class TimeSlotPicker extends LitElement {
   }
 
   private syncFormState(): void {
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value ? null : this.value, this.value)
-    const missing = this.required && !this.value
+    const closed = this.valueClosed
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
+    const missing = this.required && (!this.value || closed)
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
     const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.slot[tabindex="0"]') ?? undefined
@@ -566,7 +587,7 @@ export class TimeSlotPicker extends LitElement {
             part="days"
             .value=${this.shownDate}
             .markers=${this.dayMarkers()}
-            .disabledDates=${this.loading ? noDays : this.stripDisabled}
+            .disabledDates=${this.loading ? this.closedDays : this.stripDisabled}
             .min=${this.min}
             .max=${this.max}
             .label=${this.msg.t('day')}

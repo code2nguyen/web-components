@@ -138,3 +138,23 @@ test('disabled-dates closes days with their reason: no times there, skipped for 
   await expect(page.getByRole('button', { name: /Next available: Friday,? 16 October/ })).toBeVisible()
   await expect(page.getByRole('option', { name: /^0?9:00$/ })).toHaveCount(0)
 })
+
+test('a value on a day closed afterwards is not submitted and does not answer required', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker name="when" required time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  const state = () =>
+    picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => ({
+      valid: element.checkValidity(),
+      submitted: new FormData(element.closest('form')!).get('when'),
+    }))
+  expect(await state()).toEqual({ valid: true, submitted: '2026-10-14T09:30:00Z' })
+  await picker(page).evaluate((element: Picker & { disabledDates: string[] }) => (element.disabledDates = ['2026-10-14']))
+  // The picker moves on to the next open day.
+  await expect(page.getByRole('option', { name: /^10:00$/ })).toBeVisible()
+  expect(await state()).toEqual({ valid: false, submitted: null })
+})
+
+test('closed days stay closed in the row of days while loading', async ({ page, renderScenario }) => {
+  await renderScenario(scenario(`loading disabled-dates='[{"date":"2026-10-15","label":"Closed for training"}]'`))
+  await expect(page.getByRole('option', { name: /^Thursday,? 15 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
+})
