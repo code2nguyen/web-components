@@ -164,6 +164,9 @@ test('a standalone picker is announced as invalid once a submit reported it, and
   await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
   await picker(page).evaluate((element: Picker & { reportValidity(): boolean }) => element.reportValidity())
   await expect.poll(() => axInvalid(page, 'group', 'Time')).toBe('true')
+  // The times say so too, where the screen reader is.
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).toHaveAttribute('aria-invalid', 'true')
   await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).not.toHaveAttribute('aria-invalid', 'true')
   await expect.poll(() => axInvalid(page, 'group', 'Time')).not.toBe('true')
 })

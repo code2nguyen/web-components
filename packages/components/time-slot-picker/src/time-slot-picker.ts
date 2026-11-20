@@ -413,6 +413,15 @@ export class TimeSlotPicker extends LitElement {
     return booked
   }
 
+  /**
+   * Whether the error is shown, on the host and on the times alike: an enclosing field's error, or a failed constraint
+   * once a submit or `reportValidity()` reported it, as for a native control.
+   */
+  private get errorShown(): boolean {
+    const fails = !!this.customValidityMessage || (this.required && (!this.value || this.valueClosed))
+    return (this.field.invalid || (this.validityShown && fails)) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
     const closed = this.valueClosed
     this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
@@ -424,8 +433,7 @@ export class TimeSlotPicker extends LitElement {
     // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
     // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
     // validity once a submit reported it, as for a native control.
-    const shown = this.field.invalid || (this.validityShown && !this.internals.validity.valid)
-    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   private longDate(day: string): string {
@@ -512,7 +520,7 @@ export class TimeSlotPicker extends LitElement {
   }
 
   private renderSlots(list: PlacedSlot[], stop: string, label: string, heading: unknown) {
-    const invalid = this.field.invalid && !this.effectiveDisabled
+    const invalid = this.errorShown
     return html`<div class="group" part="group">
       ${heading}
       <div
