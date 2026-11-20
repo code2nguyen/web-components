@@ -201,9 +201,8 @@ export class TimeSlotPicker extends LitElement {
   @state() private disabledByForm = false
   @state() private announcement = ''
 
-  /** Set once the validity was reported (a failed submit); until then an invalid value is not announced. */
+  /** Set by `reportValidity()`; until then a failed constraint is not announced (an enclosing field's error still is). */
   @state() private validityShown = false
-  private checkingValidity = false
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, timeSlotPickerMessages)
@@ -227,10 +226,6 @@ export class TimeSlotPicker extends LitElement {
   constructor() {
     super()
     this.internals.role = 'group'
-    // A failed submit or `reportValidity()` shows the error, as it does for a native control.
-    this.addEventListener('invalid', () => {
-      if (!this.checkingValidity) this.validityShown = true
-    })
   }
 
   get form() {
@@ -254,22 +249,20 @@ export class TimeSlotPicker extends LitElement {
   }
 
   checkValidity() {
-    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
-    this.checkingValidity = true
-    try {
-      return this.internals.checkValidity()
-    } finally {
-      this.checkingValidity = false
-    }
+    return this.internals.checkValidity()
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {
@@ -415,7 +408,7 @@ export class TimeSlotPicker extends LitElement {
 
   /**
    * Whether the error is shown, on the host and on the times alike: an enclosing field's error, or a failed constraint
-   * once a submit or `reportValidity()` reported it, as for a native control.
+   * once `reportValidity()` reported it, as for a native control.
    */
   private get errorShown(): boolean {
     const fails = !!this.customValidityMessage || (this.required && (!this.value || this.valueClosed))
@@ -427,7 +420,7 @@ export class TimeSlotPicker extends LitElement {
     this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
     const missing = this.required && (!this.value || closed)
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t(closed ? 'closedValue' : 'valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.slot[tabindex="0"]') ?? undefined
     this.internals.setValidity(flags, message, anchor)
     // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or

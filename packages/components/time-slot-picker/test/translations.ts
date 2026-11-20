@@ -19,6 +19,7 @@ const fr: typeof timeSlotPickerMessages.en = {
   available: (count, date) => (count === 1 ? `1 horaire disponible le ${date}` : `${count} horaires disponibles le ${date}`),
   loading: 'Chargement des horaires',
   valueMissing: 'Veuillez choisir un horaire.',
+  closedValue: "L'horaire choisi n'est plus disponible. Veuillez en choisir un autre.",
 }
 
 addTranslations({ fr: { 'time-slot-picker': fr } })
