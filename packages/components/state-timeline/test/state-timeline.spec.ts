@@ -53,9 +53,9 @@ test('its accessible name follows a language change', async ({ page, scenario })
   await scenario()
   const subject = page.locator('c2-state-timeline')
   await subject.evaluate((element) => element.removeAttribute('aria-label'))
-  await expect(subject).toHaveHostAria('aria-label', 'State timeline')
+  await expect.poll(() => hostAria(subject, 'aria-label')).toBe('State timeline')
   await subject.evaluate((element) => ((element as HTMLElement & { locale: string }).locale = 'fr'))
-  await expect(subject).toHaveHostAria('aria-label', "Chronologie d'états")
+  await expect.poll(() => hostAria(subject, 'aria-label')).toBe("Chronologie d'états")
 })
 
 test('each band says what it is doing now and how long it spent outside the baseline', async ({ page, scenario }) => {
