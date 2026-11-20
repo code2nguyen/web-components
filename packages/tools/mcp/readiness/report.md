@@ -1,18 +1,18 @@
-# AI readiness — c2n 1.0.28
+# AI readiness — c2n 1.0.30
 
 > Given a user requirement, can an AI independently find the correct c2n component, understand its API, generate valid code and use it correctly?
 
-## AI readiness: 97.3/100 (A)
+## AI readiness: 97.8/100 (A)
 
 Component readiness 50% · discovery 20% · agent run 30%.
 
-**Component readiness: 97.7/100 (A)** over 269 components · **Discovery: 92.2/100** (hit@1 89%, hit@3 94% over 85 requirements) · **Agent: 100/100** (28/28 tasks)
+**Component readiness: 97.8/100 (A)** over 269 components · **Discovery: 94.5/100** (hit@1 92%, hit@3 96% over 85 requirements) · **Agent: 100/100** (28/28 tasks)
 
 ## Dimensions
 
 | Dimension | Weight | Score | |
 | --- | ---: | ---: | --- |
-| Identity and purpose — Does the AI understand what the component does and when to use it? | 15% | 99 | `████████████████████` |
+| Identity and purpose — Does the AI understand what the component does and when to use it? | 15% | 99.2 | `████████████████████` |
 | API documentation — Are properties, types, defaults, slots, events and CSS variables documented? | 25% | 98.3 | `████████████████████` |
 | Usage examples — Are there valid, realistic code examples covering the API? | 20% | 94.6 | `███████████████████░` |
 | Composition knowledge — Does the AI understand compatible children, slots and related components? | 15% | 96.4 | `███████████████████░` |
@@ -27,14 +27,14 @@ Library points lost per check (averaged over components). Fix the top rows first
 
 | Dimension | Check | Components | Points lost |
 | --- | --- | ---: | ---: |
-| Usage examples | Attributes demonstrated in examples | 96 | 0.5 |
+| Usage examples | Attributes demonstrated in examples | 93 | 0.49 |
 | Composition knowledge | Named slots used in an example | 22 | 0.3 |
 | Usage examples | Usage examples in the docs | 21 | 0.27 |
 | Usage examples | Every element appears in an example | 19 | 0.18 |
 | Composition knowledge | CSS parts described | 31 | 0.18 |
-| API documentation | get_component answers in full in one response | 42 | 0.17 |
+| API documentation | get_component answers in full in one response | 44 | 0.18 |
 | Usage examples | Gallery of styled variants | 8 | 0.13 |
-| Identity and purpose | Explains how it works and when to use it | 7 | 0.09 |
+| Identity and purpose | Explains how it works and when to use it | 7 | 0.07 |
 | Composition knowledge | Other components it is shown with are named in its docs | 4 | 0.06 |
 | API documentation | Property-only API typed | 16 | 0.06 |
 | API documentation | CSS variables whose name is not a CSS property are described | 2 | 0.04 |
@@ -46,30 +46,35 @@ Requirements where `search_components` did not rank an expected component first.
 
 | Requirement | Expected | Rank | Top 3 |
 | --- | --- | ---: | --- |
-| Show a menu when the user right-clicks a file in the list | context-menu | 3 | tree, file-browser, context-menu |
-| An on/off setting for email notifications | switch, checkbox | 4 | symbols, choice-matrix, notification-center |
-| Plot daily revenue over the last 30 days as a line | line-chart, area-chart | 10 | aging-table, scatter-chart, heatmap-chart |
-| An arrow-right icon at the end of a 'Continue' button | feather-icons, phosphor-icons, button | 3 | button-group, toggletip, phosphor-icons |
-| Show the initials of each team member in a circle | avatar | 6 | phosphor-icons, overlap-chart, chord-chart |
-| Editable grid of invoices with filtering and CSV-like cells | table, spreadsheet | 2 | phosphor-icons, table, allocation-grid |
-| Two-factor authentication code entry | otp-input, totp-code | 6 | symbols, phosphor-icons, diff-viewer |
-| KPI card with this month's signups and the change versus last month | stat, delta | 2 | sankey-chart, delta, bullet-chart |
-| Double-check with the user before they cancel their subscription | confirm-dialog, popconfirm, modal | — | phosphor-icons, floating-panel, group-table |
+| Show how much of the import has finished as a percentage bar | progress | 2 | meter, progress, delta |
+| Switch between Overview, Settings and Billing panels on the same page | tabs | 2 | tab-nav, tabs, list-item |
+| Plot daily revenue over the last 30 days as a line | line-chart, area-chart | 7 | heatmap-chart, aging-table, scatter-chart |
+| An arrow-right icon at the end of a 'Continue' button | feather-icons, phosphor-icons, button | 2 | button-group, phosphor-icons, feather-icons |
+| Show the initials of each team member in a circle | avatar | 5 | overlap-chart, radial-bar-chart, chord-chart |
+| Two-factor authentication code entry | otp-input, totp-code | 2 | qr-code, otp-input, totp-code |
+| Double-check with the user before they cancel their subscription | confirm-dialog, popconfirm, modal | — | banner, bubble-chart, floating-panel |
+
+## Held-out requirements
+
+Requirements written by an agent that never saw the components or the search (`readiness/heldout.json`), searched the same way: **67/100** (hit@1 54%, hit@3 78% over 97 requirements). Not part of the headline, and its misses are deliberately not listed: it measures whether a change to the search, the keywords or the intents generalizes, which it stops doing once anyone tunes against it. A gain on the discovery benchmark above with none here is overfitting.
 
 ## Lab requirements
 
-The requirements the component lab's builds met with c2n components (`lab/specs` for the words, `lab/reports` for the components the build used), searched the same way: **56.7/100** (hit@1 47%, hit@3 67% over 15 requirements). Not part of the headline: nobody tuned the search for these words, so a miss here is a word developers use that the docs do not.
+The requirements the component lab's builds met with c2n components (`lab/specs` for the words, `lab/reports` for the components the build used), searched the same way: **60.3/100** (hit@1 52%, hit@3 70% over 23 requirements). Not part of the headline: nobody tuned the search for these words, so a miss here is a word developers use that the docs do not.
 
 | Requirement | Build used | Rank | Top 3 |
 | --- | --- | ---: | --- |
-| catalog-filter/R3: The Brand facet works the same way. Its counts take every other active filter into account (with Tents checked: Alpenfox 2, Northwind 1, Kestrel 0). | facet-list | 3 | highlight, table, facet-list |
-| catalog-filter/R5: "In stock only" hides the products that are out of stock. | switch | — | treemap-chart, candlestick-chart, overlap-chart |
-| catalog-filter/R7: "Clear filters" resets search, facets, price and stock in one action. | button | — | facet-list, autocomplete, tree-select |
-| catalog-filter/R8: Sort by Featured, Price: low to high, Price: high to low, or Name. | select | — | phosphor-icons, order-book, table |
-| catalog-filter/R9: When nothing matches, the results say so and offer "Clear filters". | status-panel | 6 | flowsheet, search-field, autocomplete |
-| pricing-page/R1: Monthly and Yearly are two options shown at once; switching updates every price and billing note. | button-group | — | recurrence-editor, view-options, depth-chart |
-| pricing-page/R2: Prices are currency in the reader's locale. | format-number | 2 | money-input, format-number, depth-chart |
-| pricing-page/R4: On a phone the cards stack, Team first, and the comparison table scrolls sideways in its frame with the feature column kept visible. | table, card | 2 | phosphor-icons, table, group-table |
+| appointment-booking/R1: The three services are shown at once and one is picked; each shows its duration and price. | radio, format-number | — | countdown, toast, indicator |
+| appointment-booking/R2: The calendar offers 2 to 15 March only; Sundays, 13 March and past days cannot be picked and say why to a screen reader. | date-strip, date-selector | 4 | time-range-picker, heatmap-chart, date-input |
+| appointment-booking/R5: Name and phone are required; the errors show on the fields when "Confirm booking" is chosen. | form, form-field, text-field | 8 | phone-input, confirm-dialog, time-slot-picker |
+| appointment-booking/R6: Confirming shows progress, then the confirmation; a refused number shows its error on the phone field. | form, phone-input | 3 | confirm-dialog, popconfirm, phone-input |
+| appointment-booking/R8: On a phone the steps stack and the summary follows them. | card, form | — | steps, details, master-detail |
+| catalog-filter/R3: The Brand facet works the same way. Its counts take every other active filter into account (with Tents checked: Alpenfox 2, Northwind 1, Kestrel 0). | facet-list | 2 | highlight, facet-list, camera-capture |
+| catalog-filter/R5: "In stock only" hides the products that are out of stock. | switch | — | candlestick-chart, treemap-chart, overlap-chart |
+| catalog-filter/R7: "Clear filters" resets search, facets, price and stock in one action. | button | — | facet-list, candlestick-chart, autocomplete |
+| catalog-filter/R8: Sort by Featured, Price: low to high, Price: high to low, or Name. | select | — | candlestick-chart, order-book, table |
+| catalog-filter/R9: When nothing matches, the results say so and offer "Clear filters". | status-panel | 3 | search-field, flowsheet, status-panel |
+| pricing-page/R1: Monthly and Yearly are two options shown at once; switching updates every price and billing note. | button-group | 3 | recurrence-editor, view-options, button-group |
 
 ## Agent run
 
@@ -110,26 +115,26 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 
 | Component | Score | Identity | API | Usage | Composition | Framework | Validation |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| chatbot | 71.7 C | 44 | 100 | 0 | 100 | 100 | 100 |
-| feather-icons | 78.3 C | 56 | 67 | 67 | 100 | 100 | 100 |
-| task-icons | 82.2 B | 78 | 100 | 28 | 100 | 100 | 100 |
-| symbols | 85.9 B | 78 | 100 | 46 | 100 | 100 | 100 |
-| phosphor-icons | 86.4 B | 56 | 91 | 77 | 100 | 100 | 100 |
-| color-select | 87.3 B | 78 | 77 | 82 | 100 | 100 | 100 |
+| chatbot | 73.2 C | 55 | 100 | 0 | 100 | 100 | 100 |
+| feather-icons | 79.5 C | 64 | 67 | 67 | 100 | 100 | 100 |
+| task-icons | 82.8 B | 82 | 100 | 28 | 100 | 100 | 100 |
+| symbols | 86.5 B | 82 | 100 | 46 | 100 | 100 | 100 |
+| phosphor-icons | 87.7 B | 64 | 91 | 77 | 100 | 100 | 100 |
+| color-select | 87.9 B | 82 | 77 | 82 | 100 | 100 | 100 |
 | virtual-list | 88.2 B | 100 | 99 | 98 | 25 | 100 | 100 |
 | in-view | 89.1 B | 100 | 95 | 52 | 100 | 100 | 100 |
 | audio-visualizer | 90 A | 100 | 100 | 100 | 33 | 100 | 100 |
-| mat-icon | 90.1 A | 78 | 100 | 77 | 100 | 100 | 80 |
+| mat-icon | 90.7 A | 82 | 100 | 77 | 100 | 100 | 80 |
 | shortcut | 90.7 A | 100 | 100 | 54 | 100 | 100 | 100 |
 | image | 91.7 A | 100 | 98 | 98 | 50 | 100 | 100 |
 | selection-toolbar | 92.6 A | 100 | 100 | 75 | 83 | 100 | 100 |
 | context-menu | 92.8 A | 100 | 97 | 75 | 90 | 100 | 100 |
 | markdown | 93.1 A | 100 | 99 | 96 | 60 | 100 | 100 |
 | import-mapper | 93.3 A | 100 | 100 | 100 | 55 | 100 | 100 |
+| candlestick-chart | 93.6 A | 100 | 95 | 79 | 100 | 100 | 90 |
 | card-input | 93.6 A | 100 | 100 | 96 | 63 | 100 | 100 |
 | pan-zoom | 93.6 A | 100 | 97 | 100 | 63 | 100 | 100 |
 | tour | 93.6 A | 100 | 100 | 68 | 100 | 100 | 100 |
-| candlestick-chart | 93.7 A | 100 | 95 | 80 | 100 | 100 | 90 |
 | beacon | 93.8 A | 100 | 100 | 69 | 100 | 100 | 100 |
 | butterfly-chart | 94 A | 100 | 95 | 76 | 100 | 100 | 100 |
 | tabs | 94 A | 100 | 100 | 100 | 60 | 100 | 100 |
@@ -139,26 +144,25 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | waterfall-chart | 94.5 A | 100 | 95 | 79 | 100 | 100 | 100 |
 | tier-editor | 94.7 A | 100 | 100 | 98 | 68 | 100 | 100 |
 | toast | 94.7 A | 100 | 93 | 82 | 100 | 100 | 100 |
+| boxplot-chart | 94.8 A | 100 | 95 | 80 | 100 | 100 | 100 |
 | pyramid-chart | 94.8 A | 100 | 95 | 80 | 100 | 100 | 100 |
-| boxplot-chart | 94.9 A | 100 | 95 | 81 | 100 | 100 | 100 |
+| treemap-chart | 94.8 A | 100 | 95 | 80 | 100 | 100 | 100 |
 | document-checklist | 94.9 A | 100 | 100 | 74 | 100 | 100 | 100 |
-| treemap-chart | 94.9 A | 100 | 95 | 81 | 100 | 100 | 100 |
+| histogram-chart | 94.9 A | 100 | 95 | 81 | 100 | 100 | 100 |
+| radial-bar-chart | 94.9 A | 100 | 95 | 81 | 100 | 100 | 100 |
 | code-viewer | 95 A | 100 | 100 | 100 | 67 | 100 | 100 |
 | dashboard | 95 A | 100 | 93 | 84 | 100 | 100 | 100 |
-| histogram-chart | 95 A | 100 | 95 | 81 | 100 | 100 | 100 |
-| radial-bar-chart | 95 A | 100 | 95 | 81 | 100 | 100 | 100 |
 | index-bar | 95.1 A | 100 | 100 | 75 | 100 | 100 | 100 |
 | inline-edit | 95.2 A | 100 | 100 | 100 | 68 | 100 | 100 |
-| sunburst-chart | 95.3 A | 100 | 95 | 82 | 100 | 100 | 100 |
-| scatter-chart | 95.4 A | 100 | 95 | 88 | 100 | 100 | 90 |
-| bubble-chart | 95.5 A | 100 | 95 | 84 | 100 | 100 | 100 |
+| sunburst-chart | 95.2 A | 100 | 95 | 82 | 100 | 100 | 100 |
+| scatter-chart | 95.3 A | 100 | 95 | 88 | 100 | 100 | 90 |
+| bubble-chart | 95.5 A | 100 | 95 | 83 | 100 | 100 | 100 |
+| bullet-chart | 95.5 A | 100 | 95 | 83 | 100 | 100 | 100 |
 | view-options | 95.5 A | 100 | 97 | 100 | 75 | 100 | 100 |
-| bullet-chart | 95.6 A | 100 | 95 | 84 | 100 | 100 | 100 |
 | map-chart | 95.8 A | 100 | 95 | 85 | 100 | 100 | 100 |
 | search-field | 95.8 A | 100 | 100 | 98 | 75 | 100 | 100 |
 | change-review | 95.9 A | 100 | 100 | 86 | 92 | 100 | 100 |
 | color-area | 95.9 A | 100 | 92 | 90 | 100 | 100 | 100 |
-| color-slider | 95.9 A | 78 | 100 | 96 | 100 | 100 | 100 |
 | menubar | 96 A | 100 | 99 | 82 | 100 | 100 | 100 |
 | text-field | 96 A | 100 | 94 | 88 | 100 | 100 | 100 |
 | menu | 96.1 A | 100 | 94 | 92 | 100 | 100 | 93 |
@@ -171,29 +175,29 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | wheel-picker | 96.3 A | 100 | 100 | 100 | 75 | 100 | 100 |
 | share-sheet | 96.4 A | 100 | 100 | 86 | 95 | 100 | 100 |
 | trace-waterfall | 96.4 A | 100 | 100 | 86 | 95 | 100 | 100 |
+| color-slider | 96.5 A | 82 | 100 | 96 | 100 | 100 | 100 |
 | flowsheet | 96.5 A | 100 | 96 | 88 | 100 | 100 | 100 |
 | visually-hidden | 96.5 A | 100 | 100 | 82 | 100 | 100 | 100 |
-| area-chart | 96.7 A | 100 | 95 | 90 | 100 | 100 | 100 |
-| gauge-chart | 96.7 A | 100 | 95 | 93 | 100 | 100 | 93 |
+| gauge-chart | 96.6 A | 100 | 95 | 93 | 100 | 100 | 93 |
 | masonry | 96.7 A | 100 | 100 | 83 | 100 | 100 | 100 |
+| sparkline | 96.7 A | 100 | 95 | 90 | 100 | 100 | 100 |
 | heatmap-chart | 96.8 A | 100 | 100 | 84 | 100 | 100 | 100 |
-| sparkline | 96.8 A | 100 | 95 | 90 | 100 | 100 | 100 |
-| tree | 96.8 A | 100 | 96 | 97 | 90 | 100 | 100 |
-| pie-chart | 96.9 A | 100 | 95 | 91 | 100 | 100 | 100 |
+| pie-chart | 96.8 A | 100 | 95 | 90 | 100 | 100 | 100 |
+| area-chart | 96.9 A | 100 | 95 | 91 | 100 | 100 | 100 |
+| bar-chart | 96.9 A | 100 | 95 | 91 | 100 | 100 | 100 |
 | tree-table | 96.9 A | 100 | 96 | 90 | 100 | 100 | 100 |
-| bar-chart | 97 A | 100 | 95 | 91 | 100 | 100 | 100 |
+| overlap-chart | 97 A | 100 | 95 | 91 | 100 | 100 | 100 |
 | page-header | 97 A | 100 | 100 | 92 | 100 | 100 | 85 |
-| overlap-chart | 97.1 A | 100 | 95 | 92 | 100 | 100 | 100 |
 | overlay | 97.2 A | 100 | 100 | 96 | 100 | 100 | 80 |
 | radar-chart | 97.2 A | 100 | 95 | 92 | 100 | 100 | 100 |
 | scroll-progress | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | skip-link | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | switch | 97.2 A | 100 | 98 | 94 | 100 | 100 | 91 |
+| tree | 97.2 A | 100 | 96 | 99 | 90 | 100 | 100 |
 | video-player | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | overflow-list | 97.3 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | tooltip | 97.3 A | 100 | 97 | 100 | 100 | 100 | 81 |
 | checkbox-group | 97.4 A | 100 | 99 | 99 | 86 | 100 | 100 |
-| line-chart | 97.4 A | 100 | 95 | 93 | 100 | 100 | 100 |
 | navigation-menu | 97.4 A | 100 | 94 | 94 | 100 | 100 | 100 |
 | emoji-picker | 97.5 A | 100 | 100 | 88 | 100 | 100 | 100 |
 | list-item | 97.5 A | 100 | 96 | 100 | 91 | 100 | 100 |
@@ -202,13 +206,13 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | transcript | 97.5 A | 100 | 100 | 100 | 83 | 100 | 100 |
 | app-shell | 97.6 A | 100 | 100 | 96 | 96 | 100 | 90 |
 | flow | 97.6 A | 100 | 94 | 96 | 100 | 100 | 100 |
-| spreadsheet | 97.6 A | 100 | 94 | 96 | 100 | 100 | 100 |
 | time-slot-picker | 97.6 A | 100 | 100 | 98 | 88 | 100 | 100 |
 | attachment | 97.7 A | 100 | 98 | 100 | 88 | 100 | 100 |
 | carousel | 97.7 A | 100 | 100 | 89 | 100 | 100 | 100 |
 | image-cropper | 97.7 A | 100 | 94 | 96 | 100 | 100 | 100 |
 | autocomplete | 97.8 A | 100 | 99 | 100 | 91 | 100 | 95 |
 | form | 97.8 A | 100 | 100 | 98 | 88 | 100 | 100 |
+| line-chart | 97.8 A | 100 | 95 | 95 | 100 | 100 | 100 |
 | audio-player | 97.9 A | 100 | 94 | 100 | 96 | 100 | 100 |
 | icon-button | 97.9 A | 100 | 100 | 90 | 100 | 100 | 100 |
 | key-value-editor | 97.9 A | 100 | 100 | 100 | 86 | 100 | 100 |
@@ -224,20 +228,20 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | description-list | 98.3 A | 100 | 95 | 100 | 100 | 100 | 97 |
 | input-matrix | 98.3 A | 100 | 100 | 100 | 89 | 100 | 100 |
 | json-form | 98.3 A | 100 | 98 | 94 | 100 | 100 | 100 |
-| chip-group | 98.4 A | 100 | 100 | 92 | 100 | 100 | 100 |
 | image-annotator | 98.4 A | 100 | 99 | 100 | 92 | 100 | 100 |
 | otp-input | 98.4 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | select | 98.4 A | 100 | 94 | 100 | 100 | 100 | 100 |
+| spreadsheet | 98.4 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | chat-message-list | 98.5 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | date-input | 98.5 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | hover-card | 98.5 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | number-input | 98.5 A | 100 | 94 | 100 | 100 | 100 | 100 |
 | time-input | 98.5 A | 100 | 94 | 100 | 100 | 100 | 100 |
-| pagination | 98.6 A | 100 | 100 | 94 | 100 | 100 | 100 |
 | questionnaire | 98.6 A | 100 | 100 | 100 | 91 | 100 | 100 |
 | record-merge | 98.6 A | 100 | 100 | 99 | 92 | 100 | 100 |
 | json-viewer | 98.7 A | 100 | 98 | 100 | 95 | 100 | 100 |
 | money-input | 98.7 A | 100 | 97 | 97 | 100 | 100 | 100 |
+| reorder-list | 98.7 A | 100 | 95 | 100 | 100 | 100 | 100 |
 | table | 98.7 A | 100 | 96 | 100 | 100 | 100 | 99 |
 | choice-matrix | 98.8 A | 100 | 100 | 100 | 97 | 100 | 93 |
 | quantity-picker | 98.8 A | 100 | 95 | 100 | 100 | 100 | 100 |
@@ -245,6 +249,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | text-annotator | 98.8 A | 100 | 100 | 94 | 100 | 100 | 100 |
 | bottom-nav | 98.9 A | 100 | 100 | 94 | 100 | 100 | 100 |
 | command | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
+| kanban | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | mask-input | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | notepad | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | sheet | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
@@ -256,6 +261,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | date-time-picker | 99 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | delta | 99 A | 100 | 100 | 95 | 100 | 100 | 100 |
 | log-viewer | 99 A | 100 | 100 | 100 | 93 | 100 | 100 |
+| pagination | 99 A | 100 | 100 | 95 | 100 | 100 | 100 |
 | tag-input | 99 A | 100 | 99 | 100 | 96 | 100 | 100 |
 | tree-select | 99 A | 100 | 100 | 95 | 100 | 100 | 100 |
 | schema-tree | 99.1 A | 100 | 96 | 100 | 100 | 100 | 100 |
@@ -280,14 +286,12 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | state-timeline | 99.5 A | 100 | 100 | 100 | 97 | 100 | 100 |
 | unit-input | 99.5 A | 100 | 98 | 100 | 100 | 100 | 100 |
 | file-preview | 99.6 A | 100 | 98 | 100 | 100 | 100 | 100 |
-| google-map | 99.6 A | 100 | 100 | 98 | 100 | 100 | 100 |
 | split-button | 99.6 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | streaming-text | 99.6 A | 100 | 98 | 100 | 100 | 100 | 100 |
 | time-range-picker | 99.6 A | 100 | 98 | 100 | 100 | 100 | 100 |
 | aging-table | 99.7 A | 100 | 100 | 100 | 98 | 100 | 100 |
 | citation | 99.7 A | 100 | 100 | 98 | 100 | 100 | 100 |
 | file-browser | 99.7 A | 100 | 99 | 100 | 100 | 100 | 100 |
-| kanban | 99.7 A | 100 | 100 | 98 | 100 | 100 | 100 |
 | page-editor | 99.7 A | 100 | 100 | 98 | 100 | 100 | 100 |
 | radio | 99.7 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | button-group | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
@@ -295,9 +299,9 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | password-field | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | phone-input | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | popconfirm | 99.8 A | 100 | 100 | 99 | 100 | 100 | 100 |
-| reorder-list | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | slider | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | floating-panel | 99.9 A | 100 | 100 | 99 | 100 | 100 | 100 |
+| google-map | 99.9 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | highlight | 99.9 A | 100 | 100 | 100 | 100 | 100 | 99 |
 | accordion | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | action-bar | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -313,6 +317,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | camera-capture | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | celebration | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | chat-input | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
+| chip-group | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | citation-list | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | code-editor | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | copy-button | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -382,7 +387,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 
 ## Details (lowest 25)
 
-### chatbot — 71.7 (C)
+### chatbot — 73.2 (C)
 
 - **Identity and purpose · One-line description says what it is** (0%): description shorter than 8 words
 - **Identity and purpose · Found by search from its need (description minus its own name)** (0%): not in the top 10 for its own description
@@ -391,34 +396,34 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 - **Usage examples · Every element appears in an example** (0%): 1/1 missing: c2-chatbot
 - **Usage examples · Attributes demonstrated in examples** (0%): 0% shown; not: name
 
-### feather-icons — 78.3 (C)
+### feather-icons — 79.5 (C)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **Identity and purpose · Every element has a description** (0%): 1/1 missing: c2-feather-{name}
 - **API documentation · CSS variables whose name is not a CSS property are described** (0%): 1/1 missing: --c2-feather-icon--size
 - **Usage examples · Gallery of styled variants** (0%): no gallery page
 
-### task-icons — 82.2 (B)
+### task-icons — 82.8 (B)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **Usage examples · Usage examples in the docs** (60%): 2 usage example(s)
 - **Usage examples · Gallery of styled variants** (0%): no gallery page
 - **Usage examples · Attributes demonstrated in examples** (0%): 0% shown; not: label
 
-### symbols — 85.9 (B)
+### symbols — 86.5 (B)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **Usage examples · Gallery of styled variants** (0%): no gallery page
 - **Usage examples · Attributes demonstrated in examples** (0%): 0% shown; not: label
 
-### phosphor-icons — 86.4 (B)
+### phosphor-icons — 87.7 (B)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **Identity and purpose · Every element has a description** (0%): 1/1 missing: c2-phosphor-{name}
 - **API documentation · CSS variables whose name is not a CSS property are described** (0%): 1/1 missing: --c2-phosphor-icon--size
 - **Usage examples · Gallery of styled variants** (0%): no gallery page
 
-### color-select — 87.3 (B)
+### color-select — 87.9 (B)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **API documentation · Attribute defaults stated** (50%): 1/2 missing: color
@@ -443,7 +448,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 
 - **Composition knowledge · CSS parts described** (33%): 2/3 missing: bar, orb
 
-### mat-icon — 90.1 (A)
+### mat-icon — 90.7 (A)
 
 - **Identity and purpose · Explains how it works and when to use it** (0%): no intro or element description of 25+ words
 - **Usage examples · Gallery of styled variants** (0%): no gallery page
@@ -484,6 +489,16 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 
 - **Composition knowledge · Named slots used in an example** (40%): 3/5 missing: c2-import-mapper[empty], c2-import-mapper[loading], c2-import-mapper[error]
 
+### candlestick-chart — 93.6 (A)
+
+- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
+- **API documentation · Attributes typed** (97%): 1/37 missing: aria-label
+- **API documentation · Attribute defaults stated** (97%): 1/37 missing: aria-label
+- **Usage examples · Every element appears in an example** (75%): 1/4 missing: c2-chart-series
+- **Usage examples · Attributes demonstrated in examples** (37%): 22% shown; not: open-field, close-field, low-field, high-field, renderer, revision
+- **Validation · Examples pass validate_markup without errors** (88%): 1/8 missing: Realtime replay: Unknown attribute `size` on `<c2-button>`
+- **Validation · Examples pass without warnings** (88%): 1/8 missing: Realtime replay: Unknown attribute `size` on `<c2-button>`
+
 ### card-input — 93.6 (A)
 
 - **Usage examples · Attributes demonstrated in examples** (83%): 50% shown; not: name, required, readonly
@@ -500,16 +515,6 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 - **Usage examples · Usage examples in the docs** (60%): 2 usage example(s)
 - **Usage examples · Attributes demonstrated in examples** (24%): 14% shown; not: open, current, storage-key, autostart, skip-limit, skip-delay
 
-### candlestick-chart — 93.7 (A)
-
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (97%): 1/36 missing: aria-label
-- **API documentation · Attribute defaults stated** (97%): 1/36 missing: aria-label
-- **Usage examples · Every element appears in an example** (75%): 1/4 missing: c2-chart-series
-- **Usage examples · Attributes demonstrated in examples** (38%): 23% shown; not: open-field, close-field, low-field, high-field, renderer, revision
-- **Validation · Examples pass validate_markup without errors** (88%): 1/8 missing: Realtime replay: Unknown attribute `size` on `<c2-button>`
-- **Validation · Examples pass without warnings** (88%): 1/8 missing: Realtime replay: Unknown attribute `size` on `<c2-button>`
-
 ### beacon — 93.8 (A)
 
 - **Usage examples · Usage examples in the docs** (30%): 1 usage example(s)
@@ -518,10 +523,10 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 ### butterfly-chart — 94 (A)
 
 - **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (97%): 1/31 missing: aria-label
-- **API documentation · Attribute defaults stated** (97%): 1/31 missing: aria-label
+- **API documentation · Attributes typed** (97%): 1/32 missing: aria-label
+- **API documentation · Attribute defaults stated** (97%): 1/32 missing: aria-label
 - **Usage examples · Every element appears in an example** (50%): 2/4 missing: c2-chart-legend, c2-chart-tooltip
-- **Usage examples · Attributes demonstrated in examples** (50%): 30% shown; not: renderer, revision, series, x-field, x-type, legend-action
+- **Usage examples · Attributes demonstrated in examples** (48%): 29% shown; not: renderer, revision, series, x-field, x-type, legend-action
 
 ### tabs — 94 (A)
 
