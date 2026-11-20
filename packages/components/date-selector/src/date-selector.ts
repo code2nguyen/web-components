@@ -350,7 +350,8 @@ export class DateSelector extends LitElement {
       this.disabledMap = new Map()
       for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
         const entry = typeof item === 'string' ? { date: item } : item
-        if (entry && typeof entry.date === 'string' && !this.disabledMap.get(entry.date)) this.disabledMap.set(entry.date.trim(), entry.label ?? '')
+        const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
+        if (date && !this.disabledMap.get(date)) this.disabledMap.set(date, entry.label ?? '')
       }
     }
     if (changed.has('marked')) this.markedDates = new Set(Array.isArray(this.marked) ? this.marked.map((date) => date.trim()) : [])
@@ -507,17 +508,22 @@ export class DateSelector extends LitElement {
     if (this.canNavigate(amount)) this.visibleMonth = addMonths(this.visibleMonth, amount)
   }
 
-  private async moveFocus(current: string, offset: number, byMonth = false) {
+  /**
+   * Moves the focus by `offset` days (months with `byMonth`). A closed day is stepped over a day at a time, in the
+   * direction of the move, up to a year of them; with `withinWeek` (Home and End), back toward the current day instead,
+   * so the focus stays in its week.
+   */
+  private async moveFocus(current: string, offset: number, byMonth = false, withinWeek = false) {
     const date = fromIso(current)
-    if (!date) return
+    if (!date || offset === 0) return
     let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
-    // A closed day is stepped over, a day at a time in the direction of the move, up to a year of them.
-    const step = offset < 0 ? -1 : 1
-    for (let guard = 0; guard < 366 && !this.effectiveDisabled && !this.outOfRange(toIso(target)) && this.isClosed(toIso(target)); guard++) {
+    const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1)
+    const limit = withinWeek ? Math.abs(offset) : 366
+    for (let guard = 0; guard < limit && !this.effectiveDisabled && !this.outOfRange(toIso(target)) && this.isClosed(toIso(target)); guard++) {
       target = addDays(target, step)
     }
     const value = toIso(target)
-    if (this.isUnavailable(value)) return
+    if (value === current || this.isUnavailable(value)) return
     const firstVisible = toIso(this.visibleMonth)
     const afterVisible = toIso(addMonths(this.visibleMonth, this.displayedMonths))
     if (value < firstVisible || value >= afterVisible) this.visibleMonth = beginningOfMonth(target)
@@ -544,8 +550,8 @@ export class DateSelector extends LitElement {
     else if (event.key === 'ArrowRight') action = this.moveFocus(value, 1)
     else if (event.key === 'ArrowUp') action = this.moveFocus(value, -7)
     else if (event.key === 'ArrowDown') action = this.moveFocus(value, 7)
-    else if (event.key === 'Home') action = this.moveFocus(value, -column)
-    else if (event.key === 'End') action = this.moveFocus(value, 6 - column)
+    else if (event.key === 'Home') action = this.moveFocus(value, -column, false, true)
+    else if (event.key === 'End') action = this.moveFocus(value, 6 - column, false, true)
     else if (event.key === 'PageUp') action = this.moveFocus(value, event.shiftKey ? -12 : -1, true)
     else if (event.key === 'PageDown') action = this.moveFocus(value, event.shiftKey ? 12 : 1, true)
     if (action) event.preventDefault()
@@ -558,7 +564,7 @@ export class DateSelector extends LitElement {
     return Array.from({ length: 7 }, (_, index) => formatter.format(addDays(start, index)))
   }
 
-  private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, anchor: string) {
+  private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, tabStop: string) {
     const value = toIso(date)
     const disabled = this.isUnavailable(value)
     const selected = selection ? selection.has(value) : value === this.from || value === this.to
@@ -571,7 +577,7 @@ export class DateSelector extends LitElement {
     const compareFrom = selection ? '' : this.compareFrom
     const compareEnd = this.compareTo || compareFrom
     const inCompare = !!compareFrom && value >= compareFrom && value <= compareEnd
-    const focusable = !disabled && (this.focusDate ? value === this.focusDate : anchor ? value === anchor : value === today || !this.min || value >= this.min)
+    const focusable = value === tabStop
     const content = this.renderDay?.({ date: value, day: date.getDate(), selected, disabled, marked, today: value === today })
     const hasContent = content !== undefined && content !== null && content !== nothing && content !== '' && content !== false
     const describedBy = [hasContent ? `content-${value}` : '', inCompare ? 'compare-note' : ''].filter(Boolean).join(' ')
@@ -600,7 +606,7 @@ export class DateSelector extends LitElement {
     </button>`
   }
 
-  private renderMonth(month: Date, index: number, selection: Set<string> | null, anchor: string) {
+  private renderMonth(month: Date, index: number, selection: Set<string> | null, tabStop: string) {
     const year = month.getFullYear()
     const monthIndex = month.getMonth()
     const offset = this.weekStart === 'monday' ? (month.getDay() + 6) % 7 : month.getDay()
@@ -612,7 +618,7 @@ export class DateSelector extends LitElement {
       const day = cellIndex - offset + 1
       return day < 1 || day > days
         ? html`<span class="empty" role="gridcell" aria-disabled="true"></span>`
-        : this.renderDayCell(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today, selection, anchor)
+        : this.renderDayCell(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today, selection, tabStop)
     })
     return html`<section class="month" aria-label=${monthLabel}>
       <header class="month-header">
@@ -632,14 +638,20 @@ export class DateSelector extends LitElement {
     const label = this.ariaLabel === defaultLabel ? this.field.label || this.msg.t(modeLabels[this.isRange ? 'range' : this.mode]) : this.ariaLabel
     const invalid = this.field.invalid && !this.effectiveDisabled
     let selection: Set<string> | null = null
-    let anchor = this.from
+    // Exactly one day holds the roving tab stop, and it is one that can be picked: the focused day, else the range start
+    // or the first selected day, else today, else the first available day shown. Any of them may be closed or off screen.
+    const first = toIso(this.visibleMonth)
+    const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
+    const usable = (date: string) => !!date && date >= first && date < after && !this.isUnavailable(date)
+    let candidates = [this.focusDate, this.from]
     if (!this.isRange) {
       const dates = this.selectedDates
       selection = new Set(dates)
-      // The roving tab stop goes to the first selected day that is shown and enabled, so the grid stays reachable.
-      const first = toIso(this.visibleMonth)
-      const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
-      anchor = dates.find((date) => date >= first && date < after && !this.isUnavailable(date)) ?? ''
+      candidates = [this.focusDate, ...dates]
+    }
+    let tabStop = [...candidates, toIso(new Date())].find(usable) ?? ''
+    for (let day = beginningOfMonth(this.visibleMonth); !tabStop && toIso(day) < after; day = addDays(day, 1)) {
+      if (usable(toIso(day))) tabStop = toIso(day)
     }
     return html`<div
         class="c2-date-selector ${invalid ? 'error' : ''}"
@@ -648,7 +660,7 @@ export class DateSelector extends LitElement {
         aria-describedby=${this.field.describedBy()}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
       >
-        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, anchor))}
+        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, tabStop))}
         ${!selection && this.compareFrom ? html`<span id="compare-note" hidden>${this.msg.t('inComparison')}</span>` : nothing}
         <div
           class="footer"

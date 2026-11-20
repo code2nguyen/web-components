@@ -425,3 +425,24 @@ test('disabled-dates and isDateDisabled close days: read with their reason, not 
   await page.keyboard.press('ArrowLeft')
   await expect(page.getByRole('gridcell', { name: /September 5, 2026/ })).toBeFocused()
 })
+
+test('Home and End stay in the week when its first or last day is closed', async ({ page, scenario }) => {
+  await scenario('closed')
+  await page.getByRole('gridcell', { name: /September 9, 2026/ }).focus()
+  // Sunday 13 is closed: End stops on Saturday 12, not on Monday 14 of the next week.
+  await page.keyboard.press('End')
+  await expect(page.getByRole('gridcell', { name: /September 12, 2026/ })).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('gridcell', { name: /September 7, 2026/ })).toBeFocused()
+})
+
+test('the grid keeps exactly one tab stop, on a day that can be picked', async ({ page, scenario }) => {
+  const stops = () => page.locator('c2-date-selector').locator('.day[tabindex="0"]')
+  // A range starting on a closed day: the tab stop falls back to a day that can be picked.
+  await scenario('closed-range')
+  await expect(stops()).toHaveCount(1)
+  await expect(stops()).toBeEnabled()
+  // Nothing selected and no min: one tab stop, not one per day.
+  await scenario('multiple-empty')
+  await expect(stops()).toHaveCount(1)
+})

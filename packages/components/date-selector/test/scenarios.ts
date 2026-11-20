@@ -25,6 +25,11 @@ if (scenario === 'constrained') {
   subject.max = '2026-09-20'
 }
 if (scenario === 'disabled') subject.disabled = true
+if (scenario === 'closed-range') {
+  // The range starts on a Sunday the rule closes.
+  subject.from = '2026-09-13'
+  subject.isDateDisabled = (date) => new Date(`${date}T12:00:00`).getDay() === 0
+}
 if (scenario === 'closed') {
   subject.mode = 'single'
   subject.from = ''
