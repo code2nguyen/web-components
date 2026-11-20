@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book an appointment · appointment-booking lab build</title>
+    <script>
+      ;(function () {
+        try {
+          var theme = new URLSearchParams(location.search).get('theme')
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme
+        } catch (e) {
+          /* the prefers-color-scheme fallback still applies */
+        }
+      })()
+    </script>
+    <script type="module" src="./main.js"></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <header class="page__head">
+        <h1>Book an appointment</h1>
+        <p class="page__lead">Le Comptoir barber shop · 12 rue Oberkampf, Paris</p>
+      </header>
+
+      <c2-form id="booking">
+        <form id="form" class="layout">
+          <div class="steps">
+            <section class="step" aria-labelledby="service-heading">
+              <h2 id="service-heading" class="step__title">Service</h2>
+              <c2-radio-group id="service" name="service" value="haircut" aria-label="Service" class="services"></c2-radio-group>
+            </section>
+
+            <section class="step" aria-labelledby="day-heading">
+              <h2 id="day-heading" class="step__title">Day</h2>
+              <c2-form-field label="Day">
+                <c2-date-strip id="day" name="day" required days="7" start="2026-03-02" min="2026-03-02" max="2026-03-15"></c2-date-strip>
+              </c2-form-field>
+            </section>
+
+            <section class="step" aria-labelledby="time-heading">
+              <h2 id="time-heading" class="step__title">Time</h2>
+              <c2-form-field id="time-field" label="Time">
+                <c2-time-slot-picker id="time" name="time" required time-zone="Europe/Paris" class="times"></c2-time-slot-picker>
+              </c2-form-field>
+              <!-- dogfood-exempt: app text for the time step; no c2 component announces a changing message (c2-status-panel is not a live region) -->
+              <p id="time-message" class="step__message" role="status"></p>
+            </section>
+
+            <section class="step" aria-labelledby="details-heading">
+              <h2 id="details-heading" class="step__title">Your details</h2>
+              <div class="details">
+                <c2-form-field label="Name">
+                  <c2-text-field id="name" name="name" required autocomplete="name"></c2-text-field>
+                </c2-form-field>
+                <c2-form-field label="Phone number" hint="We text you a reminder the day before.">
+                  <c2-phone-input id="phone" name="phone" required country="FR" preferred-countries="FR;BE;CH"></c2-phone-input>
+                </c2-form-field>
+                <c2-form-field label="Note for the barber" necessity="optional">
+                  <c2-textarea id="note" name="note" rows="3"></c2-textarea>
+                </c2-form-field>
+              </div>
+            </section>
+          </div>
+
+          <aside class="summary" aria-labelledby="summary-heading">
+            <c2-card class="summary__card">
+              <h2 id="summary-heading" slot="header" class="summary__title">Your booking</h2>
+              <div id="confirmation" class="confirmation" tabindex="-1" hidden>
+                <p class="confirmation__title">Booking confirmed</p>
+                <p>Reference <strong id="reference"></strong></p>
+              </div>
+              <c2-description-list class="summary__list">
+                <c2-description-item label="Service"><span id="summary-service"></span></c2-description-item>
+                <c2-description-item label="When">
+                  <c2-format-date id="summary-when" date-style="full" time-style="short" time-zone="Europe/Paris">Pick a day and a time</c2-format-date>
+                </c2-description-item>
+                <c2-description-item label="Price"><c2-format-number id="summary-price" type="currency" currency="USD"></c2-format-number></c2-description-item>
+              </c2-description-list>
+              <div slot="footer" class="summary__actions">
+                <c2-button id="confirm" type="submit">Confirm booking</c2-button>
+              </div>
+            </c2-card>
+          </aside>
+        </form>
+      </c2-form>
+    </main>
+  </body>
+</html>

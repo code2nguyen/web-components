@@ -1,0 +1,405 @@
+{
+  "name": "appointment-booking",
+  "spec": "lab/specs/scenarios/appointment-booking.md",
+  "title": "appointment-booking (default direction): a barber shop's booking page, built from its spec.",
+  "app": "lab/apps/appointment-booking/default",
+  "url": "http://127.0.0.1:4196/",
+  "server": {
+    "command": "npx vite lab/apps/appointment-booking/default --host 127.0.0.1 --port 4196 --strictPort",
+    "cwd": "."
+  },
+  "journeys": [
+    {
+      "id": "t1-book-haircut",
+      "title": "T1 · Book a haircut",
+      "personas": ["mouse", "keyboard", "mobile", "dark"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-03\"]"
+          }
+        },
+        {
+          "click": {
+            "css": "#time [data-start=\"2026-03-03T09:30:00+01:00\"]"
+          }
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Name"
+          },
+          "text": "Léa Martin"
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Phone number"
+          },
+          "text": "06 12 34 56 78"
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Confirm booking"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#confirmation"
+            },
+            "contains": "BK-3021"
+          },
+          "timeout": 3000
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#summary-service"
+            },
+            "contains": "Haircut"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#summary-when"
+            },
+            "contains": "Tuesday, March 3, 2026 at 9:30 AM"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#summary-price"
+            },
+            "contains": "$35.00"
+          }
+        }
+      ]
+    },
+    {
+      "id": "t1-book-haircut-fr",
+      "title": "T1 · Book a haircut, read in French",
+      "personas": ["fr"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-03\"]"
+          }
+        },
+        {
+          "click": {
+            "css": "#time [data-start=\"2026-03-03T09:30:00+01:00\"]"
+          }
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Name"
+          },
+          "text": "Léa Martin"
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Phone number"
+          },
+          "text": "06 12 34 56 78"
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Confirm booking"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#confirmation"
+            },
+            "contains": "BK-3021"
+          },
+          "timeout": 3000
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "#summary-when"
+            },
+            "contains": "mardi 3 mars 2026 à 09:30"
+          }
+        }
+      ]
+    },
+    {
+      "id": "t2-booked-and-past",
+      "title": "T2 · Booked and past slots are not offered",
+      "personas": ["mouse", "keyboard", "fr"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-02\"]"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#time [role=\"option\"][data-start]:not([aria-disabled])"
+            },
+            "equals": 12
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "css": "#time [data-start=\"2026-03-02T11:00:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "css": "#time [data-start=\"2026-03-02T11:30:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-03\"]"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#time [role=\"option\"][data-start]:not([aria-disabled])"
+            },
+            "equals": 14
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "css": "#time [data-start=\"2026-03-03T09:00:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "css": "#time [data-start=\"2026-03-03T10:00:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "css": "#time [data-start=\"2026-03-03T14:30:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "css": "#time [data-start=\"2026-03-03T09:30:00+01:00\"]"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "t3-longer-service",
+      "title": "T3 · A longer service needs room",
+      "personas": ["mouse", "keyboard", "mobile"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "ax": "radio",
+            "name": "Cut & colour"
+          }
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-03\"]"
+          }
+        },
+        {
+          "expect": {
+            "hidden": {
+              "css": "#time [data-start=\"2026-03-03T09:30:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "expect": {
+            "visible": {
+              "css": "#time [data-start=\"2026-03-03T10:30:00+01:00\"]"
+            }
+          }
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-07\"]"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#time [role=\"option\"][data-start]:not([aria-disabled])"
+            },
+            "equals": 0
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "ax": "status"
+            },
+            "contains": "full"
+          }
+        }
+      ]
+    },
+    {
+      "id": "t4-closed-days",
+      "title": "T4 · Closed days cannot be picked",
+      "personas": ["mouse", "keyboard"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#day [aria-disabled=\"true\"][data-date=\"2026-03-08\"]"
+            },
+            "equals": 1
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Later days"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#day [aria-disabled=\"true\"][data-date=\"2026-03-13\"]"
+            },
+            "equals": 1
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "#day [aria-disabled=\"true\"][data-date=\"2026-03-15\"]"
+            },
+            "equals": 1
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "ax": "option",
+              "name": "Closed for staff training"
+            },
+            "equals": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "t5-missing-and-refused",
+      "title": "T5 · Missing and refused details",
+      "personas": ["mouse", "keyboard", "mobile"],
+      "steps": [
+        {
+          "goto": "./"
+        },
+        {
+          "click": {
+            "css": "#day [data-date=\"2026-03-03\"]"
+          }
+        },
+        {
+          "click": {
+            "css": "#time [data-start=\"2026-03-03T09:30:00+01:00\"]"
+          }
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Confirm booking"
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "c2-form-field:state(user-invalid)"
+            },
+            "equals": 2
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "c2-form-field:state(user-invalid):has(#name)"
+            },
+            "equals": 1
+          }
+        },
+        {
+          "expect": {
+            "count": {
+              "css": "c2-form-field:state(user-invalid):has(#phone)"
+            },
+            "equals": 1
+          }
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Name"
+          },
+          "text": "Léa Martin"
+        },
+        {
+          "fill": {
+            "ax": "textbox",
+            "name": "Phone number"
+          },
+          "text": "06 12 34 00 00"
+        },
+        {
+          "click": {
+            "ax": "button",
+            "name": "Confirm booking"
+          }
+        },
+        {
+          "expect": {
+            "text": {
+              "css": "c2-form-field:has(#phone)"
+            },
+            "contains": "This number cannot receive text messages"
+          },
+          "timeout": 3000
+        }
+      ]
+    }
+  ]
+}
