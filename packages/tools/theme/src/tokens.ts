@@ -59,8 +59,8 @@ export const tokens: TokenDef[] = [
   token('color-outline-strong', 'color', '#a1a1aa', 'Border colour on hover.', '#52525b'),
   token('color-error', 'color', '#dc2626', 'Error borders, error text, required indicators.', '#f87171'),
   // Status text and marks an app draws itself (a confirmation line, a "paid" state). Not mapped onto any component
-  // variable, so component defaults are unchanged; gallery examples served by @c2n/mcp do take them for these literals,
-  // so a copied card's success and warning text lightens in dark mode. The light values are the ones components use.
+  // variable, so component defaults are unchanged, and `themeExampleCss` keeps gallery literals of these values as the
+  // card's accents (they are often fills, which the light dark values would wash out). Light values match components.
   token('color-success', 'color', '#15803d', 'Success text and marks: a confirmation line, a paid or done state. AA on the surface in both themes.', '#4ade80'),
   token('color-warning', 'color', '#a16207', 'Warning text and marks: a due-soon date, a pending state. AA on the surface in both themes.', '#facc15'),
   token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(0, 0, 0, 0.6)'),
