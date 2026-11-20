@@ -312,7 +312,7 @@ export class WheelPicker extends LitElement {
     this.internals.setValidity(flags, this.customValidityMessage, anchor)
     // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
     // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
-    // validity once a submit reported it, as for a native control.
+    // failed constraint once `reportValidity()` reported it (see `errorShown`).
     this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
