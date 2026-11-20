@@ -58,6 +58,10 @@ export const tokens: TokenDef[] = [
   token('color-outline-variant', 'color', '#e4e4e7', 'Hairline dividers and light borders.', '#27272a'),
   token('color-outline-strong', 'color', '#a1a1aa', 'Border colour on hover.', '#52525b'),
   token('color-error', 'color', '#dc2626', 'Error borders, error text, required indicators.', '#f87171'),
+  // Status text and marks an app draws itself (a confirmation line, a "paid" state). Not mapped onto any component
+  // variable, so adding them changed no component's look; their light values are the ones the components already use.
+  token('color-success', 'color', '#15803d', 'Success text and marks: a confirmation line, a paid or done state. AA on the surface in both themes.', '#4ade80'),
+  token('color-warning', 'color', '#a16207', 'Warning text and marks: a due-soon date, a pending state. AA on the surface in both themes.', '#facc15'),
   token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(0, 0, 0, 0.6)'),
   token('color-inverse-surface', 'color', '#18181b', 'High-contrast surface, e.g. tooltips.', '#f4f4f5'),
   token('color-on-inverse-surface', 'color', '#fafafa', 'Text drawn on the inverse surface.', '#18181b'),
