@@ -118,6 +118,11 @@ test('a disabled date given with a reason is read with it, from the attribute or
   await expect(page.getByRole('option', { name: 'Thursday, October 15, 2026' })).not.toHaveAttribute('aria-disabled', 'true')
 })
 
+test('disabled dates written with spaces around the separator are closed', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="en-US"><c2-date-strip value="2026-10-13" disabled-dates="2026-10-15; 2026-10-16"></c2-date-strip></div>`)
+  await expect(page.getByRole('option', { name: /October 16, 2026/ })).toHaveAttribute('aria-disabled', 'true')
+})
+
 test('a disabled date reason follows the language', async ({ page, renderScenario }) => {
   await renderScenario(
     `<div lang="fr"><c2-date-strip value="2026-10-13" disabled-dates='[{"date":"2026-10-18","label":"Fermé le dimanche"}]'></c2-date-strip></div>`,

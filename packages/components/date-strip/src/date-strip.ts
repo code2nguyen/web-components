@@ -13,7 +13,6 @@ import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { dateStripMessages } from './messages'
 
-/** A day with something on it, drawn as a dot under the day. */
 /** A day that cannot be picked, with the reason a screen reader hears with it. */
 export interface DateStripDisabledDate {
   /** The day, as `YYYY-MM-DD`. */
@@ -22,6 +21,7 @@ export interface DateStripDisabledDate {
   label?: string
 }
 
+/** A day with something on it, drawn as a dot under the day. */
 export interface DateStripMarker {
   /** The day, as `YYYY-MM-DD`. */
   date: string
@@ -238,7 +238,8 @@ export class DateStrip extends LitElement {
       this.disabledMap = new Map()
       for (const item of Array.isArray(this.disabledDates) ? this.disabledDates : []) {
         const entry = typeof item === 'string' ? { date: item } : item
-        if (entry && typeof entry.date === 'string' && !this.disabledMap.get(entry.date)) this.disabledMap.set(entry.date, entry.label ?? '')
+        const date = entry && typeof entry.date === 'string' ? entry.date.trim() : ''
+        if (date && !this.disabledMap.get(date)) this.disabledMap.set(date, entry.label ?? '')
       }
     }
     if (changed.has('markers')) {
