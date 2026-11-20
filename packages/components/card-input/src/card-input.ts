@@ -234,6 +234,8 @@ export class CardInput extends LitElement {
   reportValidity() {
     // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
     this.validityShown = true
+    // Drawn now, so the control is marked invalid when the report moves the focus into it.
+    this.performUpdate()
     return this.internals.reportValidity()
   }
 
@@ -476,7 +478,8 @@ export class CardInput extends LitElement {
   override render() {
     const disabled = this.effectiveDisabled
     // A missing card or custom message reported by `reportValidity()` shows on the number, where the focus goes.
-    const error = this.firstError() ?? this.reportedError()
+    // A reported custom message comes first, as in the validity; then a part's own error.
+    const error = (this.validityShown && this.customValidityMessage ? this.reportedError() : null) ?? this.firstError() ?? this.reportedError()
     const invalid = this.errorShown
     const errorId = 'card-error'
     const describedBy = this.field.describedBy(...(error && !this.field.managed ? [errorId] : []))

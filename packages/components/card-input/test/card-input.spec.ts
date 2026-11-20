@@ -173,3 +173,25 @@ test('a disabled card shows no reported error', async ({ page, renderScenario })
   })
   await expect(card(page).locator('[part="error"]')).toHaveCount(0)
 })
+
+test('reportValidity marks the number invalid before it moves the focus there', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  const marked = await card(page).evaluate((element: CardInput) => {
+    let invalidOnFocus: string | null = null
+    element.shadowRoot!.addEventListener('focusin', (event) => (invalidOnFocus = (event.target as HTMLElement).getAttribute('aria-invalid')), { once: true })
+    element.reportValidity()
+    return invalidOnFocus
+  })
+  expect(marked).toBe('true')
+})
+
+test('a reported custom message is the error shown, as in the validity', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await number(page).fill('4242')
+  await expiry(page).focus()
+  await card(page).evaluate((element: CardInput) => {
+    element.setCustomValidity('Card declined')
+    element.reportValidity()
+  })
+  await expect(card(page).locator('[part="error"]')).toHaveText('Card declined')
+})
