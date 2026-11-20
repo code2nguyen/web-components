@@ -305,9 +305,15 @@ export class CardInput extends LitElement {
    * Whether the error is shown, on the host and on the field alike: a part's error, an enclosing field's error, or a
    * missing card or custom message once `reportValidity()` reported it.
    */
+  /** The error `reportValidity()` reported, when no part has one of its own. */
+  private reportedError(): { segment: Segment; message: string } | null {
+    if (!this.validityShown) return null
+    if (this.customValidityMessage) return { segment: 'number', message: this.customValidityMessage }
+    return this.required && !this.anyFilled() ? { segment: 'number', message: this.msg.t('valueMissing') } : null
+  }
+
   private get errorShown(): boolean {
-    const reported = this.validityShown && ((this.required && !this.anyFilled()) || !!this.customValidityMessage)
-    return (!!this.firstError() || this.field.invalid || reported) && !this.effectiveDisabled
+    return (!!this.firstError() || !!this.reportedError() || this.field.invalid) && !this.effectiveDisabled
   }
 
   private syncFormState(): void {
@@ -467,7 +473,8 @@ export class CardInput extends LitElement {
 
   override render() {
     const disabled = this.effectiveDisabled
-    const error = this.firstError()
+    // A missing card or custom message reported by `reportValidity()` shows on the number, where the focus goes.
+    const error = this.firstError() ?? this.reportedError()
     const invalid = this.errorShown
     const errorId = 'card-error'
     const describedBy = this.field.describedBy(...(error && !this.field.managed ? [errorId] : []))

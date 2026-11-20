@@ -149,3 +149,10 @@ test('a reported missing card shows its error as well as announcing it', async (
   await card(page).evaluate((element: CardInput) => element.reportValidity())
   await expect(card(page).locator('[part="field"]')).toHaveClass(/field--invalid/)
 })
+
+test('a reported missing card marks and describes the number, where the focus goes', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(number(page)).toHaveAttribute('aria-invalid', 'true')
+  await expect(number(page)).toHaveAccessibleDescription(/Please enter your card details/)
+})
