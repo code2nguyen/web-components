@@ -5,6 +5,8 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { rateMessages } from './messages.js'
 import styles from './rate.scss?inline'
 import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
@@ -59,6 +61,7 @@ export class Rate extends LitElement {
   private customValidityMessage = ''
   /** Label and description handed down by an enclosing `c2-form-field`. */
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
+  private readonly msg = new LocalizeController(this, rateMessages)
   @state() private previewValue: number | null = null
   @state() private disabledByForm = false
 
@@ -241,7 +244,7 @@ export class Rate extends LitElement {
         class="rate"
         role="slider"
         tabindex=${this.readonly || this.effectiveDisabled ? -1 : 0}
-        aria-label=${this.ariaLabel || this.field.label || 'Rating'}
+        aria-label=${this.ariaLabel || this.field.label || this.msg.t('label')}
         aria-describedby=${this.field.describedBy()}
         aria-invalid=${this.field.invalid ? 'true' : nothing}
         aria-valuemin="0"

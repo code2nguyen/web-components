@@ -33,6 +33,17 @@ test('failed uploads offer retry and removal', async ({ page, scenario }) => {
   await expect(attachment).toHaveAttribute('data-events', '[{"name":"invoice.csv"}]')
 })
 
+test('its text follows the language of the page', async ({ page, scenario }) => {
+  await scenario('lang')
+  await expect(page.getByRole('list', { name: 'Pièces jointes' })).toBeVisible()
+  await expect(page.getByRole('progressbar', { name: 'Envoi de video.mp4' })).toBeVisible()
+  await expect(page.getByText(/^Envoi · 42\s%$/)).toBeVisible()
+  await expect(page.getByRole('button', { name: "Annuler l'envoi de video.mp4" })).toBeVisible()
+  await expect(page.getByRole('status')).toHaveText("Échec de l'envoi")
+  await expect(page.getByRole('button', { name: 'Réessayer invoice.csv' })).toBeVisible()
+  await expect(page.getByText('Pièce jointe sans nom')).toBeVisible()
+})
+
 test('disabled attachments keep built-in actions inert', async ({ page, scenario }) => {
   await scenario('disabled')
   await expect(page.getByRole('button', { name: 'Retry locked.pdf' })).toBeDisabled()
@@ -84,4 +95,9 @@ test('selects Phosphor icons from the file extension with a generic fallback', a
   await expect(page.locator('c2-phosphor-file-ts')).toHaveCount(1)
   await expect(page.locator('c2-phosphor-file-pdf')).toHaveCount(1)
   await expect(page.locator('c2-phosphor-file')).toHaveCount(1)
+})
+
+test('an upload under a malformed lang still draws its progress', async ({ page, scenario }) => {
+  await scenario('uploading-bad-lang')
+  await expect(page.locator('c2-attachment')).toContainText('40%')
 })

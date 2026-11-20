@@ -89,6 +89,12 @@ const en = {
   helpTRIM: 'The text without extra spaces.',
   argsTODAY: '',
   helpTODAY: 'Today’s date.',
+  /** Accessible name of the field editing a cell in place, `{0}` being the cell ("B3"). */
+  editCell: (cell: string) => `Edit ${cell}`,
+  /** Accessible name of the formula bar, `{0}` being the active cell. */
+  formulaBar: (cell: string) => `Formula bar, ${cell}`,
+  /** Read for the corner above the row numbers. */
+  rowHeader: 'Row',
 }
 
 /** The spreadsheet's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

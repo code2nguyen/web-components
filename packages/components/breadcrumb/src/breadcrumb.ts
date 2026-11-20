@@ -1,11 +1,12 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { assignSlot, property } from '@c2n/core/lit-helper.js'
+import { assignSlot, property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { ifDefined } from 'lit/directives/if-defined.js'
 // Registers `c2-link-button`, the natural item element, and provides the ellipsis control.
 import '@c2n/link-button'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { breadcrumbMessages } from './messages.js'
 import styles from './breadcrumb.scss?inline'
 
 const LINK_BUTTON_TAG = 'c2-link-button'
@@ -63,9 +64,11 @@ export class Breadcrumb extends LitElement {
   /** Upper bound on visible items (the first, then the last ones behind an ellipsis). `0` lets the width decide alone. */
   @property({ type: Number, attribute: 'max-items' }) maxItems = 0
 
-  /** Accessible name of the navigation landmark. */
+  /** Accessible name of the navigation landmark. Unset, it is the `label` message ("Breadcrumb"). */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
+
+  private readonly msg = new LocalizeController(this, breadcrumbMessages)
 
   @state() private itemCount = 0
   @state() private expanded = false
@@ -92,20 +95,20 @@ export class Breadcrumb extends LitElement {
    * The shadow root came from the server (declarative shadow DOM). A server render cannot read the light DOM, so it
    * drew an empty trail; the first client render must draw the same one to hydrate, and the items are adopted after it.
    */
-  private readonly serverRendered = !isServer && this.shadowRoot !== null
+  private readonly hydration = new SlotReplayController(this, () => this.adoptChildren())
 
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer) {
-      if (this.serverRendered && !this.hasUpdated) void this.updateComplete.then(() => this.adoptChildren())
-      else this.adoptChildren()
+      // A server-rendered trail adopts them once hydrated, through the replay.
+      if (!this.hydration.hydrating) this.adoptChildren()
       // `slot` changes too: a child that gains or loses `slot="separator"` changes which slot it belongs in, which
       // manual assignment does not pick up by itself. Attribute records on children need `subtree`, so filter the
       // records to the trail's own children: a mutation inside an item does not change the item list.
       this.observer ??= new MutationObserver((records) => {
         const affectsItems = (record: MutationRecord) => (record.type === 'childList' ? record.target === this : (record.target as Node).parentNode === this)
         // Before hydration the deferred adoption picks the change up; adopting now would break the hydration.
-        if (records.some(affectsItems) && (this.hasUpdated || !this.serverRendered)) this.assignItems()
+        if (records.some(affectsItems) && !this.hydration.hydrating) this.assignItems()
       })
       this.observer.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['slot'] })
       if (typeof ResizeObserver !== 'undefined') {
@@ -309,7 +312,7 @@ export class Breadcrumb extends LitElement {
 
   private renderEllipsis(hidden: number) {
     return html`<li class="c2-breadcrumb-item c2-breadcrumb-item--ellipsis" part="item">
-      <c2-link-button class="c2-breadcrumb-ellipsis" part="ellipsis" aria-label=${`Show ${hidden} more items`} @click=${this.expand}>…</c2-link-button>
+      <c2-link-button class="c2-breadcrumb-ellipsis" part="ellipsis" aria-label=${this.msg.t('showMore', hidden)} @click=${this.expand}>…</c2-link-button>
       ${this.renderSeparator()}
     </li>`
   }
@@ -334,7 +337,7 @@ export class Breadcrumb extends LitElement {
       ]
     }
     return html`
-      <nav class="c2-breadcrumb" aria-label=${ifDefined(this.ariaLabel ?? 'Breadcrumb')}>
+      <nav class="c2-breadcrumb" aria-label=${this.ariaLabel || this.msg.t('label')}>
         <ol class=${classMap({ 'c2-breadcrumb-list': true, 'is-measuring': this.measuring, 'is-expanded': this.expanded })} part="list">
           ${content}
         </ol>

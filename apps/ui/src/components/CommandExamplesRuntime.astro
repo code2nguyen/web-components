@@ -1,0 +1,13 @@
+---
+/**
+ * Plays the application's part in the command gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: { command: { placeholder: 'Saisissez une commande ou cherchez…', label: 'Chercher une commande', empty: 'Aucun résultat.' } },
+  })
+</script>

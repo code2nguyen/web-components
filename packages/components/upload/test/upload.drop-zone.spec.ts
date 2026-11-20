@@ -135,6 +135,18 @@ test('announces in the language of the page', async ({ page, renderScenario }) =
   await expect(announcer(upload)).toHaveText('2 fichiers ajoutés')
 })
 
+test('file sizes are written in the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-upload id="en" max-size="2516582" auto-upload="false" aria-label="Files"></c2-upload>
+    <c2-upload id="en-big" max-size="15728640" auto-upload="false" aria-label="Files"></c2-upload>
+    <div lang="fr"><c2-upload id="fr" max-size="2516582" auto-upload="false" aria-label="Fichiers"></c2-upload></div>`)
+  await expect(page.locator('#en [part="hint"]')).toHaveText('up to 2.4 MB')
+  await expect(page.locator('#en-big [part="hint"]')).toHaveText('up to 15 MB')
+  await expect(page.locator('#fr [part="hint"]')).toHaveText(/^jusqu'à 2,4\sMo$/)
+  // A size that rounds to 1024 kB reads as 1.0 MB, not 1,024 kB.
+  await renderScenario('<c2-upload id="near-mb" max-size="1048500" auto-upload="false" aria-label="Files"></c2-upload>')
+  await expect(page.locator('#near-mb [part="hint"]')).toHaveText('up to 1.0 MB')
+})
+
 test('c2-image-uploader takes pasted images on its add tile', async ({ page, renderScenario }) => {
   await renderScenario('<c2-image-uploader multiple paste auto-upload="false" aria-label="Photos"></c2-image-uploader>')
   const uploader = page.locator('c2-image-uploader')

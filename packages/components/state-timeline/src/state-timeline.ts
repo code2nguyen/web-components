@@ -6,6 +6,8 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { stateTimelineMessages } from './messages.js'
 import styles from './state-timeline.scss?inline'
 import {
   axisTicks,
@@ -54,7 +56,6 @@ export interface StateTimeline {
 const DEFAULT_TRACK_WIDTH = 600
 /** Gap between the tooltip and the time line. */
 const TOOLTIP_GAP = 12
-const NO_DATA = 'No data'
 
 /** Position of a segment: its row, and its place among the drawn segments of that row. */
 interface Cell {
@@ -92,7 +93,7 @@ interface Moment {
  * @tag c2-state-timeline
  *
  * @slot heading - Title shown at the start of the header row, before the legend.
- * @slot empty - Shown when there are no series. Defaults to "No data".
+ * @slot empty - Shown when there are no series. Defaults to the `noData` message ("No data").
  *
  * @event {CustomEvent<StateTimelineSegmentEventDetail>} segment-click - Fired when a segment is clicked, or Enter or Space is pressed on it. Bubbles.
  * @event {CustomEvent<StateTimelineSegmentHoverEventDetail>} segment-hover - Fired when the pointer moves onto a segment, or off the segments (`segment: null`). Does not bubble.
@@ -192,6 +193,7 @@ export class StateTimeline extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, stateTimelineMessages, () => this.locale)
 
   /** The bands, as an array or a JSON attribute. Assign a new array to change the data. */
   @property({ converter: jsonPropertyConverter }) series: StateTimelineSeries[] = []
@@ -274,7 +276,12 @@ export class StateTimeline extends LitElement {
       this.pointer = null
       this.#hovered = null
     }
-    this.internals.ariaLabel = this.ariaLabel ?? 'State timeline'
+  }
+
+  protected override update(changed: PropertyValues<this>): void {
+    // Here, not in `willUpdate`: the localize controller picks the language (a `lang` change, hydration) between the two.
+    this.internals.ariaLabel = this.ariaLabel || this.msg.t('label')
+    super.update(changed)
   }
 
   protected override updated(): void {
@@ -337,7 +344,7 @@ export class StateTimeline extends LitElement {
       segment: placed.segment,
       segmentIndex: placed.index,
       state: placed.state?.key ?? null,
-      label: placed.state?.label ?? NO_DATA,
+      label: placed.state?.label ?? this.msg.t('noData'),
       start: placed.start,
       end: placed.end,
       duration: placed.end - placed.start,
@@ -508,10 +515,11 @@ export class StateTimeline extends LitElement {
   }
 
   #renderSegment(row: TimelineRow, rowIndex: number, placed: PlacedSegment, position: number, format: Intl.DateTimeFormat) {
-    const label = placed.state?.label ?? NO_DATA
+    const label = placed.state?.label ?? this.msg.t('noData')
     const active = rowIndex === this.active.row && position === this.active.position
     const baseline = placed.state?.baseline ?? false
-    const name = `${row.label ? `${row.label}: ` : ''}${label}, ${format.format(placed.start)} – ${format.format(placed.end)}, ${formatDuration(placed.end - placed.start)}`
+    const described = this.msg.t('segment', label, `${format.format(placed.start)} – ${format.format(placed.end)}`, formatDuration(placed.end - placed.start))
+    const name = row.label ? this.msg.t('inSeries', row.label, described) : described
     const left = this.#percent(placed.from)
     const classes = {
       segment: true,
@@ -541,8 +549,8 @@ export class StateTimeline extends LitElement {
     const outsideText = outside > 0 ? formatDuration(outside) : '—'
     const baseline = this.#baseline
     const spoken = [
-      last ? `now ${last.state?.label ?? NO_DATA}` : '',
-      summary && baseline ? `${outside > 0 ? outsideText : 'no time'} outside ${baseline.label}` : '',
+      last ? this.msg.t('now', last.state?.label ?? this.msg.t('noData')) : '',
+      summary && baseline ? this.msg.t('outside', outside > 0 ? outsideText : this.msg.t('noTime'), baseline.label) : '',
     ]
       .filter(Boolean)
       .join(', ')
@@ -570,8 +578,8 @@ export class StateTimeline extends LitElement {
             const left = segment ? segment.end - context.time : 0
             return html`<div class=${classMap({ 'tooltip-row': true, 'is-exception': exception, 'is-focus': moment.focus?.row === index })}>
               <span class=${classMap({ swatch: true, [this.#tone(placed?.state)]: true })}></span>
-              <span class="tooltip-name">${entry.series.label} · ${segment ? segment.label : NO_DATA}</span>
-              <span class="tooltip-left">${segment && left > 0 && exception ? `${formatDuration(left, step)} left` : ''}</span>
+              <span class="tooltip-name">${entry.series.label} · ${segment ? segment.label : this.msg.t('noData')}</span>
+              <span class="tooltip-left">${segment && left > 0 && exception ? this.msg.t('left', formatDuration(left, step)) : ''}</span>
             </div>`
           })}
           ${
@@ -601,7 +609,7 @@ export class StateTimeline extends LitElement {
             ${entry.baseline ? nothing : html`<b>${formatDuration(totals.get(entry.key)!)}</b>`}
           </li>`,
       )}
-      ${totals.has(null) ? html`<li><span class="swatch is-empty"></span>${NO_DATA} <b>${formatDuration(totals.get(null)!)}</b></li>` : nothing}
+      ${totals.has(null) ? html`<li><span class="swatch is-empty"></span>${this.msg.t('noData')} <b>${formatDuration(totals.get(null)!)}</b></li>` : nothing}
     </ul>`
   }
 
@@ -652,7 +660,7 @@ export class StateTimeline extends LitElement {
     const rows = this.#model.rows
     if (!rows.length) {
       return html`<div class="frame" part="base">
-        <div class="empty" part="empty"><slot name="empty">${NO_DATA}</slot></div>
+        <div class="empty" part="empty"><slot name="empty">${this.msg.t('noData')}</slot></div>
       </div>`
     }
     const format = rangeFormatter(this.#model.start, this.#model.end, this.#locale)

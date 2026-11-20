@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-navigation-menu: underline and pill bars, 
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import NavigationMenuExamplesRuntime from '../../components/NavigationMenuExamplesRuntime.astro'
 
 import { NavigationMenu } from '@c2n/components/navigation-menu'
 
@@ -225,3 +227,40 @@ The panel surface is `--c2-navigation-menu-item__panel--*` and the rows inside i
 ```
 
 </GalleryGrid>
+
+## Language
+
+<NavigationMenuExamplesRuntime />
+
+The name of the button shown in `mobile` mode is a message token: an app translates it once with `addTranslations`, and each menu speaks the language of its nearest `lang`. `mobile-label` still overrides one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The mobile button named in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-navigation-menu client:only="lit" aria-label="Principale" mode="mobile">
+    <c2-navigation-menu-item value="produits">
+      Produits
+      <div slot="panel">
+        <c2-navigation-menu-link href="#a">Analyses</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#b">Entrepôt</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="accueil" href="#accueil">Accueil</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'navigation-menu': {
+      mobile: 'Menu principal',
+    },
+  },
+})
+```

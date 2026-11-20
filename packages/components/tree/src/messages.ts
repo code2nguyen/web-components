@@ -9,6 +9,8 @@ const en = {
   cannotMove: (label: string) => `${label} cannot move there.`,
   /** Announced when Escape drops a dragged row back where it was. */
   cancelled: (label: string) => `Move of ${label} cancelled.`,
+  /** Shown instead of the rows when the tree holds nothing (the `empty` slot's default). */
+  empty: 'No items',
 }
 
 /**

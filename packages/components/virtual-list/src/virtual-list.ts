@@ -233,8 +233,8 @@ export class VirtualList extends LitElement {
   /** Milliseconds the built-in field waits after the last keystroke before the query is applied. */
   @property({ type: Number, attribute: 'search-debounce' }) searchDebounce = 200
 
-  /** Placeholder of the built-in search field. */
-  @property({ type: String, attribute: 'search-placeholder' }) searchPlaceholder = 'Search'
+  /** Placeholder of the built-in search field, and its accessible name. Empty, it is the `search` message ("Search"). */
+  @property({ type: String, attribute: 'search-placeholder' }) searchPlaceholder = ''
 
   /** Wraps the matched part of a row's text in `<mark part="highlight">`. */
   @property({ type: Boolean }) highlight = false
@@ -605,7 +605,7 @@ export class VirtualList extends LitElement {
           role="listbox"
           aria-multiselectable=${this.selection === 'multiple' ? 'true' : nothing}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
-          aria-label=${this.ariaLabel ?? 'Items'}
+          aria-label=${this.ariaLabel || this.msg.t('label')}
           @click=${this.#handleClick}
           @keydown=${this.#handleKeyDown}
         >
@@ -628,8 +628,8 @@ export class VirtualList extends LitElement {
         type="search"
         clearable
         .value=${this.search}
-        placeholder=${this.searchPlaceholder}
-        aria-label=${this.searchPlaceholder}
+        placeholder=${this.searchPlaceholder || this.msg.t('search')}
+        aria-label=${this.searchPlaceholder || this.msg.t('search')}
         @input=${this.#handleSearchInput}
         @clear=${this.#handleSearchClear}
         @keydown=${this.#handleSearchKeyDown}

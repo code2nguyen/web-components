@@ -1,0 +1,26 @@
+---
+/**
+ * Plays the application's part in the spreadsheet gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      spreadsheet: {
+        selectToSum: 'Sélectionnez des cellules pour voir leur somme',
+        sum: 'Somme',
+        average: 'Moyenne',
+        count: 'Nombre',
+        minimum: 'Minimum',
+        maximum: 'Maximum',
+        insertTotal: 'Insérer {0} dans {1}',
+        editCell: 'Modifier {0}',
+        formulaBar: 'Barre de formule, {0}',
+        rowHeader: 'Ligne',
+      },
+    },
+  })
+</script>

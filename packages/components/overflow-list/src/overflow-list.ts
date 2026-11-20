@@ -7,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { assignSlot, property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
+import { unwrapContents } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { Menu, Placement } from '@c2n/menu'
 import { overflowListMessages } from './messages'
@@ -93,13 +94,12 @@ function labelOf(element: Element): string {
 
 /** The icon a folded child shows, if any: its `prefix-icon`, or the content of an icon button. */
 function iconSourceOf(element: Element): Element | null {
-  let icon =
+  const icon =
     element.querySelector(':scope > [slot="prefix-icon"]') ??
     (element.localName === 'c2-icon-button' ? ([...element.children].find((child) => !child.hasAttribute('slot')) ?? null) : null)
   // A framework may wrap the icon in a box that does not render (an Astro island, a `display: contents` span): copy
   // the icon itself, since a copy of the wrapper is not hydrated again.
-  while (icon && icon.childElementCount === 1 && getComputedStyle(icon).display === 'contents') icon = icon.firstElementChild
-  return icon
+  return unwrapContents(icon)
 }
 
 /**

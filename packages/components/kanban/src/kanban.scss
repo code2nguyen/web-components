@@ -4,6 +4,11 @@
     gap: 12px,
     padding: 4px,
     scroll-snap-type: none,
+    board__drop-target--outline-color: #0265dc,
+    board__drop-target--outline-style: dashed,
+    board__drop-target--outline-width: 2px,
+    board__drop-target--outline-offset: -2px,
+    board__drop-refused--outline-color: #dc2626,
   )
 );
 
@@ -20,6 +25,17 @@
   overflow-x: auto;
   scroll-snap-type: css.cssVar(scroll-snap-type);
   box-sizing: border-box;
+}
+
+// Cards of the board's `drop-kind` dragged in from outside: accepted, or another kind, refused.
+.board--drop-target,
+.board--drop-refused {
+  outline: css.cssVar(board__drop-target--outline-width) css.cssVar(board__drop-target--outline-style) css.cssVar(board__drop-target--outline-color);
+  outline-offset: css.cssVar(board__drop-target--outline-offset);
+}
+
+.board--drop-refused {
+  outline-color: css.cssVar(board__drop-refused--outline-color);
 }
 
 .visually-hidden {

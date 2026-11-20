@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { arrayPropertyConverter, jsonPropertyConverter } from './lit-helper.ts'
+import { arrayPropertyConverter, jsonPropertyConverter, SlotReplayController, type SlotReplayHost } from './lit-helper.ts'
 
 test('a list attribute reads as a ;-separated value', () => {
   assert.deepEqual(arrayPropertyConverter.fromAttribute('EUR;USD'), ['EUR', 'USD'])
@@ -45,4 +45,48 @@ test('a JSON attribute that received a stringified object parses to nothing and 
   assert.equal(warn.mock.callCount(), 1)
   assert.equal(jsonPropertyConverter.fromAttribute('not json'), undefined)
   assert.equal(warn.mock.callCount(), 1)
+})
+
+/** A Lit host as far as the controller sees it: controllers, `hasUpdated`, `updateComplete` and a shadow root. */
+function fakeHost(shadowRoot: object | null = null) {
+  const controllers: { hostUpdated?: () => void }[] = []
+  let resolve: (value: boolean) => void = () => {}
+  const host = {
+    shadowRoot,
+    hasUpdated: false,
+    updateComplete: new Promise<boolean>((done) => (resolve = done)),
+    addController: (controller: { hostUpdated?: () => void }) => controllers.push(controller),
+    /** One update: the controllers' `hostUpdated`, then `hasUpdated`, then `updateComplete` resolves. */
+    update() {
+      for (const controller of controllers) controller.hostUpdated?.()
+      host.hasUpdated = true
+      resolve(true)
+    },
+  }
+  return host
+}
+
+test('a slot replay is server-only by default, and never runs on the server itself', async () => {
+  // Node is the server (`isServer`), where no shadow root came from a declarative template.
+  const host = fakeHost({})
+  let calls = 0
+  const replay = new SlotReplayController(host as unknown as SlotReplayHost, () => calls++)
+  assert.equal(replay.serverRendered, false)
+  assert.equal(replay.hydrating, false)
+  host.update()
+  await host.updateComplete
+  assert.equal(calls, 0)
+})
+
+test('a slot replay with `always` runs once, after the first update or from it with `immediate`', async () => {
+  const order: string[] = []
+  const host = fakeHost()
+  new SlotReplayController(host as unknown as SlotReplayHost, () => order.push('deferred'), { always: true })
+  new SlotReplayController(host as unknown as SlotReplayHost, () => order.push(`immediate, hasUpdated ${host.hasUpdated}`), { always: true, immediate: true })
+  host.update()
+  order.push('updated')
+  await host.updateComplete
+  host.update()
+  await host.updateComplete
+  assert.deepEqual(order, ['immediate, hasUpdated false', 'updated', 'deferred'])
 })

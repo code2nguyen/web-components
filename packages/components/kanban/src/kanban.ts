@@ -4,7 +4,10 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { KanbanColumn, KANBAN_COLUMN_CHANGE_EVENT, type KanbanCardView } from './kanban-column'
-import { kanbanText, type KanbanTextArgs, type KanbanTextKey } from './kanban-text'
+import { DropZoneController, type DropZoneItems } from '@c2n/core/controllers/drop-zone.js'
+import type { KanbanTextArgs, KanbanTextKey } from './kanban-text'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { kanbanMessages } from './messages.js'
 import styles from './kanban.scss?inline'
 
 export { KanbanColumn } from './kanban-column'
@@ -46,9 +49,26 @@ export interface KanbanCardMoveDetail<T extends KanbanItem = KanbanItem> {
   items: T[]
 }
 
+/** Detail of the `item-drop` event: cards dropped on the board from outside it, before `items` changes. */
+export interface KanbanItemDropDetail<T extends KanbanItem = KanbanItem> {
+  /** The payload kind of the drop: the board's `drop-kind`. */
+  kind: string
+  /** The cards the board adds, as copies placed in `toColumn`, in the order of the payload. */
+  added: T[]
+  /** The dropped entries the board turns away: not an object, or a key the board already holds. */
+  refused: unknown[]
+  /** `column-id` of the column the cards land in. */
+  toColumn: string
+  /** Position of the first added card in that column, starting at 0. */
+  toIndex: number
+  /** The whole `items` array after the drop. */
+  items: T[]
+}
+
 /** Events fired by {@link Kanban}, keyed for `addEventListener`. */
 export interface KanbanEventMap {
   'card-move': CustomEvent<KanbanCardMoveDetail>
+  'item-drop': CustomEvent<KanbanItemDropDetail>
 }
 
 export interface Kanban {
@@ -108,13 +128,22 @@ const EDGE_SCROLL_STEP = 10
  * @csspart board - Scrolling row that holds the columns.
  *
  * @event {CustomEvent<KanbanCardMoveDetail>} card-move - Fired when the user drops a card in a new place, before `items` changes. Cancelable: `preventDefault()` keeps the card where it was. Bubbles and crosses shadow boundaries.
+ * @event {CustomEvent<KanbanItemDropDetail>} item-drop - Fired when cards of the `drop-kind` payload are dropped on the board from outside it, before `items` changes. Cancelable: `preventDefault()` adds none of them. Does not bubble: each of `c2-kanban`, `c2-reorder-list` and `c2-tree` sends its own `detail`, so a drop on one nested in another must not reach the outer one's listeners. Listen on the element itself.
  *
  * @cssproperty {length} [--c2-kanban--gap=12px] - Space between columns.
  * @cssproperty {padding} [--c2-kanban--padding=4px] - Padding inside the scrolling row; keeps focus rings clear of its clipping edge.
  * @cssproperty {string} [--c2-kanban--scroll-snap-type=none] - Scroll snapping of the row; `x mandatory` snaps to columns.
+ * @cssproperty {color} [--c2-kanban__board__drop-target--outline-color=#0265dc] - Outline of the board while cards of its `drop-kind` are dragged over it.
+ * @cssproperty {string} [--c2-kanban__board__drop-target--outline-style=dashed] - Outline style while a drop is possible.
+ * @cssproperty {length} [--c2-kanban__board__drop-target--outline-width=2px] - Outline width while a drag is over the board.
+ * @cssproperty {length} [--c2-kanban__board__drop-target--outline-offset=-2px] - Outline offset; negative keeps it inside the scrolling row.
+ * @cssproperty {color} [--c2-kanban__board__drop-refused--outline-color=#dc2626] - Outline of the board while another kind of item is dragged over it, which it refuses.
  */
 @customElement('c2-kanban')
 export class Kanban extends LitElement {
+  /** ES-private, so a variant may keep a `msg` of its own. */
+  readonly #msg = new LocalizeController(this, kanbanMessages)
+
   static override styles: CSSResultGroup = unsafeCSS(styles)
 
   /** The cards' data, in display order within each column. An array in the property, JSON in the attribute. */
@@ -138,6 +167,15 @@ export class Kanban extends LitElement {
   /** Lets people move cards with a pointer or the keyboard. */
   @property({ type: Boolean, reflect: true }) editable = false
 
+  /**
+   * The kind of item payload the board takes from outside (another board, a list in the page, another window), as a
+   * source writes it with `writeItemPayload(dataTransfer, kind, items)` from `@c2n/core/controllers/drop-zone.js`
+   * (MIME type `application/x-c2n-<kind>+json`). Empty (the default) takes none. Needs `editable`. A drop adds the
+   * cards to the column under the pointer, at the position under it, fires `item-drop` and announces how many were
+   * added; a card whose key the board already holds is not added.
+   */
+  @property({ type: String, attribute: 'drop-kind' }) dropKind = ''
+
   @query('.board') private boardElement?: HTMLElement
 
   /** The columns the board lays cards out in, in display order. A variant that renders its own columns sets it in `update()`. */
@@ -147,6 +185,12 @@ export class Kanban extends LitElement {
   @state() private focusedKey: string | null = null
 
   private readonly generatedKeys = new WeakMap<object, string>()
+  private readonly dropZone = new DropZoneController(this, {
+    itemKind: () => this.dropKind,
+    disabled: () => !this.editable || !!this.session,
+    onItems: (drop) => this.receiveDrop(drop),
+  })
+  private dropAnnouncement = ''
   private keyCounter = 0
   private pendingFocus: string | null = null
   private scrollFrame = 0
@@ -166,6 +210,12 @@ export class Kanban extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('editable') && !this.editable && this.session) this.cancelSession(this.text('readOnly'))
     if (changed.has('items') && this.session && changed.get('items') !== undefined) this.cancelSession(this.text('itemsChanged'))
+    // What the drop zone announces after a drop from outside goes through the board's one live region, clear included,
+    // so the same sentence twice is read again.
+    if (this.dropZone.announcement !== this.dropAnnouncement) {
+      this.dropAnnouncement = this.dropZone.announcement
+      this.announcement = this.dropAnnouncement
+    }
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -183,7 +233,7 @@ export class Kanban extends LitElement {
     return html`
       <div
         part="board"
-        class="board"
+        class=${this.dropZone.over ? (this.dropZone.acceptable ? 'board board--drop-target' : 'board board--drop-refused') : 'board'}
         role="group"
         aria-label=${this.accessibleName() || nothing}
         @pointerdown=${this.handlePointerDown}
@@ -193,6 +243,10 @@ export class Kanban extends LitElement {
         @lostpointercapture=${this.handleLostPointerCapture}
         @keydown=${this.handleKeyDown}
         @focusin=${this.handleFocusIn}
+        @dragenter=${this.dropZone.handleDragEnter}
+        @dragover=${this.dropZone.handleDragOver}
+        @dragleave=${this.dropZone.handleDragLeave}
+        @drop=${this.dropZone.handleDrop}
       >
         ${this.renderColumns()}
       </div>
@@ -205,10 +259,9 @@ export class Kanban extends LitElement {
     return html`<slot @slotchange=${this.handleSlotChange}></slot>`
   }
 
-  /** An announcement in English; a variant overrides it to translate. */
+  /** An announcement in the page's language, from the `kanban` catalog; a variant overrides it to read its own. */
   protected text<K extends KanbanTextKey>(key: K, ...args: KanbanTextArgs<K>): string {
-    const value = kanbanText[key]
-    return typeof value === 'function' ? (value as (...values: unknown[]) => string)(...args) : value
+    return (this.#msg.t as (key: string, ...values: unknown[]) => string)(key, ...args)
   }
 
   // ---- data ----
@@ -571,13 +624,10 @@ export class Kanban extends LitElement {
     this.cancelSession(this.text('returnedInPlace', this.labelFor(session.key)))
   }
 
-  /** Column under the pointer (the nearest one horizontally), then the slot among its other cards by vertical midpoint. */
-  private updatePointerDestination(): void {
-    const session = this.session
-    const point = session?.latest
-    if (!session || session.phase !== 'dragging' || !point) return
+  /** Column under a point (the nearest one horizontally), then the slot among its cards by vertical midpoint. */
+  private destinationAt(point: Point): Position | null {
     const target = this.columnAt(point)
-    if (!target) return
+    if (!target) return null
     const wrappers = [...(target.cardsElement?.querySelectorAll<HTMLElement>(':scope > .card[data-key]') ?? [])]
     let index = wrappers.length
     for (let position = 0; position < wrappers.length; position++) {
@@ -587,7 +637,17 @@ export class Kanban extends LitElement {
         break
       }
     }
-    const column = target.columnId
+    return { column: target.columnId, index }
+  }
+
+  /** Where the dragged card lands: the destination under the pointer. */
+  private updatePointerDestination(): void {
+    const session = this.session
+    const point = session?.latest
+    if (!session || session.phase !== 'dragging' || !point) return
+    const destination = this.destinationAt(point)
+    if (!destination) return
+    const { column, index } = destination
     const current = this.positionOf(session.candidate, session.key)
     if (current?.column === column && current.index === index) return
     session.candidate = this.placeItem(session.candidate, session.key, column, index)
@@ -645,6 +705,47 @@ export class Kanban extends LitElement {
       this.scrollFrame = requestAnimationFrame(step)
     }
     this.scrollFrame = requestAnimationFrame(step)
+  }
+
+  // ---- drops from outside ----
+
+  /** Adds the cards of an item payload dropped on the board at the place under the pointer; returns how many it took. */
+  private receiveDrop({ kind, items: dropped, event }: DropZoneItems): number {
+    const destination = this.destinationAt({ x: event.clientX, y: event.clientY })
+    if (!destination) return 0
+    const source = this.sourceItems
+    const keys = new Set(source.map((item) => this.keyOf(item)))
+    const added: KanbanItem[] = []
+    const refused: unknown[] = []
+    for (const entry of dropped) {
+      const key = entry && typeof entry === 'object' && !Array.isArray(entry) ? (entry as KanbanItem)[this.itemKey] : undefined
+      const hasKey = key !== undefined && key !== null && key !== ''
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry) || (hasKey && keys.has(String(key)))) {
+        refused.push(entry)
+        continue
+      }
+      if (hasKey) keys.add(String(key))
+      added.push(this.withColumn(entry as KanbanItem, destination.column))
+    }
+    if (!added.length) return 0
+    const next = this.insertItems(source, destination.column, destination.index, added)
+    const detail: KanbanItemDropDetail = { kind, added, refused, toColumn: destination.column, toIndex: destination.index, items: next }
+    if (!this.dispatchEvent(new CustomEvent<KanbanItemDropDetail>('item-drop', { cancelable: true, detail }))) return 0
+    this.items = next
+    return added.length
+  }
+
+  /** `items` with new cards inserted into `column` at `index`, in order. */
+  private insertItems(items: readonly KanbanItem[], column: string, index: number, added: readonly KanbanItem[]): KanbanItem[] {
+    const next = [...items]
+    const siblings = next.filter((candidate) => this.columnOf(candidate) === column)
+    const bounded = Math.max(0, Math.min(siblings.length, index))
+    let at: number
+    if (bounded < siblings.length) at = next.indexOf(siblings[bounded])
+    else if (siblings.length) at = next.indexOf(siblings[siblings.length - 1]) + 1
+    else at = next.length
+    next.splice(at, 0, ...added)
+    return next
   }
 
   // ---- session ----

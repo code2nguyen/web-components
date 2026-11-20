@@ -801,7 +801,7 @@ export class Spreadsheet extends LitElement {
                 ? html`<input
                     class=${this.editing!.value.startsWith('=') ? 'editor formula' : 'editor'}
                     role="combobox"
-                    aria-label=${`Edit ${key}`}
+                    aria-label=${this.msg.t('editCell', key)}
                     aria-autocomplete="list"
                     aria-controls="formula-functions"
                     aria-expanded=${suggestions.length ? 'true' : 'false'}
@@ -848,7 +848,7 @@ export class Spreadsheet extends LitElement {
         @paste=${this.onPaste}
       >
         <div role="row" class="row">
-          <div role="columnheader" class="header corner" data-corner><span class="visually-hidden">Row</span></div>
+          <div role="columnheader" class="header corner" data-corner><span class="visually-hidden">${this.msg.t('rowHeader')}</span></div>
           ${columns.map(
             (column, index) =>
               html`<div
@@ -920,7 +920,7 @@ export class Spreadsheet extends LitElement {
                 <input
                   class="formula-input"
                   role="combobox"
-                  aria-label=${`Formula bar, ${activeKey}`}
+                  aria-label=${this.msg.t('formulaBar', activeKey)}
                   aria-autocomplete="list"
                   aria-controls="formula-functions"
                   aria-expanded=${suggestions.length && this.editing && !this.editing.inCell ? 'true' : 'false'}

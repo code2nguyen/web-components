@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import StateTimelineExamplesRuntime from '../../components/StateTimelineExamplesRuntime.astro'
 
 import { StateTimeline } from '@c2n/components/state-timeline'
 
@@ -118,3 +120,43 @@ sets the density.
 ```
 
 </GalleryGrid>
+
+## Language
+
+<StateTimelineExamplesRuntime />
+
+The stretch with no data, the tooltip and the names each band and segment read are message tokens: an app translates them once with `addTranslations`, and each timeline speaks the language of its nearest `lang`, which also formats its times.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=En français,description=The no-data state and the axis in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-state-timeline
+    client:only="lit"
+    aria-label="Santé des services"
+    series='[{"label":"API","segments":[{"start":"2026-10-08T09:00:00Z","state":"disponible"},{"start":"2026-10-08T10:05:00Z","state":"dégradé"},{"start":"2026-10-08T10:40:00Z","state":"disponible"}]},{"label":"Base","segments":[{"start":"2026-10-08T09:00:00Z","state":null},{"start":"2026-10-08T09:40:00Z","state":"disponible"},{"start":"2026-10-08T10:15:00Z","state":"dégradé"},{"start":"2026-10-08T10:55:00Z","state":"disponible"}]}]'
+    end="2026-10-08T12:00:00Z"
+  ></c2-state-timeline>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'state-timeline': {
+      label: "Chronologie d'états",
+      noData: 'Aucune donnée',
+      segment: '{0}, {1}, {2}',
+      inSeries: '{0} : {1}',
+      now: 'actuellement {0}',
+      outside: '{0} hors {1}',
+      noTime: 'aucun temps',
+      left: 'encore {0}',
+    },
+  },
+})
+```

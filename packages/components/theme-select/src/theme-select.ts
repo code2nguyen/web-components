@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues, type TemplateResult } from 'lit'
 import { query, queryAll, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -298,6 +298,20 @@ export class ThemeSelect extends LitElement {
     return document.documentElement
   }
 
+  constructor() {
+    super()
+    // `slotchange` does not fire for server-rendered slots, so read the sources once by hand. Deferred past the update
+    // Lit is finishing, or the state it sets would schedule a second render from inside the first one; on the client
+    // `slotchange` has normally run by then and each read is a no-op.
+    new SlotReplayController(
+      this,
+      () => {
+        for (const slot of this.renderRoot.querySelectorAll<HTMLSlotElement>('.c2-theme-select__icon-source slot')) this.readIconSlot(slot)
+      },
+      { always: true },
+    )
+  }
+
   override connectedCallback() {
     super.connectedCallback()
     if (isServer) return
@@ -306,17 +320,6 @@ export class ThemeSelect extends LitElement {
     this.mediaQuery.addEventListener('change', this.handleSystemChange)
     window.addEventListener('storage', this.handleStorage)
     if (!this.value) this.value = this.restore() ?? this.resolvedModes[0].value
-  }
-
-  /**
-   * `slotchange` does not fire for server-rendered slots, so read the sources once by hand. Deferred past the update
-   * Lit is finishing, or the state it sets would schedule a second render from inside the first one; on the client
-   * `slotchange` has normally run by then and each read is a no-op.
-   */
-  protected override firstUpdated() {
-    void this.updateComplete.then(() => {
-      for (const slot of this.renderRoot.querySelectorAll<HTMLSlotElement>('.c2-theme-select__icon-source slot')) this.readIconSlot(slot)
-    })
   }
 
   override disconnectedCallback() {

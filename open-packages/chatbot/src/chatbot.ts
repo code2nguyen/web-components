@@ -3,6 +3,10 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './chatbot.scss?inline'
 import '@c2n/avatar'
+
+// modern-web-ignore: literal-interface-text a sample persona of the scaffold, not interface text
+const SAMPLE_PERSONA = 'Elisa Jasmin'
+
 /**
  * Minimal chatbot shell that greets a named user and renders application-provided conversation content.
  *
@@ -29,14 +33,15 @@ export class Chatbot extends LitElement {
   static override styles = unsafeCSS(styles)
 
   /** Name included in the chatbot greeting. */
+  // modern-web-ignore: literal-interface-text the scaffold's sample value, not shipped text: the chatbot is a placeholder package
   @property({ type: String }) name = 'Example property'
 
   override render() {
     return html`
       <div class="c2-chatbot">
         <section class="c2-chatbot__header-container">
-          <c2-avatar name="Elisa Jasmin" initial-count="2"></c2-avatar>
-          <div>Elisa Jasmin</div>
+          <c2-avatar name=${SAMPLE_PERSONA} initial-count="2"></c2-avatar>
+          <div>${SAMPLE_PERSONA}</div>
         </section>
         <section class="c2-chatbot__message-container" part="messages"><slot></slot></section>
         <section class="c2-chatbot__input-container"></section>

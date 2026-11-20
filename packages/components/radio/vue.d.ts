@@ -29,6 +29,7 @@ declare module 'vue' {
     'c2-radio-group': DefineComponent<
       C2Props<RadioGroup> & {
         'aria-label'?: unknown
+        onInput?: (event: EventOf<RadioGroup, 'input'>) => void
         onChange?: (event: EventOf<RadioGroup, 'change'>) => void
       }
     >

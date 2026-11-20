@@ -1,3 +1,4 @@
+import './translations'
 import '../src/rate'
 import type { Rate } from '../src/rate'
 
@@ -6,7 +7,9 @@ const main = document.querySelector('main')!
 main.innerHTML =
   scenario === 'form'
     ? '<form><c2-rate id="subject" name="score" required aria-label="Product rating"></c2-rate></form>'
-    : '<c2-rate id="subject" value="2" aria-label="Product rating"></c2-rate>'
+    : scenario === 'lang'
+      ? '<div lang="fr"><c2-rate id="subject" value="2"></c2-rate></div>'
+      : '<c2-rate id="subject" value="2" aria-label="Product rating"></c2-rate>'
 
 const subject = document.querySelector<Rate>('#subject')!
 if (scenario === 'half') subject.allowHalf = true

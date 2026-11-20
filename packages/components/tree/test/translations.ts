@@ -8,6 +8,7 @@ addTranslations({
       movedInto: '{0} déplacé dans {1}, position {2} sur {3}.',
       cannotMove: '{0} ne peut pas aller là.',
       cancelled: 'Déplacement de {0} annulé.',
+      empty: 'Aucun élément',
     },
   },
 })

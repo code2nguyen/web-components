@@ -193,11 +193,11 @@ export class PhoneInput extends LitElement {
   /** Accessible name of the number field. Defaults to "Phone number". */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
-  /** Placeholder and accessible name of the country search field. */
-  @property({ attribute: 'search-label' }) searchLabel = 'Search countries'
+  /** Placeholder and accessible name of the country search field. Empty, it is the `search` message ("Search countries"). */
+  @property({ attribute: 'search-label' }) searchLabel = ''
 
-  /** Shown when no country matches the search. */
-  @property({ attribute: 'empty-label' }) emptyLabel = 'No country found'
+  /** Shown when no country matches the search. Unset, it is the `empty` message ("No country found"); `''` shows nothing. */
+  @property({ attribute: 'empty-label' }) emptyLabel?: string
 
   /** Form field name: the E.164 number is submitted with the form under this name. */
   @property({ type: String, reflect: true }) name = ''
@@ -713,19 +713,19 @@ export class PhoneInput extends LitElement {
             role="combobox"
             autocomplete="off"
             spellcheck="false"
-            aria-label=${this.searchLabel}
+            aria-label=${this.searchLabel || this.msg.t('search')}
             aria-autocomplete="list"
             aria-controls="countries"
             aria-expanded="true"
             aria-activedescendant=${ifDefined(options.length ? `country-${this.activeIndex}` : undefined)}
-            placeholder=${this.searchLabel}
+            placeholder=${this.searchLabel || this.msg.t('search')}
             .value=${live(this.search)}
             @input=${this.handleSearchInput}
             @change=${(event: Event) => event.stopPropagation()}
             @keydown=${this.handleSearchKeydown}
           />
         </div>
-        <div id="countries" class="list" role="listbox" aria-label=${this.searchLabel}>
+        <div id="countries" class="list" role="listbox" aria-label=${this.searchLabel || this.msg.t('search')}>
           ${
             options.length
               ? options.map(
@@ -746,7 +746,7 @@ export class PhoneInput extends LitElement {
                         <span class="option-code">+${country.dialCode}</span>
                       </div>`,
                 )
-              : html`<div class="empty" role="presentation">${this.emptyLabel}</div>`
+              : html`<div class="empty" role="presentation">${(this.emptyLabel ?? this.msg.t('empty')) || nothing}</div>`
           }
         </div>
       </div>

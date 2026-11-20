@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-command: the default palette, a floating �
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import CommandExamplesRuntime from '../../components/CommandExamplesRuntime.astro'
 
 import { Command } from '@c2n/components/command'
 import { Kbd } from '@c2n/components/kbd'
@@ -106,3 +108,25 @@ import { Kbd } from '@c2n/components/kbd'
 ```
 
 </GalleryGrid>
+
+## Language
+
+<CommandExamplesRuntime />
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=En français,description=The placeholder, the field's name and the empty text in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-command client:only="lit"><c2-command-group heading="Suggestions"><c2-command-item value="calendar">Calendrier</c2-command-item><c2-command-item value="emoji">Chercher un emoji</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Réglages"><c2-command-item value="profile">Profil</c2-command-item><c2-command-item value="billing">Facturation</c2-command-item></c2-command-group></c2-command>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: { command: { placeholder: 'Saisissez une commande ou cherchez…', label: 'Chercher une commande', empty: 'Aucun résultat.' } },
+})
+```

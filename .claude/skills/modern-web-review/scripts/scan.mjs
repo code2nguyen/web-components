@@ -309,10 +309,216 @@ const rules = [
       'A fixed + z-index layer sits under any open modal <dialog> and inside the inert document. If it must show above modals (toasts, banners), render it in the top layer (popover="manual" on a shadow element).',
     guide: 'persistent-toast-notifications, persistent-top-layer-ui',
   },
+  {
+    id: 'literal-interface-text',
+    level: 'warn',
+    ext: 'ts',
+    // English in an html`…`/svg`…` template (text between tags, or a literal aria-label/placeholder/title/alt/label),
+    // and an English string literal used as default text (`this.label || 'Close'`, `return 'No results'`). Not
+    // messages.ts, which is where the text belongs, nor tests.
+    file: (text, file) => {
+      if (/(^|\/)messages\.ts$/.test(file)) return []
+      const all = lines(text)
+      const isComment = (i) => /^\s*(\/\/|\*|\/\*)/.test(all[i] ?? '')
+      const hits = templateTextSegments(text)
+        .filter((s) => looksLikeEnglish(s.text) && !isComment(s.index))
+        .map((s) => s.index)
+      // A default-text fallback or return: `|| 'Text'`, `?? 'Text'`, `return 'Two words'`, outside throw/console lines.
+      const fallback = /(?:\|\||\?\?|\breturn)\s*(['"])([A-Z][a-z]+(?:[ \u00a0](?:(?!\1).)*)?)\1/
+      all.forEach((l, i) => {
+        if (isComment(i) || /\b(throw|console\.|new Error|warn\(|import |from ')/.test(l)) return
+        const m = fallback.exec(l)
+        if (m && (m[2].includes(' ') || /\|\||\?\?/.test(m[0]))) hits.push(i)
+        // A public property whose default is English text: `@property() label = 'Close'`. It keeps an empty default
+        // (or `undefined`) and falls back to its message at render time.
+        else if (
+          /@property\(/.test(l + (all[i - 1] ?? '')) &&
+          /^\s*(?:@property\([^)]*\)\s*)?(?:override\s+|declare\s+)*\w+(?:\s*:[^=]+)?\s*=\s*(['"])([A-Z][^'"]*)\1\s*$/.test(l)
+        ) {
+          const value = /=\s*(['"])(.*)\1\s*$/.exec(l)[2]
+          if (looksLikeEnglish(value)) hits.push(i)
+        }
+        // A text attribute bound to a template string with words in it: aria-label=${`Retry ${name}`}.
+        else if (/(aria-label|aria-roledescription|title|placeholder|alt|label)=\$\{\s*`(?:[^`$]|\$\{[^}]*\})*?[A-Za-z]{3,}/.test(l)) {
+          const literal = /=\$\{\s*`((?:[^`$]|\$\{[^}]*\})*)`/.exec(l)?.[1]?.replace(/\$\{[^}]*\}/g, ' ')
+          if (literal && looksLikeEnglish(literal)) hits.push(i)
+        }
+      })
+      return [...new Set(hits)].sort((a, b) => a - b)
+    },
+    message:
+      "English interface text in the template or as a default: a page in another language cannot translate it. Put it in src/messages.ts (`defineMessages('<package>', en)`) and render `this.msg.t('<key>')` through a LocalizeController (CLAUDE.md rule 6). Text that is not interface text (a unit symbol, a sample value) takes a modern-web-ignore comment with the reason.",
+    guide: 'CLAUDE.md "Built-in text is in English, and translatable"',
+  },
 ]
 
 function lines(text) {
   return text.split('\n')
+}
+
+// --- literal-interface-text --------------------------------------------------------------------------------------
+// The static parts of every html`…`/svg`…` template: the text between tags (minus <style> and <!-- -->) and the
+// literal values of the attributes that are read or shown (aria-label, placeholder, title, alt, …). Code inside ${…}
+// is skipped, though an html`…` nested in it is visited on its own. Returns { index (0-based line), text }.
+const TEXT_ATTRIBUTES = /^([\w-]+-label|aria-label|aria-roledescription|aria-valuetext|aria-placeholder|aria-description|placeholder|title|alt|label)$/
+
+function templateTextSegments(text) {
+  const out = []
+  const lineAt = (offset) => text.slice(0, offset).split('\n').length - 1
+  // A `/` starts a regex literal where an operand is expected: after an operator, an opening bracket, a comma or `${`.
+  const startsRegex = (i) => {
+    let j = i - 1
+    while (j >= 0 && /\s/.test(text[j])) j--
+    return j < 0 || /[(,=:[!&|?{};+\-*%<>~^]/.test(text[j])
+  }
+  // Skips a regex literal from `i` (just after its opening `/`), character classes included; returns the index after it.
+  const skipRegex = (i) => {
+    let inClass = false
+    while (i < text.length && text[i] !== '\n') {
+      const c = text[i]
+      if (c === '\\') i += 2
+      else {
+        if (c === '[') inClass = true
+        else if (c === ']') inClass = false
+        else if (c === '/' && !inClass) return i + 1
+        i++
+      }
+    }
+    return i
+  }
+  // Skips a ${…} expression from `i` (just after `${`), honouring strings, comments and nested templates; returns the
+  // index after the closing brace.
+  const skipExpression = (i) => {
+    let depth = 1
+    while (i < text.length && depth) {
+      const c = text[i]
+      if (c === "'" || c === '"') {
+        i++
+        while (i < text.length && text[i] !== c) i += text[i] === '\\' ? 2 : 1
+        i++
+      } else if (c === '`') i = skipTemplate(i + 1)
+      else if (c === '/' && text[i + 1] === '/') i = text.indexOf('\n', i) === -1 ? text.length : text.indexOf('\n', i)
+      else if (c === '/' && text[i + 1] === '*') i = text.indexOf('*/', i) === -1 ? text.length : text.indexOf('*/', i) + 2
+      else if (c === '/' && startsRegex(i)) i = skipRegex(i + 1)
+      else {
+        if (c === '{') depth++
+        else if (c === '}') depth--
+        i++
+      }
+    }
+    return i
+  }
+  // Skips any template literal from `i` (just after the backtick); returns the index after the closing backtick.
+  const skipTemplate = (i) => {
+    while (i < text.length && text[i] !== '`') {
+      if (text[i] === '\\') i += 2
+      else if (text[i] === '$' && text[i + 1] === '{') i = skipExpression(i + 2)
+      else i++
+    }
+    return i + 1
+  }
+  for (const match of text.matchAll(/(?<![.\w])(?:html|svg)`/g)) {
+    // A template quoted in a comment (JSDoc usage) is not code.
+    const lineStart = text.lastIndexOf('\n', match.index) + 1
+    if (/^\s*(\/\/|\*|\/\*)/.test(text.slice(lineStart, match.index))) continue
+    let i = match.index + match[0].length
+    let state = 'text' // text | tag | comment | style
+    let buffer = ''
+    let bufferStart = i
+    let attr = null // { name, quote, value, start }
+    let tagName = ''
+    const flush = () => {
+      if (buffer.trim()) out.push({ index: lineAt(bufferStart), text: buffer.trim() })
+      buffer = ''
+    }
+    while (i < text.length && text[i] !== '`') {
+      if (text[i] === '\\') {
+        i += 2
+        continue
+      }
+      if (text[i] === '$' && text[i + 1] === '{') {
+        if (state === 'text') flush()
+        if (attr) attr.value += '\uE000' // an expression inside the value
+        i = skipExpression(i + 2)
+        bufferStart = i
+        continue
+      }
+      const c = text[i]
+      if (state === 'comment') {
+        if (text.startsWith('-->', i)) state = 'text'
+        i++
+        continue
+      }
+      if (state === 'style') {
+        if (/^<\/style/i.test(text.slice(i, i + 7))) state = 'tag'
+        i++
+        continue
+      }
+      if (state === 'text') {
+        if (text.startsWith('<!--', i)) {
+          flush()
+          state = 'comment'
+          i += 4
+          continue
+        }
+        // `<${tag}` is a static-html tag.
+        if (c === '<' && (/[a-zA-Z/]/.test(text[i + 1] ?? '') || text.startsWith('${', i + 1))) {
+          flush()
+          state = 'tag'
+          tagName = /^<([a-zA-Z][\w-]*)/.exec(text.slice(i))?.[1]?.toLowerCase() ?? ''
+          i++
+          continue
+        }
+        if (!buffer) bufferStart = i
+        buffer += c
+        i++
+        continue
+      }
+      // state === 'tag'
+      if (attr) {
+        if (c === attr.quote) {
+          if (TEXT_ATTRIBUTES.test(attr.name)) {
+            const literal = attr.value.split('\uE000').join(' ').trim()
+            if (literal) out.push({ index: lineAt(attr.start), text: literal, attribute: attr.name })
+          }
+          attr = null
+        } else attr.value += c
+        i++
+        continue
+      }
+      const name = /^\s([.?@]?[\w:-]+)=(["'])/.exec(text.slice(i - 1, i + 80))
+      if (name && /\s/.test(text[i - 1])) {
+        i += name[0].length - 1
+        attr = { name: name[1], quote: name[2], value: '', start: i }
+        continue
+      }
+      if (c === '>') {
+        state = tagName === 'style' ? 'style' : 'text'
+        tagName = ''
+        bufferStart = i + 1
+      }
+      i++
+    }
+    if (state === 'text') flush()
+  }
+  return out
+}
+
+// Words that are UI text on their own, even alone and lower case.
+const UI_WORDS =
+  /^(close|cancel|ok|done|save|delete|remove|clear|search|loading|next|previous|back|more|less|show|hide|open|copy|copied|edit|add|apply|reset|submit|send|retry|undo|redo|today|yes|no|none|all|empty|error|selected|items?|of|and|or|page|results?|download|upload|browse|expand|collapse|menu|settings|filter|sort|required|optional)$/i
+
+function looksLikeEnglish(literal) {
+  const clean = literal
+    .replace(/&[a-z]+;|&#\d+;/gi, ' ')
+    .replace(/\uE000/g, ' ')
+    .trim()
+  const words = clean.match(/[A-Za-z][A-Za-z']*/g) ?? []
+  if (!words.length) return false
+  if (/^[\w.-]+:\/\//.test(clean) || /^[\w-]+(\.[\w-]+)+$/.test(clean)) return false // URLs, file names
+  if (words.length === 1) return words[0].length > 1 && (UI_WORDS.test(words[0]) || /^[A-Z][a-z]{2,}$/.test(words[0]))
+  // Two or more words: prose, unless it is all identifiers or units (`px`, `kB`).
+  return words.some((w) => w.length > 1) && /[a-z]{2,}/.test(clean)
 }
 
 const ignored = (all, i, id) => [all[i], all[i - 1] ?? ''].some((l) => new RegExp(`modern-web-ignore:\\s*(${id}|all)\\b`).test(l))
@@ -324,7 +530,7 @@ for (const file of files) {
   const ext = file.endsWith('.scss') ? 'scss' : 'ts'
   const touched = changedLines(file)
   for (const rule of rules.filter((r) => r.ext === ext)) {
-    const hits = rule.file ? rule.file(text) : all.flatMap((l, i) => (rule.line.test(l) && !/^\s*(\/\/|\*|\/\*)/.test(l) ? [i] : []))
+    const hits = rule.file ? rule.file(text, file) : all.flatMap((l, i) => (rule.line.test(l) && !/^\s*(\/\/|\*|\/\*)/.test(l) ? [i] : []))
     for (const i of hits) {
       if (touched && !touched.has(i + 1)) continue
       if (ignored(all, i, rule.id)) continue

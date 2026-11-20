@@ -3,6 +3,8 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { navigationMenuMessages } from './messages.js'
 import styles from './navigation-menu.scss?inline'
 import { NavigationMenuItem, type PanelToggleEventDetail } from './navigation-menu-item'
 
@@ -155,8 +157,10 @@ export class NavigationMenu extends LitElement {
    */
   @property({ type: Number, attribute: 'mobile-breakpoint' }) mobileBreakpoint = 0
 
-  /** Accessible name of the button shown in `mobile` mode. */
-  @property({ attribute: 'mobile-label' }) mobileLabel = 'Menu'
+  /** Accessible name of the button shown in `mobile` mode. Empty, it is the `mobile` message ("Menu"). */
+  @property({ attribute: 'mobile-label' }) mobileLabel = ''
+
+  private readonly msg = new LocalizeController(this, navigationMenuMessages)
 
   /** Whether the `mobile` button's list is showing. */
   @property({ type: Boolean, reflect: true, attribute: 'mobile-open' }) mobileOpen = false
@@ -678,7 +682,7 @@ export class NavigationMenu extends LitElement {
                 type="button"
                 class="mobile-trigger"
                 id="mobile-trigger"
-                aria-label=${this.mobileLabel}
+                aria-label=${this.mobileLabel || this.msg.t('mobile')}
                 aria-expanded=${this.mobileOpen ? 'true' : 'false'}
                 aria-controls="mobile-panel"
               >

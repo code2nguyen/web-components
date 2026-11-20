@@ -1260,7 +1260,7 @@ export class MapChart extends EchartsChartBase {
     if (!scale || !this.prepared) return nothing
     const title = this.resolvedSeries[0]?.label ?? ''
     const missing = this.prepared.regions.some((region) => this.#valueOf(region.key).value === null)
-    const noData = missing ? html`<span class="scale-no-data"><i style="background:${style.regionColor}"></i>No data</span>` : nothing
+    const noData = missing ? html`<span class="scale-no-data"><i style="background:${style.regionColor}"></i>${this.chartMsg.t('noData')}</span>` : nothing
     if (scale.steps) {
       const labels = this.scaleLabels
       const key = labels
@@ -1283,7 +1283,7 @@ export class MapChart extends EchartsChartBase {
     return html`
       <div class="scale-legend" part="scale-legend">
         <span class="scale-title">${title}</span>
-        <span class="scale-ramp" role="img" aria-label=${`${title}: ${this.#formatValue(min)} to ${this.#formatValue(max)}`}>
+        <span class="scale-ramp" role="img" aria-label=${this.chartMsg.t('mapScaleRange', title, this.#formatValue(min), this.#formatValue(max))}>
           <span class="scale-gradient" style="background:linear-gradient(90deg, ${scale.gradient().join(', ')})"></span>
           <span class="scale-ticks">
             <span>${this.#formatValue(min)}</span>${mid !== undefined ? html`<span>${this.#formatValue(mid)}</span>` : nothing}<span
@@ -1298,14 +1298,14 @@ export class MapChart extends EchartsChartBase {
 
   #stepsLabel(scale: MapScale): string {
     const breaks = (scale.steps ?? []).slice(0, -1).map((step) => this.#formatValue(step.to))
-    return `${this.resolvedSeries[0]?.label ?? ''}: classes broken at ${breaks.join(', ')}`
+    return this.chartMsg.t('mapScaleSteps', this.resolvedSeries[0]?.label ?? '', breaks.join(', '))
   }
 
   // ---------------------------------------------------------------- render ---
 
   protected override defaultTooltip(context: MapTooltipContext): TemplateResult {
     const noData = context.region && !context.row && this.valueField && this.prepared?.byKey.has(context.region.key)
-    return html`${super.defaultTooltip(context)}${noData ? html`<div class="tooltip-row"><span class="tooltip-label">No data</span></div>` : nothing}`
+    return html`${super.defaultTooltip(context)}${noData ? html`<div class="tooltip-row"><span class="tooltip-label">${this.chartMsg.t('noData')}</span></div>` : nothing}`
   }
 
   protected override renderActionsExtras(): unknown {
@@ -1339,7 +1339,7 @@ export class MapChart extends EchartsChartBase {
       <table class="data-table">
         <thead>
           <tr>
-            <th scope="col">Region</th>
+            <th scope="col">${this.chartMsg.t('mapRegion')}</th>
             <th scope="col">${series.label}</th>
           </tr>
         </thead>

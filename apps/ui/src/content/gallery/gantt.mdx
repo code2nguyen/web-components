@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import GanttExamplesRuntime from '../../components/GanttExamplesRuntime.astro'
 
 import { Gantt, GanttTask } from '@c2n/components/gantt'
 
@@ -132,3 +134,50 @@ swaps the hue. Density comes from `__row--height` and `__bar--height`, and the z
 ```
 
 </GalleryGrid>
+
+## Language
+
+<GanttExamplesRuntime />
+
+The column headings, the tooltip terms, the empty state and the name each row reads are message tokens: an app translates them once with `addTranslations`, and each chart speaks the language of its nearest `lang`, which also dates the timeline.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=En français,description=The headings and dates and tooltip in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-gantt client:only="lit" aria-label="Refonte de la documentation" today="2026-10-01">
+    <c2-gantt-task task-id="maquette" start="2026-09-28" end="2026-10-02" progress="0.8">Architecture</c2-gantt-task>
+    <c2-gantt-task task-id="visuel" start="2026-10-05" end="2026-10-14" progress="0.35" dependencies="maquette">Design visuel</c2-gantt-task>
+    <c2-gantt-task task-id="revue" start="2026-10-14" milestone dependencies="visuel">Revue</c2-gantt-task>
+  </c2-gantt>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    gantt: {
+      empty: 'Aucune tâche à afficher',
+      task: 'Tâche',
+      duration: 'Jours',
+      days: {
+        one: '{0} jour',
+        other: '{0} jours',
+      },
+      describeMilestone: 'jalon, {0}',
+      describeRange: 'du {0} au {1}',
+      describeProgress: '{0} terminé',
+      describeAfter: 'après {0}',
+      date: 'Date',
+      dates: 'Dates',
+      length: 'Durée',
+      after: 'Après',
+      done: 'Terminé',
+    },
+  },
+})
+```

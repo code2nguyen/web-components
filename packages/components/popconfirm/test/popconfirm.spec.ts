@@ -23,6 +23,12 @@ async function record(page: Page) {
 }
 const events = (page: Page) => page.evaluate(() => (window as unknown as { popconfirmLog: string[] }).popconfirmLog)
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-popconfirm heading="Supprimer ?" open><button slot="trigger">Supprimer</button></c2-popconfirm></div>')
+  await expect(page.getByRole('button', { name: 'Annuler' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Valider' })).toBeVisible()
+})
+
 test('clicking the trigger opens the popup with focus on Cancel', async ({ page, renderScenario }) => {
   await renderScenario(markup())
   await record(page)

@@ -495,6 +495,11 @@ test('the bar keeps its items on one row', async ({ page, renderScenario }) => {
   expect(new Set(tops).size).toBe(1)
 })
 
+test('the default name of the mobile button follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${modes('mode="mobile"')}</div>`)
+  await expect(page.getByRole('button', { name: 'Menu principal' })).toBeVisible()
+})
+
 test('mobile mode shows one button that opens the whole navigation as a hierarchy', async ({ page, renderScenario }) => {
   await renderScenario(modes('mode="mobile"'))
   const host = page.locator('c2-navigation-menu')

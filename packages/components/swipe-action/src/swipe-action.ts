@@ -4,6 +4,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
+import { unwrapContents } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { KEY_ALIASES, matchesStroke, type ShortcutStroke } from '@c2n/core/shortcut-helper.js'
 import { SWIPE_CONTAINER_EVENT, SWIPE_REQUEST_EVENT, type SwipeContainerEventDetail, type SwipeRequestEventDetail } from '@c2n/core/contexts/swipe.js'
@@ -404,9 +405,7 @@ export class SwipeAction extends LitElement {
 
   /** The element to click for a slotted action, looking through `display: contents` wrappers (an Astro island, a framework's). */
   private static actionElement(element: Element | undefined): HTMLElement | undefined {
-    let current = element
-    while (current && getComputedStyle(current).display === 'contents' && current.firstElementChild) current = current.firstElementChild
-    return current as HTMLElement | undefined
+    return unwrapContents(element, { onlyChild: false }) as HTMLElement | undefined
   }
 
   private actionsOf(side: SwipeActionSide): HTMLElement[] {

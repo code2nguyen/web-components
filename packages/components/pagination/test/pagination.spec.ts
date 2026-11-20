@@ -196,6 +196,25 @@ test('a page outside the range settles on the closest real page', async ({ page,
   await expect(host).toHaveJSProperty('endIndex', 45)
 })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">
+    <c2-pagination id="numbered" total-pages="20" page="10" sibling-count="0" boundary-count="1"></c2-pagination>
+    <c2-pagination id="simple" variant="simple" total-pages="12" page="3" show-first-last></c2-pagination>
+    <c2-pagination id="compact" variant="compact" total-items="100" page-size="10" page-size-options="10,20"></c2-pagination>
+  </div>`)
+  const numbered = page.locator('#numbered')
+  await expect(numbered.getByRole('navigation', { name: 'Pagination' })).toBeVisible()
+  await expect(numbered.getByRole('button', { name: 'Aller à la page 10' })).toHaveAttribute('aria-current', 'page')
+  await expect(numbered.getByRole('button', { name: /^Aller à la page \d+, \d+ pages sautées$/ }).first()).toBeVisible()
+  await expect(numbered.getByRole('button', { name: 'Précédent' })).toBeVisible()
+  await expect(numbered.getByRole('button', { name: 'Suivant' })).toBeVisible()
+  await expect(page.locator('#simple')).toContainText('Page 3 sur 12')
+  await expect(page.locator('#simple').getByRole('button', { name: 'Première' })).toBeVisible()
+  await expect(page.locator('#simple').getByRole('button', { name: 'Dernière' })).toBeVisible()
+  await expect(page.locator('#compact')).toContainText('1–10 sur 100')
+  await expect(page.locator('#compact')).toContainText('Lignes par page :')
+})
+
 test('the labels and templates carry the whole wording', async ({ page, renderScenario }) => {
   await renderScenario(
     `<c2-pagination
@@ -213,6 +232,13 @@ test('the labels and templates carry the whole wording', async ({ page, renderSc
   await expect(host).toContainText('Lignes par page :')
   await expect(page.getByRole('button', { name: 'Précédent' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Suivant' })).toBeVisible()
+})
+
+test('an empty page-size label shows no text, and the select keeps its name', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-pagination variant="compact" total-items="100" page-size="10" page-size-label=""></c2-pagination>')
+  const host = page.locator('c2-pagination')
+  await expect(host.locator('.c2-pagination-page-size .c2-pagination-label')).toHaveCount(0)
+  await expect(host.locator('[part="page-size"]')).toHaveAttribute('aria-label', 'Rows per page')
 })
 
 test('a pager with no paging host keeps owning its own state, before and after a move', async ({ page, renderScenario }) => {

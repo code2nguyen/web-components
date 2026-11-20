@@ -8,6 +8,8 @@ export type { FileRejection, FileRejectionReason, FileRules } from '../file-acce
 const en = {
   added: (count: number) => (count === 1 ? '1 file added' : `${count} files added`),
   rejected: (count: number) => (count === 1 ? '1 file not added' : `${count} files not added`),
+  itemsAdded: (count: number) => (count === 1 ? '1 item added' : `${count} items added`),
+  itemsRejected: (count: number) => (count === 1 ? '1 item not added' : `${count} items not added`),
 }
 
 /**
@@ -36,9 +38,33 @@ export interface DropZoneFiles {
  */
 export type DropZoneFilesHandler = (files: DropZoneFiles) => readonly File[] | number | void
 
+/** The items one drop of an item payload brought. */
+export interface DropZoneItems<T = unknown> {
+  /** The payload kind, as `itemKind` returned it. */
+  kind: string
+  /** The items the source wrote, in its order. */
+  items: T[]
+  /** The drop, for its position (`clientX`, `clientY`) and its target. */
+  event: DragEvent
+}
+
+/**
+ * Called with each drop of an accepted item payload. Return the items the host took (or how many): the announcement
+ * counts those and reports the rest as not added. Return nothing when it took every item.
+ */
+export type DropZoneItemsHandler = (items: DropZoneItems) => readonly unknown[] | number | void
+
 export interface DropZoneOptions {
-  /** Receives the files of each drop or paste. */
-  onFiles: DropZoneFilesHandler
+  /** Receives the files of each drop or paste. Without it the zone takes no files: a file drag passes through. */
+  onFiles?: DropZoneFilesHandler
+  /**
+   * The kind of item payload the zone takes besides files (see `writeItemPayload`), read at each drag so it follows a
+   * host property. Nothing (the default) takes no items. A drag carrying another kind's payload lights the zone up as
+   * refused (`acceptable` is `false`) and its drop is refused.
+   */
+  itemKind?: () => string | null | undefined
+  /** Receives the items of each drop of the `itemKind` payload. */
+  onItems?: DropZoneItemsHandler
   /**
    * The rules files are checked against, read at each drop so they follow the host's properties
    * (`() => ({ accept: this.accept, maxSize: this.maxSize })`). Without rules every file is accepted.
@@ -67,6 +93,44 @@ export interface DropZoneOptions {
   announce?: boolean | 'added'
 }
 
+/** What a drag over the zone carries, as far as the zone is concerned. */
+type DragContent = { type: 'items'; kind: string } | { type: 'refused' } | { type: 'files' }
+
+/** Whether `node` is `zone` or inside it in the composed tree: through slots and out of shadow roots to their host. */
+function composedContains(zone: Node, node: EventTarget | null): boolean {
+  let current = node instanceof Node ? node : null
+  while (current) {
+    if (current === zone) return true
+    current = (current as Element).assignedSlot ?? current.parentNode ?? (current instanceof ShadowRoot ? current.host : null)
+  }
+  return false
+}
+
+/**
+ * The drop effect within what the source allows (`effectAllowed`): an item payload moves when it may, a file is copied.
+ * An effect the source does not allow makes the browser refuse the drop.
+ */
+function dropEffectFor(allowed: string, preferMove: boolean): DataTransfer['dropEffect'] {
+  const any = allowed === 'all' || allowed === 'uninitialized'
+  const can = (effect: string) => any || allowed.toLowerCase().includes(effect)
+  if (preferMove && can('move')) return 'move'
+  if (can('copy')) return 'copy'
+  if (can('move')) return 'move'
+  if (can('link')) return 'link'
+  return 'copy'
+}
+
+/**
+ * Drag events a zone accepted. The innermost zone that accepts a drag takes it; one around it then stays out. A zone
+ * that refuses the drag (another kind) does not claim it, so a zone around it that takes that kind still can.
+ */
+const claimed = new WeakSet<Event>()
+
+/** Whether a zone nested inside this one has already taken this drag event. */
+function takenInside(event: DragEvent): boolean {
+  return claimed.has(event)
+}
+
 /**
  * A reusable file drop target: the drag-over state, the files of a drop or a paste checked against `accept`, size and
  * count rules, the Enter/Space keyboard alternative, and a short announcement of what was added for a live region.
@@ -92,7 +156,14 @@ export interface DropZoneOptions {
  * }
  * ```
  *
- * Only drags that carry files light the zone up; dragged text and links pass through. Pasting needs the zone to have
+ * A zone may take the app's own items as well, from another instance of a component, another list in the page or
+ * another window: the source writes them with `writeItemPayload(event.dataTransfer, kind, items)` in its `dragstart`,
+ * and a zone given the same `itemKind` lights up, takes the drop through `onItems` and announces how many items it
+ * added. While the drag is over the zone only the payload's kind is known (a browser hides the data until the drop),
+ * so the kind decides `acceptable`; the host judges the items themselves in `onItems`.
+ *
+ * Only drags that carry files (for a zone with `onFiles`) or an item payload (for a zone with `itemKind`) light the
+ * zone up; dragged text and links pass through. Pasting needs the zone to have
  * focus and `handleKeydown` bound. Chromium and Firefox fire `paste` on a focused element that is not editable; Safari
  * fires none, so a ⌘V/Ctrl+V that no `paste` event follows reads the clipboard with `navigator.clipboard.read()`
  * (the browser asks the visitor to allow it). Where neither works, the file picker remains the keyboard path.
@@ -203,48 +274,121 @@ export class DropZoneController implements ReactiveController {
     return !items.every((item) => mayAcceptType(item.type, rules.accept) === false)
   }
 
+  /**
+   * What a drag brings that is the zone's business: the accepted item payload, another kind's payload (refused), files
+   * (for a zone that takes them), or nothing. An item payload wins over files that come with it.
+   */
+  private dragOf(transfer: DataTransfer | null | undefined): DragContent | null {
+    if (!transfer) return null
+    const kind = this.options.itemKind?.()
+    if (kind) {
+      const kinds = itemPayloadKinds(transfer)
+      if (kinds.includes(kind.toLowerCase())) return { type: 'items', kind }
+      if (kinds.length) return { type: 'refused' }
+    }
+    if (this.options.onFiles && hasFiles(transfer)) return { type: 'files' }
+    return null
+  }
+
+  private acceptableFor(drag: DragContent, transfer: DataTransfer): boolean {
+    return drag.type === 'items' || (drag.type === 'files' && this.judge(transfer))
+  }
+
   readonly handleDragEnter = (event: DragEvent): void => {
-    if (this.disabled || !hasFiles(event.dataTransfer)) return
+    const drag = this.dragOf(event.dataTransfer)
+    if (!drag || takenInside(event)) return
+    if (this.disabled) {
+      // Unlit, but its own kind stays its own: the zone around it does not light up for a drop it would not get.
+      if (drag.type !== 'refused') claimed.add(event)
+      return
+    }
     event.preventDefault()
     this.depth += 1
-    this.setOver(true, this.judge(event.dataTransfer!))
+    if (drag.type !== 'refused') {
+      claimed.add(event)
+      this.setOver(true, this.acceptableFor(drag, event.dataTransfer!))
+    } else this.showRefusedUnlessTaken(event)
   }
 
   readonly handleDragOver = (event: DragEvent): void => {
-    if (!hasFiles(event.dataTransfer)) return
-    if (this.disabled) {
+    const drag = this.dragOf(event.dataTransfer)
+    if (!drag) return
+    // A zone nested in this one (a list in a board's card) took the drag: this one stays out of it and unlit.
+    if (takenInside(event)) {
+      if (this.over) {
+        this.depth = 0
+        this.setOver(false)
+      }
+      return
+    }
+    const transfer = event.dataTransfer!
+    if (this.disabled || drag.type === 'refused') {
       // Refuse the drop rather than ignore it: an ignored dragover lets the browser open the file in place of the page.
       event.preventDefault()
-      event.dataTransfer!.dropEffect = 'none'
+      transfer.dropEffect = 'none'
+      // A disabled zone still owns a drag of its own kind: a zone around it must not take what this one refuses.
+      if (drag.type !== 'refused') claimed.add(event)
+      // Another kind's payload shows the zone refusing it, like a file the rules turn away.
+      if (!this.disabled) {
+        this.depth = Math.max(this.depth, 1)
+        this.showRefusedUnlessTaken(event)
+      }
       return
     }
     // Cancelling dragover is what makes the zone a drop target.
     event.preventDefault()
-    event.dataTransfer!.dropEffect = 'copy'
+    claimed.add(event)
+    // Items move when the source allows it (it then removes them on `dragend`); files are always copied.
+    transfer.dropEffect = dropEffectFor(transfer.effectAllowed, drag.type === 'items')
     // A drag that started outside the window, or whose dragenter was missed, still lights the zone up.
     if (!this.over) {
       this.depth = Math.max(this.depth, 1)
-      this.setOver(true, this.judge(event.dataTransfer!))
+      this.setOver(true, this.acceptableFor(drag, transfer))
     }
   }
 
-  readonly handleDragLeave = (_event: DragEvent): void => {
-    if (!this.over) return
-    this.depth = Math.max(0, this.depth - 1)
-    if (this.depth === 0) this.setOver(false)
+  /**
+   * Shows the zone refusing a drag of another kind, unless a zone around it takes that kind: the event bubbles on to
+   * it, so the check waits until the dispatch is over: a task, not a microtask, which the browser runs between the
+   * listeners of an event it dispatches itself. A refused outline over a drop that lands would mislead.
+   */
+  private showRefusedUnlessTaken(event: DragEvent): void {
+    setTimeout(() => {
+      if (!this.depth) return
+      const taken = claimed.has(event)
+      if (taken ? this.over : !this.over || this.acceptable) this.setOver(!taken, false)
+    })
+  }
+
+  readonly handleDragLeave = (event: DragEvent): void => {
+    // Counted even while unlit: a zone that refused a drag a zone around it took still counted its dragenters.
+    if (this.depth) this.depth -= 1
+    if (this.depth || !this.over) return
+    // The pointer is still over the zone: it came back from a zone nested in it, whose dragenters this one did not
+    // count, and that zone's dragleave bubbled here after the zone's own dragenter.
+    if (event.currentTarget instanceof Node && composedContains(event.currentTarget, event.relatedTarget)) return
+    this.setOver(false)
   }
 
   readonly handleDrop = (event: DragEvent): void => {
     const wasOver = this.over
     this.depth = 0
     this.setOver(false)
-    if (this.disabled || !hasFiles(event.dataTransfer)) {
+    if (takenInside(event)) return
+    const drag = this.dragOf(event.dataTransfer)
+    if (this.disabled || !drag || drag.type === 'refused') {
       // Keep the browser from opening a file dropped on a zone that takes none now.
-      if (wasOver || hasFiles(event.dataTransfer)) event.preventDefault()
+      if (wasOver || drag) event.preventDefault()
+      if (drag && drag.type !== 'refused') {
+        claimed.add(event)
+        event.dataTransfer!.dropEffect = 'none'
+      }
       return
     }
     event.preventDefault()
-    this.receive([...event.dataTransfer!.files], 'drop')
+    claimed.add(event)
+    if (drag.type === 'items') this.receiveItems(drag.kind, event)
+    else this.receive([...event.dataTransfer!.files], 'drop')
   }
 
   readonly handlePaste = (event: ClipboardEvent): void => {
@@ -360,7 +504,7 @@ export class DropZoneController implements ReactiveController {
 
   /** Runs the files of a drop or paste through the rules and the host, then announces the result. */
   private receive(files: File[], source: DropZoneSource): void {
-    if (!files.length) return
+    if (!files.length || !this.options.onFiles) return
     const { accepted, rejected } = filterFiles(files, this.options.rules?.() ?? {})
     const taken = this.options.onFiles({ source, files, accepted, rejected })
     if (this.options.announce === false) return
@@ -368,10 +512,35 @@ export class DropZoneController implements ReactiveController {
     this.announce(added, this.options.announce === 'added' ? 0 : files.length - added)
   }
 
-  private announce(added: number, refused: number): void {
+  /** Hands the items of a dropped payload to the host, then announces how many it took. */
+  private receiveItems(kind: string, event: DragEvent): void {
+    const items = readItemPayload(event.dataTransfer, kind)
+    // A payload that is not a JSON array came from no c2n source: nothing to take, nothing to announce, and no move
+    // for the source to act on.
+    if (!items?.length || !this.options.onItems) {
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'none'
+      return
+    }
+    let taken: ReturnType<NonNullable<DropZoneOptions['onItems']>>
+    try {
+      taken = this.options.onItems({ kind, items, event })
+    } catch (error) {
+      // A payload the host could not take (one from another window may have any shape): no move, so the source keeps it.
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'none'
+      throw error
+    }
+    const added = typeof taken === 'number' ? taken : taken ? taken.length : items.length
+    // Nothing taken (all refused, or the app cancelled): report no move, so a source that removes its items on a
+    // `move` `dragend` keeps them. A partial drop stays a move: the zone refuses only items it already holds.
+    if (added === 0 && event.dataTransfer) event.dataTransfer.dropEffect = 'none'
+    if (this.options.announce === false) return
+    this.announce(added, this.options.announce === 'added' ? 0 : items.length - added, 'items')
+  }
+
+  private announce(added: number, refused: number, what: 'files' | 'items' = 'files'): void {
     const parts: string[] = []
-    if (added > 0) parts.push(this.msg.t('added', added))
-    if (refused > 0) parts.push(this.msg.t('rejected', refused))
+    if (added > 0) parts.push(this.msg.t(what === 'items' ? 'itemsAdded' : 'added', added))
+    if (refused > 0) parts.push(this.msg.t(what === 'items' ? 'itemsRejected' : 'rejected', refused))
     const text = parts.join('. ')
     // Clear first, then write: the same text twice in a row is a change a screen reader announces again.
     this.announcement = ''
@@ -428,4 +597,62 @@ function isPasteShortcut(event: KeyboardEvent): boolean {
 export function hasFiles(transfer: DataTransfer | null | undefined): boolean {
   if (!transfer) return false
   return [...transfer.types].includes('Files')
+}
+
+const ITEM_PAYLOAD = /^application\/x-c2n-([a-z0-9][a-z0-9.-]*)\+json$/
+
+/**
+ * The MIME type an item payload of `kind` travels under: `application/x-c2n-<kind>+json`. A kind is lowercase letters,
+ * digits, dots and hyphens (`kanban-card`, `tree-node`), since a drag lowercases the types it carries.
+ */
+export function itemPayloadType(kind: string): string {
+  const type = `application/x-c2n-${kind.toLowerCase()}+json`
+  if (!ITEM_PAYLOAD.test(type)) throw new TypeError(`Invalid item payload kind "${kind}": use letters, digits, dots and hyphens.`)
+  return type
+}
+
+/**
+ * Writes the items a drag carries, as JSON under `itemPayloadType(kind)`, for a drop zone whose `itemKind` is `kind`
+ * (a `c2-kanban`, `c2-reorder-list` or `c2-tree` with that `drop-kind`). Call it from the source's `dragstart`; set
+ * `effectAllowed` to `copy` for items that stay at the source, or allow `move` and remove them on `dragend` when its
+ * `dropEffect` is `move`. The items must survive `JSON.stringify`. A plain-text line per item (its label, title, name,
+ * value or id) is added for targets outside the page, unless the source wrote its own text.
+ */
+export function writeItemPayload(transfer: DataTransfer, kind: string, items: readonly unknown[]): void {
+  transfer.setData(itemPayloadType(kind), JSON.stringify(items))
+  if (![...transfer.types].includes('text/plain')) transfer.setData('text/plain', items.map(labelOf).join('\n'))
+}
+
+/**
+ * The items a drop carries under `kind`, or `null` when it carries none or they are not a JSON array. Only readable on
+ * `drop`: during a drag the browser shows the types alone (see `itemPayloadKinds`).
+ */
+export function readItemPayload<T = unknown>(transfer: DataTransfer | null | undefined, kind: string): T[] | null {
+  if (!transfer) return null
+  try {
+    const data = transfer.getData(itemPayloadType(kind))
+    if (!data) return null
+    const items: unknown = JSON.parse(data)
+    return Array.isArray(items) ? (items as T[]) : null
+  } catch {
+    return null
+  }
+}
+
+/** The kinds of item payload a drag carries, readable during the drag as on the drop. */
+export function itemPayloadKinds(transfer: DataTransfer | null | undefined): string[] {
+  if (!transfer) return []
+  return [...transfer.types].flatMap((type) => ITEM_PAYLOAD.exec(type.toLowerCase())?.[1] ?? [])
+}
+
+/** A short text for an item in the plain-text fallback: its label, title, name, value or id, else nothing. */
+function labelOf(item: unknown): string {
+  if (typeof item === 'string' || typeof item === 'number') return String(item)
+  if (!item || typeof item !== 'object') return ''
+  const record = item as Record<string, unknown>
+  for (const field of ['label', 'title', 'name', 'value', 'id']) {
+    const value = record[field]
+    if (typeof value === 'string' || typeof value === 'number') return String(value)
+  }
+  return ''
 }

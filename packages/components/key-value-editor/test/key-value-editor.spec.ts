@@ -177,6 +177,20 @@ test('view mode lists the keyed rows as text, with masked values revealed on dem
   await accessible(page)
 })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${editor(`entries='[{"key":"API","value":"1"},{"key":"API","value":"2"}]'`)}</div>`)
+  await expect(page.locator('c2-key-value-editor .header')).toHaveText(/Clé\s*Valeur/)
+  const key = page.getByRole('textbox', { name: 'Clé 1' })
+  await expect(key).toHaveAccessibleDescription('Cette clé est déjà utilisée.')
+  await expect(page.getByRole('textbox', { name: 'Valeur 1' })).toHaveAttribute('placeholder', 'valeur')
+  await expect(page.getByRole('textbox', { name: 'Clé 2' })).toHaveAttribute('placeholder', 'CLÉ')
+  await expect(page.getByRole('button', { name: 'Ajouter une ligne' })).toBeVisible()
+  await renderScenario(`<div lang="fr">${editor('mode="view" masked entries=\'[{"key":"TOKEN","value":"s3cret"}]\'')}</div>`)
+  await expect(page.locator('c2-key-value-editor .visually-hidden')).toHaveText('Valeur masquée')
+  await renderScenario(`<div lang="fr">${editor('mode="view"')}</div>`)
+  await expect(page.locator('c2-key-value-editor')).toContainText('Aucune variable')
+})
+
 test('view mode with no keyed rows shows the empty slot', async ({ page, renderScenario }) => {
   await renderScenario(editor('mode="view"'))
   await expect(page.locator('c2-key-value-editor')).toContainText('No variables')

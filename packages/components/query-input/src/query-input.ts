@@ -21,6 +21,8 @@ import {
   type QueryTerm,
   type QueryToken,
 } from './query-syntax.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { queryInputMessages } from './messages.js'
 import styles from './query-input.scss?inline'
 
 export * from './query-syntax.js'
@@ -232,6 +234,7 @@ export class QueryInput extends LitElement {
   private readonly internals = this.attachInternals()
   /** Label and description handed down by an enclosing `c2-form-field` (`field` is the box around the input). */
   private readonly formField = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, queryInputMessages)
 
   /** The query. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
@@ -254,8 +257,8 @@ export class QueryInput extends LitElement {
   /** Most suggestions listed at once. */
   @property({ type: Number, attribute: 'suggestion-limit' }) suggestionLimit = 10
 
-  /** Heading of the suggestions while a key is typed. */
-  @property({ attribute: 'fields-label' }) fieldsLabel = 'Fields'
+  /** Heading of the suggestions while a key is typed. Empty, it is the `fields` message ("Fields"). */
+  @property({ attribute: 'fields-label' }) fieldsLabel = ''
 
   /** The `key:value` chips in front of the text. */
   @state() private chips: QueryInputFilter[] = []
@@ -769,7 +772,7 @@ export class QueryInput extends LitElement {
       class=${classes}
       selectable
       removable
-      remove-label="Remove filter"
+      remove-label=${this.msg.t('removeFilter')}
       .selected=${chip.active}
       ?disabled=${this.effectiveDisabled}
       @change=${(event: Event) => {
@@ -791,7 +794,7 @@ export class QueryInput extends LitElement {
 
   private renderClearButton() {
     if ((!this.value && !this.draft && !this.chips.length) || this.effectiveDisabled) return nothing
-    return html`<button class="clear" type="button" aria-label="Clear query" tabindex="-1" @click=${this.handleClearClick}>
+    return html`<button class="clear" type="button" aria-label=${this.msg.t('clear')} tabindex="-1" @click=${this.handleClearClick}>
       <slot name="clear-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -805,7 +808,7 @@ export class QueryInput extends LitElement {
     const suggestions = this.suggestions
     const completion = this.completion
     const field = completion?.kind === 'value' ? this.fieldList.find((candidate) => candidate.key === completion.key) : undefined
-    const heading = completion?.kind === 'value' ? (field?.label ?? completion.key ?? '') : this.fieldsLabel
+    const heading = completion?.kind === 'value' ? (field?.label ?? completion.key ?? '') : this.fieldsLabel || this.msg.t('fields')
     return html`<c2-overlay popover="manual" fit-anchor .anchor=${this.field ?? undefined} .open=${this.open}>
       <div class="panel" @pointerdown=${(event: Event) => event.preventDefault()}>
         <div class="panel-header" id="suggestions-label">${heading}</div>
@@ -832,7 +835,7 @@ export class QueryInput extends LitElement {
   override render() {
     const hasFields = this.fieldList.length > 0
     const open = this.open
-    const name = this.ariaLabel || this.formField.label || this.placeholder || 'Search query'
+    const name = this.ariaLabel || this.formField.label || this.placeholder || this.msg.t('label')
     return html`<div class="field" @click=${this.handleFieldClick}>
         <span class="icon" aria-hidden="true">
           <slot name="search-icon">

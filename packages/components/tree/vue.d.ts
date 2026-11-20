@@ -26,10 +26,12 @@ declare module 'vue' {
         'selection-propagation'?: unknown
         'children-outline'?: unknown
         'expand-on-click'?: unknown
+        'drop-kind'?: unknown
         'max-depth'?: unknown
         onExpansionChange?: (event: EventOf<Tree, 'expansion-change'>) => void
         onItemLoadError?: (event: EventOf<Tree, 'item-load-error'>) => void
         onSelectionChange?: (event: EventOf<Tree, 'selection-change'>) => void
+        onItemDrop?: (event: EventOf<Tree, 'item-drop'>) => void
         onItemClick?: (event: EventOf<Tree, 'item-click'>) => void
         onItemExpand?: (event: EventOf<Tree, 'item-expand'>) => void
         onItemMove?: (event: EventOf<Tree, 'item-move'>) => void

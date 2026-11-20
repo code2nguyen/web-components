@@ -11,6 +11,10 @@ const en = {
   loadMoreFailed: "Couldn't load more",
   /** The button that asks for the next page again. */
   retry: 'Retry',
+  /** Accessible name of the list when it has no `aria-label`. */
+  label: 'Items',
+  /** Placeholder and accessible name of the built-in search field. */
+  search: 'Search',
 }
 
 /** The virtual list's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

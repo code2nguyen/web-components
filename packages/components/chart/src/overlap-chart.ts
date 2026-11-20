@@ -300,12 +300,25 @@ export class OverlapChart extends EchartsChartBase {
     return (this.#computeModel()?.regions ?? []).map((region) => ({ ...region, sets: [...region.sets] })).sort((a, b) => b.size - a.size)
   }
 
+  /** Names as an "or" list in the chart's language: `Web app or Public API`. */
+  #orList(names: string[]): string {
+    // `Intl.ListFormat` is ES2021, above the library's ES2020 typings; every engine the components support has it.
+    const ListFormat = (Intl as unknown as { ListFormat?: new (locale: string, options: { type: 'disjunction' }) => { format(items: string[]): string } })
+      .ListFormat
+    try {
+      if (ListFormat) return new ListFormat(this.chartMsg.locale, { type: 'disjunction' }).format(names)
+    } catch {
+      // A malformed locale: the plain join below.
+    }
+    return names.join(' or ')
+  }
+
   /** The readable name of a region: `Web app only`, `Web app + Public API`. */
   regionName(region: Pick<OverlapRegion, 'sets'>): string {
     const sets = this.#visibleSets()
     const names = sets.filter((set) => region.sets.includes(set.key)).map((set) => set.label)
-    if (sets.length > 1 && names.length === 1) return `${names[0]} only`
-    return names.join(' + ')
+    if (sets.length > 1 && names.length === 1) return this.chartMsg.t('vennOnly', names[0])
+    return this.chartMsg.t('vennJoined', names.join(' + '))
   }
 
   /** A set's totals, as `set-hover` and `set-click` report them. `undefined` for a set that is not visible. */
@@ -339,7 +352,7 @@ export class OverlapChart extends EchartsChartBase {
 
   protected override validationError(): string {
     const count = this.resolvedSeries.length
-    return count > OVERLAP_MAX_SETS ? `A Venn diagram shows at most ${OVERLAP_MAX_SETS} sets; this one has ${count}.` : ''
+    return count > OVERLAP_MAX_SETS ? this.chartMsg.t('vennTooMany', OVERLAP_MAX_SETS, count) : ''
   }
 
   /** Hovering or focusing a legend entry highlights that set's circle. */
@@ -531,8 +544,8 @@ export class OverlapChart extends EchartsChartBase {
     if (set) {
       return html`
         <div class="tooltip-title">${set.label}</div>
-        ${row('Members', this.#formatCount(set.total))} ${row('Share of total', this.#formatShare(set.share))}
-        ${set.only !== set.total ? row('In no other set', this.#formatCount(set.only)) : nothing}
+        ${row(this.chartMsg.t('vennMembers'), this.#formatCount(set.total))} ${row(this.chartMsg.t('vennShareOfTotal'), this.#formatShare(set.share))}
+        ${set.only !== set.total ? row(this.chartMsg.t('vennInNoOtherSet'), this.#formatCount(set.only)) : nothing}
       `
     }
     const region = context.region
@@ -542,9 +555,13 @@ export class OverlapChart extends EchartsChartBase {
       .map((item) => item.label)
     return html`
       <div class="tooltip-title">${context.formattedX}</div>
-      ${outside.length > 0 && region.sets.length > 1 ? html`<div class="tooltip-subtitle">Not in ${outside.join(' or ')}</div>` : nothing}
-      ${row('In this region', this.#formatCount(region.size))} ${row('Share of total', this.#formatShare(region.share))}
-      ${region.total !== region.size ? row(region.sets.length > 1 ? 'In all of these' : 'Set total', this.#formatCount(region.total)) : nothing}
+      ${outside.length > 0 && region.sets.length > 1 ? html`<div class="tooltip-subtitle">${this.chartMsg.t('vennNotIn', this.#orList(outside))}</div>` : nothing}
+      ${row(this.chartMsg.t('vennInThisRegion'), this.#formatCount(region.size))} ${row(this.chartMsg.t('vennShareOfTotal'), this.#formatShare(region.share))}
+      ${
+        region.total !== region.size
+          ? row(region.sets.length > 1 ? this.chartMsg.t('vennInAllOfThese') : this.chartMsg.t('vennSetTotal'), this.#formatCount(region.total))
+          : nothing
+      }
     `
   }
 
@@ -591,9 +608,9 @@ export class OverlapChart extends EchartsChartBase {
     const focused = model?.drawn.find((region) => region.mask === this.focusedMask)
     const focusedSet = this.focusedSet ? this.setDetail(this.focusedSet) : undefined
     const announcement = focusedSet
-      ? `${focusedSet.label}: ${this.#formatCount(focusedSet.total)} members, ${this.#formatShare(focusedSet.share)}`
+      ? this.chartMsg.t('vennFocusedSet', focusedSet.label, this.#formatCount(focusedSet.total), this.#formatShare(focusedSet.share))
       : focused
-        ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}`
+        ? this.chartMsg.t('vennFocusedRegion', this.regionName(focused), this.#formatCount(focused.size), this.#formatShare(focused.share))
         : ''
     render(
       html`
@@ -606,9 +623,9 @@ export class OverlapChart extends EchartsChartBase {
                   </caption>
                   <thead>
                     <tr>
-                      <th scope="col">Region</th>
-                      <th scope="col">Members</th>
-                      <th scope="col">Share</th>
+                      <th scope="col">${this.chartMsg.t('vennRegion')}</th>
+                      <th scope="col">${this.chartMsg.t('vennMembers')}</th>
+                      <th scope="col">${this.chartMsg.t('vennShare')}</th>
                     </tr>
                   </thead>
                   <tbody>

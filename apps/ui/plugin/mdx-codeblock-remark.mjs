@@ -193,8 +193,9 @@ function unwrapParagraphs(node) {
 // over capitalized misses that prototype check; `setAttribute` lowercases it again (attribute names are
 // case-insensitive in HTML), so the element ends up with exactly the attribute the fence author wrote.
 // Astro directives (`client:only`, `set:html`), `class` and `slot` are its own to interpret, so they are passed
-// through. In particular, Astro must copy `slot` onto the `<astro-island>` wrapper; capitalizing it would leave the
-// wrapper in the parent's default slot even though the inner custom element eventually receives a lowercase attribute.
+// through. In particular, Astro must see `slot` to route the child into its parent component's named slot, where
+// `@astrojs/lit` stamps it on the `<astro-island>` wrapper; capitalizing it would leave the wrapper in the parent's
+// default slot even though the inner custom element eventually receives a lowercase attribute.
 function asAttributeName(name) {
   if (name.includes(':') || name.startsWith('data-') || name === 'class' || name === 'slot') return name
   return name.charAt(0).toUpperCase() + name.slice(1)
@@ -217,11 +218,10 @@ const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 // the list's own module).
 // `c2-swipe-action` lays its actions out as flex items and clicks the outermost one on a full swipe, which a
 // `display: contents` island wrapper defeats; `c2-button` and `c2-icon-button` are registered by `chrome-modules.ts`.
-// The Lit renderer drops `slot` from an island wrapper, so `c2-image-annotator`'s `detail` slot would stay empty; the
-// image annotator gallery runtime registers `c2-comment-thread`.
+// A slotted child of an island needs no entry: Astro routes it into the island's named slot and `@astrojs/lit` puts
+// the `slot` on its `<astro-island>` wrapper, the host's direct child (see `hasSlotAttribute` for the plain-tag case).
 const NESTED_CHILDREN_OF = new Map([
   ['c2-chip-group', new Set(['c2-chip', 'c2-badge'])],
-  ['c2-image-annotator', new Set(['c2-comment-thread'])],
   ['c2-overflow-list', new Set(['c2-button', 'c2-icon-button', 'c2-link-button', 'c2-menu-item'])],
   ['c2-swipe-action', new Set(['c2-button', 'c2-icon-button'])],
 ])
@@ -230,8 +230,9 @@ function isNestedChild(tag, parentTag) {
   return NESTED_CHILD_TAGS.has(tag) || !!NESTED_CHILDREN_OF.get(parentTag)?.has(tag)
 }
 
-// Astro routes an island's `slot` into its parent's named slot only when that parent is a component; under a plain tag
-// it drops it, so a slotted icon inside a nested `c2-button` lands in the label. Such a child stays plain as well.
+// Astro routes an island's `slot` into its parent's named slot only when that parent is a component (an island); under
+// a plain tag (a nested child above) it extracts no slots and the `slot` never reaches the wrapper, so a slotted icon
+// inside a nested `c2-button` lands in the label. Such a child stays plain as well.
 function hasSlotAttribute(vnode) {
   return !!vnode.attributes?.some((attribute) => attribute.name === 'slot')
 }

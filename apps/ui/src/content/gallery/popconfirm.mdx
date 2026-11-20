@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-popconfirm: destructive, light card, no ar
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import PopconfirmExamplesRuntime from '../../components/PopconfirmExamplesRuntime.astro'
 
 import { Popconfirm } from '@c2n/components/popconfirm'
 import { Button } from '@c2n/components/button'
@@ -95,3 +97,32 @@ Curated looks for `c2-popconfirm`. Click the trigger in a card to open it. The b
 ```
 
 </GalleryGrid>
+
+## Language
+
+<PopconfirmExamplesRuntime />
+
+The two buttons are message tokens: an app translates them once with `addTranslations`, and each popconfirm speaks the language of its nearest `lang`. `confirm-label` and `cancel-label` still override one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The confirm and cancel buttons in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-popconfirm client:only="lit" heading="Supprimer cette tâche ?"><c2-button slot="trigger">Supprimer</c2-button>Cette action est irréversible.</c2-popconfirm>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    popconfirm: {
+      confirm: 'Valider',
+      cancel: 'Annuler',
+    },
+  },
+})
+```

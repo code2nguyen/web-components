@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import PaginationExamplesRuntime from '../../components/PaginationExamplesRuntime.astro'
 
 import { Pagination } from '@c2n/components/pagination'
 
@@ -118,3 +120,39 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
 ```
 
 </GalleryGrid>
+
+## Language
+
+<PaginationExamplesRuntime />
+
+The built-in labels and statuses are message tokens: an app translates them once with `addTranslations`, and each
+pagination speaks the language of its nearest `lang`. A `*-label` or `*-template` attribute still overrides one instance.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=En français,description=The labels and the status in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-pagination client:only="lit" total-pages="20" page="10" sibling-count="0"></c2-pagination>
+  <c2-pagination client:only="lit" variant="compact" total-items="100" page-size="10" page="3"></c2-pagination>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    pagination: {
+      previous: 'Précédent',
+      next: 'Suivant',
+      pageSize: 'Lignes par page :',
+      range: '{0}–{1} sur {2}',
+      page: 'Page {0} sur {1}',
+      goToPage: 'Aller à la page {0}',
+      jump: 'Aller à la page {0}, {1} pages sautées',
+    },
+  },
+})
+```

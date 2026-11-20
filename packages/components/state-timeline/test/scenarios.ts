@@ -1,4 +1,5 @@
 import { html } from 'lit'
+import './translations'
 import '../src/state-timeline'
 import type { StateTimelineSeries, StateTimelineState } from '../src/state-timeline'
 
@@ -72,7 +73,8 @@ subject.addEventListener('segment-hover', (event) => {
   output.textContent = log.join(' ')
 })
 
-if (scenario === 'default' || scenario === 'tooltip') {
+if (scenario === 'lang') subject.locale = 'fr'
+if (scenario === 'default' || scenario === 'tooltip' || scenario === 'lang') {
   subject.series = series
   subject.states = states
   subject.end = '2026-10-08T12:00:00Z'

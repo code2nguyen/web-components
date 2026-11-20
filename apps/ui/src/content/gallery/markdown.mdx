@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import MarkdownExamplesRuntime from '../../components/MarkdownExamplesRuntime.astro'
 
 import { Markdown } from '@c2n/components/markdown'
 
@@ -102,3 +104,38 @@ The rule holds for components too."></c2-markdown>
 ```
 
 </GalleryGrid>
+
+## Language
+
+<MarkdownExamplesRuntime />
+
+The name of the scrolling region around a table is a message token: an app translates it once with `addTranslations`, and each document speaks the language of its nearest `lang`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The region around the table named in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-markdown client:only="lit" value="## Bilan
+
+Le chiffre d'affaires progresse de **12 %**.
+
+| Offre | Croissance |
+| --- | --- |
+| Entreprise | 18 % |
+| Équipe | 7 %"></c2-markdown>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    markdown: {
+      table: 'Tableau',
+    },
+  },
+})
+```

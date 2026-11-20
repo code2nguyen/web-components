@@ -202,6 +202,59 @@ import { ReorderList } from '@c2n/components/reorder-list'
 
 </GalleryGrid>
 
+## Drops from another list
+
+A list with `drop-kind` takes rows dropped from outside it. The source writes them with `writeItemPayload` from
+`@c2n/core/controllers/drop-zone.js` under the same kind; the list lights up while they are over it (red for another
+kind), fires `item-drop` with the row to insert before, and announces how many were added. The page adds the rows. Drag
+a task by its handle to the other list.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Drag between lists
+<style>
+  .task-lists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .task-lists c2-reorder-list {
+    flex: 1 1 200px;
+    --c2-reorder-list--container-gap: 6px;
+  }
+  .task-lists [data-drag-handle] {
+    cursor: grab;
+    opacity: 0.55;
+  }
+</style>
+<div class="task-lists">
+  <c2-reorder-list client:only="lit" editable drop-kind="task" data-reorder-list-example="transfer" aria-label="Inbox">
+    <div data-reorder-key="invoice" data-reorder-label="Send the invoice"><span data-drag-handle aria-hidden="true">⠿</span> Send the invoice</div>
+    <div data-reorder-key="review" data-reorder-label="Review the contract"><span data-drag-handle aria-hidden="true">⠿</span> Review the contract</div>
+    <div data-reorder-key="call" data-reorder-label="Call the supplier"><span data-drag-handle aria-hidden="true">⠿</span> Call the supplier</div>
+  </c2-reorder-list>
+  <c2-reorder-list client:only="lit" editable drop-kind="task" data-reorder-list-example="transfer" aria-label="Today">
+    <div data-reorder-key="standup" data-reorder-label="Team stand-up"><span data-drag-handle aria-hidden="true">⠿</span> Team stand-up</div>
+  </c2-reorder-list>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+
+// The source: a handle in each row writes the row under the list's drop-kind.
+handle.draggable = true
+handle.addEventListener('pointerdown', (event) => event.stopPropagation()) // keep the list's own reorder off it
+handle.addEventListener('dragstart', (event) => writeItemPayload(event.dataTransfer!, 'task', [{ id: row.dataset.reorderKey, label: 'Send the invoice' }]))
+
+// The target hands the place over; the page adds (or moves) the row.
+today.addEventListener('item-drop', ({ detail }) => {
+  for (const task of detail.items) today.insertBefore(rowFor(task), detail.before)
+})
+```
+
 <ReorderListExamplesRuntime />
 
 `ranked` draws each row's position; `renderRank` replaces the number with your own content, and `name` makes the list a form control that submits the item keys in their displayed order. The `value` attribute (keys separated by `;`) sets the order it starts in, which the Ranking form card uses for a saved answer and which a form reset returns to:

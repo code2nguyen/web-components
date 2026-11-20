@@ -86,6 +86,24 @@ test('keeps custom rendering inside interactive option rows', async ({ page, sce
   await expect(option.locator('small')).toHaveText('Level 1')
 })
 
+test('its built-in text follows the language of the page', async ({ page, scenario }) => {
+  await scenario('lang')
+  const cascader = page.locator('c2-cascader')
+  await expect(cascader.locator('.placeholder')).toHaveText('Sélectionner')
+  await cascader.locator('button').first().click()
+  await expect(cascader.locator('[role="tree"]')).toHaveAttribute('aria-label', 'Options')
+  await expect(cascader.locator('[role="group"]').first()).toHaveAttribute('aria-label', 'Niveau 1')
+  await scenario('lang-empty')
+  await page.locator('c2-cascader button').first().click()
+  await expect(page.getByRole('status')).toHaveText('Aucune option disponible.')
+})
+
+test('an empty placeholder shows none', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-cascader').evaluate((element) => ((element as HTMLElement & { placeholder: string }).placeholder = ''))
+  await expect(page.locator('c2-cascader .placeholder')).toHaveText('')
+})
+
 test('supports empty and disabled states', async ({ page, scenario }) => {
   await scenario('empty')
   await page.getByRole('button', { name: 'Location' }).click()

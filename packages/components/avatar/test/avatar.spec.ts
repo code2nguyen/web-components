@@ -179,3 +179,29 @@ test('avatar group hides an avatar through a custom state, never an attribute on
   await expect(page.locator('c2-avatar').nth(2)).toBeVisible()
   expect(await attributes()).toEqual(authored)
 })
+
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">
+    <c2-avatar name="Ada Lovelace" editable status="busy"></c2-avatar>
+    <c2-avatar-group max-visible="2">
+      <c2-avatar name="Susan Kare"></c2-avatar>
+      <c2-avatar name="Paula Scher"></c2-avatar>
+      <c2-avatar name="Don Norman"></c2-avatar>
+    </c2-avatar-group>
+    <c2-avatar-group max-visible="1" count-mode="total">
+      <c2-avatar name="Susan Kare"></c2-avatar>
+      <c2-avatar name="Paula Scher"></c2-avatar>
+    </c2-avatar-group>
+  </div>`)
+  await expect(page.getByRole('button', { name: 'Téléverser avatar de Ada Lovelace' })).toBeVisible()
+  await expect(page.locator('c2-avatar[status="busy"]').locator('.c2-avatar-status')).toHaveAttribute('aria-label', 'Occupé')
+  const groups = page.locator('c2-avatar-group')
+  await expect(groups.first().getByRole('group', { name: "Groupe d'avatars" })).toBeVisible()
+  await expect(groups.first().locator('[part="overflow"]')).toHaveAttribute('aria-label', /^\d+ autres? avatars?$/)
+  await expect(groups.nth(1).locator('[part="overflow"]')).toHaveAttribute('aria-label', '2 avatars au total')
+})
+
+test('a status outside the documented ones is read out as written instead of breaking the render', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-avatar name="Ada Lovelace" status="dnd"></c2-avatar>')
+  await expect(page.locator('c2-avatar').locator('.c2-avatar-status')).toHaveAttribute('aria-label', 'dnd')
+})

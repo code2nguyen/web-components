@@ -84,6 +84,30 @@ export interface Upload {
 
 let uploadItemId = 0
 
+const byteFormats = new Map<string, Intl.NumberFormat>()
+
+/** One formatter per language, unit and precision: whole bytes are spelled out (`512 bytes`), larger units abbreviated. */
+function byteFormat(locale: string, unit: 'byte' | 'kilobyte' | 'megabyte', digits: number): Intl.NumberFormat {
+  const key = `${locale}|${unit}|${digits}`
+  let format = byteFormats.get(key)
+  if (!format) {
+    const options: Intl.NumberFormatOptions = {
+      style: 'unit',
+      unit,
+      unitDisplay: unit === 'byte' ? 'long' : 'short',
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }
+    try {
+      format = new Intl.NumberFormat(locale, options)
+    } catch {
+      format = new Intl.NumberFormat('en', options)
+    }
+    byteFormats.set(key, format)
+  }
+  return format
+}
+
 /**
  * Drag-and-drop file uploader with multiple selection, validation and an attachment-based upload queue. Set an async
  * `uploadHandler(file, { signal, onProgress })` property to connect transport; the component owns progress, success,
@@ -474,10 +498,17 @@ export class Upload extends LitElement {
     return matchesAccept(file, accept)
   }
 
+  /**
+   * A file size in the element's language, through `Intl.NumberFormat`'s units: `512 bytes`, `84 kB`, `2.4 MB` in
+   * English, `512 octets`, `84 ko`, `2,4 Mo` in French. Sizes count in 1024s, as before. The locale is the one the
+   * element renders in, which during the hydrating render of a server-rendered element is the server's.
+   */
   protected formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)} MB`
+    if (bytes < 1024) return byteFormat(this.msg.locale, 'byte', 0).format(bytes)
+    // Below 1023.5 kB: a size that rounds to 1024 kB reads as 1.0 MB.
+    if (Math.round(bytes / 1024) < 1024) return byteFormat(this.msg.locale, 'kilobyte', 0).format(Math.round(bytes / 1024))
+    const digits = bytes < 10 * 1024 * 1024 ? 1 : 0
+    return byteFormat(this.msg.locale, 'megabyte', digits).format(bytes / (1024 * 1024))
   }
 
   protected revokePreview(item: UploadItem): void {

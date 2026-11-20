@@ -8,6 +8,8 @@ const fr: typeof virtualListMessages.en = {
   loadingMore: 'Chargement…',
   loadMoreFailed: 'Impossible de charger la suite',
   retry: 'Réessayer',
+  label: 'Éléments',
+  search: 'Rechercher',
 }
 
 addTranslations({ fr: { 'virtual-list': fr } })
