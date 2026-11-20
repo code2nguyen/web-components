@@ -43,6 +43,12 @@
     title--font-weight: 500,
     description--color: #71717a,
     description--font-size: 12px,
+    drag-handle--color: #a1a1aa,
+    drag-handle__hover--color: #52525b,
+    drag-handle--size: 16px,
+    drag-handle--gap: 6px,
+    drag-handle--margin-inline-start: -4px,
+    drag-handle--cursor: grab,
     placeholder--border: 2px dashed rgb(2, 101, 220),
     placeholder--background-color: rgba(2, 101, 220, 0.08),
     empty--border: 1px dashed #bcbcc6,
@@ -180,6 +186,40 @@
   outline: css.cssVar(card__picked--outline);
   outline-offset: css.cssVar(card__focus--outline-offset);
   box-shadow: css.cssVar(card__picked--box-shadow);
+}
+
+// A card with a drag handle (`drag-kind`): the grip, then the card's own content.
+.card--handle {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(drag-handle--gap);
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.drag-handle {
+  display: inline-flex;
+  flex: none;
+  inline-size: css.cssVar(drag-handle--size);
+  block-size: css.cssVar(drag-handle--size);
+  margin-inline-start: css.cssVar(drag-handle--margin-inline-start);
+  color: css.cssVar(drag-handle--color);
+  cursor: css.cssVar(drag-handle--cursor);
+  // A pointer press on the grip is the browser's drag, not the board's own.
+  touch-action: none;
+
+  svg {
+    inline-size: 100%;
+    block-size: 100%;
+    fill: currentColor;
+  }
+
+  &:hover {
+    color: css.cssVar(drag-handle__hover--color);
+  }
 }
 
 .card--dragging {

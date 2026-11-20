@@ -376,7 +376,7 @@ export class ConfirmDialog extends LitElement {
       >
         <div slot="title" part="heading" class="c2-confirm-dialog__heading">
           <slot name="icon"></slot>
-          <span class="c2-confirm-dialog__heading-text"><slot name="heading">${this.heading}</slot></span>
+          <span class="c2-confirm-dialog__heading-text"><slot name="heading">${this.heading || nothing}</slot></span>
         </div>
         <div part="message" class="c2-confirm-dialog__message"><slot @slotchange=${this.slots.handleSlotChange}>${this.message || nothing}</slot></div>
         ${this.fields?.render() ?? nothing}

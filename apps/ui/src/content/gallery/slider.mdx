@@ -375,3 +375,36 @@ button('next').addEventListener('click', () => slider.seekMarker(1))
 // Marker content: the chapter number inside each dot.
 document.querySelector<Slider>('.chapters')!.renderMarker = ({ index }) => String(index + 1)
 ```
+
+## Language
+
+The names of the two thumbs of a range are message tokens: an app translates them once with `addTranslations`, and each slider speaks the language of its nearest `lang`. `start-label` and `end-label` still override one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The thumbs named in the language of the page,useWhen=The application is translated
+<style>
+  .slider-fr {
+    width: 180px;
+  }
+</style>
+<div lang="fr">
+  <c2-slider client:only="lit" class="slider-fr" aria-label="Prix" mode="range" min="0" max="1000" step="10" value-start="250" value-end="750"></c2-slider>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    slider: {
+      start: 'Minimum',
+      end: 'Maximum',
+      thumb: '{0} : {1}',
+    },
+  },
+})
+```

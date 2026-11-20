@@ -343,7 +343,7 @@ export class Switch extends LitElement {
           </span>
         </span>
         <span class="c2-switch-text">
-          <span class="c2-switch-label" part="label"><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot></span>
+          <span class="c2-switch-label" part="label"><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot></span>
           <span class="c2-switch-description" part="description" ?hidden=${!hasDescription}>
             <slot name="description" @slotchange=${this.handleDescriptionChange}></slot>
           </span>

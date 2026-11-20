@@ -145,7 +145,7 @@ export class CommandItem extends LitElement {
     return html`
       <slot name="prefix-icon"></slot>
       <div class="content">
-        <div class="text"><slot>${this.value}</slot></div>
+        <div class="text"><slot>${this.value || nothing}</slot></div>
         <div class="description" ?hidden=${!this.slotPresence.has('description')}>
           <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>

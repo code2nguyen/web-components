@@ -147,7 +147,7 @@ export class Toast extends LitElement {
       ${this.noIcon ? nothing : html`<span class="icon" part="icon" aria-hidden="true"><slot name="icon">${this.renderIcon()}</slot></span>`}
       <div class="content">
         ${this.heading ? html`<div class="heading" part="heading">${this.heading}</div>` : nothing}
-        <div part="message"><slot>${this.message}</slot></div>
+        <div part="message"><slot>${this.message || nothing}</slot></div>
         ${this.actionPlacement === 'end' ? nothing : this.renderAction()}
       </div>
       ${this.actionPlacement === 'end' ? html`<div class="action-end" part="action-end" ?hidden=${!this.actionLabel && !this.hasActionSlot}>${this.renderAction()}</div>` : nothing}

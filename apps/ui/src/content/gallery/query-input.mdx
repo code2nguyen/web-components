@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-query-input: a monospace log-explorer bar,
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import QueryInputExamplesRuntime from '../../components/QueryInputExamplesRuntime.astro'
 
 import { QueryInput } from '@c2n/components/query-input'
 
@@ -97,3 +99,34 @@ The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--
 ```
 
 </GalleryGrid>
+
+## Language
+
+<QueryInputExamplesRuntime />
+
+The heading of the field suggestions and the names of the field, the clear button and each filter's remove button are message tokens: an app translates them once with `addTranslations`, and each query input speaks the language of its nearest `lang`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The suggestions heading and the remove and clear buttons in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-query-input client:only="lit" value="service:web env:prod"></c2-query-input>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'query-input': {
+      label: 'Requête de recherche',
+      fields: 'Champs',
+      removeFilter: 'Retirer le filtre',
+      clear: 'Effacer la requête',
+    },
+  },
+})
+```

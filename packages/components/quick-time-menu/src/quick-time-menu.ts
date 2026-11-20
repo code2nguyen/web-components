@@ -609,7 +609,7 @@ export class QuickTimeMenu extends LitElement {
           }}
         >
           <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">${clockIcon}</svg>
-          <span class="text">${time || this.labelText}</span>
+          <span class="text">${time || this.labelText /* modern-web-ignore: empty-text-child-part labelText falls back to a message */}</span>
         </button></slot
       >${
         this.value && this.clearable && !disabled

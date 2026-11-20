@@ -1,0 +1,24 @@
+---
+/**
+ * Plays the application's part in the state-timeline gallery: the French of the En français card, under `lang="fr"`.
+ */
+---
+
+<script>
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  addTranslations({
+    fr: {
+      'state-timeline': {
+        label: "Chronologie d'états",
+        noData: 'Aucune donnée',
+        segment: '{0}, {1}, {2}',
+        inSeries: '{0} : {1}',
+        now: 'actuellement {0}',
+        outside: '{0} hors {1}',
+        noTime: 'aucun temps',
+        left: 'encore {0}',
+      },
+    },
+  })
+</script>

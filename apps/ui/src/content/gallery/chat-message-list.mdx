@@ -4,6 +4,8 @@ description: 'Chat rooms built from c2-chat-message-list, c2-chat-message and c2
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChatMessageListExamplesRuntime from '../../components/ChatMessageListExamplesRuntime.astro'
 
 import { ChatMessageList } from '@c2n/components/chat-message-list'
 import { ChatMessage } from '@c2n/components/chat-message'
@@ -163,3 +165,52 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
 ```
 
 </GalleryGrid>
+
+## Language
+
+<ChatMessageListExamplesRuntime />
+
+The loading line, the name of the log and the jump-to-latest button are message tokens: an app translates them once with `addTranslations`, and each list speaks the language of its nearest `lang`.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=En français,description=The loading line and the jump button in the language of the page,useWhen=The application is translated
+<style>
+  .list-fr {
+    height: 240px;
+    width: min(100%, 420px);
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+  }
+</style>
+<div lang="fr">
+  <c2-chat-message-list client:only="lit" class="list-fr" loading>
+    <c2-chat-message>
+      <span slot="title">Maya</span>
+      <time slot="header-time">09:12</time>
+      <div>Bonjour ! La version est-elle en ligne ?</div>
+    </c2-chat-message>
+    <c2-chat-message align="right">
+      <span slot="title">Vous</span>
+      <time slot="header-time">09:14</time>
+      <div>Oui, la v0.0.18 est publiée. Aucun incident.</div>
+    </c2-chat-message>
+  </c2-chat-message-list>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'chat-message-list': {
+      label: 'Conversation',
+      jump: 'Aller au dernier message',
+      loading: 'Chargement des messages précédents…',
+    },
+  },
+})
+```

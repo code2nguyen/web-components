@@ -12,7 +12,8 @@ test.beforeAll(async () => {
   test.setTimeout(120_000)
   const vite = await createServer({
     configFile: `${root}tests/vite.config.ts`,
-    server: { middlewareMode: true, hmr: false },
+    // No HMR socket: parallel workers would each try to bind Vite's default port.
+    server: { middlewareMode: true, hmr: false, ws: false },
     appType: 'custom',
     logLevel: 'error',
     // Node loads the dependencies itself: no browser pre-bundling, and a cache of its own so the test server's

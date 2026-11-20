@@ -1,4 +1,5 @@
 import { installFakeGoogle } from './fake-google'
+import './translations'
 
 const scope = window as unknown as { noFakeGoogle?: boolean; installFakeGoogle: typeof installFakeGoogle; configureGoogleMaps: unknown }
 // The loader test turns the fake off and serves it from the script URL instead.

@@ -2,17 +2,36 @@ import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } f
 import { query } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import {
+  DropZoneController,
+  endItemDrag,
+  itemDropTargetAt,
+  itemDropTargetOf,
+  startItemDrag,
+  startNativeItemDrag,
+  writeItemPayload,
+  type DropPoint,
+  type DropZoneItems,
+  type ItemDrag,
+  type ItemDropTarget,
+} from '@c2n/core/controllers/drop-zone.js'
+import { trackRead } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { treeMessages } from './messages.js'
 import styles from './tree.scss?inline'
 // Registers `c2-tree-item` so a consumer of the tree alone gets the row element too (as `c2-tabs` does for
 // `c2-tab`). It is also what lets an MDX `client:only` island render nested rows as plain markup.
 import './tree-item'
 import { TreeItem } from './tree-item'
+import type { ReorderHandle } from './tree-reorder'
 import type {
   TreeChildrenLoader,
   TreeExpansionChangeEventDetail,
   TreeItemClickEventDetail,
+  TreeItemDropEventDetail,
+  TreeItemMoveOutEventDetail,
   TreeItemExpandEventDetail,
   TreeItemLoadErrorEventDetail,
   TreeItemMoveEventDetail,
@@ -35,6 +54,8 @@ export interface TreeEventMap {
   'item-expand': CustomEvent<TreeItemExpandEventDetail>
   'item-load-error': CustomEvent<TreeItemLoadErrorEventDetail>
   'item-move': CustomEvent<TreeItemMoveEventDetail>
+  'item-drop': CustomEvent<TreeItemDropEventDetail>
+  'item-move-out': CustomEvent<TreeItemMoveOutEventDetail>
 }
 
 export interface Tree {
@@ -96,7 +117,7 @@ export interface Tree {
  * @tag c2-tree
  *
  * @slot - The root `c2-tree-item` rows, when authoring in markup.
- * @slot empty - Shown instead of the rows when the tree holds nothing.
+ * @slot empty - Shown instead of the rows when the tree holds nothing. Defaults to the `empty` message ("No items").
  *
  * @slotcomponent c2-tree-item
  *
@@ -109,6 +130,8 @@ export interface Tree {
  * @event {CustomEvent<TreeItemExpandEventDetail>} item-expand - Fired when a row expands. Call `preventDefault()` to keep it closed. This is where a consumer authoring in markup appends children for a lazily loaded branch.
  * @event {CustomEvent<TreeItemLoadErrorEventDetail>} item-load-error - Fired when `loadChildren` rejects.
  * @event {CustomEvent<TreeItemMoveEventDetail>} item-move - Fired before a `reorderable` tree moves a row, by drag or keyboard. Call `preventDefault()` to keep the row where it is.
+ * @event {CustomEvent<TreeItemMoveOutEventDetail>} item-move-out - Fired when another place took nodes of the `drag-kind` payload (a pointer drag carried off the tree, the drag handle's drag ending in a move, or `moveItemTo`). A data-driven tree then takes them out of `items`; in a tree authored in markup the application removes `detail.rows`, and when no listener reads them during the event they stay (a copy) and the tree warns once. Cancelable: `preventDefault()` keeps them, which makes the move a copy. Does not bubble.
+ * @event {CustomEvent<TreeItemDropEventDetail>} item-drop - Fired when nodes of the `drop-kind` payload are dropped on the tree from outside it. A data-driven tree then adds them to `items`; in a tree authored in markup the application adds a `c2-tree-item` per node to `detail.parentElement`. Cancelable: `preventDefault()` adds none of them. Does not bubble: each of `c2-kanban`, `c2-reorder-list` and `c2-tree` sends its own `detail`, so a drop on one nested in another must not reach the outer one's listeners. Listen on the element itself.
  *
  * @cssproperty {color} [--c2-tree--background=#ffffff] - Background of the tree.
  * @cssproperty {padding} [--c2-tree--padding-top=4px] - Space above the first row.
@@ -132,6 +155,11 @@ export interface Tree {
  * @cssproperty {color} [--c2-tree__drop-indicator--color=rgb(2, 101, 220)] - Colour of the line marking where a dragged row will land.
  * @cssproperty {pixel} [--c2-tree__drop-indicator--height=2px] - Thickness of that line.
  * @cssproperty {border-radius} [--c2-tree__drop-indicator--border-radius=999px] - Corner radius of that line.
+ * @cssproperty {color} [--c2-tree__drop-target--outline-color=#0265dc] - Outline of the tree while nodes of its `drop-kind` are dragged over it.
+ * @cssproperty {string} [--c2-tree__drop-target--outline-style=dashed] - Outline style while a drop is possible.
+ * @cssproperty {length} [--c2-tree__drop-target--outline-width=2px] - Outline width while a drag is over the tree.
+ * @cssproperty {length} [--c2-tree__drop-target--outline-offset=-2px] - Outline offset; negative keeps it inside the scrolling area.
+ * @cssproperty {color} [--c2-tree__drop-refused--outline-color=#dc2626] - Outline of the tree while another kind of item is dragged over it, which it refuses.
  */
 @customElement('c2-tree')
 export class Tree extends LitElement {
@@ -140,6 +168,7 @@ export class Tree extends LitElement {
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, treeMessages)
 
   /** Nodes to render. Leave empty and nest `c2-tree-item` elements instead to author the tree in markup. */
   @property({ converter: jsonPropertyConverter }) items: TreeNode[] = []
@@ -174,6 +203,31 @@ export class Tree extends LitElement {
    */
   @property({ type: Boolean, reflect: true }) reorderable = false
 
+  /**
+   * The kind of item payload the tree takes from outside (another tree, another window), as a source writes it with
+   * `writeItemPayload(dataTransfer, kind, nodes)` from `@c2n/core/controllers/drop-zone.js` (MIME type
+   * `application/x-c2n-<kind>+json`), each item a `TreeNode`. Empty (the default) takes none. Needs `reorderable`.
+   * The middle of a row nests the nodes under it, its top or bottom edge puts them before or after it. The tree fires
+   * `item-drop`, adds the nodes to `items` when it is data-driven, and announces how many were added; a node whose
+   * value the tree already holds is not added. A tree in markup adds nothing itself: the application inserts the rows
+   * from `item-drop`. A drop not cancelled counts as taken, and a source with a `drag-kind` then lets its items go; a
+   * drop among markup rows whose `detail.items` no listener read during the event adds nothing (with a warning), so no
+   * row leaves its source for a tree that never adds it: read it in the listener itself, not later in a state updater
+   * or after an `await`.
+   */
+  @property({ type: String, attribute: 'drop-kind' }) dropKind = ''
+
+  /**
+   * The kind of item payload rows leave the tree as, each a `TreeNode` with its subtree, for a tree, list or board whose
+   * `drop-kind` is the same. Empty (the default), rows stay in the tree. Set, on a `reorderable` tree: a pointer drag
+   * carried off the tree drops the row on the zone under the pointer that takes this kind; each row shows a drag handle
+   * (the `drag-handle` part of `c2-tree-item`) whose drag the browser carries (dropped back on the tree, it moves the row there; a drop outside c2n, in another
+   * window too, is a copy); and `moveItemTo`
+   * moves a row from code, the keyboard path an application wires to a command. A row another place took leaves the
+   * tree after `item-move-out`: a data-driven tree takes it out of `items`, the application removes a row in markup.
+   */
+  @property({ type: String, attribute: 'drag-kind' }) dragKind = ''
+
   /** Deepest level, `0` at the root, a moved row and its subtree may reach in a `reorderable` tree. Unset: no limit. */
   @property({ type: Number, attribute: 'max-depth' }) maxDepth?: number
 
@@ -197,6 +251,24 @@ export class Tree extends LitElement {
   @property({ attribute: false }) renderActions?: TreeItemRenderer
 
   @query('.c2-tree') private container?: HTMLElement
+
+  #warnedUnreadDrop = false
+  #warnedUnreadMoveOut = false
+  #dropZone = new DropZoneController(this, {
+    itemKind: () => this.dropKind,
+    disabled: () => this.disabled || !this.reorderable,
+    onItems: (drop) => this.#receiveDrop(drop),
+    // A row's drag handle dropped back on the tree: the row moves there, as a pointer drag would put it.
+    onOwnDrop: ({ point }) => {
+      const item = this.#nativeDrag?.item
+      // A row the application took out of the tree during the drag is not put back by dropping it.
+      if (!item || !this.#reorder || !(this.contains(item) || item.getRootNode() === this.renderRoot)) return
+      const { parent, before } = this.#dropPlace(point.y)
+      // Back on the row itself, or on its own top edge: nothing to do, and nothing to say.
+      if (parent === item || before === item) return
+      if (!this.#reorder.moveTo(item, parent, before)) this.#announce(this.msg.t('cannotMove', item.resolvedLabel))
+    },
+  })
 
   @query('slot:not([name])') private rootSlot?: HTMLSlotElement
 
@@ -347,6 +419,24 @@ export class Tree extends LitElement {
     if (changed.has('items') && !Array.isArray(this.items)) this.items = []
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    // A drag carried off the tree ends with it: the zone it hovered goes dark, and the page's drag is over.
+    const carried = this.#carried
+    this.#carried = undefined
+    carried?.target?.hover(null)
+    if (carried) endItemDrag(carried.drag)
+    // A browser drag from a handle ends with the tree too, once it is still out of the page a task later (moved, it is
+    // back by then): the drop it may still make elsewhere is a copy.
+    const native = this.#nativeDrag
+    if (native)
+      setTimeout(() => {
+        if (this.isConnected || this.#nativeDrag !== native) return
+        this.#nativeDrag = undefined
+        endItemDrag(native.drag)
+      })
+  }
+
   override updated(changed: PropertyValues<this>) {
     this.internals.role = 'tree'
     this.internals.ariaMultiSelectable = String(this.#multiple)
@@ -358,7 +448,11 @@ export class Tree extends LitElement {
       this.#reorderLoaded = true
       const reorder = import('./tree-reorder')
       reorder.then(
-        (module) => module.attachReorder(this),
+        (module) =>
+          (this.#reorder = module.attachReorder(this, {
+            carryOut: (item, point) => this.#carryOut(item, point),
+            dropOut: (point) => this.#dropOut(point),
+          })),
         // A chunk that failed to load (a dropped connection, a stale deploy) is tried again on the next update.
         () => (this.#reorderLoaded = false),
       )
@@ -404,6 +498,7 @@ export class Tree extends LitElement {
           item.checkboxSelection = this.checkboxSelection
           item.childrenOutline = this.childrenOutline
           item.selectable = this.selection !== 'none' || this.checkboxSelection
+          item.dragHandle = this.reorderable && !!this.dragKind && !this.disabled
           walk(item.childItems, level + 1)
         })
       }
@@ -605,6 +700,8 @@ export class Tree extends LitElement {
 
   #handleClick = (event: MouseEvent) => {
     if (this.disabled) return
+    // The drag handle is a control of its own, like the toggle: a click on it neither selects nor expands the row.
+    if (event.composedPath().some((node) => this.#isRowGrip(node))) return
     const item = this.#itemFromEvent(event)
     if (!item) return
 
@@ -750,12 +847,418 @@ export class Tree extends LitElement {
     </c2-tree-item>`
   }
 
+  // ---- rows leaving the tree ----
+
+  /** The reorder module, once loaded: tells whether a drag or a keyboard move is in progress. */
+  #reorder?: ReorderHandle
+  /** The row carried off the tree by a pointer drag, and the zone under the pointer that would take it. */
+  #carried?: { item: TreeItem; drag: ItemDrag; target: ItemDropTarget | null }
+  /** The row the browser carries from its drag handle, while it lasts. */
+  #nativeDrag?: { item: TreeItem; drag: ItemDrag }
+
+  /** A row as the node it leaves as: with its subtree, read from `items` or from the rows in markup. */
+  #nodeWithSubtree(item: TreeItem): TreeNode {
+    if (item.getRootNode() === this.renderRoot) {
+      const find = (nodes: TreeNode[]): TreeNode | undefined => {
+        for (const node of nodes) {
+          if (node.value === item.value) return node
+          const inner = node.children && find(node.children)
+          if (inner) return inner
+        }
+        return undefined
+      }
+      const found = find(this.items)
+      if (found) return found
+    }
+    const children = item.childItems.map((child) => this.#nodeWithSubtree(child))
+    const { value, disabled, data, hasChildren } = item.node
+    return {
+      value,
+      // The text the row shows, slotted label included.
+      label: item.resolvedLabel,
+      ...(disabled ? { disabled } : {}),
+      ...(data === undefined ? {} : { data }),
+      ...(children.length ? { children } : {}),
+      // A branch whose children were never loaded stays one: the place it lands loads them.
+      ...(hasChildren && !children.length ? { hasChildren } : {}),
+    }
+  }
+
+  /** The drag that carries a row off the tree, or `null` when the tree lets none leave. */
+  #dragOutOf(item: TreeItem): ItemDrag | null {
+    if (!this.dragKind || !this.reorderable || this.disabled || item.disabled) return null
+    return { kind: this.dragKind, items: [this.#nodeWithSubtree(item)], source: this }
+  }
+
+  /**
+   * Off the tree with a `drag-kind`: finds the zone under the pointer that takes the row and shows the drag over it.
+   * Returns whether the drag is off the tree. A zone under the pointer wins over the tree's own box, which also covers
+   * rows a scrolling ancestor hides. Called by the reorder module on each move of a pointer drag.
+   */
+  #carryOut(item: TreeItem, point: DropPoint): boolean {
+    const clear = (): false => {
+      if (this.#carried?.target) {
+        this.#carried.target.hover(null)
+        this.#carried.target = null
+      }
+      return false
+    }
+    // A tree taken out of the page mid-drag carries nothing any more.
+    if (!this.dragKind || !this.isConnected) return clear()
+    if (!this.#carried || this.#carried.item !== item) {
+      // A drag of another row left behind: its zone goes dark and its drag ends.
+      if (this.#carried) {
+        this.#carried.target?.hover(null)
+        endItemDrag(this.#carried.drag)
+        this.#carried = undefined
+      }
+      const drag = this.#dragOutOf(item)
+      // The row can no longer leave: off the tree, the release moves it nowhere.
+      if (!drag) return !this.#onTree(point, EDGE_MARGIN)
+      startItemDrag(drag)
+      this.#carried = { item, drag, target: null }
+    }
+    const current = this.#carried
+    const target = itemDropTargetAt(point, current.drag)
+    // Just past the tree's edge, still its own: the drag scrolls it there, as it does without a `drag-kind`.
+    if (!target && this.#onTree(point, EDGE_MARGIN)) return clear()
+    if (target !== current.target) current.target?.hover(null)
+    current.target = target
+    target?.hover(point)
+    return true
+  }
+
+  /**
+   * Ends a pointer drag: when it was carried off the tree onto a zone that takes it, the row moves there. Returns
+   * whether the drag was off the tree, where it is not a move within it.
+   */
+  #dropOut(point: DropPoint | null): boolean {
+    const carried = this.#carried
+    this.#carried = undefined
+    // A row that could not leave (the tree made read-only mid-drag) and is released off the tree moves nowhere.
+    if (!carried) return !!point && !!this.dragKind && !this.#onTree(point, EDGE_MARGIN)
+    carried.target?.hover(null)
+    endItemDrag(carried.drag)
+    if (!point) return false
+    if (carried.target) {
+      if (carried.target.take(carried.drag, point) > 0) this.#moveOut(carried.drag, [carried.item], carried.target.host)
+      else this.#announce(this.msg.t('cancelled', carried.item.resolvedLabel))
+      return true
+    }
+    if (this.#onTree(point, EDGE_MARGIN)) return false
+    this.#announce(this.msg.t('cancelled', carried.item.resolvedLabel))
+    return true
+  }
+
+  /** Whether a point is on the tree, or within `margin` of it. */
+  #onTree(point: DropPoint, margin = 0): boolean {
+    const box = this.getBoundingClientRect()
+    return point.x >= box.left - margin && point.x <= box.right + margin && point.y >= box.top - margin && point.y <= box.bottom + margin
+  }
+
+  /**
+   * Moves a row to another tree, list or board whose `drop-kind` is the tree's `drag-kind`, without a pointer: the
+   * keyboard path to another instance, which an application wires to a command. The node lands at the target's
+   * natural place (the end of its root). Returns whether it moved: not when the tree has no `drag-kind`, is not
+   * `reorderable`, holds no row of that value, the target takes no such node, a listener cancelled the move, or a drag or
+   * keyboard move is in progress.
+   */
+  moveItemTo(target: Element, value: string): boolean {
+    if (this.#reorder?.busy()) return false
+    const item = this.allItems.find((candidate) => candidate.value === value)
+    const drag = item ? this.#dragOutOf(item) : null
+    const zone = drag ? itemDropTargetOf(target, drag) : null
+    if (!item || !drag || !zone) return false
+    // No page drag to start: the zone takes the items straight away, and a drag in flight elsewhere is left alone.
+    if (zone.take(drag) === 0) return false
+    return this.#moveOut(drag, [item], target)
+  }
+
+  /** Takes rows another place took out of the tree, unless `item-move-out` is cancelled. */
+  #moveOut(drag: ItemDrag, leaving: TreeItem[], target: Element): boolean {
+    // A row the application already moved into the target (the element itself) is no longer the tree's to give up.
+    const rows = leaving.filter((row) => this.contains(row) || row.getRootNode() === this.renderRoot)
+    if (!rows.length) {
+      this.#announce(this.msg.t('movedOut', leaving[0].resolvedLabel))
+      return true
+    }
+    const items = drag.items as TreeNode[]
+    const detail: TreeItemMoveOutEventDetail = { kind: drag.kind, items, rows, target }
+    // Read either way: a listener removes the rows themselves, or the application's records by the items they carry.
+    const readRows = trackRead(detail, 'rows')
+    const readItems = trackRead(detail, 'items')
+    const read = () => readRows() || readItems()
+    // Read before the event: an application removes rows authored in markup from its listener.
+    const focused = rows.some((row) => row.matches(':focus-within'))
+    const visible = this.visibleItems
+    if (!this.dispatchEvent(new CustomEvent<TreeItemMoveOutEventDetail>('item-move-out', { detail, cancelable: true }))) return false
+    // Rows written in markup that no listener read stay (the tree removes only its own data rows): the move is a copy,
+    // said so rather than announced.
+    if (rows.some((row) => row.getRootNode() !== this.renderRoot) && !read()) {
+      if (!this.#warnedUnreadMoveOut)
+        console.warn(
+          'c2-tree: rows written in markup and taken by another place stayed, because no `item-move-out` listener read `detail.rows` to remove them.',
+        )
+      this.#warnedUnreadMoveOut = true
+      return false
+    }
+    // Focus inside a row that leaves (the command that moved it) goes to the next row that stays, else the one before.
+    if (focused) {
+      const leaving = (row: TreeItem) => rows.some((moved) => moved === row || moved.contains(row))
+      const at = visible.findIndex(leaving)
+      const neighbour =
+        visible.slice(at).find((row) => !leaving(row)) ??
+        visible
+          .slice(0, at)
+          .reverse()
+          .find((row) => !leaving(row))
+      const value = neighbour?.value
+      const refocus = () => {
+        const row = value === undefined ? undefined : this.allItems.find((candidate) => candidate.value === value)
+        if (row) this.#focus(row)
+        // No row left: the empty state takes focus, rather than the page.
+        else this.renderRoot.querySelector<HTMLElement>('.empty')?.focus()
+      }
+      // A framework removes the rows on its next render: a frame later, the tree has redrawn.
+      void this.updateComplete.then(() => requestAnimationFrame(() => void this.updateComplete.then(refocus)))
+    }
+    const inData = rows.filter((row) => row.getRootNode() === this.renderRoot)
+    if (inData.length) this.items = removeNodes(this.items, new Set(inData.map((row) => row.value)))
+    this.#forget(items)
+    this.#announce(this.msg.t('movedOut', rows[0].resolvedLabel))
+    return true
+  }
+
+  /**
+   * Whether a node is the drag handle of one of this tree's rows, drawn in the row's shadow root: not an app's element
+   * with that part, nor a row of a tree nested in a row.
+   */
+  #isRowGrip(node: EventTarget): boolean {
+    if (!(node instanceof Element) || !node.part.contains('drag-handle')) return false
+    const row = (node.getRootNode() as ShadowRoot).host
+    return row instanceof TreeItem && this.allItems.includes(row)
+  }
+
+  /** Drops nodes that left the tree, with their subtrees, from the selection and the expanded rows. */
+  #forget(nodes: TreeNode[]) {
+    const gone = new Set<string>()
+    const walk = (list: TreeNode[]) => {
+      for (const node of list) {
+        gone.add(node.value)
+        if (node.children) walk(node.children)
+      }
+    }
+    walk(nodes)
+    if (this.expandedItems.some((value) => gone.has(value))) this.expandedItems = this.expandedItems.filter((value) => !gone.has(value))
+    if (this.value.some((value) => gone.has(value))) this.#commitSelection(this.value.filter((value) => !gone.has(value)))
+  }
+
+  /** Reads text out through the live region the reorder module adds (a tree with a `drag-kind` is `reorderable`). */
+  #announce(text: string) {
+    let live = this.renderRoot.querySelector('.live')
+    if (!live) {
+      // Before the reorder module has added its region (a move from code in the same task): this one, which it reuses.
+      live = document.createElement('div')
+      live.className = 'live'
+      live.setAttribute('aria-live', 'polite')
+      this.renderRoot.append(live)
+    }
+    // Cleared first so the same sentence twice in a row is still read out.
+    live.textContent = ''
+    requestAnimationFrame(() => (live.textContent = text))
+  }
+
+  /** A row's drag handle: the browser carries the node, as JSON under the `drag-kind` and a line of text. */
+  #handleHandleDragStart = (event: DragEvent) => {
+    const path = event.composedPath()
+    const fromHandle = path.some((node) => this.#isRowGrip(node))
+    if (!fromHandle || !event.dataTransfer) return
+    // A pointer or keyboard move already under way keeps the row: the browser's drag would carry it a second time.
+    if (this.#reorder?.busy()) {
+      event.preventDefault()
+      return
+    }
+    const item = path.find((node): node is TreeItem => node instanceof TreeItem)
+    const drag = item ? this.#dragOutOf(item) : null
+    if (!drag || !item) {
+      event.preventDefault()
+      return
+    }
+    try {
+      writeItemPayload(event.dataTransfer, drag.kind, drag.items)
+    } catch {
+      // A node that cannot be written as JSON (a cycle, a BigInt) does not leave by the browser's drag.
+      event.preventDefault()
+      return
+    }
+    event.dataTransfer.effectAllowed = 'copyMove'
+    const row = item.renderRoot.querySelector('.row')
+    if (row) {
+      const box = row.getBoundingClientRect()
+      event.dataTransfer.setDragImage(row, event.clientX - box.left, event.clientY - box.top)
+    }
+    const carried = { item, drag }
+    this.#nativeDrag = carried
+    // A `dragend` that never reached the tree (its row left the page): the drag is finished all the same.
+    startNativeItemDrag(event, drag, () => {
+      if (this.#nativeDrag === carried) this.#handleHandleDragEnd()
+    })
+  }
+
+  #handleHandleDragEnd = () => {
+    const carried = this.#nativeDrag
+    if (!carried) return
+    this.#nativeDrag = undefined
+    endItemDrag(carried.drag)
+    // Only a c2n zone that took the row moves it, and it says so in `drag.target`; anywhere else (a text field, another
+    // window) took a copy: `dropEffect` cannot tell the two apart, and WebKit reports `none` here either way.
+    // A tree made read-only during the drag keeps its rows: the move becomes a copy.
+    if (carried.drag.target && this.reorderable && !this.disabled) this.#moveOut(carried.drag, [carried.item], carried.drag.target)
+  }
+
+  /** Where nodes dropped at a point land: into the row's middle, before its top edge, after its bottom edge. */
+  #dropPlace(y: number): { parent: TreeItem | null; before: TreeItem | null } {
+    const parentOf = (row: TreeItem): TreeItem | null => {
+      const parent = row.parentElement?.closest('c2-tree-item, c2-tree')
+      return parent instanceof TreeItem ? parent : null
+    }
+    const nextOf = (row: TreeItem): TreeItem | null => {
+      const parent = parentOf(row)
+      const siblings = parent ? parent.childItems : this.rootItems
+      return siblings[siblings.indexOf(row) + 1] ?? null
+    }
+    const rows = this.visibleItems
+    const boxOf = (row: TreeItem) => (row.renderRoot.querySelector('.row') ?? row).getBoundingClientRect()
+    // A point between two rows (a row gap, the tree's padding) counts as the nearer row's edge, so the drop stays at
+    // that depth instead of falling to the end of the root.
+    let nearest: { row: TreeItem; distance: number } | undefined
+    for (const row of rows) {
+      const box = boxOf(row)
+      const distance = y < box.top ? box.top - y : y >= box.bottom ? y - box.bottom + 1 : 0
+      if (!nearest || distance < nearest.distance) nearest = { row, distance }
+    }
+    const last = rows[rows.length - 1]
+    // Below the last row is the end of the root; anywhere above it belongs to the nearest row.
+    if (nearest && last && y < boxOf(last).bottom) {
+      const { row } = nearest
+      const box = boxOf(row)
+      const at = Math.min(Math.max((y - box.top) / (box.height || 1), 0), 1)
+      // A branch whose children have not loaded yet cannot take more: they would be lost when it loads.
+      const nestable = !row.disabled && !row.loading && !(row.hasChildren && row.childItems.length === 0)
+      if (at < 0.25) return { parent: parentOf(row), before: row }
+      // The bottom edge of an open branch sits right above its first child: the nodes go there, at the top of it.
+      if (at > 0.75 && nestable && row.expanded && row.childItems.length > 0) return { parent: row, before: row.childItems[0] }
+      if (at > 0.75 || !nestable) return { parent: parentOf(row), before: nextOf(row) }
+      return { parent: row, before: null }
+    }
+    return { parent: null, before: null }
+  }
+
+  /** Adds the nodes of an item payload dropped on the tree at the place under the pointer; returns how many it took. */
+  #receiveDrop({ kind, items: dropped, point }: DropZoneItems): number {
+    // Without a point (a keyboard move from another tree) the nodes go to the end of the root.
+    const { parent, before } = point ? this.#dropPlace(point.y) : { parent: null, before: null }
+    const siblings = parent ? parent.childItems : this.rootItems
+    const index = before ? Math.max(0, siblings.indexOf(before)) : siblings.length
+    const values = new Set<string>()
+    const walk = (rows: TreeItem[]) => {
+      for (const row of rows) {
+        values.add(row.value)
+        walk(row.childItems)
+      }
+    }
+    walk(this.rootItems)
+    const items: TreeNode[] = []
+    const refused: unknown[] = []
+    // Every value in a dropped node, its children included: one the tree already holds would make two rows answer to it.
+    const valuesOf = (node: unknown, into: string[]): boolean => {
+      const value = node && typeof node === 'object' ? (node as TreeNode).value : undefined
+      if (typeof value !== 'string' || !value) return false
+      // The payload may come from another window: a node of the wrong shape is refused, not read.
+      const { label, children } = node as { label?: unknown; children?: unknown }
+      if ((label !== undefined && typeof label !== 'string') || (children !== undefined && !Array.isArray(children))) return false
+      into.push(value)
+      return ((children as unknown[] | undefined) ?? []).every((child) => valuesOf(child, into))
+    }
+    // `max-depth` holds for drops as for the tree's own moves: the level they land at plus their subtree's height.
+    const level = parent ? parent.level + 1 : 0
+    const heightOf = (node: TreeNode): number => Math.max(0, ...(node.children ?? []).map((child) => heightOf(child) + 1))
+    const tooDeep = (node: unknown) => this.maxDepth != null && level + heightOf(node as TreeNode) > this.maxDepth
+    for (const entry of dropped) {
+      const own: string[] = []
+      let readable: boolean
+      try {
+        readable = valuesOf(entry, own) && !tooDeep(entry)
+      } catch {
+        // Nested past what the stack can walk: not a tree anyone drew.
+        readable = false
+      }
+      if (!readable || own.some((value) => values.has(value)) || new Set(own).size !== own.length) {
+        refused.push(entry)
+        continue
+      }
+      for (const value of own) values.add(value)
+      items.push(entry as TreeNode)
+    }
+    if (!items.length) return 0
+    const reference = parent ?? before ?? this.rootItems[this.rootItems.length - 1]
+    const inData = reference ? reference.getRootNode() === this.renderRoot : !this.#hasAuthoredRows()
+    const parentElement = parent ?? this
+    // A row from data sits in this shadow root; one from markup may be wrapped (an island, a layout `div`): `before` is
+    // the wrapper that is a child of `parentElement`, so `parentElement.insertBefore(row, before)` works.
+    const outer = (row: TreeItem): Element => {
+      if (inData) return row
+      let node: Element = row
+      while (node.parentElement && node.parentElement !== parentElement) node = node.parentElement
+      return node.parentElement === parentElement ? node : row
+    }
+    const detail: TreeItemDropEventDetail = {
+      kind,
+      items,
+      refused,
+      parent: parent?.node ?? null,
+      index,
+      parentElement,
+      before: before ? outer(before) : null,
+    }
+    const read = trackRead(detail, 'items')
+    if (!this.dispatchEvent(new CustomEvent<TreeItemDropEventDetail>('item-drop', { detail, cancelable: true }))) return 0
+    // Among rows written in markup the tree adds none itself: a drop whose items nobody read added nothing, and a source
+    // with a `drag-kind` must not let them go.
+    if (!inData && !read()) {
+      if (!this.#warnedUnreadDrop)
+        console.warn('c2-tree: a drop among rows written in markup added nothing, because no `item-drop` listener read `detail.items` to add them.')
+      this.#warnedUnreadDrop = true
+      return 0
+    }
+    if (inData) this.items = insertNodes(this.items, parent?.value ?? null, index, items)
+    // The new rows show under their parent.
+    if (parent && !parent.expanded) void this.updateComplete.then(() => this.expand(parent.value))
+    return items.length
+  }
+
+  // The hydrating render matched the server's, which drew no empty state; the client draws it once that has completed.
+  readonly #hydration = new SlotReplayController(this, () => this.requestUpdate())
+
+  /** Whether the author wrote rows in markup: a default-slot child, not slotted content (`empty`) or a style or script. */
+  #hasAuthoredRows(): boolean {
+    // A server render has no light DOM to look at (the SSR shim gives the host no `children`).
+    return Array.from(this.children ?? []).some((child) => !child.hasAttribute('slot') && !['style', 'script', 'template'].includes(child.localName))
+  }
+
   override render() {
-    const empty = this.items.length === 0 && this.childElementCount === 0
+    // A server render cannot see the light DOM, so it draws no empty state: hydration would keep it under authored rows.
+    const empty = !isServer && !this.#hydration.hydrating && this.items.length === 0 && !this.#hasAuthoredRows()
     return html`
       <div
-        class="c2-tree"
+        class=${this.#dropZone.over ? (this.#dropZone.acceptable ? 'c2-tree drop-target' : 'c2-tree drop-refused') : 'c2-tree'}
         part="tree"
+        @dragenter=${this.#dropZone.handleDragEnter}
+        @dragover=${this.#dropZone.handleDragOver}
+        @dragleave=${this.#dropZone.handleDragLeave}
+        @drop=${this.#dropZone.handleDrop}
+        @dragstart=${this.#handleHandleDragStart}
+        @dragend=${this.#handleHandleDragEnd}
         @click=${this.#handleClick}
         @keydown=${this.#handleKeydown}
         @c2-tree-item-toggle=${this.#handleToggle}
@@ -768,8 +1271,9 @@ export class Tree extends LitElement {
           (node) => this.#renderNode(node, 0),
         )}
         <slot @slotchange=${this.#handleItemChange}></slot>
-        ${empty ? html`<div class="empty"><slot name="empty">No items</slot></div>` : nothing}
+        ${empty ? html`<div class="empty" tabindex="-1"><slot name="empty">${this.msg.t('empty')}</slot></div>` : nothing}
       </div>
+      <div class="drop-status" role="status" aria-live="polite" aria-atomic="true">${this.#dropZone.announcement}</div>
     `
   }
 }
@@ -782,6 +1286,42 @@ function unwrap(element: Element): TreeItem[] {
   if (element instanceof TreeItem) return [element]
   const child = element.firstElementChild
   return child instanceof TreeItem ? [child] : []
+}
+
+/** Distance past the tree's edge, in pixels, that still counts as the tree for its own drag. */
+const EDGE_MARGIN = 40
+
+/** `items` without the nodes whose value is in `values`, at any depth; untouched branches are kept. */
+function removeNodes(items: TreeNode[], values: Set<string>): TreeNode[] {
+  let changed = false
+  const next: TreeNode[] = []
+  for (const node of items) {
+    if (values.has(node.value)) {
+      changed = true
+      continue
+    }
+    const children = node.children ? removeNodes(node.children, values) : undefined
+    if (children !== node.children) {
+      changed = true
+      next.push(children!.length === 0 && node.hasChildren ? { ...node, children, hasChildren: false } : { ...node, children })
+    } else next.push(node)
+  }
+  return changed ? next : items
+}
+
+/** `items` with `nodes` inserted under `parent` (`null` for the root) at `index`; untouched branches are kept. */
+function insertNodes(items: TreeNode[], parent: string | null, index: number, nodes: TreeNode[]): TreeNode[] {
+  if (parent === null) return [...items.slice(0, index), ...nodes, ...items.slice(index)]
+  const find = (list: TreeNode[]): TreeNode | undefined => {
+    for (const node of list) {
+      if (node.value === parent) return node
+      const found = node.children && find(node.children)
+      if (found) return found
+    }
+    return undefined
+  }
+  const children = find(items)?.children ?? []
+  return replaceChildren(items, parent, [...children.slice(0, index), ...nodes, ...children.slice(index)])
 }
 
 /** Rebuilds only the path down to `value`, leaving every untouched branch identical. */

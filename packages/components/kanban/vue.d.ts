@@ -26,6 +26,10 @@ declare module 'vue' {
         'column-field'?: unknown
         'label-field'?: unknown
         'description-field'?: unknown
+        'drop-kind'?: unknown
+        'drag-kind'?: unknown
+        onItemMoveOut?: (event: EventOf<Kanban, 'item-move-out'>) => void
+        onItemDrop?: (event: EventOf<Kanban, 'item-drop'>) => void
         onCardMove?: (event: EventOf<Kanban, 'card-move'>) => void
       }
     >
@@ -43,7 +47,11 @@ declare module 'vue' {
         'column-field'?: unknown
         'label-field'?: unknown
         'description-field'?: unknown
+        'drop-kind'?: unknown
+        'drag-kind'?: unknown
         onCardMove?: (event: EventOf<MatrixBoard, 'card-move'>) => void
+        onItemMoveOut?: (event: EventOf<MatrixBoard, 'item-move-out'>) => void
+        onItemDrop?: (event: EventOf<MatrixBoard, 'item-drop'>) => void
       }
     >
   }

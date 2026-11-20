@@ -1,0 +1,123 @@
+body {
+  margin: 0;
+  background: var(--c2-theme--color-surface, #ffffff);
+  color: var(--c2-theme--color-on-surface, #18181b);
+  font-family: var(--c2-theme--font-family, system-ui, sans-serif);
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page__head h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.page__lead {
+  margin: 4px 0 24px;
+  color: var(--c2-theme--color-on-surface-variant, #71717a);
+}
+
+#booking {
+  --c2-form--display: block;
+}
+
+.layout {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+
+  .summary {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+.steps {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+
+.step__title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.step__message {
+  margin: 8px 0 0;
+  color: var(--c2-theme--color-on-surface-variant, #71717a);
+}
+
+.step__message:empty {
+  display: none;
+}
+
+.services {
+  --c2-radio-group--align-items: stretch;
+}
+
+.service {
+  --c2-radio__container--border: var(--c2-theme--border, 1px solid #d4d4d8);
+  --c2-radio__container--padding-top: 10px;
+  --c2-radio__container--padding-right: 14px;
+  --c2-radio__container--padding-bottom: 10px;
+  --c2-radio__container--padding-left: 8px;
+  --c2-radio__container__checked--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+  --c2-radio__container__checked--background: var(--c2-theme--color-primary-container, #edf1fe);
+  --c2-radio__state-layer--size: 24px;
+}
+
+.service__name {
+  font-weight: 600;
+}
+
+/* The only markers are the closed days' reasons, for a screen reader: no dot. */
+#day {
+  --c2-date-strip__marker--color: transparent;
+}
+
+/* The day is picked on the c2-date-strip above: the picker's own row of days would repeat it. */
+.times::part(days) {
+  display: none;
+}
+
+.details {
+  display: grid;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.summary__title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.summary__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirmation {
+  margin-bottom: 12px;
+}
+
+.confirmation__title {
+  margin: 0 0 4px;
+  font-weight: 600;
+  /* @c2n/theme has color-error but no success colour: a pair of literals (c2n-workaround: no success token). */
+  color: light-dark(#15803d, #4ade80);
+}
+
+.confirmation p {
+  margin: 0;
+}

@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -135,6 +135,11 @@ export class QuantityPicker extends LitElement {
 
   constructor() {
     super()
+    // Hydrated from server-rendered markup, the slot fires no slotchange: collect the counters after the first update.
+    new SlotReplayController(this, () => this.collect(this.renderRoot.querySelector('.counters slot')), {
+      always: true,
+      immediate: true,
+    })
     this.internals.role = 'group'
     this.addEventListener(QUANTITY_CHANGE, (event) => this.handleCount(event))
     this.addEventListener(QUANTITY_SYNC, (event) => {
@@ -275,8 +280,7 @@ export class QuantityPicker extends LitElement {
   }
 
   protected override firstUpdated(): void {
-    // Hydrated from server-rendered markup, the slot fires no slotchange: collect the counters now.
-    this.collect(this.renderRoot.querySelector('.counters slot'))
+    // The counters were collected just before, by the slot replay.
     this.ready = true
   }
 

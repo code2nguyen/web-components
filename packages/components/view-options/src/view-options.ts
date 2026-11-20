@@ -1,7 +1,7 @@
 import { LitElement, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { html, unsafeStatic } from 'lit/static-html.js'
 import { query, state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { isComposingKey, redispatchEvent } from '@c2n/core/dom-helper.js'
@@ -279,8 +279,11 @@ export class ViewOptions extends LitElement {
 
   private readonly internals = this.attachInternals()
 
-  /** A declarative shadow root at construction: the first client render must match the server's, which saw no children. */
-  private readonly serverRendered = !isServer && this.shadowRoot !== null
+  /**
+   * A declarative shadow root at construction: the first client render must match the server's, which saw no children.
+   * The slot was assigned before the component upgraded, so it may never report a change: read them once hydrated.
+   */
+  private readonly hydration = new SlotReplayController(this, () => this.readChildren(), { immediate: true })
   private readonly msg = new LocalizeController(this, viewOptionsMessages)
 
   /** Open state at the pointerdown that started a press on the trigger; the popover light-dismisses before the click. */
@@ -571,7 +574,7 @@ export class ViewOptions extends LitElement {
 
   protected override willUpdate() {
     // Read the children before the first render, so it does not need a second one when the slot reports them.
-    if (!this.hasUpdated && !this.serverRendered) {
+    if (!this.hasUpdated && !this.hydration.serverRendered) {
       this.readChildren()
       // A server render has no light DOM to query; the slot reports a slotted trigger once the client hydrates.
       if (!isServer) this.hasSlottedTrigger = !!this.querySelector(':scope > [slot="trigger"]')
@@ -582,8 +585,6 @@ export class ViewOptions extends LitElement {
     // The first render ran before the default trigger existed; anchor the overlay now rather than render again.
     if (this.overlay) this.overlay.anchor = this.triggerElement ?? undefined
     void this.syncTriggerAria()
-    // Hydrated: the slot was assigned before the component upgraded, so it may never report a change.
-    if (this.serverRendered) this.readChildren()
   }
 
   protected override updated(_changed: PropertyValues<this>) {

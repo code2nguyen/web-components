@@ -5,6 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { GoogleMapsElement, type GoogleMapsErrorEventDetail } from './google-maps-element.js'
 import { GoogleMapsError, importGoogleLibrary } from './google-maps-loader.js'
+import { googleMapMessages } from './messages.js'
 import { latLngConverter, parseLatLng, sameLatLng, type LatLng } from './geo.js'
 import type { GoogleMap } from './google-map.js'
 import styles from './google-street-view.scss?inline'
@@ -33,8 +34,6 @@ export interface GoogleStreetView {
   addEventListener: TypedAddEventListener<GoogleStreetView, GoogleStreetViewEventMap>
   removeEventListener: TypedRemoveEventListener<GoogleStreetView, GoogleStreetViewEventMap>
 }
-
-const NO_IMAGERY = 'Street View has no imagery near this place.'
 
 /**
  * A Google Street View panorama. Give it a `position` to look around a place, or link it to a `c2-google-map` with `for`: the
@@ -90,7 +89,7 @@ export class GoogleStreetView extends GoogleMapsElement {
   #reported?: GoogleStreetViewChangeEventDetail
   #linked?: google.maps.Map
 
-  protected readonly loadingMessage = 'Loading Street View…'
+  protected readonly loadingNotice = 'loadingStreetView'
 
   /** The underlying `google.maps.StreetViewPanorama`, once it exists. */
   get panorama(): google.maps.StreetViewPanorama | undefined {
@@ -113,7 +112,7 @@ export class GoogleStreetView extends GoogleMapsElement {
       if (panorama.getStatus() === 'OK') {
         if (this.status !== 'ready' && panorama.getVisible()) this.status = 'ready'
       } else if (this.position || this.pano) {
-        this.fail(new GoogleMapsError('no-imagery', NO_IMAGERY))
+        this.fail(new GoogleMapsError('no-imagery', googleMapMessages.en.noImagery))
       }
     })
     panorama.addListener('position_changed', () => this.#report())
@@ -123,7 +122,7 @@ export class GoogleStreetView extends GoogleMapsElement {
       if (panorama.getVisible() && this.status === 'loading') this.status = 'ready'
     })
     if (this.pano || this.position) this.status = 'ready'
-    else this.message = 'Drag the pegman onto the map to look around.'
+    else this.notice = 'pegman'
     this.dispatchEvent(new CustomEvent<GoogleStreetViewReadyEventDetail>('map-ready', { detail: { panorama } }))
     void this.#link()
   }

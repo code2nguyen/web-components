@@ -1,3 +1,4 @@
+import { composedSelectionRange } from '@c2n/core/dom-helper.js'
 import type { TextAnnotator } from './text-annotator.js'
 
 /** Text offset of a boundary point in the drawn text, tags left out; throws when the point is in another tree. */
@@ -25,19 +26,16 @@ export function annotate(host: TextAnnotator, text: string, label: string): bool
   const root = host.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
   const wrapper = root.querySelector('[part~="text"]')
   if (!selection?.rangeCount || !wrapper) return false
-  const composed = selection.getComposedRanges as unknown as (...roots: ShadowRoot[]) => StaticRange[]
   // getComposedRanges is Baseline 2025, first with a list of roots (Safari 17). Before it, Firefox's getRangeAt already
   // sees into the shadow root and Chromium has shadowRoot.getSelection(). A range that cannot see in makes offset() throw.
-  const ranges = [
-    () => selection.getComposedRanges({ shadowRoots: [root] })[0],
-    () => composed.call(selection, root)[0],
-    () => (root.getSelection?.() ?? selection).getRangeAt(0),
-  ]
+  const ranges = [() => composedSelectionRange(selection, [root]), () => (root.getSelection?.() ?? selection).getRangeAt(0)]
   let start = -1
   let end = -1
   for (const range of ranges) {
     try {
-      const { startContainer, startOffset, endContainer, endOffset } = range()
+      const found = range()
+      if (!found) continue
+      const { startContainer, startOffset, endContainer, endOffset } = found
       start = offset(wrapper, startContainer, startOffset)
       end = offset(wrapper, endContainer, endOffset)
       break

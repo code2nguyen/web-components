@@ -2,6 +2,11 @@
   $prefix: c2-reorder-list,
   $theme: (
     container-border-width: 0px,
+    container__drop-target--outline-color: #0265dc,
+    container__drop-target--outline-style: dashed,
+    container__drop-target--outline-width: 2px,
+    container__drop-target--outline-offset: 2px,
+    container__drop-refused--outline-color: #dc2626,
     container-border-color: #bcbcc6,
     container-border-radius: 8px,
     container-padding: 0px,
@@ -36,6 +41,11 @@
     swipe-action__accent--background-color: #0265dc,
     swipe-action__neutral--background-color: #52525b,
     swipe-content--background-color: #ffffff,
+    drag-handle--color: #a1a1aa,
+    drag-handle__hover--color: #52525b,
+    drag-handle--size: 16px,
+    drag-handle--gap: 8px,
+    drag-handle--cursor: grab,
     rank--min-width: 24px,
     rank--height: 24px,
     rank--padding: 0 6px,
@@ -66,6 +76,17 @@
   border-radius: css.cssVar(container-border-radius);
   padding: css.cssVar(container-padding);
   margin: css.cssVar(container-margin);
+}
+
+// Items of the list's `drop-kind` dragged in from outside: accepted, or another kind, refused.
+.c2-reorder-list-container.drop-target,
+.c2-reorder-list-container.drop-refused {
+  outline: css.cssVar(container__drop-target--outline-width) css.cssVar(container__drop-target--outline-style) css.cssVar(container__drop-target--outline-color);
+  outline-offset: css.cssVar(container__drop-target--outline-offset);
+}
+
+.c2-reorder-list-container.drop-refused {
+  outline-color: css.cssVar(container__drop-refused--outline-color);
 }
 
 .list-item {
@@ -122,6 +143,38 @@
 }
 
 // Rank -------------------------------------------------------------------------------------------------------------
+
+// A row with a drag handle (`drag-kind`): the grip, then the row.
+.handled {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(drag-handle--gap);
+}
+
+.handled__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.drag-handle {
+  display: inline-flex;
+  flex: none;
+  inline-size: css.cssVar(drag-handle--size);
+  block-size: css.cssVar(drag-handle--size);
+  color: css.cssVar(drag-handle--color);
+  cursor: css.cssVar(drag-handle--cursor);
+  touch-action: none;
+
+  svg {
+    inline-size: 100%;
+    block-size: 100%;
+    fill: currentColor;
+  }
+
+  &:hover {
+    color: css.cssVar(drag-handle__hover--color);
+  }
+}
 
 .ranked {
   display: flex;

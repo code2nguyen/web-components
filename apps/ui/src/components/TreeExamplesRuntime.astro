@@ -1,0 +1,86 @@
+---
+/** Enhances tree examples whose drag source (a native drag writing an item payload) or `moveItemTo` command cannot be expressed as HTML. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Tree } from '@c2n/components/tree'
+  import '@c2n/components/tree'
+  import '@c2n/components/chip'
+  import '@c2n/components/button'
+  import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the En français card, under `lang="fr"`.
+  addTranslations({
+    fr: {
+      tree: {
+        moved: '{0} déplacé en position {1} sur {2}.',
+        movedInto: '{0} déplacé dans {1}, position {2} sur {3}.',
+        cannotMove: '{0} ne peut pas aller là.',
+        cancelled: 'Déplacement de {0} annulé.',
+        movedOut: '{0} a quitté l’arbre.',
+        empty: 'Aucun élément',
+      },
+    },
+  })
+
+  /** Chips beside the tree become new files: each drags a `tree-node` the tree places where it lands. */
+  function setupTransfer(tree: Tree) {
+    const source = tree.closest('[data-tree-transfer]')?.querySelector('[data-tree-source]')
+    if (!source) return
+    source.querySelectorAll<HTMLElement>('c2-chip[data-value]').forEach((chip) => {
+      chip.draggable = true
+      chip.addEventListener('dragstart', (event) => {
+        if (!event.dataTransfer) return
+        writeItemPayload(event.dataTransfer, 'tree-node', [{ value: chip.dataset.value, label: chip.textContent?.trim() }])
+        event.dataTransfer.effectAllowed = 'move'
+      })
+    })
+    // The data-driven tree adds the nodes to `items` itself; the page takes the chips it placed out of the tray.
+    tree.addEventListener('item-drop', ({ detail }) => {
+      for (const node of detail.items) source.querySelector(`c2-chip[data-value="${CSS.escape(node.value)}"]`)?.remove()
+    })
+  }
+
+  /**
+   * Two trees that trade rows (`drag-kind` and `drop-kind`): by a pointer drag, a row's handle, or the arrow button in
+   * its actions, the keyboard path, which calls `moveItemTo` on the tree the row is in.
+   */
+  function setupTrees(tree: Tree) {
+    const other = () =>
+      [...(tree.closest('[data-tree-pair]')?.querySelectorAll<Tree>('c2-tree[data-tree-example="trees"]') ?? [])].find((candidate) => candidate !== tree)
+    const name = other()?.getAttribute('aria-label') ?? ''
+    tree.renderActions = ({ node }) =>
+      html`<c2-button
+        class="tree-move"
+        aria-label=${`Move ${node.label ?? node.value} to ${name}`}
+        @click=${(event: Event) => {
+          event.stopPropagation()
+          const target = other()
+          if (target) tree.moveItemTo(target, node.value)
+        }}
+        >→</c2-button
+      >`
+  }
+
+  const initialized = new WeakSet<Tree>()
+
+  function setup() {
+    document.querySelectorAll<Tree>('c2-tree[data-tree-example]').forEach((tree) => {
+      if (initialized.has(tree)) return
+      // A pair is wired once both trees are in the page: each is an island of its own, which may come first, and the
+      // move buttons name the other one.
+      if (tree.dataset.treeExample === 'trees' && ![...(tree.closest('[data-tree-pair]')?.querySelectorAll('c2-tree') ?? [])].some((other) => other !== tree))
+        return
+      initialized.add(tree)
+      if (tree.dataset.treeExample === 'transfer') setupTransfer(tree)
+      if (tree.dataset.treeExample === 'trees') setupTrees(tree)
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

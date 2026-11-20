@@ -7,6 +7,7 @@ const fr: typeof dateInputMessages.en = {
   calendar: 'Calendrier',
   today: "Aujourd'hui",
   clear: 'Effacer',
+  openCalendar: 'Ouvrir le calendrier',
 }
 
 const fields: typeof dateFieldsMessages.en = {

@@ -48,7 +48,7 @@ interface FormControlElement extends HTMLElement {
 @Directive({
   selector: '${selector(value)}',
   host: {
-    '(input)': 'handleInput()',
+    '(input)': 'handleInput($event)',
     '(focusout)': 'handleTouched()',
   },
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => C2ValueAccessor), multi: true }],
@@ -74,7 +74,9 @@ export class C2ValueAccessor implements ControlValueAccessor {
     this.element.disabled = isDisabled
   }
 
-  protected handleInput(): void {
+  protected handleInput(event: Event): void {
+    // An \`input\` that bubbled from a control in the element's action zone (a select in a footer slot) is not its edit.
+    if (event.target !== this.element) return
     this.notifyChange(this.element.value)
   }
 
@@ -87,7 +89,7 @@ export class C2ValueAccessor implements ControlValueAccessor {
 @Directive({
   selector: '${selector(checked)}',
   host: {
-    '(change)': 'handleChange()',
+    '(change)': 'handleChange($event)',
     '(focusout)': 'handleTouched()',
   },
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => C2CheckedAccessor), multi: true }],
@@ -113,7 +115,8 @@ export class C2CheckedAccessor implements ControlValueAccessor {
     this.element.disabled = isDisabled
   }
 
-  protected handleChange(): void {
+  protected handleChange(event: Event): void {
+    if (event.target !== this.element) return
     this.notifyChange(Boolean(this.element.checked))
   }
 

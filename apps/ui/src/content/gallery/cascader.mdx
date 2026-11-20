@@ -4,6 +4,8 @@ description: 'Hierarchical pickers for locations, teams and catalogues, with cli
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import CascaderExamplesRuntime from '../../components/CascaderExamplesRuntime.astro'
 
 import { Cascader } from '@c2n/components/cascader'
 
@@ -93,3 +95,38 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
 ```
 
 </GalleryGrid>
+
+## Language
+
+<CascaderExamplesRuntime />
+
+The placeholder, the empty state and the names of the panel and its columns are message tokens: an app translates them once with `addTranslations`, and each cascader speaks the language of its nearest `lang`. A `placeholder` attribute still overrides one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The placeholder and the panel in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-cascader
+    client:only="lit"
+    aria-label="Lieu"
+    options='[{"value":"idf","label":"Île-de-France","children":[{"value":"paris","label":"Paris","children":[{"value":"p11","label":"11e arrondissement"},{"value":"p15","label":"15e arrondissement"}]},{"value":"versailles","label":"Versailles"}]},{"value":"ara","label":"Auvergne-Rhône-Alpes","children":[{"value":"lyon","label":"Lyon"},{"value":"grenoble","label":"Grenoble"}]}]'
+  ></c2-cascader>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    cascader: {
+      placeholder: 'Sélectionner',
+      panel: 'Options',
+      level: 'Niveau {0}',
+      empty: 'Aucune option disponible.',
+    },
+  },
+})
+```

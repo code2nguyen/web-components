@@ -3,7 +3,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -243,9 +243,19 @@ export class Steps extends LitElement {
   private observer?: MutationObserver
 
   private syncQueued = false
-  private hydrationSyncQueued = false
-  /** A declarative shadow root is attached before the element upgrades: the list was rendered on the server. */
-  private readonly serverRendered = this.shadowRoot !== null
+  /**
+   * Server-rendered steps nested in this shadow root hydrate after this list's first update: writing to them before
+   * that would make their first render differ from what the server drew. The replay syncs once they have.
+   */
+  private readonly hydration = new SlotReplayController(
+    this,
+    () => {
+      const root: ParentNode = this.steps?.length ? (this.renderRoot as ShadowRoot) : this
+      const steps = [...root.querySelectorAll('c2-step')] as (HTMLElement & { updateComplete?: Promise<unknown> })[]
+      void Promise.all(steps.map((step) => step.updateComplete)).then(() => this.syncSteps())
+    },
+    { immediate: true },
+  )
 
   private readonly msg = new LocalizeController(this, stepsMessages)
   private readonly slotPresence = new SlotPresenceController(this, ['summary', 'actions'])
@@ -285,16 +295,8 @@ export class Steps extends LitElement {
   protected override updated(changed: PropertyValues) {
     // A new count is the walk's own output: walking again for it would only find the same count.
     if (changed.size === 1 && changed.has('shownProgress')) return
-    // Server-rendered steps nested in this shadow root hydrate after this first update: writing to them before that
-    // would make their first render differ from what the server drew. Sync once they have.
-    if (this.serverRendered && !this.hasSynced) {
-      if (this.hydrationSyncQueued) return
-      this.hydrationSyncQueued = true
-      const root: ParentNode = this.steps?.length ? (this.renderRoot as ShadowRoot) : this
-      const steps = [...root.querySelectorAll('c2-step')] as (HTMLElement & { updateComplete?: Promise<unknown> })[]
-      void Promise.all(steps.map((step) => step.updateComplete)).then(() => this.syncSteps())
-      return
-    }
+    // A server-rendered list syncs through its hydration replay first (see `hydration`).
+    if (this.hydration.serverRendered && !this.hasSynced) return
     this.syncSteps()
   }
 

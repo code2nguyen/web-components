@@ -195,7 +195,7 @@ export class Fieldset extends LitElement {
     return html`<fieldset part="fieldset" class=${invalid ? 'invalid' : ''} ?disabled=${this.disabled} aria-describedby=${describedBy || nothing}>
       <legend class="legend-row" ?hidden=${!hasLegend && !hasAction}>
         <span class="legend" part="legend"
-          ><slot name="legend" @slotchange=${this.handleSlotChange}>${this.legend}</slot>${
+          ><slot name="legend" @slotchange=${this.handleSlotChange}>${this.legend || nothing}</slot>${
             this.required && hasLegend
               ? html`<span class="required" aria-hidden="true">*</span><span class="visually-hidden">${this.msg.t('required')}</span>`
               : nothing
@@ -205,12 +205,12 @@ export class Fieldset extends LitElement {
       </legend>
       <div class="header" part="header" ?hidden=${!hasLegend && !hasAction && !hasDescription && !invalid}>
         <div id="description" class="description" part="description" ?hidden=${!hasDescription}>
-          <slot name="description" @slotchange=${this.handleSlotChange}>${this.description}</slot>
+          <slot name="description" @slotchange=${this.handleSlotChange}>${this.description || nothing}</slot>
         </div>
         <div class="error-region" aria-live="polite">
           <div id="error" class="error" part="error" ?hidden=${!invalid}>
             ${this.renderIcon()}<span class="visually-hidden">${this.msg.t('errorPrefix')}</span>
-            <span><slot name="error" @slotchange=${this.handleSlotChange}>${this.errorText}</slot></span>
+            <span><slot name="error" @slotchange=${this.handleSlotChange}>${this.errorText || nothing}</slot></span>
           </div>
         </div>
       </div>

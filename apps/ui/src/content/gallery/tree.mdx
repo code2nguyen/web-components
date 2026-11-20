@@ -5,10 +5,13 @@ description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explore
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import TreeExamplesRuntime from '../../components/TreeExamplesRuntime.astro'
 
 import { Tree } from '@c2n/components/tree'
 import { TreeItem } from '@c2n/components/tree/tree-item'
 import { Button } from '@c2n/components/button'
+import { Chip } from '@c2n/components/chip'
 
 <ExampleModules />
 
@@ -183,3 +186,169 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
 ```
 
 </GalleryGrid>
+
+## Drops from outside the tree
+
+A tree with `drop-kind` and `reorderable` takes nodes dropped from outside it. The source writes them with
+`writeItemPayload` from `@c2n/core/controllers/drop-zone.js` under the same kind. The middle of a row nests them under
+it, its top or bottom quarter puts them before or after it; a value the tree already holds is refused. A tree built from
+`items` adds the nodes itself and fires `item-drop`; one written in markup hands the app `parentElement` and `before`.
+Drag a file onto a folder.
+
+<TreeExamplesRuntime />
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Drop files into folders
+<style>
+  .tree-transfer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .tree-transfer c2-tree {
+    flex: 1 1 220px;
+  }
+  .tree-transfer .tray {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+</style>
+<div class="tree-transfer" data-tree-transfer>
+  <c2-tree
+    client:only="lit"
+    aria-label="Project"
+    reorderable
+    drop-kind="tree-node"
+    data-tree-example="transfer"
+    expanded-items="src;docs"
+    items='[{"value":"src","label":"src","children":[{"value":"app","label":"app.ts"}]},{"value":"docs","label":"docs","children":[{"value":"intro","label":"intro.md"}]}]'
+  ></c2-tree>
+  <div class="tray" data-tree-source>
+    <c2-chip data-value="guide">guide.md</c2-chip>
+    <c2-chip data-value="routes">routes.ts</c2-chip>
+    <c2-chip data-value="app">app.ts (already there)</c2-chip>
+  </div>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { writeItemPayload } from '@c2n/core/controllers/drop-zone.js'
+
+// The source: anything draggable that writes nodes under the tree's drop-kind.
+chip.draggable = true
+chip.addEventListener('dragstart', (event) => writeItemPayload(event.dataTransfer!, 'tree-node', [{ value: 'guide', label: 'guide.md' }]))
+
+// A tree built from `items` adds the nodes itself; the page only clears its tray.
+tree.addEventListener('item-drop', ({ detail }) => {
+  for (const node of detail.items) tray.querySelector(`[data-value="${node.value}"]`)?.remove()
+})
+```
+
+A tree with `drag-kind` lets its rows leave, each with its subtree: a pointer drag carried off the tree drops the row
+on the tree under the pointer, each row's handle starts a drag the browser carries (dropped back on its own tree it moves the row there; a drop outside c2n, in another window too, takes a copy), and
+`moveItemTo(target, value)` is the keyboard path an application wires to a command. The tree the row left fires
+`item-move-out` and, when built from `items`, takes it out itself. Drag a row to the other tree, or use its arrow button.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Move rows between trees
+<style>
+  .tree-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+    --c2-button__container--height: 22px;
+    --c2-button__container--padding-left: 6px;
+    --c2-button__container--padding-right: 6px;
+  }
+  .tree-pair c2-tree {
+    flex: 1 1 220px;
+    min-block-size: 120px;
+    /* Two boxes, so the two trees read as two. */
+    --c2-tree--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tree--border-top-left-radius: 8px;
+    --c2-tree--border-top-right-radius: 8px;
+    --c2-tree--border-bottom-left-radius: 8px;
+    --c2-tree--border-bottom-right-radius: 8px;
+    --c2-tree--padding-top: 6px;
+    --c2-tree--padding-bottom: 6px;
+    /* The move button is the keyboard path: keep it shown, not only on hover. */
+    --c2-tree-item__actions--opacity: 1;
+  }
+</style>
+<div class="tree-pair" data-tree-pair>
+  <c2-tree
+    client:only="lit"
+    aria-label="Drafts"
+    reorderable
+    drag-kind="tree-node"
+    drop-kind="tree-node"
+    data-tree-example="trees"
+    expanded-items="ideas"
+    items='[{"value":"ideas","label":"ideas","children":[{"value":"pricing","label":"pricing.md"},{"value":"roadmap","label":"roadmap.md"}]},{"value":"notes","label":"notes.md"}]'
+  ></c2-tree>
+  <c2-tree
+    client:only="lit"
+    aria-label="Published"
+    reorderable
+    drag-kind="tree-node"
+    drop-kind="tree-node"
+    data-tree-example="trees"
+    items='[{"value":"welcome","label":"welcome.md"}]'
+  ></c2-tree>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+// <c2-tree reorderable drag-kind="tree-node" drop-kind="tree-node" items="…"> on both trees: rows move by pointer or
+// handle, and each tree updates its own `items`.
+
+// The keyboard path: a command in each row's actions.
+drafts.renderActions = ({ node }) => html`<c2-button aria-label="Publish ${node.label}" @click=${() => drafts.moveItemTo(published, node.value)}>→</c2-button>`
+
+// Save both sides of a move.
+published.addEventListener('item-drop', () => queueMicrotask(() => save(published.items)))
+drafts.addEventListener('item-move-out', () => queueMicrotask(() => save(drafts.items)))
+```
+
+## Language
+
+The empty state and the announcements of a moved row are message tokens: an app translates them once with `addTranslations`, and each tree speaks the language of its nearest `lang`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The empty state and the move announcements in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-tree client:only="lit" aria-label="Fichiers"></c2-tree>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    tree: {
+      moved: '{0} déplacé en position {1} sur {2}.',
+      movedInto: '{0} déplacé dans {1}, position {2} sur {3}.',
+      cannotMove: '{0} ne peut pas aller là.',
+      cancelled: 'Déplacement de {0} annulé.',
+      movedOut: '{0} a quitté l’arbre.',
+      empty: 'Aucun élément',
+    },
+  },
+})
+```

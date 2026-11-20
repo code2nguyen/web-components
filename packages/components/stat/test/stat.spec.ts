@@ -40,3 +40,12 @@ test('draws no icon box or description line without that content', async ({ page
   await expect(host.locator('[part="icon"]')).toBeVisible()
   await expect(host.locator('[part="description"]')).toBeVisible()
 })
+
+test('a value of 0 shows 0, not the placeholder', async ({ page, scenario }) => {
+  await scenario('no-value')
+  const stat = page.locator('c2-stat')
+  await expect(stat.locator('.placeholder')).toHaveText('--')
+  await stat.evaluate((element) => ((element as unknown as { value: unknown }).value = 0))
+  await expect(stat.locator('[part="value"]')).toHaveText('0')
+  await expect(stat.locator('.placeholder')).toHaveCount(0)
+})

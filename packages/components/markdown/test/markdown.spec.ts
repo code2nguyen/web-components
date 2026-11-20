@@ -79,6 +79,15 @@ test('renders CommonMark and GFM blocks from a script source', async ({ page, re
   await accessible(page)
 })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr"><c2-markdown><script type="text/markdown">
+| a | b |
+| - | - |
+| 1 | 2 |
+</script></c2-markdown></div>`)
+  await expect(page.getByRole('region', { name: 'Tableau' })).toBeVisible()
+})
+
 test('raw HTML is shown as code and never interpreted', async ({ page, renderScenario }) => {
   // Plain code blocks keep the block's text in this shadow root: a c2-code-viewer, which may load mid-test, holds it in its own.
   await renderScenario('<c2-markdown code="plain"></c2-markdown>')

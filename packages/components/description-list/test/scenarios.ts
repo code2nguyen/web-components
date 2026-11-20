@@ -84,6 +84,7 @@ const markup: Record<string, string> = {
   </c2-description-list>`,
   'properties-fr': `<div lang="fr"><c2-description-list aria-label="Affaire">
     <c2-description-item label="Nom" editor="text">Renouvellement Acme</c2-description-item>
+    <c2-description-item label="Téléphone"></c2-description-item>
   </c2-description-list></div>`,
 }
 

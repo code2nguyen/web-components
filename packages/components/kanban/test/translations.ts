@@ -18,6 +18,7 @@ const matrixBoard: typeof matrixBoardMessages.en = {
   atBottom: (card) => `${card} est déjà sur la dernière ligne.`,
   atStart: (card) => `${card} est déjà dans la première colonne.`,
   atEnd: (card) => `${card} est déjà dans la dernière colonne.`,
+  movedOut: (card) => `${card} a quitté le tableau.`,
   readOnly: 'Déplacement annulé : le tableau n’est plus modifiable.',
   itemsChanged: 'Les cartes ont changé. Déplacement annulé.',
   instructions:
@@ -28,3 +29,19 @@ const matrixBoard: typeof matrixBoardMessages.en = {
 }
 
 addTranslations({ fr: { 'matrix-board': matrixBoard } })
+
+addTranslations({
+  fr: {
+    kanban: {
+      // The board's announcements are the matrix board's keys: the same French, without its grid words.
+      card: matrixBoard.card,
+      pickedUp: matrixBoard.pickedUp,
+      moved: matrixBoard.moved,
+      dropped: matrixBoard.dropped,
+      returned: matrixBoard.returned,
+      movedOut: matrixBoard.movedOut,
+      empty: 'Aucune carte',
+      instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la avec les flèches, Début ou Fin ; Espace la pose et Échap annule.',
+    },
+  },
+})

@@ -4,6 +4,8 @@ description: 'Task, support and hiring boards styled through the column and card
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import KanbanExamplesRuntime from '../../components/KanbanExamplesRuntime.astro'
 
 import { Kanban } from '@c2n/components/kanban'
 
@@ -148,3 +150,119 @@ the board to reach every column. Give the board a `renderItem` for richer card c
 ```
 
 </GalleryGrid>
+
+## Moving cards between boards
+
+A board with `drop-kind` takes cards from outside it: another board, a list elsewhere in the page, another window. A
+board with `drag-kind` lets its cards leave: a pointer drag carried off the board drops the card on the board under the
+pointer, each card's handle starts a drag the browser carries (dropped back on its own board it moves the card there; a drop outside c2n, in another window too, takes a copy), and `moveItemTo(target, key)`
+is the keyboard path an application wires to a command. The board under the card lights up (red for another kind, under a handle drag),
+adds it where it lands and fires `item-drop`; the card then leaves its own board, which fires `item-move-out`. Each
+board announces what it did. Drag a card to the other board, or use its arrow button.
+
+<KanbanExamplesRuntime />
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=Move cards between boards
+<style>
+  .transfer-boards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    --c2-kanban-column--width: 190px;
+    --c2-kanban-column__card--font-size: 13px;
+    --c2-button__container--height: 24px;
+    --c2-button__container--padding-left: 6px;
+    --c2-button__container--padding-right: 6px;
+  }
+</style>
+<div class="transfer-boards">
+  <c2-kanban
+    client:only="lit"
+    editable
+    drag-kind="kanban-card"
+    drop-kind="kanban-card"
+    data-kanban-example="transfer"
+    aria-label="Backlog"
+    items='[{"id":"B-1","column":"backlog","title":"Dark mode for charts"},{"id":"B-2","column":"backlog","title":"Export as PDF"},{"id":"B-3","column":"backlog","title":"Keyboard shortcuts"}]'
+  >
+    <c2-kanban-column column-id="backlog" label="Backlog"></c2-kanban-column>
+  </c2-kanban>
+  <c2-kanban
+    client:only="lit"
+    editable
+    drag-kind="kanban-card"
+    drop-kind="kanban-card"
+    data-kanban-example="transfer"
+    aria-label="Sprint 43"
+    items='[{"id":"S-1","column":"todo","title":"Fix the login redirect"}]'
+  >
+    <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+    <c2-kanban-column column-id="doing" label="In progress"></c2-kanban-column>
+  </c2-kanban>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+// <c2-kanban editable drag-kind="kanban-card" drop-kind="kanban-card"> on both boards: cards move by pointer or handle.
+
+// The keyboard path: a command in each card moves it to the other board.
+backlog.renderItem = ({ item }) => html`${item.title}
+  <c2-button aria-label="Move ${item.title} to the sprint" @click=${() => backlog.moveItemTo(sprint, String(item.id))}>→</c2-button>`
+
+// Save both sides of a move.
+sprint.addEventListener('item-drop', ({ detail }) => save(detail.items))
+backlog.addEventListener('item-move-out', ({ detail }) => save(detail.items))
+```
+
+## Language
+
+The empty column, the keyboard instructions and the announcements of a moving card are message tokens: an app translates them once with `addTranslations`, and each board speaks the language of its nearest `lang`.
+
+<GalleryGrid columns="1">
+
+```html tag=MdxCodeBlock,label=En français,description=The empty column and the move announcements in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-kanban
+    client:only="lit"
+    editable
+    aria-label="Tâches"
+    items='[{"id":"1","column":"todo","title":"Rédiger les notes de version"},{"id":"2","column":"todo","title":"Mettre à jour les captures"}]'
+  >
+    <c2-kanban-column column-id="todo" label="À faire"></c2-kanban-column>
+    <c2-kanban-column column-id="done" label="Terminé"></c2-kanban-column>
+  </c2-kanban>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    kanban: {
+      card: 'Carte',
+      pickedUp: '{0} prise dans {1}, position {2} sur {3}. Déplacez-la avec les flèches, posez-la avec Espace, annulez avec Échap.',
+      dragStarted: '{0} prise.',
+      moved: '{0} déplacée dans {1}, position {2} sur {3}.',
+      dropped: '{0} posée dans {1}, position {2} sur {3}.',
+      droppedInPlace: '{0} reposée à sa place.',
+      returned: '{0} revenue dans {1}, position {2}.',
+      returnedInPlace: '{0} revenue à sa place.',
+      movedOut: '{0} a quitté le tableau.',
+      refused: '{0} ne peut pas aller dans {1} et revient à sa place.',
+      atStart: '{0} est déjà dans la première colonne.',
+      atEnd: '{0} est déjà dans la dernière colonne.',
+      readOnly: 'Déplacement annulé : le tableau n’est plus modifiable.',
+      itemsChanged: 'Les cartes ont changé. Déplacement annulé.',
+      empty: 'Aucune carte',
+      instructions: 'Appuyez sur Espace pour prendre une carte. Déplacez-la avec les flèches, Début ou Fin ; Espace la pose et Échap annule.',
+    },
+  },
+})
+```

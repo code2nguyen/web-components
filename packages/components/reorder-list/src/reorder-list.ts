@@ -1,6 +1,6 @@
 import { html, LitElement, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { arrayPropertyConverter, assignSlot, property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, assignSlot, property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -9,6 +9,19 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { animate, type Options as MotionOptions } from '@lit-labs/motion'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
+import {
+  DropZoneController,
+  endItemDrag,
+  itemDropTargetAt,
+  itemDropTargetOf,
+  startItemDrag,
+  startNativeItemDrag,
+  writeItemPayload,
+  type DropZoneItems,
+  type ItemDrag,
+  type ItemDropTarget,
+} from '@c2n/core/controllers/drop-zone.js'
+import { trackRead } from '@c2n/core/dom-helper.js'
 import { reorderListMessages } from './messages'
 import styles from './reorder-list.scss?inline'
 
@@ -81,11 +94,47 @@ export interface ReorderErrorEventDetail {
   elements: readonly HTMLElement[]
 }
 
+/** Detail of the `item-drop` event: items dropped on the list from outside it, for the application to add as rows. */
+export interface ReorderItemDropEventDetail {
+  /** The payload kind of the drop: the list's `drop-kind`. */
+  kind: string
+  /** The items the source wrote, in its order. */
+  items: unknown[]
+  /** The displayed position the new rows take, from 0: the row the pointer was over, or past it. */
+  index: number
+  /**
+   * The light-DOM row to insert the new rows before (`list.insertBefore(row, detail.before)`), or `null` to append
+   * them. It is not the displayed row at `index` once the user has reordered: the list keeps the light DOM in place and
+   * a row added before this one is shown at `index`.
+   */
+  before: HTMLElement | null
+}
+
+/** Detail of the `item-move-out` event: rows another place took, for the application to remove. */
+export interface ReorderItemMoveOutEventDetail {
+  /** The payload kind they left as: the list's `drag-kind`. */
+  kind: string
+  /** What the target was given for each row: `dragData` of it, or `{ id, label }` from its `data-reorder-key` and label. */
+  items: unknown[]
+  /** The light-DOM rows to remove (`row.remove()`), in the same order. */
+  rows: HTMLElement[]
+  /**
+   * The c2n element that took them (another list, a board, a tree). A drop anywhere else (a text field, a page's own drop area,
+   * another window) takes a copy, and they stay.
+   */
+  target: Element
+}
+
+/** Builds what a row carries when it leaves the list (`drag-kind`): any value `JSON.stringify` keeps. */
+export type ReorderListDragData = (row: ReorderItemReference) => unknown
+
 /** Events fired by {@link ReorderList}, keyed for `addEventListener`. */
 export interface ReorderListEventMap {
+  'item-move-out': CustomEvent<ReorderItemMoveOutEventDetail>
   reorder: CustomEvent<ReorderEventDetail>
   'reorder-error': CustomEvent<ReorderErrorEventDetail>
   'swipe-action': CustomEvent<ReorderSwipeActionEventDetail>
+  'item-drop': CustomEvent<ReorderItemDropEventDetail>
   input: Event
   /** @deprecated Listen for `reorder`. */
   change: CustomEvent<number[]>
@@ -118,6 +167,10 @@ interface ReorderSession {
   canDrag?: boolean
   canSwipe?: boolean
   swipeBase?: number
+  /** The row carried off the list (`drag-kind`), and the zone under the pointer that would take it. */
+  out?: { drag: ItemDrag; target: ItemDropTarget | null }
+  /** The row could not leave when the drag first went for it (`dragData` threw, say): it is not tried again. */
+  stays?: boolean
 }
 
 interface SwipeState {
@@ -138,6 +191,16 @@ const SWIPE_START_THRESHOLD = 8
 const FULL_SWIPE_RATIO = 0.55
 
 const SPECIAL_SLOTS = new Set(['placeholder', 'dragging-item'])
+/** The grip of a row's drag handle: two columns of three dots. */
+const grip = html`<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+  <circle cx="6" cy="4" r="1.25" />
+  <circle cx="10" cy="4" r="1.25" />
+  <circle cx="6" cy="8" r="1.25" />
+  <circle cx="10" cy="8" r="1.25" />
+  <circle cx="6" cy="12" r="1.25" />
+  <circle cx="10" cy="12" r="1.25" />
+</svg>`
+
 const INTERACTIVE_SELECTOR = 'a[href],button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[draggable="true"]'
 const DEFAULT_DRAG_THRESHOLD = 10
 const EDGE_SCROLL_ZONE = 40
@@ -184,6 +247,7 @@ function parseMotionDuration(value: string): number {
  * @csspart container - Ordered-list layout and component-owned spacing boundary.
  * @csspart rank - With `ranked`, the badge region before each row's content, containing the row's position or what `renderRank` returns; hidden from assistive technology, which already announces the position.
  * @csspart item - Repeated component-owned placement wrapper around the default slot's assigned ordinary item; styles placement, not assigned content.
+ * @csspart drag-handle - With a `drag-kind`, the grip at the start of each movable row: the browser carries the row from it, to another list, a board or a tree; elsewhere, another window too, the drop is a copy.
  * @csspart placeholder - Component-owned destination marker wrapping the `placeholder` slot or its visible fallback; styles placement, not assigned content.
  * @csspart dragging-item - Fixed-position component-owned preview region wrapping the `dragging-item` slot or its recognizable fallback; styles placement, not assigned content.
  * @csspart swipe-content - With `swipeable`, the sliding layer around an item's slot; styles placement, not assigned content.
@@ -195,8 +259,15 @@ function parseMotionDuration(value: string): number {
  * @event {CustomEvent<ReorderErrorEventDetail>} reorder-error - Fired when duplicate non-empty item keys prevent pickup.
  * @event {CustomEvent<number[]>} change - Deprecated numeric permutation emitted with `reorder` during the compatibility window.
  * @event {CustomEvent<ReorderSwipeActionEventDetail>} swipe-action - Fired when a swipe action runs, from its button, a full swipe or its key. Bubbles, crosses shadow boundaries and is cancelable: the `delete` action removes the item unless the event is canceled.
+ * @event {CustomEvent<ReorderItemMoveOutEventDetail>} item-move-out - Fired when another place took rows of the `drag-kind` payload (a pointer drag carried off the list, the drag handle's drag ending in a move, or `moveItemTo`). The list draws no rows of its own: the application removes `detail.rows`; when no listener reads them during the event, they stay (a copy) and the list warns once. Cancelable, like the board's and the tree's: `preventDefault()` says the rows stay (a copy), and the list announces no move. Does not bubble.
+ * @event {CustomEvent<ReorderItemDropEventDetail>} item-drop - Fired when items of the `drop-kind` payload are dropped on the list from outside it. The application adds a row for each, before `detail.before`. Cancelable: `preventDefault()` announces them as not added. Does not bubble: each of `c2-kanban`, `c2-reorder-list` and `c2-tree` sends its own `detail`, so a drop on one nested in another must not reach the outer one's listeners. Listen on the element itself.
  *
  * @cssproperty {length} [--c2-reorder-list--container-border-width=0px] - Container border width.
+ * @cssproperty {color} [--c2-reorder-list__container__drop-target--outline-color=#0265dc] - Outline of the list while items of its `drop-kind` are dragged over it.
+ * @cssproperty {string} [--c2-reorder-list__container__drop-target--outline-style=dashed] - Outline style while a drop is possible.
+ * @cssproperty {length} [--c2-reorder-list__container__drop-target--outline-width=2px] - Outline width while a drag is over the list.
+ * @cssproperty {length} [--c2-reorder-list__container__drop-target--outline-offset=2px] - Outline offset from the list's edge.
+ * @cssproperty {color} [--c2-reorder-list__container__drop-refused--outline-color=#dc2626] - Outline of the list while another kind of item is dragged over it, which it refuses.
  * @cssproperty {color} [--c2-reorder-list--container-border-color=#bcbcc6] - Container border color.
  * @cssproperty {length} [--c2-reorder-list--container-border-radius=8px] - Container corner radius.
  * @cssproperty {length} [--c2-reorder-list--container-padding=0px] - Padding inside the list.
@@ -231,6 +302,11 @@ function parseMotionDuration(value: string): number {
  * @cssproperty {color} [--c2-reorder-list__swipe-action__accent--background-color=#0265dc] - Background of an `accent` action.
  * @cssproperty {color} [--c2-reorder-list__swipe-action__neutral--background-color=#52525b] - Background of a `neutral` action.
  * @cssproperty {color} [--c2-reorder-list__swipe-content--background-color=#ffffff] - Background of the sliding layer, which hides the actions until an item is swiped.
+ * @cssproperty {color} [--c2-reorder-list__drag-handle--color=#a1a1aa] - Colour of a row's drag handle (`drag-kind`).
+ * @cssproperty {color} [--c2-reorder-list__drag-handle__hover--color=#52525b] - Colour of the drag handle under the pointer.
+ * @cssproperty {length} [--c2-reorder-list__drag-handle--size=16px] - Size of the drag handle's grip.
+ * @cssproperty {length} [--c2-reorder-list__drag-handle--gap=8px] - Space between the drag handle and the row's content.
+ * @cssproperty {string} [--c2-reorder-list__drag-handle--cursor=grab] - Cursor over the drag handle.
  * @cssproperty {length} [--c2-reorder-list__rank--min-width=24px] - Minimum width of the rank badge.
  * @cssproperty {length} [--c2-reorder-list__rank--height=24px] - Height of the rank badge.
  * @cssproperty {length} [--c2-reorder-list__rank--padding=0 6px] - Padding of the rank badge.
@@ -254,6 +330,32 @@ export class ReorderList extends LitElement {
 
   /** Enables pointer and keyboard reordering. */
   @property({ type: Boolean, reflect: true }) editable = false
+
+  /**
+   * The kind of item payload the list takes from outside (another list, another window), as a source writes it with
+   * `writeItemPayload(dataTransfer, kind, items)` from `@c2n/core/controllers/drop-zone.js` (MIME type
+   * `application/x-c2n-<kind>+json`). Empty (the default) takes none. Needs `editable`. The list draws no rows of its
+   * own: a drop fires `item-drop` with the place under the pointer, the application adds the rows there, and the list
+   * announces how many were added. A drop not cancelled counts as taken, and a source with a `drag-kind` then lets its
+   * items go. A drop whose `detail.items` no `item-drop` listener read during the event adds nothing (the list warns
+   * once), so no item leaves its source for a list that never adds it: read it in the listener itself
+   * (`const { items, before } = event.detail`), not later in a state updater or after an `await`.
+   */
+  @property({ type: String, attribute: 'drop-kind' }) dropKind = ''
+
+  /**
+   * The kind of item payload rows leave the list as, for a list, board or tree whose `drop-kind` is the same. Empty
+   * (the default), rows stay in the list. Set, on an `editable` list: a pointer drag carried off the list drops the row
+   * on the zone under the pointer that takes this kind; each movable row shows a drag handle (the `drag-handle` part)
+   * whose drag the browser carries (dropped back on the list, it reorders the row; a drop outside c2n, in another window
+   * too, is a copy); and `moveItemTo` moves a row from code, the keyboard path an
+   * application wires to a command. A row is carried as `dragData` returns it, else as `{ id, label }`. The list
+   * draws no rows of its own: when another place took one, `item-move-out` asks the application to remove it.
+   */
+  @property({ type: String, attribute: 'drag-kind' }) dragKind = ''
+
+  /** What a row carries when it leaves the list (`drag-kind`). Unset, `{ id, label }`: its `data-reorder-key` and label. */
+  @property({ attribute: false }) dragData?: ReorderListDragData
 
   /** Minimum summed pointer movement in CSS pixels before pickup. Invalid values use 10. */
   @property({ type: Number, attribute: 'drag-start-threshold' }) dragStartThreshold: number = 10
@@ -333,6 +435,15 @@ export class ReorderList extends LitElement {
   private readonly assignmentIds = new WeakMap<HTMLElement, string>()
   private assignmentCounter = 0
   private readonly msg = new LocalizeController(this, reorderListMessages)
+  private warnedUnreadDrop = false
+  private warnedUnreadMoveOut = false
+  private readonly dropZone = new DropZoneController(this, {
+    itemKind: () => this.dropKind,
+    disabled: () => !this.reorderable || !!this.session,
+    onItems: (drop) => this.receiveDrop(drop),
+    onOwnDrop: ({ point }) => this.dropOwnRow(point),
+  })
+  private dropAnnouncement = ''
   private readonly instructionsId = `c2-reorder-list-instructions-${++componentId}`
   private readonly swipeInstructionsId = `c2-reorder-list-swipe-instructions-${componentId}`
   private childListObserver?: MutationObserver
@@ -351,14 +462,15 @@ export class ReorderList extends LitElement {
   private swipeListening = false
   private lastInputMethod: ReorderInputMethod = 'mouse'
 
+  /**
+   * A declarative shadow root was rendered on the server, which cannot see the light DOM, so it holds no items:
+   * hydrate that empty list first, or Lit finds more items than markers and throws, and only then pick them up.
+   */
+  private readonly hydration = new SlotReplayController(this, () => this.reconcileAuthoredOrder())
+
   override connectedCallback(): void {
-    // A declarative shadow root was rendered on the server, which cannot see the light DOM, so it holds no items:
-    // hydrate that empty list first, or Lit finds more items than markers and throws, and only then pick them up.
-    // Read before `super`, which attaches the shadow root of a client-rendered element.
-    const hydrating = !!this.shadowRoot && !this.hasUpdated
     super.connectedCallback()
-    if (hydrating) void this.updateComplete.then(() => this.reconcileAuthoredOrder())
-    else this.reconcileAuthoredOrder()
+    if (!this.hydration.hydrating) this.reconcileAuthoredOrder()
     this.observeChildren()
     // Moved in the document: its labels may differ, and the observer was dropped on disconnect.
     if (this.hasUpdated) this.syncContainerName()
@@ -374,12 +486,27 @@ export class ReorderList extends LitElement {
     // Dropped, not kept: a reconnected list observes again from scratch (see `connectedCallback`).
     this.labelObserver = undefined
     this.observedLabels = []
+    // A browser drag from a handle ends with the list too, once it is still out of the page a task later (moved, it is
+    // back by then): the drop it may still make elsewhere is a copy.
+    const carried = this.nativeDrag
+    if (carried)
+      setTimeout(() => {
+        if (this.isConnected || this.nativeDrag !== carried) return
+        this.nativeDrag = null
+        endItemDrag(carried.drag)
+      })
     this.finishSession()
     super.disconnectedCallback()
   }
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     if (changedProperties.has('editable') && !this.editable && this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
+    // What the drop zone announces after a drop from outside goes through the list's one live region, clear included,
+    // so the same sentence twice is read again.
+    if (this.dropZone.announcement !== this.dropAnnouncement) {
+      this.dropAnnouncement = this.dropZone.announcement
+      this.announcement = this.dropAnnouncement
+    }
     if ((changedProperties as PropertyValues).has('formDisabled') && this.formDisabled) {
       if (this.session) this.cancelSession(this.msg.t('canceledNotEditable'))
       this.closeSwipe()
@@ -407,7 +534,11 @@ export class ReorderList extends LitElement {
       ${this.swipeable && this.swipeShortcutText ? html`<p id=${this.swipeInstructionsId} class="visually-hidden">${this.swipeShortcutText}</p>` : nothing}
       <div
         part="container"
-        class="c2-reorder-list-container"
+        class=${classMap({
+          'c2-reorder-list-container': true,
+          'drop-target': this.dropZone.over && this.dropZone.acceptable,
+          'drop-refused': this.dropZone.over && !this.dropZone.acceptable,
+        })}
         role="list"
         aria-describedby=${this.field.describedBy()}
         @pointerdown=${this.handlePointerDown}
@@ -415,6 +546,12 @@ export class ReorderList extends LitElement {
         @pointerup=${this.handlePointerUp}
         @pointercancel=${this.handlePointerCancel}
         @lostpointercapture=${this.handleLostPointerCapture}
+        @dragenter=${this.dropZone.handleDragEnter}
+        @dragover=${this.dropZone.handleDragOver}
+        @dragleave=${this.dropZone.handleDragLeave}
+        @drop=${this.dropZone.handleDrop}
+        @dragstart=${this.handleHandleDragStart}
+        @dragend=${this.handleHandleDragEnd}
       >
         ${repeat(
           entries,
@@ -439,7 +576,14 @@ export class ReorderList extends LitElement {
     const tabbable = this.isKeyboardItem(item) && (this.focusedItem === item || (!this.focusedItem && this.firstKeyboardItem(order) === item))
     const describedBy = [draggable ? this.instructionsId : '', swipe && this.swipeShortcutText ? this.swipeInstructionsId : ''].filter(Boolean).join(' ')
     const assigned = html`<slot name=${this.getAssignmentId(item)} ${assignSlot([item])}></slot>`
-    const slot = this.ranked ? this.renderRanked(item, index, order.length, active, assigned) : assigned
+    const ranked = this.ranked ? this.renderRanked(item, index, order.length, active, assigned) : assigned
+    const slot =
+      draggable && this.dragKind
+        ? html`<div class="handled">
+            <span part="drag-handle" class="drag-handle" draggable="true" aria-hidden="true">${grip}</span>
+            <div class="handled__content">${ranked}</div>
+          </div>`
+        : ranked
     return html`
       <div
         ${animate(() => this.itemMotionOptions())}
@@ -596,6 +740,32 @@ export class ReorderList extends LitElement {
     })
   }
 
+  /** Asks the application to add the rows of an item payload dropped on the list; returns how many it took. */
+  private receiveDrop({ kind, items, point }: DropZoneItems): number {
+    const wrappers = [...(this.containerElement?.querySelectorAll<HTMLElement>('.list-item[data-assignment-id]') ?? [])]
+    // Without a point (a keyboard move from another list) the rows go to the end.
+    let index = wrappers.findIndex((wrapper) => {
+      const rect = wrapper.getBoundingClientRect()
+      return !!point && point.y < rect.top + rect.height / 2
+    })
+    if (index === -1) index = wrappers.length
+    // New rows keep their light-DOM position among the rows that stayed, so the row authored at `index` is the one to
+    // insert before for them to show at `index`.
+    const before = this.authoredOrder[index] ?? null
+    const detail: ReorderItemDropEventDetail = { kind, items, index, before }
+    const read = trackRead(detail, 'items')
+    if (!this.dispatchEvent(new CustomEvent<ReorderItemDropEventDetail>('item-drop', { cancelable: true, detail }))) return 0
+    // The list adds no row itself: a drop whose items nobody read added none, and a source with a `drag-kind` must not
+    // let them go.
+    if (!read()) {
+      if (!this.warnedUnreadDrop)
+        console.warn('c2-reorder-list: a drop of its `drop-kind` added nothing, because no `item-drop` listener read `detail.items` to add the rows.')
+      this.warnedUnreadDrop = true
+      return 0
+    }
+    return items.length
+  }
+
   private reconcileAuthoredOrder(): void {
     const authored = this.getAuthoredItems()
     if (!this.manualSlots) for (const item of authored) item.setAttribute('slot', this.getAssignmentId(item))
@@ -719,6 +889,11 @@ export class ReorderList extends LitElement {
     if (session.phase !== 'dragging-pointer') return
     event.preventDefault()
     this.positionPointerPreview()
+    if (this.carryOut(session)) {
+      // Carried off the list: it neither scrolls nor moves the row's place in it any more.
+      this.stopAutoScroll()
+      return
+    }
     this.updatePointerDestination(event.clientY)
     this.updateAutoScroll(event.clientY)
   }
@@ -739,13 +914,199 @@ export class ReorderList extends LitElement {
       return
     }
     if (session.phase === 'dragging-pointer') {
-      const rect = this.containerElement?.getBoundingClientRect()
-      const inside = !!rect && event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom
-      if (inside) this.commitSession()
-      else this.cancelSession(this.msg.t('canceled'))
+      const point = { x: event.clientX, y: event.clientY }
+      session.latestPoint = point
+      if (this.dragKind) this.carryOut(session)
+      const out = session.out
+      // On the list, and over no zone drawn on top of it: a reorder. The margin that keeps the drag the list's own while
+      // it moves (its edge scroll) does not make a release there one, with or without a `drag-kind`.
+      if (!out?.target && this.onList(point)) {
+        // Back on the list with no move since it left: the place under the pointer, not the one it left from.
+        if (this.dragKind) this.updatePointerDestination(point.y)
+        this.commitSession()
+        return
+      }
+      // Carried off the list onto a zone that takes it: the row moves there.
+      if (out?.target) {
+        this.finishSession()
+        if (out.target.take(out.drag, point) > 0) this.moveOut(out.drag, [session.item], out.target.host)
+        else this.announcement = this.msg.t('canceled')
+        return
+      }
+      this.cancelSession(this.msg.t('canceled'))
       return
     }
     this.finishSession()
+  }
+
+  /** Whether a point is on the list, or within `margin` of it. */
+  private onList(point: Point, margin = 0): boolean {
+    const rect = this.containerElement?.getBoundingClientRect()
+    return !!rect && point.x >= rect.left - margin && point.x <= rect.right + margin && point.y >= rect.top - margin && point.y <= rect.bottom + margin
+  }
+
+  /**
+   * Off the list with a `drag-kind`: finds the zone under the pointer that takes the row and shows the drag over it.
+   * Returns whether the drag is off the list, where the row's place in the list stays as it was. A zone under the
+   * pointer wins over the list's own box, which also covers rows a scrolling ancestor hides.
+   */
+  private carryOut(session: ReorderSession): boolean {
+    const point = session.latestPoint
+    const clear = (): false => {
+      if (session.out?.target) {
+        session.out.target.hover(null)
+        session.out.target = null
+      }
+      return false
+    }
+    if (!this.dragKind || !point) return clear()
+    if (!session.out) {
+      const drag = session.stays ? null : this.dragOutOf([session.item])
+      // The row can no longer leave: off the list, the release returns it.
+      if (!drag) {
+        session.stays = true
+        return !this.onList(point, EDGE_SCROLL_ZONE)
+      }
+      startItemDrag(drag)
+      session.out = { drag, target: null }
+    }
+    const carried = session.out
+    const target = itemDropTargetAt(point, carried.drag)
+    // Just past the list's edge, still its own: the edge scroll goes on there.
+    if (!target && this.onList(point, EDGE_SCROLL_ZONE)) return clear()
+    if (target !== carried.target) carried.target?.hover(null)
+    carried.target = target
+    target?.hover(point)
+    return true
+  }
+
+  /** What rows carry when they leave the list, or `null` when the list lets none leave. */
+  private dragOutOf(rows: readonly HTMLElement[]): ItemDrag | null {
+    if (!this.dragKind || !this.reorderable || !rows.length) return null
+    let items: unknown[]
+    try {
+      items = rows.map((row) => {
+        if (this.dragData) return this.dragData(this.itemReference(row))
+        const id = row.dataset.reorderKey?.trim()
+        return id ? { id, label: this.getItemLabel(row) } : { label: this.getItemLabel(row) }
+      })
+    } catch {
+      // `dragData` threw for a row: it cannot leave, and still reorders within the list.
+      return null
+    }
+    return { kind: this.dragKind, items, source: this }
+  }
+
+  /**
+   * Moves a row to another list, board or tree whose `drop-kind` is the list's `drag-kind`, without a pointer: the
+   * keyboard path to another instance, which an application wires to a command. The row lands at the target's natural
+   * place (the end). Returns whether the row left the list: not when the list has no `drag-kind`, is not `editable`, no
+   * row has that `data-reorder-key`, the target takes no such item, or a listener cancelled `item-move-out` (the
+   * target then holds a copy). Otherwise the row has left: the application removes it on `item-move-out`.
+   */
+  moveItemTo(target: Element, key: string): boolean {
+    // Two rows with one key: which one leaves is not knowable, as a pointer drag refuses too (`reorder-error`).
+    if (this.session || !this.validateKeys()) return false
+    const row = this.visualOrder.find((candidate) => candidate.dataset.reorderKey?.trim() === key && !this.isFixedItem(candidate))
+    const drag = row ? this.dragOutOf([row]) : null
+    const zone = drag ? itemDropTargetOf(target, drag) : null
+    if (!row || !drag || !zone) return false
+    // No page drag to start: the zone takes the items straight away, and a drag in flight elsewhere is left alone.
+    if (zone.take(drag) === 0) return false
+    return this.moveOut(drag, [row], target)
+  }
+
+  /** Tells the application which rows another place took, for it to remove them. */
+  private moveOut(drag: ItemDrag, leaving: HTMLElement[], target: Element): boolean {
+    // A row the application already moved into the target (the element itself, not a copy) is no longer the list's to
+    // give up: removing it would take it out of the target.
+    const rows = leaving.filter((row) => row.parentElement === this)
+    if (!rows.length) {
+      this.announcement = this.msg.t('movedOut', this.getItemLabel(leaving[0]))
+      return true
+    }
+    const detail: ReorderItemMoveOutEventDetail = { kind: drag.kind, items: [...drag.items], rows, target }
+    // Read either way: a listener removes the rows themselves, or the application's records by the items they carry.
+    const readRows = trackRead(detail, 'rows')
+    const readItems = trackRead(detail, 'items')
+    const read = () => readRows() || readItems()
+    const focused = rows.some((row) => row.matches(':focus-within'))
+    const order = this.visualOrder.filter((row) => this.isKeyboardItem(row))
+    // Cancelled: the rows stay, and the move is a copy.
+    if (!this.dispatchEvent(new CustomEvent<ReorderItemMoveOutEventDetail>('item-move-out', { detail, cancelable: true }))) return false
+    // The list removes no row itself: rows nobody read stay, and the move is a copy, said so rather than announced.
+    if (!read()) {
+      if (!this.warnedUnreadMoveOut)
+        console.warn('c2-reorder-list: rows taken by another place stayed, because no `item-move-out` listener read `detail.rows` to remove them.')
+      this.warnedUnreadMoveOut = true
+      return false
+    }
+    this.announcement = this.msg.t('movedOut', this.getItemLabel(rows[0]))
+    if (!focused) return true
+    // Focus inside a row that leaves (the command that moved it) goes to the next row that stays, else the one before.
+    // The application removes the rows now or on its next render (a framework's state update): wait for that.
+    const gone = (row: HTMLElement) => row.parentElement !== this
+    const refocus = () => {
+      if (!rows.every(gone)) return false
+      const at = order.indexOf(rows[0])
+      const neighbour =
+        order.slice(at).find((row) => !gone(row)) ??
+        order
+          .slice(0, at)
+          .reverse()
+          .find((row) => !gone(row))
+      this.pendingFocus = neighbour ?? 'host'
+      this.requestUpdate()
+      return true
+    }
+    if (!refocus()) requestAnimationFrame(() => refocus() || requestAnimationFrame(refocus))
+    return true
+  }
+
+  /** The row being carried by the browser from its drag handle, and what it carries. */
+  private nativeDrag: { drag: ItemDrag; row: HTMLElement } | null = null
+
+  /** A row's drag handle: the browser carries the row, as JSON under the `drag-kind` and a line of text. */
+  private readonly handleHandleDragStart = (event: DragEvent): void => {
+    // The list's own grip only: an app's element of the same class in a row keeps its own drag.
+    const fromHandle = event
+      .composedPath()
+      .some((node) => node instanceof Element && node.part.contains('drag-handle') && node.getRootNode() === this.renderRoot)
+    if (!fromHandle || !event.dataTransfer) return
+    const wrapper = this.getWrapperFromEvent(event)
+    const row = wrapper ? this.getItemByAssignmentId(wrapper.dataset.assignmentId) : null
+    const drag = row && !this.session && this.validateKeys() ? this.dragOutOf([row]) : null
+    if (!drag || !row || !wrapper) {
+      event.preventDefault()
+      return
+    }
+    try {
+      writeItemPayload(event.dataTransfer, drag.kind, drag.items)
+    } catch {
+      // A row that cannot be written as JSON (a cycle, a BigInt) does not leave by the browser's drag.
+      event.preventDefault()
+      return
+    }
+    event.dataTransfer.effectAllowed = 'copyMove'
+    const rect = wrapper.getBoundingClientRect()
+    event.dataTransfer.setDragImage(wrapper, event.clientX - rect.left, event.clientY - rect.top)
+    const carried = { drag, row }
+    this.nativeDrag = carried
+    // A `dragend` that never reached the list (its row left the page): the drag is finished all the same.
+    startNativeItemDrag(event, drag, () => {
+      if (this.nativeDrag === carried) this.handleHandleDragEnd()
+    })
+  }
+
+  private readonly handleHandleDragEnd = (): void => {
+    const carried = this.nativeDrag
+    if (!carried) return
+    this.nativeDrag = null
+    endItemDrag(carried.drag)
+    // Only a c2n zone that took the row moves it, and it says so in `drag.target`; anywhere else (a text field,
+    // another window) took a copy: `dropEffect` cannot tell the two apart, and WebKit reports `none` here either way.
+    // A list made read-only during the drag keeps its rows: the move becomes a copy.
+    if (carried.drag.target && this.reorderable) this.moveOut(carried.drag, [carried.row], carried.drag.target)
   }
 
   private handlePointerCancel(event: PointerEvent): void {
@@ -1051,23 +1412,44 @@ export class ReorderList extends LitElement {
       return
     }
 
-    this.visualOrder = [...session.candidateOrder]
-    const order = Object.freeze(session.candidateOrder.map((item) => Object.freeze(this.itemReference(item))))
-    const detail: ReorderEventDetail = Object.freeze({
-      item: Object.freeze(this.itemReference(session.item)),
-      fromIndex: session.fromIndex,
-      toIndex: session.candidateIndex,
-      order,
-      inputMethod: session.inputMethod,
-    })
-    const legacyOrder = this.getAuthoredItems().map((item) => session.candidateOrder.indexOf(item))
-    const label = this.getItemLabel(session.item)
     this.finishSession()
+    this.commitOrder(session.item, session.candidateOrder, session.fromIndex, session.candidateIndex, session.inputMethod)
+  }
+
+  /** Shows `nextOrder`, says so and fires `reorder`, `input` and `change`: the end of every reorder that changed it. */
+  private commitOrder(item: HTMLElement, nextOrder: readonly HTMLElement[], fromIndex: number, toIndex: number, inputMethod: ReorderInputMethod): void {
+    this.visualOrder = [...nextOrder]
+    const order = Object.freeze(nextOrder.map((candidate) => Object.freeze(this.itemReference(candidate))))
+    const detail: ReorderEventDetail = Object.freeze({
+      item: Object.freeze(this.itemReference(item)),
+      fromIndex,
+      toIndex,
+      order,
+      inputMethod,
+    })
+    const legacyOrder = this.getAuthoredItems().map((candidate) => nextOrder.indexOf(candidate))
+    const label = this.getItemLabel(item)
     this.announcement = this.msg.t('dropped', label, detail.fromIndex + 1, detail.toIndex + 1)
     this.pendingFocus = detail.inputMethod === 'keyboard' ? detail.item.element : null
     this.dispatchEvent(new CustomEvent<ReorderEventDetail>('reorder', { bubbles: true, composed: true, detail }))
     this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
     this.dispatchEvent(new CustomEvent<number[]>('change', { bubbles: true, cancelable: true, detail: legacyOrder }))
+  }
+
+  /** A row's drag handle dropped back on the list: the row moves to the drop point, as a pointer drag would put it. */
+  private dropOwnRow(point: Point): void {
+    const row = this.nativeDrag?.row
+    if (!row || this.session || !this.visualOrder.includes(row) || this.isFixedItem(row) || !this.validateKeys()) return
+    const original = [...this.visualOrder]
+    const others = original.filter((item) => item !== row && !this.isFixedItem(item))
+    let ordinal = others.findIndex((item) => {
+      const rect = this.getWrapperForItem(item)?.getBoundingClientRect()
+      return !!rect && point.y < rect.top + rect.height / 2
+    })
+    if (ordinal === -1) ordinal = others.length
+    const nextOrder = this.orderAtMovableOrdinal(original, row, ordinal)
+    if (this.sameOrder(original, nextOrder)) return
+    this.commitOrder(row, nextOrder, original.indexOf(row), nextOrder.indexOf(row), this.lastInputMethod === 'keyboard' ? 'mouse' : this.lastInputMethod)
   }
 
   private cancelSession(message: string): void {
@@ -1079,6 +1461,11 @@ export class ReorderList extends LitElement {
   }
 
   private finishSession(): void {
+    const out = this.session?.out
+    if (out) {
+      out.target?.hover(null)
+      endItemDrag(out.drag)
+    }
     document.removeEventListener('keydown', this.handleDocumentKeyDown)
     this.visibilityObserver?.disconnect()
     this.stopAutoScroll()
@@ -1269,8 +1656,12 @@ export class ReorderList extends LitElement {
   }
 
   private hasInteractiveOrigin(event: Event, wrapper: HTMLElement | null): boolean {
+    // A finger or a pen on the list's own grip starts the list's drag, which carries the row off it too: few touch browsers run
+    // the browser's drag, and the grip neither scrolls nor would do anything else.
+    const byHand = event instanceof PointerEvent && event.pointerType !== 'mouse'
     for (const node of event.composedPath()) {
       if (node === wrapper) return false
+      if (byHand && node instanceof Element && node.part.contains('drag-handle') && node.getRootNode() === this.renderRoot) continue
       if (node instanceof Element && node.matches(INTERACTIVE_SELECTOR)) return true
     }
     return false

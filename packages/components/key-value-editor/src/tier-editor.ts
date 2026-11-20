@@ -114,12 +114,10 @@ export class TierEditor extends KeyValueEditor {
 
   constructor() {
     super()
-    // Text properties of the key-value editor fall back to the tier messages while left empty.
-    this.keyLabel = ''
-    this.valueLabel = ''
+    // Text properties of the key-value editor fall back to the tier messages while left empty; the placeholders show
+    // none unless set.
     this.keyPlaceholder = ''
     this.valuePlaceholder = ''
-    this.addLabel = ''
   }
 
   /**

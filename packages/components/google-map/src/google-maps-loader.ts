@@ -1,4 +1,5 @@
 /// <reference types="google.maps" />
+import { googleMapMessages } from './messages.js'
 
 /**
  * One loader for every Google Maps element on the page.
@@ -83,7 +84,7 @@ export function loadGoogleMaps(elementKey?: string): Promise<void> {
   if (loading) return loading
 
   const key = resolveApiKey(elementKey)
-  if (!key) return Promise.reject(new GoogleMapsError('missing-key', 'Set a Google Maps API key to show this map.'))
+  if (!key) return Promise.reject(new GoogleMapsError('missing-key', googleMapMessages.en.missingKey))
 
   const globals = window as unknown as Record<string, unknown>
   // Google calls this global when it rejects the key; it offers no event or promise for it.

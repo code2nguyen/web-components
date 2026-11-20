@@ -1,8 +1,12 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: '.',
   testMatch: ['packages/components/*/test/*.spec.ts', 'open-packages/*/test/*.spec.ts', 'packages/umbrella/test/*.spec.ts', 'tests/style-contracts/*.spec.ts'],
+  // Agent worktrees live inside the repo and carry their own copy of every suite and of @playwright/test. Anchored to
+  // this checkout: a bare `**/.claude/worktrees/**` would also match every file of a run started inside a worktree.
+  testIgnore: [`${fileURLToPath(new URL('./.claude/worktrees/', import.meta.url))}**`],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

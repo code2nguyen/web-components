@@ -105,6 +105,13 @@ test('measures plain elements that do not report a size', async ({ page, scenari
   await expectNoOverflow(page)
 })
 
+test('its built-in text follows the language of the page', async ({ page, scenario }) => {
+  await scenario('lang')
+  const more = page.locator('c2-chip-group').getByRole('button', { name: /^\d+ de plus$/ })
+  await more.click()
+  await expect(page.locator('c2-chip-group').getByRole('button', { name: 'Afficher moins' })).toBeVisible()
+})
+
 test('an expandable group expands and collapses from the keyboard', async ({ page, scenario }) => {
   await scenario('expandable')
   const more = page.locator('c2-chip-group').getByRole('button', { name: /more$/ })

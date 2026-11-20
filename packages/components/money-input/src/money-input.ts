@@ -417,7 +417,7 @@ export class MoneyInput extends LitElement {
   }
 
   private renderSymbol() {
-    return html`<span class="symbol" aria-hidden="true"><slot name="symbol">${this.format.symbol}</slot></span>`
+    return html`<span class="symbol" aria-hidden="true"><slot name="symbol">${this.format.symbol || nothing}</slot></span>`
   }
 
   private renderPicker(currencies: string[], locale: string) {
@@ -488,7 +488,7 @@ export class MoneyInput extends LitElement {
       ${
         showSupporting
           ? html`<div id="supporting-text" class="supporting-text ${classMap({ error: showError })}">
-              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
+              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message || nothing}</slot>
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }

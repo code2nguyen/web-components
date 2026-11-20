@@ -167,7 +167,7 @@ export class BottomNavItem extends LitElement {
             : nothing
         }
       </span>
-      <span part="label" class="label ${this.labelHidden ? 'visually-hidden' : ''}"><slot>${this.label}</slot></span
+      <span part="label" class="label ${this.labelHidden ? 'visually-hidden' : ''}"><slot>${this.label || nothing}</slot></span
       >${announcement ? html`<span class="visually-hidden">, ${announcement}</span>` : nothing}
     `
   }

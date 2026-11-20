@@ -308,6 +308,24 @@ test.describe('c2-google-street-view', () => {
     await accessible(page)
   })
 
+  test('shows its notices in the language of the page', async ({ page, renderScenario }) => {
+    await renderScenario(
+      `<div lang="fr"><c2-google-street-view position="0,0"></c2-google-street-view><c2-google-map id="city" center="1,1"></c2-google-map><c2-google-street-view for="city"></c2-google-street-view></div>`,
+    )
+    await expect(page.locator('c2-google-street-view').first().getByRole('alert')).toHaveText('Street View n’a pas d’images près de ce lieu.')
+    await expect(page.locator('c2-google-street-view').nth(1).getByRole('status')).toHaveText('Déposez le bonhomme sur la carte pour regarder autour.')
+    // The event keeps the English text for the developer.
+    expect((await events(page, 'map-error'))[0].detail.message).toBe('Street View has no imagery near this place.')
+  })
+
+  test('an error with no message shows the error notice, not the loading one', async ({ page, renderScenario }) => {
+    await renderScenario(`<c2-google-street-view position="1,1"></c2-google-street-view>`)
+    const view = page.locator('c2-google-street-view')
+    await view.evaluate((element) => (element as unknown as { fail: (error: unknown) => void }).fail(new Error('')))
+    await expect(view.getByRole('alert')).toHaveText('The map could not be loaded.')
+    expect((await events(page, 'map-error'))[0].detail).toEqual({ reason: 'load-failed', message: 'The map could not be loaded.' })
+  })
+
   test('becomes the Street View of the map it is linked to', async ({ page, renderScenario }) => {
     await renderScenario(`<c2-google-map id="city" center="1,1"></c2-google-map><c2-google-street-view for="city"></c2-google-street-view>`)
     const view = page.locator('c2-google-street-view')

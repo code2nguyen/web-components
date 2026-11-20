@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import FlowExamplesRuntime from '../../components/FlowExamplesRuntime.astro'
 
 import { Flow } from '@c2n/components/flow'
 import ExampleModules from '../../components/ExampleModules.astro'
@@ -98,3 +100,49 @@ Looks for `c2-flow`. The node variables (`--c2-flow__node--*`) and the edge colo
 ```
 
 </GalleryGrid>
+
+## Language
+
+<FlowExamplesRuntime />
+
+The statuses, the menus, the keyboard announcements and the hints are message tokens: an app translates them once with `addTranslations`, and each flow speaks the language of its nearest `lang`. A message that joins a list or reads conditional parts (`after`, `before`, `rows`, `edgeSelected`) is given as a function from script.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=En français,description=The node statuses and menus in the language of the page,useWhen=The application is translated
+<style>
+  .flow-fr,
+  .flow-fr c2-flow {
+    width: 100%;
+  }
+  .flow-fr c2-flow {
+    --c2-flow--height: 260px;
+  }
+</style>
+<div lang="fr" class="flow-fr">
+  <c2-flow client:only="lit" aria-label="Chaîne de déploiement" nodes='[{"id":"build","label":"Compilation","status":"success","meta":"2 min"},{"id":"test","label":"Tests","status":"running"},{"id":"deploy","label":"Déploiement","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    flow: {
+      duration: 'Durée',
+      statusPending: 'À venir',
+      statusRunning: 'En cours',
+      statusSuccess: 'Réussi',
+      statusError: 'Échec',
+      zoomIn: 'Zoom avant',
+      zoomOut: 'Zoom arrière',
+      fitView: 'Ajuster à la vue',
+      connectPrompt: 'Relier {0} à {1}. Les flèches ou Tab choisissent un autre nœud, Entrée relie, Échap annule.',
+      // …and the other keys of the flow catalog
+    },
+  },
+})
+```

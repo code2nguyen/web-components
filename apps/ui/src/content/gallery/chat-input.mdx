@@ -3,6 +3,8 @@ title: 'Chat Input gallery'
 ---
 
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChatInputExamplesRuntime from '../../components/ChatInputExamplesRuntime.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import { ChatInput } from '@c2n/components/chat-input'
 import { IconButton } from '@c2n/components/icon-button'
@@ -196,3 +198,36 @@ Each composition below is a complete assistant prompt experience. The cards stay
 ```
 
 </GalleryGrid>
+
+## Language
+
+<ChatInputExamplesRuntime />
+
+The name of the send button is a message token: an app translates it once with `addTranslations`, and each chat input speaks the language of its nearest `lang`. `send-label` still overrides one instance.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The send button named in the language of the page,useWhen=The application is translated
+<style>
+  .chat-input-fr {
+    width: min(100%, 560px);
+  }
+</style>
+<div lang="fr" class="chat-input-fr">
+  <c2-chat-input client:only="lit" aria-label="Message" placeholder="Posez votre question…"></c2-chat-input>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'chat-input': {
+      send: 'Envoyer le message',
+    },
+  },
+})
+```

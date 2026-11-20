@@ -1045,7 +1045,7 @@ export class WeekPlanner extends LitElement {
       <div class="body">
         <header class="header ${dated ? 'dated' : ''} ${dated || usesParity || hasHeading || hasActions ? '' : 'navigation-only'}">
           <h2 class="title" part="heading" id="heading" ?hidden=${!hasHeading}>
-            <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
+            <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading || nothing}</slot>
           </h2>
           ${weekStart ? html`<p class="week-title" aria-live="polite">${this.weekTitle(weekStart)}</p>` : nothing}
           ${usesParity && !dated ? this.renderSwitch() : nothing}

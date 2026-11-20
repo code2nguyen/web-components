@@ -1,5 +1,6 @@
 import { addTranslations } from '@c2n/core/localize.js'
 import { tierEditorMessages } from '../src/tier-editor-messages.js'
+import { keyValueEditorMessages } from '../src/messages.js'
 
 // The French an app would add: the library ships its text in English only.
 
@@ -26,4 +27,22 @@ const tierFr: typeof tierEditorMessages.en = {
   noTier: (quantity) => `Aucun palier ne couvre ${quantity}.`,
 }
 
-addTranslations({ fr: { 'tier-editor': tierFr } })
+const fr: typeof keyValueEditorMessages.en = {
+  show: (name) => `Afficher ${name}`,
+  hide: (name) => `Masquer ${name}`,
+  remove: (key) => `Retirer ${key}`,
+  removeRow: (row) => `Retirer la ligne ${row}`,
+  valueMissing: 'Ajoutez au moins une variable.',
+  key: 'Clé',
+  value: 'Valeur',
+  field: (column, row) => `${column} ${row}`,
+  keyPlaceholder: 'CLÉ',
+  valuePlaceholder: 'valeur',
+  add: 'Ajouter une ligne',
+  duplicate: 'Cette clé est déjà utilisée.',
+  pattern: "Cette clé n'est pas valide.",
+  empty: 'Aucune variable',
+  hiddenValue: 'Valeur masquée',
+}
+
+addTranslations({ fr: { 'tier-editor': tierFr, 'key-value-editor': fr } })

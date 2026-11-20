@@ -8,6 +8,8 @@ import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { dateInputMessages } from './messages.js'
 import styles from './date-input.scss?inline'
 
 /** What the calendar button opens: the browser's own date picker, or the themed calendar popover. */
@@ -106,6 +108,7 @@ export class DateInput extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   /** Label and description handed down by an enclosing `c2-form-field`, which then draws the supporting line. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
+  private readonly msg = new LocalizeController(this, dateInputMessages)
   @query('input') private readonly input?: HTMLInputElement
   @query('.field') private readonly fieldElement?: HTMLElement
   @state() private calendarOpen = false
@@ -360,7 +363,7 @@ export class DateInput extends LitElement {
           class="calendar-button"
           type="button"
           tabindex="-1"
-          aria-label="Open calendar"
+          aria-label=${this.msg.t('openCalendar')}
           aria-haspopup=${this.picker === 'calendar' ? 'dialog' : nothing}
           aria-expanded=${this.picker === 'calendar' ? String(this.calendarOpen) : nothing}
           ?disabled=${this.effectiveDisabled || this.readOnly}
@@ -378,7 +381,7 @@ export class DateInput extends LitElement {
       ${
         showSupporting
           ? html`<div id="supporting-text" class="supporting-text ${classMap({ error: showError })}">
-              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
+              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message || nothing}</slot>
             </div>`
           : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }

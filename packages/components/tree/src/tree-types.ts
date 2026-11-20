@@ -104,6 +104,45 @@ export interface TreeItemMoveEventDetail {
   previousIndex: number
 }
 
+/** Detail of the `item-drop` event: nodes dropped on the tree from outside it, before the tree changes. */
+export interface TreeItemDropEventDetail {
+  /** The payload kind of the drop: the tree's `drop-kind`. */
+  kind: string
+  /** The nodes the tree adds, in the order of the payload. */
+  items: TreeNode[]
+  /** The dropped entries the tree turns away: not a node with a `value`, or a value the tree already holds. */
+  refused: unknown[]
+  /** The parent the nodes go under, or `null` for the root. */
+  parent: TreeNode | null
+  /** Their index among that parent's children. */
+  index: number
+  /**
+   * In a tree authored in markup, the element to add a `c2-tree-item` per node to (`parentElement.insertBefore(row,
+   * before)`): the parent row, or the tree at the root. A data-driven tree adds the nodes to `items` itself.
+   */
+  parentElement: Element
+  /** The element to insert the new rows before, or `null` to append them. */
+  before: Element | null
+}
+
+/** Detail of the `item-move-out` event: nodes another place took, before they leave the tree. */
+export interface TreeItemMoveOutEventDetail {
+  /** The payload kind they left as: the tree's `drag-kind`. */
+  kind: string
+  /** The nodes that leave, each with its subtree. */
+  items: TreeNode[]
+  /**
+   * Their rows. A data-driven tree takes the nodes out of `items` itself; in a tree authored in markup the
+   * application removes these elements (`row.remove()`).
+   */
+  rows: Element[]
+  /**
+   * The c2n element that took them (another tree, a list, a board). A drop anywhere else (a text field, a page's own drop area,
+   * another window) takes a copy, and they stay.
+   */
+  target: Element
+}
+
 /** How a checkbox tick travels between a node and its relatives. */
 export type TreeSelectionPropagation = 'none' | 'descendants' | 'parents' | 'both'
 

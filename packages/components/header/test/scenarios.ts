@@ -1,8 +1,12 @@
+import './translations'
 import '../src/header'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
-main.innerHTML = `<c2-header id="subject" navigation-label="Product">
+main.innerHTML =
+  scenario === 'lang'
+    ? `<div lang="fr"><c2-header id="subject"><a href="#marches">Marchés</a></c2-header></div>`
+    : `<c2-header id="subject" navigation-label="Product">
   <strong slot="brand">Northstar</strong>
   <a href="#markets">Markets</a>
   <button slot="actions">Sign in</button>

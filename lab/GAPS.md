@@ -17,7 +17,7 @@ Outcomes: **met** (a component does it as documented), **workaround** (met with 
 | account-settings | feature | dense-admin | 13 | | | | | not built |
 | checkout | feature | default | 11 | | | | | not built |
 | project-board | feature | default | 11 | | | | | not built |
-| appointment-booking | scenario | default | 9 | | | | | not built |
+| appointment-booking | scenario | default | 9 | 6 | 2 | 0 | 1 | [reports/appointment-booking/default.md](reports/appointment-booking/default.md) |
 | catalog-filter | scenario | default | 13 | 8 | 4 | 1 | 0 | [reports/catalog-filter/default.md](reports/catalog-filter/default.md) |
 | document-upload | scenario | default | 8 | | | | | not built |
 | orders-table | scenario | default | 9 | | | | | not built |
@@ -31,21 +31,26 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 
 | Capability | Specs | Met | Workaround | Hand-rolled | Failed | Components | Where it fell short |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| `a11y.screen-reader` | 3 | 1 | 1 | 0 | 1 | c2-time-slot-picker, c2-date-strip, c2-facet-list, c2-slider, c2-switch, c2-chip, c2-table, c2-table-column | appointment-booking/R9, pricing-page/R7 |
+| `a11y.keyboard` | 2 | 1 | 0 | 0 | 1 | c2-time-slot-picker, c2-date-strip, c2-facet-list, c2-slider, c2-switch, c2-chip | appointment-booking/R9 |
 | `feedback.live-announce` | 1 | 0 | 0 | 1 | 0 |  | catalog-filter/R10 |
-| `a11y.screen-reader` | 2 | 1 | 1 | 0 | 0 | c2-facet-list, c2-slider, c2-switch, c2-chip, c2-table, c2-table-column | pricing-page/R7 |
 | `filter.counts` | 1 | 1 | 1 | 0 | 0 | c2-facet-list | catalog-filter/R2 |
 | `filter.multi-value` | 1 | 1 | 1 | 0 | 0 | c2-facet-list | catalog-filter/R2 |
 | `filter.range` | 1 | 0 | 1 | 0 | 0 | c2-slider, c2-number-input | catalog-filter/R4 |
-| `i18n.format` | 2 | 1 | 1 | 0 | 0 | c2-format-number | pricing-page/R2 |
-| `layout.responsive` | 2 | 1 | 1 | 0 | 0 | c2-sheet, c2-button, c2-table, c2-card | catalog-filter/R11 |
+| `i18n.format` | 3 | 2 | 1 | 0 | 0 | c2-format-date, c2-format-number | pricing-page/R2 |
+| `input.date` | 1 | 0 | 1 | 0 | 0 | c2-date-strip, c2-date-selector | appointment-booking/R2 |
+| `input.time-slot` | 1 | 0 | 1 | 0 | 0 | c2-time-slot-picker, c2-date-strip | appointment-booking/R3 |
+| `layout.responsive` | 3 | 2 | 1 | 0 | 0 | c2-card, c2-form, c2-sheet, c2-button, c2-table | catalog-filter/R11 |
 | `overlay.drawer` | 1 | 0 | 1 | 0 | 0 | c2-sheet, c2-button | catalog-filter/R11 |
 | `search.highlight` | 1 | 0 | 1 | 0 | 0 | c2-search-field, c2-highlight | catalog-filter/R1 |
 | `search.text` | 1 | 0 | 1 | 0 | 0 | c2-search-field, c2-highlight | catalog-filter/R1 |
-| `a11y.keyboard` | 1 | 1 | 0 | 0 | 0 | c2-facet-list, c2-slider, c2-switch, c2-chip |  |
 | `filter.chips` | 1 | 1 | 0 | 0 | 0 | c2-chip, c2-chip-group |  |
 | `filter.clear-all` | 1 | 1 | 0 | 0 | 0 | c2-button |  |
 | `filter.toggle` | 1 | 1 | 0 | 0 | 0 | c2-switch |  |
-| `input.choice` | 1 | 1 | 0 | 0 | 0 | c2-button-group, c2-button, c2-badge |  |
+| `form.async-submit` | 1 | 1 | 0 | 0 | 0 | c2-form, c2-button, c2-phone-input |  |
+| `form.validation` | 1 | 1 | 0 | 0 | 0 | c2-form, c2-form-field, c2-text-field |  |
+| `input.choice` | 2 | 2 | 0 | 0 | 0 | c2-radio-group, c2-radio, c2-format-number, c2-button-group, c2-button, c2-badge |  |
+| `input.phone` | 1 | 1 | 0 | 0 | 0 | c2-phone-input |  |
 | `layout.disclosure` | 1 | 1 | 0 | 0 | 0 | c2-details |  |
 | `list.empty-state` | 1 | 1 | 0 | 0 | 0 | c2-status-panel, c2-button |  |
 | `sort.choice` | 1 | 1 | 0 | 0 | 0 | c2-select, c2-list-item |  |
@@ -56,42 +61,53 @@ Sorted by how far the components fall short (failed ×3, hand-rolled ×2, workar
 
 | Component | Requirements served | Short of the need |
 | --- | --- | --- |
+| `c2-time-slot-picker` | 2 | **appointment-booking/R3** workaround: The picker gets the chosen day's free starts only, with `date` set, and its own row of days is hidden with `::part(days) { display: none }`, since the day is picked above. Its strip could not be the day picker: it disables every day with no free start, so a closed Sunday and a Saturday that is full for a Cut & colour look the same, and T3's full day cannot be picked to be told so. A day with no free start hides the picker and shows the app's own "is full for cut & colour" status line (filed, `c2-time-slot-picker` gap).<br>**appointment-booking/R9** failed: The days and the times both work with the arrow keys, but a time is read as "9:30 AM" in a list box named "Morning": its day is never part of what a screen reader hears, and nothing an app sets adds it (filed, `c2-time-slot-picker` gap). The picker's host is also announced as an invalid group on load, before anything was submitted (filed, `c2-time-slot-picker` bug). |
+| `c2-date-strip` | 3 | **appointment-booking/R2** workaround: The spec asks for a calendar, but `c2-date-selector` has no way to close single days (only `min`/`max`), so the day is a `c2-date-strip` (`min`, `max`, `disabled-dates` for the Sundays and 13 March), a week at a time. A disabled day gives no reason to a screen reader: each closed day also gets a `markers` entry whose label ("Closed on Sundays") is read with the day, and the dot is hidden with `--c2-date-strip__marker--color: transparent` (filed, `c2-date-strip` and `c2-date-selector` gaps). |
 | `c2-facet-list` | 3 | **catalog-filter/R2** workaround: Every value carries Only and Exclude buttons (a Datadog log-search idiom) and there is no attribute to turn them off; a shop offers neither. Hidden with the documented `::part(action) { display: none }`. The app also has to handle `exclude` in case a value arrives excluded. |
-| `c2-format-number` | 2 | **pricing-page/R2** workaround: `type="currency" maximum-fraction-digits="0"`. It follows the nearest `lang` before the browser's language, and the page is `lang="en"`, so the reader's locale has to be passed explicitly (`locale=${navigator.language}`) on every price. Right for text in the page's language, but a price list in the reader's locale is the common case. |
+| `c2-format-number` | 4 | **pricing-page/R2** workaround: `type="currency" maximum-fraction-digits="0"`. It follows the nearest `lang` before the browser's language, and the page is `lang="en"`, so the reader's locale has to be passed explicitly (`locale=${navigator.language}`) on every price. Right for text in the page's language, but a price list in the reader's locale is the common case. |
 | `c2-search-field` | 1 | **catalog-filter/R1** workaround: Searches on `input` with the app's own 150ms debounce instead of the field's `search` event: once the app sets `value` (a chip or "Clear filters" empties the field), the field still remembers the last query, so typing the same query again fires no `search` (journey `t1b-search-again`). `findMatches` (exported next to `c2-highlight`) filters with the same matcher the highlight marks with, accents ignored on both. |
 | `c2-sheet` | 1 | **catalog-filter/R11** workaround: No component is a sidebar on a wide screen and a drawer on a phone. The app moves the one filter panel between the `<aside>` and a `c2-sheet` on a `matchMedia` change, so there is still a single set of controls and one state. |
 | `c2-slider` | 2 | **catalog-filter/R4** workaround: `c2-slider mode="range"` drags and steps but cannot be typed into, so two `c2-number-input`s sit under it and the app keeps the three in step (about 20 lines). The number inputs' stepper buttons are all named "Increase value" / "Decrease value", without the field's name. |
 | `c2-table` | 3 | **pricing-page/R7** workaround: `renderCell` returns a check/minus icon plus a visually hidden "Included"/"Not included" carried on `part="sr-only"`, styled from the page through `c2-table::part()`. The hidden text first used `position: absolute` and escaped the table's clip (the page became 554px wide on a phone, and taps failed); the wrapper needs its own `part` with `position: relative`. `align="center"` did not centre a renderer's node: fixed in this change. |
 | `c2-badge` | 1 |  |
-| `c2-button` | 5 |  |
+| `c2-button` | 6 |  |
 | `c2-button-group` | 2 |  |
-| `c2-card` | 2 |  |
+| `c2-card` | 3 |  |
 | `c2-chip` | 2 |  |
 | `c2-chip-group` | 1 |  |
+| `c2-date-selector` | 1 |  |
 | `c2-details` | 2 |  |
+| `c2-form` | 3 |  |
+| `c2-form-field` | 1 |  |
+| `c2-format-date` | 1 |  |
 | `c2-highlight` | 1 |  |
 | `c2-list-item` | 1 |  |
 | `c2-number-input` | 1 |  |
+| `c2-phone-input` | 2 |  |
+| `c2-radio` | 1 |  |
+| `c2-radio-group` | 1 |  |
 | `c2-select` | 1 |  |
 | `c2-status-panel` | 1 |  |
 | `c2-switch` | 2 |  |
 | `c2-table-column` | 1 |  |
+| `c2-text-field` | 1 |  |
 
 ## Coverage
 
 **Capabilities no spec requires** (0): none
 
-**Capabilities required but not built yet** (39): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `form.validation`, `input.phone`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `list.selection`, `feedback.toast`, `form.error-summary`, `form.async-submit`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.payment-card`, `planning.board`, `list.reorder`, `input.date`, `input.time-slot`, `input.file-upload`
+**Capabilities required but not built yet** (34): `chart.kpi`, `chart.trend`, `chart.compare`, `input.date-range`, `table.sort`, `list.loading`, `data.async-source`, `nav.sidebar`, `list.large`, `nav.command-palette`, `nav.breadcrumb`, `table.inline-edit`, `input.rich-text`, `collab.comments`, `collab.activity`, `overlay.confirm`, `feedback.undo`, `list.selection`, `feedback.toast`, `form.error-summary`, `form.dirty-guard`, `form.conditional`, `form.secret`, `nav.tabs`, `i18n.translate`, `theme.density`, `nav.steps`, `input.money`, `input.number`, `input.address`, `input.payment-card`, `planning.board`, `list.reorder`, `input.file-upload`
 
-**Components no build report names** (217 of 236):
+**Components no build report names** (232 of 264):
 
 - Buttons: copy-button, float-button, icon-button, split-button
-- Chart: area-chart, bar-chart, boxplot-chart, bubble-chart, bullet-chart, butterfly-chart, candlestick-chart, chord-chart, depth-chart, gauge-chart, heatmap-chart, line-chart, map-chart, overlap-chart, pie-chart, pyramid-chart, radar-chart, radial-bar-chart, sankey-chart, scatter-chart, sparkline, state-timeline, sunburst-chart, treemap-chart, waterfall-chart
-- Chat: chat-input, chat-message, chat-message-list, citation, comment-thread, markdown, reaction-bar, streaming-text
-- Data display: attachment, audio-player, audio-visualizer, avatar, bar-list, barcode, comparison-bar, countdown, description-list, distribution-bar, file-browser, format-date, google-map, image, image-compare, indicator, kbd, list, marker, math, mermaid, meter, order-book, org-chart, payment-card, pivot-table, qr-code, relative-time, reorder-list, stat, status-light, steps, text-effect, timeline, trace-waterfall, transcript, tree, truncate, video-player, video-tile, virtual-list
-- Editors & viewers: change-review, code-editor, code-viewer, diff-viewer, flow, image-annotator, image-cropper, json-viewer, log-viewer, mind-map, page-editor, pan-zoom, selection-toolbar, spreadsheet, terminal
-- Feedback: banner, celebration, confirm-dialog, hover-card, loading-overlay, modal, notification-center, overlay, popconfirm, progress, scroll-progress, share-sheet, skeleton, spinner, toast, toggletip, tooltip, tour, working-indicator
-- Inputs: address-field, angle-slider, autocomplete, barcode-scanner, camera-capture, card-input, cascader, checkbox, checkbox-group, choice-matrix, color-area, color-select, color-slider, date-input, date-selector, date-strip, date-time-picker, duration-input, emoji-picker, fieldset, filter-builder, form, form-field, fx-converter, import-mapper, inline-edit, json-form, key-value-editor, keypad, label, mask-input, money-input, month-picker, otp-input, password-field, phone-input, promo-code-field, quantity-picker, query-input, questionnaire, quick-time-menu, radio, rate, recurrence-editor, rich-text-editor, secret-field, shortcut, signature-pad, tag-input, text-field, textarea, theme-select, time-input, time-range-picker, time-slot-picker, tree-select, upload, view-options, wheel-picker
+- Chart: area-chart, bar-chart, boxplot-chart, bubble-chart, bullet-chart, butterfly-chart, candlestick-chart, chord-chart, depth-chart, gauge-chart, heatmap-chart, histogram-chart, line-chart, map-chart, overlap-chart, pie-chart, pyramid-chart, radar-chart, radial-bar-chart, sankey-chart, scatter-chart, sparkline, state-timeline, sunburst-chart, treemap-chart, waterfall-chart
+- Chat: chat-input, chat-message, chat-message-list, citation, citation-list, comment-thread, markdown, reaction-bar, streaming-text
+- Data display: attachment, audio-player, audio-visualizer, avatar, bar-list, barcode, comparison-bar, countdown, delta, description-list, distribution-bar, file-browser, google-map, image, image-compare, indicator, kbd, list, marker, math, mermaid, meter, order-book, org-chart, payment-card, qr-code, range-indicator, relative-time, reorder-list, stat, status-light, steps, text-annotator, text-effect, timeline, trace-waterfall, transcript, tree, truncate, video-player, video-tile, virtual-list
+- Editors & viewers: change-review, code-editor, code-viewer, diff-viewer, file-preview, flow, image-annotator, image-cropper, json-viewer, log-viewer, mind-map, page-editor, pan-zoom, schema-tree, selection-toolbar, terminal
+- Feedback: banner, beacon, celebration, confirm-dialog, hover-card, loading-overlay, modal, navigation-progress, notification-center, overlay, popconfirm, progress, scroll-progress, share-sheet, skeleton, spinner, toast, toggletip, tooltip, tour, working-indicator
+- Inputs: address-field, angle-slider, autocomplete, barcode-scanner, camera-capture, card-input, cascader, checkbox, checkbox-group, choice-matrix, color-area, color-select, color-slider, date-fields, date-input, date-time-picker, document-checklist, duration-input, emoji-picker, fieldset, filter-builder, fx-converter, image-uploader, import-mapper, inline-edit, input-matrix, json-form, key-value-editor, keypad, label, mask-input, money-input, month-picker, native-select, otp-input, password-field, promo-code-field, quantity-picker, query-input, questionnaire, quick-time-menu, rate, record-merge, recurrence-editor, rich-text-editor, scorecard, secret-field, shortcut, shortcut-sheet, signature-pad, tag-input, textarea, theme-select, tier-editor, time-input, time-range-picker, totp-code, tree-select, unit-input, upload, view-options, wheel-picker
 - Layout: accordion, action-bar, app-shell, backdrop, beam, border-beam, carousel, chatbot, dashboard, device-frame, floating-panel, header, in-view, marquee, masonry, master-detail, overflow-list, page-header, save-bar, scroll-area, separator, split-panel, sticky, swipe-action, video-grid, visually-hidden
-- Navigation: bottom-nav, breadcrumb, command, context-menu, link-button, menu, menubar, navigation-menu, pagination, side-nav, skip-link, table-of-contents, tabs
-- Planning: gantt, kanban, month-planner, notepad, scheduler, todo-list, week-planner
+- Navigation: bottom-nav, breadcrumb, command, context-menu, index-bar, link-button, menu, menubar, navigation-menu, pagination, side-nav, skip-link, tab-nav, table-of-contents, tabs
+- Planning: gantt, kanban, matrix-board, month-planner, notepad, scheduler, todo-list, week-planner
+- Table: aging-table, pivot-table, spreadsheet

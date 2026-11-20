@@ -56,14 +56,31 @@ interface Drag {
   hoverTimer?: ReturnType<typeof setTimeout>
 }
 
+/** What the tree lends the reorder module for a drag carried off it: kept off the tree's public type. */
+export interface ReorderHooks {
+  /** Shows a pointer drag off the tree over the zone under it; returns whether the pointer is off the tree. */
+  carryOut(item: TreeItem, point: { x: number; y: number }): boolean
+  /** Ends a pointer drag carried off the tree (`null`: taken by nothing); returns whether it was off the tree. */
+  dropOut(point: { x: number; y: number } | null): boolean
+}
+
+/** What the reorder module tells the tree back. */
+export interface ReorderHandle {
+  /** Whether a press, a drag or a keyboard move is in progress. */
+  busy(): boolean
+  /** Moves a row under `parent` (`null`: the root) before `before` (`null`: last), when that place may hold it. */
+  moveTo(item: TreeItem, parent: TreeItem | null, before: TreeItem | null): boolean
+}
+
 /** Wires drag and keyboard reordering onto a tree. Called once per tree, by the tree itself. */
-export function attachReorder(tree: Tree): void {
+export function attachReorder(tree: Tree, hooks: ReorderHooks): ReorderHandle {
   const root = tree.renderRoot as ShadowRoot
   const indicator = document.createElement('div')
   indicator.className = 'drop-indicator'
   indicator.part.add('drop-indicator')
   indicator.hidden = true
-  const live = document.createElement('div')
+  // A region the tree may already have added for an announcement made before this module loaded.
+  const live = root.querySelector<HTMLElement>('.live') ?? document.createElement('div')
   live.className = 'live'
   live.setAttribute('aria-live', 'polite')
   root.append(indicator, live)
@@ -208,9 +225,15 @@ export function attachReorder(tree: Tree): void {
   })
 
   // A row that is a link, or holds an image, would otherwise start the browser's own drag and cancel ours. A touch
-  // hold would open the long-press menu partway into the drag.
+  // hold would open the long-press menu partway into the drag. An element the app made draggable on purpose
+  // (`draggable="true"`, a handle that writes an item payload for another tree) keeps its drag.
   tree.addEventListener('dragstart', (event) => {
-    if (tree.reorderable) event.preventDefault()
+    if (!tree.reorderable) return
+    // Only inside the tree: a draggable ancestor (a dashboard pane) must not take the rows' drag away from the reorder.
+    const path = event.composedPath()
+    const inside = path.slice(0, Math.max(0, path.indexOf(tree)))
+    if (inside.some((node) => node instanceof Element && node.getAttribute('draggable') === 'true')) return
+    event.preventDefault()
   })
   tree.addEventListener('contextmenu', (event) => {
     if ((press?.touch || drag) && tree.reorderable) event.preventDefault()
@@ -248,6 +271,16 @@ export function attachReorder(tree: Tree): void {
     }
     if (!drag || event.pointerId !== drag.pointerId) return
     event.preventDefault()
+    // Carried off a tree with a `drag-kind`: the zone under the pointer shows the drag, and no place in this tree does.
+    if (hooks.carryOut(drag.item, { x: event.clientX, y: event.clientY })) {
+      // Off the tree, a branch the pointer crossed on its way out does not open any more.
+      clearTimeout(drag.hoverTimer)
+      drag.hover = undefined
+      drag.drop = undefined
+      setDropTarget(null)
+      indicator.hidden = true
+      return
+    }
     autoscroll(event.clientY)
     update(event.clientX, event.clientY)
   }
@@ -258,7 +291,8 @@ export function attachReorder(tree: Tree): void {
 
   const onUp = (event: PointerEvent) => {
     if (drag && event.pointerId === drag.pointerId) {
-      const { item, drop } = drag
+      const { item } = drag
+      let drop = drag.drop
       // The release would otherwise click the row it ends over, changing the selection or following a link.
       const swallow = (click: Event) => {
         click.stopPropagation()
@@ -266,7 +300,19 @@ export function attachReorder(tree: Tree): void {
       }
       window.addEventListener('click', swallow, { capture: true, once: true })
       setTimeout(() => window.removeEventListener('click', swallow, true))
-      end()
+      // Before `end`, which drops a carried drag as taken by nothing; `end` runs even when the zone that takes it throws.
+      let carriedOff: boolean
+      try {
+        carriedOff = hooks.dropOut({ x: event.clientX, y: event.clientY })
+        // Back on the tree with no move since it left: the place under the pointer, which leaving had cleared.
+        if (!carriedOff && !drag.drop) {
+          update(event.clientX, event.clientY)
+          drop = drag.drop
+        }
+      } finally {
+        end()
+      }
+      if (carriedOff) return
       if (drop) void move(item, drop.parent, drop.before)
       return
     }
@@ -285,6 +331,8 @@ export function attachReorder(tree: Tree): void {
   }
 
   const end = () => {
+    // A drag carried off the tree that ends any other way (Escape, a cancelled pointer) takes nothing.
+    if (drag) hooks.dropOut(null)
     if (press) clearTimeout(press.timer)
     if (drag) {
       clearTimeout(drag.hoverTimer)
@@ -387,12 +435,30 @@ export function attachReorder(tree: Tree): void {
     indicator.style.width = `${Math.max(0, box.width - inset)}px`
   }
 
+  return {
+    busy: () => !!press || !!drag || moving,
+    moveTo: (item, parent, before) => {
+      if (moving || !allowed(item, parent, before)) return false
+      void move(item, parent, before)
+      return true
+    },
+  }
+
   /** The row an event happened on. A press or key on the toggle, the checkbox or the actions belongs to that control. */
   function itemOf(event: Event): TreeItem | undefined {
     for (const target of event.composedPath()) {
       if (target instanceof TreeItem) return target
       if (target === tree) return undefined
-      if (target instanceof Element && (target.part.contains('toggle') || target.part.contains('checkbox') || target.part.contains('actions'))) {
+      // A finger or a pen on the grip starts the tree's own long-press drag, which carries the row off the tree too: few touch
+      // browsers run the browser's drag, which the grip starts for a mouse.
+      const byHand = event instanceof PointerEvent && event.pointerType !== 'mouse'
+      if (
+        target instanceof Element &&
+        (target.part.contains('toggle') ||
+          target.part.contains('checkbox') ||
+          target.part.contains('actions') ||
+          (target.part.contains('drag-handle') && !byHand))
+      ) {
         return undefined
       }
     }

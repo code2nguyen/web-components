@@ -14,6 +14,18 @@
   import '@c2n/components/slider'
   import '@c2n/components/button'
   import '@c2n/components/number-input'
+  import { addTranslations } from '@c2n/core/localize.js'
+
+  // The French of the En français card, under `lang="fr"`.
+  addTranslations({
+    fr: {
+      slider: {
+        start: 'Minimum',
+        end: 'Maximum',
+        thumb: '{0} : {1}',
+      },
+    },
+  })
 
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.round(seconds) % 60).padStart(2, '0')}`
   const speeds = [1, 2, 4]

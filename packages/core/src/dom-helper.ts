@@ -214,3 +214,153 @@ export function deepActiveElement(): Element | null {
   while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
   return active
 }
+
+/** The elements Astro wraps every island in (`display: contents` through Astro's own stylesheet). */
+const ISLAND_WRAPPER_TAGS = ['astro-island', 'astro-slot', 'astro-static-slot'] as const
+
+/** A selector matching every {@link isIslandWrapper} element, for `querySelectorAll` and `closest`. */
+export const ISLAND_WRAPPER_SELECTOR = ISLAND_WRAPPER_TAGS.join(', ')
+
+/**
+ * Whether the element is one of a framework's island wrappers (Astro's `astro-island`, `astro-slot`,
+ * `astro-static-slot`), recognised by tag alone: the answer does not depend on styles having loaded or on the element
+ * being connected. Use it where only those wrappers may be looked through and any other element must count.
+ */
+export function isIslandWrapper(element: Element): boolean {
+  return (ISLAND_WRAPPER_TAGS as readonly string[]).includes(element.localName)
+}
+
+/**
+ * Whether the element draws no box of its own: an island wrapper ({@link isIslandWrapper}) or any element whose
+ * computed `display` is `contents` (a framework's wrapper, an app's `<span style="display: contents">`). Such an
+ * element stands for what it holds. Only the tag is checked on the server, which has no styles.
+ */
+export function isLayoutWrapper(element: Element): boolean {
+  if (isIslandWrapper(element)) return true
+  return !isServer && getComputedStyle(element).display === 'contents'
+}
+
+export interface UnwrapContentsOptions {
+  /** What counts as a wrapper to look through. Default {@link isLayoutWrapper}. */
+  wrapper?: (element: Element) => boolean
+  /**
+   * Look through a wrapper only while it holds a single element child (default `true`). `false` steps into the first
+   * element child of any wrapper that has one.
+   */
+  onlyChild?: boolean
+}
+
+/**
+ * The element a wrapper stands for: `element` itself, or, while it is a wrapper ({@link isLayoutWrapper} by
+ * default), its element child, down through nested wrappers. A framework wraps a component in a box that does not
+ * render (an Astro island), an app in a `display: contents` span; a component that copies, measures or clicks a
+ * slotted element wants what is inside. `null` and `undefined` are returned as they are.
+ */
+export function unwrapContents<T extends Element | null | undefined>(element: T, options: UnwrapContentsOptions = {}): T | Element {
+  const { wrapper = isLayoutWrapper, onlyChild = true } = options
+  let current: Element | null | undefined = element
+  while (current && (onlyChild ? current.childElementCount === 1 : current.firstElementChild) && wrapper(current)) current = current.firstElementChild
+  return current as T | Element
+}
+
+export interface FindWrappedOptions {
+  /** How many levels below `element` to search (default 1: its children). */
+  depth?: number
+  /** An element the search does not look inside (a nested list owns its own rows). It may still match itself. */
+  skip?: (element: Element) => boolean
+}
+
+/**
+ * The element a slotted child stands for: itself when `match` accepts it, otherwise the first match among its
+ * descendants (depth-first, in document order) within `depth` levels. That is how a row arrives wrapped by a
+ * framework island, an app's link or another component (a `c2-swipe-action` around a `c2-list-item`). Unlike
+ * {@link unwrapContents} it looks through any element, whatever its display.
+ */
+export function findWrapped<T extends Element>(element: Element, match: (element: Element) => element is T, options?: FindWrappedOptions): T | undefined
+export function findWrapped(element: Element, match: (element: Element) => boolean, options?: FindWrappedOptions): Element | undefined
+export function findWrapped(element: Element, match: (element: Element) => boolean, options: FindWrappedOptions = {}): Element | undefined {
+  const { depth = 1, skip } = options
+  const search = (current: Element, level: number): Element | undefined => {
+    if (match(current)) return current
+    if (level >= depth || skip?.(current)) return undefined
+    for (const child of current.children) {
+      const found = search(child, level + 1)
+      if (found) return found
+    }
+    return undefined
+  }
+  return search(element, 0)
+}
+
+export interface FormControlOptions {
+  /**
+   * Only a control a person enters a value in: no `<input type="hidden">`, no button-like input (`submit`, `reset`,
+   * `image`, `button`) and no form-associated element whose tag ends in `button` (`c2-button`, `c2-split-button`).
+   */
+  entryOnly?: boolean
+}
+
+const NOT_ENTRY_INPUT_TYPES = new Set(['hidden', 'submit', 'reset', 'image', 'button'])
+
+/**
+ * Whether the element is a form control: a native `<input>`, `<select>` or `<textarea>`, or a form-associated custom
+ * element (`static formAssociated = true`, which every `c2-*` control declares). A custom element that has not
+ * upgraded yet is not one, and neither are `null` and `undefined`.
+ */
+export function isFormControl(element: Element | null | undefined, options: FormControlOptions = {}): boolean {
+  if (!element) return false
+  const name = element.localName
+  if (name === 'input') return !options.entryOnly || !NOT_ENTRY_INPUT_TYPES.has((element.getAttribute('type') ?? '').toLowerCase())
+  if (name === 'select' || name === 'textarea') return true
+  if ((element.constructor as { formAssociated?: boolean }).formAssociated !== true) return false
+  return !options.entryOnly || !name.endsWith('button')
+}
+
+/**
+ * The selection's ranges with their boundaries inside the given shadow roots (`Selection.getComposedRanges()`), or
+ * `undefined` when the engine cannot answer. Tries the standard options object first, then the shadow roots as
+ * arguments, the form WebKit first shipped (Safari 17). `getComposedRanges` is Baseline newly available (2025): a
+ * caller keeps its own fallback (`shadowRoot.getSelection()` in Chromium, `getRangeAt` in Firefox) for `undefined`.
+ */
+export function composedSelectionRanges(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange[] | undefined {
+  if (typeof selection.getComposedRanges !== 'function') return undefined
+  try {
+    return selection.getComposedRanges({ shadowRoots })
+  } catch {
+    try {
+      const variadic = selection.getComposedRanges as unknown as (...roots: ShadowRoot[]) => StaticRange[]
+      return variadic.apply(selection, shadowRoots)
+    } catch {
+      return undefined
+    }
+  }
+}
+
+/** The first of {@link composedSelectionRanges}, or `undefined` when there is none or the engine cannot answer. */
+export function composedSelectionRange(selection: Selection, shadowRoots: ShadowRoot[]): StaticRange | undefined {
+  return composedSelectionRanges(selection, shadowRoots)?.[0]
+}
+
+/**
+ * Makes `detail[key]` a getter that records being read, and returns whether it was. For an event that asks the
+ * application to act on a field (`item-drop`: add `items`; `item-move-out`: remove `rows`): a listener that does
+ * reads it, so an event nobody acted on can be told apart, whenever and however the listener was added.
+ */
+export function trackRead<T extends object, K extends keyof T>(detail: T, key: K): () => boolean {
+  let value = detail[key]
+  let read = false
+  Object.defineProperty(detail, key, {
+    get() {
+      read = true
+      return value
+    },
+    // A listener may replace the field (normalise the items in place): that is acting on it too.
+    set(next: T[K]) {
+      read = true
+      value = next
+    },
+    enumerable: true,
+    configurable: true,
+  })
+  return () => read
+}

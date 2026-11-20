@@ -34,6 +34,15 @@ async function clipboardEvent(locator: Locator, type: 'copy' | 'cut' | 'paste', 
   )
 }
 
+test('the cell editors and the row header follow the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${budget.replace('<c2-spreadsheet ', '<c2-spreadsheet formula-bar ')}</div>`)
+  await expect(page.locator('c2-spreadsheet [data-corner] .visually-hidden')).toHaveText('Ligne')
+  await expect(page.locator('c2-spreadsheet .formula-input')).toHaveAttribute('aria-label', /^Barre de formule, /)
+  await cell(page, 'A2').click()
+  await page.keyboard.type('x')
+  await expect(page.locator('c2-spreadsheet input.editor')).toHaveAttribute('aria-label', 'Modifier A2')
+})
+
 test('computes formulas and formats each column', async ({ page, renderScenario }) => {
   await renderScenario(budget)
   await expect(cell(page, 'A1')).toHaveText('Flights')

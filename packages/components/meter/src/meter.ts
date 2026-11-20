@@ -234,7 +234,7 @@ export class Meter extends LitElement {
       <div class="c2-meter">
         <div class="c2-meter-header" part="header">
           <span id="label" class="c2-meter-label" part="label" ?hidden=${!hasLabel}>
-            <slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
+            <slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot>
           </span>
           <span class="c2-meter-value" part="value" aria-hidden="true">
             <slot name="value" @slotchange=${this.slotPresence.handleSlotChange}>${shown}</slot>

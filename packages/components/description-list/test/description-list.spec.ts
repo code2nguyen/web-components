@@ -298,3 +298,8 @@ for (const name of ['default', 'header', 'rich-label', 'groups', 'groups-no-head
     expect(results.violations).toEqual([])
   })
 }
+
+test('the placeholder of an empty value follows the page language', async ({ page, scenario }) => {
+  await scenario('properties-fr')
+  await expect(page.locator('c2-description-item[label="Téléphone"] [part="empty"]')).toHaveText('Non renseigné')
+})

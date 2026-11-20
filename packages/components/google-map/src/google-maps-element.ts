@@ -2,7 +2,9 @@
 import { LitElement, html, nothing, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
 import { AUTH_FAILURE_EVENT, CONFIG_EVENT, GoogleMapsError, hasAuthFailed, type GoogleMapsErrorReason } from './google-maps-loader.js'
+import { googleMapMessages, type GoogleMapMessageKey } from './messages.js'
 
 export interface GoogleMapsErrorEventDetail {
   reason: GoogleMapsErrorReason
@@ -11,7 +13,16 @@ export interface GoogleMapsErrorEventDetail {
 
 type Status = 'loading' | 'ready' | 'error'
 
-const AUTH_MESSAGE = 'Google Maps rejected the API key. Check its HTTP referrer and API restrictions.'
+const AUTH_MESSAGE = googleMapMessages.en.authFailed
+
+/** The notice shown in place of the map for each `map-error` reason. */
+// `route-failed` is a route's own, reported through `route-error`; it never reaches a map's notice.
+const ERROR_NOTICE: Partial<Record<GoogleMapsErrorReason, GoogleMapMessageKey>> = {
+  'missing-key': 'missingKey',
+  'load-failed': 'loadFailed',
+  'auth-failed': 'authFailed',
+  'no-imagery': 'noImagery',
+}
 
 /**
  * What a map and a street view share: the key, the load, and the message shown instead of the map while it loads
@@ -29,7 +40,10 @@ export abstract class GoogleMapsElement extends LitElement {
   @property({ type: String, attribute: 'api-key' }) apiKey?: string
 
   @state() protected status: Status = 'loading'
-  @state() protected message = ''
+  /** The notice shown in place of the map: an error, or a hint while it waits. Empty shows the loading notice. */
+  @state() protected notice: GoogleMapMessageKey | '' = ''
+
+  protected readonly msg = new LocalizeController(this, googleMapMessages)
 
   /** Where Google draws. Present from the first render on. */
   protected get canvas(): HTMLElement {
@@ -42,8 +56,8 @@ export abstract class GoogleMapsElement extends LitElement {
   /** Builds the Google object inside {@link canvas} and sets `status` to `ready` when it shows. Called once, after the first render. */
   protected abstract initialize(): Promise<void>
 
-  /** What to say while loading, e.g. "Loading map…". */
-  protected abstract readonly loadingMessage: string
+  /** The message shown while loading, e.g. `loadingMap`. */
+  protected abstract readonly loadingNotice: GoogleMapMessageKey
 
   override connectedCallback(): void {
     super.connectedCallback()
@@ -79,7 +93,7 @@ export abstract class GoogleMapsElement extends LitElement {
     this.#errorReason = undefined
     // Only what changed, so the first start does not schedule a second render from `firstUpdated`.
     if (this.status !== 'loading') this.status = 'loading'
-    if (this.message) this.message = ''
+    if (this.notice) this.notice = ''
     this.initialize().then(
       () => {
         if (hasAuthFailed()) this.fail(new GoogleMapsError('auth-failed', AUTH_MESSAGE))
@@ -91,10 +105,16 @@ export abstract class GoogleMapsElement extends LitElement {
   /** Shows `error` in place of the map and reports it through `map-error`. */
   protected fail(error: unknown): void {
     const reason = error instanceof GoogleMapsError ? error.reason : 'load-failed'
-    const message = error instanceof Error ? error.message : String(error)
+    const notice = ERROR_NOTICE[reason] ?? 'loadFailed'
+    // The event keeps the error's own text for the developer; the page shows the translatable notice, which an
+    // empty `error.message` cannot blank.
+    const message = (error instanceof Error ? error.message : String(error ?? '')) || googleMapMessages.en[notice]
+    // Anything but the loader's own errors is unexpected (a bad `options` value, an API change): the notice is
+    // generic, so the cause goes to the console as well as to `map-error`.
+    if (!(error instanceof GoogleMapsError)) console.error(error)
     this.#errorReason = reason
     this.status = 'error'
-    this.message = message
+    this.notice = notice
     this.dispatchEvent(new CustomEvent<GoogleMapsErrorEventDetail>('map-error', { detail: { reason, message } }))
   }
 
@@ -109,7 +129,7 @@ export abstract class GoogleMapsElement extends LitElement {
         this.status === 'ready'
           ? nothing
           : html`<div class="message ${this.status}" part="message" role=${this.status === 'error' ? 'alert' : 'status'}>
-              ${this.message || this.loadingMessage}
+              ${this.msg.t(this.notice || this.loadingNotice)}
             </div>`
       }
       <slot></slot>

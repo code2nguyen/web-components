@@ -9,6 +9,19 @@ const activeValue = (page: Page) =>
 const events = (page: Page) =>
   page.locator('c2-command').evaluate((element) => JSON.parse(element.getAttribute('data-events') ?? '[]').map((d: { value: string }) => d.value))
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-command query="zzz"><c2-command-item value="a">Alpha</c2-command-item></c2-command></div>')
+  const field = page.getByRole('combobox', { name: 'Chercher une commande' })
+  await expect(field).toHaveAttribute('placeholder', 'Saisissez une commande ou cherchez…')
+  await expect(page.locator('c2-command [role="listbox"]')).toHaveAttribute('aria-label', 'Chercher une commande')
+  await expect(page.getByText('Aucun résultat.')).toBeVisible()
+})
+
+test('an empty placeholder shows none', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-command placeholder=""></c2-command>')
+  await expect(page.getByRole('combobox', { name: 'Search commands' })).toHaveAttribute('placeholder', '')
+})
+
 const palette = `<c2-command>
   <c2-command-group heading="Suggestions">
     <c2-command-item value="calendar">Calendar</c2-command-item>

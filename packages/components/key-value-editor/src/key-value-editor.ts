@@ -63,7 +63,7 @@ let nextRowId = 0
  * @tag c2-key-value-editor
  *
  * @slot actions - Extra controls next to the add button, e.g. an "Import .env" button.
- * @slot empty - Shown instead of the rows when there are none to show: in view mode, or with `lock-keys`. Defaults to "No variables".
+ * @slot empty - Shown instead of the rows when there are none to show: in view mode, or with `lock-keys`. Defaults to the `empty` message ("No variables").
  * @slot hint - Help text under the rows, e.g. "Paste a .env file into a key field to add several variables at once."
  * @slot add-icon - Replaces the plus of the add button.
  * @slot remove-icon - Replaces the cross of each row's remove button. Drawn as a copy in each place (a page-level SVG symbol it uses comes along): style it with inline styles, attributes or inherited custom properties; page class rules, listeners and properties set on the slotted element do not reach the copies.
@@ -151,26 +151,32 @@ export class KeyValueEditor extends LitElement {
   /** Accessible name of the whole editor, e.g. `Environment variables`. */
   @property({ type: String }) label = ''
 
-  /** Header of the key column, and the start of each key field's accessible name (`Key 1`). */
-  @property({ type: String, attribute: 'key-label' }) keyLabel = 'Key'
+  /**
+   * Header of the key column, and the start of each key field's accessible name (`Key 1`). Empty, it is the `key`
+   * message ("Key").
+   */
+  @property({ type: String, attribute: 'key-label' }) keyLabel = ''
 
-  /** Header of the value column, and the start of each value field's accessible name (`Value 1`). */
-  @property({ type: String, attribute: 'value-label' }) valueLabel = 'Value'
+  /**
+   * Header of the value column, and the start of each value field's accessible name (`Value 1`). Empty, it is the
+   * `value` message ("Value").
+   */
+  @property({ type: String, attribute: 'value-label' }) valueLabel = ''
 
-  /** Placeholder of the key fields. */
-  @property({ type: String, attribute: 'key-placeholder' }) keyPlaceholder = 'KEY'
+  /** Placeholder of the key fields. Unset, it is the `keyPlaceholder` message ("KEY"); `''` shows none. */
+  @property({ type: String, attribute: 'key-placeholder' }) keyPlaceholder?: string
 
-  /** Placeholder of the value fields. */
-  @property({ type: String, attribute: 'value-placeholder' }) valuePlaceholder = 'value'
+  /** Placeholder of the value fields. Unset, it is the `valuePlaceholder` message ("value"); `''` shows none. */
+  @property({ type: String, attribute: 'value-placeholder' }) valuePlaceholder?: string
 
-  /** Text of the add button. */
-  @property({ type: String, attribute: 'add-label' }) addLabel = 'Add another'
+  /** Text of the add button. Empty, it is the `add` message ("Add another"). */
+  @property({ type: String, attribute: 'add-label' }) addLabel = ''
 
-  /** Message under a key another row also has. */
-  @property({ type: String, attribute: 'duplicate-message' }) duplicateMessage = 'This key is already used.'
+  /** Message under a key another row also has. Empty, it is the `duplicate` message ("This key is already used."). */
+  @property({ type: String, attribute: 'duplicate-message' }) duplicateMessage = ''
 
-  /** Message under a key that does not match `key-pattern`. */
-  @property({ type: String, attribute: 'pattern-message' }) patternMessage = 'This key is not valid.'
+  /** Message under a key that does not match `key-pattern`. Empty, it is the `pattern` message ("This key is not valid."). */
+  @property({ type: String, attribute: 'pattern-message' }) patternMessage = ''
 
   // Behaviour
 
@@ -354,7 +360,7 @@ export class KeyValueEditor extends LitElement {
 
   /** The message under a row whose key is refused, and the form's validation message while it is. */
   protected keyErrorMessage(error: string): string {
-    return error === 'duplicate' ? this.duplicateMessage : this.patternMessage
+    return error === 'duplicate' ? this.duplicateMessage || this.msg.t('duplicate') : this.patternMessage || this.msg.t('pattern')
   }
 
   /** Whether a row counts as filled in: for the `empty` state, `required` and view mode. Here, whether it has a key. */
@@ -374,12 +380,22 @@ export class KeyValueEditor extends LitElement {
 
   /** Text of the add button. */
   protected addButtonLabel(): string {
-    return this.addLabel
+    return this.addLabel || this.msg.t('add')
   }
 
   /** Default content of the `empty` slot. */
   protected emptyLabel(): string {
-    return 'No variables'
+    return this.msg.t('empty')
+  }
+
+  /** The key column's name: `key-label`, else the `key` message. */
+  private keyColumnName(): string {
+    return this.keyLabel || this.msg.t('key')
+  }
+
+  /** The value column's name: `value-label`, else the `value` message. */
+  private valueColumnName(): string {
+    return this.valueLabel || this.msg.t('value')
   }
 
   /** Replaces the rows and fires `input` then `change`, for edits that are complete as they happen. */
@@ -624,8 +640,8 @@ export class KeyValueEditor extends LitElement {
   /** The column headers above the rows. */
   protected renderHeader() {
     return html`<div class="header" aria-hidden="true">
-      <span>${this.keyLabel}</span>
-      <span>${this.valueLabel}</span>
+      <span>${this.keyColumnName()}</span>
+      <span>${this.valueColumnName()}</span>
     </div>`
   }
 
@@ -644,7 +660,7 @@ export class KeyValueEditor extends LitElement {
     const value = String(entry.value ?? '')
     const locked = this.isKeyLocked(entry)
     // A fixed key names its value field; an editable one may still be blank, so the field is numbered instead.
-    const valueName = locked && key.trim() ? key.trim() : `${this.valueLabel} ${number}`
+    const valueName = locked && key.trim() ? key.trim() : this.msg.t('field', this.valueColumnName(), number)
     // An enclosing field's error marks every field, as the browser marks an invalid native control.
     const fieldInvalid = this.formField.invalid && !this.isDisabled
     const keyCell = locked
@@ -654,10 +670,10 @@ export class KeyValueEditor extends LitElement {
       : html`<input
           class="key"
           type="text"
-          aria-label="${this.keyLabel} ${number}"
+          aria-label=${this.msg.t('field', this.keyColumnName(), number)}
           aria-invalid=${error || fieldInvalid ? 'true' : nothing}
           aria-describedby=${ifDefined(error ? errorId : undefined)}
-          placeholder=${this.keyPlaceholder || nothing}
+          placeholder=${(this.keyPlaceholder ?? this.msg.t('keyPlaceholder')) || nothing}
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
@@ -676,7 +692,7 @@ export class KeyValueEditor extends LitElement {
           type=${hidden ? 'password' : 'text'}
           aria-label=${valueName}
           aria-invalid=${fieldInvalid ? 'true' : nothing}
-          placeholder=${this.valuePlaceholder || nothing}
+          placeholder=${(this.valuePlaceholder ?? this.msg.t('valuePlaceholder')) || nothing}
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
@@ -687,7 +703,7 @@ export class KeyValueEditor extends LitElement {
           @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, index, 'value')}
           @paste=${(event: ClipboardEvent) => this.handlePaste(event, index, 'value')}
         />
-        ${masked ? this.renderReveal(id, hidden, locked && key.trim() ? key.trim() : `${this.valueLabel.toLowerCase()} ${number}`) : nothing}
+        ${masked ? this.renderReveal(id, hidden, locked && key.trim() ? key.trim() : this.msg.t('field', this.valueColumnName().toLowerCase(), number)) : nothing}
       </span>
       ${
         locked
@@ -731,7 +747,7 @@ export class KeyValueEditor extends LitElement {
             <dd class="item-value">
               ${
                 hidden
-                  ? html`<span class="dots" aria-hidden="true">••••••••</span><span class="visually-hidden">Hidden value</span>`
+                  ? html`<span class="dots" aria-hidden="true">••••••••</span><span class="visually-hidden">${this.msg.t('hiddenValue')}</span>`
                   : html`<span class="text">${String(entry.value ?? '')}</span>`
               }
               ${masked ? this.renderReveal(id, hidden, key) : nothing}

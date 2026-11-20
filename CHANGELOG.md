@@ -3,6 +3,82 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.30](https://github.com/code2nguyen/web-components/releases/tag/v1.0.30) — 2026-11-20
+
+### Features
+
+- **tree:** Let rows leave the tree under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo ([a841d77](https://github.com/code2nguyen/web-components/commit/a841d77))
+- **reorder-list:** Let rows leave the list under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo ([5e81b30](https://github.com/code2nguyen/web-components/commit/5e81b30))
+- **kanban:** Let cards leave the board under a drag-kind: a drag handle, a pointer drag carried off it and moveItemTo ([b545fb3](https://github.com/code2nguyen/web-components/commit/b545fb3))
+- **core:** Share an in-page item drag session and a registry of item drop targets ([0e808b1](https://github.com/code2nguyen/web-components/commit/0e808b1))
+- **core:** Add wrapper, form-control and composed-selection helpers to dom-helper ([76d59f9](https://github.com/code2nguyen/web-components/commit/76d59f9))
+- **core:** Add SlotReplayController, which replays a slot handler once after a server-rendered host hydrates ([78c0782](https://github.com/code2nguyen/web-components/commit/78c0782))
+- **tree:** Take nodes dropped from another tree under a drop-kind ([3ef097f](https://github.com/code2nguyen/web-components/commit/3ef097f))
+- **reorder-list:** Take rows dropped from outside the list under a drop-kind ([2946930](https://github.com/code2nguyen/web-components/commit/2946930))
+- **kanban:** Take cards dropped from another board under a drop-kind ([1f08305](https://github.com/code2nguyen/web-components/commit/1f08305))
+- **core:** Let a drop zone take the app's own items as a typed payload besides files ([af2af6a](https://github.com/code2nguyen/web-components/commit/af2af6a))
+- **core:** Read the clipboard for a paste shortcut that fires no paste event, so a drop zone takes pasted files in Safari ([78fb187](https://github.com/code2nguyen/web-components/commit/78fb187))
+
+### Fixes
+
+- **chatbot:** Keep the class JSDoc on the class, so the manifest keeps its slot, parts and variables ([0b5a434](https://github.com/code2nguyen/web-components/commit/0b5a434))
+- **terminal:** Set the translated accessible name after the language is resolved, so it follows a language change ([79c04d2](https://github.com/code2nguyen/web-components/commit/79c04d2))
+- **kanban:** Translate the board's move announcements through the kanban message catalog ([d868a77](https://github.com/code2nguyen/web-components/commit/d868a77))
+- **radio:** Fire the group's own input with its new value, and keep the options' input inside ([b2c6d58](https://github.com/code2nguyen/web-components/commit/b2c6d58))
+- **upload:** Write file sizes with Intl.NumberFormat units in the element's language ([c7cff3f](https://github.com/code2nguyen/web-components/commit/c7cff3f))
+- **flow:** Translate the Delete key's shortcut hint through message tokens ([b04a3ca](https://github.com/code2nguyen/web-components/commit/b04a3ca))
+- **chart:** Translate the Venn diagram's and the map's text and the candlestick's series name through message tokens ([0bc4509](https://github.com/code2nguyen/web-components/commit/0bc4509))
+- **state-timeline:** Translate the timeline name, the band and segment names, the tooltip and the empty text through message tokens ([578f170](https://github.com/code2nguyen/web-components/commit/578f170))
+- **gantt:** Translate the column headings, row names, tooltip terms and empty text through message tokens ([a82e6c0](https://github.com/code2nguyen/web-components/commit/a82e6c0))
+- **spreadsheet:** Translate the cell editors' names and the row header through message tokens ([e5c6ae3](https://github.com/code2nguyen/web-components/commit/e5c6ae3))
+- **trace-waterfall:** Translate the tree name, the empty text and the error mark through message tokens ([955c7ec](https://github.com/code2nguyen/web-components/commit/955c7ec))
+- **markdown:** Translate the table region's name through message tokens ([9c82ccc](https://github.com/code2nguyen/web-components/commit/9c82ccc))
+- **rate:** Translate the default accessible name through message tokens ([a7847f9](https://github.com/code2nguyen/web-components/commit/a7847f9))
+- **query-input:** Translate the field name, suggestions heading, chip remove and clear buttons through message tokens ([29858a1](https://github.com/code2nguyen/web-components/commit/29858a1))
+- **date-input:** Translate the calendar button's name through message tokens ([1fe171d](https://github.com/code2nguyen/web-components/commit/1fe171d))
+- **avatar:** Translate the edit buttons' names and the group's labels through message tokens ([8aba0d2](https://github.com/code2nguyen/web-components/commit/8aba0d2))
+- **chip-group:** Translate the overflow indicator and collapse button through message tokens ([2fd22c3](https://github.com/code2nguyen/web-components/commit/2fd22c3))
+- **navigation-menu:** Translate the mobile button's default name through message tokens ([c0387c7](https://github.com/code2nguyen/web-components/commit/c0387c7))
+- **header:** Translate the navigation landmark's default name through message tokens ([d426565](https://github.com/code2nguyen/web-components/commit/d426565))
+- **virtual-list:** Translate the list name and the search field's placeholder through message tokens ([7998879](https://github.com/code2nguyen/web-components/commit/7998879))
+- **tree:** Translate the empty text through message tokens ([52bc302](https://github.com/code2nguyen/web-components/commit/52bc302))
+- **kanban:** Translate a column's empty text and keyboard instructions through message tokens ([e45ff1a](https://github.com/code2nguyen/web-components/commit/e45ff1a))
+- **key-value-editor:** Translate the column names, placeholders, add button, key errors and empty text through message tokens ([a9c9dc3](https://github.com/code2nguyen/web-components/commit/a9c9dc3))
+- **slider:** Translate the range thumbs' names through message tokens ([746432b](https://github.com/code2nguyen/web-components/commit/746432b))
+- **phone-input:** Translate the country search label and its empty text through message tokens ([1c9498a](https://github.com/code2nguyen/web-components/commit/1c9498a))
+- **cascader:** Translate the placeholder, the panel and column names and the empty text through message tokens ([af9c688](https://github.com/code2nguyen/web-components/commit/af9c688))
+- **chat-message-list:** Translate the log name, the jump button and the loading text through message tokens ([8bf31a0](https://github.com/code2nguyen/web-components/commit/8bf31a0))
+- **chat-input:** Translate the send button's name through message tokens ([00e59e3](https://github.com/code2nguyen/web-components/commit/00e59e3))
+- **popconfirm:** Translate the default button labels through message tokens ([7588dc6](https://github.com/code2nguyen/web-components/commit/7588dc6))
+- **command:** Translate the placeholder, the field name and the empty text through message tokens ([99cfc67](https://github.com/code2nguyen/web-components/commit/99cfc67))
+- **breadcrumb:** Translate the landmark name and the ellipsis label through message tokens ([18284d7](https://github.com/code2nguyen/web-components/commit/18284d7))
+- **pagination:** Translate the default labels and status templates through message tokens ([08ff876](https://github.com/code2nguyen/web-components/commit/08ff876))
+- **attachment:** Translate the upload status and action names through message tokens ([1dc5307](https://github.com/code2nguyen/web-components/commit/1dc5307))
+- **angular:** Ignore an input or change that bubbled from a control in the element's action zone ([7215656](https://github.com/code2nguyen/web-components/commit/7215656))
+- **form-field:** Ignore an input or change that bubbled from a control in its control's action zone ([34194fc](https://github.com/code2nguyen/web-components/commit/34194fc))
+- **upload:** Translate the drop prompt, hint and button labels through message tokens ([bc2e77d](https://github.com/code2nguyen/web-components/commit/bc2e77d))
+- **navigation-menu:** Let a click close the panel in the page's first moments, after a closed hover-open, and after the pointer re-enters the open item ([8b66726](https://github.com/code2nguyen/web-components/commit/8b66726))
+- **description-list:** Translate an empty value's placeholder through a message token ([de6f98e](https://github.com/code2nguyen/web-components/commit/de6f98e))
+- **chart:** Translate the no-data and loading texts through message tokens ([ad9a40b](https://github.com/code2nguyen/web-components/commit/ad9a40b))
+- **virtual-list:** Translate the empty and no-results messages through message tokens ([24c451f](https://github.com/code2nguyen/web-components/commit/24c451f))
+- **table:** Translate the empty message through a message token ([5e01ea0](https://github.com/code2nguyen/web-components/commit/5e01ea0))
+- **time-input:** End empty text bindings with nothing so a value set after hydration shows ([ca3feb7](https://github.com/code2nguyen/web-components/commit/ca3feb7))
+- **tree:** Follow a slotted label's text when it changes in place, as renderLabel's does ([9a1144c](https://github.com/code2nguyen/web-components/commit/9a1144c))
+- **command:** Show a group heading set after hydration when the server rendered none ([2331b0c](https://github.com/code2nguyen/web-components/commit/2331b0c))
+- **google-map:** Translate the map notices, and show an error notice for an error with no message ([694ce7e](https://github.com/code2nguyen/web-components/commit/694ce7e))
+- **google-map:** Resolve @c2n/core to the workspace package instead of a stale 0.0.19 copy ([136b27e](https://github.com/code2nguyen/web-components/commit/136b27e))
+- **tree:** Name a row from its live label when no label is slotted ([4cccdd8](https://github.com/code2nguyen/web-components/commit/4cccdd8))
+- **table-of-contents:** Render nothing rather than an empty string in the index bar's bubble ([8575b1c](https://github.com/code2nguyen/web-components/commit/8575b1c))
+- **menu:** Render nothing rather than an empty string for an unlabelled menu item, so a hydrated label lands in its text node ([efd2e04](https://github.com/code2nguyen/web-components/commit/efd2e04))
+- **list-item:** Render nothing rather than an empty string for an unlabelled item, so a hydrated label lands in its text node ([53e0c6b](https://github.com/code2nguyen/web-components/commit/53e0c6b))
+- **tree:** Render nothing rather than an empty string for an unlabelled row, so a label set after hydration shows ([da98b25](https://github.com/code2nguyen/web-components/commit/da98b25))
+
+### Docs site & examples
+
+- **examples:** Keep the observability alerts page within a 768px viewport while its tabs and table lay out ([6d5be46](https://github.com/code2nguyen/web-components/commit/6d5be46))
+- **ui:** Let a slotted child of an island stay an island, dropping the image annotator special case ([a10d11e](https://github.com/code2nguyen/web-components/commit/a10d11e))
+- **ui:** Bound the date-input range examples with the themed calendar, and say what typing still allows ([afb63d1](https://github.com/code2nguyen/web-components/commit/afb63d1))
+
 ## [1.0.29](https://github.com/code2nguyen/web-components/releases/tag/v1.0.29) — 2026-11-19
 
 ### Features

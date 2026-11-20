@@ -4,7 +4,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { isComposingKey } from '@c2n/core/dom-helper.js'
+import { composedSelectionRanges, isComposingKey } from '@c2n/core/dom-helper.js'
 import { terminalMessages } from './messages.js'
 import { commonPrefix, parseAnsi, parseArgs } from './terminal-text.js'
 import styles from './terminal.scss?inline'
@@ -246,9 +246,11 @@ export class Terminal extends LitElement {
     else super.focus(options)
   }
 
-  protected override willUpdate(_changed: PropertyValues<this>): void {
-    // Also follows a language change, which re-renders without a property change.
+  protected override update(changed: PropertyValues<this>): void {
+    // Also follows a language change, which re-renders without a property change. Here, not in `willUpdate`: the
+    // localize controller picks the new language between the two.
     this.internals.ariaLabel = this.heading || this.msg.t('terminal')
+    super.update(changed)
   }
 
   override connectedCallback(): void {
@@ -690,18 +692,15 @@ export class Terminal extends LitElement {
   private hasSelection(): boolean {
     const root = this.shadowRoot as (ShadowRoot & { getSelection?(): Selection | null }) | null
     if (!(root?.getSelection?.()?.isCollapsed ?? true)) return true
-    const selection = window.getSelection() as (Selection & { getComposedRanges?(options: { shadowRoots: ShadowRoot[] }): StaticRange[] }) | null
+    const selection = window.getSelection()
     if (!selection) return false
-    if (root && selection.getComposedRanges) {
-      try {
-        // Only text selected in the output counts: with the command line focused, its caret is a range too.
-        const output = root.querySelector('.output')
-        const inOutput = (node: Node) => !!output && output.contains(node)
-        const ranges = selection.getComposedRanges({ shadowRoots: [root] })
-        if (ranges.some((range) => !range.collapsed && (inOutput(range.startContainer) || inOutput(range.endContainer)))) return true
-      } catch {
-        // An engine with the older signature (`getComposedRanges(...roots)`) falls back to the document selection.
-      }
+    // An engine that cannot answer (no `getComposedRanges`) falls back to the document selection.
+    const ranges = root ? composedSelectionRanges(selection, [root]) : undefined
+    if (root && ranges) {
+      // Only text selected in the output counts: with the command line focused, its caret is a range too.
+      const output = root.querySelector('.output')
+      const inOutput = (node: Node) => !!output && output.contains(node)
+      if (ranges.some((range) => !range.collapsed && (inOutput(range.startContainer) || inOutput(range.endContainer)))) return true
     }
     return !selection.isCollapsed
   }

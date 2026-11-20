@@ -146,16 +146,35 @@ async function arrowTo(page, locator) {
   return false
 }
 
+/**
+ * Whether Tab itself stops on the target. Arrow keys are only how a person reaches an item a widget keeps out of the tab
+ * order (a roving option, an active descendant): from a sibling control in the same component (the country button of a
+ * phone field) they would open its popup instead, so a target with its own tab stop is reached with Tab.
+ */
+function isTabStop(locator) {
+  return locator
+    .evaluate((el) => {
+      if (el.tabIndex < 0 || el.disabled || el.getAttribute('aria-disabled') === 'true') return false
+      // A host taken out of the tab order (a roving option such as a segmented button) takes its shadow tree with it.
+      for (let node = el.getRootNode(); node instanceof ShadowRoot; node = node.host.getRootNode()) {
+        if (node.host.getAttribute('tabindex') === '-1') return false
+      }
+      return true
+    })
+    .catch(() => false)
+}
+
 async function tabTo(page, locator, ctx, maxTabs) {
+  const tabStop = await isTabStop(locator)
   const relation = await focusRelation(locator)
   if (relation === 'on') return true
-  if (relation === 'nearby' && (await arrowTo(page, locator))) return true
+  if (relation === 'nearby' && !tabStop && (await arrowTo(page, locator))) return true
   for (let i = 0; i < maxTabs; i++) {
     await page.keyboard.press('Tab')
     await ctx.onTabStop?.()
     const now = await focusRelation(locator)
     if (now === 'on') return true
-    if (now === 'nearby' && (await arrowTo(page, locator))) return true
+    if (now === 'nearby' && !tabStop && (await arrowTo(page, locator))) return true
   }
   const target = await locator
     .evaluate((el) => {

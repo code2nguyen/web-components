@@ -2,6 +2,11 @@ import { accessible } from '../../../../tests/component-fixture'
 import type { Rate } from '../src/rate'
 import { test, expect } from './fixture'
 
+test('its default name follows the language of the page', async ({ page, scenario }) => {
+  await scenario('lang')
+  await expect(page.locator('c2-rate [aria-label="Note"]')).toBeAttached()
+})
+
 test('selects a whole-star rating with the pointer', async ({ page, scenario }) => {
   await scenario()
   const host = page.locator('c2-rate')

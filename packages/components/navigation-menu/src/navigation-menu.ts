@@ -3,6 +3,8 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { navigationMenuMessages } from './messages.js'
 import styles from './navigation-menu.scss?inline'
 import { NavigationMenuItem, type PanelToggleEventDetail } from './navigation-menu-item'
 
@@ -155,8 +157,10 @@ export class NavigationMenu extends LitElement {
    */
   @property({ type: Number, attribute: 'mobile-breakpoint' }) mobileBreakpoint = 0
 
-  /** Accessible name of the button shown in `mobile` mode. */
-  @property({ attribute: 'mobile-label' }) mobileLabel = 'Menu'
+  /** Accessible name of the button shown in `mobile` mode. Empty, it is the `mobile` message ("Menu"). */
+  @property({ attribute: 'mobile-label' }) mobileLabel = ''
+
+  private readonly msg = new LocalizeController(this, navigationMenuMessages)
 
   /** Whether the `mobile` button's list is showing. */
   @property({ type: Boolean, reflect: true, attribute: 'mobile-open' }) mobileOpen = false
@@ -185,8 +189,10 @@ export class NavigationMenu extends LitElement {
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
 
-  /** When hover last opened a panel, so the click that usually follows the pointer does not close it again. */
-  private hoverOpenedAt = 0
+  /**
+   * When hover last opened a panel, so the click that usually follows the pointer does not close it again; `-Infinity`
+   * when it did not. Not 0: `performance.now()` starts at 0 with the page. */
+  private hoverOpenedAt = -Infinity
 
   /** The item a click just closed: hover leaves it shut until the pointer moves to another item or leaves the bar. */
   private hoverSuppressed?: NavigationMenuItem
@@ -443,6 +449,9 @@ export class NavigationMenu extends LitElement {
 
   private scheduleOpen(item: NavigationMenuItem) {
     this.clearTimers()
+    // Already open: `pointerover` bubbles up from the trigger's own content, and opening it "again" would restart the
+    // grace that keeps a click from closing a panel hover just opened, swallowing the visitor's next deliberate click.
+    if (item.expanded) return
     if (!item.hasPanel || item.disabled) {
       // Moving onto a plain link closes whatever was open, with the same grace period.
       if (this.value) this.scheduleClose()
@@ -510,13 +519,16 @@ export class NavigationMenu extends LitElement {
     if (item.disabled || !item.hasPanel) return
     event.preventDefault()
     if (!item.expanded) {
+      // The click opened it, not hover: a stamp left by an earlier hover-open that has since closed must not make the
+      // next deliberate click look like the second half of a point-and-click.
+      this.hoverOpenedAt = -Infinity
       this.setValue(item.value)
       return
     }
     // A click on the open trigger closes it. The one exception is the click that lands just after hover opened the
     // panel: that visitor pointed and clicked in one motion and meant to open it, so the panel stays.
     const justOpenedByHover = performance.now() - this.hoverOpenedAt < HOVER_CLICK_GRACE
-    this.hoverOpenedAt = 0
+    this.hoverOpenedAt = -Infinity
     if (justOpenedByHover) return
     // The pointer is still on the item, so keep hover from reopening what the click just closed.
     this.hoverSuppressed = item
@@ -670,7 +682,7 @@ export class NavigationMenu extends LitElement {
                 type="button"
                 class="mobile-trigger"
                 id="mobile-trigger"
-                aria-label=${this.mobileLabel}
+                aria-label=${this.mobileLabel || this.msg.t('mobile')}
                 aria-expanded=${this.mobileOpen ? 'true' : 'false'}
                 aria-controls="mobile-panel"
               >

@@ -92,6 +92,7 @@ export function distributionParts(
   }))
   if (folded.length > 0) {
     const value = folded.reduce((sum, item) => sum + item.value, 0)
+    // modern-web-ignore: literal-interface-text the element passes its translated `other` message; this default only serves direct callers of the helper
     parts.push({ key: '__other', label: options.otherLabel ?? 'Other', value, share: value / total, index: parts.length, other: true, items: folded })
   }
   return parts
@@ -284,7 +285,9 @@ export class DistributionBar extends LitElement {
     const active = this.active === null ? undefined : parts[this.active]
     return html`
       <div class="header" part="header" ?hidden=${!hasLabel && !this.slotPresence.has('header-end')}>
-        <span id="label" class="label" part="label" ?hidden=${!hasLabel}><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot></span>
+        <span id="label" class="label" part="label" ?hidden=${!hasLabel}
+          ><slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot></span
+        >
         <span class="header-end"><slot name="header-end" @slotchange=${this.slotPresence.handleSlotChange}></slot></span>
       </div>
       <div class="track">

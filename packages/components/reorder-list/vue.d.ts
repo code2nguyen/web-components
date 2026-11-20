@@ -20,10 +20,14 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-reorder-list': DefineComponent<
       C2Props<ReorderList> & {
+        'drop-kind'?: unknown
+        'drag-kind'?: unknown
         'drag-start-threshold'?: unknown
         'auto-scroll-disabled'?: unknown
         'swipe-actions'?: unknown
         onInput?: (event: EventOf<ReorderList, 'input'>) => void
+        onItemDrop?: (event: EventOf<ReorderList, 'item-drop'>) => void
+        onItemMoveOut?: (event: EventOf<ReorderList, 'item-move-out'>) => void
         onSwipeAction?: (event: EventOf<ReorderList, 'swipe-action'>) => void
         onReorder?: (event: EventOf<ReorderList, 'reorder'>) => void
         onChange?: (event: EventOf<ReorderList, 'change'>) => void

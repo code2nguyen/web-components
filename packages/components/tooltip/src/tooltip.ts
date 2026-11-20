@@ -474,7 +474,7 @@ export class Tooltip extends LitElement {
   override render() {
     return html`
       <div class="c2-tooltip">
-        <slot>${this.targetText}</slot>
+        <slot>${this.targetText || nothing}</slot>
         ${this.hideArrow ? nothing : html`<span class="c2-tooltip__arrow"></span>`}
       </div>
     `

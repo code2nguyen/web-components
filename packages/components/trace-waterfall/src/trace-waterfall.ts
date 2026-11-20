@@ -16,6 +16,8 @@ import {
   type TraceSpan,
   type TraceTimeUnit,
 } from './trace-model.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { traceWaterfallMessages } from './messages.js'
 import styles from './trace-waterfall.scss?inline'
 
 export type { TraceSpan, TraceSpanStatus, TraceTimeUnit } from './trace-model.js'
@@ -85,7 +87,7 @@ export interface TraceWaterfall {
  *
  * @tag c2-trace-waterfall
  *
- * @slot empty - Shown instead of the waterfall while there are no spans.
+ * @slot empty - Shown instead of the waterfall while there are no spans. Defaults to the `empty` message ("No spans").
  *
  * @csspart header - The row holding the column title and the time axis.
  * @csspart row - One span.
@@ -153,8 +155,10 @@ export class TraceWaterfall extends LitElement {
   /** Highlights the spans whose name or service contains this text, dims the rest and opens the spans above each match. */
   @property({ type: String }) search = ''
 
-  /** Accessible name of the span tree. */
-  @property({ type: String }) label = 'Trace'
+  /** Accessible name of the span tree. Empty, it is the `label` message ("Trace"). */
+  @property({ type: String }) label = ''
+
+  private readonly msg = new LocalizeController(this, traceWaterfallMessages)
 
   /** Spans opened or closed by the user. */
   @state() private overrides = new Map<string, boolean>()
@@ -212,7 +216,7 @@ export class TraceWaterfall extends LitElement {
 
   override render() {
     if (!this.model.nodes.size) {
-      return html`<div class="empty"><slot name="empty">No spans</slot></div>`
+      return html`<div class="empty"><slot name="empty">${this.msg.t('empty')}</slot></div>`
     }
     const total = this.model.total
     return html`
@@ -223,7 +227,14 @@ export class TraceWaterfall extends LitElement {
             ${ticks(total).map((at, i, all) => html`<span class="tick ${i === 0 ? 'first' : i === all.length - 1 ? 'last' : ''}" style="--at: ${this.share(at)}">${formatDuration(at)}</span>`)}
           </div>
         </div>
-        <div class="rows" role="tree" aria-label=${this.label} @keydown=${this.onKeydown} @click=${this.onClick} @focusin=${this.onFocusin}>
+        <div
+          class="rows"
+          role="tree"
+          aria-label=${this.label || this.msg.t('label')}
+          @keydown=${this.onKeydown}
+          @click=${this.onClick}
+          @focusin=${this.onFocusin}
+        >
           ${repeat(
             this.rows,
             (row) => row.node.key,
@@ -282,7 +293,7 @@ export class TraceWaterfall extends LitElement {
               : nothing
           }
         </span>
-        ${error ? html`<span class="error-mark" role="img" aria-label="Error"></span>` : nothing}
+        ${error ? html`<span class="error-mark" role="img" aria-label=${this.msg.t('error')}></span>` : nothing}
         <span class="label" title=${span.name}>${this.highlight(String(span.name ?? ''))}</span>
         ${span.service ? html`<span class="service">${this.highlight(span.service)}</span>` : nothing}
       </div>

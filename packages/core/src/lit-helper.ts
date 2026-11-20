@@ -1,6 +1,6 @@
 import { property as litProperty, type PropertyDecorator as LitPropertyDecorator } from '@lit/reactive-element/decorators/property.js'
 import type { PropertyDeclaration } from '@lit/reactive-element'
-import { noChange } from 'lit'
+import { isServer, noChange, type ReactiveController, type ReactiveControllerHost } from 'lit'
 import { Directive, directive, PartType, type ElementPart, type PartInfo } from 'lit/directive.js'
 
 export { html, svg, nothing } from 'lit'
@@ -227,3 +227,70 @@ function assignNodes(slot: HTMLSlotElement, nodes: readonly (Element | Text)[]):
  * attributes; check `shadowRoot.slotAssignment`.
  */
 export const assignSlot = directive(AssignSlotDirective)
+
+/** What {@link SlotReplayController} needs of its host: a Lit element. */
+export type SlotReplayHost = ReactiveControllerHost & HTMLElement & { readonly hasUpdated: boolean }
+
+export interface SlotReplayOptions {
+  /**
+   * Call the handler after the first update of a client-rendered host too, not only of a server-rendered one. For a
+   * handler that also reads state no `slotchange` reports on the client (an empty slot fires none). Default `false`.
+   */
+  always?: boolean
+  /**
+   * Call the handler from the first update itself, where `firstUpdated` would (just before it), rather than once that
+   * update has completed. State the handler sets then schedules a second update from inside the first, which Lit
+   * warns about in development; the default waits for `updateComplete` instead. Default `false`.
+   */
+  immediate?: boolean
+}
+
+/**
+ * Calls a slot's handler once after the host hydrates, standing in for the `slotchange` a server-rendered element
+ * never hears.
+ *
+ * A declarative shadow root (server rendering) has its slots assigned by the parser, before the element upgrades and
+ * before Lit binds `@slotchange` on the server's `<slot>`: the event has already fired, and no other follows for the
+ * children that were there. A component that learns about its children from `slotchange` (its rows, its actions, its
+ * label) would never see them. The hydrating render itself must match the server's, which saw no light DOM, so the
+ * children are read after it: by default once the first update has completed.
+ *
+ * `serverRendered` and `hydrating` answer the questions a component asks around it: whether the shadow root came from
+ * the server, and whether the hydrating first update is still to come (work that changes what the first render draws
+ * must wait for the replay). Construct it as a class field, so `shadowRoot` is read before Lit attaches a client root.
+ *
+ * ```ts
+ * private readonly hydration = new SlotReplayController(this, () => this.handleSlotChange())
+ * ```
+ */
+export class SlotReplayController implements ReactiveController {
+  /** Whether the shadow root came from the server (declarative shadow DOM), read when the host was constructed. */
+  readonly serverRendered: boolean
+  readonly #host: SlotReplayHost
+  readonly #handler: (() => void) | undefined
+  readonly #options: SlotReplayOptions
+  #replayed = false
+
+  constructor(host: SlotReplayHost, handler?: () => void, options: SlotReplayOptions = {}) {
+    this.#host = host
+    this.#handler = handler
+    this.#options = options
+    this.serverRendered = !isServer && !!host.shadowRoot
+    host.addController(this)
+  }
+
+  /** Server-rendered and not hydrated yet: the first update, which must draw what the server drew, is still to come. */
+  get hydrating(): boolean {
+    // `#replayed` too: Lit runs `hostUpdated`, and so an `immediate` handler, before it sets `hasUpdated`.
+    return this.serverRendered && !this.#host.hasUpdated && !this.#replayed
+  }
+
+  hostUpdated(): void {
+    if (this.#replayed) return
+    this.#replayed = true
+    const handler = this.#handler
+    if (!handler || (!this.serverRendered && !this.#options.always)) return
+    if (this.#options.immediate) handler()
+    else void this.#host.updateComplete.then(() => handler())
+  }
+}

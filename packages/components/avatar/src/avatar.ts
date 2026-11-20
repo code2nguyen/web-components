@@ -5,9 +5,14 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { avatarMessages } from './messages.js'
 import styles from './avatar.scss?inline'
 
 export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline'
+
+/** The statuses with a message; any other value an app sets is read out as written. */
+const STATUSES: ReadonlySet<string> = new Set<AvatarStatus>(['online', 'away', 'busy', 'offline'])
 
 export interface AvatarChangeDetail {
   file: File
@@ -144,6 +149,7 @@ export class Avatar extends LitElement {
   // Group state lives in a custom state, never on an attribute: the parent group measures on connect, before a
   // framework hydrates, and an attribute it wrote then would be one the server never rendered.
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, avatarMessages)
 
   @state() private imageFailed = false
   @state() private previewUrl: string | undefined = undefined
@@ -307,7 +313,7 @@ export class Avatar extends LitElement {
                 loading="lazy"
                 @error=${this.handleImageError}
               />`
-            : html`<slot>${this.initial}</slot>`
+            : html`<slot>${this.initial || nothing}</slot>`
         }
       </div>
     `
@@ -316,7 +322,7 @@ export class Avatar extends LitElement {
   override render() {
     const source = this.previewUrl ?? this.src
     const showImage = !!source && !this.imageFailed
-    const subject = this.name ? `${this.name} avatar` : 'avatar'
+    const subject = this.name ? this.msg.t('subject', this.name) : this.msg.t('subjectUnnamed')
     // The file input exists only while the avatar is editable, and is hidden from assistive technology even then: the
     // Change/Upload button opens it, and an exposed one is a second "No file chosen" button in every row that shows an
     // avatar.
@@ -340,7 +346,7 @@ export class Avatar extends LitElement {
               type="button"
               class="avatar-trigger"
               ?disabled=${this.disabled}
-              aria-label=${showImage ? `Change ${subject}` : `Upload ${subject}`}
+              aria-label=${showImage ? this.msg.t('change', subject) : this.msg.t('upload', subject)}
               @click=${this.browse}
             >
               ${this.renderVisual(source, true)}
@@ -355,10 +361,12 @@ export class Avatar extends LitElement {
             </button>`
           : this.renderVisual(source, false)
       }
-      <slot name="badge" class="c2-avatar-badge"> ${this.status ? html`<span class="c2-avatar-status" aria-label=${this.status}></span>` : nothing} </slot>
+      <slot name="badge" class="c2-avatar-badge">
+        ${this.status ? html`<span class="c2-avatar-status" aria-label=${STATUSES.has(this.status) ? this.msg.t(this.status as AvatarStatus) : this.status}></span>` : nothing}
+      </slot>
       ${
         this.editable && showImage
-          ? html`<button type="button" class="remove-action" ?disabled=${this.disabled} aria-label=${`Remove ${subject}`} @click=${this.removeImage}>
+          ? html`<button type="button" class="remove-action" ?disabled=${this.disabled} aria-label=${this.msg.t('remove', subject)} @click=${this.removeImage}>
               <slot name="remove-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
               </slot>

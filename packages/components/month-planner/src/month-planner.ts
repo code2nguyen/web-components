@@ -1048,7 +1048,7 @@ export class MonthPlanner extends LitElement {
     >
       <header class="header">
         <h2 class="heading" part="heading" id="heading" ?hidden=${!hasHeading}>
-          <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
+          <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading || nothing}</slot>
         </h2>
         <h2 class="title" aria-live="polite">
           ${

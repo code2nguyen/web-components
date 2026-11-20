@@ -1,12 +1,20 @@
 import { defineMessages } from '@c2n/core/localize.js'
 
 const en = {
+  /** Shown when the list has no items and `empty-message` is not set. */
+  empty: 'No items',
+  /** Shown when a search matches nothing and `no-results-message` is not set. */
+  noResults: 'No matches',
   /** Shown under the last item while the next page loads (`has-more`). */
   loadingMore: 'Loading more…',
   /** Shown under the last item when loading the next page failed and `load-more-error` holds no message of its own. */
   loadMoreFailed: "Couldn't load more",
   /** The button that asks for the next page again. */
   retry: 'Retry',
+  /** Accessible name of the list when it has no `aria-label`. */
+  label: 'Items',
+  /** Placeholder and accessible name of the built-in search field. */
+  search: 'Search',
 }
 
 /** The virtual list's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "id": "2026-11-20T1602-appointment-booking",
+  "startedAt": "2026-11-20T16:02:19.598Z",
+  "durationSeconds": 62,
+  "mode": "run",
+  "target": "appointment-booking",
+  "spec": "appointment-booking",
+  "direction": "default",
+  "library": {
+    "version": "1.0.29",
+    "commit": "5aac3322675bfad465597273a8b4cb371931f5ce",
+    "branch": "lab/2026-11-20",
+    "dirty": false
+  },
+  "runner": {
+    "personas": [
+      "mouse",
+      "keyboard",
+      "mobile",
+      "dark",
+      "fr"
+    ],
+    "repeat": 2,
+    "journeys": [
+      "t1-book-haircut",
+      "t2-booked-and-past",
+      "t3-longer-service",
+      "t4-closed-days",
+      "t5-missing-and-refused",
+      "t1-book-haircut-fr"
+    ],
+    "axe": true,
+    "full": true
+  },
+  "build": {
+    "report": "lab/reports/appointment-booking/default.md",
+    "builder": "agent (Claude Code, c2n MCP server)",
+    "date": "2026-11-20",
+    "outcomes": {
+      "R1": {
+        "outcome": "met",
+        "components": [
+          "c2-radio-group",
+          "c2-radio",
+          "c2-format-number"
+        ]
+      },
+      "R2": {
+        "outcome": "workaround",
+        "components": [
+          "c2-date-strip",
+          "c2-date-selector"
+        ]
+      },
+      "R3": {
+        "outcome": "workaround",
+        "components": [
+          "c2-time-slot-picker",
+          "c2-date-strip"
+        ]
+      },
+      "R4": {
+        "outcome": "met",
+        "components": [
+          "c2-phone-input"
+        ]
+      },
+      "R5": {
+        "outcome": "met",
+        "components": [
+          "c2-form",
+          "c2-form-field",
+          "c2-text-field"
+        ]
+      },
+      "R6": {
+        "outcome": "met",
+        "components": [
+          "c2-form",
+          "c2-button",
+          "c2-phone-input"
+        ]
+      },
+      "R7": {
+        "outcome": "met",
+        "components": [
+          "c2-format-date",
+          "c2-format-number"
+        ]
+      },
+      "R8": {
+        "outcome": "met",
+        "components": [
+          "c2-card",
+          "c2-form"
+        ]
+      },
+      "R9": {
+        "outcome": "failed",
+        "components": [
+          "c2-time-slot-picker",
+          "c2-date-strip"
+        ]
+      }
+    }
+  },
+  "summary": {
+    "journeys": 16,
+    "passed": 16,
+    "flakyJourneys": 0,
+    "failed": 0,
+    "findings": {
+      "new": 0,
+      "known": 1,
+      "flaky": 0
+    }
+  },
+  "journeys": [
+    {
+      "persona": "mouse",
+      "journey": "t1-book-haircut",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t2-booked-and-past",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t3-longer-service",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t4-closed-days",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mouse",
+      "journey": "t5-missing-and-refused",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t1-book-haircut",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t2-booked-and-past",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t3-longer-service",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t4-closed-days",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "keyboard",
+      "journey": "t5-missing-and-refused",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t1-book-haircut",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t3-longer-service",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "mobile",
+      "journey": "t5-missing-and-refused",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "dark",
+      "journey": "t1-book-haircut",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t1-book-haircut-fr",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    },
+    {
+      "persona": "fr",
+      "journey": "t2-booked-and-past",
+      "runs": 2,
+      "passed": 2,
+      "failedStep": null
+    }
+  ],
+  "findings": [
+    {
+      "key": "appointment-booking/console-warning/c2-radio/Element c2-radio scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inefficient",
+      "kind": "console-warning",
+      "severity": "warn",
+      "component": "c2-radio",
+      "rule": "Element c2-radio scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inefficient",
+      "status": "known",
+      "reproducible": true,
+      "seen": {
+        "mouse/t3-longer-service": 2,
+        "mobile/t3-longer-service": 2
+      },
+      "message": "Element c2-radio scheduled an update (generally because a property was set) after an update completed, causing a new update to be scheduled. This is inefficient and should be avoided unless the next update can only be scheduled as a side effect of the previous update. See https://lit.dev/msg/change-"
+    }
+  ],
+  "change": null
+}

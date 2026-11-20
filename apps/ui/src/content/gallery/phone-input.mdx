@@ -4,6 +4,8 @@ description: 'Ready-made looks for c2-phone-input: a large sign-up field, a pill
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import PhoneInputExamplesRuntime from '../../components/PhoneInputExamplesRuntime.astro'
 
 import { PhoneInput } from '@c2n/components/phone-input'
 
@@ -98,3 +100,36 @@ The box is one set of variables (`--c2-phone-input--border`, `--c2-phone-input--
 ```
 
 </GalleryGrid>
+
+## Language
+
+<PhoneInputExamplesRuntime />
+
+The field and country names, the country search and the validation messages are message tokens: an app translates them once with `addTranslations`, and each input speaks the language of its nearest `lang`. The country names come from `Intl.DisplayNames` in the `locale` attribute.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=En français,description=The country list and its search in the language of the page,useWhen=The application is translated
+<div lang="fr">
+  <c2-phone-input client:only="lit" country="FR" locale="fr" required></c2-phone-input>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    'phone-input': {
+      label: 'Numéro de téléphone',
+      country: 'Pays : {0} (+{1})',
+      valueMissing: 'Saisissez un numéro de téléphone.',
+      patternMismatch: 'Saisissez un numéro de téléphone valide pour {0}.',
+      search: 'Chercher un pays',
+      empty: 'Aucun pays trouvé',
+    },
+  },
+})
+```

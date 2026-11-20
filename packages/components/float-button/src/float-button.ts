@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -171,6 +171,9 @@ export class FloatButton extends LitElement {
 
   constructor() {
     super()
+    // A server-rendered shadow root has its slots filled before hydration, so no slotchange follows: read them after
+    // the first update (a client render too, as before).
+    new SlotReplayController(this, () => this.refreshActions(), { always: true, immediate: true })
     if (!isServer) {
       this.addEventListener('focusout', this.onFocusOut)
       this.addEventListener('pointerenter', this.onPointerEnter)
@@ -213,11 +216,6 @@ export class FloatButton extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>) {
     if (this.disabled && this.open) this.open = false
     if (changed.has('open') && this.open && !this.hasActions && this.hasUpdated) this.open = false
-  }
-
-  protected override firstUpdated() {
-    // A server-rendered shadow root has its slots filled before hydration, so no slotchange follows: read them now.
-    this.refreshActions()
   }
 
   protected override updated(changed: PropertyValues<this>) {

@@ -1,6 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
@@ -102,17 +102,16 @@ export class Banner extends LitElement {
 
   @state() private hasActions = false
 
-  // A declarative shadow root exists before the first update.
-  private readonly serverRendered = this.shadowRoot !== null
-
   // slotchange keeps hasActions current, but the first render must already know it. A server-rendered banner hydrates
   // with the server's DOM, which a value changed before hydration would not update, so it reads the slot once after.
+  private readonly hydration = new SlotReplayController(this, () => this.readActions(), { immediate: true })
+
   protected override willUpdate() {
-    if (!isServer && !this.hasUpdated && !this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
+    if (!isServer && !this.hasUpdated && !this.hydration.serverRendered) this.readActions()
   }
 
-  protected override firstUpdated() {
-    if (this.serverRendered) this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
+  private readActions() {
+    this.hasActions = this.querySelector(':scope > [slot="actions"]') !== null
   }
 
   /** Requests dismissal. Fires `banner-close`; unless it is prevented the banner is hidden. Returns whether it was hidden. */
@@ -149,7 +148,7 @@ export class Banner extends LitElement {
       ${this.noIcon ? nothing : html`<span class="icon" part="icon" aria-hidden="true"><slot name="icon">${this.renderIcon()}</slot></span>`}
       <div class="content" part="content" role=${role}>
         ${this.heading ? html`<span class="heading" part="heading">${this.heading}</span>` : nothing}
-        <span class="message" part="message"><slot>${this.message}</slot></span>
+        <span class="message" part="message"><slot>${this.message || nothing}</slot></span>
       </div>
       <div class="actions" part="actions" ?hidden=${!this.hasActions}>
         <slot name="actions" @slotchange=${(event: Event) => (this.hasActions = (event.target as HTMLSlotElement).assignedNodes().length > 0)}></slot>

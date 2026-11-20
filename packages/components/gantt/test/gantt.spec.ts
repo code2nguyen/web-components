@@ -214,6 +214,14 @@ test('clicking the chevron collapses a group', async ({ page, renderScenario }) 
   await expect(page.locator('c2-gantt .links path.head')).toHaveCount(0)
 })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${dataChart()}<c2-gantt id="empty" tasks="[]"></c2-gantt></div>`)
+  await expect(rowOf(page, 'vis')).toHaveAccessibleName(/^Visual design, du .+ au .+, 12 jours, 35\s%\sterminé, après Information architecture$/)
+  await expect(page.locator('c2-gantt .corner-name').first()).toHaveText('Tâche')
+  await expect(page.locator('c2-gantt .corner-days').first()).toHaveText('Jours')
+  await expect(page.locator('#empty [part="empty"]')).toHaveText('Aucune tâche à afficher')
+})
+
 test('the scale changes the width of a day', async ({ page, renderScenario }) => {
   await renderScenario(dataChart('scale="day"'))
   expect(await widthOf(page, 'c2-gantt .bar[data-id="ia"]')).toBeCloseTo(5 * 28, 0)
@@ -393,4 +401,11 @@ test('the component writes no attributes on its host', async ({ page, renderScen
   await pointerClick(barOf(page, 'vis'))
   const attributes = await page.locator('c2-gantt').evaluate((element) => element.getAttributeNames().sort())
   expect(attributes).toEqual(['aria-label', 'tasks', 'today'])
+})
+
+test('a chart under a malformed lang still draws its rows and tooltip', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="en_US">${dataChart()}</div>`)
+  await expect(page.locator('c2-gantt .row')).toHaveCount(4)
+  await barOf(page, 'vis').hover()
+  await expect(page.locator('c2-gantt .tooltip')).toContainText('35%')
 })

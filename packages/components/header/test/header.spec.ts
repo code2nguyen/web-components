@@ -2,6 +2,11 @@ import { test, expect } from './fixture'
 
 // Cover the states and transitions that matter, with real pointer and keyboard input and observable results.
 // See tests/README.md; `npm test` runs the suites of changed packages.
+test('the default name of the landmark follows the language of the page', async ({ page, scenario }) => {
+  await scenario('lang')
+  await expect(page.getByRole('navigation', { name: 'Principale' })).toBeVisible()
+})
+
 test('renders a named navigation landmark and every shell slot', async ({ page, scenario }) => {
   await scenario()
   await expect(page.getByRole('navigation', { name: 'Product' })).toBeVisible()

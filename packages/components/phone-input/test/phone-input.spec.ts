@@ -5,6 +5,16 @@ const events = async (page: Page) => JSON.parse((await page.locator('c2-phone-in
 const number = (page: Page) => page.getByRole('textbox', { name: 'Phone number' })
 const countryButton = (page: Page) => page.getByRole('button', { name: /^Country:/ })
 
+test('its built-in text follows the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario('<div lang="fr"><c2-phone-input country="FR"></c2-phone-input></div>')
+  await expect(page.getByRole('textbox', { name: 'Numéro de téléphone' })).toBeVisible()
+  await page.getByRole('button', { name: /^Pays :/ }).click()
+  const search = page.getByRole('combobox', { name: 'Chercher un pays' })
+  await expect(search).toHaveAttribute('placeholder', 'Chercher un pays')
+  await search.fill('zzzz')
+  await expect(page.locator('c2-phone-input .empty')).toHaveText('Aucun pays trouvé')
+})
+
 test('groups the national number as it is typed and reports it in E.164', async ({ page, renderScenario }) => {
   await renderScenario('<c2-phone-input country="FR"></c2-phone-input>')
   const host = page.locator('c2-phone-input')

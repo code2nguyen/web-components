@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, isServer } from 'lit'
 import { query } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { property, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { MenuSelectEventDetail } from '@c2n/menu'
@@ -65,6 +65,12 @@ export interface Menubar {
 export class Menubar extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  constructor() {
+    super()
+    // A server-rendered slot is assigned before its slotchange listener exists, so the first count follows the first update.
+    new SlotReplayController(this, () => this.syncTabStops(), { always: true, immediate: true })
+  }
+
   /** Accessible name of the menu bar ("Application", "Document"). */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
@@ -123,11 +129,6 @@ export class Menubar extends LitElement {
       if (menu.hasUpdated) menu.tabStop = tabStop
       else void menu.updateComplete.then(() => (menu.tabStop = menu === this.activeMenu))
     }
-  }
-
-  protected override firstUpdated(): void {
-    // A server-rendered slot is assigned before its slotchange listener exists, so the first count happens here.
-    this.syncTabStops()
   }
 
   override disconnectedCallback(): void {

@@ -291,6 +291,54 @@ test('the uniform layout labels by share and keeps the regions table for assisti
   await expect(chart.locator('.plot')).toHaveAttribute('aria-label', 'Venn diagram of Web app, Mobile app, Public API')
 })
 
+test('its built-in text follows the language of the page', async ({ page, scenario }) => {
+  await scenario('overlap-uniform')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveState('ready')
+  await chart.evaluate((element) => element.setAttribute('lang', 'fr'))
+  await expect(chart.locator('table.overlap-a11y thead th')).toHaveText(['Région', 'Membres', 'Part'])
+  await expect(chart.locator('table.overlap-a11y tbody tr').first()).toContainText('Web app seulement')
+})
+
+test('the region names it hands the engine follow a language change', async ({ page, scenario }) => {
+  await scenario('overlap-uniform')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveState('ready')
+  const names = await chart.evaluate(async (element) => {
+    const adapter = (element as unknown as { adapter: { setData(data: unknown): void } }).adapter
+    const sent: unknown[] = []
+    const setData = adapter.setData.bind(adapter)
+    adapter.setData = (data) => {
+      sent.push(data)
+      setData(data)
+    }
+    element.setAttribute('lang', 'fr')
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    return JSON.stringify(sent)
+  })
+  expect(names).toContain('Web app seulement')
+})
+
+test('a language change batched with new data still reaches the engine', async ({ page, scenario }) => {
+  await scenario('overlap-uniform')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveState('ready')
+  const names = await chart.evaluate(async (element) => {
+    const host = element as HTMLElement & { data: unknown[]; adapter: { setData(data: unknown): void } }
+    const sent: unknown[] = []
+    const setData = host.adapter.setData.bind(host.adapter)
+    host.adapter.setData = (data) => {
+      sent.push(data)
+      setData(data)
+    }
+    element.setAttribute('lang', 'fr')
+    host.data = [...host.data]
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    return JSON.stringify(sent.at(-1))
+  })
+  expect(names).toContain('Web app seulement')
+})
+
 test('has no automated accessibility violations', async ({ page, scenario }) => {
   await scenario('overlap')
   await expect(page.locator('c2-overlap-chart')).toHaveState('ready')

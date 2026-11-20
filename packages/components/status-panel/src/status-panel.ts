@@ -171,10 +171,10 @@ export class StatusPanel extends LitElement {
           ${this.media === 'none' ? nothing : html`<div part="media" class="media"><slot name="media">${this.renderDefaultMedia()}</slot></div>`}
           <div class="header" ?hidden=${!hasTitle && !hasDescription}>
             <div part="title" class="title" role="heading" aria-level=${this.headingLevel} ?hidden=${!hasTitle}>
-              <slot name="title" @slotchange=${this.handleSlotChange}>${this.heading}</slot>
+              <slot name="title" @slotchange=${this.handleSlotChange}>${this.heading || nothing}</slot>
             </div>
             <div part="description" class="description" ?hidden=${!hasDescription}>
-              <slot name="description" @slotchange=${this.handleSlotChange}>${this.description}</slot>
+              <slot name="description" @slotchange=${this.handleSlotChange}>${this.description || nothing}</slot>
             </div>
           </div>
         </div>

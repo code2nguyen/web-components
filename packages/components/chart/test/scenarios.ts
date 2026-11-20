@@ -8,6 +8,7 @@
  * The page also counts engine calls, which is what lets the perf spec assert the init/update split
  * without measuring wall-clock time.
  */
+import './translations'
 import '../src/line-chart'
 import '../src/area-chart'
 import '../src/bar-chart'
@@ -123,6 +124,9 @@ function build(): void {
       break
     case 'loading':
       main.innerHTML = `<c2-line-chart id="chart" loading></c2-line-chart>`
+      break
+    case 'states-fr':
+      main.innerHTML = `<div lang="fr"><c2-line-chart id="chart" data="[]"></c2-line-chart><c2-bar-chart id="loading-chart" loading></c2-bar-chart></div>`
       break
     case 'error':
       main.innerHTML = `<c2-line-chart id="chart" error="Metrics unavailable"></c2-line-chart>`
@@ -538,7 +542,7 @@ function build(): void {
         { t: 'B', open: 2, close: 1, low: 0, high: 3 },
       ]
     }
-  } else if (!['empty', 'loading', 'error', 'sparkline'].includes(scenario)) {
+  } else if (!['empty', 'loading', 'error', 'sparkline', 'states-fr'].includes(scenario)) {
     chart.data = series(2, 40)
   }
 

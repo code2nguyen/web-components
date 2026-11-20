@@ -48,6 +48,10 @@ const chordEn = {
 export const chordMessages = defineMessages('chord-chart', chordEn)
 
 const chartEn = {
+  /** Shown when the chart has no data and `empty-message` is not set. */
+  noData: 'No data',
+  /** Shown while `loading` is set, as the `loading` slot's default content. */
+  loading: 'Loading…',
   annotations: 'Annotations',
   annotationAt: (label: string, at: string) => `${label}, ${at}`,
   annotationRange: (label: string, from: string, to: string) => `${label}, ${from} to ${to}`,
@@ -75,6 +79,35 @@ const chartEn = {
   resetView: 'Reset view',
   vennDiagram: 'Venn diagram',
   vennSummary: (sets: string) => `Venn diagram of ${sets}`,
+  /** Name of the region that only one set covers, in `c2-overlap-chart`. */
+  vennOnly: (set: string) => `${set} only`,
+  /** Name of a region several sets cover: the set names joined. */
+  vennJoined: (sets: string) => sets,
+  /** Error state of a Venn diagram given too many sets. */
+  vennTooMany: (max: number, count: number) => `A Venn diagram shows at most ${max} sets; this one has ${count}.`,
+  /** Terms of `c2-overlap-chart`'s tooltip and of its regions table. */
+  vennRegion: 'Region',
+  vennMembers: 'Members',
+  /** Announced for the set the keyboard is on: its name, how many members, their share of the whole. */
+  vennFocusedSet: (set: string, count: string, share: string) => `${set}: ${count} members, ${share}`,
+  /** Announced for the region the keyboard is on: its name, its size, its share of the whole. */
+  vennFocusedRegion: (region: string, count: string, share: string) => `${region}: ${count}, ${share}`,
+  vennShare: 'Share',
+  vennShareOfTotal: 'Share of total',
+  vennInNoOtherSet: 'In no other set',
+  vennInThisRegion: 'In this region',
+  vennInAllOfThese: 'In all of these',
+  vennSetTotal: 'Set total',
+  /** Tooltip line naming the visible sets a region is outside of, `{0}` being them as a list ("A or B"). */
+  vennNotIn: (sets: string) => `Not in ${sets}`,
+  /** Header of the region column of `c2-map-chart`'s data table. */
+  mapRegion: 'Region',
+  /** Accessible name of the map's colour ramp: its title, then the lowest and the highest value. */
+  mapScaleRange: (title: string, min: string, max: string) => `${title}: ${min} to ${max}`,
+  /** Accessible name of the map's classes: its title, then the values the classes break at. */
+  mapScaleSteps: (title: string, breaks: string) => `${title}: classes broken at ${breaks}`,
+  /** Default legend name of `c2-candlestick-chart`'s series. */
+  price: 'Price',
 }
 
 /** A key of the shared chart messages that names a chart type, read into the generated summary. */

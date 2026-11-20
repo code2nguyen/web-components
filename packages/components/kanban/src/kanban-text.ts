@@ -1,7 +1,6 @@
 /**
- * What `c2-kanban` announces while a card moves, in English. The board itself is not translated yet; a variant built on
- * it (`c2-matrix-board`) registers these keys in its own message catalog, so its announcements follow the page
- * language. Positions arrive counted from 1.
+ * What `c2-kanban` announces while a card moves, in English. The board registers these keys in the `kanban` catalog
+ * (`messages.ts`); a variant built on it (`c2-matrix-board`) registers them in its own. Positions arrive counted from 1.
  */
 export const kanbanText = {
   /** Name of a card whose label field is empty. */
@@ -31,6 +30,8 @@ export const kanbanText = {
   atStart: (card: string) => `${card} is already in the first column.`,
   /** The arrow key points after the last column. */
   atEnd: (card: string) => `${card} is already in the last column.`,
+  /** A card another board, list or tree took (`drag-kind`). */
+  movedOut: (card: string) => `${card} moved off the board.`,
   /** The board stopped being editable during a move. */
   readOnly: 'Moving canceled because the board is no longer editable.',
   /** The application replaced `items` during a move. */

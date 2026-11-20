@@ -10,6 +10,8 @@ import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type P
 // Registers `c2-select` and its `c2-list-item` options, the rows-per-page control of the `compact` variant.
 import '@c2n/select'
 import '@c2n/list-item'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { paginationMessages } from './messages.js'
 import styles from './pagination.scss?inline'
 
 /** Which layout the pagination renders. */
@@ -238,27 +240,36 @@ export class Pagination extends LitElement {
   /** Dim every control and ignore interaction. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
-  /** Visible and accessible label of the previous-page control. */
-  @property({ type: String, attribute: 'previous-label' }) previousLabel = 'Previous'
-  /** Visible and accessible label of the next-page control. */
-  @property({ type: String, attribute: 'next-label' }) nextLabel = 'Next'
-  /** Visible and accessible label of the first-page control. */
-  @property({ type: String, attribute: 'first-label' }) firstLabel = 'First'
-  /** Visible and accessible label of the last-page control. */
-  @property({ type: String, attribute: 'last-label' }) lastLabel = 'Last'
-  /** Text before the rows-per-page select. A trailing colon is dropped from the select's accessible name. */
-  @property({ type: String, attribute: 'page-size-label' }) pageSizeLabel = 'Rows per page:'
-  /** Range status of the `compact` variant. Placeholders: `{start}`, `{end}`, `{total}`. */
-  @property({ type: String, attribute: 'range-template' }) rangeTemplate = '{start}–{end} of {total}'
-  /** Status of the `simple` variant. Placeholders: `{page}`, `{pageCount}`. */
-  @property({ type: String, attribute: 'page-template' }) pageTemplate = 'Page {page} of {pageCount}'
-  /** Accessible name of a page number. Placeholder: `{page}`. */
-  @property({ type: String, attribute: 'page-label-template' }) pageLabelTemplate = 'Go to page {page}'
-  /** Accessible name of an ellipsis. Placeholders: `{page}` (where it jumps), `{from}`, `{to}`, `{count}` (pages hidden). */
-  @property({ type: String, attribute: 'jump-label-template' }) jumpLabelTemplate = 'Jump to page {page}, skipping {count} pages'
+  /** Visible and accessible label of the previous-page control. Empty, it is the `previous` message ("Previous"). */
+  @property({ type: String, attribute: 'previous-label' }) previousLabel = ''
+  /** Visible and accessible label of the next-page control. Empty, it is the `next` message ("Next"). */
+  @property({ type: String, attribute: 'next-label' }) nextLabel = ''
+  /** Visible and accessible label of the first-page control. Empty, it is the `first` message ("First"). */
+  @property({ type: String, attribute: 'first-label' }) firstLabel = ''
+  /** Visible and accessible label of the last-page control. Empty, it is the `last` message ("Last"). */
+  @property({ type: String, attribute: 'last-label' }) lastLabel = ''
+  /**
+   * Text before the rows-per-page select. A trailing colon is dropped from the select's accessible name. Unset, it is
+   * the `pageSize` message ("Rows per page:"); an empty string shows no text, and the select keeps the message as its
+   * accessible name. Reading it while unset gives `undefined`.
+   */
+  @property({ type: String, attribute: 'page-size-label' }) pageSizeLabel?: string
+  /** Range status of the `compact` variant. Placeholders: `{start}`, `{end}`, `{total}`. Empty, it is the `range` message ("1–10 of 100"). */
+  @property({ type: String, attribute: 'range-template' }) rangeTemplate = ''
+  /** Status of the `simple` variant. Placeholders: `{page}`, `{pageCount}`. Empty, it is the `page` message ("Page 3 of 12"). */
+  @property({ type: String, attribute: 'page-template' }) pageTemplate = ''
+  /** Accessible name of a page number. Placeholder: `{page}`. Empty, it is the `goToPage` message ("Go to page 4"). */
+  @property({ type: String, attribute: 'page-label-template' }) pageLabelTemplate = ''
+  /**
+   * Accessible name of an ellipsis. Placeholders: `{page}` (where it jumps), `{from}`, `{to}`, `{count}` (pages hidden).
+   * Empty, it is the `jump` message ("Jump to page 5, skipping 7 pages").
+   */
+  @property({ type: String, attribute: 'jump-label-template' }) jumpLabelTemplate = ''
 
   /** Accessible name of the navigation landmark. */
   @property({ type: String, attribute: 'aria-label' }) override ariaLabel!: string
+
+  private readonly msg = new LocalizeController(this, paginationMessages)
 
   /** The nav control the user last pressed, so focus can follow it when the press disables it. */
   private lastPressedNav: 'previous' | 'next' | null = null
@@ -555,11 +566,11 @@ export class Pagination extends LitElement {
   }
 
   private renderPrevious(page: number) {
-    return this.renderNav('previous', page - 1, page <= 1, chevronLeft, this.previousLabel)
+    return this.renderNav('previous', page - 1, page <= 1, chevronLeft, this.previousLabel || this.msg.t('previous'))
   }
 
   private renderNext(page: number, count: number) {
-    return this.renderNav('next', page + 1, page >= count, chevronRight, this.nextLabel)
+    return this.renderNav('next', page + 1, page >= count, chevronRight, this.nextLabel || this.msg.t('next'))
   }
 
   private renderPages(page: number) {
@@ -574,7 +585,7 @@ export class Pagination extends LitElement {
                 class="c2-pagination-control c2-pagination-item"
                 part="item"
                 type="button"
-                aria-label=${format(this.pageLabelTemplate, { page: item.page })}
+                aria-label=${this.pageLabelTemplate ? format(this.pageLabelTemplate, { page: item.page }) : this.msg.t('goToPage', item.page)}
                 aria-current=${item.page === page ? 'page' : nothing}
                 ?disabled=${this.disabled}
                 @click=${() => this.handleNav(item.page, null)}
@@ -596,7 +607,11 @@ export class Pagination extends LitElement {
       class="c2-pagination-control c2-pagination-ellipsis"
       part="ellipsis"
       type="button"
-      aria-label=${format(this.jumpLabelTemplate, { page: item.target, from: item.from, to: item.to, count: item.to - item.from + 1 })}
+      aria-label=${
+        this.jumpLabelTemplate
+          ? format(this.jumpLabelTemplate, { page: item.target, from: item.from, to: item.to, count: item.to - item.from + 1 })
+          : this.msg.t('jump', item.target, item.to - item.from + 1)
+      }
       ?disabled=${this.disabled}
       @click=${() => this.handleNav(item.target, null)}
     >
@@ -607,33 +622,36 @@ export class Pagination extends LitElement {
 
   private renderNumbered(page: number, count: number) {
     return html`<ul class=${classMap({ 'c2-pagination-list': true, 'is-measuring': this.measuring })}>
-      ${this.showFirstLast ? html`<li>${this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel)}</li>` : nothing}
+      ${this.showFirstLast ? html`<li>${this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel || this.msg.t('first'))}</li>` : nothing}
       <li>${this.renderPrevious(page)}</li>
       ${this.renderPages(page)}
       <li>${this.renderNext(page, count)}</li>
-      ${this.showFirstLast ? html`<li>${this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel)}</li>` : nothing}
+      ${this.showFirstLast ? html`<li>${this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel || this.msg.t('last'))}</li>` : nothing}
     </ul>`
   }
 
   private renderSimple(page: number, count: number) {
     return html`<ul class=${classMap({ 'c2-pagination-list': true, 'is-measuring': this.measuring })}>
-      ${this.showFirstLast ? html`<li>${this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel)}</li>` : nothing}
+      ${this.showFirstLast ? html`<li>${this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel || this.msg.t('first'))}</li>` : nothing}
       <li>${this.renderPrevious(page)}</li>
-      <li class="c2-pagination-status" part="label" aria-live="polite">${format(this.pageTemplate, { page, pageCount: count })}</li>
+      <li class="c2-pagination-status" part="label" aria-live="polite">
+        ${this.pageTemplate ? format(this.pageTemplate, { page, pageCount: count }) : this.msg.t('page', page, count)}
+      </li>
       <li>${this.renderNext(page, count)}</li>
-      ${this.showFirstLast ? html`<li>${this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel)}</li>` : nothing}
+      ${this.showFirstLast ? html`<li>${this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel || this.msg.t('last'))}</li>` : nothing}
     </ul>`
   }
 
   private renderPageSize() {
     if (this.hidePageSize || this.pageSizeOptions.length === 0) return nothing
+    const pageSizeLabel = this.pageSizeLabel ?? this.msg.t('pageSize')
     const options = this.pageSizeOptions.includes(this.pageSize) ? this.pageSizeOptions : [...this.pageSizeOptions, this.pageSize].sort((a, b) => a - b)
     return html`<div class="c2-pagination-page-size">
-      <span class="c2-pagination-label" part="label">${this.pageSizeLabel}</span>
+      ${pageSizeLabel ? html`<span class="c2-pagination-label" part="label">${pageSizeLabel}</span>` : nothing}
       <c2-select
         class="c2-pagination-page-size-select"
         part="page-size"
-        aria-label=${this.pageSizeLabel.replace(/\s*:\s*$/, '')}
+        aria-label=${(pageSizeLabel || this.msg.t('pageSize')).replace(/\s*:\s*$/, '')}
         ?disabled=${this.disabled}
         .value=${[String(this.pageSize)]}
         @selection-change=${this.handlePageSizeChange}
@@ -652,12 +670,13 @@ export class Pagination extends LitElement {
         this.hideRange
           ? nothing
           : html`<span class="c2-pagination-label c2-pagination-status" part="label" aria-live="polite"
-              >${format(this.rangeTemplate, { start, end: this.endIndex, total })}</span
+              >${this.rangeTemplate ? format(this.rangeTemplate, { start, end: this.endIndex, total }) : this.msg.t('range', start, this.endIndex, total)}</span
             >`
       }
       <div class="c2-pagination-arrows">
-        ${this.showFirstLast ? this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel) : nothing} ${this.renderPrevious(page)}
-        ${this.renderNext(page, count)} ${this.showFirstLast ? this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel) : nothing}
+        ${this.showFirstLast ? this.renderNav('first', 1, page <= 1, chevronsLeft, this.firstLabel || this.msg.t('first')) : nothing}
+        ${this.renderPrevious(page)} ${this.renderNext(page, count)}
+        ${this.showFirstLast ? this.renderNav('last', count, page >= count, chevronsRight, this.lastLabel || this.msg.t('last')) : nothing}
       </div>
     `
   }
@@ -665,7 +684,7 @@ export class Pagination extends LitElement {
   override render() {
     const count = this.pageCount
     const page = this.currentPage
-    return html`<nav class="c2-pagination" part="pagination" aria-label=${this.ariaLabel ?? 'Pagination'}>
+    return html`<nav class="c2-pagination" part="pagination" aria-label=${this.ariaLabel || this.msg.t('label')}>
       ${this.variant === 'compact' ? this.renderCompact(page, count) : this.variant === 'simple' ? this.renderSimple(page, count) : this.renderNumbered(page, count)}
     </nav>`
   }

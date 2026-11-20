@@ -6,6 +6,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { isApplePlatform } from '@c2n/core/shortcut-helper.js'
+import { isLayoutWrapper, unwrapContents } from '@c2n/core/dom-helper.js'
 import {
   Glide,
   InertiaTracker,
@@ -1188,12 +1189,11 @@ export class PanZoom extends LitElement {
     else {
       const slot = this.renderRoot.querySelector<HTMLSlotElement>('.content > slot')
       const elements = slot?.assignedElements({ flatten: true }) ?? []
-      let only = elements.length === 1 ? elements[0] : null
       // A wrapper that draws no box of its own (a framework's `display: contents` element round the content) is
       // looked through, down to its single child.
-      while (only && only.childElementCount === 1 && !['img', 'svg', 'canvas'].includes(only.localName) && getComputedStyle(only).display === 'contents') {
-        only = only.firstElementChild
-      }
+      const only = unwrapContents(elements.length === 1 ? elements[0] : null, {
+        wrapper: (element) => !['img', 'svg', 'canvas'].includes(element.localName) && isLayoutWrapper(element),
+      })
       if (only?.localName === 'img') art = 'img'
       else if (only?.localName === 'svg') art = 'svg'
       else if (only?.localName === 'canvas') art = 'canvas'

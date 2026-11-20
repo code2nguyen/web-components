@@ -8,6 +8,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+import LineChartExamplesRuntime from '../../components/LineChartExamplesRuntime.astro'
 
 import { LineChart } from '@c2n/components/chart/line-chart'
 import { ChartSeries } from '@c2n/components/chart/chart-series'
@@ -57,6 +58,8 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
   </div>
 </c2-card>
 ```
+
+<LineChartExamplesRuntime />
 
 <GalleryGrid min="340">
 
@@ -251,6 +254,23 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
     <span>Sample 13 above the UCL (rule 1) · samples 24–25 end a run of nine above the centre line (rule 2)</span>
   </div>
 </c2-card>
+```
+
+```html tag=MdxCodeBlock,label=No data in French
+<style>
+  .line-fr {
+    width: 100%;
+  }
+  .line-fr c2-line-chart {
+    width: 100%;
+    --c2-chart--height: 180px;
+  }
+</style>
+<div lang="fr" class="line-fr">
+  <c2-line-chart x-field="month" data="[]" aria-label="Ventes mensuelles">
+    <c2-chart-series field="sales" label="Ventes"></c2-chart-series>
+  </c2-line-chart>
+</div>
 ```
 
 </GalleryGrid>

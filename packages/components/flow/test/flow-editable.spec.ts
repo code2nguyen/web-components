@@ -951,6 +951,12 @@ test.describe('actions', () => {
   })
 })
 
+test('the menu names the Delete key in the language of the page', async ({ page, renderScenario }) => {
+  await renderScenario(`<div lang="fr">${flow()}</div>`)
+  await node(page, 'draft').click({ button: 'right' })
+  await expect(item(page, 'flow:delete').locator('c2-kbd')).toHaveText('Suppr')
+})
+
 test('its text follows the nearest lang, and a lang change, without re-creating the element', async ({ page, renderScenario }) => {
   await renderScenario(`<div lang="fr">${flow({ nodes: [], edges: [] })}</div>`)
   const lang = page.locator('div[lang]')

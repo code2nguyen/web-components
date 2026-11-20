@@ -1,0 +1,22 @@
+import { addTranslations } from '@c2n/core/localize.js'
+
+// The French an app would add: the library ships its text in English only.
+addTranslations({
+  fr: {
+    gantt: {
+      empty: 'Aucune tâche à afficher',
+      task: 'Tâche',
+      duration: 'Jours',
+      days: { one: '{0} jour', other: '{0} jours' },
+      describeMilestone: 'jalon, {0}',
+      describeRange: 'du {0} au {1}',
+      describeProgress: '{0} terminé',
+      describeAfter: 'après {0}',
+      date: 'Date',
+      dates: 'Dates',
+      length: 'Durée',
+      after: 'Après',
+      done: 'Terminé',
+    },
+  },
+})

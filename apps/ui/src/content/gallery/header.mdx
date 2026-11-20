@@ -1,5 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import HeaderExamplesRuntime from '../../components/HeaderExamplesRuntime.astro'
 import { Header } from '@c2n/components/header'
 import { NavigationMenu } from '@c2n/components/navigation-menu'
 import { LinkButton } from '@c2n/components/link-button'
@@ -133,3 +135,42 @@ Each example gets a full gallery row so the complete brand, navigation and actio
 ```
 
 </GalleryGrid>
+
+## Language
+
+<HeaderExamplesRuntime />
+
+The name of the navigation landmark is a message token: an app translates it once with `addTranslations`, and each header speaks the language of its nearest `lang`. `navigation-label` still overrides one instance.
+
+<GalleryGrid min={720}>
+
+```html tag=MdxCodeBlock,label=En français,description=The navigation landmark named in the language of the page,useWhen=The application is translated
+<style>
+  .header-fr,
+  .header-fr c2-header {
+    width: 100%;
+  }
+</style>
+<div lang="fr" class="header-fr">
+  <c2-header client:only="lit">
+    <c2-link-button slot="brand" href="#accueil">Northstar</c2-link-button>
+    <c2-link-button href="#produits">Produits</c2-link-button>
+    <c2-link-button href="#tarifs">Tarifs</c2-link-button>
+    <c2-button slot="actions">Se connecter</c2-button>
+  </c2-header>
+</div>
+```
+
+</GalleryGrid>
+
+```ts tag=CodeBlock
+import { addTranslations } from '@c2n/core/localize.js'
+
+addTranslations({
+  fr: {
+    header: {
+      navigation: 'Principale',
+    },
+  },
+})
+```

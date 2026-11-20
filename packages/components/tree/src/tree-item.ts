@@ -59,12 +59,17 @@ export interface TreeItem {
  * @slot toggle-icon - Replaces the default chevron. It is rotated by the component, so supply the collapsed orientation.
  *
  * @csspart row - The clickable row, excluding any nested children.
+ * @csspart drag-handle - The grip at the start of the row in a tree with a `drag-kind`: the browser carries the row from it, to another tree, a list or a board; elsewhere, another window too, the drop is a copy.
  * @csspart toggle - The disclosure toggle.
  * @csspart label - Text box containing the `label` slot or label-property fallback.
  * @csspart actions - Trailing box wrapping the assigned `actions` slot.
  * @csspart group - The container holding the nested children.
  * @csspart checkbox - The selection checkbox rendered when checkbox selection is enabled.
  *
+ * @cssproperty {length} [--c2-tree-item__drag-handle--size=16px] - Size of the drag handle's grip (`drag-kind` on the tree).
+ * @cssproperty {color} [--c2-tree-item__drag-handle--color=#a1a1aa] - Colour of the drag handle.
+ * @cssproperty {color} [--c2-tree-item__drag-handle__hover--color=#52525b] - Colour of the drag handle under the pointer.
+ * @cssproperty {string} [--c2-tree-item__drag-handle--cursor=grab] - Cursor over the drag handle.
  * @cssproperty {pixel} [--c2-tree-item__row--min-height=28px] - Height of a row.
  * @cssproperty {pixel} [--c2-tree-item__row--indent=16px] - Extra inset added per level of depth.
  * @cssproperty {padding} [--c2-tree-item__row--padding-top=0px] - Space above the row's content. `row--min-height` is a floor, so this only grows the row once content plus padding passes it.
@@ -168,6 +173,9 @@ export class TreeItem extends LitElement {
   /** Whether the row is being dragged. Written by a `reorderable` parent `c2-tree`. */
   @property({ attribute: false }) dragging = false
 
+  /** Set by the tree: shows the drag handle that carries the row off a tree with a `drag-kind`. */
+  @property({ attribute: false }) dragHandle = false
+
   /** Whether a dragged row would land under this one. Written by a `reorderable` parent `c2-tree`. */
   @property({ attribute: false }) dropTarget = false
 
@@ -175,6 +183,12 @@ export class TreeItem extends LitElement {
 
   /** Cached so the accessible name is not recomputed from slotted nodes on every sync. */
   #resolvedLabel = ''
+
+  /**
+   * Watches the label slot's author content: text rewritten in place (a `renderLabel` result after `items` change,
+   * an app updating a slotted span) fires no `slotchange`, and the accessible name must follow it.
+   */
+  #labelObserver?: MutationObserver
 
   /** The row as a {@link TreeNode}, so both authoring modes produce the same event details and renderer input. */
   get node(): TreeNode {
@@ -203,10 +217,12 @@ export class TreeItem extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.#notify()
+    if (this.hasUpdated) this.#readLabelSlot()
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.#labelObserver?.disconnect()
     this.#notify()
   }
 
@@ -251,11 +267,28 @@ export class TreeItem extends LitElement {
   }
 
   #readLabelSlot() {
-    const assigned = this.labelSlot?.assignedNodes({ flatten: true }) ?? []
-    this.#resolvedLabel = assigned
+    // Author content only: `flatten` would also return the slot's fallback text, which Lit updates in place
+    // without a `slotchange`, so a later `label` change would never reach the accessible name. A forwarded
+    // `<slot>` is flattened as the browser draws it, its own fallback included; the observer below follows that text.
+    const assigned = (this.labelSlot?.assignedNodes() ?? []).flatMap((node) =>
+      node instanceof HTMLSlotElement ? node.assignedNodes({ flatten: true }) : [node],
+    )
+    const resolved = assigned
       .map((node) => node.textContent ?? '')
       .join('')
       .trim()
+    if (resolved !== this.#resolvedLabel) {
+      this.#resolvedLabel = resolved
+      // The checkbox's `aria-label` is rendered from it. This runs from `slotchange` and the observer, often right after
+      // an update, so write the label on the checkbox (in this shadow root) rather than schedule a second render; the
+      // next render binds the same value.
+      this.renderRoot.querySelector('c2-checkbox.checkbox')?.setAttribute('aria-label', resolved || this.label || this.value)
+    }
+    this.#labelObserver?.disconnect()
+    if (assigned.length > 0) {
+      this.#labelObserver ??= new MutationObserver(() => this.#readLabelSlot())
+      for (const node of assigned) this.#labelObserver.observe(node, { characterData: true, childList: true, subtree: true })
+    }
     this.#syncAria()
   }
 
@@ -280,6 +313,20 @@ export class TreeItem extends LitElement {
   override render() {
     const branch = this.isBranch
     const content = html`
+      ${
+        this.dragHandle && !this.disabled
+          ? html`<span class="drag-handle" part="drag-handle" draggable="true" aria-hidden="true">
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <circle cx="6" cy="4" r="1.25" />
+                <circle cx="10" cy="4" r="1.25" />
+                <circle cx="6" cy="8" r="1.25" />
+                <circle cx="10" cy="8" r="1.25" />
+                <circle cx="6" cy="12" r="1.25" />
+                <circle cx="10" cy="12" r="1.25" />
+              </svg>
+            </span>`
+          : nothing
+      }
       ${
         this.loading
           ? html`<c2-spinner class="spinner" part="toggle" aria-hidden="true"></c2-spinner>`
@@ -312,7 +359,7 @@ export class TreeItem extends LitElement {
       }
       <slot name="icon"></slot>
       <span class="label" part="label">
-        <slot name="label" @slotchange=${this.#readLabelSlot}>${this.label || this.value}</slot>
+        <slot name="label" @slotchange=${this.#readLabelSlot}>${this.label || this.value || nothing}</slot>
       </span>
       <span class="actions" part="actions"><slot name="actions"></slot></span>
     `

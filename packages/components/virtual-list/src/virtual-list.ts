@@ -233,8 +233,8 @@ export class VirtualList extends LitElement {
   /** Milliseconds the built-in field waits after the last keystroke before the query is applied. */
   @property({ type: Number, attribute: 'search-debounce' }) searchDebounce = 200
 
-  /** Placeholder of the built-in search field. */
-  @property({ type: String, attribute: 'search-placeholder' }) searchPlaceholder = 'Search'
+  /** Placeholder of the built-in search field, and its accessible name. Empty, it is the `search` message ("Search"). */
+  @property({ type: String, attribute: 'search-placeholder' }) searchPlaceholder = ''
 
   /** Wraps the matched part of a row's text in `<mark part="highlight">`. */
   @property({ type: Boolean }) highlight = false
@@ -290,11 +290,11 @@ export class VirtualList extends LitElement {
   /** Shows the error state with this message. */
   @property({ type: String }) error = ''
 
-  /** Message shown when there are no items at all. */
-  @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No items'
+  /** Message shown when there are no items at all. Defaults to the translatable `empty` message; an empty string shows none. */
+  @property({ type: String, attribute: 'empty-message' }) emptyMessage?: string
 
-  /** Message shown when a search is active and nothing matches. */
-  @property({ type: String, attribute: 'no-results-message' }) noResultsMessage = 'No matches'
+  /** Message shown when a search is active and nothing matches. Defaults to the translatable `noResults` message; an empty string shows none. */
+  @property({ type: String, attribute: 'no-results-message' }) noResultsMessage?: string
 
   private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
   private readonly msg = new LocalizeController(this, virtualListMessages)
@@ -605,7 +605,7 @@ export class VirtualList extends LitElement {
           role="listbox"
           aria-multiselectable=${this.selection === 'multiple' ? 'true' : nothing}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
-          aria-label=${this.ariaLabel ?? 'Items'}
+          aria-label=${this.ariaLabel || this.msg.t('label')}
           @click=${this.#handleClick}
           @keydown=${this.#handleKeyDown}
         >
@@ -628,8 +628,8 @@ export class VirtualList extends LitElement {
         type="search"
         clearable
         .value=${this.search}
-        placeholder=${this.searchPlaceholder}
-        aria-label=${this.searchPlaceholder}
+        placeholder=${this.searchPlaceholder || this.msg.t('search')}
+        aria-label=${this.searchPlaceholder || this.msg.t('search')}
         @input=${this.#handleSearchInput}
         @clear=${this.#handleSearchClear}
         @keydown=${this.#handleSearchKeyDown}
@@ -639,7 +639,7 @@ export class VirtualList extends LitElement {
 
   #renderState(count: number) {
     if (this.error) {
-      return html`<div class="state state--error" part="state"><slot name="error">${this.error}</slot></div>`
+      return html`<div class="state state--error" part="state"><slot name="error">${this.error || nothing}</slot></div>`
     }
     if (count > 0) return nothing
     // An empty list with more to come is waiting for its first page: the row under it says so.
@@ -650,9 +650,9 @@ export class VirtualList extends LitElement {
       </div>`
     }
     if (this.searching) {
-      return html`<div class="state" part="state"><slot name="no-results">${this.noResultsMessage}</slot></div>`
+      return html`<div class="state" part="state"><slot name="no-results">${(this.noResultsMessage ?? this.msg.t('noResults')) || nothing}</slot></div>`
     }
-    return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
+    return html`<div class="state" part="state"><slot name="empty">${(this.emptyMessage ?? this.msg.t('empty')) || nothing}</slot></div>`
   }
 
   #renderRows(start: number, end: number): unknown {

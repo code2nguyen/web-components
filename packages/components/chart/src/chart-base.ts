@@ -396,8 +396,8 @@ export abstract class ChartBase extends LitElement {
   /** Shows an error message instead of the plot. */
   @property({ type: String }) error = ''
 
-  /** Replaces the built-in "no data" text. */
-  @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No data'
+  /** Replaces the built-in "no data" text (the translatable `noData` message); an empty string shows none. */
+  @property({ type: String, attribute: 'empty-message' }) emptyMessage?: string
 
   /** Caps how many points a streaming chart keeps; older points fall off the front. `0` keeps everything. */
   @property({ type: Number, attribute: 'max-points' }) maxPoints = 0
@@ -446,6 +446,8 @@ export abstract class ChartBase extends LitElement {
   #optionsDirty = false
   #optionsMode: 'merge' | 'replace' = 'merge'
   #dataDirty = false
+  /** The language the engine's options and data were last built in. */
+  #engineLocale: string | undefined
   #appended = 0
   #measured = { width: 0, height: 0 }
   #resizeObserver?: ResizeObserver
@@ -631,7 +633,9 @@ export abstract class ChartBase extends LitElement {
    * and `false` is returned, so Lit skips render and commit entirely and the canvas is never touched.
    */
   protected override shouldUpdate(changed: PropertyValues): boolean {
-    if (!this.hasUpdated || !this.adapter) return true
+    // A bare requestUpdate() (a language change, a new aria-label) changes no data: it renders.
+    // A language change batched with data still renders: the engine's names follow it in `update`.
+    if (!this.hasUpdated || !this.adapter || changed.size === 0 || this.#engineLocale !== this.chartMsg.resolve()) return true
     for (const key of changed.keys()) if (!this.isDataKey(key as string)) return true
     this.frame = this.buildFrame()
     this.#flushData()
@@ -665,6 +669,17 @@ export abstract class ChartBase extends LitElement {
     }
     // A shrinking series set cannot be merged into ECharts: the removed series would stay on screen.
     if (changed.has('series') || changed.has('seriesElements') || this.replacesOptions(changed)) this.#optionsMode = 'replace'
+  }
+
+  protected override update(changed: PropertyValues): void {
+    // Text handed to the engine (a series name, the overlap regions' names) follows a language change, which changes no
+    // property. Here, not in `willUpdate`: the localize controller picks the new language between the two.
+    if (this.hasUpdated && this.#engineLocale !== this.chartMsg.locale) {
+      this.#optionsDirty = true
+      this.#dataDirty = true
+    }
+    this.#engineLocale = this.chartMsg.locale
+    super.update(changed)
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -1378,9 +1393,9 @@ export abstract class ChartBase extends LitElement {
     // A client hydrating that markup renders it once as the server did, then validates (see `firstUpdated`).
     const error = this.error || (isServer || this.#hydrating ? '' : this.validationError())
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
-    if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
+    if (this.loading) return html`<div class="state" part="state"><slot name="loading">${this.chartMsg.t('loading')}</slot></div>`
     if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
-      return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
+      return html`<div class="state" part="state"><slot name="empty">${(this.emptyMessage ?? this.chartMsg.t('noData')) || nothing}</slot></div>`
     }
     return nothing
   }

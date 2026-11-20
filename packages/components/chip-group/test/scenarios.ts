@@ -1,3 +1,4 @@
+import './translations'
 import '../src/chip-group'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
@@ -13,13 +14,14 @@ const markup: Record<string, string> = {
   badges: `<c2-chip-group id="subject" aria-label="Topics">${badges}</c2-chip-group>`,
   max: `<c2-chip-group id="subject" aria-label="Topics" max="2">${chips}</c2-chip-group>`,
   expandable: `<c2-chip-group id="subject" aria-label="Topics" expandable>${chips}</c2-chip-group>`,
+  lang: `<c2-chip-group id="subject" aria-label="Sujets" expandable>${chips}</c2-chip-group>`,
   plain: `<c2-chip-group id="subject" aria-label="Topics">${spans}</c2-chip-group>`,
 }
 
 // A declarative shadow root (server rendering) is in named mode: the group routes collapsed items by `slot` instead.
 const declarative = (html: string) => html.replace('<c2-chip-group id="subject" aria-label="Topics">', '$&<template shadowrootmode="open"></template>')
 
-const content = `<div class="frame" style="width: ${scenario === 'wide' ? 1200 : 320}px">${markup[scenario] ?? markup.default}</div>
+const content = `<div class="frame" ${scenario === 'lang' ? 'lang="fr"' : ''} style="width: ${scenario === 'wide' ? 1200 : 320}px">${markup[scenario] ?? markup.default}</div>
   <div class="controls">
     <button id="narrow">Narrow</button>
     <button id="widen">Widen</button>

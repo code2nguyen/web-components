@@ -7,6 +7,8 @@ import { state } from 'lit/decorators.js'
 // The group lays out chips and badges: register them, so markup that only loads the group still upgrades its items.
 import '@c2n/chip'
 import '@c2n/badge'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { chipGroupMessages } from './messages.js'
 import styles from './chip-group.scss?inline'
 
 /** Events fired by {@link ChipGroup}, keyed for `addEventListener`. */
@@ -88,16 +90,17 @@ export class ChipGroup extends LitElement {
   /** Makes the indicator a button that expands the group, and adds a button that collapses it. */
   @property({ type: Boolean, reflect: true }) expandable = false
 
-  /** Word after the count in the indicator's accessible name: `3 more`. */
-  @property({ attribute: 'more-label' }) moreLabel = 'more'
+  /** Word after the count in the indicator's accessible name: `3 more`. Empty, the name is the `more` message. */
+  @property({ attribute: 'more-label' }) moreLabel = ''
 
-  /** Text of the button that collapses an expanded group. */
-  @property({ attribute: 'collapse-label' }) collapseLabel = 'Show less'
+  /** Text of the button that collapses an expanded group. Empty, it is the `collapse` message ("Show less"). */
+  @property({ attribute: 'collapse-label' }) collapseLabel = ''
 
   @state() private items: Element[] = []
   @state() private visibleCount = Infinity
 
   private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, chipGroupMessages)
   private childObserver?: MutationObserver
   /** Measures the row and the indicator, plus any child that does not report its own size. */
   private resizeObserver?: ResizeObserver
@@ -255,11 +258,11 @@ export class ChipGroup extends LitElement {
     if (this.expanded) {
       if (!this.expandable) return nothing
       return html`<button class="indicator collapse" part="collapse" type="button" aria-expanded="true" @click=${() => this.setExpanded(false)}>
-        ${this.collapseLabel}
+        ${this.collapseLabel || this.msg.t('collapse')}
       </button>`
     }
     if (hidden === 0) return nothing
-    const label = `${hidden} ${this.moreLabel}`
+    const label = this.moreLabel ? `${hidden} ${this.moreLabel}` : this.msg.t('more', hidden)
     return this.expandable
       ? html`<button class="indicator overflow" part="overflow" type="button" aria-expanded="false" aria-label=${label} @click=${() => this.setExpanded(true)}>
           +${hidden}

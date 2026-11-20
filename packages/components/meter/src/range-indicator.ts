@@ -238,7 +238,7 @@ export class RangeIndicator extends LitElement {
       <div class="c2-range-indicator" aria-hidden="true">
         <div class="c2-range-indicator-header" part="header">
           <span class="c2-range-indicator-label" part="label" ?hidden=${!hasLabel}>
-            <slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
+            <slot @slotchange=${this.slotPresence.handleSlotChange}>${this.label || nothing}</slot>
           </span>
           <span class="c2-range-indicator-value" part="value">
             <slot name="value">${this.valueText || this.format(finite(this.value) ?? min)}</slot>

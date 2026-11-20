@@ -5,6 +5,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { isComposingKey, redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { commandMessages } from './messages.js'
 import styles from './command.scss?inline'
 import { CommandItem } from './command-item'
 import { CommandGroup } from './command-group'
@@ -54,7 +56,7 @@ export interface Command {
  * @slot default - The rows: `c2-command-item`, `c2-command-group` and `c2-command-separator` elements (separators are hidden while a query is typed).
  * @slot prefix-icon - Icon before the search field. Defaults to a magnifier.
  * @slot suffix - Content after the search field, such as an `esc` hint or a spinner.
- * @slot empty - Shown when no row matches. Defaults to "No results found."
+ * @slot empty - Shown when no row matches. Defaults to the `empty` message ("No results found.").
  * @slot footer - A bar under the list, such as keyboard hints.
  *
  * @csspart field - The row holding the icon, the search input and the suffix.
@@ -124,11 +126,14 @@ export class Command extends LitElement {
   /** The search text. Setting it filters the rows as typing does. */
   @property() query = ''
 
-  /** Placeholder of the search field. */
-  @property() placeholder = 'Type a command or search…'
+  /**
+   * Placeholder of the search field. Unset, it is the `placeholder` message ("Type a command or search…"); `''` shows
+   * none.
+   */
+  @property() placeholder?: string
 
-  /** Accessible name of the search field and the list. */
-  @property() label = 'Search commands'
+  /** Accessible name of the search field and the list. Empty, it is the `label` message ("Search commands"). */
+  @property() label = ''
 
   /** Show every row whatever the query, for rows the app filters itself (a server search). */
   @property({ type: Boolean, attribute: 'manual-filter' }) manualFilter = false
@@ -141,6 +146,7 @@ export class Command extends LitElement {
   private readonly internals = this.attachInternals()
 
   private readonly slotPresence = new SlotPresenceController(this, ['footer'])
+  private readonly msg = new LocalizeController(this, commandMessages)
 
   private observer?: MutationObserver
 
@@ -346,21 +352,21 @@ export class Command extends LitElement {
           aria-expanded="true"
           aria-controls="list"
           aria-autocomplete="list"
-          aria-label=${this.label}
+          aria-label=${this.label || this.msg.t('label')}
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder=${this.placeholder}
+          placeholder=${this.placeholder ?? this.msg.t('placeholder')}
           .value=${live(this.query)}
           @input=${this.handleInput}
           @keydown=${this.handleKeyDown}
         />
         <slot name="suffix"></slot>
       </div>
-      <div class="list" part="list" id="list" role="listbox" aria-label=${this.label}>
+      <div class="list" part="list" id="list" role="listbox" aria-label=${this.label || this.msg.t('label')}>
         <slot></slot>
       </div>
-      <div class="empty" part="empty"><slot name="empty">No results found.</slot></div>
+      <div class="empty" part="empty"><slot name="empty">${this.msg.t('empty')}</slot></div>
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
