@@ -3,6 +3,10 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './chatbot.scss?inline'
 import '@c2n/avatar'
+
+// modern-web-ignore: literal-interface-text a sample persona of the scaffold, not interface text
+const SAMPLE_PERSONA = 'Elisa Jasmin'
+
 /**
  * Minimal chatbot shell that greets a named user and renders application-provided conversation content.
  *
@@ -24,9 +28,6 @@ import '@c2n/avatar'
  * @cssproperty {color} [--c2-chatbot__header--background=rgb(248, 248, 248)]
  * @cssproperty {border} [--c2-chatbot__header--border-bottom=1px solid rgb(177, 177, 177)]
  */
-// modern-web-ignore: literal-interface-text a sample persona of the scaffold, not interface text
-const SAMPLE_PERSONA = 'Elisa Jasmin'
-
 @customElement('c2-chatbot')
 export class Chatbot extends LitElement {
   static override styles = unsafeCSS(styles)
