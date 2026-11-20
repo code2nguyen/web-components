@@ -301,10 +301,6 @@ export class CardInput extends LitElement {
     return !!(this.numberDigits || this.expiryDigits || this.cvcDigits)
   }
 
-  /**
-   * Whether the error is shown, on the host and on the field alike: a part's error, an enclosing field's error, or a
-   * missing card or custom message once `reportValidity()` reported it.
-   */
   /** The error `reportValidity()` reported, when no part has one of its own. */
   private reportedError(): { segment: Segment; message: string } | null {
     if (!this.validityShown) return null
@@ -312,6 +308,10 @@ export class CardInput extends LitElement {
     return this.required && !this.anyFilled() ? { segment: 'number', message: this.msg.t('valueMissing') } : null
   }
 
+  /**
+   * Whether the error is shown, on the host and on the field alike: a part's error, an enclosing field's error, or a
+   * missing card or custom message once `reportValidity()` reported it.
+   */
   private get errorShown(): boolean {
     return (!!this.firstError() || !!this.reportedError() || this.field.invalid) && !this.effectiveDisabled
   }
