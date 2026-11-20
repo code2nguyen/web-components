@@ -105,7 +105,7 @@ the days that carry something, and `renderDay` draws content of your own under t
 ```
 
 ```html tag=MdxCodeBlock,label=Closed days
-<c2-date-selector mode="single" months="1" value="2026-09-17" locale="en-US" aria-label="Choose an appointment day"
+<c2-date-selector class="appointment-calendar" mode="single" months="1" value="2026-09-17" locale="en-US" aria-label="Choose an appointment day"
   disabled-dates='[{"date":"2026-09-11","label":"Holiday"},{"date":"2026-09-24","label":"Staff training"}]'
   data-closed-example="sundays"></c2-date-selector>
 ```
@@ -139,7 +139,9 @@ The closed-days card names its holidays in `disabled-dates` (each reason is read
 by rule with `isDateDisabled`; the arrow keys step over both:
 
 ```ts tag=CodeBlock
-const calendar = document.querySelector<DateSelector>('c2-date-selector')!
+import type { DateSelector } from '@c2n/components/date-selector'
+
+const calendar = document.querySelector<DateSelector>('.appointment-calendar')!
 calendar.isDateDisabled = (date) => new Date(`${date}T12:00:00`).getDay() === 0
 ```
 

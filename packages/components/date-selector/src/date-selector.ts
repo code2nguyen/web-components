@@ -359,7 +359,12 @@ export class DateSelector extends LitElement {
   protected override updated(changed: PropertyValues<this>) {
     // The focused day was closed under the user (disabled-dates arriving late): its button went disabled and lost the
     // focus, which goes to the day now holding the tab stop rather than to the page.
-    if (this.dayHadFocus && !this.shadowRoot?.activeElement) this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus()
+    // Focused once this update completed: the day's `@focus` handler sets `focusDate`, which must not change mid-update.
+    if (this.dayHadFocus && !this.shadowRoot?.activeElement) {
+      void this.updateComplete.then(() => {
+        if (!this.shadowRoot?.activeElement) this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus()
+      })
+    }
     if (
       changed.has('from') ||
       changed.has('to') ||

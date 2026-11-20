@@ -461,6 +461,10 @@ test('a selected day closed afterwards is not submitted and does not answer requ
 })
 
 test('the focus stays in the grid when the focused day is closed under it', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
   await scenario('single')
   await page.getByRole('gridcell', { name: /September 15, 2026/ }).focus()
   await page.locator('c2-date-selector').evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-15']))
@@ -468,6 +472,7 @@ test('the focus stays in the grid when the focused day is closed under it', asyn
   await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
   await page.keyboard.press('ArrowRight')
   await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
+  expect(warnings).toEqual([])
 })
 
 test('Home lands on the nearest day inside min', async ({ page, scenario }) => {
