@@ -512,3 +512,19 @@ test('a range shows its end as the tab stop when its start is not shown', async 
   await selector.evaluate((element: HTMLElement & { from: string; to: string }) => Object.assign(element, { from: '2026-08-28', to: '2026-09-03' }))
   await expect(selector.locator('.day[tabindex="0"]')).toHaveAttribute('data-date', '2026-09-03')
 })
+
+test('in multiple mode the keyboard reaches a selected day closed afterwards, and Page Down stays in the month asked for', async ({ page, scenario }) => {
+  await scenario('multiple')
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
+  await page.getByRole('gridcell', { name: /September 9, 2026/ }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('gridcell', { name: /September 10, 2026/ })).toBeFocused()
+  await page.keyboard.press(' ')
+  await expect(selector).toHaveAttribute('value', '2026-09-03')
+  // October's last days closed: Page Down from 30 September lands on October's last open day, not in November.
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-10-29', '2026-10-30', '2026-10-31']))
+  await page.getByRole('gridcell', { name: /September 30, 2026/ }).focus()
+  await page.keyboard.press('PageDown')
+  await expect(page.getByRole('gridcell', { name: /October 28, 2026/ })).toBeFocused()
+})

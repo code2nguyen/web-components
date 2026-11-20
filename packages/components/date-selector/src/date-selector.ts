@@ -544,15 +544,27 @@ export class DateSelector extends LitElement {
     const date = fromIso(current)
     if (!date || offset === 0) return
     let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
-    const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1)
-    const limit = withinWeek ? Math.abs(offset) : 366
-    // Home and End also step back over days outside min/max, landing on the nearest day inside them.
-    const blocked = (day: string) => this.isClosed(day) || (withinWeek && this.outOfRange(day))
-    for (let guard = 0; guard < limit && !this.effectiveDisabled && (withinWeek || !this.outOfRange(toIso(target))) && blocked(toIso(target)); guard++) {
-      target = addDays(target, step)
+    const closed = (day: string) => this.isClosed(day) && !this.removableClosed(day)
+    if (byMonth) {
+      // Page Up and Page Down stay in the month asked for: the nearest open day after the target, else before it.
+      const month = target.getMonth()
+      const inMonth = (day: Date) => day.getMonth() === month
+      let found: Date | undefined
+      for (let day = target; !found && inMonth(day); day = addDays(day, 1)) if (!closed(toIso(day))) found = day
+      for (let day = addDays(target, -1); !found && inMonth(day); day = addDays(day, -1)) if (!closed(toIso(day))) found = day
+      if (!found) return
+      target = found
+    } else {
+      const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1)
+      const limit = withinWeek ? Math.abs(offset) : 366
+      // Home and End also step back over days outside min/max, landing on the nearest day inside them.
+      const blocked = (day: string) => closed(day) || (withinWeek && this.outOfRange(day))
+      for (let guard = 0; guard < limit && !this.effectiveDisabled && (withinWeek || !this.outOfRange(toIso(target))) && blocked(toIso(target)); guard++) {
+        target = addDays(target, step)
+      }
     }
     const value = toIso(target)
-    if (value === current || this.isUnavailable(value)) return
+    if (value === current || (this.isUnavailable(value) && !this.removableClosed(value))) return
     const firstVisible = toIso(this.visibleMonth)
     const afterVisible = toIso(addMonths(this.visibleMonth, this.displayedMonths))
     if (value < firstVisible || value >= afterVisible) this.visibleMonth = beginningOfMonth(target)
@@ -671,7 +683,7 @@ export class DateSelector extends LitElement {
     // or the first selected day, else today, else the first available day shown. Any of them may be closed or off screen.
     const first = toIso(this.visibleMonth)
     const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
-    const usable = (date: string) => !!date && date >= first && date < after && !this.isUnavailable(date)
+    const usable = (date: string) => !!date && date >= first && date < after && (!this.isUnavailable(date) || this.removableClosed(date))
     let candidates = [this.focusDate, this.from, this.to]
     if (!this.isRange) {
       const dates = this.selectedDates
