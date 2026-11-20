@@ -651,11 +651,12 @@ export class ReorderList extends LitElement {
   }
 
   /** Asks the application to add the rows of an item payload dropped on the list; returns how many it took. */
-  private receiveDrop({ kind, items, event }: DropZoneItems): number {
+  private receiveDrop({ kind, items, point }: DropZoneItems): number {
     const wrappers = [...(this.containerElement?.querySelectorAll<HTMLElement>('.list-item[data-assignment-id]') ?? [])]
+    // Without a point (a keyboard move from another list) the rows go to the end.
     let index = wrappers.findIndex((wrapper) => {
       const rect = wrapper.getBoundingClientRect()
-      return event.clientY < rect.top + rect.height / 2
+      return !!point && point.y < rect.top + rect.height / 2
     })
     if (index === -1) index = wrappers.length
     // New rows keep their light-DOM position among the rows that stayed, so the row authored at `index` is the one to

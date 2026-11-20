@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { composedSelectionRange, composedSelectionRanges, findWrapped, isFormControl, isIslandWrapper, isLayoutWrapper, unwrapContents } from './dom-helper.ts'
+import {
+  composedSelectionRange,
+  composedSelectionRanges,
+  findWrapped,
+  isFormControl,
+  isIslandWrapper,
+  isLayoutWrapper,
+  trackRead,
+  unwrapContents,
+} from './dom-helper.ts'
 
 /** Just enough of an element for the tree walks: these helpers read no other DOM API (and Node has no DOM). */
 class FakeElement {
@@ -128,4 +137,21 @@ test('composedSelectionRanges takes the options object, then the roots as argume
   assert.equal(composedSelectionRanges(broken, [root]), undefined)
   assert.equal(composedSelectionRanges({} as Selection, [root]), undefined)
   assert.equal(composedSelectionRange({ getComposedRanges: () => [] } as unknown as Selection, [root]), undefined)
+})
+
+test('trackRead says whether a listener read the field, and keeps its value', () => {
+  const detail = { items: [1, 2], kind: 'task' }
+  const read = trackRead(detail, 'items')
+  assert.equal(read(), false)
+  assert.equal(detail.kind, 'task')
+  assert.equal(read(), false)
+  const { items } = detail
+  assert.deepEqual(items, [1, 2])
+  assert.equal(read(), true)
+  assert.deepEqual(Object.keys(detail), ['items', 'kind'])
+  const replaced = { items: [1] }
+  const wrote = trackRead(replaced, 'items')
+  replaced.items = [3]
+  assert.equal(wrote(), true)
+  assert.deepEqual(replaced.items, [3])
 })

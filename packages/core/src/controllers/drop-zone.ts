@@ -38,14 +38,25 @@ export interface DropZoneFiles {
  */
 export type DropZoneFilesHandler = (files: DropZoneFiles) => readonly File[] | number | void
 
+/** A point in viewport coordinates, as a pointer event's `clientX` and `clientY`. */
+export interface DropPoint {
+  x: number
+  y: number
+}
+
 /** The items one drop of an item payload brought. */
 export interface DropZoneItems<T = unknown> {
   /** The payload kind, as `itemKind` returned it. */
   kind: string
-  /** The items the source wrote, in its order. */
+  /** The items the source wrote, in its order: a copy, never the source's own objects. */
   items: T[]
-  /** The drop, for its position (`clientX`, `clientY`) and its target. */
-  event: DragEvent
+  /**
+   * Where they were dropped. Absent for a move made without a pointer (a keyboard command calling `moveItemTo` on
+   * the source): the host puts them at its natural place, the end.
+   */
+  point?: DropPoint
+  /** The browser's drop event, for a drop the browser carried; absent for a pointer drag a source handed over. */
+  event?: DragEvent
 }
 
 /**
@@ -91,10 +102,16 @@ export interface DropZoneOptions {
    * nothing (`false`).
    */
   announce?: boolean | 'added'
+  /**
+   * Receives an item the host itself is dragging (`startItemDrag` with the host as `source`) dropped back on it by the
+   * browser: the host moves it to `point`, a reorder rather than a move in. Without it such a drop is refused. The drop
+   * does not set `drag.target`, so the source keeps the item.
+   */
+  onOwnDrop?: (drop: { drag: ItemDrag; point: DropPoint; event: DragEvent }) => void
 }
 
 /** What a drag over the zone carries, as far as the zone is concerned. */
-type DragContent = { type: 'items'; kind: string } | { type: 'refused' } | { type: 'files' }
+type DragContent = { type: 'items'; kind: string } | { type: 'own' } | { type: 'reorder' } | { type: 'refused' } | { type: 'files' }
 
 /** Whether `node` is `zone` or inside it in the composed tree: through slots and out of shadow roots to their host. */
 function composedContains(zone: Node, node: EventTarget | null): boolean {
@@ -199,11 +216,42 @@ export class DropZoneController implements ReactiveController {
     this.host = host
     this.options = options
     this.msg = new LocalizeController(host, dropZoneMessages)
+    this.itemTarget = {
+      host: this.host,
+      // Never the source, nor a zone inside it (a list in one of its cards): the item would land inside itself.
+      accepts: (drag) =>
+        this.host.isConnected &&
+        !this.disabled &&
+        !!this.options.onItems &&
+        !composedContains(drag.source, this.host) &&
+        this.options.itemKind?.()?.toLowerCase() === drag.kind.toLowerCase(),
+      hover: (point) => this.setOver(!!point, true),
+      take: (drag, point) => {
+        this.setOver(false)
+        // The zone may have stopped taking such items since the pointer reached it (disabled, a new kind).
+        if (!this.itemTarget.accepts(drag)) return 0
+        // A copy, as a drop carried by the browser would bring: the host may keep or change the objects it is given.
+        let items: unknown[]
+        try {
+          items = JSON.parse(JSON.stringify(drag.items)) as unknown[]
+        } catch {
+          // A cycle or a BigInt in the items: they cannot travel, so nothing is taken and the source keeps them.
+          return 0
+        }
+        // The zone's own spelling of the kind, as a drop the browser carried reports it.
+        return this.takeItems(this.options.itemKind?.() ?? drag.kind, items, point, undefined)
+      },
+    }
     host.addController(this)
   }
 
+  /** The zone as a target of the page's own item drags: a pointer drag a source hands over, or a keyboard move. */
+  private readonly itemTarget: ItemDropTarget
+  private unregisterItemTarget?: () => void
+
   hostConnected(): void {
     this.listen()
+    if (this.options.itemKind && !this.unregisterItemTarget) this.unregisterItemTarget = registerItemDropTarget(this.itemTarget)
   }
 
   hostUpdated(): void {
@@ -213,6 +261,8 @@ export class DropZoneController implements ReactiveController {
 
   hostDisconnected(): void {
     this.unlisten()
+    this.unregisterItemTarget?.()
+    this.unregisterItemTarget = undefined
     // A paste shortcut still waiting for its clipboard fallback belongs to the zone that left, and a read already
     // running is dropped: the zone no longer hears the `paste` that would make it moot.
     this.pastes += 1
@@ -278,11 +328,19 @@ export class DropZoneController implements ReactiveController {
    * What a drag brings that is the zone's business: the accepted item payload, another kind's payload (refused), files
    * (for a zone that takes them), or nothing. An item payload wins over files that come with it.
    */
-  private dragOf(transfer: DataTransfer | null | undefined): DragContent | null {
+  private dragOf(event: DragEvent): DragContent | null {
+    const transfer = event.dataTransfer
     if (!transfer) return null
     const kind = this.options.itemKind?.()
+    // The host's own item, dragged by the browser back over it: a reorder, when the host takes those.
+    if (this.options.onOwnDrop && !this.disabled && currentItemDrag()?.source === this.host && itemPayloadKinds(transfer).length) return { type: 'reorder' }
     if (kind) {
       const kinds = itemPayloadKinds(transfer)
+      // Items dragged out of this host or one around it, or over their source (a list in this board's card that takes
+      // nothing back itself), whatever their kind: dropping them there is no move, and the zone neither lights up nor
+      // refuses them.
+      const source = currentItemDrag()?.source
+      if (kinds.length && source && (composedContains(source, this.host) || event.composedPath().includes(source))) return { type: 'own' }
       if (kinds.includes(kind.toLowerCase())) return { type: 'items', kind }
       if (kinds.length) return { type: 'refused' }
     }
@@ -295,9 +353,15 @@ export class DropZoneController implements ReactiveController {
   }
 
   readonly handleDragEnter = (event: DragEvent): void => {
-    const drag = this.dragOf(event.dataTransfer)
+    const drag = this.dragOf(event)
     if (!drag || takenInside(event)) return
-    if (this.disabled) {
+    if (drag.type === 'reorder') {
+      // Taken, but unlit: the item is already the host's.
+      event.preventDefault()
+      claimed.add(event)
+      return
+    }
+    if (this.disabled || drag.type === 'own') {
       // Unlit, but its own kind stays its own: the zone around it does not light up for a drop it would not get.
       if (drag.type !== 'refused') claimed.add(event)
       return
@@ -311,7 +375,7 @@ export class DropZoneController implements ReactiveController {
   }
 
   readonly handleDragOver = (event: DragEvent): void => {
-    const drag = this.dragOf(event.dataTransfer)
+    const drag = this.dragOf(event)
     if (!drag) return
     // A zone nested in this one (a list in a board's card) took the drag: this one stays out of it and unlit.
     if (takenInside(event)) {
@@ -322,14 +386,24 @@ export class DropZoneController implements ReactiveController {
       return
     }
     const transfer = event.dataTransfer!
-    if (this.disabled || drag.type === 'refused') {
+    if (drag.type === 'reorder') {
+      event.preventDefault()
+      claimed.add(event)
+      transfer.dropEffect = 'move'
+      return
+    }
+    if (this.disabled || drag.type === 'refused' || drag.type === 'own') {
       // Refuse the drop rather than ignore it: an ignored dragover lets the browser open the file in place of the page.
       event.preventDefault()
       transfer.dropEffect = 'none'
       // A disabled zone still owns a drag of its own kind: a zone around it must not take what this one refuses.
       if (drag.type !== 'refused') claimed.add(event)
+      if (this.over && drag.type === 'own') {
+        this.depth = 0
+        this.setOver(false)
+      }
       // Another kind's payload shows the zone refusing it, like a file the rules turn away.
-      if (!this.disabled) {
+      if (!this.disabled && drag.type === 'refused') {
         this.depth = Math.max(this.depth, 1)
         this.showRefusedUnlessTaken(event)
       }
@@ -375,8 +449,17 @@ export class DropZoneController implements ReactiveController {
     this.depth = 0
     this.setOver(false)
     if (takenInside(event)) return
-    const drag = this.dragOf(event.dataTransfer)
-    if (this.disabled || !drag || drag.type === 'refused') {
+    const drag = this.dragOf(event)
+    const own = currentItemDrag()
+    if (drag?.type === 'reorder' && own) {
+      event.preventDefault()
+      claimed.add(event)
+      this.options.onOwnDrop!({ drag: own, point: { x: event.clientX, y: event.clientY }, event })
+      // Over here and now: the source's `dragend` may never come, its node redrawn away by the move it made.
+      endItemDrag(own)
+      return
+    }
+    if (this.disabled || !drag || drag.type === 'refused' || drag.type === 'own') {
       // Keep the browser from opening a file dropped on a zone that takes none now.
       if (wasOver || drag) event.preventDefault()
       if (drag && drag.type !== 'refused') {
@@ -388,7 +471,7 @@ export class DropZoneController implements ReactiveController {
     event.preventDefault()
     claimed.add(event)
     if (drag.type === 'items') this.receiveItems(drag.kind, event)
-    else this.receive([...event.dataTransfer!.files], 'drop')
+    else if (drag.type === 'files') this.receive([...event.dataTransfer!.files], 'drop')
   }
 
   readonly handlePaste = (event: ClipboardEvent): void => {
@@ -515,26 +598,27 @@ export class DropZoneController implements ReactiveController {
   /** Hands the items of a dropped payload to the host, then announces how many it took. */
   private receiveItems(kind: string, event: DragEvent): void {
     const items = readItemPayload(event.dataTransfer, kind)
-    // A payload that is not a JSON array came from no c2n source: nothing to take, nothing to announce, and no move
-    // for the source to act on.
-    if (!items?.length || !this.options.onItems) {
-      if (event.dataTransfer) event.dataTransfer.dropEffect = 'none'
-      return
-    }
+    const added = items ? this.takeItems(kind, items, { x: event.clientX, y: event.clientY }, event) : 0
+    // Nothing taken (all refused, the app cancelled, or a payload that is not a JSON array): report no move, so a source
+    // that removes its items on a `move` `dragend` keeps them. A partial drop stays a move: the zone refuses only items
+    // it already holds.
+    if (added === 0 && event.dataTransfer) event.dataTransfer.dropEffect = 'none'
+  }
+
+  /** Runs items through the host, announces how many it took and returns that count. */
+  private takeItems(kind: string, items: unknown[], point: DropPoint | undefined, event: DragEvent | undefined): number {
+    if (!items.length || !this.options.onItems) return 0
     let taken: ReturnType<NonNullable<DropZoneOptions['onItems']>>
     try {
-      taken = this.options.onItems({ kind, items, event })
+      taken = this.options.onItems({ kind, items, point, event })
     } catch (error) {
       // A payload the host could not take (one from another window may have any shape): no move, so the source keeps it.
-      if (event.dataTransfer) event.dataTransfer.dropEffect = 'none'
+      if (event?.dataTransfer) event.dataTransfer.dropEffect = 'none'
       throw error
     }
     const added = typeof taken === 'number' ? taken : taken ? taken.length : items.length
-    // Nothing taken (all refused, or the app cancelled): report no move, so a source that removes its items on a
-    // `move` `dragend` keeps them. A partial drop stays a move: the zone refuses only items it already holds.
-    if (added === 0 && event.dataTransfer) event.dataTransfer.dropEffect = 'none'
-    if (this.options.announce === false) return
-    this.announce(added, this.options.announce === 'added' ? 0 : items.length - added, 'items')
+    if (this.options.announce !== false) this.announce(added, this.options.announce === 'added' ? 0 : items.length - added, 'items')
+    return added
   }
 
   private announce(added: number, refused: number, what: 'files' | 'items' = 'files'): void {
@@ -655,4 +739,132 @@ function labelOf(item: unknown): string {
     if (typeof value === 'string' || typeof value === 'number') return String(value)
   }
   return ''
+}
+
+/**
+ * An item drag in progress in this page, started by a source with `startItemDrag`: what a zone needs to know without
+ * the browser's data transfer, which hides the items until the drop and is absent from a pointer drag.
+ */
+export interface ItemDrag<T = unknown> {
+  /** The payload kind, as `writeItemPayload` writes it. */
+  kind: string
+  /** The items, which must survive `JSON.stringify`: a zone is given a copy. */
+  items: readonly T[]
+  /** The element they are dragged out of. A zone on it takes nothing back, and does not light up for them. */
+  source: Element
+}
+
+/**
+ * A zone that takes the page's own item drags without the browser's drag and drop: a pointer drag a source hands over
+ * when it leaves the source, or a keyboard move. Every `DropZoneController` with an `itemKind` registers one.
+ */
+export interface ItemDropTarget {
+  /** The element the zone belongs to. */
+  readonly host: Element
+  /** Whether it takes this drag now: its kind, not disabled, not the drag's own source. */
+  accepts(drag: ItemDrag): boolean
+  /** Shows the drag over it at a point, or ends that (`null`). */
+  hover(point: DropPoint | null): void
+  /** Takes the items at a point, or at its natural place (the end) without one, and returns how many it took. */
+  take(drag: ItemDrag, point?: DropPoint): number
+}
+
+interface ItemDragRegistry {
+  drag: ItemDrag | null
+  targets: Set<ItemDropTarget>
+}
+
+/** Shared through `globalThis`, so two copies of this module in one page (two bundles) see each other's zones. */
+const registry: ItemDragRegistry = ((globalThis as unknown as Record<symbol, ItemDragRegistry | undefined>)[Symbol.for('c2n.item-drag')] ??= {
+  drag: null,
+  targets: new Set(),
+})
+
+/**
+ * Marks an item drag as started from `drag.source`: call it with `writeItemPayload` in the source's `dragstart`, or
+ * when a pointer drag starts, and `endItemDrag` once it is over. Zones on the source then stay out of it.
+ */
+export function startItemDrag(drag: ItemDrag): void {
+  registry.drag = drag
+}
+
+/** The watch `startNativeItemDrag` keeps for a drag whose `dragend` may never come, by drag. */
+const watchers = new WeakMap<ItemDrag, () => void>()
+
+/**
+ * `startItemDrag` from a source's `dragstart` handler, for a drag the browser carries. Its `dragend` may never reach
+ * the source: a listener after it (a scroll area that pans on mouse drags) may cancel the `dragstart`, or the dragged
+ * node may leave the document mid-drag. Then the drag ends again by itself, a task after a cancelled `dragstart` or at
+ * the next press of a pointer (none reaches the page while the browser drags), and `forget` runs, for the source to
+ * finish it as on `dragend`: a zone that took the items says so in `drag.target`.
+ */
+export function startNativeItemDrag(event: DragEvent, drag: ItemDrag, forget: () => void): void {
+  startItemDrag(drag)
+  const end = () => {
+    unwatch()
+    if (registry.drag !== drag) return
+    endItemDrag(drag)
+    forget()
+  }
+  const unwatch = () => {
+    removeEventListener('pointerdown', end, true)
+    watchers.delete(drag)
+  }
+  addEventListener('pointerdown', end, true)
+  // A `dragend` that reached the source ends the drag first: the watch goes with it.
+  watchers.set(drag, unwatch)
+  setTimeout(() => {
+    if (event.defaultPrevented) end()
+  })
+}
+
+/** Ends the item drag `startItemDrag` started (or any, without an argument). */
+export function endItemDrag(drag?: ItemDrag): void {
+  if (drag) watchers.get(drag)?.()
+  if (!drag || registry.drag === drag) registry.drag = null
+}
+
+/** The item drag in progress in this page, if a source started one. */
+export function currentItemDrag(): ItemDrag | null {
+  return registry.drag
+}
+
+/** Adds a zone to the page's item drop targets; returns the function that removes it. */
+export function registerItemDropTarget(target: ItemDropTarget): () => void {
+  registry.targets.add(target)
+  return () => registry.targets.delete(target)
+}
+
+/**
+ * The zone that takes `drag` at a point: the innermost accepting zone under the topmost element there, so a zone a
+ * dialog covers is not one, and never one around the source while the point is on the source. The source's dragged
+ * preview must not catch the pointer (`pointer-events: none`).
+ */
+export function itemDropTargetAt(point: DropPoint, drag: ItemDrag): ItemDropTarget | null {
+  if (typeof document === 'undefined') return null
+  let element = document.elementFromPoint(point.x, point.y)
+  // Down through shadow roots to the element actually there.
+  while (element?.shadowRoot) {
+    const inner = element.shadowRoot.elementFromPoint(point.x, point.y)
+    if (!inner || inner === element) break
+    element = inner
+  }
+  if (!element) return null
+  // Over the source itself, a zone around it (a board holding the list a row comes from) is not a target: the pointer is
+  // still reordering inside the source.
+  const box = drag.source.getBoundingClientRect()
+  const onSource = point.x >= box.left && point.x <= box.right && point.y >= box.top && point.y <= box.bottom
+  let best: ItemDropTarget | null = null
+  for (const target of registry.targets) {
+    if (!target.accepts(drag) || !composedContains(target.host, element)) continue
+    if (onSource && composedContains(target.host, drag.source)) continue
+    if (!best || composedContains(best.host, target.host)) best = target
+  }
+  return best
+}
+
+/** The zone of `host` that takes `drag`, for a move made without a pointer (`moveItemTo`). */
+export function itemDropTargetOf(host: Element, drag: ItemDrag): ItemDropTarget | null {
+  for (const target of registry.targets) if (target.host === host && target.accepts(drag)) return target
+  return null
 }

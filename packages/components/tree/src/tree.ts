@@ -817,8 +817,9 @@ export class Tree extends LitElement {
   }
 
   /** Adds the nodes of an item payload dropped on the tree at the place under the pointer; returns how many it took. */
-  #receiveDrop({ kind, items: dropped, event }: DropZoneItems): number {
-    const { parent, before } = this.#dropPlace(event.clientY)
+  #receiveDrop({ kind, items: dropped, point }: DropZoneItems): number {
+    // Without a point (a keyboard move from another tree) the nodes go to the end of the root.
+    const { parent, before } = point ? this.#dropPlace(point.y) : { parent: null, before: null }
     const siblings = parent ? parent.childItems : this.rootItems
     const index = before ? Math.max(0, siblings.indexOf(before)) : siblings.length
     const values = new Set<string>()

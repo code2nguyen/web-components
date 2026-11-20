@@ -710,8 +710,8 @@ export class Kanban extends LitElement {
   // ---- drops from outside ----
 
   /** Adds the cards of an item payload dropped on the board at the place under the pointer; returns how many it took. */
-  private receiveDrop({ kind, items: dropped, event }: DropZoneItems): number {
-    const destination = this.destinationAt({ x: event.clientX, y: event.clientY })
+  private receiveDrop({ kind, items: dropped, point }: DropZoneItems): number {
+    const destination = point ? this.destinationAt(point) : this.endDestinationFor(dropped)
     if (!destination) return 0
     const source = this.sourceItems
     const keys = new Set(source.map((item) => this.keyOf(item)))
@@ -733,6 +733,19 @@ export class Kanban extends LitElement {
     if (!this.dispatchEvent(new CustomEvent<KanbanItemDropDetail>('item-drop', { cancelable: true, detail }))) return 0
     this.items = next
     return added.length
+  }
+
+  /**
+   * Where cards moved in without a pointer (`moveItemsTo` on another board) land: the end of the column they all come
+   * from when this board has it, else of the first column.
+   */
+  private endDestinationFor(dropped: readonly unknown[]): Position | null {
+    const columns = this.columnElements.map((column) => column.columnId)
+    const from = new Set(dropped.map((entry) => (entry && typeof entry === 'object' ? this.columnOf(entry as KanbanItem) : undefined)))
+    const [only] = from
+    const column = from.size === 1 && only !== undefined && columns.includes(only) ? only : columns[0]
+    if (column === undefined) return null
+    return { column, index: this.layoutOf(this.sourceItems).get(column)?.length ?? 0 }
   }
 
   /** `items` with new cards inserted into `column` at `index`, in order. */
