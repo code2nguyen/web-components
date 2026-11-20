@@ -26,7 +26,19 @@ export interface KanbanCardView {
   tabbable?: boolean
   /** Height of the placeholder: the dragged card's height. */
   height?: number
+  /** Shows the drag handle that carries the card off the board (`drag-kind`). */
+  handle?: boolean
 }
+
+/** The grip of a card's drag handle: two columns of three dots. */
+const grip = html`<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+  <circle cx="6" cy="4" r="1.25" />
+  <circle cx="10" cy="4" r="1.25" />
+  <circle cx="6" cy="8" r="1.25" />
+  <circle cx="10" cy="8" r="1.25" />
+  <circle cx="6" cy="12" r="1.25" />
+  <circle cx="10" cy="12" r="1.25" />
+</svg>`
 
 let instanceCount = 0
 
@@ -47,6 +59,7 @@ let instanceCount = 0
  * @csspart count - Card count in the default header, followed by the limit when one is set.
  * @csspart cards - List of the column's cards.
  * @csspart card - Box around one card's rendered content; carries the focus ring and the drag lift.
+ * @csspart drag-handle - Grip at the start of each card while the board has a `drag-kind`: the browser carries the card from it, to another board, list or tree; elsewhere, another window too, the drop is a copy.
  * @csspart placeholder - Gap marking where a dragged card will land.
  * @csspart empty - Component-owned region wrapping the `empty` slot or its "No cards" fallback, shown while the column holds no card; styles placement, not assigned content.
  * @csspart footer - Component-owned region wrapping the `footer` slot below the cards; styles placement, not assigned content.
@@ -95,6 +108,12 @@ let instanceCount = 0
  * @cssproperty {border} [--c2-kanban-column__placeholder--border=2px dashed rgb(2, 101, 220)] - Border of the drop gap.
  * @cssproperty {color} [--c2-kanban-column__placeholder--background-color=rgba(2, 101, 220, 0.08)] - Background of the drop gap.
  * @cssproperty {border} [--c2-kanban-column__empty--border=1px dashed #bcbcc6] - Border of the empty hint.
+ * @cssproperty {color} [--c2-kanban-column__drag-handle--color=#a1a1aa] - Colour of a card's drag handle (`drag-kind`).
+ * @cssproperty {color} [--c2-kanban-column__drag-handle__hover--color=#52525b] - Colour of the drag handle under the pointer.
+ * @cssproperty {length} [--c2-kanban-column__drag-handle--size=16px] - Size of the drag handle's grip.
+ * @cssproperty {length} [--c2-kanban-column__drag-handle--gap=6px] - Space between the drag handle and the card's content.
+ * @cssproperty {length} [--c2-kanban-column__drag-handle--margin-inline-start=-4px] - Inset of the drag handle into the card's start padding.
+ * @cssproperty {string} [--c2-kanban-column__drag-handle--cursor=grab] - Cursor over the drag handle.
  * @cssproperty {border-radius} [--c2-kanban-column__empty--border-radius=6px] - Radius of the empty hint.
  * @cssproperty {padding} [--c2-kanban-column__empty--padding=16px 8px] - Padding of the empty hint.
  * @cssproperty {color} [--c2-kanban-column__empty--color=#71717a] - Text colour of the empty hint.
@@ -206,7 +225,18 @@ export class KanbanColumn extends LitElement {
           <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
       </div>
-      ${this.dragged ? html`<div part="card" class="card card--dragging" aria-hidden="true">${this.dragged.content}</div>` : nothing}
+      ${
+        this.dragged
+          ? html`<div part="card" class=${classMap({ card: true, 'card--dragging': true, 'card--handle': !!this.dragged.handle })} aria-hidden="true">
+              ${
+                this.dragged.handle
+                  ? html`<span part="drag-handle" class="drag-handle">${grip}</span>
+                      <div class="card-content">${this.dragged.content}</div>`
+                  : this.dragged.content
+              }
+            </div>`
+          : nothing
+      }
     `
   }
 
@@ -214,7 +244,7 @@ export class KanbanColumn extends LitElement {
     return html`
       <div
         part="card"
-        class=${classMap({ card: true, 'card--movable': this.editable, 'card--picked': !!card.picked })}
+        class=${classMap({ card: true, 'card--movable': this.editable, 'card--picked': !!card.picked, 'card--handle': !!card.handle })}
         data-key=${card.key}
         role="listitem"
         aria-posinset=${index + 1}
@@ -222,7 +252,12 @@ export class KanbanColumn extends LitElement {
         aria-describedby=${this.editable ? this.instructionsId : nothing}
         tabindex=${this.editable ? (card.tabbable ? 0 : -1) : nothing}
       >
-        ${card.content}
+        ${
+          card.handle
+            ? html`<span part="drag-handle" class="drag-handle" draggable="true" aria-hidden="true">${grip}</span>
+                <div class="card-content">${card.content}</div>`
+            : card.content
+        }
       </div>
     `
   }

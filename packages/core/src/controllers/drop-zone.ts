@@ -218,13 +218,15 @@ export class DropZoneController implements ReactiveController {
     this.msg = new LocalizeController(host, dropZoneMessages)
     this.itemTarget = {
       host: this.host,
+      reordersOwnDrops: !!options.onOwnDrop,
       // Never the source, nor a zone inside it (a list in one of its cards): the item would land inside itself.
       accepts: (drag) =>
-        this.host.isConnected &&
-        !this.disabled &&
+        // The cheap checks first: this runs for every registered zone on each move of a drag.
+        this.options.itemKind?.()?.toLowerCase() === drag.kind.toLowerCase() &&
         !!this.options.onItems &&
-        !composedContains(drag.source, this.host) &&
-        this.options.itemKind?.()?.toLowerCase() === drag.kind.toLowerCase(),
+        !this.disabled &&
+        this.host.isConnected &&
+        !composedContains(drag.source, this.host),
       hover: (point) => this.setOver(!!point, true),
       take: (drag, point) => {
         this.setOver(false)
@@ -333,14 +335,20 @@ export class DropZoneController implements ReactiveController {
     if (!transfer) return null
     const kind = this.options.itemKind?.()
     // The host's own item, dragged by the browser back over it: a reorder, when the host takes those.
-    if (this.options.onOwnDrop && !this.disabled && currentItemDrag()?.source === this.host && itemPayloadKinds(transfer).length) return { type: 'reorder' }
+    if (this.options.onOwnDrop && !this.disabled && dragCarriedBy(transfer)?.source === this.host && itemPayloadKinds(transfer).length)
+      return { type: 'reorder' }
     if (kind) {
       const kinds = itemPayloadKinds(transfer)
       // Items dragged out of this host or one around it, or over their source (a list in this board's card that takes
       // nothing back itself), whatever their kind: dropping them there is no move, and the zone neither lights up nor
       // refuses them.
-      const source = currentItemDrag()?.source
-      if (kinds.length && source && (composedContains(source, this.host) || event.composedPath().includes(source))) return { type: 'own' }
+      const source = dragCarriedBy(transfer)?.source
+      if (kinds.length && source) {
+        // Inside a source that moves its own items dropped back on it (a list in a board's card): the board's drop, so
+        // this zone stays out of the way and lets the event reach it.
+        if (source !== this.host && composedContains(source, this.host) && reordersOwnDrops(source)) return null
+        if (composedContains(source, this.host) || event.composedPath().includes(source)) return { type: 'own' }
+      }
       if (kinds.includes(kind.toLowerCase())) return { type: 'items', kind }
       if (kinds.length) return { type: 'refused' }
     }
@@ -450,13 +458,16 @@ export class DropZoneController implements ReactiveController {
     this.setOver(false)
     if (takenInside(event)) return
     const drag = this.dragOf(event)
-    const own = currentItemDrag()
+    const own = dragCarriedBy(event.dataTransfer)
     if (drag?.type === 'reorder' && own) {
       event.preventDefault()
       claimed.add(event)
-      this.options.onOwnDrop!({ drag: own, point: { x: event.clientX, y: event.clientY }, event })
-      // Over here and now: the source's `dragend` may never come, its node redrawn away by the move it made.
-      endItemDrag(own)
+      try {
+        this.options.onOwnDrop!({ drag: own, point: { x: event.clientX, y: event.clientY }, event })
+      } finally {
+        // Over here and now: the source's `dragend` may never come, its node redrawn away by the move it made.
+        finishItemDrag(own)
+      }
       return
     }
     if (this.disabled || !drag || drag.type === 'refused' || drag.type === 'own') {
@@ -599,6 +610,13 @@ export class DropZoneController implements ReactiveController {
   private receiveItems(kind: string, event: DragEvent): void {
     const items = readItemPayload(event.dataTransfer, kind)
     const added = items ? this.takeItems(kind, items, { x: event.clientX, y: event.clientY }, event) : 0
+    const drag = dragCarriedBy(event.dataTransfer)
+    if (added > 0 && drag && drag.kind.toLowerCase() === kind.toLowerCase()) {
+      drag.target = this.host
+      // The source's `dragend` normally follows at once. One that never comes (its node redrawn away mid-drag) still
+      // lets the items leave the source now, not at the next pointer press.
+      finishItemDrag(drag)
+    }
     // Nothing taken (all refused, the app cancelled, or a payload that is not a JSON array): report no move, so a source
     // that removes its items on a `move` `dragend` keeps them. A partial drop stays a move: the zone refuses only items
     // it already holds.
@@ -752,6 +770,11 @@ export interface ItemDrag<T = unknown> {
   items: readonly T[]
   /** The element they are dragged out of. A zone on it takes nothing back, and does not light up for them. */
   source: Element
+  /**
+   * The host of the zone that took them, set by that zone when the browser carried the drop, so the source can tell
+   * on `dragend` where its items went. Unset while the drag lasts, and for a drop outside c2n.
+   */
+  target?: Element
 }
 
 /**
@@ -767,11 +790,18 @@ export interface ItemDropTarget {
   hover(point: DropPoint | null): void
   /** Takes the items at a point, or at its natural place (the end) without one, and returns how many it took. */
   take(drag: ItemDrag, point?: DropPoint): number
+  /** Whether its own items, dragged back over it by the browser, move within it (`onOwnDrop`). */
+  readonly reordersOwnDrops?: boolean
 }
 
 interface ItemDragRegistry {
   drag: ItemDrag | null
   targets: Set<ItemDropTarget>
+  /**
+   * The watch `startNativeItemDrag` keeps for a drag whose `dragend` may never come, by drag: `end` finishes it as the
+   * source's `dragend` would. Optional: a registry an older copy of this module created has none until it is used.
+   */
+  watches?: WeakMap<ItemDrag, { end: () => void; unwatch: () => void; mark: string }>
 }
 
 /** Shared through `globalThis`, so two copies of this module in one page (two bundles) see each other's zones. */
@@ -788,8 +818,36 @@ export function startItemDrag(drag: ItemDrag): void {
   registry.drag = drag
 }
 
-/** The watch `startNativeItemDrag` keeps for a drag whose `dragend` may never come, by drag. */
-const watchers = new WeakMap<ItemDrag, () => void>()
+/** Kept on the shared registry, so a zone in another copy of this module can finish a drag this one started. */
+const watches = (registry.watches ??= new WeakMap())
+
+/** Whether the zone of `host` moves its own items dropped back on it. */
+function reordersOwnDrops(host: Element): boolean {
+  for (const target of registry.targets) if (target.host === host && target.reordersOwnDrops) return true
+  return false
+}
+
+/**
+ * The page's item drag, when the browser drop carrying `transfer` is that drag: one whose `dragend` was lost stays
+ * registered until the next press, and a drop of the same kind from another window in the meantime is not it.
+ */
+function dragCarriedBy(transfer: DataTransfer | null | undefined): ItemDrag | null {
+  const drag = registry.drag
+  const mark = drag && watches.get(drag)?.mark
+  if (mark && !transfer?.types.includes(mark)) return null
+  return drag
+}
+
+/**
+ * Finishes a drag a zone just dropped, a task later: the source's `dragend` normally comes first and does it; one that
+ * never comes (the dragged node redrawn away by the drop) then lets the source finish now, not at the next press.
+ */
+function finishItemDrag(drag: ItemDrag): void {
+  const watch = watches.get(drag)
+  if (watch) setTimeout(() => watch.end())
+  // A source that started the drag itself reads `drag.target` in its own `dragend`, which comes after the drop.
+  else setTimeout(() => endItemDrag(drag))
+}
 
 /**
  * `startItemDrag` from a source's `dragstart` handler, for a drag the browser carries. Its `dragend` may never reach
@@ -800,7 +858,9 @@ const watchers = new WeakMap<ItemDrag, () => void>()
  */
 export function startNativeItemDrag(event: DragEvent, drag: ItemDrag, forget: () => void): void {
   startItemDrag(drag)
-  const end = () => {
+  const end = (event?: Event) => {
+    // A second finger on the screen while the browser carries the first is not the press after the drag.
+    if (event instanceof PointerEvent && !event.isPrimary) return
     unwatch()
     if (registry.drag !== drag) return
     endItemDrag(drag)
@@ -808,11 +868,15 @@ export function startNativeItemDrag(event: DragEvent, drag: ItemDrag, forget: ()
   }
   const unwatch = () => {
     removeEventListener('pointerdown', end, true)
-    watchers.delete(drag)
+    watches.delete(drag)
   }
   addEventListener('pointerdown', end, true)
+  // What tells this drag's drop from another of the same kind: a type of its own in the browser's transfer.
+  // Random, not counted: two copies of this module in one page would count alike.
+  const mark = `application/x-c2n-drag-${Math.random().toString(36).slice(2)}`
+  event.dataTransfer?.setData(mark, '1')
   // A `dragend` that reached the source ends the drag first: the watch goes with it.
-  watchers.set(drag, unwatch)
+  watches.set(drag, { end, unwatch, mark })
   setTimeout(() => {
     if (event.defaultPrevented) end()
   })
@@ -820,7 +884,7 @@ export function startNativeItemDrag(event: DragEvent, drag: ItemDrag, forget: ()
 
 /** Ends the item drag `startItemDrag` started (or any, without an argument). */
 export function endItemDrag(drag?: ItemDrag): void {
-  if (drag) watchers.get(drag)?.()
+  if (drag) watches.get(drag)?.unwatch()
   if (!drag || registry.drag === drag) registry.drag = null
 }
 

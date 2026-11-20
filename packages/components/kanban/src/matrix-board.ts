@@ -97,6 +97,7 @@ const axisOf = (values: unknown): Axis[] => {
  * @csspart cell-count - Number of cards in a cell.
  * @csspart card - Box around one card's rendered content.
  * @csspart placeholder - Gap marking where a dragged card will land.
+ * @csspart drag-handle - Grip at the start of each card while the board has a `drag-kind`.
  * @csspart footer - Component-owned region wrapping the default slot under the grid; styles placement, not assigned content.
  *
  * @event {CustomEvent<MatrixBoardCardMoveDetail>} card-move - Fired when the user drops a card in a new place, before `items` changes. `fromRow`/`toRow` and `fromColumn`/`toColumn` are the axis ids of the two cells. Cancelable: `preventDefault()` keeps the card where it was. Bubbles and crosses shadow boundaries.
@@ -227,7 +228,7 @@ export class MatrixBoard extends Kanban {
               const columnName = titled(this.columnTitle, column.label)
               return html`<c2-kanban-column
                 part="cell"
-                exportparts="card, placeholder"
+                exportparts="card, placeholder, drag-handle"
                 class=${Number.isInteger(band) && band >= 1 && band <= 5 ? `cell band-${band}` : 'cell'}
                 style=${styleMap({ gridRow: String(r + 1), gridColumn: String(lead + c + 1) })}
                 column-id=${id}
