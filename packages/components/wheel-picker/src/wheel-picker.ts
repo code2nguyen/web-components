@@ -303,6 +303,14 @@ export class WheelPicker extends LitElement {
     })
   }
 
+  /**
+   * Whether the error is shown, on the host and on the wheels alike: an enclosing field's error, or a custom validity
+   * message once a submit or `reportValidity()` reported it, as for a native control.
+   */
+  private get errorShown(): boolean {
+    return (this.field.invalid || (this.validityShown && !!this.customValidityMessage)) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
     const joined = this.value.join(';')
     this.internals.setFormValue(this.effectiveDisabled || !this.name ? null : joined, joined)
@@ -312,8 +320,7 @@ export class WheelPicker extends LitElement {
     // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
     // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
     // validity once a submit reported it, as for a native control.
-    const shown = this.field.invalid || (this.validityShown && !this.internals.validity.valid)
-    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   /** Sets one wheel's value as the user's choice: fires `input` then `change`. */
@@ -410,7 +417,7 @@ export class WheelPicker extends LitElement {
 
   override render() {
     const disabled = this.effectiveDisabled
-    const invalid = this.field.invalid && !disabled
+    const invalid = this.errorShown
     const count = this.wheels.length
     return html`<div class="wheels ${invalid ? 'wheels--invalid' : ''}" part="wheels">
         <div class="band" aria-hidden="true"></div>
