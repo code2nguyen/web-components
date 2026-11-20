@@ -18,6 +18,7 @@ const fr: typeof reorderListMessages.en = {
   deleted: (label: string) => `${label} supprimé.`,
   actionDone: (action: string, label: string) => `${action} : ${label}.`,
   duplicateKey: (key: string) => `Réorganisation impossible : la clé ${key} est utilisée plusieurs fois.`,
+  movedOut: (label: string) => `${label} a quitté la liste.`,
   canceled: "Réorganisation annulée. L'élément est revenu à sa position d'origine.",
   canceledNotEditable: "Réorganisation annulée : la modification n'est plus disponible.",
   canceledItemsChanged: 'Les éléments ont changé. Réorganisation annulée.',

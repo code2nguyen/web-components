@@ -1,5 +1,6 @@
 import { test, expect, accessible } from '../../../../tests/component-fixture'
 import { readFileSync } from 'node:fs'
+import type { Page } from '@playwright/test'
 
 const rows = `
   <div id="first" data-reorder-key="first" data-reorder-label="First task" style="height:60px">First</div>
@@ -1392,8 +1393,15 @@ test('takes rows dropped from outside under its drop-kind at the place under the
   await expect(host.getByRole('status')).toHaveText('1 item added')
 })
 
+/** What an application does for a list with a `drop-kind`: read `detail.items` on `item-drop` to add them. Unread, the drop adds nothing. */
+const listenForDrops = (page: Page) =>
+  page
+    .locator('c2-reorder-list[drop-kind]')
+    .evaluateAll((lists) => lists.forEach((list) => list.addEventListener('item-drop', (event) => void (event as CustomEvent).detail.items)))
+
 test('refuses another kind of payload and a canceled item-drop, and ignores drops without drop-kind', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  await listenForDrops(page)
   const host = page.locator('c2-reorder-list')
   expect(await dropPayload(page, '#first', 'application/x-c2n-kanban-card+json', [{ id: 'x' }])).toBe('refused')
   expect(await dropPayload(page, '#first', TASK_TYPE, [{ id: 'x' }], false)).toBe('target')
@@ -1553,6 +1561,7 @@ test('a read-only nested list keeps a drop of its own kind from the zone around 
 
 test('a drop of its kind whose payload cannot be read reports no move', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-reorder-list editable drop-kind="task" aria-label="Tasks">${rows}</c2-reorder-list>`)
+  await listenForDrops(page)
   const effects = await page.evaluate(async (type) => {
     const target = document.getElementById('first')!
     const box = target.getBoundingClientRect()
@@ -1577,6 +1586,7 @@ test('in a real drag, a nested list shows no refusal over a kind the zone around
       </div>
     </c2-reorder-list>
   `)
+  await listenForDrops(page)
   await page.evaluate(() =>
     document
       .getElementById('source')!
@@ -1604,6 +1614,7 @@ test('the zone around a nested list stays lit when the pointer comes back onto i
       </div>
     </c2-reorder-list>
   `)
+  await listenForDrops(page)
   const outerClass = await page.evaluate(async (type) => {
     const transfer = new DataTransfer()
     transfer.setData(type, '[]')
@@ -1622,4 +1633,511 @@ test('the zone around a nested list stays lit when the pointer comes back onto i
     return outer.shadowRoot!.querySelector('.c2-reorder-list-container')!.className
   }, TASK_TYPE)
   expect(outerClass).toMatch(/drop-target/)
+})
+
+// ---- rows leaving the list (drag-kind) ----
+
+const twoLists = (sourceAttributes = 'editable drag-kind="task"') => `
+  <c2-reorder-list id="today" ${sourceAttributes} aria-label="Today">${rows}</c2-reorder-list>
+  <div style="height:40px"></div>
+  <c2-reorder-list id="later" editable drop-kind="task" aria-label="Later">
+    <div data-reorder-key="later-1" data-reorder-label="Later task" style="height:60px">Later task</div>
+  </c2-reorder-list>
+`
+
+/** Wires both lists as an application would: the target adds rows, the source removes the ones that left. */
+async function wireTransfer(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const log: unknown[] = []
+    ;(window as Window & { transfers?: unknown[] }).transfers = log
+    document.getElementById('later')!.addEventListener('item-drop', (event) => {
+      const { items, before } = (event as CustomEvent).detail
+      for (const item of items as { id: string; label: string }[]) {
+        const row = document.createElement('div')
+        row.dataset.reorderKey = item.id
+        row.dataset.reorderLabel = item.label
+        row.textContent = item.label
+        row.style.height = '60px'
+        document.getElementById('later')!.insertBefore(row, before)
+      }
+    })
+    document.getElementById('today')!.addEventListener('item-move-out', (event) => {
+      const { items, rows, target } = (event as CustomEvent).detail
+      log.push({ items, target: (target as Element | null)?.id ?? null })
+      for (const row of rows as HTMLElement[]) row.remove()
+    })
+  })
+}
+const keysOf = (page: Page, id: string) =>
+  page.locator(`#${id}`).evaluate((element) => [...element.children].map((row) => (row as HTMLElement).dataset.reorderKey))
+const transfers = (page: Page) => page.evaluate(() => (window as Window & { transfers?: unknown[] }).transfers)
+
+test('a pointer drag carried off the list drops the row on the list under the pointer, and the app moves it', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  const source = (await page.locator('#second').boundingBox())!
+  const target = (await page.locator('#later').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + source.height / 2 + 15, { steps: 3 })
+  await page.mouse.move(target.x + 30, target.y + target.height - 5, { steps: 10 })
+  await expect(page.locator('#later').locator('.drop-target')).toHaveCount(1)
+  await page.mouse.up()
+  await expect.poll(() => keysOf(page, 'later')).toEqual(['later-1', 'second'])
+  expect(await keysOf(page, 'today')).toEqual(['first', 'third'])
+  expect(await transfers(page)).toEqual([{ items: [{ id: 'second', label: 'Second task' }], target: 'later' }])
+  await expect(page.locator('#today').getByRole('status')).toHaveText('Second task moved out of the list.')
+})
+
+test('moveItemTo moves a row to the end of another list, and dragData shapes what it carries', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  const moved = await page.locator('#today').evaluate((element) => {
+    const list = element as HTMLElement & { moveItemTo(target: Element, key: string): boolean; dragData?: (row: { key?: string }) => unknown }
+    list.dragData = ({ key }) => ({ id: key, label: `Task ${key}` })
+    return [
+      list.moveItemTo(document.getElementById('later')!, 'first'),
+      list.moveItemTo(document.body, 'third'),
+      list.moveItemTo(document.getElementById('later')!, 'nope'),
+    ]
+  })
+  expect(moved).toEqual([true, false, false])
+  expect(await keysOf(page, 'later')).toEqual(['later-1', 'first'])
+  expect(await keysOf(page, 'today')).toEqual(['second', 'third'])
+  expect(await transfers(page)).toEqual([{ items: [{ id: 'first', label: 'Task first' }], target: 'later' }])
+})
+
+test("a row's drag handle carries it to another list as a browser drag", async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  const handle = page.locator('#today [part="drag-handle"]').first()
+  await expect(page.locator('#today [part="drag-handle"]')).toHaveCount(3)
+  await handle.dragTo(page.locator('#later'), { targetPosition: { x: 20, y: 55 } })
+  await expect.poll(() => keysOf(page, 'later')).toEqual(['later-1', 'first'])
+  expect(await keysOf(page, 'today')).toEqual(['second', 'third'])
+})
+
+test('without drag-kind a row carried off the list returns, and shows no handle', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists('editable'))
+  await wireTransfer(page)
+  await expect(page.locator('#today [part="drag-handle"]')).toHaveCount(0)
+  const source = (await page.locator('#second').boundingBox())!
+  const target = (await page.locator('#later').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(target.x + 30, target.y + target.height - 5, { steps: 10 })
+  await page.mouse.up()
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  expect(await keysOf(page, 'later')).toEqual(['later-1'])
+})
+
+test('a row carried out of a list that scrolls in a panel reaches a list drawn over its hidden rows', async ({ page, renderScenario }) => {
+  await renderScenario(
+    twoLists()
+      .replace('<c2-reorder-list id="today"', '<div id="panel" style="height:70px;overflow:auto"><c2-reorder-list id="today"')
+      .replace('</c2-reorder-list>\n  <div style="height:40px"></div>', '</c2-reorder-list></div>'),
+  )
+  await wireTransfer(page)
+  const source = (await page.locator('#first').boundingBox())!
+  const target = (await page.locator('#later').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + 35, { steps: 3 })
+  await page.mouse.move(target.x + 30, target.y + target.height - 5, { steps: 10 })
+  await page.mouse.up()
+  await expect.poll(() => keysOf(page, 'later')).toEqual(['later-1', 'first'])
+  expect(await keysOf(page, 'today')).toEqual(['second', 'third'])
+})
+
+test('a drag handle dropped on a drop area outside c2n leaves the row in the list', async ({ page, renderScenario }) => {
+  await renderScenario(`${twoLists()}<div id="foreign" style="height:120px">Drop here</div>`)
+  await wireTransfer(page)
+  await page.locator('#foreign').evaluate((element) => {
+    element.addEventListener('dragover', (event) => event.preventDefault())
+    element.addEventListener('drop', (event) => event.preventDefault())
+  })
+  await page.locator('#today [part="drag-handle"]').first().dragTo(page.locator('#foreign'))
+  await page.waitForTimeout(100)
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  expect(await transfers(page)).toEqual([])
+})
+
+test('a list inside a zone of its own kind still reorders by pointer', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="outer"><c2-reorder-list id="today" editable drag-kind="task" aria-label="Today">${rows}</c2-reorder-list></div>`)
+  // A zone around the list that takes its kind, as a board or a list holding it would register.
+  await page.evaluate(() => {
+    const registry = (globalThis as unknown as Record<symbol, { targets: Set<unknown> }>)[Symbol.for('c2n.item-drag')]
+    ;(window as Window & { taken?: number }).taken = 0
+    registry.targets.add({
+      host: document.getElementById('outer'),
+      accepts: (drag: { kind: string }) => drag.kind === 'task',
+      hover: () => {},
+      take: () => ++(window as Window & { taken?: number }).taken!,
+    })
+  })
+  const source = (await page.locator('#first').boundingBox())!
+  const third = (await page.locator('#third').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + 35, { steps: 3 })
+  await page.mouse.move(third.x + 30, third.y + third.height - 5, { steps: 10 })
+  await page.mouse.up()
+  await expect.poll(() => visualIds(page.locator('#today'))).toEqual(['second', 'third', 'first'])
+  expect(await page.evaluate(() => (window as Window & { taken?: number }).taken)).toBe(0)
+})
+
+test('a row carried out of a scrolling panel stops scrolling it', async ({ page, renderScenario }) => {
+  await renderScenario(
+    twoLists()
+      .replace('<c2-reorder-list id="today"', '<div id="panel" style="height:70px;overflow:auto"><c2-reorder-list id="today"')
+      .replace('</c2-reorder-list>\n  <div style="height:40px"></div>', '</c2-reorder-list></div>'),
+  )
+  await wireTransfer(page)
+  const source = (await page.locator('#first').boundingBox())!
+  const target = (await page.locator('#later').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + 60, { steps: 4 })
+  await page.mouse.move(target.x + 30, target.y + target.height - 5, { steps: 4 })
+  const scrollTop = () => page.locator('#panel').evaluate((element) => element.scrollTop)
+  const before = await scrollTop()
+  await page.waitForTimeout(300)
+  expect(await scrollTop()).toBe(before)
+  await page.mouse.up()
+})
+
+test("an app's own drag handle in a row keeps its drag, and a list nested in a row of the source does not take it", async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-reorder-list id="plain" editable drop-kind="task" aria-label="Plain">
+      <div data-reorder-key="mine" data-reorder-label="Mine">Mine <span class="drag-handle" draggable="true">⠿</span></div>
+    </c2-reorder-list>
+    <c2-reorder-list id="today" editable drag-kind="task" aria-label="Today">
+      <div data-reorder-key="holder" data-reorder-label="Holder">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Inner"></c2-reorder-list>
+      </div>
+      <div data-reorder-key="first" data-reorder-label="First">First</div>
+    </c2-reorder-list>
+  `)
+  const cancelled = await page.locator('#plain .drag-handle').evaluate((element) => {
+    const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
+    element.dispatchEvent(event)
+    return event.defaultPrevented
+  })
+  expect(cancelled).toBe(false)
+  const moved = await page
+    .locator('#today')
+    .evaluate((element) =>
+      (element as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(document.getElementById('inner')!, 'first'),
+    )
+  expect(moved).toBe(false)
+})
+
+test('cancelling item-move-out keeps the row, and moveItemTo says it did not move', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const moved = await page.locator('#today').evaluate((element) => {
+    element.addEventListener('item-move-out', (event) => event.preventDefault())
+    return (element as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(document.getElementById('later')!, 'first')
+  })
+  expect(moved).toBe(false)
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  await expect(page.locator('#today').getByRole('status')).not.toHaveText(/moved out/)
+})
+
+test("a row's drag handle dropped back on its own list reorders the row", async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  const third = (await page.locator('#third').boundingBox())!
+  await page
+    .locator('#today [part="drag-handle"]')
+    .first()
+    .dragTo(page.locator('#today'), {
+      targetPosition: { x: 20, y: third.y - (await page.locator('#today').boundingBox())!.y + third.height - 5 },
+    })
+  await expect.poll(() => visualIds(page.locator('#today'))).toEqual(['second', 'third', 'first'])
+  expect(await transfers(page)).toEqual([])
+})
+
+test('a row the app removes on its next render is announced, and focus in it goes to the next row', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  // A framework removes the row when it renders the new state: a frame later, not inside the event.
+  await page.evaluate(() => {
+    // The target's page adds the row (here, nowhere visible): a list that nobody handles item-drop on refuses drops.
+    document.getElementById('later')!.addEventListener('item-drop', (event) => void (event as CustomEvent).detail.items)
+    document.getElementById('today')!.addEventListener('item-move-out', (event) => {
+      const rows = (event as CustomEvent).detail.rows as HTMLElement[]
+      requestAnimationFrame(() => rows.forEach((row) => row.remove()))
+    })
+  })
+  await page.locator('#first').evaluate((row) => {
+    const button = document.createElement('button')
+    button.textContent = 'Move'
+    button.addEventListener('click', () =>
+      (row.parentElement as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(document.getElementById('later')!, 'first'),
+    )
+    row.append(button)
+  })
+  await page.locator('#first button').focus()
+  await page.keyboard.press('Enter')
+  await expect.poll(() => keysOf(page, 'today')).toEqual(['second', 'third'])
+  await expect(page.locator('#today').getByRole('status')).toHaveText('First task moved out of the list.')
+  await expect.poll(() => page.locator('#today').evaluate((element) => element.matches(':focus-within'))).toBe(true)
+})
+
+test('rows sharing a key do not leave: which one would is not knowable', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists().replace('data-reorder-key="third"', 'data-reorder-key="first"'))
+  await wireTransfer(page)
+  const moved = await page
+    .locator('#today')
+    .evaluate((element) =>
+      (element as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(document.getElementById('later')!, 'first'),
+    )
+  expect(moved).toBe(false)
+  expect(await keysOf(page, 'later')).toEqual(['later-1'])
+})
+
+test('with a drag-kind, a release just past the list cancels as it does without, and a throwing dragData keeps the row', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists().replace('<div style="height:40px"></div>', '<div style="height:200px"></div>'))
+  const source = (await page.locator('#first').boundingBox())!
+  const list = (await page.locator('#today').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + 35, { steps: 3 })
+  await page.mouse.move(source.x + 30, list.y + list.height + 20, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(100)
+  expect(await visualIds(page.locator('#today'))).toEqual(['first', 'second', 'third'])
+  const cancelled = await page.locator('#today').evaluate((element) => {
+    ;(element as HTMLElement & { dragData: () => unknown }).dragData = () => {
+      throw new Error('no data')
+    }
+    const handle = element.shadowRoot!.querySelector('[part="drag-handle"]')!
+    const event = new DragEvent('dragstart', { bubbles: true, composed: true, cancelable: true, dataTransfer: new DataTransfer() })
+    handle.dispatchEvent(event)
+    return event.defaultPrevented
+  })
+  expect(cancelled).toBe(true)
+})
+
+test('a row whose dragData throws still reorders within its list, and is not asked again on each move', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await page.locator('#today').evaluate((element) => {
+    const counted = window as Window & { calls?: number }
+    counted.calls = 0
+    ;(element as HTMLElement & { dragData: () => unknown }).dragData = () => {
+      counted.calls!++
+      throw new Error('no data')
+    }
+  })
+  const source = (await page.locator('#first').boundingBox())!
+  const third = (await page.locator('#third').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + 35, { steps: 3 })
+  await page.mouse.move(third.x + 30, third.y + third.height - 5, { steps: 10 })
+  await page.mouse.up()
+  await expect.poll(() => visualIds(page.locator('#today'))).toEqual(['second', 'third', 'first'])
+  expect(await page.evaluate(() => (window as Window & { calls?: number }).calls)).toBe(1)
+})
+
+test('a row the app itself moves into the target list stays there: the source does not take it back out', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const result = await page.evaluate(() => {
+    const today = document.getElementById('today') as HTMLElement & { moveItemTo(target: Element, key: string): boolean }
+    const later = document.getElementById('later')!
+    let movedOut = 0
+    // The application moves the element itself rather than building a copy.
+    later.addEventListener('item-drop', (event) => {
+      for (const item of (event as CustomEvent).detail.items as { id: string }[]) later.append(document.getElementById(item.id)!)
+    })
+    today.addEventListener('item-move-out', () => movedOut++)
+    return { moved: today.moveItemTo(later, 'first'), movedOut }
+  })
+  expect(result).toEqual({ moved: true, movedOut: 0 })
+  expect(await keysOf(page, 'later')).toEqual(['later-1', 'first'])
+  expect(await keysOf(page, 'today')).toEqual(['second', 'third'])
+})
+
+test('a handle drag whose dragend never comes still leaves the source once the target took it', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  await page.evaluate(async () => {
+    const transfer = new DataTransfer()
+    const handle = document.getElementById('today')!.shadowRoot!.querySelector('[part="drag-handle"]')!
+    const fire = (kind: string, target: Element, x = 0, y = 0) =>
+      target.dispatchEvent(new DragEvent(kind, { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y }))
+    fire('dragstart', handle)
+    const box = document.getElementById('later')!.getBoundingClientRect()
+    const [x, y] = [box.x + 20, box.y + box.height - 5]
+    const over = document.elementFromPoint(x, y)!
+    fire('dragenter', over, x, y)
+    fire('dragover', over, x, y)
+    fire('drop', over, x, y)
+    // No dragend: the row's handle was redrawn away mid-drag.
+  })
+  await expect.poll(() => keysOf(page, 'later')).toEqual(['later-1', 'first'])
+  await expect.poll(() => keysOf(page, 'today')).toEqual(['second', 'third'])
+})
+
+test('a handle drag dropped back on its own list is finished even when its dragend never comes', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  await wireTransfer(page)
+  const carried = await page.evaluate(async () => {
+    const transfer = new DataTransfer()
+    const list = document.getElementById('today')!
+    const handle = list.shadowRoot!.querySelector('[part="drag-handle"]')!
+    const fire = (kind: string, target: Element, x = 0, y = 0) =>
+      target.dispatchEvent(new DragEvent(kind, { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y }))
+    fire('dragstart', handle)
+    const box = document.getElementById('third')!.getBoundingClientRect()
+    const [x, y] = [box.x + 20, box.y + box.height - 5]
+    const over = document.elementFromPoint(x, y)!
+    fire('dragenter', over, x, y)
+    fire('dragover', over, x, y)
+    fire('drop', over, x, y)
+    // No dragend: the move redrew the row's handle away.
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    return (list as unknown as { nativeDrag: unknown }).nativeDrag
+  })
+  expect(carried).toBeNull()
+  await expect.poll(() => visualIds(page.locator('#today'))).toEqual(['second', 'third', 'first'])
+  expect(await transfers(page)).toEqual([])
+})
+
+test('a row dropped by its handle over a list nested in another of its own rows reorders it in its own list', async ({ page, renderScenario, browserName }) => {
+  await renderScenario(`
+    <c2-reorder-list id="today" editable drag-kind="task" aria-label="Today">
+      <div id="first" data-reorder-key="first" data-reorder-label="First" style="height:60px">First</div>
+      <div id="second" data-reorder-key="second" data-reorder-label="Second" style="height:60px">Second</div>
+      <div id="holder" data-reorder-key="holder" data-reorder-label="Holder" style="height:120px">
+        <c2-reorder-list id="inner" editable drop-kind="task" aria-label="Inner">
+          <div data-reorder-key="sub" data-reorder-label="Sub" style="height:60px">Sub</div>
+        </c2-reorder-list>
+      </div>
+    </c2-reorder-list>
+  `)
+  await page.locator('#inner').evaluate((element) => element.addEventListener('item-drop', () => {}))
+  const effect = await page.evaluate(() => {
+    const transfer = new DataTransfer()
+    const fire = (kind: string, target: Element, x = 0, y = 0) => {
+      const event = new DragEvent(kind, { dataTransfer: transfer, bubbles: true, composed: true, cancelable: true, clientX: x, clientY: y })
+      target.dispatchEvent(event)
+      return event.defaultPrevented
+    }
+    fire('dragstart', document.getElementById('today')!.shadowRoot!.querySelector('[part="drag-handle"]')!)
+    const box = document.getElementById('inner')!.getBoundingClientRect()
+    const [x, y] = [box.x + 40, box.y + box.height / 2]
+    // The deepest element under the point, through shadow roots, as the browser targets a drag.
+    let over = document.elementFromPoint(x, y)!
+    while (over.shadowRoot) {
+      const inner = over.shadowRoot.elementFromPoint(x, y)
+      if (!inner || inner === over) break
+      over = inner
+    }
+    fire('dragenter', over, x, y)
+    fire('dragover', over, x, y)
+    // What the browser shows and whether it drops at all: refused (`none`) would make no drop.
+    const shown = transfer.dropEffect
+    fire('drop', over, x, y)
+    return shown
+  })
+  // Chromium and WebKit leave a synthetic transfer's dropEffect at `none` whatever a listener sets; Firefox reports it.
+  if (browserName === 'firefox') expect(effect).toBe('move')
+  // Over the upper half of the holder row: before it.
+  await expect.poll(() => visualIds(page.locator('#today'))).toEqual(['second', 'first', 'holder'])
+})
+
+test('a list nobody handles item-drop on refuses a drop, so the row stays in its source', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const moved = await page
+    .locator('#today')
+    .evaluate((element) =>
+      (element as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(document.getElementById('later')!, 'first'),
+    )
+  expect(moved).toBe(false)
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  expect(await keysOf(page, 'later')).toEqual(['later-1'])
+})
+
+test('a pointer drag dropped on a list whose item-drop nobody acts on adds nothing, and the row returns', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const source = (await page.locator('#second').boundingBox())!
+  const target = (await page.locator('#later').boundingBox())!
+  await page.mouse.move(source.x + 20, source.y + source.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(source.x + 30, source.y + source.height / 2 + 15, { steps: 3 })
+  await page.mouse.move(target.x + 30, target.y + target.height - 5, { steps: 10 })
+  await page.mouse.up()
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  expect(await keysOf(page, 'later')).toEqual(['later-1'])
+})
+
+test('a listener added before the list was defined counts once it reads the items', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const result = await page.evaluate(async () => {
+    // A list from a template's content is not upgraded until it joins the page: the application's listener is on it
+    // before the element's constructor runs, as with a module that loads after the page renders.
+    const template = document.createElement('template')
+    template.innerHTML = '<c2-reorder-list id="pending" editable drop-kind="task" aria-label="Pending"></c2-reorder-list>'
+    const pending = template.content.firstElementChild as HTMLElement
+    const added: unknown[] = []
+    pending.addEventListener('item-drop', (event) => added.push(...((event as CustomEvent).detail.items as unknown[])))
+    const upgradedEarly = pending instanceof customElements.get('c2-reorder-list')!
+    document.body.append(pending)
+    await customElements.whenDefined('c2-reorder-list')
+    const today = document.createElement('c2-reorder-list') as HTMLElement & {
+      moveItemTo(target: Element, key: string): boolean
+      updateComplete: Promise<unknown>
+    }
+    today.setAttribute('editable', '')
+    today.setAttribute('drag-kind', 'task')
+    today.innerHTML = '<div data-reorder-key="x" data-reorder-label="X">X</div>'
+    today.addEventListener('item-move-out', (event) => ((event as CustomEvent).detail.rows as Element[]).forEach((row) => row.remove()))
+    document.body.append(today)
+    await today.updateComplete
+    return { upgradedEarly, moved: today.moveItemTo(pending, 'x'), added: added.length, left: today.children.length }
+  })
+  expect(result).toEqual({ upgradedEarly: false, moved: true, added: 1, left: 0 })
+})
+
+test('rows nobody removes on item-move-out stay, and moveItemTo says they did not move', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const moved = await page.evaluate(() => {
+    const later = document.getElementById('later')!
+    later.addEventListener('item-drop', (event) => void (event as CustomEvent).detail.items)
+    return (document.getElementById('today') as HTMLElement & { moveItemTo(target: Element, key: string): boolean }).moveItemTo(later, 'first')
+  })
+  expect(moved).toBe(false)
+  expect(await keysOf(page, 'today')).toEqual(['first', 'second', 'third'])
+  await expect(page.locator('#today').getByRole('status')).not.toHaveText(/moved out/)
+})
+
+test("a finger on a row's grip starts the list's own drag, as a mouse on the row does", async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const armed = await page.locator('#today').evaluate((list) => {
+    const handle = list.shadowRoot!.querySelector('[part="drag-handle"]')!
+    const box = handle.getBoundingClientRect()
+    const init = { bubbles: true, composed: true, cancelable: true, isPrimary: true, pointerId: 7, button: 0, clientX: box.x + 4, clientY: box.y + 4 }
+    const state = list as unknown as { session?: { phase: string } | null }
+    handle.dispatchEvent(new PointerEvent('pointerdown', { ...init, pointerType: 'mouse' }))
+    const byMouse = state.session?.phase ?? null
+    handle.dispatchEvent(new PointerEvent('pointerdown', { ...init, pointerType: 'touch' }))
+    return [byMouse, state.session?.phase ?? null]
+  })
+  expect(armed).toEqual([null, 'armed-pointer'])
+})
+
+test('an item-move-out listener that removes rows by the items they carry counts as removing them', async ({ page, renderScenario }) => {
+  await renderScenario(twoLists())
+  const moved = await page.evaluate(() => {
+    const later = document.getElementById('later')!
+    const today = document.getElementById('today') as HTMLElement & { moveItemTo(target: Element, key: string): boolean }
+    later.addEventListener('item-drop', (event) => void (event as CustomEvent).detail.items)
+    // The application keeps its own records and removes by id, never touching `detail.rows`.
+    today.addEventListener('item-move-out', (event) => {
+      for (const item of (event as CustomEvent).detail.items as { id: string }[]) today.querySelector(`[data-reorder-key="${item.id}"]`)?.remove()
+    })
+    return today.moveItemTo(later, 'first')
+  })
+  expect(moved).toBe(true)
+  expect(await keysOf(page, 'today')).toEqual(['second', 'third'])
 })
