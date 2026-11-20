@@ -115,3 +115,15 @@ test('a custom validity message is not announced as invalid before a field shows
   expect(await picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => element.checkValidity())).toBe(false)
   expect(await axInvalid(page, 'group', 'Height')).not.toBe('true')
 })
+
+test('a custom validity message is announced once reported', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en"><c2-wheel-picker label="Height" columns='${HEIGHT}'></c2-wheel-picker></form>`)
+  await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void; reportValidity(): boolean }) => {
+    element.setCustomValidity('Too short')
+    element.reportValidity()
+  })
+  await expect.poll(() => axInvalid(page, 'group', 'Height')).toBe('true')
+  await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void }) => element.setCustomValidity(''))
+  await expect.poll(() => axInvalid(page, 'group', 'Height')).not.toBe('true')
+})

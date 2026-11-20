@@ -143,6 +143,10 @@ export class WheelPicker extends LitElement {
 
   @state() private disabledByForm = false
 
+  /** Set once the validity was reported (a failed submit); until then an invalid value is not announced. */
+  @state() private validityShown = false
+  private checkingValidity = false
+
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, wheelPickerMessages)
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
@@ -162,6 +166,10 @@ export class WheelPicker extends LitElement {
   constructor() {
     super()
     this.internals.role = 'group'
+    // A failed submit or `reportValidity()` shows the error, as it does for a native control.
+    this.addEventListener('invalid', () => {
+      if (!this.checkingValidity) this.validityShown = true
+    })
   }
 
   get form() {
@@ -181,7 +189,13 @@ export class WheelPicker extends LitElement {
   }
 
   checkValidity() {
-    return this.internals.checkValidity()
+    // Its `invalid` event reports nothing to the user, unlike a submit or `reportValidity()`.
+    this.checkingValidity = true
+    try {
+      return this.internals.checkValidity()
+    } finally {
+      this.checkingValidity = false
+    }
   }
 
   reportValidity() {
@@ -195,6 +209,7 @@ export class WheelPicker extends LitElement {
 
   formResetCallback() {
     this.value = [...(this.defaultValue ?? [])]
+    this.validityShown = false
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -239,9 +254,6 @@ export class WheelPicker extends LitElement {
     if (next.length !== values.length || next.some((value, at) => value !== values[at])) this.value = next
     if (this.defaultValue === undefined && this.wheels.some((wheel) => wheel.options.length)) this.defaultValue = [...this.value]
     this.internals.ariaLabel = this.label || this.field.label || this.msg.t('label')
-    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a custom
-    // validity message would be announced before it is shown. Invalid is the error the field shows.
-    this.internals.ariaInvalid = this.field.invalid && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   protected override updated(changed: PropertyValues<this>): void {
@@ -297,6 +309,11 @@ export class WheelPicker extends LitElement {
     const flags = this.customValidityMessage ? { customError: true } : {}
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.wheel') ?? undefined
     this.internals.setValidity(flags, this.customValidityMessage, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
+    // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
+    // validity once a submit reported it, as for a native control.
+    const shown = this.field.invalid || (this.validityShown && !this.internals.validity.valid)
+    this.internals.ariaInvalid = shown && !this.effectiveDisabled ? 'true' : 'false'
   }
 
   /** Sets one wheel's value as the user's choice: fires `input` then `change`. */
