@@ -190,6 +190,8 @@ export class WheelPicker extends LitElement {
   reportValidity() {
     // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
     this.validityShown = true
+    // Drawn now, so the control is marked invalid when the report moves the focus into it.
+    this.performUpdate()
     return this.internals.reportValidity()
   }
 
