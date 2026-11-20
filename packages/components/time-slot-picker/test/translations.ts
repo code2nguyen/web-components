@@ -10,6 +10,7 @@ const fr: typeof timeSlotPickerMessages.en = {
   morning: 'Matin',
   afternoon: 'Après-midi',
   evening: 'Soir',
+  periodOn: (period, date) => `${period}, ${date}`,
   times: (date) => `Horaires du ${date}`,
   timesIn: (zone) => `Horaires en ${zone}`,
   unavailable: (time) => `${time}, indisponible`,

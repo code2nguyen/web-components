@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, axInvalid } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 type Picker = HTMLElement & { value: string; date: string }
@@ -32,6 +32,8 @@ test('shows the first free day, its times grouped by period in the zone, taken o
   await expect(page.getByRole('option', { name: /^Friday,? 16 October 2026, times available$/ })).toBeVisible()
   await expect(page.getByRole('listbox', { name: 'Morning' }).getByRole('option')).toHaveText([/^0?9:00$/, /^0?9:30$/])
   await expect(page.getByRole('listbox', { name: 'Afternoon' }).getByRole('option')).toHaveText([/^14:00$/])
+  // A time reached by Tab is heard with its day: the list box is named with it.
+  await expect(page.getByRole('listbox', { name: /^Morning, Wednesday,? 14 October$/ })).toBeVisible()
   await expect(page.getByRole('listbox', { name: 'Evening' }).getByRole('option', { name: '18:00, unavailable' })).toHaveAttribute('aria-disabled', 'true')
   await expect(picker(page).locator('[part="zone"]')).toHaveText('Times in Coordinated Universal Time')
   await accessible(page)
@@ -92,6 +94,7 @@ test('loading shows a busy list; text follows the language', async ({ page, rend
   await expect(page.getByRole('listbox', { name: 'Chargement des horaires' })).toHaveAttribute('aria-busy', 'true')
   await picker(page).evaluate((element: Picker & { loading: boolean }) => (element.loading = false))
   await expect(page.getByRole('listbox', { name: 'Matin' }).getByRole('option')).toHaveText([/^0?9:00$/, /^0?9:30$/])
+  await expect(page.getByRole('listbox', { name: /^Matin, mercredi 14 octobre$/ })).toBeVisible()
   await expect(picker(page)).toHaveHostAria('aria-label', 'Choisir un horaire')
   await expect(page.getByRole('option', { name: '18:00, indisponible' })).toBeVisible()
 })
@@ -109,4 +112,29 @@ test('slots that arrive after the picker renders move it to their first free day
   await expect(page.getByRole('option', { name: /^Tuesday,? 27 October 2026/ })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('option', { name: /^0?9:00$/ })).toBeVisible()
   expect(await events(page)).toEqual([{ start: '2026-10-26', end: '2026-11-01' }])
+})
+
+test('a required picker with no value is not announced as invalid before the user does anything', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await expect(page.getByRole('listbox', { name: 'Morning' })).toBeVisible()
+  expect(await picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => element.checkValidity())).toBe(false)
+  expect(await axInvalid(page, 'group', 'Time')).not.toBe('true')
+})
+
+test('disabled-dates closes days with their reason: no times there, skipped for the first day shown and the next available', async ({
+  page,
+  renderScenario,
+}) => {
+  const closed = JSON.stringify([{ date: '2026-10-14', label: 'Closed for training' }])
+  await renderScenario(scenario(`disabled-dates='${closed}'`))
+  // The 14th has free times but is closed: the picker opens on the 16th, the next day with one.
+  await expect(page.getByRole('option', { name: /^Wednesday,? 14 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('option', { name: /^Friday,? 16 October 2026/ })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('option', { name: /^10:00$/ })).toBeVisible()
+  // Shown anyway through `date`, it offers no times and jumps to the next open day.
+  await picker(page).evaluate((element: Picker) => (element.date = '2026-10-14'))
+  await expect(picker(page).locator('[part="empty"]')).toContainText(/No times on Wednesday,? 14 October/)
+  await expect(page.getByRole('button', { name: /Next available: Friday,? 16 October/ })).toBeVisible()
+  await expect(page.getByRole('option', { name: /^0?9:00$/ })).toHaveCount(0)
 })
