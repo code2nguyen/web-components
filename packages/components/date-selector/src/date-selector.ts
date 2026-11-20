@@ -201,8 +201,8 @@ export class DateSelector extends LitElement {
   private defaultCompareFrom = ''
   private defaultCompareTo = ''
   private markedDates = new Set<string>()
-  /** Whether a day button had the focus when the update started. */
-  private dayHadFocus = false
+  /** The day whose button had the focus when the update started, or `''`. */
+  private focusedDay = ''
   /** `disabledDates` by day, each with its reason (`''` for none), rebuilt when it changes. */
   private disabledMap = new Map<string, string>()
   @state() private disabledByForm = false
@@ -334,7 +334,8 @@ export class DateSelector extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    this.dayHadFocus = !!this.shadowRoot?.activeElement?.classList.contains('day')
+    const active = this.shadowRoot?.activeElement as HTMLElement | null | undefined
+    this.focusedDay = active?.classList.contains('day') ? (active.dataset.date ?? '') : ''
     if (!this.defaultsCaptured) {
       this.defaultFrom = this.from
       this.defaultTo = this.to
@@ -357,13 +358,12 @@ export class DateSelector extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
-    // The focused day was closed under the user (disabled-dates arriving late): its button went disabled and lost the
-    // focus, which goes to the day now holding the tab stop rather than to the page.
-    // Focused once this update completed: the day's `@focus` handler sets `focusDate`, which must not change mid-update.
-    if (this.dayHadFocus && !this.shadowRoot?.activeElement) {
-      void this.updateComplete.then(() => {
-        if (!this.shadowRoot?.activeElement) this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus()
-      })
+    // The focused day was closed under the user (disabled-dates arriving late): its button went disabled, and the
+    // focus goes to the day now holding the tab stop rather than to the page. Decided from the day, not from the
+    // active element, since some browsers blur a disabled button only at the next rendering step. Focused once this
+    // update completed: the day's `@focus` handler sets `focusDate`, which must not change mid-update.
+    if (this.focusedDay && this.isUnavailable(this.focusedDay) && !this.removableClosed(this.focusedDay)) {
+      void this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus())
     }
     if (
       changed.has('from') ||
@@ -450,7 +450,8 @@ export class DateSelector extends LitElement {
     if (!this.isRange) {
       const dates = this.selectedDates.filter((date) => !this.isClosed(date))
       // The restore state keeps a closed selection, so it comes back with the page if the day reopens.
-      if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null, this.value || null)
+      if (this.effectiveDisabled || !this.name) this.internals.setFormValue(null)
+      else if (dates.length === 0) this.internals.setFormValue(null, this.value || null)
       else {
         const data = new FormData()
         for (const date of dates) data.append(this.name, date)
