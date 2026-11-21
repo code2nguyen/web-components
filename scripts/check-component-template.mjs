@@ -3,7 +3,8 @@
  * starts from, and `packages/components/CLAUDE.md` documents that shape as the convention. This gate keeps the two
  * honest: it renders the templates with plop's own helpers into a throwaway package beside the real ones, then
  *
- * - type-checks it with the shared library config (`noUnusedLocals`, `noImplicitOverride`, …);
+ * - type-checks it with the shared library config (`noUnusedLocals`, `noImplicitOverride`, …), and its scaffolded
+ *   Playwright suite (`files/wc-test`) with the test config;
  * - lints it with the repo's eslint config;
  * - compiles its SCSS through `@c2n/sass`;
  * - rejects the patterns the conventions forbid (`property`/`customElement` from `lit/decorators.js`, a placeholder
@@ -23,6 +24,7 @@ import { compile, NodePackageImporter } from 'sass'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const templateDir = join(root, 'scripts/generator/files/wc/src')
+const testTemplateDir = join(root, 'scripts/generator/files/wc-test')
 // The name the skeleton in packages/components/CLAUDE.md is written for; no real component has it.
 const name = 'Note Panel'
 const id = 'note-panel'
@@ -37,12 +39,17 @@ mkdirSync(join(outDir, 'src'), { recursive: true })
 
 try {
   const walk = (dir) => readdirSync(dir).flatMap((entry) => (statSync(join(dir, entry)).isDirectory() ? walk(join(dir, entry)) : [join(dir, entry)]))
-  for (const file of walk(templateDir)) {
-    const target = join(outDir, 'src', plop.renderString(relative(templateDir, file), { name }).replace(/\.hbs$/, ''))
-    mkdirSync(dirname(target), { recursive: true })
-    writeFileSync(target, file.endsWith('.hbs') ? plop.renderString(readFileSync(file, 'utf8'), { name }) : readFileSync(file, 'utf8'))
-  }
+  for (const [from, to] of [
+    [templateDir, 'src'],
+    [testTemplateDir, 'test'],
+  ])
+    for (const file of walk(from)) {
+      const target = join(outDir, to, plop.renderString(relative(from, file), { name }).replace(/\.hbs$/, ''))
+      mkdirSync(dirname(target), { recursive: true })
+      writeFileSync(target, file.endsWith('.hbs') ? plop.renderString(readFileSync(file, 'utf8'), { name }) : readFileSync(file, 'utf8'))
+    }
   cpSync(join(root, 'scripts/generator/files/wc/tsconfig.lib.json'), join(outDir, 'tsconfig.json'))
+  writeFileSync(join(outDir, 'tsconfig.test.json'), JSON.stringify({ extends: '../../../tests/tsconfig.json', include: ['test/**/*.ts'] }))
 
   const run = (label, command, args) => {
     try {
@@ -52,7 +59,10 @@ try {
     }
   }
   run('type-check', join(root, 'node_modules/.bin/tsc'), ['-p', join(outDir, 'tsconfig.json'), '--noEmit'])
-  run('eslint', join(root, 'node_modules/.bin/eslint'), ['--no-warn-ignored', '--max-warnings=0', join(outDir, 'src')])
+  run('test type-check', join(root, 'node_modules/.bin/tsc'), ['-p', join(outDir, 'tsconfig.test.json')])
+  run('eslint', join(root, 'node_modules/.bin/eslint'), ['--no-warn-ignored', '--max-warnings=0', join(outDir, 'src'), join(outDir, 'test')])
+  if (!readFileSync(join(outDir, 'test/scenarios.html'), 'utf8').startsWith('<!doctype html>'))
+    problems.push('test/scenarios.html: does not start with <!doctype html> (quirks mode; an .hbs template formatted by prettier as Handlebars loses it)')
 
   try {
     compile(join(outDir, 'src', `${id}.scss`), { importers: [new NodePackageImporter(root)], loadPaths: [join(root, 'node_modules')] })
