@@ -5,12 +5,14 @@ import { addressFieldMessages } from '../src/messages.js'
 
 const fr: typeof addressFieldMessages.en = {
   addressGroup: 'Adresse',
+  addressIn: (country) => `Adresse (${country})`,
   country: 'Pays ou région',
   select: 'Choisir',
   optional: (label) => `${label} (facultatif)`,
   required: (label) => `${label} obligatoire`,
   postalInvalid: (label, example) => `${label} doit ressembler à ${example}`,
   filled: 'Adresse remplie',
+  otherCountry: (country) => `Seules les adresses dans ce pays sont acceptées : ${country}`,
   address: 'Adresse',
   addressLine1: 'Adresse, ligne 1',
   street: 'Rue',
