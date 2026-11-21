@@ -25,7 +25,7 @@ The rule, in order:
 
 1. **Use the `c2-*` element.** Find it with the `c2n` MCP server (`search_components`, `get_component`), or
    `packages/tools/skill/skills/c2n-components/references/component-catalog.md` for a name, then the package's
-   `custom-elements.json` for the exact API. There are 52 of them; assume one exists before concluding it does not.
+   `custom-elements.json` for the exact API. Assume one exists before concluding it does not: there are over two hundred.
 2. **Style it through its own CSS variables** (`--c2-<component>__<part>--<property>`), bridged to the site's
    `--site-*` tokens. Never fork a component's internals or reach into its shadow DOM. An app-level variant belongs
    in `src/components/ui/` (`SiteButton.astro`, `SiteCard.astro`, `SiteIconButton.astro` are the pattern: a `c2-*`

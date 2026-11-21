@@ -42,6 +42,8 @@
     "docs:check": "node scripts/check-component-docs.mjs",
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
+    "check:agent-docs": "node scripts/check-agent-docs.mjs",
+    "check:reachability": "npm run check:reachability -w packages/tools/mcp",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
