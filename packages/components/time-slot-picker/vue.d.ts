@@ -23,6 +23,7 @@ declare module 'vue' {
         'time-zone'?: unknown
         'group-by'?: unknown
         'show-end'?: unknown
+        'disabled-dates'?: unknown
         onDateChange?: (event: EventOf<TimeSlotPicker, 'date-change'>) => void
         onInput?: (event: EventOf<TimeSlotPicker, 'input'>) => void
         onChange?: (event: EventOf<TimeSlotPicker, 'change'>) => void

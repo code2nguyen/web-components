@@ -10,6 +10,7 @@ const fr: typeof timeSlotPickerMessages.en = {
   morning: 'Matin',
   afternoon: 'Après-midi',
   evening: 'Soir',
+  periodOn: (period, date) => `${period}, ${date}`,
   times: (date) => `Horaires du ${date}`,
   timesIn: (zone) => `Horaires en ${zone}`,
   unavailable: (time) => `${time}, indisponible`,
@@ -18,6 +19,7 @@ const fr: typeof timeSlotPickerMessages.en = {
   available: (count, date) => (count === 1 ? `1 horaire disponible le ${date}` : `${count} horaires disponibles le ${date}`),
   loading: 'Chargement des horaires',
   valueMissing: 'Veuillez choisir un horaire.',
+  closedValue: "L'horaire choisi n'est plus disponible. Veuillez en choisir un autre.",
 }
 
 addTranslations({ fr: { 'time-slot-picker': fr } })

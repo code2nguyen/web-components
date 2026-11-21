@@ -9,7 +9,9 @@ const fr: typeof dateStripMessages.en = {
   next: 'Jours suivants',
   marked: (date, marker) => `${date}, ${marker}`,
   hasEvents: 'a des événements',
+  disabledReason: (day, reason) => `${day}, ${reason}`,
   valueMissing: 'Veuillez choisir un jour.',
+  closedValue: "Le jour choisi n'est plus disponible. Veuillez en choisir un autre.",
 }
 
 addTranslations({ fr: { 'date-strip': fr } })

@@ -9,8 +9,12 @@ const en = {
   /** A day with a marker, as a screen reader hears it: the date, then the marker's label or this word. */
   marked: (date: string, marker: string) => `${date}, ${marker}`,
   hasEvents: 'has events',
+  /** A day given in `disabled-dates` with a reason: the day as read so far, then the reason. */
+  disabledReason: (day: string, reason: string) => `${day}, ${reason}`,
   /** The validation message of a required strip. */
   valueMissing: 'Please choose a day.',
+  /** The validation message of a required strip whose day was closed after it was picked (`disabled-dates`). */
+  closedValue: 'The chosen day is no longer available. Please choose another.',
 }
 
 /** The date strip's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

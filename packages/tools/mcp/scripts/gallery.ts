@@ -235,6 +235,9 @@ export function themeExampleCss(
     // A theme-invariant colour (the dark-block roles) shares its value with a flipping role; matching a bare literal
     // to it would freeze a colour that has to follow the theme, so only roles with a dark value are candidates.
     if (!token.dark) continue
+    // The status roles are for text an app draws; gallery literals of the same value are often fills and borders (a
+    // checked switch track), which their light dark values would wash out, so those stay the card's own accents.
+    if (token.name === '--c2-theme--color-success' || token.name === '--c2-theme--color-warning') continue
     const key = normalizeColor(token.light)
     byValue.set(key, [...(byValue.get(key) ?? []), token.name])
   }

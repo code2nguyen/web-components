@@ -132,3 +132,17 @@ booking.min = isoDaysFromToday(-2) // d-2 and later
 const history = document.querySelector<DateSelector>('#history')!
 history.max = isoDaysFromToday(-1) // d-1 and earlier: past dates only
 ```
+
+## Closing single days
+
+`disabled-dates` closes single days inside the range, such as holidays: a `;`-separated list of `YYYY-MM-DD` days, or a
+JSON array whose items may be `{ date, label }`, the label saying why ("Holiday") and read with the day by screen
+readers. `isDateDisabled` closes days by a rule. The arrow keys step over closed days, and Home and End stay in the week.
+A range may span a closed day; only its ends must be open, and a selected day closed afterwards is neither submitted
+nor counted by `required`. The gallery's "Closed days" card shows both:
+
+```ts tag=CodeBlock
+calendar.disabledDates = [{ date: '2026-12-25', label: 'Holiday' }]
+// Read the day at local noon, so every time zone gets the same weekday.
+calendar.isDateDisabled = (date) => new Date(`${date}T12:00:00`).getDay() === 0
+```

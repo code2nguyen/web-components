@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, axInvalid } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 import type { CardInput } from '../src/card-input'
 
@@ -126,4 +126,72 @@ test('with brands limited, a number of a network the field does not know is refu
   await number(page).fill('9000000000000001')
   await expiry(page).focus()
   await expect(card(page).locator('[part="error"]')).toHaveText('This card type is not accepted.')
+})
+
+test('a required empty card is not announced as invalid before the user does anything', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await expect(number(page)).toBeVisible()
+  expect(await card(page).evaluate((element: CardInput) => element.checkValidity())).toBe(false)
+  expect(await page.locator('form').evaluate((form: HTMLFormElement) => form.checkValidity())).toBe(false)
+  expect(await axInvalid(page, 'group', 'Card')).not.toBe('true')
+})
+
+test('a required empty card is announced as invalid once reportValidity() reported it', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect.poll(() => axInvalid(page, 'group', 'Card')).toBe('true')
+})
+
+test('a reported missing card shows its error as well as announcing it', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(card(page).locator('[part="field"]')).toHaveClass(/field--invalid/)
+})
+
+test('a reported missing card marks and describes the number, where the focus goes', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(number(page)).toHaveAttribute('aria-invalid', 'true')
+  await expect(number(page)).toHaveAccessibleDescription(/Please enter your card details/)
+})
+
+test('a reported started card shows the problem of a part not left yet', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await number(page).fill('4242424242424242')
+  await card(page).evaluate((element: CardInput) => element.reportValidity())
+  await expect(expiry(page)).toHaveAttribute('aria-invalid', 'true')
+  await expect(card(page).locator('[part="error"]')).toBeVisible()
+})
+
+test('a disabled card shows no reported error', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await card(page).evaluate((element: CardInput) => {
+    element.reportValidity()
+    element.disabled = true
+  })
+  await expect(card(page).locator('[part="error"]')).toHaveCount(0)
+})
+
+test('reportValidity marks the number invalid before it moves the focus there', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  const marked = await card(page).evaluate((element: CardInput) => {
+    let invalidOnFocus: string | null = null
+    element.shadowRoot!.addEventListener('focusin', (event) => (invalidOnFocus = (event.target as HTMLElement).getAttribute('aria-invalid')), { once: true })
+    element.reportValidity()
+    return invalidOnFocus
+  })
+  expect(marked).toBe('true')
+})
+
+test('a reported custom message is the error shown, as in the validity', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en"><c2-card-input required label="Card"></c2-card-input></form>`)
+  await number(page).fill('4242')
+  await expiry(page).focus()
+  await card(page).evaluate((element: CardInput) => {
+    element.setCustomValidity('Card declined')
+    element.reportValidity()
+  })
+  await expect(card(page).locator('[part="error"]')).toHaveText('Card declined')
 })

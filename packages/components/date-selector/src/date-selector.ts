@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { queryAll, state } from 'lit/decorators.js'
-import { arrayPropertyConverter, property } from '@c2n/core/lit-helper.js'
+import { arrayPropertyConverter, itemListPropertyConverter, property, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -49,6 +49,14 @@ export interface DateSelectorDayContext {
 
 /** Draws extra content under a day's number (a price, an event count, a custom marker). */
 export type DateSelectorDayRenderer = (context: DateSelectorDayContext) => unknown
+
+/** A day that cannot be picked, with the reason a screen reader hears with it. */
+export interface DateSelectorDisabledDate {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  /** Why it cannot be picked ("Closed on Sundays"), read with the day by screen readers. */
+  label?: string
+}
 
 export interface DateSelectorEventMap {
   input: Event
@@ -119,7 +127,9 @@ function nextRange(from: string, to: string, value: string): [string, string] {
  * When `name` is present, the start date is submitted under that name and the end date under `end-name` (or
  * `${name}-end`). In `single` mode `value` is submitted under `name`, and in `multiple` mode each date is submitted
  * under `name`. `required` requires a complete range, or at least one date. Use `min` and `max` to constrain availability:
- * days outside them are disabled, and the month navigation stops at the months that contain them.
+ * days outside them are disabled, and the month navigation stops at the months that contain them. `disabled-dates`
+ * closes single days (a holiday), each with an optional reason read with the day, and `isDateDisabled` closes days by
+ * a rule (every Sunday); the arrow keys step over both. A range may span a closed day; only its ends must be open.
  *
  * In `range` mode a second pair, `compare-from` and `compare-to`, is drawn as a band under the days of a comparison
  * range (an analytics "compare to" period). `compare="previous-period"` or `compare="previous-year"` derives it from the
@@ -191,6 +201,10 @@ export class DateSelector extends LitElement {
   private defaultCompareFrom = ''
   private defaultCompareTo = ''
   private markedDates = new Set<string>()
+  /** The day whose button had the focus when the update started, or `''`. */
+  private focusedDay = ''
+  /** `disabledDates` by day, each with its reason (`''` for none), rebuilt when it changes. */
+  private disabledMap = new Map<string, string>()
   @state() private disabledByForm = false
   @state() private visibleMonth = beginningOfMonth(new Date())
   @state() private focusDate = ''
@@ -224,6 +238,16 @@ export class DateSelector extends LitElement {
   @property({ type: String, reflect: true }) value = ''
   /** Dates drawn with a dot (events, availability), as `YYYY-MM-DD`: an array, or `;`-separated / JSON in the attribute. */
   @property({ converter: arrayPropertyConverter }) marked: string[] = []
+  /**
+   * Single days that cannot be picked: `YYYY-MM-DD` strings, or `{ date, label }` objects whose label says why and is
+   * read with the day. As an attribute, a `;`-separated list of days, or a JSON array of either form.
+   */
+  @property({ attribute: 'disabled-dates', converter: itemListPropertyConverter }) disabledDates: (DateSelectorDisabledDate | string)[] = []
+  /**
+   * Closes the days it returns `true` for, as a rule. Given a `YYYY-MM-DD` day; read it at local noon, so every time
+   * zone gets the same weekday: `` (date) => new Date(`${date}T12:00:00`).getDay() === 0 `` closes every Sunday.
+   */
+  @property({ attribute: false }) isDateDisabled?: (date: string) => boolean
   /** Adds content under each day's number. The day button, its label and its selection stay the component's. */
   @property({ attribute: false }) renderDay?: DateSelectorDayRenderer
   /**
@@ -310,6 +334,8 @@ export class DateSelector extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
+    const active = this.shadowRoot?.activeElement as HTMLElement | null | undefined
+    this.focusedDay = active?.classList.contains('day') ? (active.dataset.date ?? '') : ''
     if (!this.defaultsCaptured) {
       this.defaultFrom = this.from
       this.defaultTo = this.to
@@ -327,10 +353,18 @@ export class DateSelector extends LitElement {
     // A preset wins over a comparison range set by hand, so any change to either pair derives it again.
     if (['from', 'to', 'compare', 'mode', 'compareFrom', 'compareTo'].some((key) => changed.has(key as keyof DateSelector))) this.deriveCompare()
     if (!this.isRange && (changed.has('value') || changed.has('mode'))) this.normalizeValue()
+    if (changed.has('disabledDates')) this.disabledMap = readDisabledDates(this.disabledDates)
     if (changed.has('marked')) this.markedDates = new Set(Array.isArray(this.marked) ? this.marked.map((date) => date.trim()) : [])
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // The focused day was closed under the user (disabled-dates arriving late): its button went disabled, and the
+    // focus goes to the day now holding the tab stop rather than to the page. Decided from the day, not from the
+    // active element, since some browsers blur a disabled button only at the next rendering step. Focused once this
+    // update completed: the day's `@focus` handler sets `focusDate`, which must not change mid-update.
+    if (this.focusedDay && this.isUnavailable(this.focusedDay) && !this.removableClosed(this.focusedDay)) {
+      void this.updateComplete.then(() => this.renderRoot.querySelector<HTMLElement>('.day[tabindex="0"]')?.focus())
+    }
     if (
       changed.has('from') ||
       changed.has('to') ||
@@ -342,6 +376,8 @@ export class DateSelector extends LitElement {
       changed.has('endName') ||
       changed.has('required') ||
       changed.has('disabled') ||
+      changed.has('disabledDates') ||
+      changed.has('isDateDisabled') ||
       // The validation message is translated: a new language, or translations added later, write it again.
       (!this.internals.validity.valid && this.internals.validationMessage !== this.missingMessage())
     )
@@ -398,14 +434,24 @@ export class DateSelector extends LitElement {
     if (value !== this.value) this.value = value
   }
 
+  /** A selection is made but closed afterwards (disabled-dates arriving late): a range end, or every selected day. */
+  private selectionClosed() {
+    if (this.isRange) return (!!this.from && this.isClosed(this.from)) || (!!this.to && this.isClosed(this.to))
+    const dates = this.selectedDates
+    return dates.length > 0 && dates.every((date) => this.isClosed(date))
+  }
+
   private missingMessage() {
-    return this.msg.t(missingMessages[this.isRange ? 'range' : this.mode])
+    return this.selectionClosed() ? this.msg.t('closedSelection') : this.msg.t(missingMessages[this.isRange ? 'range' : this.mode])
   }
 
   private syncFormState() {
+    // A selected day closed afterwards (disabled-dates arriving late) is kept, but neither submitted nor an answer.
     if (!this.isRange) {
-      const dates = this.selectedDates
-      if (this.effectiveDisabled || !this.name || dates.length === 0) this.internals.setFormValue(null)
+      const dates = this.selectedDates.filter((date) => !this.isClosed(date))
+      // The restore state keeps a closed selection, so it comes back with the page if the day reopens.
+      if (this.effectiveDisabled || !this.name) this.internals.setFormValue(null)
+      else if (dates.length === 0) this.internals.setFormValue(null, this.value || null)
       else {
         const data = new FormData()
         for (const date of dates) data.append(this.name, date)
@@ -416,8 +462,9 @@ export class DateSelector extends LitElement {
       return
     }
     const compared = !!this.compareFrom && !!this.compareTo
+    const closedEnd = this.selectionClosed()
     if (this.effectiveDisabled || !this.name || !this.from) this.internals.setFormValue(null)
-    else if (this.to || compared) {
+    else if (closedEnd || this.to || compared) {
       const data = new FormData()
       data.append(this.name, this.from)
       if (this.to) data.append(this.endName || `${this.name}-end`, this.to)
@@ -427,18 +474,38 @@ export class DateSelector extends LitElement {
         data.append(`${this.name}-compare-end`, this.compareTo)
         state += `/${this.compareFrom}/${this.compareTo}/${this.compare}`
       }
-      this.internals.setFormValue(data, state)
+      // A closed end keeps the whole state for a restore, but nothing is submitted.
+      this.internals.setFormValue(closedEnd ? null : data, state)
     } else this.internals.setFormValue(this.from, `${this.from}/`)
-    if (this.required && (!this.from || !this.to)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
+    if (this.required && (!this.from || !this.to || closedEnd)) this.internals.setValidity({ valueMissing: true }, this.missingMessage())
     else this.internals.setValidity({})
   }
 
+  private outOfRange(value: string) {
+    return (!!this.min && value < this.min) || (!!this.max && value > this.max)
+  }
+
+  /** Closed by `disabled-dates` or `isDateDisabled`: unlike `min`/`max`, the arrow keys step over it. */
+  private isClosed(value: string) {
+    return this.disabledMap.has(value) || !!this.isDateDisabled?.(value)
+  }
+
+  /** Closed for what a click picks now: a comparison range is a past reference, not a booking, so it may use any day. */
+  private blocksPicking(value: string) {
+    return this.isClosed(value) && !(this.isRange && this.editing === 'compare')
+  }
+
   private isUnavailable(value: string) {
-    return this.effectiveDisabled || (!!this.min && value < this.min) || (!!this.max && value > this.max)
+    return this.effectiveDisabled || this.outOfRange(value) || this.blocksPicking(value)
+  }
+
+  /** A selected day closed afterwards, in `multiple` mode: it stays clickable so the user can take it out. */
+  private removableClosed(value: string) {
+    return this.mode === 'multiple' && !this.effectiveDisabled && !this.outOfRange(value) && this.isClosed(value) && this.selectedDates.includes(value)
   }
 
   private select(value: string) {
-    if (this.isUnavailable(value)) return
+    if (this.isUnavailable(value) && !this.removableClosed(value)) return
     if (this.mode === 'single') this.value = value
     else if (this.mode === 'multiple') {
       const dates = this.selectedDates
@@ -448,7 +515,10 @@ export class DateSelector extends LitElement {
       if (this.compare && this.compare !== 'custom') this.compare = 'custom'
       ;[this.compareFrom, this.compareTo] = nextRange(this.compareFrom, this.compareTo, value)
     } else {
-      ;[this.from, this.to] = nextRange(this.from, this.to, value)
+      // A range start closed afterwards does not anchor the click, which starts a new range; otherwise as usual (a click
+      // after a complete range, closed end or not, starts a new one).
+      const from = this.from && !this.isClosed(this.from) ? this.from : ''
+      ;[this.from, this.to] = nextRange(from, from ? this.to : '', value)
       // Derived now rather than in the next update, so the events below carry the new comparison range.
       this.deriveCompare()
     }
@@ -472,12 +542,39 @@ export class DateSelector extends LitElement {
     if (this.canNavigate(amount)) this.visibleMonth = addMonths(this.visibleMonth, amount)
   }
 
-  private async moveFocus(current: string, offset: number, byMonth = false) {
+  /**
+   * Moves the focus by `offset` days (months with `byMonth`). A closed day is stepped over a day at a time, in the
+   * direction of the move, up to a year of them; with `withinWeek` (Home and End), back toward the current day instead,
+   * so the focus stays in its week.
+   */
+  private async moveFocus(current: string, offset: number, byMonth = false, withinWeek = false) {
     const date = fromIso(current)
-    if (!date) return
-    const target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
+    if (!date || offset === 0) return
+    let target = byMonth ? shiftMonths(date, offset) : addDays(date, offset)
+    const closed = (day: string) => this.blocksPicking(day) && !this.removableClosed(day)
+    if (byMonth) {
+      // Page Up and Page Down stay in the month asked for: the nearest day that can be picked after the target, else
+      // before it (a day past `max` or before `min` counts as closed here).
+      const pickable = (day: string) => !closed(day) && !this.outOfRange(day)
+      const month = target.getMonth()
+      const inMonth = (day: Date) => day.getMonth() === month
+      let found: Date | undefined
+      for (let day = target; !found && inMonth(day); day = addDays(day, 1)) if (pickable(toIso(day))) found = day
+      for (let day = addDays(target, -1); !found && inMonth(day); day = addDays(day, -1)) if (pickable(toIso(day))) found = day
+      if (!found) return
+      target = found
+    } else {
+      // Up and Down keep the weekday column, stepping a week at a time; the other moves step a day at a time.
+      const step = (offset < 0 ? -1 : 1) * (withinWeek ? -1 : 1) * (Math.abs(offset) === 7 && !withinWeek ? 7 : 1)
+      const limit = withinWeek ? Math.abs(offset) : Math.abs(step) === 7 ? 53 : 366
+      // Home and End also step back over days outside min/max, landing on the nearest day inside them.
+      const blocked = (day: string) => closed(day) || (withinWeek && this.outOfRange(day))
+      for (let guard = 0; guard < limit && !this.effectiveDisabled && (withinWeek || !this.outOfRange(toIso(target))) && blocked(toIso(target)); guard++) {
+        target = addDays(target, step)
+      }
+    }
     const value = toIso(target)
-    if (this.isUnavailable(value)) return
+    if (value === current || (this.isUnavailable(value) && !this.removableClosed(value))) return
     const firstVisible = toIso(this.visibleMonth)
     const afterVisible = toIso(addMonths(this.visibleMonth, this.displayedMonths))
     if (value < firstVisible || value >= afterVisible) this.visibleMonth = beginningOfMonth(target)
@@ -504,8 +601,8 @@ export class DateSelector extends LitElement {
     else if (event.key === 'ArrowRight') action = this.moveFocus(value, 1)
     else if (event.key === 'ArrowUp') action = this.moveFocus(value, -7)
     else if (event.key === 'ArrowDown') action = this.moveFocus(value, 7)
-    else if (event.key === 'Home') action = this.moveFocus(value, -column)
-    else if (event.key === 'End') action = this.moveFocus(value, 6 - column)
+    else if (event.key === 'Home') action = this.moveFocus(value, -column, false, true)
+    else if (event.key === 'End') action = this.moveFocus(value, 6 - column, false, true)
     else if (event.key === 'PageUp') action = this.moveFocus(value, event.shiftKey ? -12 : -1, true)
     else if (event.key === 'PageDown') action = this.moveFocus(value, event.shiftKey ? 12 : 1, true)
     if (action) event.preventDefault()
@@ -518,9 +615,9 @@ export class DateSelector extends LitElement {
     return Array.from({ length: 7 }, (_, index) => formatter.format(addDays(start, index)))
   }
 
-  private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, anchor: string) {
+  private renderDayCell(date: Date, column: number, dateLabel: Intl.DateTimeFormat, today: string, selection: Set<string> | null, tabStop: string) {
     const value = toIso(date)
-    const disabled = this.isUnavailable(value)
+    const disabled = this.isUnavailable(value) && !this.removableClosed(value)
     const selected = selection ? selection.has(value) : value === this.from || value === this.to
     const range = !selection && !!this.to
     const inRange = range && value > this.from && value < this.to
@@ -531,7 +628,7 @@ export class DateSelector extends LitElement {
     const compareFrom = selection ? '' : this.compareFrom
     const compareEnd = this.compareTo || compareFrom
     const inCompare = !!compareFrom && value >= compareFrom && value <= compareEnd
-    const focusable = !disabled && (this.focusDate ? value === this.focusDate : anchor ? value === anchor : value === today || !this.min || value >= this.min)
+    const focusable = value === tabStop
     const content = this.renderDay?.({ date: value, day: date.getDate(), selected, disabled, marked, today: value === today })
     const hasContent = content !== undefined && content !== null && content !== nothing && content !== '' && content !== false
     const describedBy = [hasContent ? `content-${value}` : '', inCompare ? 'compare-note' : ''].filter(Boolean).join(' ')
@@ -542,7 +639,7 @@ export class DateSelector extends LitElement {
       type="button"
       role="gridcell"
       data-date=${value}
-      aria-label=${dateLabel.format(date)}
+      aria-label=${disabled && this.disabledMap.get(value) ? this.msg.t('disabledReason', dateLabel.format(date), this.disabledMap.get(value)!) : dateLabel.format(date)}
       aria-describedby=${describedBy || nothing}
       aria-selected=${selected ? 'true' : 'false'}
       aria-current=${value === today ? 'date' : nothing}
@@ -560,7 +657,7 @@ export class DateSelector extends LitElement {
     </button>`
   }
 
-  private renderMonth(month: Date, index: number, selection: Set<string> | null, anchor: string) {
+  private renderMonth(month: Date, index: number, selection: Set<string> | null, tabStop: string) {
     const year = month.getFullYear()
     const monthIndex = month.getMonth()
     const offset = this.weekStart === 'monday' ? (month.getDay() + 6) % 7 : month.getDay()
@@ -572,7 +669,7 @@ export class DateSelector extends LitElement {
       const day = cellIndex - offset + 1
       return day < 1 || day > days
         ? html`<span class="empty" role="gridcell" aria-disabled="true"></span>`
-        : this.renderDayCell(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today, selection, anchor)
+        : this.renderDayCell(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today, selection, tabStop)
     })
     return html`<section class="month" aria-label=${monthLabel}>
       <header class="month-header">
@@ -592,14 +689,20 @@ export class DateSelector extends LitElement {
     const label = this.ariaLabel === defaultLabel ? this.field.label || this.msg.t(modeLabels[this.isRange ? 'range' : this.mode]) : this.ariaLabel
     const invalid = this.field.invalid && !this.effectiveDisabled
     let selection: Set<string> | null = null
-    let anchor = this.from
+    // Exactly one day holds the roving tab stop, and it is one that can be picked: the focused day, else the range start
+    // or the first selected day, else today, else the first available day shown. Any of them may be closed or off screen.
+    const first = toIso(this.visibleMonth)
+    const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
+    const usable = (date: string) => !!date && date >= first && date < after && (!this.isUnavailable(date) || this.removableClosed(date))
+    let candidates = [this.focusDate, this.from, this.to]
     if (!this.isRange) {
       const dates = this.selectedDates
       selection = new Set(dates)
-      // The roving tab stop goes to the first selected day that is shown and enabled, so the grid stays reachable.
-      const first = toIso(this.visibleMonth)
-      const after = toIso(addMonths(this.visibleMonth, this.displayedMonths))
-      anchor = dates.find((date) => date >= first && date < after && !this.isUnavailable(date)) ?? ''
+      candidates = [this.focusDate, ...dates]
+    }
+    let tabStop = [...candidates, toIso(new Date())].find(usable) ?? ''
+    for (let day = beginningOfMonth(this.visibleMonth); !tabStop && toIso(day) < after; day = addDays(day, 1)) {
+      if (usable(toIso(day))) tabStop = toIso(day)
     }
     return html`<div
         class="c2-date-selector ${invalid ? 'error' : ''}"
@@ -608,7 +711,7 @@ export class DateSelector extends LitElement {
         aria-describedby=${this.field.describedBy()}
         aria-disabled=${this.effectiveDisabled ? 'true' : 'false'}
       >
-        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, anchor))}
+        ${Array.from({ length: this.displayedMonths }, (_, index) => this.renderMonth(addMonths(this.visibleMonth, index), index, selection, tabStop))}
         ${!selection && this.compareFrom ? html`<span id="compare-note" hidden>${this.msg.t('inComparison')}</span>` : nothing}
         <div
           class="footer"

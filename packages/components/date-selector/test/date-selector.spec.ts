@@ -399,3 +399,158 @@ test('translations added after the first render rewrite the validation message',
     .poll(() => selector.evaluate((element: HTMLElementTagNameMap['c2-date-selector']) => element.validationMessage))
     .toBe('Wählen Sie ein Start- und Enddatum')
 })
+
+test('disabled-dates and isDateDisabled close days: read with their reason, not picked, stepped over by the arrows', async ({ page, scenario }) => {
+  await scenario('closed')
+  const selector = page.locator('c2-date-selector')
+  await expect(page.getByRole('gridcell', { name: /^Friday, September 11, 2026, Holiday$/ })).toBeDisabled()
+  await expect(page.getByRole('gridcell', { name: /^Tuesday, September 15, 2026$/ })).toBeDisabled()
+  await expect(page.getByRole('gridcell', { name: /^Sunday, September 13, 2026$/ })).toBeDisabled()
+  await page.getByRole('gridcell', { name: /September 13, 2026/ }).click({ force: true })
+  await expect(selector).toHaveAttribute('value', '2026-09-10')
+  await page.getByRole('gridcell', { name: /September 10, 2026/ }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('gridcell', { name: /September 12, 2026/ })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('gridcell', { name: /September 14, 2026/ })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('gridcell', { name: /September 16, 2026/ })).toBeFocused()
+  // Back over the same days; down a week onto a closed day keeps the column and lands a week further.
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('gridcell', { name: /September 14, 2026/ })).toBeFocused()
+  await page.getByRole('gridcell', { name: /September 8, 2026/ }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('gridcell', { name: /September 22, 2026/ })).toBeFocused()
+  await page.getByRole('gridcell', { name: /September 7, 2026/ }).focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('gridcell', { name: /September 5, 2026/ })).toBeFocused()
+})
+
+test('Home and End stay in the week when its first or last day is closed', async ({ page, scenario }) => {
+  await scenario('closed')
+  await page.getByRole('gridcell', { name: /September 9, 2026/ }).focus()
+  // Sunday 13 is closed: End stops on Saturday 12, not on Monday 14 of the next week.
+  await page.keyboard.press('End')
+  await expect(page.getByRole('gridcell', { name: /September 12, 2026/ })).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('gridcell', { name: /September 7, 2026/ })).toBeFocused()
+})
+
+test('the grid keeps exactly one tab stop, on a day that can be picked', async ({ page, scenario }) => {
+  const stops = () => page.locator('c2-date-selector').locator('.day[tabindex="0"]')
+  // A range starting on a closed day: the tab stop falls back to a day that can be picked.
+  await scenario('closed-range')
+  await expect(stops()).toHaveCount(1)
+  await expect(stops()).toBeEnabled()
+  // Nothing selected and no min: one tab stop, not one per day.
+  await scenario('multiple-empty')
+  await expect(stops()).toHaveCount(1)
+})
+
+test('a selected day closed afterwards is not submitted and does not answer required', async ({ page, scenario }) => {
+  await scenario('single')
+  const selector = page.locator('c2-date-selector')
+  const state = () =>
+    selector.evaluate((element: HTMLElement & { checkValidity(): boolean }) => ({
+      valid: element.checkValidity(),
+      submitted: new FormData(element.closest('form')!).get('trip'),
+    }))
+  expect(await state()).toEqual({ valid: true, submitted: '2026-09-10' })
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
+  await expect.poll(state).toEqual({ valid: false, submitted: null })
+  expect(await selector.evaluate((element: HTMLElement & { validationMessage: string }) => element.validationMessage)).toBe(
+    'The chosen date is no longer available',
+  )
+})
+
+test('the focus stays in the grid when the focused day is closed under it', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+  await scenario('single')
+  await page.getByRole('gridcell', { name: /September 15, 2026/ }).focus()
+  await page.locator('c2-date-selector').evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-15']))
+  await expect(page.getByRole('gridcell', { name: /September 15, 2026/ })).toBeDisabled()
+  await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('c2-date-selector').locator('.day:focus')).toHaveCount(1)
+  expect(warnings).toEqual([])
+})
+
+test('Home lands on the nearest day inside min', async ({ page, scenario }) => {
+  await scenario('constrained')
+  // min is Tuesday 8 September: Home from Friday 11 stops there, not on the Monday before it.
+  await page.getByRole('gridcell', { name: /September 11, 2026/ }).focus()
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('gridcell', { name: /September 8, 2026/ })).toBeFocused()
+})
+
+test('a range start closed afterwards does not anchor the next click, which starts a new range', async ({ page, scenario }) => {
+  await scenario()
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
+  await page.getByRole('gridcell', { name: /September 15, 2026/ }).click()
+  await expect(selector).toHaveAttribute('from', '2026-09-15')
+  await expect(selector).toHaveJSProperty('to', '')
+})
+
+test('in multiple mode a selected day closed afterwards can still be taken out', async ({ page, scenario }) => {
+  await scenario('multiple')
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10', '2026-09-11']))
+  // An unselected closed day stays closed.
+  await expect(page.getByRole('gridcell', { name: /September 11, 2026/ })).toBeDisabled()
+  await page.getByRole('gridcell', { name: /September 10, 2026/ }).click()
+  await expect(selector).toHaveAttribute('value', '2026-09-03')
+  await expect(page.getByRole('gridcell', { name: /September 10, 2026/ })).toBeDisabled()
+})
+
+test('a range shows its end as the tab stop when its start is not shown', async ({ page, scenario }) => {
+  await scenario()
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { from: string; to: string }) => Object.assign(element, { from: '2026-08-28', to: '2026-09-03' }))
+  await expect(selector.locator('.day[tabindex="0"]')).toHaveAttribute('data-date', '2026-09-03')
+})
+
+test('in multiple mode the keyboard reaches a selected day closed afterwards, and Page Down stays in the month asked for', async ({ page, scenario }) => {
+  await scenario('multiple')
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-09-10']))
+  await page.getByRole('gridcell', { name: /September 9, 2026/ }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('gridcell', { name: /September 10, 2026/ })).toBeFocused()
+  await page.keyboard.press(' ')
+  await expect(selector).toHaveAttribute('value', '2026-09-03')
+  // October's last days closed: Page Down from 30 September lands on October's last open day, not in November.
+  await selector.evaluate((element: HTMLElement & { disabledDates: string[] }) => (element.disabledDates = ['2026-10-29', '2026-10-30', '2026-10-31']))
+  await page.getByRole('gridcell', { name: /September 30, 2026/ }).focus()
+  await page.keyboard.press('PageDown')
+  await expect(page.getByRole('gridcell', { name: /October 28, 2026/ })).toBeFocused()
+})
+
+test('Page Down lands on the nearest day inside max in the month asked for', async ({ page, scenario }) => {
+  await scenario('constrained')
+  // max is 20 September: Page Down from 25 August would be 25 September, past max; it lands on 20 September.
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { min: string }) => (element.min = '2026-08-01'))
+  await page.getByRole('button', { name: 'Previous month' }).click()
+  await page.getByRole('gridcell', { name: /August 25, 2026/ }).focus()
+  await page.keyboard.press('PageDown')
+  await expect(page.getByRole('gridcell', { name: /September 20, 2026/ })).toBeFocused()
+})
+
+test('a comparison range may start or end on a closed day', async ({ page, scenario }) => {
+  await scenario('closed-range')
+  const selector = page.locator('c2-date-selector')
+  await selector.evaluate((element: HTMLElement & { from: string; to: string; editing: string }) =>
+    Object.assign(element, { from: '2026-09-14', to: '2026-09-18', editing: 'compare' }),
+  )
+  await page.getByRole('gridcell', { name: /September 6, 2026/ }).click()
+  await page.getByRole('gridcell', { name: /September 13, 2026/ }).click()
+  // Pickable here, so read without a closed reason.
+  await selector.evaluate((element: HTMLElement & { disabledDates: unknown }) => (element.disabledDates = [{ date: '2026-09-11', label: 'Holiday' }]))
+  await expect(page.getByRole('gridcell', { name: /^Friday, September 11, 2026$/ })).toBeEnabled()
+  await expect(selector).toHaveJSProperty('compareFrom', '2026-09-06')
+  await expect(selector).toHaveJSProperty('compareTo', '2026-09-13')
+})

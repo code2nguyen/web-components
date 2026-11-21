@@ -143,6 +143,9 @@ export class WheelPicker extends LitElement {
 
   @state() private disabledByForm = false
 
+  /** Set by `reportValidity()`; until then a failed constraint is not announced (an enclosing field's error still is). */
+  @state() private validityShown = false
+
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, wheelPickerMessages)
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
@@ -185,16 +188,23 @@ export class WheelPicker extends LitElement {
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
+    // Drawn now, so the control is marked invalid when the report moves the focus into it.
+    this.performUpdate()
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {
     this.value = [...(this.defaultValue ?? [])]
+    this.validityShown = false
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -288,12 +298,24 @@ export class WheelPicker extends LitElement {
     })
   }
 
+  /**
+   * Whether the error is shown, on the host and on the wheels alike: an enclosing field's error, or a custom validity
+   * message once `reportValidity()` reported it, as for a native control.
+   */
+  private get errorShown(): boolean {
+    return (this.field.invalid || (this.validityShown && !!this.customValidityMessage)) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
     const joined = this.value.join(';')
     this.internals.setFormValue(this.effectiveDisabled || !this.name ? null : joined, joined)
     const flags = this.customValidityMessage ? { customError: true } : {}
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.wheel') ?? undefined
     this.internals.setValidity(flags, this.customValidityMessage, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a custom-invalid
+    // control would be announced as invalid on load. Invalid is the error the field shows, or the
+    // failed constraint once `reportValidity()` reported it (see `errorShown`).
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   /** Sets one wheel's value as the user's choice: fires `input` then `change`. */
@@ -390,7 +412,7 @@ export class WheelPicker extends LitElement {
 
   override render() {
     const disabled = this.effectiveDisabled
-    const invalid = this.field.invalid && !disabled
+    const invalid = this.errorShown
     const count = this.wheels.length
     return html`<div class="wheels ${invalid ? 'wheels--invalid' : ''}" part="wheels">
         <div class="band" aria-hidden="true"></div>

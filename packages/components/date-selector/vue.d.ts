@@ -21,6 +21,7 @@ declare module 'vue' {
     'c2-date-selector': DefineComponent<
       C2Props<DateSelector> & {
         'week-start'?: unknown
+        'disabled-dates'?: unknown
         'compare-from'?: unknown
         'compare-to'?: unknown
         'end-name'?: unknown
