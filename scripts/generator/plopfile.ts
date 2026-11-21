@@ -90,7 +90,7 @@ export default function (plop: NodePlopAPI) {
             // Registers the element for pages that render markup as plain HTML instead of hydrating islands.
             register({ registry: 'componentModules', template: "import '@c2n/components/{{ dashCase name }}'" }),
             // Quoted because a dash-cased id is not a bare identifier; prettier drops the quotes when it can.
-            register({ registry: 'componentPreviews', template: "  '{{ dashCase name }}': `<c2-{{ dashCase name }}></c2-{{ dashCase name }}>`," }),
+            register({ registry: 'componentPreviews', template: "  '{{ dashCase name }}': `<c2-{{ dashCase name }}>Content</c2-{{ dashCase name }}>`," }),
             {
               type: 'add',
               path: '../../apps/ui/src/content/gallery/{{dashCase name}}.mdx',
