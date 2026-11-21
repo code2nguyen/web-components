@@ -18,7 +18,7 @@ const en = {
   /** Announced when a suggestion fills the address. */
   filled: 'Address filled in',
   /** Announced when a suggestion is from another country than the one the field is fixed to: `{0}` is that country. */
-  otherCountry: (country: string) => `That address is not in the country of this form: ${country}`,
+  otherCountry: (country: string) => `Only addresses in ${country} can be used`,
   // Field labels.
   address: 'Address',
   addressLine1: 'Address line 1',

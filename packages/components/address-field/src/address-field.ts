@@ -150,6 +150,8 @@ export class AddressField extends LitElement {
   private readonly suggest = (query: string, signal: AbortSignal) =>
     this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
   private resolving: AbortController | null = null
+  /** The pick in progress: the suggestion's id and the text typed before it. */
+  private picking: { id: string; typed: string } | null = null
 
   constructor() {
     super()
@@ -239,7 +241,8 @@ export class AddressField extends LitElement {
   private normalized(value: Partial<AddressValue> | null | undefined): AddressValue {
     const fixed = this.fixedCountry
     const next = normalize(value, fixed || this.country)
-    return fixed && next.country !== fixed ? moveTo(next, next.country, fixed) : next
+    // Always moved, so a value with no country and one naming another both lose the parts the format has no field for.
+    return fixed ? moveTo(next, next.country, fixed) : next
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
@@ -345,16 +348,22 @@ export class AddressField extends LitElement {
   private async pick(item: AddressSuggestion): Promise<void> {
     const provider = this.provider
     if (!provider || !item?.id) return
-    // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's id.
-    const typed = this.value.line1
+    // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's id. While
+    // an earlier pick is pending, the line holds that pick's id, so its typed text is the one to keep.
+    const before = this.picking && this.value.line1 === this.picking.id ? this.picking.typed : this.value.line1
+    const picking = { id: item.id, typed: before }
+    this.picking = picking
     // The autocomplete wrote the suggestion's id on the line: put back what was typed, unless the user typed since.
     const restore = () => {
-      if (this.value.line1 === item.id) this.set('line1', typed, true)
+      if (this.value.line1 === item.id) this.set('line1', before)
     }
     this.resolving?.abort()
     const controller = new AbortController()
     this.resolving = controller
     try {
+      // After the autocomplete has written the id, so a provider that throws at once is restored like one that rejects.
+      await Promise.resolve()
+      if (controller.signal.aborted) return
       const found = await provider.resolve(item.id, { locale: this.msg.locale, signal: controller.signal })
       if (controller.signal.aborted) return
       const country = (found.country || this.value.country).toUpperCase()
@@ -378,6 +387,8 @@ export class AddressField extends LitElement {
     } catch {
       // The provider failed or the request was superseded: the typed text stays.
       if (!controller.signal.aborted) restore()
+    } finally {
+      if (this.picking === picking) this.picking = null
     }
   }
 

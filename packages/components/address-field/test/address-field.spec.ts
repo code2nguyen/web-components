@@ -132,7 +132,7 @@ test('one country in countries fixes the field to it: no picker, and another cou
   )
   await input(field(page), 'line1').fill('1 Fer')
   await field(page).locator('c2-list-item', { hasText: '1 Ferry Building' }).click()
-  await expect(field(page).locator('.announcement')).toHaveText('That address is not in the country of this form: France')
+  await expect(field(page).locator('.announcement')).toHaveText('Only addresses in France can be used')
   expect(await value(field(page))).toMatchObject({ line1: '1 Fer', city: 'Paris', country: 'FR' })
   expect(await page.evaluate(() => (window as unknown as { fakeProvider: { queries: string[][] } }).fakeProvider.queries.at(-1))).toEqual(['1 Fer', 'FR'])
   // A form reset goes back to the first value, still in France.
