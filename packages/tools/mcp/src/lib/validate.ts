@@ -257,12 +257,16 @@ function checkAttribute(
   if (binding.kind === 'property' && element.properties?.includes(name)) return
   // A container's attribute, written as an attribute (not `.primary=${…}`) where that container reads it.
   const read = CONTAINER_ATTRIBUTES.get(lower)
-  if (read && (binding.kind === 'attribute' || attribute.name === name)) {
+  // Vue's `:primary` sets the attribute too when the element has no such property (`key in el` is false).
+  const asAttribute = binding.kind === 'attribute' || attribute.name === name || /^(:|v-bind:)/.test(attribute.name)
+  if (read && asAttribute) {
     const placed = read.slot ? placement.parent === read.container && placement.slot === read.slot : placement.ancestors.includes(read.container)
     if (placed) return
-    // The shell and the side nav find their toggles at runtime (`composedPath()`), so a toggle in a header component
-    // rendered inside them from another file works: say so, as a warning rather than an error.
-    if (!read.slot) {
+    // The shell and the side nav find their toggles at runtime (`composedPath()`), and an action slotted into
+    // `actions` may be built in another template than its page header: when this file does not show the container,
+    // say so as a warning rather than an error.
+    const elsewhere = read.slot ? placement.slot === read.slot && !placement.ancestors.includes(read.container) : true
+    if (elsewhere) {
       report(
         attribute.index,
         'warning',

@@ -153,6 +153,13 @@ test('accepts the attributes a container reads off its descendants, inside that 
     validateMarkup(registry, '<c2-button app-shell-toggle="navigation">Menu</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
     ['unknown-attribute:warning'],
   )
+  // An action built in another template than its page header: a warning.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button slot="actions" primary>Save</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
+  // Vue's `:primary` falls back to the attribute on an element without that property.
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" :primary="isMain">Go</c2-button></c2-page-header>', 'a.vue'), [])
   // A property binding is not the attribute the container reads.
   assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
 })
