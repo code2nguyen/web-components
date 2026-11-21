@@ -347,7 +347,7 @@ const rules = [
       return [...new Set(hits)].sort((a, b) => a - b)
     },
     message:
-      "English interface text in the template or as a default: a page in another language cannot translate it. Put it in src/messages.ts (`defineMessages('<package>', en)`) and render `this.msg.t('<key>')` through a LocalizeController (CLAUDE.md rule 6). Text that is not interface text (a unit symbol, a sample value) takes a modern-web-ignore comment with the reason.",
+      "English interface text in the template or as a default: a page in another language cannot translate it. Put it in src/messages.ts (`defineMessages('<package>', en)`) and render `this.msg.t('<key>')` through a LocalizeController (docs/agents/component-foundation.md rule 6). Text that is not interface text (a unit symbol, a sample value) takes a modern-web-ignore comment with the reason.",
     guide: 'packages/components/CLAUDE.md "Built-in text is in English, and translatable"',
   },
 ]
