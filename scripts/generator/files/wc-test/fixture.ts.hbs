@@ -9,4 +9,5 @@ export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>(
     })
   },
 })
-export { expect } from '@playwright/test'
+// `toHaveHostAria` reads what the component states through ElementInternals, which `toHaveAttribute` cannot see.
+export { expect } from '../../../../tests/component-fixture'

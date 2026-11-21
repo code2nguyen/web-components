@@ -77,7 +77,75 @@ Scaffold with `npm run generate` and follow the `new-component` skill; `docs/age
 
 ## Component conventions
 
-Follow the shape in `packages/components/checkbox/src/checkbox.ts`:
+### Skeleton
+
+Every component starts from this shape, which `npm run generate` writes (from `scripts/generator/files/wc/src/`) for a component named "Note Panel" (a made-up name: there is no `c2-note-panel`). `npm run check:component-template` (a `component-tests.yml` gate) renders that template, type-checks, lints and compiles it, and fails if a code line below no longer matches it, so this block and the generator cannot drift apart.
+
+```ts
+import { LitElement, html, unsafeCSS } from 'lit'
+import { property } from '@c2n/core/lit-helper.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { notePanelMessages } from './messages'
+import styles from './note-panel.scss?inline'
+
+/**
+ * @tag c2-note-panel
+ * @slot - The content.
+ * @slot actions - Commands the application adds (an action zone); hidden while empty.
+ * @csspart content - The wrapper of the default slot.
+ * @csspart actions - The wrapper of the `actions` slot.
+ * @cssproperty {length} [--c2-note-panel__container--gap=8px] - Space between the content and the actions.
+ */
+@customElement('c2-note-panel')
+export class NotePanel extends LitElement {
+  static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, notePanelMessages)
+  private readonly slots = new SlotPresenceController(this, ['actions'])
+
+  @property() label = ''
+
+  protected override updated(): void {
+    this.internals.role = 'group'
+    this.internals.ariaLabel = this.label || this.msg.t('label')
+  }
+
+  override render() {
+    return html`
+      <div class="content" part="content"><slot></slot></div>
+      <div class="actions" part="actions" ?hidden=${!this.slots.has('actions')}>
+        <slot name="actions" @slotchange=${this.slots.handleSlotChange}></slot>
+      </div>
+    `
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'c2-note-panel': NotePanel
+  }
+}
+```
+
+with `src/messages.ts` (`export const notePanelMessages = defineMessages('note-panel', { label: 'Note panel' })`) and `src/note-panel.scss` (the `$theme` map holding `container--gap: 8px`, read as `css.cssVar(container--gap)`). What it shows: the `@c2n/core` imports, host semantics through `internals` and never a host attribute, text through a message with an empty-default property falling back to it, a slot region wrapped in a documented `part` and hidden while empty, and a variable with its default in `$theme` and its `@cssproperty` line. The rules behind each line are the list below.
+
+### Reference components by kind
+
+The skeleton covers what every component has. For the patterns only some need, copy the component that does it, not a component of another kind (a badge built from `c2-checkbox` drags the form machinery along):
+
+| The component…                                         | Reference                          | What to copy                                                                                                               |
+| ------------------------------------------------------ | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| is a form control                                      | `c2-checkbox`, `c2-text-field`     | form association, `FieldContextConsumer`, `formDisabledCallback`/`formStateRestoreCallback`, `redispatchEvent`, `EventMap` |
+| displays a collection                                  | `c2-table`, `c2-virtual-list`      | declarative children and JSON attribute, the in-memory property, `dataSource` with loading/empty/error slots               |
+| draws content per item                                 | `c2-tree`, `c2-steps`              | `render<Part>` renderers taking one context object, narrow renderers beside the whole-item one                             |
+| has a toolbar, header or footer for the app's commands | `c2-page-header`, `c2-table`       | action-zone slots hidden while empty, their wrapper parts, the methods and events an action needs                          |
+| routes light-DOM children into per-item slots          | `c2-masonry`                       | `slotAssignment: 'manual'` with `assignSlot`, the declarative-shadow-root fallback                                         |
+| announces itself as a group with a name                | `c2-audio-player`, `c2-action-bar` | `internals.role`/`internals.ariaLabel`, a `label` property falling back to a message                                       |
+
+### Rules
 
 - `@customElement('c2-<name>')`, styles via `import styles from './<name>.scss?inline'` + `static override styles = unsafeCSS(styles)`.
 - `noImplicitOverride` is on — `override` is required on `render`, `update`, `styles`, `focus`, inherited ARIA props, etc.

@@ -56,6 +56,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: The scaffolded component matches the documented skeleton and conventions
+        run: npm run check:component-template
       - run: npm run build -w packages/umbrella
       - run: npm run docs:check
       # A component or validator change that breaks a lab build's markup makes its report's generated section stale:

@@ -11,16 +11,16 @@ most work for this component.
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-{{ dashCase name}}></c2-{{ dashCase name}}>
+<c2-{{ dashCase name}}>Content</c2-{{ dashCase name}}>
 ```
 
 ```html tag=MdxCodeBlock,label=Themed
 <style>
   .themed {
-    /* --c2-{{ dashCase name}}--… */
+    --c2-{{ dashCase name}}__container--gap: 16px;
   }
 </style>
-<c2-{{ dashCase name}} class="themed"></c2-{{ dashCase name}}>
+<c2-{{ dashCase name}} class="themed">Content<c2-button slot="actions">Action</c2-button></c2-{{ dashCase name}}>
 ```
 
 </GalleryGrid>

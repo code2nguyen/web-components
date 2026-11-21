@@ -1,0 +1,14 @@
+import { defineMessages } from '@c2n/core/localize.js'
+
+/**
+ * Every string the component draws or announces (labels, `aria-label`s, live-region text, validation messages,
+ * default slot content), in English. A function takes the values it formats: called with `{0}`, `{1}`… it must read
+ * as the template a translation writes.
+ */
+const en = {
+  /** The component's accessible name when the author sets no `label`. */
+  label: '{{ sentenceCase name }}',
+}
+
+/** An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */
+export const {{ camelCase name }}Messages = defineMessages('{{ dashCase name }}', en)

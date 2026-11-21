@@ -49,7 +49,8 @@ you skip it.
 
 ## 4. Review against the rules
 
-For each touched component, check at least:
+Compare with the reference component of the same kind ("Reference components by kind" in
+`packages/components/CLAUDE.md`), not with one of another kind. For each touched component, check at least:
 
 - **Presentation** — a new look is a documented `--c2-<name>__<part>[__<state>]--<property>` variable with its default
   in the `$theme` map and an `@cssproperty` line, not a `size`/`color`/`variant` attribute.
