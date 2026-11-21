@@ -258,7 +258,6 @@ export class AddressField extends LitElement {
         if (this.hasUpdated && changed.has('countries') && !changed.has('value') && next.country !== this.value.country) {
           // Checked against the new format, as when the user picks a country.
           this.touched = new Set()
-          this.showAll = false
           // An empty field has nothing to report.
           this.movedByCountries = PARTS.some((part) => next[part].trim())
         }
@@ -271,7 +270,8 @@ export class AddressField extends LitElement {
     this.syncForm()
     if (this.movedByCountries) {
       this.movedByCountries = false
-      this.emit(true)
+      // After this update, so a listener that sets a property starts a new one rather than changing this one.
+      queueMicrotask(() => this.emit(true))
     }
   }
 
@@ -385,7 +385,8 @@ export class AddressField extends LitElement {
       const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
       next.region = regionCode(country, next.region)
       if (!next.line2) next.line2 = this.value.line2
-      this.value = next
+      // As the field will hold it, so the events carry the same value.
+      this.value = this.normalized(next)
       this.touched = new Set()
       this.announcement = this.msg.t('filled')
       this.emit(true)
