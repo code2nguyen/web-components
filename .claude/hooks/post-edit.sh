@@ -2,8 +2,8 @@
 # PostToolUse hook after Write/Edit/MultiEdit (registered in .claude/settings.json).
 #
 # 1. Formats the written file with the repo's prettier, so formatting is right as the agent goes instead of at
-#    commit time (lint-staged still runs). Same extensions as `format:check`, plus .astro/.scss, which CLAUDE.md asks
-#    to format by hand; .prettierignore applies.
+#    commit time (lint-staged still runs). The extensions `format:check` covers; .prettierignore applies. Not .astro or
+#    .scss: some of those files are not prettier-clean, and a one-line edit would reformat the whole file.
 # 2. For application code checks the c2 markup with `c2n-mcp validate --hook`: an unknown tag, attribute, slot or CSS
 #    variable, or a native control where a c2 element exists. Exit code 2 hands the findings back to the agent.
 #    Errors only: the validator reports a whole file, and these apps carry accepted warnings (native controls the
@@ -25,7 +25,7 @@ case "$rel" in
 esac
 
 case "$rel" in
-  *.cjs | *.html | *.js | *.json | *.md | *.ts | *.tsx | *.vue | *.astro | *.scss)
+  *.cjs | *.html | *.js | *.json | *.md | *.ts | *.tsx | *.vue)
     [ -L "$rel" ] || [ ! -x node_modules/.bin/prettier ] || node_modules/.bin/prettier --write --log-level=silent "$rel" >/dev/null 2>&1
     ;;
 esac
