@@ -64,12 +64,19 @@ const GLOBAL_ATTRIBUTES = new Set(
   ),
 )
 /**
- * Attributes a container reads off its descendants, valid on any element inside it: `c2-app-shell` and `c2-side-nav`
- * toggle from a click on an element carrying theirs, `c2-page-header` folds and labels its actions by theirs. They are
- * not attributes of the element that carries them, so its manifest does not list them. Keep in step with the sources
+ * Attributes a container reads off its descendants, valid on an element inside that container only: `c2-app-shell` and
+ * `c2-side-nav` toggle from a click on a descendant carrying theirs, `c2-page-header` folds and labels its actions by
+ * theirs. They are not attributes of the element that carries them, so its manifest does not list them, and outside the
+ * container (`<c2-button primary>` on its own) they do nothing and stay errors. Keep in step with the sources
  * (`getAttribute`/`hasAttribute` on another element in `packages/components/*\/src`).
  */
-const CONTAINER_ATTRIBUTES = new Set(['app-shell-toggle', 'side-nav-toggle', 'overflow-priority', 'menu-label', 'primary'])
+const CONTAINER_ATTRIBUTES = new Map([
+  ['app-shell-toggle', 'c2-app-shell'],
+  ['side-nav-toggle', 'c2-side-nav'],
+  ['overflow-priority', 'c2-page-header'],
+  ['menu-label', 'c2-page-header'],
+  ['primary', 'c2-page-header'],
+])
 const DOM_EVENTS = new Set(
   'click dblclick auxclick contextmenu input change submit reset invalid focus blur focusin focusout keydown keyup keypress pointerdown pointerup pointermove pointerenter pointerleave pointerover pointerout pointercancel mousedown mouseup mousemove mouseenter mouseleave mouseover mouseout wheel touchstart touchend touchmove touchcancel dragstart drag dragend dragenter dragleave dragover drop scroll scrollend copy cut paste select toggle beforetoggle load error animationstart animationend animationiteration transitionstart transitionend transitionrun transitioncancel beforeinput compositionstart compositionupdate compositionend gotpointercapture lostpointercapture selectstart selectionchange cancel close resize slotchange formdata animationcancel'.split(
     ' ',
@@ -122,7 +129,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
         continue
       }
       const parent = stack.at(-1)
-      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, jsx, svelte, report, used)
+      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, stack, jsx, svelte, report, used)
       else {
         checkNative(registry, tag, report)
         const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
@@ -164,7 +171,16 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
 
 type Report = (index: number, severity: Severity, rule: Finding['rule'], message: string) => void
 
-function checkElement(registry: Registry, tag: Tag, parent: string | undefined, jsx: boolean, svelte: boolean, report: Report, used: Map<string, string>) {
+function checkElement(
+  registry: Registry,
+  tag: Tag,
+  parent: string | undefined,
+  ancestors: readonly string[],
+  jsx: boolean,
+  svelte: boolean,
+  report: Report,
+  used: Map<string, string>,
+) {
   const resolved = resolveElement(registry, tag.name)
   if (!resolved || (resolved.tag !== tag.name && !resolved.element.tag.includes('{name}'))) {
     const hint = suggest(Object.keys(registry.tagIndex), tag.name, 3)
@@ -173,12 +189,20 @@ function checkElement(registry: Registry, tag: Tag, parent: string | undefined, 
   }
   used.set(resolved.tag, resolved.modulePath)
   const element = resolved.element
-  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, jsx, svelte, report)
+  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, ancestors, jsx, svelte, report)
   const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
   if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
 }
 
-function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attributes'][number], jsx: boolean, svelte: boolean, report: Report) {
+function checkAttribute(
+  element: ElementEntry,
+  tag: string,
+  attribute: Tag['attributes'][number],
+  ancestors: readonly string[],
+  jsx: boolean,
+  svelte: boolean,
+  report: Report,
+) {
   const binding = readBinding(attribute.name, jsx, svelte)
   if (!binding) return
   const events = element.events.map((e) => e.name)
@@ -224,7 +248,10 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
   if (binding.kind === 'attribute' && attributes.includes(lower)) return
   if (binding.kind === 'property' && element.properties?.includes(name)) return
   // ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
-  if (GLOBAL_ATTRIBUTES.has(lower) || CONTAINER_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
+  // A container's attribute, written as an attribute (not `.primary=${…}`) on a descendant of that container.
+  const container = CONTAINER_ATTRIBUTES.get(lower)
+  if (container && (binding.kind === 'attribute' || attribute.name === name) && ancestors.includes(container)) return
+  if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
   const flat = (value: string) => value.toLowerCase().replaceAll('-', '')
   const loose = attributes.find((a) => flat(a) === flat(name))
   // A property binding (and a JSX prop, which React 19 assigns as a property) may use the camelCase spelling.

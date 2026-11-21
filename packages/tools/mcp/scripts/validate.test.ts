@@ -63,6 +63,9 @@ const components = [
     element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
   ]),
   component('tabs', [element('c2-tabs', 'tabs'), element('c2-tab', 'tabs')]),
+  component('page-header', [element('c2-page-header', 'page-header', { slots: ['actions'] })]),
+  component('app-shell', [element('c2-app-shell', 'app-shell')]),
+  component('side-nav', [element('c2-side-nav', 'side-nav')]),
   component(
     'feather-icons',
     [{ ...element('c2-feather-{name}', 'feather-icons'), modulePath: '@c2n/feather-icons/icons/{name}.js', className: 'Feather{Name}' }],
@@ -135,9 +138,15 @@ test('reads Lit expressions with quotes and nested templates as one value', () =
   )
 })
 
-test('accepts the attributes a container reads off its descendants, by their attribute name', () => {
-  assert.deepEqual(rules('<c2-button app-shell-toggle="aside" side-nav-toggle overflow-priority="2" menu-label="Export" primary>Go</c2-button>'), [])
-  assert.deepEqual(rules('<c2-button .overflowPriority=${2}>Go</c2-button>'), ['1:unknown-attribute'])
+test('accepts the attributes a container reads off its descendants, inside that container only', () => {
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" primary overflow-priority="2" menu-label="Export">Go</c2-button></c2-page-header>'), [])
+  assert.deepEqual(rules('<c2-app-shell><div><c2-button app-shell-toggle="aside">Details</c2-button></div></c2-app-shell>'), [])
+  assert.deepEqual(rules('<c2-side-nav><c2-button side-nav-toggle>Menu</c2-button></c2-side-nav>'), [])
+  // Outside its container the attribute does nothing: `primary` is no look of c2-button.
+  assert.deepEqual(rules('<c2-button primary>Save</c2-button>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header></c2-page-header><c2-button menu-label="x">Go</c2-button>'), ['1:unknown-attribute'])
+  // A property binding is not the attribute the container reads.
+  assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
 })
 
 test('accepts templated slot names and framework directives', () => {
