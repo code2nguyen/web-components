@@ -11,6 +11,7 @@ const fr: typeof addressFieldMessages.en = {
   required: (label) => `${label} obligatoire`,
   postalInvalid: (label, example) => `${label} doit ressembler à ${example}`,
   filled: 'Adresse remplie',
+  otherCountry: (country) => `Choisissez une adresse en ${country}`,
   address: 'Adresse',
   addressLine1: 'Adresse, ligne 1',
   street: 'Rue',

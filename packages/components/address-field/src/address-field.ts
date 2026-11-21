@@ -137,6 +137,8 @@ export class AddressField extends LitElement {
   @state() private showAll = false
   @state() private formDisabled = false
   @state() private announcement = ''
+  /** Why the last suggestion was not taken, shown on the first line until it is edited. */
+  @state() private refused = ''
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, addressFieldMessages)
@@ -144,12 +146,8 @@ export class AddressField extends LitElement {
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private defaultValue: AddressValue | null = null
   /** One function for the autocomplete: a new one each render would cancel its request and reload it. */
-  private readonly suggest = (query: string, signal: AbortSignal) => {
-    this.query = query
-    return this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
-  }
-  /** The text last searched for, put back when a suggestion is refused. */
-  private query = ''
+  private readonly suggest = (query: string, signal: AbortSignal) =>
+    this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
   private resolving: AbortController | null = null
 
   constructor() {
@@ -159,7 +157,7 @@ export class AddressField extends LitElement {
 
   /** The address, with every part as a string. */
   get address(): AddressValue {
-    return normalize(this.value, this.country)
+    return this.normalized(this.value)
   }
 
   /** Whether every part the country needs is filled and valid. */
@@ -189,7 +187,7 @@ export class AddressField extends LitElement {
   }
 
   formResetCallback(): void {
-    this.value = { ...(this.defaultValue ?? normalize(null, this.fixedCountry || this.country)) }
+    this.value = { ...(this.defaultValue ?? this.normalized(null)) }
     this.touched = new Set()
     this.showAll = false
   }
@@ -202,7 +200,7 @@ export class AddressField extends LitElement {
   formStateRestoreCallback(state: string | File | FormData | null): void {
     if (typeof state !== 'string' || !state) return
     try {
-      this.value = normalize(JSON.parse(state) as Partial<AddressValue>, this.fixedCountry || this.country)
+      this.value = this.normalized(JSON.parse(state) as Partial<AddressValue>)
     } catch {
       // Not state this element wrote: keep the current value.
     }
@@ -210,11 +208,7 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    if (!this.defaultValue) {
-      const value = normalize(this.value, this.fixedCountry || this.country)
-      const fixed = this.fixedCountry
-      this.defaultValue = fixed && value.country !== fixed ? moveTo(value, value.country, fixed) : value
-    }
+    this.defaultValue ??= this.normalized(this.value)
   }
 
   /** The one country the field is fixed to, when `countries` lists exactly one; otherwise empty. */
@@ -228,13 +222,21 @@ export class AddressField extends LitElement {
     return [...new Set(this.countries.map((code) => code.trim().toUpperCase()).filter(Boolean))]
   }
 
+  /**
+   * A value as the field holds it: every part a string, the starting country when it has none, and in a field fixed to
+   * one country, moved to it. Like a value with no country, one naming another is corrected without an event, as any
+   * value set by code.
+   */
+  private normalized(value: Partial<AddressValue> | null | undefined): AddressValue {
+    const fixed = this.fixedCountry
+    const next = normalize(value, fixed || this.country)
+    return fixed && next.country !== fixed ? moveTo(next, next.country, fixed) : next
+  }
+
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') || changed.has('country') || changed.has('countries')) {
-      const fixed = this.fixedCountry
-      const next = normalize(this.value, fixed || this.country)
-      // Like a value with no country, one naming another country is corrected without an event, as any value set by code.
-      const moved = fixed && next.country !== fixed ? moveTo(next, next.country, fixed) : next
-      if (JSON.stringify(moved) !== JSON.stringify(this.value)) this.value = moved
+      const next = this.normalized(this.value)
+      if (JSON.stringify(next) !== JSON.stringify(this.value)) this.value = next
     }
   }
 
@@ -320,6 +322,8 @@ export class AddressField extends LitElement {
   private async pick(item: AddressSuggestion): Promise<void> {
     const provider = this.provider
     if (!provider || !item?.id) return
+    // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's key.
+    const typed = this.value.line1
     this.resolving?.abort()
     const controller = new AbortController()
     this.resolving = controller
@@ -330,10 +334,15 @@ export class AddressField extends LitElement {
       // A field fixed to one country takes no address from another: the typed text stays, and the user is told why.
       const fixed = this.fixedCountry
       if (fixed && country !== fixed) {
-        this.announcement = this.msg.t('otherCountry', this.countryName(fixed))
-        this.set('line1', this.query)
+        this.refused = this.msg.t('otherCountry', this.countryName(fixed))
+        this.set('line1', typed)
+        // A fresh announcement each time: the same text twice would not be read again.
+        this.announcement = ''
+        await this.updateComplete
+        this.announcement = this.refused
         return
       }
+      this.refused = ''
       const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
       next.region = regionCode(country, next.region)
       if (!next.line2) next.line2 = this.value.line2
@@ -376,7 +385,8 @@ export class AddressField extends LitElement {
     const label = required ? this.labelOf(part) : this.msg.t('optional', this.labelOf(part))
     const error = this.errors().find((entry) => entry.part === part)
     // Inside a c2-form-field that shows the message, the parts keep only the error look.
-    const message = this.field.managed ? '' : (error?.message ?? '')
+    const own = error?.message ?? (part === 'line1' ? this.refused : '')
+    const message = this.field.managed ? '' : own
     const invalid = !!error || this.field.invalid
     const disabled = this.disabled || this.formDisabled
     const value = this.value[part]
@@ -409,6 +419,7 @@ export class AddressField extends LitElement {
         .dataSource=${this.suggest}
         @input=${(event: Event) => {
           event.stopPropagation()
+          this.refused = ''
           this.set(part, (event.currentTarget as HTMLInputElement).value)
         }}
         @change=${stop}
