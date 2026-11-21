@@ -109,7 +109,7 @@ export class AddressField extends LitElement {
   /** The address. Set it as an object, or as JSON on the attribute. */
   @property({ converter: jsonPropertyConverter }) value: AddressValue = { ...EMPTY }
 
-  /** The country to start with, when `value` has none. */
+  /** The country to start with, when `value` has none. Ignored when `countries` holds a single code, which is then the country. */
   @property() country = 'US'
 
   /**
@@ -142,7 +142,10 @@ export class AddressField extends LitElement {
   private readonly msg = new LocalizeController(this, addressFieldMessages)
   /** In a `c2-form-field`, its label names the group and its hint and error describe it. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
-  private defaultValue: AddressValue | null = null
+  /** The value the element connected with, as given: a reset normalizes it again, for the `countries` in effect then. */
+  private defaultValue: Partial<AddressValue> | null = null
+  /** Set when a change to `countries` moved the address, so the app hears of it once the update is done. */
+  private movedByCountries = false
   /** One function for the autocomplete: a new one each render would cancel its request and reload it. */
   private readonly suggest = (query: string, signal: AbortSignal) =>
     this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
@@ -185,7 +188,7 @@ export class AddressField extends LitElement {
   }
 
   formResetCallback(): void {
-    this.value = { ...(this.defaultValue ?? this.normalized(null)) }
+    this.value = this.normalized(this.defaultValue)
     this.touched = new Set()
     this.showAll = false
   }
@@ -206,18 +209,26 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= this.normalized(this.value)
+    this.defaultValue ??= { ...this.value }
   }
 
-  /** The one country the field is fixed to, when `countries` lists exactly one; otherwise empty. */
+  /** The one country the field is fixed to, when `countries` lists exactly one two-letter code; otherwise empty. */
   private get fixedCountry(): string {
     const codes = this.countryList()
-    return codes.length === 1 ? codes[0] : ''
+    if (codes.length !== 1) return ''
+    if (/^[A-Z]{2}$/.test(codes[0])) return codes[0]
+    if (!this.warnedCode) {
+      this.warnedCode = true
+      console.warn(`c2-address-field: countries="${codes[0]}" is not a two-letter country code; separate codes with ";".`)
+    }
+    return ''
   }
+
+  private warnedCode = false
 
   /** `countries` as upper-case codes, without blanks or repeats. */
   private countryList(): string[] {
-    return [...new Set(this.countries.map((code) => code.trim().toUpperCase()).filter(Boolean))]
+    return [...new Set((this.countries ?? []).map((code) => String(code).trim().toUpperCase()).filter(Boolean))]
   }
 
   /**
@@ -234,12 +245,20 @@ export class AddressField extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') || changed.has('country') || changed.has('countries')) {
       const next = this.normalized(this.value)
-      if (JSON.stringify(next) !== JSON.stringify(this.value)) this.value = next
+      if (JSON.stringify(next) !== JSON.stringify(this.value)) {
+        // The app set neither this value nor a new one: the field's own country list moved it, so it reports the edit.
+        if (this.hasUpdated && changed.has('countries') && !changed.has('value') && next.country !== this.value.country) this.movedByCountries = true
+        this.value = next
+      }
     }
   }
 
   protected override updated(): void {
     this.syncForm()
+    if (this.movedByCountries) {
+      this.movedByCountries = false
+      this.emit(true)
+    }
   }
 
   // ----------------------------------------------------------------------------------------------------- validity
@@ -322,6 +341,10 @@ export class AddressField extends LitElement {
     if (!provider || !item?.id) return
     // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's id.
     const typed = this.value.line1
+    // The autocomplete wrote the suggestion's id on the line: put back what was typed, unless the user typed since.
+    const restore = () => {
+      if (this.value.line1 === item.id) this.set('line1', typed)
+    }
     this.resolving?.abort()
     const controller = new AbortController()
     this.resolving = controller
@@ -332,9 +355,11 @@ export class AddressField extends LitElement {
       // A field fixed to one country takes no address from another: the typed text stays, and the user is told why.
       const fixed = this.fixedCountry
       if (fixed && country !== fixed) {
-        // The autocomplete wrote the suggestion's id on the line: put back what was typed, unless the user typed since.
-        if (this.value.line1 === item.id) this.set('line1', typed)
-        this.announcement = this.msg.t('otherCountry', this.countryName(fixed))
+        restore()
+        // Cleared first, so the same text is read again for a second refusal; skipped if a newer pick took over.
+        this.announcement = ''
+        await this.updateComplete
+        if (this.resolving === controller) this.announcement = this.msg.t('otherCountry', this.countryName(fixed))
         return
       }
       const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
@@ -345,7 +370,8 @@ export class AddressField extends LitElement {
       this.announcement = this.msg.t('filled')
       this.emit(true)
     } catch {
-      // The typed text stays; the provider failed or the request was superseded.
+      // The provider failed or the request was superseded: the typed text stays.
+      if (!controller.signal.aborted) restore()
     }
   }
 
@@ -361,7 +387,14 @@ export class AddressField extends LitElement {
     } catch {
       names = null
     }
-    const name = (code: string) => names?.of(code) ?? code
+    const name = (code: string) => {
+      try {
+        return names?.of(code) ?? code
+      } catch {
+        // Not a region code (a typo in `countries`): show it as written.
+        return code
+      }
+    }
     return [...new Set(codes)].sort((a, b) => name(a).localeCompare(name(b), this.msg.locale))
   }
 

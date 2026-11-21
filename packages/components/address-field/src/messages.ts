@@ -4,7 +4,7 @@ const en = {
   /** The group's accessible name when it has no `label`. */
   addressGroup: 'Address',
   /** The group's accessible name when it has no `label` and is fixed to one country: `{0}` is that country. */
-  addressIn: (country: string) => `Address in ${country}`,
+  addressIn: (country: string) => `Address (${country})`,
   /** The country picker. */
   country: 'Country or region',
   /** A region picker's placeholder. */
@@ -18,7 +18,7 @@ const en = {
   /** Announced when a suggestion fills the address. */
   filled: 'Address filled in',
   /** Announced when a suggestion is from another country than the one the field is fixed to: `{0}` is that country. */
-  otherCountry: (country: string) => `Choose an address in ${country}`,
+  otherCountry: (country: string) => `That address is not in the country of this form: ${country}`,
   // Field labels.
   address: 'Address',
   addressLine1: 'Address line 1',

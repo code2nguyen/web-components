@@ -118,7 +118,7 @@ test('one country in countries fixes the field to it: no picker, and another cou
   expect(await labels(field(page))).toEqual(['Address', 'Apartment, suite, etc. (optional)', 'Postal code', 'City'])
   await expect(field(page).locator('[data-part="country"]')).toHaveCount(0)
   // The group says which country, since there is no picker to show it.
-  await expect(field(page).locator('[role="group"]')).toHaveAttribute('aria-label', 'Address in France')
+  await expect(field(page).locator('[role="group"]')).toHaveAttribute('aria-label', 'Address (France)')
   expect(await value(field(page))).toMatchObject({ country: 'FR' })
   await input(field(page), 'line1').fill('8 rue de Rivoli')
   const data = await page.locator('form').evaluate((form) => Object.fromEntries(new FormData(form as HTMLFormElement)))
@@ -132,12 +132,22 @@ test('one country in countries fixes the field to it: no picker, and another cou
   )
   await input(field(page), 'line1').fill('1 Fer')
   await field(page).locator('c2-list-item', { hasText: '1 Ferry Building' }).click()
-  await expect(field(page).locator('.announcement')).toHaveText('Choose an address in France')
+  await expect(field(page).locator('.announcement')).toHaveText('That address is not in the country of this form: France')
   expect(await value(field(page))).toMatchObject({ line1: '1 Fer', city: 'Paris', country: 'FR' })
   expect(await page.evaluate(() => (window as unknown as { fakeProvider: { queries: string[][] } }).fakeProvider.queries.at(-1))).toEqual(['1 Fer', 'FR'])
   // A form reset goes back to the first value, still in France.
   await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
   expect(await value(field(page))).toMatchObject({ country: 'FR', line1: '' })
+  // Changing the list to one country moves the address the user entered, and reports it.
+  await props(field(page), { countries: ['FR', 'BE'] })
+  await choose(field(page), 'country', 'BE')
+  await watch(field(page), 'address-change')
+  await props(field(page), { countries: ['FR'] })
+  expect(await value(field(page))).toMatchObject({ country: 'FR' })
+  expect((await events(field(page))).length).toBe(1)
+  // A list that is not one code (a comma instead of ";") does not fix the field.
+  await props(field(page), { countries: ['FR,BE'] })
+  await expect(field(page).locator('[data-part="country"]')).toHaveCount(1)
   // More than one country brings the picker back; a trailing separator is not a second country.
   await props(field(page), { countries: ['FR', ''] })
   await expect(field(page).locator('[data-part="country"]')).toHaveCount(0)
