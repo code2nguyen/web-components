@@ -89,7 +89,8 @@ for (const guide of nestedGuides) {
 }
 for (const doc of agentDocs) if (!rootGuide.includes(`\`${doc}\``)) problems.push(`CLAUDE.md: the "Where the rest lives" table does not list \`${doc}\``)
 const rootAgents = join(root, 'AGENTS.md')
-if (!lstatSync(rootAgents).isSymbolicLink() || readlinkSync(rootAgents) !== 'CLAUDE.md') problems.push('AGENTS.md: not a symlink to CLAUDE.md')
+if (!existsSync(rootAgents) || !lstatSync(rootAgents).isSymbolicLink() || readlinkSync(rootAgents) !== 'CLAUDE.md')
+  problems.push('AGENTS.md: not a symlink to CLAUDE.md')
 
 // --- One copy of every skill ---------------------------------------------------------------------------------------
 
