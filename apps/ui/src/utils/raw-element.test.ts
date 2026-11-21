@@ -12,8 +12,8 @@ test('stripServerRendering removes declarative shadow roots, Lit markers and def
 
 test('rawElement builds the tag and cleans the slotted HTML', () => {
   assert.equal(
-    rawElement('c2-details', { label: 'More', open: true, hidden: false }, serverRendered),
-    '<c2-details label="More" open><c2-badge tone="primary">Latest</c2-badge></c2-details>',
+    rawElement('c2-details', { label: 'More', expanded: true, hidden: false }, serverRendered),
+    '<c2-details label="More" expanded><c2-badge tone="primary">Latest</c2-badge></c2-details>',
   )
 })
 

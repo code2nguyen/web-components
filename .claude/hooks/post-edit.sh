@@ -4,11 +4,11 @@
 # 1. Formats the written file with the repo's prettier, so formatting is right as the agent goes instead of at
 #    commit time (lint-staged still runs). Same extensions as `format:check`, plus .astro/.scss, which CLAUDE.md asks
 #    to format by hand; .prettierignore applies.
-# 2. For application code (apps/examples, lab/apps) checks the c2 markup with `c2n-mcp validate --hook`: an unknown
-#    tag, attribute, slot or CSS variable, or a native control where a c2 element exists. Exit code 2 hands the
-#    findings back to the agent. apps/ui is left out until its existing findings are fixed
-#    (`node packages/tools/mcp/src/cli.ts validate apps/ui/src`): the validator reports a whole file, so every edit to
-#    one of those pages would surface problems unrelated to the edit.
+# 2. For application code checks the c2 markup with `c2n-mcp validate --hook`: an unknown tag, attribute, slot or CSS
+#    variable, or a native control where a c2 element exists. Exit code 2 hands the findings back to the agent.
+#    apps/examples and lab/apps get every finding. apps/ui gets errors only: its chrome and guides carry accepted
+#    warnings (native controls the `check:dogfood` ratchet governs, prose about them), and the validator reports a whole
+#    file, so warnings would surface problems unrelated to the edit. Keep `validate apps/ui/src` at 0 errors.
 #
 # Never fails the edit for its own reasons: a missing prettier, registry or file exits 0.
 set -u
@@ -31,9 +31,10 @@ case "$rel" in
 esac
 
 case "$rel" in
-  apps/examples/* | lab/apps/*)
+  apps/examples/* | lab/apps/* | apps/ui/src/*)
     [ -f packages/tools/mcp/data/registry.json ] || exit 0
-    printf '%s' "$payload" | node packages/tools/mcp/src/cli.ts validate --hook
+    case "$rel" in apps/ui/*) only=--errors-only ;; *) only= ;; esac
+    printf '%s' "$payload" | node packages/tools/mcp/src/cli.ts validate --hook $only
     exit $?
     ;;
 esac

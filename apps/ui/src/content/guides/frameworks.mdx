@@ -107,7 +107,7 @@ React 19 assigns a prop as a property when the element has one, so `rows={rows}`
 
 ```tsx tag=CodeBlock
 // Server-rendered: attributes by their markup name, structured values as JSON
-<c2-dash-card col="1" row="1" min-width="240" expand-full>
+<c2-dash-card col="1" row="1" min-width="240" expand-full />
 <c2-table rows={JSON.stringify(rows)} columns={JSON.stringify(columns)} row-key="id" />
 ```
 

@@ -57,7 +57,7 @@ const components = [
     element('c2-table', 'table', {
       attributes: ['row-key', 'rows', 'selection'],
       properties: ['rows', 'rowKey', 'selection'],
-      slots: ['toolbar', 'cell:{line}:{field}'],
+      slots: ['toolbar', 'cell:{line}:{field}', 'detail-<row>'],
       events: ['selection-change'],
     }),
     element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
@@ -135,8 +135,14 @@ test('reads Lit expressions with quotes and nested templates as one value', () =
   )
 })
 
+test('accepts the attributes a container reads off its descendants, by their attribute name', () => {
+  assert.deepEqual(rules('<c2-button app-shell-toggle="aside" side-nav-toggle overflow-priority="2" menu-label="Export" primary>Go</c2-button>'), [])
+  assert.deepEqual(rules('<c2-button .overflowPriority=${2}>Go</c2-button>'), ['1:unknown-attribute'])
+})
+
 test('accepts templated slot names and framework directives', () => {
-  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span><span slot="detail-docs"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="detail"></span></c2-table>'), ['1:unknown-slot'])
   assert.deepEqual(rules('<c2-text-field v-model="q" :value.prop="v" @input="f" client:load *ngIf="x" [(ngModel)]="m" ngModel></c2-text-field>'), [])
 })
 

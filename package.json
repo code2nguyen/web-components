@@ -44,6 +44,7 @@
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:agent-docs": "node scripts/check-agent-docs.mjs",
     "check:reachability": "npm run check:reachability -w packages/tools/mcp",
+    "check:app-markup": "node packages/tools/mcp/src/cli.ts validate apps/ui/src apps/examples lab/apps",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",

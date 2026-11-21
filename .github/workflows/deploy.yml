@@ -96,6 +96,9 @@ jobs:
       - name: Every component is reachable through MCP and llms.txt
         run: npm run check:reachability
 
+      - name: c2 markup in the docs site, example apps and lab builds has no errors
+        run: npm run check:app-markup
+
       - name: Test the cross-agent installer
         run: npm test -w packages/tools/skill
 

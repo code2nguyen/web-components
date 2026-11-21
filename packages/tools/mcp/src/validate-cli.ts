@@ -32,10 +32,12 @@ const EXTENSIONS = new Set([
 const SKIPPED_DIRECTORIES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', '.git', '.next', '.nuxt', '.svelte-kit', '.astro', '.angular'])
 
 export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--format json|text]
-       c2n-mcp validate --hook
+       c2n-mcp validate --hook [--errors-only]
 
 Checks markup and CSS against the c2n component API (default path: src). Exits 1 on errors, or on warnings too with
---strict. --hook reads a Claude Code PostToolUse payload from stdin and reports the written file's findings to the agent.`
+--strict. --hook reads a Claude Code PostToolUse payload from stdin and reports the written file's findings to the agent;
+with --errors-only it reports errors and stays quiet about warnings (for code with accepted warnings, such as a site's
+own chrome).`
 
 /** Files under `path`, each once. Links inside the tree are not followed: one pointing back up would never end. */
 function collect(path: string, files: Set<string>, top = true) {
@@ -76,7 +78,7 @@ export async function runValidate(args: string[]): Promise<number> {
       return 0
     }
     if (!file || !existsSync(file) || !EXTENSIONS.has(extname(file).toLowerCase())) return 0
-    const findings = check(file)
+    const findings = check(file).filter((finding) => !args.includes('--errors-only') || finding.severity === 'error')
     if (findings.length === 0) return 0
     process.stderr.write(
       `c2n validate: ${relative(process.cwd(), file)} has ${findings.length} problem(s) with the c2n components. Fix them (get_component has the API; a deliberate native element gets a c2n-ignore comment):\n${formatFindings(relative(process.cwd(), file), findings)}\n`,

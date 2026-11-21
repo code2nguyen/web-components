@@ -63,6 +63,13 @@ const GLOBAL_ATTRIBUTES = new Set(
     ' ',
   ),
 )
+/**
+ * Attributes a container reads off its descendants, valid on any element inside it: `c2-app-shell` and `c2-side-nav`
+ * toggle from a click on an element carrying theirs, `c2-page-header` folds and labels its actions by theirs. They are
+ * not attributes of the element that carries them, so its manifest does not list them. Keep in step with the sources
+ * (`getAttribute`/`hasAttribute` on another element in `packages/components/*\/src`).
+ */
+const CONTAINER_ATTRIBUTES = new Set(['app-shell-toggle', 'side-nav-toggle', 'overflow-priority', 'menu-label', 'primary'])
 const DOM_EVENTS = new Set(
   'click dblclick auxclick contextmenu input change submit reset invalid focus blur focusin focusout keydown keyup keypress pointerdown pointerup pointermove pointerenter pointerleave pointerover pointerout pointercancel mousedown mouseup mousemove mouseenter mouseleave mouseover mouseout wheel touchstart touchend touchmove touchcancel dragstart drag dragend dragenter dragleave dragover drop scroll scrollend copy cut paste select toggle beforetoggle load error animationstart animationend animationiteration transitionstart transitionend transitionrun transitioncancel beforeinput compositionstart compositionupdate compositionend gotpointercapture lostpointercapture selectstart selectionchange cancel close resize slotchange formdata animationcancel'.split(
     ' ',
@@ -217,7 +224,7 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
   if (binding.kind === 'attribute' && attributes.includes(lower)) return
   if (binding.kind === 'property' && element.properties?.includes(name)) return
   // ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
-  if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
+  if (GLOBAL_ATTRIBUTES.has(lower) || CONTAINER_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
   const flat = (value: string) => value.toLowerCase().replaceAll('-', '')
   const loose = attributes.find((a) => flat(a) === flat(name))
   // A property binding (and a JSX prop, which React 19 assigns as a property) may use the camelCase spelling.
@@ -273,8 +280,8 @@ function checkSlot(registry: Registry, parent: string, slot: Tag['attributes'][n
   const resolved = resolveElement(registry, parent)
   if (!resolved || !slot.value || /[{}$]/.test(slot.value)) return
   const slots = resolved.element.slots.map((s) => s.name).filter((s) => s && s !== 'default')
-  // Templated slot names (`cell:{line}:{field}`) match any value in their placeholders.
-  const pattern = (name: string) => new RegExp(`^${name.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{[^}]+\}/g, '[^:]+')}$`)
+  // Templated slot names (`cell:{line}:{field}`, `detail-<row>`) match any value in their placeholders.
+  const pattern = (name: string) => new RegExp(`^${name.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{[^}]+\}|<[^>]+>/g, '[^:]+')}$`)
   if (slots.some((name) => pattern(name).test(slot.value ?? ''))) return
   const hint = suggest(slots, slot.value, 2)
   const list = slots.length ? ` Named slots: ${slots.map((s) => `\`${s}\``).join(', ')}.` : ' It has no named slots.'

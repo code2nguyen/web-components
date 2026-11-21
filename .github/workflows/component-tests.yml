@@ -64,6 +64,8 @@ jobs:
         run: npm run build:registry -w packages/tools/mcp && node lab/scripts/readiness.mjs --check
       - name: Every component is reachable through MCP and llms.txt
         run: npm run check:reachability
+      - name: c2 markup in the docs site, example apps and lab builds has no errors
+        run: npm run check:app-markup
       - name: Guidance for coding agents (CLAUDE.md, AGENTS.md, skills) is consistent
         run: npm run check:agent-docs
       - name: Verify generated component manifests are committed
