@@ -70,7 +70,7 @@ more detail, do this, in order, and stop when the session's budget is spent; wha
    section later (after editing the report), run the script without `--log`: it reads the committed log.
 6. File what the report found (step 3 below): `workaround`, `hand-rolled` and `failed` rows on an existing component
    go to `COMPONENT-FEEDBACK.md`; a missing component goes in the report's "Missing components" for review against
-   `COMPONENT-ROADMAP.md`.
+   `docs/planning/COMPONENT-ROADMAP.md`.
 
 ## 1. Run the scripted journeys
 

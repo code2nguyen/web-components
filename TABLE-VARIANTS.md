@@ -2,7 +2,7 @@
 
 `@c2n/table` holds one data grid and the variants built on it. This file says which features belong to the grid and
 which make a variant, audits the features shipped so far against that rule, and classifies the table rows still waiting
-in `COMPONENT-ACTION-PLAN.md`.
+in `docs/planning/COMPONENT-ACTION-PLAN.md`.
 
 ## The rule
 

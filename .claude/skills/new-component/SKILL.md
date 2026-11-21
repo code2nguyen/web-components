@@ -223,7 +223,7 @@ that the review was done and what it caught.
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
 - `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
 - `npm run build:tools` run (then `npm install` again if it changed `packages/umbrella/package.json`, with `package-lock.json` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
-- the component's row deleted from `COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
+- the component's row deleted from `docs/planning/COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - AI readiness: `npm run mcp:readiness` scores the component A (≥ 90) with no honestly fixable check left, its discovery requirements in `tasks.json` rank it in the top 3, nothing else regressed, and `packages/tools/mcp/readiness/` is committed
 - `apps/ui/src/store/component-manifests.ts` import + entry
