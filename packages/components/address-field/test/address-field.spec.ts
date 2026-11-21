@@ -152,6 +152,9 @@ test('one country in countries fixes the field to it: no picker, and another cou
   await props(field(page), { countries: ['FR'] })
   expect(await value(field(page))).toMatchObject({ country: 'FR', line1: 'Rue de la Loi 16' })
   expect(await events(field(page))).toHaveLength(1)
+  // Within the fixed country, a region given by name stays, as in a field that is not fixed.
+  await props(field(page), { countries: ['US'], value: { country: 'US', line1: '1 Main St', city: 'SF', region: 'California' } })
+  expect(await value(field(page))).toMatchObject({ country: 'US', region: 'California' })
   // A list that is not one code (a comma instead of ";") does not fix the field.
   await props(field(page), { countries: ['FR,BE'] })
   await expect(field(page).locator('[data-part="country"]')).toHaveCount(1)

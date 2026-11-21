@@ -52,6 +52,8 @@ function moveTo(value: AddressValue, from: string, to: string): AddressValue {
   const next: AddressValue = { ...value, country: to }
   const format = addressFormat(to)
   for (const key of PARTS) if (!format.rows.flat().includes(key)) next[key] = ''
+  // Within one country, a region stays as given (a name the region list reads, as in a field that is not fixed).
+  if (from === to) return next
   if (format.regions && !format.regions.some(([code]) => code === next.region)) next.region = ''
   if (!format.regions && addressFormat(from).regions) next.region = ''
   return next
@@ -221,7 +223,9 @@ export class AddressField extends LitElement {
     if (/^[A-Z]{2}$/.test(codes[0])) return codes[0]
     if (!this.warnedCode) {
       this.warnedCode = true
-      console.warn(`c2-address-field: countries="${codes[0]}" is not a two-letter country code; separate codes with ";".`)
+      console.warn(
+        `c2-address-field: countries="${codes[0]}" is not a country code: \`countries\` takes ISO 3166 two-letter codes (FR, not FRA), separated by ";".`,
+      )
     }
     return ''
   }
