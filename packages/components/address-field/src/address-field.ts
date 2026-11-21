@@ -91,7 +91,7 @@ function normalize(value: Partial<AddressValue> | null | undefined, country = ''
  *
  * @event {CustomEvent<AddressChangeEventDetail>} address-change - The address changed: `detail.value` and whether it is complete.
  * @event {Event} input - A part changed.
- * @event {Event} change - A part was committed, or a suggestion filled the address.
+ * @event {Event} change - A part was committed, a suggestion filled the address, or a change to `countries` moved a filled address to its one country.
  *
  * @csspart address - The grid of parts.
  * @csspart row - A row of parts.
@@ -121,7 +121,7 @@ export class AddressField extends LitElement {
   /** The form field name: the form receives `name[part]` for each part. */
   @property({ reflect: true }) name = ''
 
-  /** The group's accessible name; "Address" by default. */
+  /** The group's accessible name; "Address" by default, or "Address (France)" in a field fixed to one country. */
   @property() label = ''
 
   /** The address must be given; otherwise it may be left empty, but once started, the country's required parts are. */
@@ -142,8 +142,8 @@ export class AddressField extends LitElement {
   private readonly msg = new LocalizeController(this, addressFieldMessages)
   /** In a `c2-form-field`, its label names the group and its hint and error describe it. */
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
-  /** The value the element connected with, as given: a reset normalizes it again, for the `countries` in effect then. */
-  private defaultValue: Partial<AddressValue> | null = null
+  /** The value the element connected with: a reset moves it again to the country `countries` fixes then, if any. */
+  private defaultValue: AddressValue | null = null
   /** Set when a change to `countries` moved the address, so the app hears of it once the update is done. */
   private movedByCountries = false
   /** One function for the autocomplete: a new one each render would cancel its request and reload it. */
@@ -209,7 +209,7 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= { ...this.value }
+    this.defaultValue ??= normalize(this.value, this.country)
   }
 
   /** The one country the field is fixed to, when `countries` lists exactly one two-letter code; otherwise empty. */
@@ -247,7 +247,13 @@ export class AddressField extends LitElement {
       const next = this.normalized(this.value)
       if (JSON.stringify(next) !== JSON.stringify(this.value)) {
         // The app set neither this value nor a new one: the field's own country list moved it, so it reports the edit.
-        if (this.hasUpdated && changed.has('countries') && !changed.has('value') && next.country !== this.value.country) this.movedByCountries = true
+        if (this.hasUpdated && changed.has('countries') && !changed.has('value') && next.country !== this.value.country) {
+          // Checked against the new format, as when the user picks a country.
+          this.touched = new Set()
+          this.showAll = false
+          // An empty field has nothing to report.
+          this.movedByCountries = this.filled()
+        }
         this.value = next
       }
     }
@@ -343,7 +349,7 @@ export class AddressField extends LitElement {
     const typed = this.value.line1
     // The autocomplete wrote the suggestion's id on the line: put back what was typed, unless the user typed since.
     const restore = () => {
-      if (this.value.line1 === item.id) this.set('line1', typed)
+      if (this.value.line1 === item.id) this.set('line1', typed, true)
     }
     this.resolving?.abort()
     const controller = new AbortController()

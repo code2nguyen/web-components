@@ -138,13 +138,20 @@ test('one country in countries fixes the field to it: no picker, and another cou
   // A form reset goes back to the first value, still in France.
   await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
   expect(await value(field(page))).toMatchObject({ country: 'FR', line1: '' })
-  // Changing the list to one country moves the address the user entered, and reports it.
+  // Changing the list to one country moves an empty field silently, and a filled one with an event.
   await props(field(page), { countries: ['FR', 'BE'] })
   await choose(field(page), 'country', 'BE')
   await watch(field(page), 'address-change')
   await props(field(page), { countries: ['FR'] })
   expect(await value(field(page))).toMatchObject({ country: 'FR' })
-  expect((await events(field(page))).length).toBe(1)
+  expect(await events(field(page))).toHaveLength(0)
+  await props(field(page), { countries: ['FR', 'BE'] })
+  await choose(field(page), 'country', 'BE')
+  await input(field(page), 'line1').fill('Rue de la Loi 16')
+  await watch(field(page), 'address-change')
+  await props(field(page), { countries: ['FR'] })
+  expect(await value(field(page))).toMatchObject({ country: 'FR', line1: 'Rue de la Loi 16' })
+  expect(await events(field(page))).toHaveLength(1)
   // A list that is not one code (a comma instead of ";") does not fix the field.
   await props(field(page), { countries: ['FR,BE'] })
   await expect(field(page).locator('[data-part="country"]')).toHaveCount(1)
