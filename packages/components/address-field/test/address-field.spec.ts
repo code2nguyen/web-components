@@ -113,6 +113,22 @@ test('another country changes the parts, their order and labels, and keeps what 
   ])
 })
 
+test('one country in countries fixes the field to it: no picker, and another country in the value is replaced', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-address-field name="ship" countries="fr"></c2-address-field></form>`)
+  expect(await labels(field(page))).toEqual(['Address', 'Apartment, suite, etc. (optional)', 'Postal code', 'City'])
+  await expect(field(page).locator('[data-part="country"]')).toHaveCount(0)
+  expect(await value(field(page))).toMatchObject({ country: 'FR' })
+  await input(field(page), 'line1').fill('8 rue de Rivoli')
+  const data = await page.locator('form').evaluate((form) => Object.fromEntries(new FormData(form as HTMLFormElement)))
+  expect(data).toMatchObject({ 'ship[line1]': '8 rue de Rivoli', 'ship[country]': 'FR' })
+  await props(field(page), { value: { country: 'US', line1: '1 Main St', city: 'Paris' } })
+  expect(await value(field(page))).toMatchObject({ country: 'FR', line1: '1 Main St', city: 'Paris' })
+  // More than one country brings the picker back.
+  await props(field(page), { countries: ['FR', 'BE'] })
+  await expect(field(page).locator('[data-part="country"]')).toHaveCount(1)
+  await accessible(page)
+})
+
 test('with a provider, the first line suggests addresses and picking one fills every part, switching country', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-address-field></c2-address-field>`)
   await field(page).evaluate(

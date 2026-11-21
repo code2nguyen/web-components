@@ -43,7 +43,7 @@ import '@c2n/components/address-field'
 
 ### Countries
 
-About 40 countries have a format of their own: the parts they need, in their order, with their labels (State, Province, Prefecture, County, Emirate; ZIP code, Postcode, PIN code, CEP, Eircode), which are required, the postal-code pattern, and a list of regions where one is usual (the US, Canada, Australia, Brazil, Mexico, India, Japan and the United Arab Emirates). Any other country gets a general format. The picker lists the countries with a format, named in the page's language; `countries` limits or extends it, and `country` sets the starting one. Changing country keeps the parts both formats share.
+About 40 countries have a format of their own: the parts they need, in their order, with their labels (State, Province, Prefecture, County, Emirate; ZIP code, Postcode, PIN code, CEP, Eircode), which are required, the postal-code pattern, and a list of regions where one is usual (the US, Canada, Australia, Brazil, Mexico, India, Japan and the United Arab Emirates). Any other country gets a general format. The picker lists the countries with a format, named in the page's language; `countries` limits or extends it, and `country` sets the starting one. With a single code (`countries="FR"`) the field is fixed to that country: the picker is not shown, a value or a suggestion naming another country is set to it, and the form still receives `name[country]`. Changing country keeps the parts both formats share.
 
 ### Value and form
 

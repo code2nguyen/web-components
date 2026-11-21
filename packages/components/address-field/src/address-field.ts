@@ -61,6 +61,8 @@ function normalize(value: Partial<AddressValue> | null | undefined, country = ''
  * prefecture first for Japan. About 40 countries have a format of their own; any other gets a general one.
  *
  * The country picker lists the countries with a format (`countries` changes the list), named in the page's language.
+ * With a single entry in `countries` (`countries="FR"`), the address is for that country only: there is no picker, and
+ * a value or a suggestion naming another country is set to it.
  * Changing country keeps the parts both formats share. Required parts and the postal-code pattern are checked when a
  * part is left and when the form is submitted; each part shows its own message, and the form does not submit while
  * one is wrong. With a `name`, the form receives `name[line1]`, `name[city]`, `name[postalCode]`… and `name[country]`.
@@ -99,7 +101,10 @@ export class AddressField extends LitElement {
   /** The country to start with, when `value` has none. */
   @property() country = 'US'
 
-  /** The countries offered, as ISO codes; every country with a format when empty. */
+  /**
+   * The countries offered, as ISO codes; every country with a format when empty. With one code, the field is fixed to
+   * that country and shows no country picker.
+   */
   @property({ converter: arrayPropertyConverter }) countries: string[] = []
 
   /** The form field name: the form receives `name[part]` for each part. */
@@ -169,7 +174,7 @@ export class AddressField extends LitElement {
   }
 
   formResetCallback(): void {
-    this.value = { ...(this.defaultValue ?? normalize(null, this.country)) }
+    this.value = { ...(this.defaultValue ?? normalize(null, this.fixedCountry || this.country)) }
     this.touched = new Set()
     this.showAll = false
   }
@@ -190,12 +195,19 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= normalize(this.value, this.country)
+    this.defaultValue ??= normalize(this.value, this.fixedCountry || this.country)
+  }
+
+  /** The one country the field is fixed to, when `countries` lists exactly one; otherwise empty. */
+  private get fixedCountry(): string {
+    return this.countries.length === 1 ? this.countries[0].trim().toUpperCase() : ''
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('value') || changed.has('country')) {
-      const next = normalize(this.value, this.country)
+    if (changed.has('value') || changed.has('country') || changed.has('countries')) {
+      const fixed = this.fixedCountry
+      const next = normalize(this.value, fixed || this.country)
+      if (fixed && next.country !== fixed) next.country = fixed
       if (JSON.stringify(next) !== JSON.stringify(this.value)) this.value = next
     }
   }
@@ -292,7 +304,7 @@ export class AddressField extends LitElement {
     try {
       const found = await provider.resolve(item.id, { locale: this.msg.locale, signal: controller.signal })
       if (controller.signal.aborted) return
-      const country = (found.country || this.value.country).toUpperCase()
+      const country = this.fixedCountry || (found.country || this.value.country).toUpperCase()
       const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
       next.region = regionCode(country, next.region)
       if (!next.line2) next.line2 = this.value.line2
@@ -396,6 +408,24 @@ export class AddressField extends LitElement {
     ></c2-form-field>`
   }
 
+  private renderCountry(disabled: boolean) {
+    return html`<c2-form-field class="part" label=${this.msg.t('country')} necessity="none">
+      <c2-select
+        data-part="country"
+        .value=${[this.value.country]}
+        ?disabled=${disabled}
+        @input=${(event: Event) => event.stopPropagation()}
+        @change=${(event: Event) => event.stopPropagation()}
+        @selection-change=${(event: CustomEvent<{ value: string[] }>) => {
+          const code = event.detail.value[0]
+          if (code && code !== this.value.country) this.set('country', code, true)
+        }}
+      >
+        ${this.countryCodes().map((code) => html`<c2-list-item value=${code}>${this.countryName(code)}</c2-list-item>`)}
+      </c2-select>
+    </c2-form-field>`
+  }
+
   override render() {
     const format = addressFormat(this.value.country)
     const disabled = this.disabled || this.formDisabled
@@ -406,21 +436,7 @@ export class AddressField extends LitElement {
         aria-label=${this.label || this.field.label || this.msg.t('addressGroup')}
         aria-describedby=${this.field.describedBy()}
       >
-        <c2-form-field class="part" label=${this.msg.t('country')} necessity="none">
-          <c2-select
-            data-part="country"
-            .value=${[this.value.country]}
-            ?disabled=${disabled}
-            @input=${(event: Event) => event.stopPropagation()}
-            @change=${(event: Event) => event.stopPropagation()}
-            @selection-change=${(event: CustomEvent<{ value: string[] }>) => {
-              const code = event.detail.value[0]
-              if (code && code !== this.value.country) this.set('country', code, true)
-            }}
-          >
-            ${this.countryCodes().map((code) => html`<c2-list-item value=${code}>${this.countryName(code)}</c2-list-item>`)}
-          </c2-select>
-        </c2-form-field>
+        ${this.fixedCountry ? nothing : this.renderCountry(disabled)}
         ${format.rows.map((row) => html`<div class="row" part="row" style="--_parts: ${row.length}">${row.map((part) => this.renderPart(part))}</div>`)}
       </div>
       ${this.field.renderDescription()}
