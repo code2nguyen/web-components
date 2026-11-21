@@ -2,7 +2,7 @@
 
 A running log of friction hit while **consuming** `c2-*` components from an application — `apps/ui`,
 `apps/examples/*`, or any project using the published packages. It is the feedback loop the dogfooding rule
-(see `CLAUDE.md` / `AGENTS.md`) exists to produce: every hand-rolled workaround in an app is a component that
+(see `apps/ui/CLAUDE.md`) exists to produce: every hand-rolled workaround in an app is a component that
 is missing something, and this is where that gets recorded instead of quietly worked around.
 
 **Who writes here:** anyone — human or agent — who uses a c2n component and has to fight it. Append an entry

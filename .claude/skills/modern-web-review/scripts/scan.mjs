@@ -105,7 +105,7 @@ const rules = [
     ext: 'ts',
     line: /\bthis\.style\.(setProperty\s*\(|removeProperty\s*\(|[a-zA-Z]+\s*=(?!=))/,
     message: 'Writes inline style on the host (SSR hydration mismatch, overrides author styles). Style an element inside the shadow root.',
-    guide: 'prerendering-custom-elements, CLAUDE.md "Never write an attribute on the host"',
+    guide: 'prerendering-custom-elements, packages/components/CLAUDE.md "Never write an attribute on the host"',
   },
   {
     id: 'host-attribute-write',
@@ -152,7 +152,7 @@ const rules = [
     ext: 'ts',
     line: /import\s*\{[^}]*\b(customElement|property)\b[^}]*\}\s*from\s*['"]lit\/decorators\.js['"]/,
     message: "Import customElement from '@c2n/core/element-helper.js' and property from '@c2n/core/lit-helper.js' (repo convention).",
-    guide: 'CLAUDE.md "Component conventions"',
+    guide: 'packages/components/CLAUDE.md "Component conventions"',
   },
   {
     id: 'document-pointer-drag',
@@ -348,7 +348,7 @@ const rules = [
     },
     message:
       "English interface text in the template or as a default: a page in another language cannot translate it. Put it in src/messages.ts (`defineMessages('<package>', en)`) and render `this.msg.t('<key>')` through a LocalizeController (CLAUDE.md rule 6). Text that is not interface text (a unit symbol, a sample value) takes a modern-web-ignore comment with the reason.",
-    guide: 'CLAUDE.md "Built-in text is in English, and translatable"',
+    guide: 'packages/components/CLAUDE.md "Built-in text is in English, and translatable"',
   },
 ]
 

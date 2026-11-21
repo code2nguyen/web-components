@@ -6,7 +6,7 @@ argument-hint: <Component Name> [npm|open] [category] [one-line description]
 
 # New component
 
-Create a new `@c2n/<name>` package with the repo's plop generator, implement the element, and wire everything the generator does not touch. Follow CLAUDE.md conventions throughout (theming, JSDoc manifest tags, `override`, `redispatchEvent`, code style).
+Create a new `@c2n/<name>` package with the repo's plop generator, implement the element, and wire everything the generator does not touch. Follow the conventions in `packages/components/CLAUDE.md` throughout (theming, JSDoc manifest tags, `override`, `redispatchEvent`, code style).
 
 ## 1. Collect inputs
 
@@ -21,7 +21,7 @@ From `$ARGUMENTS` and the conversation, determine:
 
 If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
 
-Then settle the six foundation decisions (CLAUDE.md, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
+Then settle the six foundation decisions (`packages/components/CLAUDE.md`, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
 
 | Decision         | Write down                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -32,7 +32,7 @@ Then settle the six foundation decisions (CLAUDE.md, "Component foundation") bef
 | **Text**         | Every string the component draws or announces, as a key in `src/messages.ts`.                                                                                                              |
 | **Gallery**      | The list of cards: one per feature above, and which of them need an `<Name>ExamplesRuntime.astro` because the feature is property-only.                                                    |
 
-Then settle the **platform decisions** the same way (CLAUDE.md, "Modern web platform"; step 1 of the `modern-web-review` skill): for each behaviour the component needs (a popup, a dialog, a collapsible region, a growing field, Enter to submit, a long list, drag, a canvas, motion), search the modern-web-guidance guides, read the matching one, and write down the feature you will use, its Baseline status and its fallback. Prefer the platform feature over hand-written JavaScript, and an existing `@c2n/core` helper (`isComposingKey`, `lockPageScroll`, the overlay) over a new copy.
+Then settle the **platform decisions** the same way (`packages/components/CLAUDE.md`, "Modern web platform"; step 1 of the `modern-web-review` skill): for each behaviour the component needs (a popup, a dialog, a collapsible region, a growing field, Enter to submit, a long list, drag, a canvas, motion), search the modern-web-guidance guides, read the matching one, and write down the feature you will use, its Baseline status and its fallback. Prefer the platform feature over hand-written JavaScript, and an existing `@c2n/core` helper (`isComposingKey`, `lockPageScroll`, the overlay) over a new copy.
 
 ## 2. Design mock screen (complex components)
 
@@ -108,7 +108,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
 - **An API an agent can read** (AI readiness, below): the class JSDoc says what the element is and when to use it; every public member a consumer may set from script (`render<Part>`, `dataSource`, methods, public getters) has a JSDoc description and a type, and an internal that is public only for TypeScript's sake (a `@query` handle, a handler, internal state) gets `/** @internal */` so the manifest and `get_component` leave it out. A `@cssproperty` whose last segment is not a CSS property (`--size`, `--icon-size`, `--visible-rows`) gets a `- description` saying what it sets (`Width and height of the thumb`). A `@slot` description names the components it typically holds (`a c2-list of c2-list-item links`); a child element's JSDoc names its parent.
-- **Modern platform** (CLAUDE.md, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
+- **Modern platform** (`packages/components/CLAUDE.md`, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
 - Replace the scaffold's `<c2-<name>>` in `index.html` with a few hand-written usage examples (states, slots, themed variant).
 
 ## 5. Write the test suite

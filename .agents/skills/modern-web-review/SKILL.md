@@ -12,7 +12,7 @@ the rules below come from; its report is the artifact "c2n Platform Audit".
 
 ## Browser support policy
 
-This is the policy in AGENTS.md, "Modern web platform". Every recommendation states the Baseline status the guide
+This is the policy in `packages/components/CLAUDE.md`, "Modern web platform". Every recommendation states the Baseline status the guide
 gives:
 
 | Status                   | Use it                                                                                                                                                                                     |
@@ -110,7 +110,7 @@ where `part="match"` is public API.
 
 ## 4. Report
 
-In the pull request description (AGENTS.md, "Before opening a pull request"), list what the modern web review found
+In the pull request description (CLAUDE.md, "Before opening a pull request"), list what the modern web review found
 and what was done: each scanner `error` fixed or justified with a `modern-web-ignore` comment, each `warn` decided, and
 each review finding with its guide id. A finding that needs a larger change or a public API change is left for a
 follow-up and said so.

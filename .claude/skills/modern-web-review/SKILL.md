@@ -12,7 +12,7 @@ the rules below come from; its report is the artifact "c2n Platform Audit".
 
 ## Browser support policy
 
-This is the policy in CLAUDE.md, "Modern web platform". Every recommendation states the Baseline status the guide
+This is the policy in `packages/components/CLAUDE.md`, "Modern web platform". Every recommendation states the Baseline status the guide
 gives:
 
 | Status                   | Use it                                                                                                                                                                                     |
