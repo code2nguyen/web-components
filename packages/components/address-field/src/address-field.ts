@@ -47,6 +47,16 @@ const AUTOCOMPLETE: Record<AddressPart, string> = {
   postalCode: 'postal-code',
 }
 
+/** Moves an address to another country: keeps the parts both formats share, and a region only when the new format accepts it. */
+function moveTo(value: AddressValue, from: string, country: string): AddressValue {
+  const next = { ...value, country }
+  const format = addressFormat(country)
+  for (const key of PARTS) if (!format.rows.flat().includes(key)) next[key] = ''
+  if (format.regions && !format.regions.some(([code]) => code === next.region)) next.region = ''
+  if (!format.regions && addressFormat(from).regions) next.region = ''
+  return next
+}
+
 /** An address value from anything an app may hand over: missing parts are empty strings. */
 function normalize(value: Partial<AddressValue> | null | undefined, country = ''): AddressValue {
   const next = { ...EMPTY, ...(value && typeof value === 'object' ? value : {}) }
@@ -200,20 +210,31 @@ export class AddressField extends LitElement {
 
   /** The one country the field is fixed to, when `countries` lists exactly one; otherwise empty. */
   private get fixedCountry(): string {
-    return this.countries.length === 1 ? this.countries[0].trim().toUpperCase() : ''
+    const codes = new Set(this.countries.map((code) => code.trim().toUpperCase()).filter(Boolean))
+    return codes.size === 1 ? [...codes][0] : ''
   }
+
+  /** Set when the field moved the value to its fixed country, so the app hears of it once the update is done. */
+  private movedToFixed = false
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') || changed.has('country') || changed.has('countries')) {
       const fixed = this.fixedCountry
       const next = normalize(this.value, fixed || this.country)
-      if (fixed && next.country !== fixed) next.country = fixed
-      if (JSON.stringify(next) !== JSON.stringify(this.value)) this.value = next
+      let moved = next
+      if (fixed && next.country !== fixed) moved = moveTo(next, next.country, fixed)
+      // A value that named another country changed under the app: report it like an edit.
+      if (moved !== next && this.value?.country) this.movedToFixed = true
+      if (JSON.stringify(moved) !== JSON.stringify(this.value)) this.value = moved
     }
   }
 
   protected override updated(): void {
     this.syncForm()
+    if (this.movedToFixed) {
+      this.movedToFixed = false
+      this.emit(false)
+    }
   }
 
   // ----------------------------------------------------------------------------------------------------- validity
@@ -266,11 +287,7 @@ export class AddressField extends LitElement {
     let next = { ...this.value, [part]: text }
     if (part === 'country') {
       // Keep what both formats share; a listed region does not carry to another country's list.
-      const format = addressFormat(text)
-      for (const key of PARTS) if (!format.rows.flat().includes(key)) next[key] = ''
-      if (format.regions && !format.regions.some(([code]) => code === next.region)) next.region = ''
-      if (!format.regions && addressFormat(this.value.country).regions) next.region = ''
-      next = normalize(next)
+      next = normalize(moveTo(this.value, this.value.country, text))
       this.touched = new Set()
     }
     this.value = next
@@ -304,9 +321,12 @@ export class AddressField extends LitElement {
     try {
       const found = await provider.resolve(item.id, { locale: this.msg.locale, signal: controller.signal })
       if (controller.signal.aborted) return
-      const country = this.fixedCountry || (found.country || this.value.country).toUpperCase()
-      const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
+      const country = (found.country || this.value.country).toUpperCase()
+      let next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
       next.region = regionCode(country, next.region)
+      // A field fixed to one country keeps it: only the parts that country's format has are taken.
+      const fixed = this.fixedCountry
+      if (fixed && country !== fixed) next = moveTo(next, country, fixed)
       if (!next.line2) next.line2 = this.value.line2
       this.value = next
       this.touched = new Set()
