@@ -21,7 +21,7 @@ From `$ARGUMENTS` and the conversation, determine:
 
 If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
 
-Then settle the six foundation decisions (`packages/components/CLAUDE.md`, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
+Then settle the six foundation decisions (`docs/agents/component-foundation.md`) before writing code, and state them in the design doc or the first message about the component:
 
 | Decision         | Write down                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -146,6 +146,7 @@ npm run build -w packages/components/<name>   # type-check + vite build; regener
 npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
 npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
+npm run check:reachability                    # served docs page, description, 3+ intents, umbrella entry, tags resolve (docs/agents/adding-a-component.md)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
 node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/<name>   # legacy-pattern scan: fix each error or justify it with a modern-web-ignore comment
