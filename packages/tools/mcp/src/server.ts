@@ -239,7 +239,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Search components',
       description:
-        'Free-text search across component names, descriptions, attributes, slots, events, example labels and icon names. Use it to find the component for a UI need ("dropdown", "dialog", "avatar with status", "arrow icon").',
+        'Free-text search across component names, descriptions, intents (what each component is for), attributes, slots, events, example labels and, for a query about icons or one that is an icon name, icon names. Use it to find the component for a UI need, worded as a requirement or a widget name ("let users turn a setting on or off", "dropdown", "avatar with status", "arrow icon").',
       inputSchema: { query: z.string().min(2).describe('What you are looking for'), limit: z.number().int().min(1).max(25).default(10) },
       annotations: readOnly,
     },
@@ -251,7 +251,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           hits
             .map(
               (h) =>
-                `- **${h.component.title}** ${h.component.tagPattern ? `\`${h.component.tagPattern}\`` : h.component.elements.map((e) => `\`${e.tag}\``).join(', ')} (${h.component.package}) — ${h.component.description}\n  matched: ${h.matches.join(', ')}`,
+                `- **${h.component.title}** ${h.component.tagPattern ? `\`${h.component.tagPattern}\`` : h.component.elements.map((e) => `\`${e.tag}\``).join(', ')} (${h.component.package}) — ${h.component.description}${h.intent ? `\n  use it to: ${h.intent}` : ''}\n  matched: ${h.matches.join(', ')}`,
             )
             .join('\n'),
       )

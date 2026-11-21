@@ -16,6 +16,7 @@
  * library score is below it.
  */
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -107,10 +108,12 @@ export interface ReadinessReport {
   discovery: ReturnType<typeof runDiscovery>
   /** The same measure over the requirements of the component lab's builds (`readiness/lab.ts`); not in the headline. */
   lab: ReturnType<typeof runDiscovery>
+  /** The same measure over `readiness/heldout.json`, written blind and never tuned against; not in the headline. */
+  heldout: ReturnType<typeof runDiscovery>
   agent?: AgentReport
 }
 
-function build(only: string[], subset: boolean, labRequirements: Task[]): ReadinessReport {
+function build(only: string[], subset: boolean, labRequirements: Task[], heldout: ReturnType<typeof runDiscovery>): ReadinessReport {
   const registry = loadRegistry()
   const sources = fileSources()
   const components = Object.values(registry.components)
@@ -160,8 +163,32 @@ function build(only: string[], subset: boolean, labRequirements: Task[]): Readin
     weakest,
     discovery,
     lab,
+    heldout,
     agent,
   }
+}
+
+/** The held-out requirements (`readiness/heldout.json`): their words were never seen by whoever tunes the search. */
+function heldoutTasks(): Task[] {
+  return (JSON.parse(readFileSync(join(here, 'readiness/heldout.json'), 'utf8')) as { tasks: Task[] }).tasks
+}
+
+/** The held-out result as the baseline stores it, with the set it was measured on: a score on another set is not comparable. */
+function heldoutSummary(heldout: ReturnType<typeof runDiscovery>): Baseline['heldout'] {
+  const set = createHash('sha256')
+    // By id and answer, order-free: a reordered file or a fixed typo is the same set.
+    .update(JSON.stringify(heldout.tasks.map((t) => JSON.stringify([t.id, t.expect])).sort()))
+    .digest('hex')
+    .slice(0, 12)
+  return { score: heldout.score, hitAt1: round(heldout.hitAt1 * 100), hitAt3: round(heldout.hitAt3 * 100), tasks: heldout.tasks.length, set }
+}
+
+/** The held-out figure of a changes.md headline: its move since `before`, or "new set" when `before` measured another set. */
+export function heldoutFigure(now: NonNullable<Baseline['heldout']>, before: Baseline['heldout']): string {
+  if (!before) return ` · held-out ${now.score} (new)`
+  // A baseline written before sets were recorded cannot say which set it measured.
+  const same = before.set !== undefined && before.set === now.set
+  return ` · held-out ${now.score} (${same ? signed(round(now.score - before.score)) : 'new set'})`
 }
 
 const pct = (v: number) => `${Math.round(v * 100)}%`
@@ -209,6 +236,7 @@ function markdown(report: ReadinessReport): string {
     ...report.discovery.tasks
       .filter((t) => t.rank !== 1)
       .map((t) => `| ${t.requirement.replace(/\|/g, '\\|')} | ${t.expect.join(', ')} | ${t.rank ?? '—'} | ${t.top.join(', ')} |`),
+    ...heldoutMarkdown(report.heldout),
     ...labMarkdown(report.lab),
   ]
   if (report.agent) {
@@ -254,6 +282,37 @@ export function withLabSection(text: string, lines: string[]): string {
   return anchor >= 0 ? text.slice(0, anchor) + block + text.slice(anchor) : `${text.trimEnd()}\n\n${block.trimEnd()}\n`
 }
 
+/**
+ * The held-out discovery section: numbers only. Its misses are deliberately not listed, since a list of misses is what
+ * someone would tune against.
+ */
+function heldoutMarkdown(heldout: ReturnType<typeof runDiscovery>): string[] {
+  return [
+    '',
+    '## Held-out requirements',
+    '',
+    `Requirements written by an agent that never saw the components or the search (\`readiness/heldout.json\`), searched the same way: **${heldout.score}/100** (hit@1 ${pct(heldout.hitAt1)}, hit@3 ${pct(heldout.hitAt3)} over ${heldout.tasks.length} requirements). Not part of the headline, and its misses are deliberately not listed: it measures whether a change to the search, the keywords or the intents generalizes, which it stops doing once anyone tunes against it. A gain on the discovery benchmark above with none here is overfitting.`,
+  ]
+}
+
+/** `report.md` with its "Held-out requirements" section replaced by `lines` (inserted before the lab section when missing). */
+export function withHeldoutSection(text: string, lines: string[]): string {
+  const block = lines.join('\n').replace(/^\n+/, '') + '\n\n'
+  const start = text.search(/^## Held-out requirements$/m)
+  if (start >= 0) {
+    const end = text.indexOf('\n## ', start + 1)
+    return end >= 0 ? text.slice(0, start) + block + text.slice(end + 1) : `${text.slice(0, start)}${block}`.trimEnd() + '\n'
+  }
+  const anchor = [/^## Lab requirements$/m, /^## Agent run$/m, /^## Components \(lowest first\)$/m].map((re) => text.search(re)).find((i) => i >= 0)
+  return anchor !== undefined ? text.slice(0, anchor) + block + text.slice(anchor) : `${text.trimEnd()}\n\n${block.trimEnd()}\n`
+}
+
+/** The held-out result in the working tree's baseline (a run not yet committed included), else the committed one. */
+function heldoutOnDisk(previous: Baseline | undefined): Baseline['heldout'] {
+  const file = join(outDir, 'baseline.json')
+  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as Baseline).heldout : previous?.heldout
+}
+
 /** The lab discovery section: the requirements of real builds, worded for a product rather than for the benchmark. */
 function labMarkdown(lab: ReturnType<typeof runDiscovery>, afterFullRun = false): string[] {
   if (lab.tasks.length === 0) return []
@@ -294,6 +353,8 @@ export interface Baseline {
   discovery: { score: number; hitAt1: number; hitAt3: number; tasks: number }
   /** Discovery over the component lab's requirements; not in `overall`. */
   lab?: { score: number; hitAt1: number; hitAt3: number; tasks: number }
+  /** Discovery over the held-out requirements (`readiness/heldout.json`); not in `overall`. `set` identifies the set. */
+  heldout?: { score: number; hitAt1: number; hitAt3: number; tasks: number; set?: string }
   agent?: { score: number; passed: number; tasks: number; date: string; model?: string }
   components: Record<string, BaselineComponent>
 }
@@ -338,7 +399,7 @@ export function compare(before: BaselineComponent | undefined, now: BaselineComp
 /** Files whose change can move every score: the scoring itself, the registry builder and what the MCP server serves. */
 const SCORING = [
   // Not the benchmark (tasks.json) nor the lab reader (lab.ts), which never feed a component score; not the call log.
-  /^packages\/tools\/mcp\/scripts\/(readiness\/(?!tasks\.json|lab\.ts)|readiness\.ts|build-registry\.ts|frontmatter\.ts|usage\.ts|gallery\.ts)/,
+  /^packages\/tools\/mcp\/scripts\/(readiness\/(?!tasks\.json|heldout\.json|lab\.ts)|readiness\.ts|build-registry\.ts|frontmatter\.ts|usage\.ts|gallery\.ts)/,
   /^packages\/tools\/mcp\/src\/(?!call-log\.ts)/,
   // Everything else build-registry reads into what an agent is served: previews, the theme tokens, the skill's guides.
   /^apps\/ui\/src\/data\/component-(presets|previews)\.ts$/,
@@ -427,7 +488,7 @@ function changesMarkdown(
       ? `Full run: every component scored; the ${rows.length} whose result moved are listed. Full report: [report.md](report.md).`
       : `Scored ${rows.length} new or modified component${rows.length === 1 ? '' : 's'}; the other ${Object.keys(baseline.components).length - rows.length} keep their last score. Full report: [report.md](report.md).`,
     '',
-    `**AI readiness ${baseline.overall}/100** (${previous ? signed(round(baseline.overall - previous.overall)) : 'new'}) · component readiness ${baseline.score} (${previous ? signed(round(baseline.score - previous.score)) : 'new'}) · discovery ${baseline.discovery.score}${baseline.agent ? ` · agent ${baseline.agent.score}` : ''}${baseline.lab ? ` · lab requirements ${baseline.lab.score} (${previous?.lab ? signed(round(baseline.lab.score - previous.lab.score)) : 'new'}, ${baseline.lab.tasks} requirements)` : ''}`,
+    `**AI readiness ${baseline.overall}/100** (${previous ? signed(round(baseline.overall - previous.overall)) : 'new'}) · component readiness ${baseline.score} (${previous ? signed(round(baseline.score - previous.score)) : 'new'}) · discovery ${baseline.discovery.score}${baseline.heldout ? heldoutFigure(baseline.heldout, previous?.heldout) : ''}${baseline.agent ? ` · agent ${baseline.agent.score}` : ''}${baseline.lab ? ` · lab requirements ${baseline.lab.score} (${previous?.lab ? signed(round(baseline.lab.score - previous.lab.score)) : 'new'}, ${baseline.lab.tasks} requirements)` : ''}`,
     '',
     '| Component | Score | Change | Got better | Got worse |',
     '| --- | ---: | ---: | --- | --- |',
@@ -456,6 +517,9 @@ function printSummary(report: ReadinessReport, merged: Baseline): void {
   )
   console.log(
     `  Discovery            ${bar(report.discovery.score)} ${report.discovery.score}/100 (hit@1 ${pct(report.discovery.hitAt1)}, hit@3 ${pct(report.discovery.hitAt3)}, ${report.discovery.tasks.length} requirements)`,
+  )
+  console.log(
+    `  Held-out             ${bar(report.heldout.score)} ${report.heldout.score}/100 (hit@1 ${pct(report.heldout.hitAt1)}, hit@3 ${pct(report.heldout.hitAt3)}, ${report.heldout.tasks.length} requirements; not in the headline, never tune against it)`,
   )
   if (report.lab.tasks.length)
     console.log(
@@ -554,7 +618,13 @@ async function main() {
   // no effect (a note edited), and a registry input outside the components (component-previews.ts, the skill's guides)
   // can move it with no lab file touched.
   const labChanged = Boolean(labRequirements) && labResultDiffers(runDiscovery(registry, labRequirements), previous)
-  if (!full && ids && ids.size === 0 && !labChanged) {
+  // The held-out result moves with any docs edit (an intent, a description) and with a new heldout.json, as the lab's does.
+  const heldout = runDiscovery(registry, heldoutTasks())
+  const heldoutBefore = heldoutOnDisk(previous)
+  const heldoutNow = heldoutSummary(heldout)!
+  // A stored result from before sets were recorded counts as moved, so this run records its set.
+  const heldoutMoved = JSON.stringify(heldoutBefore) !== JSON.stringify(heldoutNow)
+  if (!full && ids && ids.size === 0 && !labChanged && !heldoutMoved) {
     // Nothing to score: the committed results stand, and the working tree stays clean.
     console.log(`AI readiness — c2n ${registry.c2nVersion} — no component changed since ${since.slice(0, 7)}; the committed results stand.`)
     console.log(
@@ -562,7 +632,7 @@ async function main() {
     )
     return
   }
-  const report = build(full ? [] : [...(ids ?? [])], !full, labRequirements ?? [])
+  const report = build(full ? [] : [...(ids ?? [])], !full, labRequirements ?? [], heldout)
   const scored = Object.fromEntries(report.components.map((c) => [c.id, toBaselineComponent(c)]))
   const components = full ? scored : Object.fromEntries(Object.entries({ ...previous!.components, ...scored }).filter(([id]) => registry.components[id]))
   const merged: Baseline = {
@@ -578,6 +648,7 @@ async function main() {
     },
     // A lab tree that failed to load keeps the last result.
     lab: labRequirements ? labSummary(report.lab) : labOnDisk(previous),
+    heldout: heldoutSummary(report.heldout),
     agent: report.agent
       ? { score: report.agent.score, passed: report.agent.passed, tasks: report.agent.tasks.length, date: report.agent.date, model: report.agent.model }
       : undefined,
@@ -612,17 +683,19 @@ async function main() {
     console.log('\n  Weakest checks (library points lost):')
     for (const w of report.weakest.slice(0, 6))
       console.log(`    ${w.pointsLost.toFixed(2).padStart(5)}  ${w.dimension} · ${w.label} (${w.components} components)`)
-  } else if (labMoved && existsSync(join(outDir, 'report.md'))) {
+  } else if ((labMoved || heldoutMoved) && existsSync(join(outDir, 'report.md'))) {
     reportRewritten = true
-    // The lab result moved (a lab file, or a component's docs, changed): report.md's lab section follows baseline.json.
+    // The lab or held-out result moved (a lab file, heldout.json, or a component's docs changed): report.md's sections
+    // follow baseline.json.
     const file = join(outDir, 'report.md')
     const current = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
-    const updated = withLabSection(current, labMarkdown(report.lab, true))
+    let updated = labMoved ? withLabSection(current, labMarkdown(report.lab, true)) : current
+    if (heldoutMoved) updated = withHeldoutSection(updated, heldoutMarkdown(report.heldout))
     if (updated !== current) writeFileSync(file, updated)
   }
   // A full run lists the components whose result moved; a changed run every component it scored.
   const moved = full ? rows.filter(({ cmp }) => cmp.delta !== 0 || cmp.fixed.length || cmp.worse.length) : rows
-  // A run that scored no component (only the lab result moved) keeps changes.md's record of the last scored ones.
+  // A run that scored no component (only the lab or held-out result moved) keeps changes.md's record of the last scored ones.
   const labOnly = !full && report.components.length === 0
   if (labOnly && existsSync(join(outDir, 'changes.md'))) {
     // Its headline still states the lab result, which this run moved: that line follows, the scored components stay.
@@ -631,10 +704,19 @@ async function main() {
     const lab = merged.lab
       ? ` · lab requirements ${merged.lab.score} (${labOnDisk(previous) ? signed(round(merged.lab.score - labOnDisk(previous)!.score)) : 'new'}, ${merged.lab.tasks} requirements)`
       : ''
-    // Replace the lab figure, or add it to the headline when an earlier changes.md had none.
-    const updated = / · lab requirements /.test(current)
-      ? current.replace(/ · lab requirements [^\n]*/, lab)
-      : current.replace(/^(\*\*AI readiness [^\n]*)$/m, `$1${lab}`)
+    // Replace the figure that moved (only that one: the other keeps its recorded change), or add it to the headline
+    // when an earlier changes.md had none.
+    let updated = current
+    if (labMoved)
+      updated = / · lab requirements /.test(updated)
+        ? updated.replace(/ · lab requirements [^\n]*/, lab)
+        : updated.replace(/^(\*\*AI readiness [^\n]*)$/m, `$1${lab}`)
+    if (heldoutMoved && merged.heldout) {
+      const figure = heldoutFigure(merged.heldout, heldoutOnDisk(previous))
+      updated = / · held-out [\d.]+ \([^)]*\)/.test(updated)
+        ? updated.replace(/ · held-out [\d.]+ \([^)]*\)/, figure)
+        : updated.replace(/^(\*\*AI readiness [^\n]*?discovery [\d.]+)/m, `$1${figure}`)
+    }
     if (updated !== current) writeFileSync(file, updated)
   }
   if (!labOnly)

@@ -382,3 +382,24 @@ test('a spec id used twice is left out, and the other specs still count', { skip
     ['lab:t/R1'],
   )
 })
+
+test("a changed run replaces report.md's held-out section, or adds it before the lab section", async () => {
+  const { withHeldoutSection } = await import('./readiness.ts')
+  const lines = ['', '## Held-out requirements', '', 'new']
+  assert.equal(
+    withHeldoutSection('# R\n\n## Held-out requirements\n\nold\n\n## Lab requirements\n\nl\n', lines),
+    '# R\n\n## Held-out requirements\n\nnew\n\n## Lab requirements\n\nl\n',
+  )
+  assert.equal(withHeldoutSection('# R\n\n## Lab requirements\n\nl\n', lines), '# R\n\n## Held-out requirements\n\nnew\n\n## Lab requirements\n\nl\n')
+  assert.equal(withHeldoutSection('# R\n', lines), '# R\n\n## Held-out requirements\n\nnew\n')
+})
+
+test('the held-out figure moves only within one set', async () => {
+  const { heldoutFigure } = await import('./readiness.ts')
+  const now = { score: 70, hitAt1: 60, hitAt3: 80, tasks: 97, set: 'a' }
+  assert.equal(heldoutFigure(now, { ...now, score: 67 }), ' · held-out 70 (+3)')
+  assert.equal(heldoutFigure(now, { ...now, score: 67, set: 'b' }), ' · held-out 70 (new set)')
+  // A baseline from before sets were recorded cannot say which set it measured.
+  assert.equal(heldoutFigure(now, { score: 67, hitAt1: 0, hitAt3: 0, tasks: 97 }), ' · held-out 70 (new set)')
+  assert.equal(heldoutFigure(now, undefined), ' · held-out 70 (new)')
+})

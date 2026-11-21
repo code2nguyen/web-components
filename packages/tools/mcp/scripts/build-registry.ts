@@ -14,7 +14,7 @@
  * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
  * remain deterministic.
  */
-import { flowList, parseFrontmatter } from './frontmatter.ts'
+import { flowList, parseFrontmatter, PLACEHOLDER_INTENT } from './frontmatter.ts'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -432,6 +432,8 @@ for (const dir of packageDirs.sort()) {
       title: doc?.frontmatter.title ?? shortName,
       description: doc?.frontmatter.description ?? '',
       keywords: flowList(doc?.frontmatter.keywords ?? ''),
+      // The generator's `TODO:` placeholders are not intents: searched, they would match every requirement's "what".
+      intents: flowList(doc?.frontmatter.intents ?? '').filter((intent) => !PLACEHOLDER_INTENT.test(intent)),
       intro,
       category,
       status: doc ? 'stable' : 'undocumented',

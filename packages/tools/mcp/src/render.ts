@@ -68,7 +68,12 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
     if (description) out.push(description)
     const summary = firstSentence(component.description || component.intro || '')
     out.push(summary ? `\nPart of \`${component.package}\`: ${summary}` : `\nPart of \`${component.package}\`.`)
-  } else out.push(component.description || component.intro || '')
+  } else {
+    out.push(component.description || component.intro || '')
+    // What it is for, as requirements word it: how an agent tells it from a sibling (select or button group). Left out
+    // once the answer must be shortened: the API it was asked for comes first, and search already showed the intent.
+    if (component.intents?.length && !options.compact) out.push('', 'Use it to:', ...component.intents.map((intent) => `- ${intent}`))
+  }
   out.push('')
   const status = installed?.via
     ? `(installed ${installed.version} through \`${UMBRELLA}\` ${installed.via.version}: import it from \`${component.install.umbrella ?? UMBRELLA}\`, not \`${component.package}\`)`
@@ -253,7 +258,8 @@ function fittedNote(component: ComponentEntry, options: ComponentRenderOptions, 
     component.elements.some((element) => ((options.installed?.elements?.get(element.tag) ?? element)[key]?.length ?? 0) > 0)
   if (level.summarize?.has('css') && options.include.has('css') && has('cssProperties')) done.push('CSS variables summarized by part')
   if (level.summarize?.has('parts') && options.include.has('parts') && has('cssParts')) done.push('CSS parts listed by name')
-  if (level.compact) done.push('descriptions cut to their first sentence')
+  if (level.compact)
+    done.push(component.intents?.length ? 'descriptions cut to their first sentence, intents left out' : 'descriptions cut to their first sentence')
   if (level.focus && component.elements.length > 1) done.push("the package's other elements listed by name")
   if (level.brief) done.push('CSS variables and parts counted, methods named')
   // A request that already named its sections is narrowed by element instead: repeating it would return the same.

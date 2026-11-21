@@ -3,6 +3,11 @@ title: 'Chat Message List'
 description: 'Scrolling conversation log that follows new messages, counts unread ones and loads older history.'
 category: 'Chat'
 keywords: ['conversation', 'chat log', 'messages']
+intents:
+  - 'Show a scrolling conversation that follows new messages as they arrive.'
+  - 'Load older messages when the user scrolls up the history.'
+  - 'Count unread messages while the user is scrolled away from the bottom.'
+  - 'Announce new chat messages to screen readers as a log.'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
