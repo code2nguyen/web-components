@@ -38,3 +38,6 @@ packages/umbrella/custom-elements.json
 
 # Design mocks of components before they are built (new-component skill, step 2)
 /design-mocks/
+
+# Rendered by scripts/check-component-template.mjs and removed when it ends
+packages/components/.note-panel/

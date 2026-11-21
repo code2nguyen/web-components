@@ -33,6 +33,12 @@ const guide = join(root, 'packages/components/CLAUDE.md')
 const outDir = join(root, 'packages/components', `.${id}`)
 
 const problems = []
+// An interrupted run would otherwise leave a stray package beside the real ones (it is also git-ignored).
+for (const signal of ['SIGINT', 'SIGTERM'])
+  process.on(signal, () => {
+    rmSync(outDir, { recursive: true, force: true })
+    process.exit(130)
+  })
 const plop = await nodePlop()
 rmSync(outDir, { recursive: true, force: true })
 mkdirSync(join(outDir, 'src'), { recursive: true })
