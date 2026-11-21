@@ -155,6 +155,12 @@ test('one country in countries fixes the field to it: no picker, and another cou
   // Within the fixed country, a region given by name stays, as in a field that is not fixed.
   await props(field(page), { countries: ['US'], value: { country: 'US', line1: '1 Main St', city: 'SF', region: 'California' } })
   expect(await value(field(page))).toMatchObject({ country: 'US', region: 'California' })
+  // A reset in a fixed field gives back what the field first showed, county included.
+  await renderScenario(`<form><c2-address-field countries="GB" value='{"line1":"1 High St","city":"Canterbury","region":"Kent"}'></c2-address-field></form>`)
+  await input(field(page), 'line1').fill('2 High St')
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  expect(await value(field(page))).toMatchObject({ country: 'GB', line1: '1 High St', region: 'Kent' })
+  await props(field(page), { countries: ['FR', 'BE'] })
   // A list that is not one code (a comma instead of ";") does not fix the field.
   await props(field(page), { countries: ['FR,BE'] })
   await expect(field(page).locator('[data-part="country"]')).toHaveCount(1)

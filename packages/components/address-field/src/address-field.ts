@@ -213,7 +213,8 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= normalize(this.value, this.country)
+    // No starting country filled in yet: a reset fills it in, from `countries` and `country` as they are then.
+    this.defaultValue ??= normalize(this.value)
   }
 
   /** The one country the field is fixed to, when `countries` lists exactly one two-letter code; otherwise empty. */
@@ -259,7 +260,7 @@ export class AddressField extends LitElement {
           this.touched = new Set()
           this.showAll = false
           // An empty field has nothing to report.
-          this.movedByCountries = this.filled()
+          this.movedByCountries = PARTS.some((part) => next[part].trim())
         }
         this.value = next
       }
