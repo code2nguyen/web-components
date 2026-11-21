@@ -145,12 +145,15 @@ test('accepts the attributes a container reads off its descendants, inside that 
   // Outside its container the attribute does nothing: `primary` is no look of c2-button.
   assert.deepEqual(rules('<c2-button primary>Save</c2-button>'), ['1:unknown-attribute'])
   assert.deepEqual(rules('<c2-page-header></c2-page-header><c2-button menu-label="x">Go</c2-button>'), ['1:unknown-attribute'])
+  // c2-page-header reads its actions only: a direct child in the `actions` slot.
+  assert.deepEqual(rules('<c2-page-header><div slot="actions"><c2-button primary>Go</c2-button></div></c2-page-header>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header><c2-button primary>Go</c2-button></c2-page-header>'), ['1:unknown-attribute'])
   // A property binding is not the attribute the container reads.
   assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
 })
 
 test('accepts templated slot names and framework directives', () => {
-  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span><span slot="detail-docs"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span><span slot="detail-docs"></span><span slot="detail-user:42"></span></c2-table>'), [])
   assert.deepEqual(rules('<c2-table><span slot="detail"></span></c2-table>'), ['1:unknown-slot'])
   assert.deepEqual(rules('<c2-text-field v-model="q" :value.prop="v" @input="f" client:load *ngIf="x" [(ngModel)]="m" ngModel></c2-text-field>'), [])
 })

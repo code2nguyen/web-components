@@ -47,6 +47,18 @@ function collect(path: string, files: Set<string>, top = true) {
   } else if ((top || stat.isFile()) && EXTENSIONS.has(extname(path).toLowerCase())) files.add(resolve(path))
 }
 
+/**
+ * In the c2n monorepo, a component being built has a package directory but no registry entry until `build:tools` runs,
+ * so its own docs would read as unknown elements on every edit. A tag whose `packages/components/<id>` or
+ * `open-packages/<id>` exists under the working directory is skipped in hook mode; a misspelled tag has no such
+ * directory and is still reported. Elsewhere neither directory exists, so nothing changes.
+ */
+function underConstruction(finding: Finding): boolean {
+  if (finding.rule !== 'unknown-element') return false
+  const id = /`<c2-([a-z0-9-]+)>`/.exec(finding.message)?.[1]
+  return !!id && ['packages/components', 'open-packages'].some((dir) => existsSync(join(dir, id, 'package.json')))
+}
+
 let registry: ReturnType<typeof loadRegistry> | undefined
 /** The registry with the project's installed manifests overlaid, built once per run. */
 function installedRegistry() {
@@ -78,7 +90,9 @@ export async function runValidate(args: string[]): Promise<number> {
       return 0
     }
     if (!file || !existsSync(file) || !EXTENSIONS.has(extname(file).toLowerCase())) return 0
-    const findings = check(file).filter((finding) => !args.includes('--errors-only') || finding.severity === 'error')
+    const findings = check(file)
+      .filter((finding) => !args.includes('--errors-only') || finding.severity === 'error')
+      .filter((finding) => !underConstruction(finding))
     if (findings.length === 0) return 0
     process.stderr.write(
       `c2n validate: ${relative(process.cwd(), file)} has ${findings.length} problem(s) with the c2n components. Fix them (get_component has the API; a deliberate native element gets a c2n-ignore comment):\n${formatFindings(relative(process.cwd(), file), findings)}\n`,
