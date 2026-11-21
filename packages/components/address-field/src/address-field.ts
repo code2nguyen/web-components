@@ -137,8 +137,6 @@ export class AddressField extends LitElement {
   @state() private showAll = false
   @state() private formDisabled = false
   @state() private announcement = ''
-  /** Why the last suggestion was not taken, shown on the first line until it is edited. */
-  @state() private refused = ''
 
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, addressFieldMessages)
@@ -322,7 +320,7 @@ export class AddressField extends LitElement {
   private async pick(item: AddressSuggestion): Promise<void> {
     const provider = this.provider
     if (!provider || !item?.id) return
-    // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's key.
+    // The text typed before the pick: `suggestion-select` comes before the autocomplete writes the suggestion's id.
     const typed = this.value.line1
     this.resolving?.abort()
     const controller = new AbortController()
@@ -334,15 +332,11 @@ export class AddressField extends LitElement {
       // A field fixed to one country takes no address from another: the typed text stays, and the user is told why.
       const fixed = this.fixedCountry
       if (fixed && country !== fixed) {
-        this.refused = this.msg.t('otherCountry', this.countryName(fixed))
-        this.set('line1', typed)
-        // A fresh announcement each time: the same text twice would not be read again.
-        this.announcement = ''
-        await this.updateComplete
-        this.announcement = this.refused
+        // The autocomplete wrote the suggestion's id on the line: put back what was typed, unless the user typed since.
+        if (this.value.line1 === item.id) this.set('line1', typed)
+        this.announcement = this.msg.t('otherCountry', this.countryName(fixed))
         return
       }
-      this.refused = ''
       const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
       next.region = regionCode(country, next.region)
       if (!next.line2) next.line2 = this.value.line2
@@ -385,8 +379,7 @@ export class AddressField extends LitElement {
     const label = required ? this.labelOf(part) : this.msg.t('optional', this.labelOf(part))
     const error = this.errors().find((entry) => entry.part === part)
     // Inside a c2-form-field that shows the message, the parts keep only the error look.
-    const own = error?.message ?? (part === 'line1' ? this.refused : '')
-    const message = this.field.managed ? '' : own
+    const message = this.field.managed ? '' : (error?.message ?? '')
     const invalid = !!error || this.field.invalid
     const disabled = this.disabled || this.formDisabled
     const value = this.value[part]
@@ -419,7 +412,6 @@ export class AddressField extends LitElement {
         .dataSource=${this.suggest}
         @input=${(event: Event) => {
           event.stopPropagation()
-          this.refused = ''
           this.set(part, (event.currentTarget as HTMLInputElement).value)
         }}
         @change=${stop}
@@ -474,7 +466,7 @@ export class AddressField extends LitElement {
         class="address"
         part="address"
         role="group"
-        aria-label=${this.label || this.field.label || this.msg.t('addressGroup')}
+        aria-label=${this.label || this.field.label || (this.fixedCountry ? this.msg.t('addressIn', this.countryName(this.fixedCountry)) : this.msg.t('addressGroup'))}
         aria-describedby=${this.field.describedBy()}
       >
         ${this.fixedCountry ? nothing : this.renderCountry(disabled)}

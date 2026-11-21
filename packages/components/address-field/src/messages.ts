@@ -3,6 +3,8 @@ import { defineMessages } from '@c2n/core/localize.js'
 const en = {
   /** The group's accessible name when it has no `label`. */
   addressGroup: 'Address',
+  /** The group's accessible name when it has no `label` and is fixed to one country: `{0}` is that country. */
+  addressIn: (country: string) => `Address in ${country}`,
   /** The country picker. */
   country: 'Country or region',
   /** A region picker's placeholder. */
