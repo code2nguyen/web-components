@@ -15,6 +15,8 @@ const en = {
   postalInvalid: (label: string, example: string) => `${label} should look like ${example}`,
   /** Announced when a suggestion fills the address. */
   filled: 'Address filled in',
+  /** Announced when a suggestion is from another country than the one the field is fixed to: `{0}` is that country. */
+  otherCountry: (country: string) => `Choose an address in ${country}`,
   // Field labels.
   address: 'Address',
   addressLine1: 'Address line 1',

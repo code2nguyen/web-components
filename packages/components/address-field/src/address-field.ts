@@ -48,9 +48,9 @@ const AUTOCOMPLETE: Record<AddressPart, string> = {
 }
 
 /** Moves an address to another country: keeps the parts both formats share, and a region only when the new format accepts it. */
-function moveTo(value: AddressValue, from: string, country: string): AddressValue {
-  const next = { ...value, country }
-  const format = addressFormat(country)
+function moveTo(value: AddressValue, from: string, to: string): AddressValue {
+  const next: AddressValue = { ...value, country: to }
+  const format = addressFormat(to)
   for (const key of PARTS) if (!format.rows.flat().includes(key)) next[key] = ''
   if (format.regions && !format.regions.some(([code]) => code === next.region)) next.region = ''
   if (!format.regions && addressFormat(from).regions) next.region = ''
@@ -72,7 +72,8 @@ function normalize(value: Partial<AddressValue> | null | undefined, country = ''
  *
  * The country picker lists the countries with a format (`countries` changes the list), named in the page's language.
  * With a single entry in `countries` (`countries="FR"`), the address is for that country only: there is no picker, and
- * a value or a suggestion naming another country is set to it.
+ * a value naming another country is moved to it (keeping the parts both formats share), and a suggestion from another
+ * country is not taken.
  * Changing country keeps the parts both formats share. Required parts and the postal-code pattern are checked when a
  * part is left and when the form is submitted; each part shows its own message, and the form does not submit while
  * one is wrong. With a `name`, the form receives `name[line1]`, `name[city]`, `name[postalCode]`… and `name[country]`.
@@ -143,8 +144,12 @@ export class AddressField extends LitElement {
   private readonly field = new FieldContextConsumer(this, { kind: 'text' })
   private defaultValue: AddressValue | null = null
   /** One function for the autocomplete: a new one each render would cancel its request and reload it. */
-  private readonly suggest = (query: string, signal: AbortSignal) =>
-    this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
+  private readonly suggest = (query: string, signal: AbortSignal) => {
+    this.query = query
+    return this.provider ? this.provider.suggest(query, { country: this.value.country, locale: this.msg.locale, signal }) : []
+  }
+  /** The text last searched for, put back when a suggestion is refused. */
+  private query = ''
   private resolving: AbortController | null = null
 
   constructor() {
@@ -197,7 +202,7 @@ export class AddressField extends LitElement {
   formStateRestoreCallback(state: string | File | FormData | null): void {
     if (typeof state !== 'string' || !state) return
     try {
-      this.value = normalize(JSON.parse(state) as Partial<AddressValue>, this.country)
+      this.value = normalize(JSON.parse(state) as Partial<AddressValue>, this.fixedCountry || this.country)
     } catch {
       // Not state this element wrote: keep the current value.
     }
@@ -205,36 +210,36 @@ export class AddressField extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.defaultValue ??= normalize(this.value, this.fixedCountry || this.country)
+    if (!this.defaultValue) {
+      const value = normalize(this.value, this.fixedCountry || this.country)
+      const fixed = this.fixedCountry
+      this.defaultValue = fixed && value.country !== fixed ? moveTo(value, value.country, fixed) : value
+    }
   }
 
   /** The one country the field is fixed to, when `countries` lists exactly one; otherwise empty. */
   private get fixedCountry(): string {
-    const codes = new Set(this.countries.map((code) => code.trim().toUpperCase()).filter(Boolean))
-    return codes.size === 1 ? [...codes][0] : ''
+    const codes = this.countryList()
+    return codes.length === 1 ? codes[0] : ''
   }
 
-  /** Set when the field moved the value to its fixed country, so the app hears of it once the update is done. */
-  private movedToFixed = false
+  /** `countries` as upper-case codes, without blanks or repeats. */
+  private countryList(): string[] {
+    return [...new Set(this.countries.map((code) => code.trim().toUpperCase()).filter(Boolean))]
+  }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') || changed.has('country') || changed.has('countries')) {
       const fixed = this.fixedCountry
       const next = normalize(this.value, fixed || this.country)
-      let moved = next
-      if (fixed && next.country !== fixed) moved = moveTo(next, next.country, fixed)
-      // A value that named another country changed under the app: report it like an edit.
-      if (moved !== next && this.value?.country) this.movedToFixed = true
+      // Like a value with no country, one naming another country is corrected without an event, as any value set by code.
+      const moved = fixed && next.country !== fixed ? moveTo(next, next.country, fixed) : next
       if (JSON.stringify(moved) !== JSON.stringify(this.value)) this.value = moved
     }
   }
 
   protected override updated(): void {
     this.syncForm()
-    if (this.movedToFixed) {
-      this.movedToFixed = false
-      this.emit(false)
-    }
   }
 
   // ----------------------------------------------------------------------------------------------------- validity
@@ -322,11 +327,15 @@ export class AddressField extends LitElement {
       const found = await provider.resolve(item.id, { locale: this.msg.locale, signal: controller.signal })
       if (controller.signal.aborted) return
       const country = (found.country || this.value.country).toUpperCase()
-      let next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
-      next.region = regionCode(country, next.region)
-      // A field fixed to one country keeps it: only the parts that country's format has are taken.
+      // A field fixed to one country takes no address from another: the typed text stays, and the user is told why.
       const fixed = this.fixedCountry
-      if (fixed && country !== fixed) next = moveTo(next, country, fixed)
+      if (fixed && country !== fixed) {
+        this.announcement = this.msg.t('otherCountry', this.countryName(fixed))
+        this.set('line1', this.query)
+        return
+      }
+      const next = normalize({ ...EMPTY, line2: this.value.line2, ...found, country }, country)
+      next.region = regionCode(country, next.region)
       if (!next.line2) next.line2 = this.value.line2
       this.value = next
       this.touched = new Set()
@@ -340,7 +349,8 @@ export class AddressField extends LitElement {
   // ------------------------------------------------------------------------------------------------------ render
 
   private countryCodes(): string[] {
-    const codes = (this.countries.length ? this.countries : Object.keys(ADDRESS_FORMATS)).map((code) => code.toUpperCase())
+    const list = this.countryList()
+    const codes = list.length ? list : Object.keys(ADDRESS_FORMATS)
     if (this.value.country && !codes.includes(this.value.country)) codes.push(this.value.country)
     let names: Intl.DisplayNames | null = null
     try {
