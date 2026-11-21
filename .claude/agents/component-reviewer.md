@@ -9,12 +9,12 @@ General correctness bugs are `/code-review`'s job; look for what breaks this rep
 
 ## 1. Find the change
 
-The caller may name a base, a commit or a range, or components. Otherwise compare with `develop`. For one commit use
+The caller may name a base, a commit or a range, or components. Otherwise compare with `origin/develop` (`git fetch origin develop` first; a cloud session often has no local `develop`). For one commit use
 `git show <commit>` and `git diff <commit>~1 <commit>` in place of the commands below.
 
 ```bash
-git diff --stat develop...HEAD
-git diff develop...HEAD -- packages/components open-packages apps/ui/src/content
+git diff --stat origin/develop...HEAD
+git diff origin/develop...HEAD -- packages/components open-packages apps/ui/src/content
 ```
 
 List the components the diff touches (`packages/components/<name>`). For each, read the changed source, its SCSS, its
@@ -33,7 +33,7 @@ Read them before judging; quote the rule a finding breaks.
 ## 3. Run the mechanical checks
 
 ```bash
-node .claude/skills/modern-web-review/scripts/scan.mjs --base=develop   # legacy platform patterns on the lines changed since the base
+node .claude/skills/modern-web-review/scripts/scan.mjs --base=origin/develop   # legacy platform patterns on the lines changed since the base
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx
 git diff --exit-code -- 'packages/components/*/custom-elements.json'   # only meaningful after the package was rebuilt
 ```
