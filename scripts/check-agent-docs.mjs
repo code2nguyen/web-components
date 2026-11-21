@@ -24,7 +24,8 @@ const rel = (file) => relative(root, file)
 
 const tracked = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' })
   .split('\0')
-  .filter(Boolean)
+  // A guide deleted but not yet committed is still in the index.
+  .filter((file) => file && existsSync(join(root, file)))
 const nestedGuides = tracked.filter((file) => file.endsWith('/CLAUDE.md') && !file.includes('node_modules/'))
 const agentDocs = tracked.filter((file) => file.startsWith('docs/agents/') && file.endsWith('.md'))
 const skillFiles = ['.claude/skills', '.agents/skills'].flatMap((dir) =>
