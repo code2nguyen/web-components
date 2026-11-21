@@ -37,7 +37,7 @@ const problems = []
 for (const signal of ['SIGINT', 'SIGTERM'])
   process.on(signal, () => {
     rmSync(outDir, { recursive: true, force: true })
-    process.exit(130)
+    process.exit(128 + (signal === 'SIGINT' ? 2 : 15))
   })
 const plop = await nodePlop()
 rmSync(outDir, { recursive: true, force: true })
