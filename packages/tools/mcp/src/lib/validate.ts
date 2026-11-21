@@ -260,6 +260,17 @@ function checkAttribute(
   if (read && (binding.kind === 'attribute' || attribute.name === name)) {
     const placed = read.slot ? placement.parent === read.container && placement.slot === read.slot : placement.ancestors.includes(read.container)
     if (placed) return
+    // The shell and the side nav find their toggles at runtime (`composedPath()`), so a toggle in a header component
+    // rendered inside them from another file works: say so, as a warning rather than an error.
+    if (!read.slot) {
+      report(
+        attribute.index,
+        'warning',
+        'unknown-attribute',
+        `\`${lower}\` works only on an element inside \`<${read.container}>\`, which this file does not show around it. Fine when the element is rendered inside one from another file.`,
+      )
+      return
+    }
   }
   // ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
   if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return

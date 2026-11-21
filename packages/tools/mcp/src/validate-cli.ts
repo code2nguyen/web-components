@@ -48,15 +48,23 @@ function collect(path: string, files: Set<string>, top = true) {
 }
 
 /**
- * In the c2n monorepo, a component being built has a package directory but no registry entry until `build:tools` runs,
- * so its own docs would read as unknown elements on every edit. A tag whose `packages/components/<id>` or
- * `open-packages/<id>` exists under the working directory is skipped in hook mode; a misspelled tag has no such
- * directory and is still reported. Elsewhere neither directory exists, so nothing changes.
+ * In the c2n monorepo (run from its root), a component being built has a package directory but no registry entry until
+ * `build:tools` runs, so its own docs would read as unknown elements on every edit. Hook mode skips an unknown tag that
+ * belongs to such a package: the longest `packages/components/<dir>` or `open-packages/<dir>` whose name starts the
+ * tag (`c2-foo-item` belongs to `foo`), and only while the registry knows no `@c2n/<dir>`. A misspelled or invented tag
+ * is still reported, including one that merely resembles a built package (`c2-chart`: `@c2n/chart` is registered).
  */
 function underConstruction(finding: Finding): boolean {
-  if (finding.rule !== 'unknown-element') return false
+  if (finding.rule !== 'unknown-element' || !existsSync('packages/tools/mcp/src/validate-cli.ts')) return false
   const id = /`<c2-([a-z0-9-]+)>`/.exec(finding.message)?.[1]
-  return !!id && ['packages/components', 'open-packages'].some((dir) => existsSync(join(dir, id, 'package.json')))
+  if (!id) return false
+  const parts = id.split('-')
+  for (let length = parts.length; length > 0; length--) {
+    const dir = parts.slice(0, length).join('-')
+    if (!['packages/components', 'open-packages'].some((group) => existsSync(join(group, dir, 'package.json')))) continue
+    return !installedRegistry().packageIndex[`@c2n/${dir}`]
+  }
+  return false
 }
 
 let registry: ReturnType<typeof loadRegistry> | undefined

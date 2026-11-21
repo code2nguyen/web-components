@@ -148,6 +148,11 @@ test('accepts the attributes a container reads off its descendants, inside that 
   // c2-page-header reads its actions only: a direct child in the `actions` slot.
   assert.deepEqual(rules('<c2-page-header><div slot="actions"><c2-button primary>Go</c2-button></div></c2-page-header>'), ['1:unknown-attribute'])
   assert.deepEqual(rules('<c2-page-header><c2-button primary>Go</c2-button></c2-page-header>'), ['1:unknown-attribute'])
+  // A toggle may be rendered inside the shell from another file: a warning, not an error.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button app-shell-toggle="navigation">Menu</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
   // A property binding is not the attribute the container reads.
   assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
 })
