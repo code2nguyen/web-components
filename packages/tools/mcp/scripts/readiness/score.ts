@@ -8,6 +8,7 @@
  *
  * Pure functions over a `Sources` object, so the unit tests can stub the file system.
  */
+import { PLACEHOLDER_INTENT } from '../frontmatter.ts'
 import { readFileSync } from 'node:fs'
 import { searchComponents } from '../../src/search.ts'
 import { validateMarkup } from '../../src/lib/validate.ts'
@@ -179,6 +180,8 @@ export function needFromDescription(component: ComponentEntry): string {
 function identity(registry: Registry, c: ComponentEntry): Check[] {
   const elementText = c.elements[0]?.description ?? ''
   const rank = searchRank(registry, needFromDescription(c), [c.id])
+  // The generator's `TODO:` placeholders count as missing (build-registry drops them too; a stale registry may not).
+  const written = (c.intents ?? []).filter((intent) => !PLACEHOLDER_INTENT.test(intent)).length
   return [
     check(
       'description',
@@ -202,6 +205,14 @@ function identity(registry: Registry, c: ComponentEntry): Check[] {
       (e) => words(e.description) >= 5,
       (e) => e.tag,
     )!,
+    // What it is for, worded as a requirement: a held-out benchmark found these reach new wording that keywords miss.
+    check(
+      'intents',
+      'Intents say what it is for, worded as requirements',
+      2,
+      written >= 3 ? 1 : written > 0 ? 0.5 : 0,
+      `${written} intent(s) written in the docs frontmatter (want 3–5)`,
+    ),
     check(
       'distinguishable',
       'Found by search from its need (description minus its own name)',

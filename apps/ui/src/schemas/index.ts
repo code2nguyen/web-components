@@ -38,12 +38,21 @@ export const componentSchema = z.object({
    * "segmented control"): read by the `@c2n/mcp` search and scored by `npm run mcp:readiness`.
    */
   keywords: z.array(z.string()).optional(),
+  /**
+   * What a developer is trying to achieve when this component is the right choice, worded as a requirement and
+   * without naming the widget ("Let users turn a setting on or off with immediate effect."). Three to five; where
+   * a sibling serves a nearby need, say what sets this one apart. Read by the `@c2n/mcp` search and shown by
+   * `get_component`; `npm run mcp:readiness` checks every page has them.
+   */
+  intents: z.array(z.string()).optional(),
 })
 
 export const iconSetSchema = z.object({
   title: z.string(),
   description: z.string().default(''),
   package: z.string().optional(),
+  /** As on component pages: what a developer is trying to achieve when this set is the right choice. */
+  intents: z.array(z.string()).optional(),
 })
 
 /** Gallery pages (`src/content/gallery/<component-id>.mdx`): styled variants of a component, one MdxCodeBlock fence per card. */

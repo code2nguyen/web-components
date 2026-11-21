@@ -1,0 +1,607 @@
+{
+  "$comment": "Held-out discovery benchmark: requirements written by an agent that never saw the components, their docs or the search, across 16 app domains, then labelled by a second agent from the catalog alone without seeing any search results. NEVER tune the search, keywords or intents against these requirements, and never add to or reword them after looking at results: that is what makes this the honest measure of whether discovery generalizes. The report prints only their numbers, not the misses, for that reason. Tune against tasks.json instead (add a requirement there when an agent picks the wrong component in real use). To refresh this set, write a new one the same blind way and replace it whole. `noMatch` lists requirements no component serves: candidates for a new component, not misses. This is the second set: the first chose the design of the intents and the icon gate, so it was retired.",
+  "tasks": [
+    {
+      "id": "b001",
+      "domain": "legal",
+      "requirement": "Show each clause of the contract as a collapsible section so reviewers can open only the parts they care about.",
+      "expect": ["accordion", "details"]
+    },
+    {
+      "id": "b002",
+      "domain": "legal",
+      "requirement": "As a paralegal I want to compare two versions of an agreement side by side with removed and added wording highlighted.",
+      "expect": ["diff-viewer"]
+    },
+    {
+      "id": "b003",
+      "domain": "legal",
+      "requirement": "Signing flow should walk the client through review, identity check, signature and confirmation, showing which step they are on.",
+      "expect": ["steps"]
+    },
+    {
+      "id": "b004",
+      "domain": "legal",
+      "requirement": "Matter page needs a vertical history of filings, hearings and correspondence ordered by date.",
+      "expect": ["timeline"]
+    },
+    {
+      "id": "b005",
+      "domain": "legal",
+      "requirement": "Let attorneys type case notes with bold, lists and links, not just plain text.",
+      "expect": ["rich-text-editor", "page-editor"]
+    },
+    {
+      "id": "b006",
+      "domain": "legal",
+      "requirement": "Hovering over a defined term in the document should reveal its definition without leaving the page.",
+      "expect": ["hover-card", "tooltip"]
+    },
+    {
+      "id": "b007",
+      "domain": "agriculture",
+      "requirement": "Farmers pick a field on a satellite view and see its boundary outlined with the crop planted.",
+      "expect": ["google-map"]
+    },
+    {
+      "id": "b008",
+      "domain": "agriculture",
+      "requirement": "Soil moisture readings for the last 30 days, one line per sensor.",
+      "expect": ["line-chart"]
+    },
+    {
+      "id": "b009",
+      "domain": "agriculture",
+      "requirement": "As a grower I want to set the irrigation threshold anywhere between 10 and 60 percent by dragging.",
+      "expect": ["slider"]
+    },
+    {
+      "id": "b010",
+      "domain": "agriculture",
+      "requirement": "Harvest planning screen: a week-by-week view where crews and fields can be scheduled into time slots.",
+      "expect": ["scheduler", "week-planner"]
+    },
+    {
+      "id": "b011",
+      "domain": "agriculture",
+      "requirement": "Livestock records list thousands of animals and must scroll smoothly on cheap tablets in the barn.",
+      "expect": ["virtual-list"]
+    },
+    {
+      "id": "b012",
+      "domain": "agriculture",
+      "requirement": "Show how full each grain silo is at a glance, like a fill gauge.",
+      "expect": ["meter", "gauge-chart", "progress"]
+    },
+    {
+      "id": "b013",
+      "domain": "energy",
+      "requirement": "Customer portal should show this month's electricity use broken down by hour of day as a heat grid.",
+      "expect": ["heatmap-chart"]
+    },
+    {
+      "id": "b014",
+      "domain": "energy",
+      "requirement": "Outage map with pins for each reported outage, clickable for crew ETA.",
+      "expect": ["google-map"]
+    },
+    {
+      "id": "b015",
+      "domain": "energy",
+      "requirement": "As a plant operator I need a big number showing current output in MW with a small trend line beside it.",
+      "expect": ["stat", "sparkline"]
+    },
+    {
+      "id": "b016",
+      "domain": "energy",
+      "requirement": "Let customers choose their billing date from a calendar, weekends greyed out.",
+      "expect": ["date-selector", "date-input"]
+    },
+    {
+      "id": "b017",
+      "domain": "energy",
+      "requirement": "Show the share of renewable versus fossil generation in the current mix as a ring.",
+      "expect": ["pie-chart"]
+    },
+    {
+      "id": "b018",
+      "domain": "energy",
+      "requirement": "When a meter reading upload fails, tell the user briefly in the corner and let them retry.",
+      "expect": ["toast"]
+    },
+    {
+      "id": "b019",
+      "domain": "sports/fitness",
+      "requirement": "Athletes rate how hard the session felt on a 1 to 10 scale by tapping.",
+      "expect": ["rate", "button-group"]
+    },
+    {
+      "id": "b020",
+      "domain": "sports/fitness",
+      "requirement": "Show weekly training load progress toward the goal as a filling bar.",
+      "expect": ["progress", "meter"]
+    },
+    {
+      "id": "b021",
+      "domain": "sports/fitness",
+      "requirement": "As a coach I want to drag players between the starting lineup and the bench.",
+      "expect": ["kanban"]
+    },
+    {
+      "id": "b022",
+      "domain": "sports/fitness",
+      "requirement": "Workout builder: reorder exercises in the routine by dragging them up and down.",
+      "expect": ["reorder-list"]
+    },
+    {
+      "id": "b023",
+      "domain": "sports/fitness",
+      "requirement": "Rest timer counting down between sets with a circle that empties.",
+      "expect": ["countdown", "progress"]
+    },
+    {
+      "id": "b024",
+      "domain": "sports/fitness",
+      "requirement": "League standings with sortable columns for wins, losses, points and goal difference.",
+      "expect": ["table"]
+    },
+    {
+      "id": "b025",
+      "domain": "sports/fitness",
+      "requirement": "Member profile header shows the person's photo or initials if no photo is uploaded.",
+      "expect": ["avatar"]
+    },
+    {
+      "id": "b026",
+      "domain": "restaurants/food delivery",
+      "requirement": "Order tracking: placed, being prepared, out for delivery, delivered — highlight the current stage.",
+      "expect": ["steps"]
+    },
+    {
+      "id": "b027",
+      "domain": "restaurants/food delivery",
+      "requirement": "Diner picks quantity of each dish with minus and plus buttons, minimum 1, max 20.",
+      "expect": ["number-input", "quantity-picker"]
+    },
+    {
+      "id": "b028",
+      "domain": "restaurants/food delivery",
+      "requirement": "Kitchen screen columns for new, cooking and ready orders; staff move tickets across columns.",
+      "expect": ["kanban"]
+    },
+    {
+      "id": "b029",
+      "domain": "restaurants/food delivery",
+      "requirement": "As a customer I want to filter the menu by dietary labels like vegan, gluten-free, halal by tapping chips.",
+      "expect": ["chip"]
+    },
+    {
+      "id": "b030",
+      "domain": "restaurants/food delivery",
+      "requirement": "Restaurant photos should swipe horizontally at the top of the listing.",
+      "expect": ["carousel"]
+    },
+    {
+      "id": "b031",
+      "domain": "restaurants/food delivery",
+      "requirement": "Show the courier's live position and route to my address.",
+      "expect": ["google-map"]
+    },
+    {
+      "id": "b032",
+      "domain": "restaurants/food delivery",
+      "requirement": "Typing an address should suggest matching streets as I type.",
+      "expect": ["address-field", "autocomplete"]
+    },
+    {
+      "id": "b033",
+      "domain": "insurance claims",
+      "requirement": "Claimant drops photos of the damage into an area or browses for them, with upload progress per file.",
+      "expect": ["upload", "image-uploader"]
+    },
+    {
+      "id": "b034",
+      "domain": "insurance claims",
+      "requirement": "Claim status pill on each row: submitted, in review, approved, denied, each with its own colour.",
+      "expect": ["badge", "status-light"]
+    },
+    {
+      "id": "b035",
+      "domain": "insurance claims",
+      "requirement": "As an adjuster I want to see all the claim's details as label/value pairs in a tidy two-column summary.",
+      "expect": ["description-list"]
+    },
+    {
+      "id": "b036",
+      "domain": "insurance claims",
+      "requirement": "Warn the user at the top of the form that the policy lapses in 5 days, dismissible.",
+      "expect": ["banner"]
+    },
+    {
+      "id": "b037",
+      "domain": "insurance claims",
+      "requirement": "Ask for the date of incident; it cannot be in the future.",
+      "expect": ["date-input", "date-fields"]
+    },
+    {
+      "id": "b038",
+      "domain": "insurance claims",
+      "requirement": "Before deleting a claim draft, require the user to confirm in a blocking prompt.",
+      "expect": ["confirm-dialog", "modal"]
+    },
+    {
+      "id": "b039",
+      "domain": "government services",
+      "requirement": "Benefit application split into personal info, income, household and review, can't skip ahead until valid.",
+      "expect": ["steps", "form"]
+    },
+    {
+      "id": "b040",
+      "domain": "government services",
+      "requirement": "Breadcrumb trail so citizens know they're in Services > Permits > Building permit.",
+      "expect": ["breadcrumb"]
+    },
+    {
+      "id": "b041",
+      "domain": "government services",
+      "requirement": "Page shows a friendly illustration and message when a search returns no results.",
+      "expect": ["status-panel", "symbols"]
+    },
+    {
+      "id": "b042",
+      "domain": "government services",
+      "requirement": "Citizen picks their county from a long list with type-to-filter.",
+      "expect": ["autocomplete"]
+    },
+    {
+      "id": "b043",
+      "domain": "government services",
+      "requirement": "As a resident I want to choose my preferred contact method: email, SMS or post, only one.",
+      "expect": ["radio", "button-group"]
+    },
+    {
+      "id": "b044",
+      "domain": "government services",
+      "requirement": "Every form field should show its error message right under it once I leave the field.",
+      "expect": ["form-field", "form"]
+    },
+    {
+      "id": "b045",
+      "domain": "government services",
+      "requirement": "FAQ page where each question expands to show its answer.",
+      "expect": ["accordion", "details"]
+    },
+    {
+      "id": "b046",
+      "domain": "non-profit",
+      "requirement": "Donation page: preset amounts 10, 25, 50, 100 or a custom amount, pick one.",
+      "expect": ["button-group", "radio"]
+    },
+    {
+      "id": "b047",
+      "domain": "non-profit",
+      "requirement": "Campaign hero shows raised so far versus the target, with a percent.",
+      "expect": ["progress", "meter"]
+    },
+    {
+      "id": "b048",
+      "domain": "non-profit",
+      "requirement": "Monthly donations per region over the year, grouped columns per region.",
+      "expect": ["bar-chart"]
+    },
+    {
+      "id": "b049",
+      "domain": "non-profit",
+      "requirement": "Volunteer sign up: tick every day of the week you're available.",
+      "expect": ["checkbox-group", "button-group", "chip"]
+    },
+    {
+      "id": "b050",
+      "domain": "non-profit",
+      "requirement": "As a donor I want to opt in to receive newsletters with a simple on/off control.",
+      "expect": ["switch"]
+    },
+    {
+      "id": "b051",
+      "domain": "non-profit",
+      "requirement": "Wall of supporters' photos in uneven heights, packed like Pinterest.",
+      "expect": ["masonry"]
+    },
+    {
+      "id": "b052",
+      "domain": "manufacturing",
+      "requirement": "Line dashboard: a tile per machine with status colour, uptime % and alarm count.",
+      "expect": ["stat"]
+    },
+    {
+      "id": "b053",
+      "domain": "manufacturing",
+      "requirement": "Bill of materials shown as nested parts you can expand down to individual screws.",
+      "expect": ["tree-table", "tree"]
+    },
+    {
+      "id": "b054",
+      "domain": "manufacturing",
+      "requirement": "Scrap rate over shifts, with an area under the line shaded.",
+      "expect": ["area-chart"]
+    },
+    {
+      "id": "b055",
+      "domain": "manufacturing",
+      "requirement": "Operators scan or type a batch number; field shows a spinner while it validates.",
+      "expect": ["text-field"]
+    },
+    {
+      "id": "b056",
+      "domain": "manufacturing",
+      "requirement": "Production order page has a header with order number, status and action buttons on the right.",
+      "expect": ["page-header"]
+    },
+    {
+      "id": "b057",
+      "domain": "manufacturing",
+      "requirement": "Inspection checklist where each item can be marked pass, fail or n/a.",
+      "expect": ["choice-matrix", "scorecard"]
+    },
+    {
+      "id": "b058",
+      "domain": "music/podcasts",
+      "requirement": "Episode player with play/pause, scrubbing through the timeline and playback speed.",
+      "expect": ["audio-player", "video-player"]
+    },
+    {
+      "id": "b059",
+      "domain": "music/podcasts",
+      "requirement": "As a listener I want to see the waveform of the track so I can jump to the drop.",
+      "expect": ["audio-player"]
+    },
+    {
+      "id": "b060",
+      "domain": "music/podcasts",
+      "requirement": "Show the episode's guest list as overlapping circular photos with +3 for the rest.",
+      "expect": ["avatar"]
+    },
+    {
+      "id": "b062",
+      "domain": "music/podcasts",
+      "requirement": "Volume control that the user drags horizontally.",
+      "expect": ["slider"]
+    },
+    {
+      "id": "b063",
+      "domain": "music/podcasts",
+      "requirement": "Artist page: switch between Overview, Albums, Tours and About without leaving the page.",
+      "expect": ["tabs"]
+    },
+    {
+      "id": "b064",
+      "domain": "music/podcasts",
+      "requirement": "Mark explicit tracks with a small E label next to the title.",
+      "expect": ["badge"]
+    },
+    {
+      "id": "b065",
+      "domain": "gaming community",
+      "requirement": "Clan chat with message bubbles, timestamps and the sender's name.",
+      "expect": ["chat-message", "chat-message-list"]
+    },
+    {
+      "id": "b066",
+      "domain": "gaming community",
+      "requirement": "Leaderboard of the top 10,000 players that loads more as you scroll.",
+      "expect": ["virtual-list", "table"]
+    },
+    {
+      "id": "b067",
+      "domain": "gaming community",
+      "requirement": "As a moderator I want a right-click options list on a post: pin, lock, delete, ban author.",
+      "expect": ["context-menu"]
+    },
+    {
+      "id": "b068",
+      "domain": "gaming community",
+      "requirement": "Show players' online/away/offline state as a coloured dot on their picture.",
+      "expect": ["avatar", "indicator"]
+    },
+    {
+      "id": "b070",
+      "domain": "gaming community",
+      "requirement": "Notification count bubble on the inbox link.",
+      "expect": ["indicator", "badge"]
+    },
+    {
+      "id": "b072",
+      "domain": "research lab",
+      "requirement": "Scatter of measured versus predicted values with each experiment as a dot.",
+      "expect": ["scatter-chart"]
+    },
+    {
+      "id": "b073",
+      "domain": "research lab",
+      "requirement": "Protocol editor where researchers write steps in markdown with live preview.",
+      "expect": ["markdown", "code-editor"]
+    },
+    {
+      "id": "b074",
+      "domain": "research lab",
+      "requirement": "As a lab manager I want to book an instrument for a block of hours on a weekly calendar.",
+      "expect": ["week-planner", "scheduler"]
+    },
+    {
+      "id": "b075",
+      "domain": "research lab",
+      "requirement": "Show overlapping sets of genes hit across three experiments as intersecting circles.",
+      "expect": ["overlap-chart"]
+    },
+    {
+      "id": "b076",
+      "domain": "research lab",
+      "requirement": "Code snippet area with syntax highlighting for analysis scripts, editable.",
+      "expect": ["code-editor"]
+    },
+    {
+      "id": "b077",
+      "domain": "hospitality",
+      "requirement": "Guest picks check-in and check-out dates in one go, with nights counted.",
+      "expect": ["date-selector"]
+    },
+    {
+      "id": "b078",
+      "domain": "hospitality",
+      "requirement": "Room photos open full screen when clicked, with next/previous.",
+      "expect": ["file-preview", "image"]
+    },
+    {
+      "id": "b079",
+      "domain": "hospitality",
+      "requirement": "As a front-desk agent I want a timeline of rooms vs days showing which room is booked when.",
+      "expect": ["scheduler"]
+    },
+    {
+      "id": "b080",
+      "domain": "hospitality",
+      "requirement": "Star rating guests can leave, half stars allowed.",
+      "expect": ["rate"]
+    },
+    {
+      "id": "b081",
+      "domain": "hospitality",
+      "requirement": "Number of adults and children, each adjustable but never below zero.",
+      "expect": ["quantity-picker", "number-input"]
+    },
+    {
+      "id": "b082",
+      "domain": "hospitality",
+      "requirement": "Amenities list with a small pictogram next to each: wifi, pool, parking.",
+      "expect": ["phosphor-icons", "feather-icons", "mat-icon"]
+    },
+    {
+      "id": "b083",
+      "domain": "recruiting",
+      "requirement": "Candidate pipeline board: applied, screen, interview, offer, hired.",
+      "expect": ["kanban"]
+    },
+    {
+      "id": "b084",
+      "domain": "recruiting",
+      "requirement": "Recruiter adds skills as removable tags; suggest existing skills while typing.",
+      "expect": ["tag-input", "autocomplete"]
+    },
+    {
+      "id": "b085",
+      "domain": "recruiting",
+      "requirement": "Pick interview time slots from the interviewer's free times in a week grid.",
+      "expect": ["time-slot-picker"]
+    },
+    {
+      "id": "b086",
+      "domain": "recruiting",
+      "requirement": "As a hiring manager I want a slide-in panel from the right with the candidate's profile when I click a row.",
+      "expect": ["sheet"]
+    },
+    {
+      "id": "b087",
+      "domain": "recruiting",
+      "requirement": "Placeholder grey shapes while the candidate list is loading.",
+      "expect": ["skeleton"]
+    },
+    {
+      "id": "b088",
+      "domain": "recruiting",
+      "requirement": "Interview feedback form generated from a JSON schema the HR team maintains.",
+      "expect": ["json-form"]
+    },
+    {
+      "id": "b089",
+      "domain": "personal finance",
+      "requirement": "Spending by category for the month as a pie.",
+      "expect": ["pie-chart"]
+    },
+    {
+      "id": "b090",
+      "domain": "personal finance",
+      "requirement": "Net worth over five years with a range selector to zoom into a period.",
+      "expect": ["line-chart", "area-chart"]
+    },
+    {
+      "id": "b091",
+      "domain": "personal finance",
+      "requirement": "Transactions list grouped by day with sticky day headers, filterable by text search.",
+      "expect": ["virtual-list", "group-table"]
+    },
+    {
+      "id": "b092",
+      "domain": "personal finance",
+      "requirement": "Enter amounts with currency formatting and two decimals, no letters allowed.",
+      "expect": ["money-input"]
+    },
+    {
+      "id": "b093",
+      "domain": "personal finance",
+      "requirement": "As a user I want a tiny inline trend next to each account balance.",
+      "expect": ["sparkline"]
+    },
+    {
+      "id": "b094",
+      "domain": "personal finance",
+      "requirement": "Hide account numbers until the user taps to reveal, like a password field.",
+      "expect": ["secret-field"]
+    },
+    {
+      "id": "b095",
+      "domain": "IT helpdesk",
+      "requirement": "Ticket page splits into a conversation on the left and ticket properties on the right, resizable.",
+      "expect": ["split-panel"]
+    },
+    {
+      "id": "b096",
+      "domain": "IT helpdesk",
+      "requirement": "Command palette: press Cmd+K to search tickets, users and actions.",
+      "expect": ["command"]
+    },
+    {
+      "id": "b097",
+      "domain": "IT helpdesk",
+      "requirement": "Assign ticket to an agent by searching names, showing their photo in the results.",
+      "expect": ["autocomplete"]
+    },
+    {
+      "id": "b098",
+      "domain": "IT helpdesk",
+      "requirement": "Show a hint explaining SLA when hovering the little question mark next to it.",
+      "expect": ["toggletip", "tooltip"]
+    },
+    {
+      "id": "b099",
+      "domain": "IT helpdesk",
+      "requirement": "Site-wide banner during the maintenance window with a link to the status page.",
+      "expect": ["banner"]
+    },
+    {
+      "id": "b100",
+      "domain": "IT helpdesk",
+      "requirement": "Left-hand navigation that collapses to just pictograms on narrow screens.",
+      "expect": ["side-nav", "app-shell"]
+    }
+  ],
+  "noMatch": [
+    {
+      "id": "b061",
+      "domain": "music/podcasts",
+      "requirement": "Chapter list beside the player; clicking jumps to that timestamp.",
+      "note": "No chapter-list component; chapters only exist on the video-player seek bar, so a clickable chapter list beside a player has no specific match."
+    },
+    {
+      "id": "b069",
+      "domain": "gaming community",
+      "requirement": "Tournament bracket tree for the knockout rounds.",
+      "note": "No tournament-bracket component; org-chart/flow are hierarchies/graphs, not knockout brackets."
+    },
+    {
+      "id": "b071",
+      "domain": "research lab",
+      "requirement": "Sample freezer layout: a grid of 9x9 slots, click a slot to see what's stored there.",
+      "note": "No specific slot-grid/plate-map component; matrix-board is a drag board of cards between cells, not a fixed 9x9 storage layout."
+    }
+  ]
+}

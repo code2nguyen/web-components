@@ -23,11 +23,13 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-time-slot-picker': Omit<C2Props<TimeSlotPicker>, 'slots'> & {
+      'c2-time-slot-picker': Omit<C2Props<TimeSlotPicker>, 'slots' | 'disabledDates'> & {
         'time-zone'?: Attribute
         'group-by'?: Attribute
         'show-end'?: Attribute
+        'disabled-dates'?: Attribute
         slots?: TimeSlotPicker['slots'] | string
+        disabledDates?: TimeSlotPicker['disabledDates'] | string
       }
     }
   }

@@ -11,6 +11,8 @@ const en = {
   morning: 'Morning',
   afternoon: 'Afternoon',
   evening: 'Evening',
+  /** Accessible name of a group of times: its heading and the day, so a time reached by Tab is heard with its day. */
+  periodOn: (period: string, date: string) => `${period}, ${date}`,
   /** Heading of the times when they are not grouped: the day they are on. */
   times: (date: string) => `Times on ${date}`,
   /** The line naming the time zone the times are shown in. */
@@ -27,6 +29,8 @@ const en = {
   loading: 'Loading times',
   /** The validation message of a required picker. */
   valueMissing: 'Please choose a time.',
+  /** The validation message of a required picker whose time is on a day closed afterwards (`disabled-dates`). */
+  closedValue: 'The chosen time is no longer available. Please choose another.',
 }
 
 /** The time slot picker's interface text in English. An app adds its languages with `addTranslations`; each shows for the nearest `lang`. */

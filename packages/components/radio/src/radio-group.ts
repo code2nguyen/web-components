@@ -170,7 +170,8 @@ export class RadioGroup extends LitElement {
   }
 
   override updated(changed: PropertyValues<this>) {
-    if (changed.has('value') || changed.has('disabled')) this.syncRadios()
+    if (changed.has('value') || changed.has('disabled') || this.syncPending) this.syncRadios()
+    this.syncPending = false
     this.syncFormState()
   }
 
@@ -196,11 +197,19 @@ export class RadioGroup extends LitElement {
     this.syncRadios()
   }
 
+  /** Set when the options must be synced on the next update without `value` having changed. */
+  private syncPending = false
+
   /** Called through the context when an option's `checked` changed (user or code). */
   private handleCheckedChanged(radio: Radio) {
     if (radio.checked) {
       if (this.value !== radio.value) this.value = radio.value
-      else this.syncRadios()
+      else {
+        // Called from the option's own `updated()`: syncing now would set its `tabbable` while it is still updating
+        // (Lit's change-in-update warning), so the options are synced on the group's next update.
+        this.syncPending = true
+        this.requestUpdate()
+      }
     } else if (this.value === radio.value && !this.radios.some((other) => other.checked)) {
       this.value = ''
     }

@@ -1,12 +1,13 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, itemListPropertyConverter, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
 import { formatDate, isTimeZone, parseDate, wallClockAt, zoneLabel } from '@c2n/core/zoned-time.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/date-strip'
+import type { DateStripDisabledDate } from '@c2n/date-strip'
 import { timeSlotPickerMessages } from './messages'
 import styles from './time-slot-picker.scss?inline'
 import { disabledByAncestor } from '@c2n/core/dom-helper.js'
@@ -76,9 +77,6 @@ function dayInstant(day: string): Date {
   return new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12))
 }
 
-/** One empty list, so the strip does not see a new `disabledDates` on every render while loading. */
-const noDays: string[] = []
-
 function periodOf(minutes: number): Period {
   return minutes < 12 * 60 ? 'morning' : minutes < 17 * 60 ? 'afternoon' : 'evening'
 }
@@ -89,8 +87,12 @@ function periodOf(minutes: number): Period {
  *
  * `slots` lists the times, each an ISO `start` (with its offset), an optional `end`, and `available: false` for one
  * that is taken. They are shown in `time-zone` (the browser's zone by default) and filed under their day in that zone.
- * Days with a free time carry a dot; days between the first and last slot without one are disabled. A day with no
- * free time offers a jump to the next one that has.
+ * Days with a free time carry a dot; days between the first and last slot without one are disabled. `disabled-dates`
+ * closes days outright (a weekly closing day, a holiday), each with an optional reason read with the day; a closed day
+ * offers no times even when `slots` lists some. A day with no free time offers a jump to the next one that has.
+ *
+ * To pick the day with another control (a month calendar), hide the row of days with `::part(days) { display: none }`
+ * and set `date` from that control: the times follow it.
  *
  * The value is the picked slot's `start`, exactly as given. Paging the days fires `range-change` with the days now
  * shown, so an app can load their slots, showing `loading` meanwhile.
@@ -166,6 +168,13 @@ export class TimeSlotPicker extends LitElement {
   /** Shows each time with its end ("9:00 – 9:30"). */
   @property({ type: Boolean, attribute: 'show-end' }) showEnd = false
 
+  /**
+   * Days that are closed, whatever `slots` lists for them: `YYYY-MM-DD` strings, or `{ date, label }` objects whose
+   * label says why ("Closed on Sundays") and is read with the day. As an attribute, a `;`-separated list of days, or
+   * a JSON array of either form. Passed to the row of days, as `c2-date-strip`'s `disabled-dates`.
+   */
+  @property({ attribute: 'disabled-dates', converter: itemListPropertyConverter }) disabledDates: (DateStripDisabledDate | string)[] = []
+
   /** The earliest day that can be shown, as `YYYY-MM-DD`. */
   @property() min = ''
 
@@ -192,6 +201,9 @@ export class TimeSlotPicker extends LitElement {
   @state() private disabledByForm = false
   @state() private announcement = ''
 
+  /** Set by `reportValidity()`; until then a failed constraint is not announced (an enclosing field's error still is). */
+  @state() private validityShown = false
+
   private readonly internals = this.attachInternals()
   private readonly msg = new LocalizeController(this, timeSlotPickerMessages)
   private readonly field = new FieldContextConsumer(this, { kind: 'choice' })
@@ -201,8 +213,12 @@ export class TimeSlotPicker extends LitElement {
   private byDay = new Map<string, PlacedSlot[]>()
   /** Days with at least one free time, in order. */
   private freeDays: string[] = []
-  /** Days between the first and last day with slots that have no free time, rebuilt with `byDay`. */
-  private booked: string[] = []
+  /** The days `disabledDates` closes, rebuilt with `byDay`. */
+  private closed = new Set<string>()
+  /** The closed days with their reasons, as the row of days takes them; rebuilt with `byDay`. */
+  private closedDays: DateStripDisabledDate[] = []
+  /** What the row of days disables once loaded: the closed days, then the booked ones; rebuilt with `byDay`. */
+  private stripDisabled: DateStripDisabledDate[] = []
   /** The day shown while `date` is not set. */
   private defaultDate = ''
   private announcementTimer: ReturnType<typeof setTimeout> | undefined
@@ -237,16 +253,23 @@ export class TimeSlotPicker extends LitElement {
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
+    // Drawn now, so the control is marked invalid when the report moves the focus into it.
+    this.performUpdate()
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {
     this.value = this.defaultValue ?? ''
+    this.validityShown = false
   }
 
   formDisabledCallback(disabled: boolean) {
@@ -278,10 +301,13 @@ export class TimeSlotPicker extends LitElement {
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (this.defaultValue === undefined) this.defaultValue = this.value
-    if (changed.has('slots') || changed.has('timeZone')) this.place()
+    if (changed.has('slots') || changed.has('timeZone') || changed.has('disabledDates')) this.place()
     // With no day asked for, show the value's day, else the first free day from today, else the first free day.
     // Worked out again as slots or a value arrive, so a picker mounted before its slots load moves to them.
-    if (!parseDate(this.date) && (changed.has('date') || changed.has('slots') || changed.has('timeZone') || changed.has('value') || !this.hasUpdated)) {
+    if (
+      !parseDate(this.date) &&
+      (changed.has('date') || changed.has('slots') || changed.has('timeZone') || changed.has('disabledDates') || changed.has('value') || !this.hasUpdated)
+    ) {
       const picked = this.placedValue()
       const today = this.today()
       this.defaultDate = picked?.day ?? this.freeDays.find((day) => day >= today) ?? this.freeDays[0] ?? today
@@ -320,17 +346,43 @@ export class TimeSlotPicker extends LitElement {
       else this.byDay.set(day, [placed])
     }
     for (const list of this.byDay.values()) list.sort((a, b) => a.start - b.start)
-    this.freeDays = [...this.byDay.keys()].filter((day) => this.byDay.get(day)!.some((slot) => slot.available)).sort()
-    this.booked = this.bookedDays()
+    this.closedDays = [...readDisabledDates(this.disabledDates)].map(([date, label]) => (label ? { date, label } : { date }))
+    this.closed = new Set(this.closedDays.map((entry) => entry.date))
+    this.freeDays = [...this.byDay.keys()].filter((day) => !this.closed.has(day) && this.byDay.get(day)!.some((slot) => slot.available)).sort()
+    this.stripDisabled = [
+      ...this.closedDays,
+      ...this.bookedDays()
+        .filter((day) => !this.closed.has(day))
+        .map((date) => ({ date })),
+    ]
   }
 
-  private placedValue(): PlacedSlot | undefined {
+  /** The slots of a day, sorted by time; none on a closed day. */
+  private slotsOn(day: string): PlacedSlot[] {
+    return this.closed.has(day) ? [] : (this.byDay.get(day) ?? [])
+  }
+
+  /** The value's slot, wherever it is, closed days included. */
+  private findValue(): PlacedSlot | undefined {
     if (!this.value) return undefined
     for (const list of this.byDay.values()) {
       const found = list.find((placed) => placed.slot.start === this.value)
       if (found) return found
     }
     return undefined
+  }
+
+  /** The value's slot, unless its day is closed. */
+  private placedValue(): PlacedSlot | undefined {
+    const found = this.findValue()
+    return found && !this.closed.has(found.day) ? found : undefined
+  }
+
+  /** A value on a closed day is kept (the day may reopen) but neither submitted nor counted as an answer. */
+  private get valueClosed(): boolean {
+    // Its day comes from the value itself: an app paging through weeks replaces `slots`, so its slot may be gone.
+    const start = this.value ? Date.parse(this.value) : NaN
+    return !Number.isNaN(start) && this.closed.has(formatDate(wallClockAt(start, this.zone)))
   }
 
   /** The strip's dots, labelled for screen readers; kept while the days and the language stay the same. */
@@ -357,13 +409,27 @@ export class TimeSlotPicker extends LitElement {
     return booked
   }
 
+  /**
+   * Whether the error is shown, on the host and on the times alike: an enclosing field's error, or a failed constraint
+   * once `reportValidity()` reported it, as for a native control.
+   */
+  private get errorShown(): boolean {
+    const fails = !!this.customValidityMessage || (this.required && (!this.value || this.valueClosed))
+    return (this.field.invalid || (this.validityShown && fails)) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value ? null : this.value, this.value)
-    const missing = this.required && !this.value
+    const closed = this.valueClosed
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
+    const missing = this.required && (!this.value || closed)
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t(closed ? 'closedValue' : 'valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.slot[tabindex="0"]') ?? undefined
     this.internals.setValidity(flags, message, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required or
+    // custom-invalid control would be announced as invalid on load. Invalid is the error the field shows, or the
+    // failed constraint once `reportValidity()` reported it (see `errorShown`).
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   private longDate(day: string): string {
@@ -381,7 +447,7 @@ export class TimeSlotPicker extends LitElement {
     if (day === this.shownDate) return
     this.date = day
     this.focusSlot = ''
-    const free = (this.byDay.get(day) ?? []).filter((slot) => slot.available).length
+    const free = this.slotsOn(day).filter((slot) => slot.available).length
     if (!this.loading) this.announce(free ? this.msg.t('available', free, this.longDate(day)) : this.msg.t('noTimes', this.longDate(day)))
     this.dispatchEvent(new CustomEvent('date-change', { detail: { date: day }, bubbles: true, composed: true }))
   }
@@ -425,7 +491,7 @@ export class TimeSlotPicker extends LitElement {
       case 'Enter':
       case ' ': {
         event.preventDefault()
-        const placed = this.byDay.get(this.shownDate)?.find((slot) => slot.slot.start === current.dataset.start)
+        const placed = this.slotsOn(this.shownDate).find((slot) => slot.slot.start === current.dataset.start)
         if (placed) this.pick(placed)
         return
       }
@@ -450,7 +516,7 @@ export class TimeSlotPicker extends LitElement {
   }
 
   private renderSlots(list: PlacedSlot[], stop: string, label: string, heading: unknown) {
-    const invalid = this.field.invalid && !this.effectiveDisabled
+    const invalid = this.errorShown
     return html`<div class="group" part="group">
       ${heading}
       <div
@@ -494,7 +560,7 @@ export class TimeSlotPicker extends LitElement {
         </div>
       </div>`
     }
-    const list = this.byDay.get(this.shownDate) ?? []
+    const list = this.slotsOn(this.shownDate)
     if (!list.some((placed) => placed.available)) {
       const next = this.freeDays.find((day) => day > this.shownDate && (!parseDate(this.max) || day <= this.max))
       return html`<div class="empty" part="empty">
@@ -515,11 +581,12 @@ export class TimeSlotPicker extends LitElement {
       : ([this.focusSlot, this.value].find((start) => usable.some((placed) => placed.slot.start === start)) ?? usable[0].slot.start)
     if (this.groupBy === 'none') return this.renderSlots(list, stop, this.msg.t('times', this.longDate(this.shownDate)), nothing)
     const periods: Period[] = ['morning', 'afternoon', 'evening']
+    const day = this.longDate(this.shownDate)
     return periods.map((period) => {
       const group = list.filter((placed) => periodOf(placed.minutes) === period)
       if (!group.length) return nothing
       const heading = this.msg.t(period)
-      return this.renderSlots(group, stop, heading, html`<div class="heading" part="heading" aria-hidden="true">${heading}</div>`)
+      return this.renderSlots(group, stop, this.msg.t('periodOn', heading, day), html`<div class="heading" part="heading" aria-hidden="true">${heading}</div>`)
     })
   }
 
@@ -536,7 +603,7 @@ export class TimeSlotPicker extends LitElement {
             part="days"
             .value=${this.shownDate}
             .markers=${this.dayMarkers()}
-            .disabledDates=${this.loading ? noDays : this.booked}
+            .disabledDates=${this.loading ? this.closedDays : this.stripDisabled}
             .min=${this.min}
             .max=${this.max}
             .label=${this.msg.t('day')}

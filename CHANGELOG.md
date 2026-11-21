@@ -3,6 +3,24 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.31](https://github.com/code2nguyen/web-components/releases/tag/v1.0.31) — 2026-11-21
+
+### Features
+
+- **mcp:** Search component intents, gate icon names, add a held-out benchmark ([7134e1f](https://github.com/code2nguyen/web-components/commit/7134e1f))
+- **theme:** Add color-success and color-warning tokens with dark values ([484c057](https://github.com/code2nguyen/web-components/commit/484c057))
+- **date-selector:** Close single days with disabled-dates and days by rule with isDateDisabled ([2600722](https://github.com/code2nguyen/web-components/commit/2600722))
+- **date-strip:** Read a disabled day with its reason, given as { date, label } in disabled-dates ([2cff296](https://github.com/code2nguyen/web-components/commit/2cff296))
+- **core:** Add itemListPropertyConverter for lists of strings or small objects ([a129118](https://github.com/code2nguyen/web-components/commit/a129118))
+
+### Fixes
+
+- **time-slot-picker:** Not invalid on load, times named with their day, and closed days through disabled-dates ([4c87da2](https://github.com/code2nguyen/web-components/commit/4c87da2))
+- **radio:** Defer the group's option sync when an option reports a change from its own update ([7a44d6a](https://github.com/code2nguyen/web-components/commit/7a44d6a))
+- **wheel-picker:** Stop announcing a custom validity message as invalid before a field shows it ([0ae3ed8](https://github.com/code2nguyen/web-components/commit/0ae3ed8))
+- **card-input:** Stop announcing a required empty card as invalid before the user edits it ([ade8e39](https://github.com/code2nguyen/web-components/commit/ade8e39))
+- **lab:** Reach a target with its own tab stop by Tab, not by walking a sibling control with the arrow keys ([f5c8a50](https://github.com/code2nguyen/web-components/commit/f5c8a50))
+
 ## [1.0.30](https://github.com/code2nguyen/web-components/releases/tag/v1.0.30) — 2026-11-20
 
 ### Features

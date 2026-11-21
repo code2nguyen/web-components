@@ -29,6 +29,13 @@ export interface ComponentEntry {
    * "snackbar", "segmented control"). From the docs page's `keywords` frontmatter; searched with the weight of the name.
    */
   keywords?: string[]
+  /**
+   * What a developer is trying to achieve when this component is the right choice, as a requirement would word it
+   * ("let users turn a setting on or off with immediate effect"), without naming the widget. From the docs page's
+   * `intents` frontmatter; searched with the weight of the description, and the best-matching one is shown with a
+   * search result. A held-out benchmark measured them: they generalize to new wording where more keywords did not.
+   */
+  intents?: string[]
   intro?: string
   category: string
   /** `stable` has a docs page; `undocumented` is published and built but has no page yet. */

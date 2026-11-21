@@ -2,6 +2,11 @@
 title: 'Time Slot Picker'
 description: "Pick a free time from someone's calendar: a row of days, then that day's times grouped into morning, afternoon and evening."
 category: 'Inputs'
+intents:
+  - 'Let visitors book an available time from someone''s calendar.'
+  - 'Show free appointment times for a chosen day grouped by period.'
+  - 'Pick a meeting slot like in a booking page.'
+  - 'Choose a day, then one of its open times.'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -50,6 +55,8 @@ import '@c2n/components/time-slot-picker'
 ### Days
 
 The day shown is `date` (`YYYY-MM-DD`). By default it is the day of the value, else the first day from today with a free time. Days with a free time carry a dot. Days between the first and last slot with none are disabled, and the arrow keys step over them. On a day with no free time, the picker says so and offers the next day that has one. Showing another day fires `date-change`.
+
+`disabled-dates` closes days whatever `slots` lists for them, such as a weekly closing day or a holiday: days, or `{ date, label }` objects whose label is read with the day, as on `c2-date-strip`. A closed day offers no times, and a value on a day closed afterwards is neither submitted nor counted by `required`. To pick the day with another control, such as a month calendar, hide the row of days with `::part(days) { display: none }` and set `date` from that control.
 
 Paging the days fires `range-change` with the first and last day now shown. An app that loads slots a week at a time listens for it, sets `loading` (which shows placeholder times), and sets `slots` when they arrive.
 

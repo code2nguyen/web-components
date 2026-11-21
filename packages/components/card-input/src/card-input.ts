@@ -138,6 +138,8 @@ export class CardInput extends LitElement {
   @state() private cvcDigits = ''
   /** Parts that lost focus once: only their problems show. */
   @state() private touched = new Set<Segment>()
+  /** Set by `reportValidity()`: from then on a missing card is announced too. */
+  @state() private validityShown = false
   @state() private disabledByForm = false
   /** The detected brand's name, in a polite live region: announced once per change. */
   @state() private brandAnnouncement = ''
@@ -196,6 +198,7 @@ export class CardInput extends LitElement {
     this.expiryDigits = ''
     this.cvcDigits = ''
     this.touched = new Set()
+    this.validityShown = false
     this.brandAnnouncement = ''
     this.emitCardChange()
   }
@@ -229,12 +232,18 @@ export class CardInput extends LitElement {
   }
 
   reportValidity() {
+    // Reported, so announced: unlike the `invalid` event, which a page's `form.checkValidity()` fires as well.
+    this.validityShown = true
+    // Drawn now, so the control is marked invalid when the report moves the focus into it.
+    this.performUpdate()
     return this.internals.reportValidity()
   }
 
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.syncFormState()
+    // The error look reads the message too.
+    this.requestUpdate()
   }
 
   formResetCallback() {
@@ -294,6 +303,23 @@ export class CardInput extends LitElement {
     return !!(this.numberDigits || this.expiryDigits || this.cvcDigits)
   }
 
+  /** The error `reportValidity()` reported, when no part has one of its own. */
+  private reportedError(): { segment: Segment; message: string } | null {
+    if (!this.validityShown || this.effectiveDisabled) return null
+    if (this.customValidityMessage) return { segment: 'number', message: this.customValidityMessage }
+    // A started card reports its first problem, untouched parts included, as the validity does.
+    if (this.anyFilled()) return this.firstError(true)
+    return this.required ? { segment: 'number', message: this.msg.t('valueMissing') } : null
+  }
+
+  /**
+   * Whether the error is shown, on the host and on the field alike: a part's error, an enclosing field's error, or a
+   * missing card or custom message once `reportValidity()` reported it.
+   */
+  private get errorShown(): boolean {
+    return (!!this.firstError() || !!this.reportedError() || this.field.invalid) && !this.effectiveDisabled
+  }
+
   private syncFormState(): void {
     const filled = this.anyFilled()
     if (this.effectiveDisabled || !this.name || !filled) this.internals.setFormValue(null)
@@ -311,6 +337,9 @@ export class CardInput extends LitElement {
     const flags = this.customValidityMessage || error ? { customError: true } : missing ? { valueMissing: true } : {}
     const anchor = this.input(error?.segment ?? 'number') ?? undefined
     this.internals.setValidity(flags, message, anchor)
+    // Stated explicitly: with a role on the host, Chrome otherwise reads `invalid` from the validity, so a required
+    // empty card would be announced as invalid on load. Invalid is the error shown, or the validity once reported.
+    this.internals.ariaInvalid = this.errorShown ? 'true' : 'false'
   }
 
   private input(segment: Segment): HTMLInputElement | null {
@@ -448,8 +477,10 @@ export class CardInput extends LitElement {
 
   override render() {
     const disabled = this.effectiveDisabled
-    const error = this.firstError()
-    const invalid = (!!error || this.field.invalid) && !disabled
+    // A missing card or custom message reported by `reportValidity()` shows on the number, where the focus goes.
+    // A reported custom message comes first, as in the validity; then a part's own error.
+    const error = (this.validityShown && this.customValidityMessage ? this.reportedError() : null) ?? this.firstError() ?? this.reportedError()
+    const invalid = this.errorShown
     const errorId = 'card-error'
     const describedBy = this.field.describedBy(...(error && !this.field.managed ? [errorId] : []))
     const segmentInvalid = (segment: Segment) => (error?.segment === segment || (this.field.invalid && !error) ? 'true' : nothing)

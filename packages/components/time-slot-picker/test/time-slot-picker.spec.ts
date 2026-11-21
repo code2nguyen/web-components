@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, axInvalid } from '../../../../tests/component-fixture'
 import type { Page } from '@playwright/test'
 
 type Picker = HTMLElement & { value: string; date: string }
@@ -32,6 +32,8 @@ test('shows the first free day, its times grouped by period in the zone, taken o
   await expect(page.getByRole('option', { name: /^Friday,? 16 October 2026, times available$/ })).toBeVisible()
   await expect(page.getByRole('listbox', { name: 'Morning' }).getByRole('option')).toHaveText([/^0?9:00$/, /^0?9:30$/])
   await expect(page.getByRole('listbox', { name: 'Afternoon' }).getByRole('option')).toHaveText([/^14:00$/])
+  // A time reached by Tab is heard with its day: the list box is named with it.
+  await expect(page.getByRole('listbox', { name: /^Morning, Wednesday,? 14 October$/ })).toBeVisible()
   await expect(page.getByRole('listbox', { name: 'Evening' }).getByRole('option', { name: '18:00, unavailable' })).toHaveAttribute('aria-disabled', 'true')
   await expect(picker(page).locator('[part="zone"]')).toHaveText('Times in Coordinated Universal Time')
   await accessible(page)
@@ -92,6 +94,7 @@ test('loading shows a busy list; text follows the language', async ({ page, rend
   await expect(page.getByRole('listbox', { name: 'Chargement des horaires' })).toHaveAttribute('aria-busy', 'true')
   await picker(page).evaluate((element: Picker & { loading: boolean }) => (element.loading = false))
   await expect(page.getByRole('listbox', { name: 'Matin' }).getByRole('option')).toHaveText([/^0?9:00$/, /^0?9:30$/])
+  await expect(page.getByRole('listbox', { name: /^Matin, mercredi 14 octobre$/ })).toBeVisible()
   await expect(picker(page)).toHaveHostAria('aria-label', 'Choisir un horaire')
   await expect(page.getByRole('option', { name: '18:00, indisponible' })).toBeVisible()
 })
@@ -109,4 +112,97 @@ test('slots that arrive after the picker renders move it to their first free day
   await expect(page.getByRole('option', { name: /^Tuesday,? 27 October 2026/ })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('option', { name: /^0?9:00$/ })).toBeVisible()
   expect(await events(page)).toEqual([{ start: '2026-10-26', end: '2026-11-01' }])
+})
+
+test('a required picker with no value is not announced as invalid before the user does anything', async ({ page, renderScenario, browserName }) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await expect(page.getByRole('listbox', { name: 'Morning' })).toBeVisible()
+  expect(await picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => element.checkValidity())).toBe(false)
+  // A page that checks its form to enable a submit button reports nothing either.
+  expect(await page.locator('form').evaluate((form: HTMLFormElement) => form.checkValidity())).toBe(false)
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).not.toHaveAttribute('aria-invalid', 'true')
+  expect(await axInvalid(page, 'group', 'Time')).not.toBe('true')
+})
+
+test('disabled-dates closes days with their reason: no times there, skipped for the first day shown and the next available', async ({
+  page,
+  renderScenario,
+}) => {
+  const closed = JSON.stringify([{ date: '2026-10-14', label: 'Closed for training' }])
+  await renderScenario(scenario(`disabled-dates='${closed}'`))
+  // The 14th has free times but is closed: the picker opens on the 16th, the next day with one.
+  await expect(page.getByRole('option', { name: /^Wednesday,? 14 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('option', { name: /^Friday,? 16 October 2026/ })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('option', { name: /^10:00$/ })).toBeVisible()
+  // Shown anyway through `date`, it offers no times and jumps to the next open day.
+  await picker(page).evaluate((element: Picker) => (element.date = '2026-10-14'))
+  await expect(picker(page).locator('[part="empty"]')).toContainText(/No times on Wednesday,? 14 October/)
+  await expect(page.getByRole('button', { name: /Next available: Friday,? 16 October/ })).toBeVisible()
+  await expect(page.getByRole('option', { name: /^0?9:00$/ })).toHaveCount(0)
+})
+
+test('a value on a day closed afterwards is not submitted and does not answer required', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker name="when" required time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  const state = () =>
+    picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => ({
+      valid: element.checkValidity(),
+      submitted: new FormData(element.closest('form')!).get('when'),
+    }))
+  expect(await state()).toEqual({ valid: true, submitted: '2026-10-14T09:30:00Z' })
+  await picker(page).evaluate((element: Picker & { disabledDates: string[] }) => (element.disabledDates = ['2026-10-14']))
+  // The picker moves on to the next open day.
+  await expect(page.getByRole('option', { name: /^10:00$/ })).toBeVisible()
+  expect(await state()).toEqual({ valid: false, submitted: null })
+  expect(await picker(page).evaluate((element: Picker & { validationMessage: string }) => element.validationMessage)).toBe(
+    'The chosen time is no longer available. Please choose another.',
+  )
+})
+
+test('closed days stay closed in the row of days while loading', async ({ page, renderScenario }) => {
+  await renderScenario(scenario(`loading disabled-dates='[{"date":"2026-10-15","label":"Closed for training"}]'`))
+  await expect(page.getByRole('option', { name: /^Thursday,? 15 October 2026, Closed for training$/ })).toHaveAttribute('aria-disabled', 'true')
+})
+
+test('a standalone picker is announced as invalid once reportValidity() reported it, and not after a time is picked', async ({
+  page,
+  renderScenario,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', 'reads the accessibility tree over CDP')
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker required label="Time" time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await picker(page).evaluate((element: Picker & { reportValidity(): boolean }) => element.reportValidity())
+  await expect.poll(() => axInvalid(page, 'group', 'Time')).toBe('true')
+  // The times say so too, where the screen reader is.
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).toHaveAttribute('aria-invalid', 'true')
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).not.toHaveAttribute('aria-invalid', 'true')
+  // A custom message reported, then withdrawn: the times follow at once.
+  await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void; reportValidity(): boolean }) => {
+    element.setCustomValidity('Too late')
+    element.reportValidity()
+  })
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).toHaveAttribute('aria-invalid', 'true')
+  await picker(page).evaluate((element: Picker & { setCustomValidity(message: string): void }) => element.setCustomValidity(''))
+  await expect(page.getByRole('listbox', { name: /^Morning/ })).not.toHaveAttribute('aria-invalid', 'true')
+  await expect.poll(() => axInvalid(page, 'group', 'Time')).not.toBe('true')
+})
+
+test('a value whose slot is no longer loaded is still dropped when its day closes', async ({ page, renderScenario }) => {
+  await renderScenario(`<form lang="en-GB"><c2-time-slot-picker name="when" required time-zone="UTC" slots='${SLOTS}'></c2-time-slot-picker></form>`)
+  await page.getByRole('option', { name: /^0?9:30$/ }).click()
+  // The app pages on and loads that week only, then closes the 14th.
+  await picker(page).evaluate((element: Picker & { slots: unknown; disabledDates: string[] }) => {
+    element.slots = [{ start: '2026-10-21T09:00:00Z' }]
+    element.disabledDates = ['2026-10-14']
+  })
+  await expect
+    .poll(() =>
+      picker(page).evaluate((element: Picker & { checkValidity(): boolean }) => ({
+        valid: element.checkValidity(),
+        submitted: new FormData(element.closest('form')!).get('when'),
+      })),
+    )
+    .toEqual({ valid: false, submitted: null })
 })

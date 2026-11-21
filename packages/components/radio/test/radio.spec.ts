@@ -120,3 +120,26 @@ test("the group fires its own input with its new value, and keeps its options' i
   await page.locator('c2-radio[value="b"]').click()
   await expect.poll(() => page.evaluate(() => (window as unknown as { heard: string[] }).heard)).toEqual(['input:c2-radio-group:b', 'change:c2-radio-group:b'])
 })
+test('radios created from script: the first click on another option schedules no update after an update', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(`<c2-radio-group aria-label="Service"></c2-radio-group>`)
+  await page.locator('c2-radio-group').evaluate(async (group) => {
+    for (const [value, text] of [
+      ['cut', 'Cut'],
+      ['colour', 'Colour'],
+    ]) {
+      const radio = document.createElement('c2-radio') as HTMLElement & { value: string }
+      radio.value = value
+      radio.textContent = text
+      group.append(radio)
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  })
+  await page.getByRole('radio', { name: 'Colour' }).click()
+  await expect(page.locator('c2-radio-group')).toHaveJSProperty('value', 'colour')
+  await expect(page.getByRole('radio', { name: 'Cut' })).not.toBeChecked()
+  expect(warnings).toEqual([])
+})

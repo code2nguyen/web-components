@@ -1,6 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { state } from 'lit/decorators.js'
-import { property, jsonPropertyConverter, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, itemListPropertyConverter, readDisabledDates } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import { FieldContextConsumer } from '@c2n/core/contexts/field.js'
@@ -12,6 +12,14 @@ import styles from './date-strip.scss?inline'
 import { disabledByAncestor } from '@c2n/core/dom-helper.js'
 
 export { dateStripMessages } from './messages'
+
+/** A day that cannot be picked, with the reason a screen reader hears with it. */
+export interface DateStripDisabledDate {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  /** Why it cannot be picked ("Closed on Sundays"), read with the day by screen readers. */
+  label?: string
+}
 
 /** A day with something on it, drawn as a dot under the day. */
 export interface DateStripMarker {
@@ -69,7 +77,7 @@ function addDays(date: Date, amount: number): Date {
  * The value is a `YYYY-MM-DD` string in the local calendar, so it does not shift across time zones. `min` and `max`
  * disable the days outside them and stop the paging there. `markers` lists the days with a dot, each with an optional
  * label a screen reader hears with the day. `disabled-dates` turns off single days (fully booked, closed), which the arrow
- * keys step over.
+ * keys step over; a day given as `{ date, label }` is read with its reason ("Closed on Sundays").
  *
  * The days are a list box with one tab stop: the arrow keys move by day and page on at the ends, Home and End go to
  * the first and last day shown, Page Up and Page Down page, and Enter or Space picks. It is a form control: under a
@@ -136,8 +144,11 @@ export class DateStrip extends LitElement {
   /** The latest day that can be picked, as `YYYY-MM-DD`. */
   @property() max = ''
 
-  /** Single days that cannot be picked, as `YYYY-MM-DD`. As an attribute, a `;`-separated list. */
-  @property({ attribute: 'disabled-dates', converter: arrayPropertyConverter }) disabledDates: string[] = []
+  /**
+   * Single days that cannot be picked: `YYYY-MM-DD` strings, or `{ date, label }` objects whose label says why and is
+   * read with the day. As an attribute, a `;`-separated list of days, or a JSON array of either form.
+   */
+  @property({ attribute: 'disabled-dates', converter: itemListPropertyConverter }) disabledDates: (DateStripDisabledDate | string)[] = []
 
   /** The days with a dot. As an attribute, a JSON array of `"YYYY-MM-DD"` strings or `{ date, label }` objects. */
   @property({ converter: jsonPropertyConverter }) markers: (DateStripMarker | string)[] = []
@@ -169,8 +180,8 @@ export class DateStrip extends LitElement {
   private markerMap = new Map<string, DateStripMarker>()
   /** Set when a value from outside moved the days shown: `range-change` follows the render. */
   private rangeMoved = false
-  /** `disabledDates` as a set, rebuilt when it changes. */
-  private disabledSet = new Set<string>()
+  /** `disabledDates` by day, each with its reason (`''` for none), rebuilt when it changes. */
+  private disabledMap = new Map<string, string>()
   /** The locale the page of days was laid out for: a week starts on its first day. */
   private layoutLocale = ''
 
@@ -223,7 +234,7 @@ export class DateStrip extends LitElement {
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('value') && this.value && !fromIso(this.value)) this.value = ''
     if (this.defaultValue === undefined) this.defaultValue = this.value
-    if (changed.has('disabledDates')) this.disabledSet = new Set(Array.isArray(this.disabledDates) ? this.disabledDates : [])
+    if (changed.has('disabledDates')) this.disabledMap = readDisabledDates(this.disabledDates)
     if (changed.has('markers')) {
       this.markerMap = new Map()
       for (const marker of Array.isArray(this.markers) ? this.markers : []) {
@@ -303,8 +314,15 @@ export class DateStrip extends LitElement {
     return (!!this.minDay && day < this.minDay) || (!!this.maxDay && day > this.maxDay)
   }
 
+  /** A day as a screen reader hears it: the date, what is on it, then why it cannot be picked. */
+  private dayLabel(day: string, name: string, marker: DateStripMarker | undefined): string {
+    const marked = marker ? this.msg.t('marked', name, marker.label || this.msg.t('hasEvents')) : name
+    const reason = this.disabledMap.get(day)
+    return reason ? this.msg.t('disabledReason', marked, reason) : marked
+  }
+
   private unavailable(day: string): boolean {
-    return this.effectiveDisabled || this.outOfRange(day) || this.disabledSet.has(day)
+    return this.effectiveDisabled || this.outOfRange(day) || this.disabledMap.has(day)
   }
 
   private canPage(direction: -1 | 1): boolean {
@@ -327,10 +345,12 @@ export class DateStrip extends LitElement {
   }
 
   private syncFormState(): void {
-    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value ? null : this.value, this.value)
-    const missing = this.required && !this.value
+    // A day closed after it was picked (disabled-dates arriving late) is kept, but neither submitted nor an answer.
+    const closed = !!this.value && this.disabledMap.has(this.value)
+    this.internals.setFormValue(this.effectiveDisabled || !this.name || !this.value || closed ? null : this.value, this.value)
+    const missing = this.required && (!this.value || closed)
     const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
-    const message = this.customValidityMessage || (missing ? this.msg.t('valueMissing') : '')
+    const message = this.customValidityMessage || (missing ? this.msg.t(closed ? 'closedValue' : 'valueMissing') : '')
     const anchor = this.renderRoot?.querySelector<HTMLElement>('.day[tabindex="0"]') ?? undefined
     this.internals.setValidity(flags, message, anchor)
   }
@@ -486,7 +506,7 @@ export class DateStrip extends LitElement {
               role="option"
               data-date=${day}
               tabindex=${day === stop ? 0 : -1}
-              aria-label=${marker ? this.msg.t('marked', name, marker.label || this.msg.t('hasEvents')) : name}
+              aria-label=${this.dayLabel(day, name, marker)}
               aria-selected=${selected ? 'true' : 'false'}
               aria-current=${day === today ? 'date' : nothing}
               aria-disabled=${disabled ? 'true' : nothing}

@@ -3,6 +3,8 @@ import { defineMessages } from '@c2n/core/localize.js'
 const en = {
   /** The group's accessible name when it has no `label`. */
   addressGroup: 'Address',
+  /** The group's accessible name when it has no `label` and is fixed to one country: `{0}` is that country. */
+  addressIn: (country: string) => `Address (${country})`,
   /** The country picker. */
   country: 'Country or region',
   /** A region picker's placeholder. */
@@ -15,6 +17,8 @@ const en = {
   postalInvalid: (label: string, example: string) => `${label} should look like ${example}`,
   /** Announced when a suggestion fills the address. */
   filled: 'Address filled in',
+  /** Announced when a suggestion is from another country than the one the field is fixed to: `{0}` is that country. */
+  otherCountry: (country: string) => `Only addresses in ${country} can be used`,
   // Field labels.
   address: 'Address',
   addressLine1: 'Address line 1',

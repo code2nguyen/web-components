@@ -2,6 +2,74 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.31",
+      "date": "2026-11-21",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["mcp"],
+              "text": "Search component intents, gate icon names, add a held-out benchmark",
+              "hash": "7134e1f"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Add color-success and color-warning tokens with dark values",
+              "hash": "484c057"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Close single days with disabled-dates and days by rule with isDateDisabled",
+              "hash": "2600722"
+            },
+            {
+              "scopes": ["date-strip"],
+              "text": "Read a disabled day with its reason, given as { date, label } in disabled-dates",
+              "hash": "2cff296"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Add itemListPropertyConverter for lists of strings or small objects",
+              "hash": "a129118"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["time-slot-picker"],
+              "text": "Not invalid on load, times named with their day, and closed days through disabled-dates",
+              "hash": "4c87da2"
+            },
+            {
+              "scopes": ["radio"],
+              "text": "Defer the group's option sync when an option reports a change from its own update",
+              "hash": "7a44d6a"
+            },
+            {
+              "scopes": ["wheel-picker"],
+              "text": "Stop announcing a custom validity message as invalid before a field shows it",
+              "hash": "0ae3ed8"
+            },
+            {
+              "scopes": ["card-input"],
+              "text": "Stop announcing a required empty card as invalid before the user edits it",
+              "hash": "ade8e39"
+            },
+            {
+              "scopes": ["lab"],
+              "text": "Reach a target with its own tab stop by Tab, not by walking a sibling control with the arrow keys",
+              "hash": "f5c8a50"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.30",
       "date": "2026-11-20",
       "sections": [

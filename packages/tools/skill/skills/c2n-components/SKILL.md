@@ -26,7 +26,7 @@ Reuse an existing variant or token bridge over creating a new one.
 
 When c2n MCP tools are available:
 
-1. `list_components` or `search_components` to pick the component for the need.
+1. `list_components` or `search_components` to pick the component for the need. Search with the need as the requirement states it ("let users turn a setting on or off"), not only a widget name you guess; each hit's "use it to" line says what it is for, and `get_component` lists them all, which is how to choose between siblings.
 2. `get_component` for attributes, slots, events, documented CSS parts and CSS variables (grouped by semantic target and state, with the theme token each follows).
 3. `get_examples` for real markup. Start with the default example, then pick a look from the docs gallery (§2a). Preserve any accessibility note returned with an example.
 4. `get_presets` when a curated visual treatment is useful. A preset is structured CSS-variable and attribute data suitable for generation; a gallery example is broader usage and composition context.
