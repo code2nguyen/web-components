@@ -19,6 +19,10 @@ import { execFileSync } from 'node:child_process'
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+// node-plop and sass resolve through the workspaces that own them (scripts/generator's plop, packages/tools/sass), hoisted
+// to the root. They are deliberately not root devDependencies: declaring sass at the root made npm 11's `npm ci` demand
+// every platform package of its optional @parcel/watcher dependency in the lockfile, which a lockfile written on one
+// platform does not hold (see "Linux native binaries in the lockfile" in CLAUDE.md).
 import nodePlop from 'node-plop'
 import { compile, NodePackageImporter } from 'sass'
 

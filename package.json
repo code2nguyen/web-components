@@ -64,10 +64,8 @@
     "husky": "9.1.7",
     "lerna": "10.0.1",
     "lint-staged": "17.4.1",
-    "node-plop": "0.32.3",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "sass": "1.104.0",
     "semver": "7.7.2",
     "wireit": "^0.14.13"
   },
