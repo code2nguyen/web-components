@@ -113,6 +113,23 @@ test('another country changes the parts, their order and labels, and keeps what 
   ])
 })
 
+test('a fixed field named by its author still announces the country, as the group description', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-address-field label="Shipping address" countries="FR"></c2-address-field>`)
+  const group = field(page).locator('[role="group"]')
+  await expect(group).toHaveAttribute('aria-label', 'Shipping address')
+  await expect(group).toHaveAccessibleDescription('France')
+  // Not fixed: no country description.
+  await props(field(page), { countries: ['FR', 'DE'] })
+  await expect(group).not.toHaveAttribute('aria-describedby')
+})
+
+test('a fixed field named by its c2-form-field describes the group with the country, then the hint', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-form-field label="Delivery" hint="Where we ship"><c2-address-field countries="FR"></c2-address-field></c2-form-field>`)
+  const group = field(page).locator('[role="group"]')
+  await expect(group).toHaveAttribute('aria-label', 'Delivery')
+  await expect(group).toHaveAccessibleDescription('France Where we ship')
+})
+
 test('one country in countries fixes the field to it: no picker, and another country in the value is replaced', async ({ page, renderScenario }) => {
   await renderScenario(`<form><c2-address-field name="ship" countries="fr"></c2-address-field></form>`)
   expect(await labels(field(page))).toEqual(['Address', 'Apartment, suite, etc. (optional)', 'Postal code', 'City'])
