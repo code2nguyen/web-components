@@ -72,6 +72,12 @@ jobs:
         run: npm run check:agent-docs
       - name: Verify generated component manifests are committed
         run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+      # Also in deploy.yml as a backstop; here so a stale file fails the pull request, not the deploy after the merge.
+      - name: Slot-styling audit and lab/GAPS.md are up to date
+        run: |
+          node scripts/generate-slot-styling-audit.mjs
+          node lab/scripts/gaps.mjs > /dev/null
+          git diff --exit-code -- scripts/data/slot-styling-audit.json lab/GAPS.md
       # The initial full-library audit still has unresolved failures. Collect the complete result on every PR;
       # promote this to a required gate only after the inventory and browser/panel evidence reach zero failures.
       - name: Style-contract static diagnostic

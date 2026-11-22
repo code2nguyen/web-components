@@ -145,6 +145,8 @@ npm run build:tools                           # regenerate the MCP registry (ign
 npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
 npm run check:reachability                    # served docs page, description, 3+ intents, umbrella entry, tags resolve (docs/agents/adding-a-component.md)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
+node scripts/generate-slot-styling-audit.mjs  # add the new slots to scripts/data/slot-styling-audit.json, then fill in each new entry's decision (docs:check)
+node lab/scripts/gaps.mjs > /dev/null         # lab/GAPS.md lists the new component (after build:tools); CI fails on either file left stale
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
 node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/<name>   # legacy-pattern scan: fix each error or justify it with a modern-web-ignore comment
 npm run lint && npm run format:check          # or: npm run fix
