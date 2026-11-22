@@ -27,7 +27,6 @@
     "allow": [
       "Bash(npx tsc --noEmit)",
       "Bash(npx tsc --noEmit *)",
-      "Bash(npx prettier --check *)",
       "Bash(node .claude/skills/modern-web-review/scripts/scan.mjs)",
       "Bash(node .claude/skills/modern-web-review/scripts/scan.mjs *)",
       "Bash(npm run test:type-check)",
