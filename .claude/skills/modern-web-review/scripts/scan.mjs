@@ -3,7 +3,7 @@
 // does not bring them back. Each rule names the modern replacement and the modern-web-guidance guide to read.
 //
 //   node .claude/skills/modern-web-review/scripts/scan.mjs                      # files changed vs origin/develop (+ uncommitted)
-//   node .claude/skills/modern-web-review/scripts/scan.mjs --all                # every component, core and open package
+//   node .claude/skills/modern-web-review/scripts/scan.mjs --all                # every component and core
 //   node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/tabs [more paths…]
 //   node .claude/skills/modern-web-review/scripts/scan.mjs --base=<ref> --json
 //
@@ -22,7 +22,7 @@ const base = flag('base')?.split('=')[1] ?? 'origin/develop'
 const asJson = Boolean(flag('json'))
 const paths = args.filter((a) => !a.startsWith('--'))
 
-const SOURCE_ROOTS = ['packages/components', 'packages/core/src', 'open-packages']
+const SOURCE_ROOTS = ['packages/components', 'packages/core/src']
 const isSource = (file) =>
   /\.(ts|scss)$/.test(file) &&
   SOURCE_ROOTS.some((r) => file.startsWith(r)) &&

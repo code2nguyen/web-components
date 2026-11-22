@@ -41,4 +41,4 @@ npm run test:a11y -w apps/examples/observability-nextjs
 
 The preview is served under `/web-components/demo/observability-nextjs/`, matching GitHub Pages. No environment variables, account, database, secret, real address, arbitrary endpoint, or external telemetry service is accepted.
 
-See [COMPONENT-EVALUATION.md](./COMPONENT-EVALUATION.md) for the complete c2n integration assessment and [`specs/003-nextjs-observability/quickstart.md`](../../../specs/003-nextjs-observability/quickstart.md) for end-to-end validation.
+See [COMPONENT-EVALUATION.md](./COMPONENT-EVALUATION.md) for the complete c2n integration assessment and [`specs/003-nextjs-observability/quickstart.md`](https://github.com/code2nguyen/web-components/blob/0900bc1836c9/specs/003-nextjs-observability/quickstart.md) for end-to-end validation.
