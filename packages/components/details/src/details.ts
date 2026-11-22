@@ -9,8 +9,6 @@ import { classMap } from 'lit/directives/class-map.js'
 import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
 
-const nativeCommands = typeof HTMLButtonElement === 'undefined' || 'commandForElement' in HTMLButtonElement.prototype
-
 /** A native button, or an element that draws its button in its shadow root and forwards commands to it (`c2-button`). */
 const isInvoker = (element: Element) => element instanceof HTMLButtonElement || !!element.shadowRoot?.querySelector('button')
 
@@ -150,8 +148,6 @@ export class Details extends LitElement {
   @consume({ context: accordionContext, subscribe: true })
   private accordion: AccordionContext | undefined
 
-  private commandRoot: Node | undefined
-
   constructor() {
     super()
     this.addEventListener('command', this.handleCommand)
@@ -159,10 +155,6 @@ export class Details extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!nativeCommands) {
-      this.commandRoot = this.getRootNode()
-      this.commandRoot.addEventListener('click', this.handleTriggerClick)
-    }
     // Moved open into its group: it is the open one now.
     if (this.hasUpdated && this.expanded) this.closeNamePeers()
   }
@@ -170,8 +162,6 @@ export class Details extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.accordion = undefined
-    this.commandRoot?.removeEventListener('click', this.handleTriggerClick)
-    this.commandRoot = undefined
     this.cancelContentAnimations()
     this.closing = false
   }
@@ -225,24 +215,6 @@ export class Details extends LitElement {
   }
 
   private readonly handleCommand = (event: Event) => this.runCommand(event, (event as CommandEvent).command)
-
-  /**
-   * Without invoker commands, a click on a trigger naming this panel runs its command: a native button, or an element
-   * such as `c2-button` that carries `commandfor` on its host and draws its button in a shadow root. As natively, a
-   * disabled button and a submit or reset button of a form send nothing.
-   */
-  private readonly handleTriggerClick = (event: Event) => {
-    const path = event.composedPath()
-    const trigger = path.find((node): node is Element => node instanceof Element && node.hasAttribute('commandfor'))
-    if (!trigger || !this.id || trigger.getAttribute('commandfor') !== this.id || !isInvoker(trigger)) return
-    // The button the click went through: the trigger itself, or the one in its shadow root.
-    const button = path.find(
-      (node): node is HTMLButtonElement => node instanceof HTMLButtonElement && (node === trigger || node.getRootNode() === trigger.shadowRoot),
-    )
-    const { type, form } = trigger as Element & { type?: string; form?: HTMLFormElement | null }
-    if (!button || button.disabled || trigger.matches(':disabled') || (type !== 'button' && form)) return
-    this.runCommand(event, trigger.getAttribute('command'))
-  }
 
   private runCommand(event: Event, command: string | null) {
     if (!event.defaultPrevented && (command === '--toggle' || command === '--open' || command === '--close'))
