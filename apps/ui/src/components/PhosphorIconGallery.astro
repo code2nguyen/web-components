@@ -38,7 +38,7 @@ const weights = [
   {
     items.map(({ name, markup }) => (
       <div class="phosphor-icon-gallery__item" data-name={name}>
-        {/* dogfood-exempt: one cell per icon — a c2-icon-button here is 1,512 shadow roots on one page. */}
+        {/* dogfood-exempt, c2n-ignore: one cell per icon — a c2-icon-button here is 1,512 shadow roots on one page. */}
         <button type="button" class="phosphor-icon-gallery__configure" title={`Customize ${name}`}>
           <Fragment set:html={markup} />
           <span class="phosphor-icon-gallery__label">{name}</span>

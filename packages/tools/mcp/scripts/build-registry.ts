@@ -416,7 +416,9 @@ for (const dir of packageDirs.sort()) {
     // `list_components` filters through `z.enum(registry.categories)`: a category missing here would be unfilterable.
     if (!CATEGORIES.includes(category))
       throw new Error(`${id}: category '${category}' is not in CATEGORIES (keep it in step with apps/ui/src/schemas/index.ts)`)
+    // MDX comments (`{/* c2n-ignore: … */}` markers for the validator) are not prose: dropped before the line is picked.
     const intro = doc?.body
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
       .split('\n')
       .map((l) => l.trim())
       .find((l) => l && !l.startsWith('import ') && !l.startsWith('#') && !l.startsWith('```') && !l.startsWith('<'))
