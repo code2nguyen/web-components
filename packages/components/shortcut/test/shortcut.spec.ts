@@ -1,19 +1,10 @@
 import { test, expect } from './fixture'
+import { isApple } from '../../../../tests/component-fixture'
 
 type Page = import('@playwright/test').Page
 
 const log = (page: Page) => page.getByRole('status')
 
-/**
- * The page's own reading of the platform, as `isApplePlatform()` does it. A device preset can report a platform other
- * than the host's (`Desktop Chrome` claims Windows on a Mac), so `ControlOrMeta`, which follows the host, would press
- * the wrong modifier.
- */
-const isApple = (page: Page) =>
-  page.evaluate(() => {
-    const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? ''
-    return /mac|iphone|ipad|ipod/i.test(platform)
-  })
 const mod = async (page: Page, key: string) => `${(await isApple(page)) ? 'Meta' : 'Control'}+${key}`
 
 test('fires the matching action and prevents the browser default', async ({ page, scenario }) => {

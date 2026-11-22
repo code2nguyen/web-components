@@ -50,7 +50,8 @@ test('trigger="click" fires from the click; the colours come from the variable',
 })
 
 test('burst and emoji draw and end; a page click goes through the stage while it plays', async ({ page, renderScenario }) => {
-  await renderScenario(`<c2-celebration kind="burst" style="--c2-celebration--duration: 1500ms"></c2-celebration><c2-button id="under">Under</c2-button>`)
+  // A burst lives 30% of the duration and fades as it goes: 5s keeps its sparks solid long enough to sample.
+  await renderScenario(`<c2-celebration kind="burst" style="--c2-celebration--duration: 5000ms"></c2-celebration><c2-button id="under">Under</c2-button>`)
   await watch(celebration(page), 'celebration-end')
   await page.evaluate(() => document.getElementById('under')!.addEventListener('click', () => (document.body.dataset.clicked = 'yes')))
   await celebration(page).evaluate((element) => (element as HTMLElement & { fire(options: object): void }).fire({ x: 40, y: 40 }))
@@ -60,6 +61,7 @@ test('burst and emoji draw and end; a page click goes through the stage while it
   await expect.poll(() => events(page)).toEqual([null])
 
   await props(celebration(page), { kind: 'emoji', emoji: ['🚀'] })
+  await celebration(page).evaluate((element) => (element as HTMLElement).style.setProperty('--c2-celebration--duration', '1500ms'))
   await celebration(page).evaluate((element) => (element as HTMLElement & { fire(): void }).fire())
   await expect.poll(() => drawn(page)).toBe(true)
   await expect.poll(() => events(page)).toHaveLength(2)

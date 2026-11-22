@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import type { Flow, FlowEdge, FlowLayout, FlowNode } from '../src/flow'
-import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, isApple } from '../../../../tests/component-fixture'
 
 const NODES: FlowNode[] = [
   { id: 'checkout', label: 'Checkout', status: 'success', meta: '4s' },
@@ -169,8 +169,9 @@ test('the canvas context menu groups the view controls and switches the layout d
     await expect(item(page, value)).toBeVisible()
   }
   await expect(item(page, 'flow:details')).toHaveCount(0)
-  await expect(item(page, 'flow:zoom-in').locator('c2-kbd[slot="shortcut"]')).toHaveText('Ctrl +')
-  await expect(item(page, 'flow:fit').locator('c2-kbd[slot="shortcut"]')).toHaveText('Ctrl 0')
+  const apple = await isApple(page)
+  await expect(item(page, 'flow:zoom-in').locator('c2-kbd[slot="shortcut"]')).toHaveText(apple ? '⌘+' : 'Ctrl +')
+  await expect(item(page, 'flow:fit').locator('c2-kbd[slot="shortcut"]')).toHaveText(apple ? '⌘0' : 'Ctrl 0')
   await expect(item(page, 'flow:direction-lr')).toHaveJSProperty('checked', true)
   // Nothing has been moved yet, so there is no custom layout to discard.
   await expect(item(page, 'flow:auto-layout')).toHaveJSProperty('disabled', true)
@@ -431,12 +432,8 @@ test('Ctrl/⌘ + plus, minus and 0 zoom and fit while focus is in the flow; the 
   await renderScenario(flow())
   const scale = () => page.locator('c2-flow .viewport').evaluate((element) => Number(/scale\(([\d.]+)\)/.exec((element as HTMLElement).style.transform)?.[1]))
   const fitted = await scale()
-  // The modifier the page reads as `mod`. Playwright's ControlOrMeta follows the host OS instead, which differs on macOS.
-  const mod = await page.evaluate(() =>
-    /mac|iphone|ipad|ipod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform)
-      ? 'Meta'
-      : 'Control',
-  )
+  // The modifier the page reads as `mod`.
+  const mod = (await isApple(page)) ? 'Meta' : 'Control'
   await node(page, 'checkout').focus()
 
   await page.keyboard.press('-')

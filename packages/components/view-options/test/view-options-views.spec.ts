@@ -90,7 +90,7 @@ test('Save as and Rename ask for a name in a field loaded on first use, Enter co
   await expect(field).toHaveCount(0)
   await expect(panel(page)).toBeVisible()
   await action(page, 'view-rename').click()
-  await page.keyboard.press('Control+A')
+  await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Open bugs')
   await action(page, 'view-confirm').click()
   expect(await events(page)).toEqual([
@@ -131,7 +131,7 @@ test('the name field has a name, focus goes back to the action after Escape or E
   // Rename keeps the view it started on, even if the app moves view-id before the name is confirmed.
   await action(page, 'view-rename').click()
   await host(page).evaluate((element: HTMLElement & { viewId: string }) => (element.viewId = 'triage'))
-  await page.keyboard.press('Control+A')
+  await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('Bugs')
   await page.keyboard.press('Enter')
   expect(await events(page)).toEqual([{ id: 'mine', name: 'Bugs' }])

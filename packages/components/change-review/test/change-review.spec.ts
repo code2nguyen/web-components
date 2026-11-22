@@ -1,4 +1,4 @@
-import { test, expect, accessible, watch, props } from '../../../../tests/component-fixture'
+import { test, expect, accessible, watch, props, isApple } from '../../../../tests/component-fixture'
 import type { Locator, Page } from '@playwright/test'
 
 type Decision = 'accepted' | 'rejected' | null
@@ -91,7 +91,7 @@ test('each hunk is a named group with Accept and Reject; a decision collapses it
   await expect(review(page).getByRole('group', { name: 'Change 3 of 3: 1 line removed, nothing added' })).toBeVisible()
   await expect(hunk(page, 1).locator('ins')).toHaveText(' edited')
   await expect(review(page).locator('.gap').first()).toHaveText('⋯ 4 unchanged lines')
-  await expect(button(page, 'Accept change 1')).toHaveAttribute('title', 'Accept (Ctrl+Enter)')
+  await expect(button(page, 'Accept change 1')).toHaveAttribute('title', (await isApple(page)) ? 'Accept (⌘Enter)' : 'Accept (Ctrl+Enter)')
   await accessible(page)
 
   await button(page, 'Accept change 1').click()
@@ -133,14 +133,14 @@ test('the keyboard moves between hunks and decides them; the last decision shows
   await page.keyboard.press('Alt+ArrowUp')
   expect(await focused(page)).toBe('Accept change 1')
   await page.keyboard.press('Alt+ArrowDown')
-  await page.keyboard.press('Control+Enter')
+  await page.keyboard.press('ControlOrMeta+Enter')
   expect(await decisions(page)).toEqual([null, 'accepted', null])
   expect(await focused(page)).toBe('Accept change 3')
-  await page.keyboard.press('Control+Backspace')
+  await page.keyboard.press('ControlOrMeta+Backspace')
   expect(await decisions(page)).toEqual([null, 'accepted', 'rejected'])
   // Wraps round to the hunk still open.
   expect(await focused(page)).toBe('Accept change 1')
-  await page.keyboard.press('Control+Enter')
+  await page.keyboard.press('ControlOrMeta+Enter')
   await expect(bar(page)).toContainText('All 3 changes reviewed')
   await expect(bar(page)).toContainText('2 accepted · 1 rejected')
   await expect(page.locator('#apply')).toBeVisible()
@@ -209,7 +209,9 @@ test('keys typed in slotted content keep their meaning; a shortcut with nothing 
     ;(window as unknown as { kept: string[] }).kept = []
     document.addEventListener('keydown', (event) => {
       if (!event.defaultPrevented && !['Control', 'Alt', 'Shift', 'Meta'].includes(event.key))
-        (window as unknown as { kept: string[] }).kept.push(`${event.ctrlKey ? 'Control+' : ''}${event.altKey ? 'Alt+' : ''}${event.key}`)
+        (window as unknown as { kept: string[] }).kept.push(
+          `${event.ctrlKey ? 'Control+' : ''}${event.metaKey ? 'Meta+' : ''}${event.altKey ? 'Alt+' : ''}${event.key}`,
+        )
     })
   })
   const kept = () => page.evaluate(() => (window as unknown as { kept: string[] }).kept.splice(0))
@@ -217,19 +219,23 @@ test('keys typed in slotted content keep their meaning; a shortcut with nothing 
   await button(page, 'Accept all').click()
   const input = page.locator('#message')
   await expect(input).toBeVisible()
+  // Deleting a word is Alt+Backspace on Apple platforms, Ctrl+Backspace elsewhere; the decide shortcut is ⌘ or Ctrl+Enter.
+  const apple = await isApple(page)
+  const deleteWord = apple ? 'Alt+Backspace' : 'Control+Backspace'
+  const decide = apple ? 'Meta+Enter' : 'Control+Enter'
   await input.fill('fix total rounding')
-  await input.press('Control+Backspace')
+  await input.press(deleteWord)
   await expect(input).toHaveValue('fix total ')
   await input.press('Alt+ArrowDown')
-  await input.press('Control+Enter')
-  expect(await kept()).toEqual(['Control+Backspace', 'Alt+ArrowDown', 'Control+Enter'])
+  await input.press(decide)
+  expect(await kept()).toEqual([deleteWord, 'Alt+ArrowDown', decide])
   expect(await decisions(page)).toEqual(['accepted', 'accepted', 'accepted'])
 
   // On the hunks the shortcuts still work, and one with nothing to do is not swallowed.
   await review(page).evaluate((element) => (element as HTMLElement & { reset(): void }).reset())
   await button(page, 'Accept change 1').focus()
   await page.keyboard.press('Alt+ArrowUp')
-  await page.keyboard.press('Control+Enter')
+  await page.keyboard.press('ControlOrMeta+Enter')
   expect(await decisions(page)).toEqual(['accepted', null, null])
   expect(await kept()).toEqual(['Alt+ArrowUp'])
 })

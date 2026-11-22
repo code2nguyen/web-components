@@ -1,13 +1,8 @@
 import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from './fixture'
+import { isApple } from '../../../../tests/component-fixture'
 
 type Page = import('@playwright/test').Page
-
-const isApple = (page: Page) =>
-  page.evaluate(() => {
-    const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? ''
-    return /mac|iphone|ipad|ipod/i.test(platform)
-  })
 
 const dialog = (page: Page) => page.getByRole('dialog', { name: 'Keyboard shortcuts' })
 const rows = (page: Page) => page.locator('c2-shortcut-sheet').getByRole('listitem')
