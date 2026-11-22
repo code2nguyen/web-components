@@ -6,11 +6,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, isCommandInvoker, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
-
-/** A native button, or an element that draws its button in its shadow root and forwards commands to it (`c2-button`). */
-const isInvoker = (element: Element) => element instanceof HTMLButtonElement || !!element.shadowRoot?.querySelector('button')
 
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
 export interface DetailsEventMap {
@@ -230,7 +227,7 @@ export class Details extends LitElement {
     const expanded = String(this.expanded)
     if (this.id && root.querySelectorAll)
       for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="--toggle"]`)) {
-        if (!isInvoker(trigger) || (trigger.ariaExpanded === expanded && (trigger.getAttribute('aria-expanded') ?? expanded) === expanded)) continue
+        if (!isCommandInvoker(trigger) || (trigger.ariaExpanded === expanded && (trigger.getAttribute('aria-expanded') ?? expanded) === expanded)) continue
         trigger.ariaExpanded = expanded
         // modern-web-ignore: aria-attribute-on-other-element updates only the aria-expanded the author wrote on a c2-button trigger, so it does not go stale
         if (!(trigger instanceof HTMLButtonElement) && trigger.hasAttribute('aria-expanded')) trigger.setAttribute('aria-expanded', expanded)

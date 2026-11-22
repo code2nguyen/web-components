@@ -341,7 +341,7 @@ test('a c2-button trigger drives a headless panel, and its inner button reports 
   await accessible(page)
 })
 
-test('a running c2-button, a submit c2-button of a form and a non-button send nothing', async ({ page, renderScenario }) => {
+test('a running c2-button, the submit and untyped buttons of a form and a non-button send nothing', async ({ page, renderScenario }) => {
   await renderScenario('<c2-details id="filters" headless><p>Status: open</p></c2-details>')
   await page.locator('main').evaluate(
     async (main, { url, markup }) => {
@@ -353,14 +353,23 @@ test('a running c2-button, a submit c2-button of a form and a non-button send no
     {
       url: BUTTON_MODULE,
       markup: `<c2-button running commandfor="filters" command="--toggle">Busy</c2-button>
-        <form><c2-button type="submit" commandfor="filters" command="--toggle">Send</c2-button></form>
+        <form><c2-button type="submit" commandfor="filters" command="--toggle" aria-expanded="false">Send</c2-button>
+          <button commandfor="filters" command="--toggle" aria-expanded="false">Untyped</button></form>
+        <input type="button" commandfor="filters" command="--toggle" aria-expanded="false" value="Input">
         <span commandfor="filters" command="--toggle">Text</span>`,
     },
   )
-  for (const selector of ['c2-button[running]', 'c2-button[type="submit"]', 'span[commandfor]'])
+  for (const selector of ['c2-button[running]', 'c2-button[type="submit"]', 'form > button', 'span[commandfor]'])
     await page.locator(selector).evaluate((element) => ((element.shadowRoot?.querySelector('button') ?? element) as HTMLElement).click())
   await page.locator('c2-button[running]').evaluate((element) => (element as HTMLElement).click())
   await expect(page.locator('c2-details')).toHaveJSProperty('expanded', false)
+  // Opened another way: the submit button controls nothing, so its authored state is left as written.
+  await page.locator('c2-details').evaluate((element: Details) => (element.expanded = true))
+  await expect(page.locator('c2-details')).toHaveJSProperty('expanded', true)
+  await expect(page.locator('c2-button[type="submit"]')).toHaveAttribute('aria-expanded', 'false')
+  expect(await page.locator('c2-button[type="submit"]').evaluate((el) => (el as HTMLElement).ariaExpanded)).toBe('false')
+  await expect(page.locator('form > button')).toHaveAttribute('aria-expanded', 'false')
+  await expect(page.locator('input[commandfor]')).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('headless content may draw past the panel edge, as a focus ring does', async ({ page, renderScenario }) => {
