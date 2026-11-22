@@ -87,7 +87,7 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
   <c2-cascader
     aria-label="Choose a location"
     placeholder="Choose a district"
- 
+
   >
     <div slot="empty">No regions available.</div>
   </c2-cascader>
@@ -102,7 +102,7 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
 
 The placeholder, the empty state and the names of the panel and its columns are message tokens: an app translates them once with `addTranslations`, and each cascader speaks the language of its nearest `lang`. A `placeholder` attribute still overrides one instance.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=En français,description=The placeholder and the panel in the language of the page,useWhen=The application is translated
 <div lang="fr">

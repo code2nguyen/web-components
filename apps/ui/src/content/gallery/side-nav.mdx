@@ -11,7 +11,7 @@ import { SideNav } from '@c2n/components/side-nav'
 
 Every card is a fixed-height frame with a narrow drawer; the look is a handful of `--c2-side-nav--*` variables on a class. The rows inside are plain links styled by the card.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -215,7 +215,7 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
 
 The overlay is kept inside its frame with `--c2-side-nav__over--position: absolute`; leave it `fixed` in an app so it covers the viewport. The rail cards put the toggle in the drawer header and hide labels with a rule on `:not([opened])`.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Overlay
 <style>

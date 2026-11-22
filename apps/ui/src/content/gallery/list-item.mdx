@@ -179,7 +179,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
 
 `prefix-icon` and `suffix-icon` accept an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`, sized by `--c2-list-item__icon--size`. Anything can go in the default slot; use `label` to give a select a short name for a rich row.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Prefix icons
 <style>
@@ -518,7 +518,7 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
 
 A control in the `control` slot turns the row into a settings row: the row's text names the control, its `description` describes it, and a click anywhere on the row flips a switch or checkbox or focuses a select. The control keeps its own role, focus and keys. For a row that opens another page with its current value, use an `href` row with the value and a chevron in `suffix-icon`.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Settings group
 <style>

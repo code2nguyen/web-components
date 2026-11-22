@@ -14,7 +14,7 @@ import FindBarExamplesRuntime from '../../components/FindBarExamplesRuntime.astr
 
 Every match is one `<mark>`, styled by the `--c2-highlight__mark--*` variables; the match at `active-index` adds the `--c2-highlight__mark__active--*` ones on top.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-highlight query="apple">Apple pie, apple tart and pineapple crumble.</c2-highlight>
@@ -103,7 +103,7 @@ return formatUser(user)</c2-highlight>
 
 `c2-find-bar` drives the highlights inside the element its `for` names. Type in a card's field: Enter and Shift+Enter step through the matches, Alt+C and Alt+W toggle match case and whole word, Escape clears.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Find in a list
 <style>

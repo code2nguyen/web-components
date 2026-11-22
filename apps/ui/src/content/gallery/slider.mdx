@@ -198,7 +198,7 @@ end.addEventListener('change', async () => {
 
 `markers` draws points of interest on the track: the events of a replay, the chapters of a recording, the readings of a log. They are decoration: the slider still selects any value on its step grid, and a thumb resting on a marker adds its `label` to what assistive technology reads. Each marker's `kind` becomes a `marker-<kind>` part, so a page colours each kind with `::part()`.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Event markers
 <style>
