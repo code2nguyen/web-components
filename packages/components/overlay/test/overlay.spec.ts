@@ -159,3 +159,38 @@ test('an element that does not forward commands is no trigger, and a moved overl
   await expect(host).toBeVisible()
   await expect(page.getByRole('button', { name: 'Filters', expanded: true })).toBeVisible()
 })
+
+test('an input naming it by commandfor and the submit and untyped buttons of a form open nothing, so none is the anchor or reported expanded', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<div style="margin: 160px 0 0 240px"><button id="open" popovertarget="filters">Open</button></div>
+    <c2-overlay id="filters" placement="bottom-start"><button>Status</button></c2-overlay>`)
+  await page.locator('main').evaluate(async (main, url) => {
+    await import(url)
+    main.insertAdjacentHTML(
+      'afterbegin',
+      '<input type="button" commandfor="filters" command="toggle-popover" value="Input">' +
+        '<form><button commandfor="filters" command="toggle-popover">Untyped</button><button popovertarget="filters">Submit</button>' +
+        '<input type="submit" popovertarget="filters" value="Send"><c2-button type="submit" commandfor="filters" command="toggle-popover">Save</c2-button></form>',
+    )
+    main.querySelector('form')!.addEventListener('submit', (event) => event.preventDefault())
+    await (main.querySelector('c2-button') as Element & { updateComplete: Promise<boolean> }).updateComplete
+  }, BUTTON_MODULE)
+  const host = page.locator('c2-overlay')
+  // As the browser treats them: neither form button opens it.
+  await page.getByRole('button', { name: 'Untyped' }).click()
+  await page.getByRole('button', { name: 'Submit' }).click()
+  await page.getByRole('button', { name: 'Send' }).click()
+  await page.getByRole('button', { name: 'Input' }).click()
+  await expect(host).toHaveJSProperty('open', false)
+  const open = page.getByRole('button', { name: 'Open' })
+  await open.click()
+  await expect(host).toHaveJSProperty('open', true)
+  // Placed under the button that opened it, not under the controls that come first in the page.
+  const anchor = (await open.boundingBox())!
+  const box = (await host.boundingBox())!
+  expect(Math.abs(box.x - anchor.x)).toBeLessThan(2)
+  expect(box.y).toBeGreaterThan(anchor.y)
+  expect(await page.locator('c2-button').evaluate((el) => (el as HTMLElement).ariaExpanded)).toBeNull()
+})
