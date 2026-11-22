@@ -151,12 +151,25 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
   for (const block of cssBlocks(source, isCss)) checkCss(block.css, block.offset, report)
 
   for (const match of source.matchAll(/--c2-[a-z0-9_-]*[a-z0-9]/g)) {
+    const after = source.slice(match.index + match[0].length, match.index + match[0].length + 8)
     // A name built in a template (`--c2-button__${part}--color`) is not checkable.
-    if (known.has(match[0]) || /^[_-]*(\$\{|\{)/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 4))) continue
-    const declared = /^\s*:/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 8))
+    if (known.has(match[0]) || /^[_-]*(\$\{|\{)/.test(after)) continue
+    const declared = /^\s*:/.test(after)
     const read = /var\(\s*$/.test(source.slice(Math.max(0, match.index - 8), match.index))
+    const before = source.slice(Math.max(0, match.index - 40), match.index)
+    // Written to, not read: an object key (`{ '--c2-x': v }`, `{ ['--c2-x' as string]: v }`), `setProperty('--c2-x', …)`,
+    // Svelte `style:--c2-x={v}` or Angular `[style.--c2-x]="v"`. Only used to refuse the published-variable exemption
+    // below; the severity stays on `declared`, since these forms are guessed from the text.
+    const written =
+      declared ||
+      (/[{,]\s*['"]$/.test(before) && /^['"]\s*:/.test(after)) ||
+      (/\[\s*['"`]$/.test(before) && /^['"`]\s*(as\s+\w+\s*)?\]\s*:/.test(source.slice(match.index + match[0].length, match.index + match[0].length + 30))) ||
+      /(setProperty\(\s*['"`]|style:|\[style\.)$/.test(before)
     // A family named in prose (`--c2-chart__series-1…`, `--c2-details*`) is a prefix of real names; in code it is a typo.
-    if (!declared && !read && prefixes(known).has(match[0])) continue
+    // A placeholder after the prefix (`var(--c2-theme--…)`, `var(--c2-theme--<token>)`) names the family even inside var().
+    if (!declared && (!read || /^[_-]*(…|<|\*|\.\.\.)/.test(after)) && prefixes(known).has(match[0])) continue
+    // A variable an element's description says it publishes (`--c2-overlay--available-height`) is there to be read.
+    if (!written && published(registry, known).has(match[0])) continue
     const hint = suggest([...known], match[0], 2)
     // Setting an unknown variable does nothing; reading one may be a value the component publishes at runtime.
     report(
@@ -368,12 +381,49 @@ function checkNative(registry: Registry, tag: Tag, report: Report) {
   )
 }
 
+/** The c2 tag an `:is()`/`:where()` group targets: the subject (last compound) of one of its branches, else ''. */
+function groupSubject(group: string): string {
+  for (const branch of group.split(',').reduce(joinNestedCommas, [] as string[])) {
+    const subject =
+      branch
+        .replace(/\((?:[^()]|\([^()]*\))*\)/g, '')
+        .trim()
+        .split(/[\s>+~]+/)
+        .at(-1) ?? ''
+    const tag = /^c2-[a-z0-9-]+/.exec(subject)?.[0]
+    if (tag) return tag
+  }
+  return ''
+}
+
+/** Rejoins the pieces of a selector list split on every comma, so only the commas outside parentheses separate. */
+function joinNestedCommas(selectors: string[], piece: string): string[] {
+  const last = selectors.at(-1)
+  const depth = (text: string) => [...text].reduce((n, c) => n + (c === '(' ? 1 : c === ')' ? -1 : 0), 0)
+  if (last !== undefined && depth(last) > 0) selectors[selectors.length - 1] = `${last},${piece}`
+  else selectors.push(piece)
+  return selectors
+}
+
 function checkCss(css: string, offset: number, report: Report) {
   const stripped = css.replace(/\/\*[\s\S]*?\*\//g, (m) => ' '.repeat(m.length))
   for (const rule of stripped.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     const host = rule[1]
-      .split(',')
+      // Only top-level commas separate selectors: `:not(c2-menu, c2-list) > hr` styles the `hr`, not a c2 host.
+      .split(/,/)
+      .reduce(joinNestedCommas, [] as string[])
       .map((s) => s.trim())
+      // A `:not()` or `:has()` group is not the subject (`hr:not(c2-a, c2-b)` styles the `hr`); an `:is()` or `:where()`
+      // group is, so its arguments stay and the first c2 tag in the compound is the host.
+      .map((s) => s.replace(/:(not|has)\((?:[^()]|\([^()]*\))*\)/g, ''))
+      .map((s) =>
+        s
+          .replace(/:(is|where)\(((?:[^()]|\([^()]*\))*)\)/g, (_, _kind, group: string) => {
+            const subject = groupSubject(group)
+            return subject ? ` ${subject}` : ''
+          })
+          .replace(/\((?:[^()]|\([^()]*\))*\)/g, ''),
+      )
       .map((s) => s.split(/[\s>+~]+/).at(-1) ?? '')
       .find((compound) => /^c2-[a-z0-9-]+(?![a-z0-9-]*::part)/.test(compound) && !compound.includes('::'))
     if (host) checkDeclarations(rule[2], offset + rule.index + rule[1].length + 1, host.match(/^c2-[a-z0-9-]+/)?.[0] ?? host, report)
@@ -656,6 +706,23 @@ function knownVariables(registry: Registry): Set<string> {
   const names = new Set<string>(registry.theme.tokens.map((t) => t.name))
   for (const component of Object.values(registry.components)) for (const element of component.elements) for (const p of element.cssProperties) names.add(p.name)
   variableCache = { registry, names }
+  return names
+}
+
+let publishedCache: { known: Set<string>; names: Set<string> } | undefined
+
+/**
+ * Variables an element sets at runtime for its content to read, named in its description rather than as a
+ * `@cssproperty` input (`--c2-overlay--available-height`). Reading one is right; setting one does nothing.
+ */
+function published(registry: Registry, known: Set<string>): Set<string> {
+  if (publishedCache?.known === known) return publishedCache.names
+  const names = new Set<string>()
+  const families = prefixes(known)
+  for (const component of Object.values(registry.components))
+    for (const element of component.elements)
+      for (const m of (element.description ?? '').matchAll(/--c2-[a-z0-9_-]*[a-z0-9]/g)) if (!known.has(m[0]) && !families.has(m[0])) names.add(m[0])
+  publishedCache = { known, names }
   return names
 }
 

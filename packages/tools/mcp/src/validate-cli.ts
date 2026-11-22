@@ -39,12 +39,18 @@ Checks markup and CSS against the c2n component API (default path: src). Exits 1
 with --errors-only it reports errors and stays quiet about warnings (for code with accepted warnings, such as a site's
 own chrome).`
 
-/** Files under `path`, each once. Links inside the tree are not followed: one pointing back up would never end. */
+/** A unit test's fixtures (`a.test.ts`, `b.spec.tsx`) are data, not markup an app renders; a page or component file is never one. */
+const TEST_FILE = /\.(test|spec)\.(ts|tsx|js|jsx|mjs|cjs|mts|cts)$/i
+
+/**
+ * Files under `path`, each once. Links inside the tree are not followed: one pointing back up would never end. A
+ * directory walk skips test files; a test file named on the command line is still checked.
+ */
 function collect(path: string, files: Set<string>, top = true) {
   const stat = top ? statSync(path) : lstatSync(path)
   if (stat.isDirectory()) {
     for (const name of readdirSync(path)) if (!SKIPPED_DIRECTORIES.has(name)) collect(join(path, name), files, false)
-  } else if ((top || stat.isFile()) && EXTENSIONS.has(extname(path).toLowerCase())) files.add(resolve(path))
+  } else if ((top || (stat.isFile() && !TEST_FILE.test(path))) && EXTENSIONS.has(extname(path).toLowerCase())) files.add(resolve(path))
 }
 
 /**
@@ -97,7 +103,8 @@ export async function runValidate(args: string[]): Promise<number> {
     } catch {
       return 0
     }
-    if (!file || !existsSync(file) || !EXTENSIONS.has(extname(file).toLowerCase())) return 0
+    // Test fixtures are skipped here as in a directory walk, so the hook and `check:app-markup` agree.
+    if (!file || !existsSync(file) || !EXTENSIONS.has(extname(file).toLowerCase()) || TEST_FILE.test(file)) return 0
     const findings = check(file)
       .filter((finding) => !args.includes('--errors-only') || finding.severity === 'error')
       .filter((finding) => !underConstruction(finding))

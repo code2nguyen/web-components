@@ -142,8 +142,8 @@ return formatUser(user)</c2-highlight>
     gap: 10px;
     max-width: 460px;
   }
-  .find-replace c2-highlight {
-    display: block;
+  /* c2-highlight is inline text with no box of its own: the code frame is a plain wrapper. */
+  .find-replace-code {
     padding: 10px 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px;
@@ -156,9 +156,9 @@ return formatUser(user)</c2-highlight>
 </style>
 <div class="find-replace">
   <c2-find-bar for="find-replace-code" value="user" replace replacement="account" data-find-bar-example="replace"></c2-find-bar>
-  <c2-highlight id="find-replace-code">const user = await getUser(id)
+  <div class="find-replace-code"><c2-highlight id="find-replace-code">const user = await getUser(id)
 if (!user.active) return null
-return formatUser(user)</c2-highlight>
+return formatUser(user)</c2-highlight></div>
 </div>
 ```
 

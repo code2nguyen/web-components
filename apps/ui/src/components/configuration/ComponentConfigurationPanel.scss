@@ -411,7 +411,7 @@ c2-details.section {
 
 // The share/import disclosure reuses `.block` for its padding, so its own chrome must stay flat.
 c2-details.block--details {
-  padding: 0;
+  padding: 0; // c2n-ignore: clears the padding the shared .block class puts on this host
   gap: 0;
   --c2-details--border-top: none;
   --c2-details--border-right: none;
