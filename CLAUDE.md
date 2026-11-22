@@ -29,6 +29,7 @@ npm run lint:fix
 npm run format:check              # prettier
 npm run format:fix
 npm run fix                       # lint:fix + format:fix
+npm run check:pr                  # CI's gates in one run, one summary table; component suites in Chromium only (-- --fast: skip builds and browser suites)
 
 npm run build -w packages/tools/theme     # regenerate @c2n/theme (tokens.css, base.css, tokens.json, report.json) from the component manifests
 npm run build:tools               # after the root build: @c2n/mcp registry (packages/tools/mcp/data/registry.json) + @c2n/skill catalog/version sync
@@ -46,7 +47,7 @@ Claude Code on the web: `.claude/hooks/session-start.sh` (registered in `.claude
 
 After every file Claude Code writes, `.claude/hooks/post-edit.sh` (a `PostToolUse` hook, local and remote) formats it with prettier and checks its c2 markup with `c2n-mcp validate --hook`, handing its errors back to the agent under `apps/ui/src/`, `apps/examples/` and `lab/apps/` (warnings stay quiet: those trees carry accepted ones).
 
-CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run build:tools`, `npm run mcp:smoke`, a `git diff --exit-code` freshness check on the generated skill catalog / plugin files, and deploys `apps/ui/dist/` to GitHub Pages. `npm run check:agent-docs` (paths named in the guidance files exist, every `AGENTS.md` links its `CLAUDE.md`, one copy of each skill) `npm run check:reachability` (every component reachable through MCP and `/llms.txt`) and `npm run check:app-markup` (no `validate` errors in `apps/ui/src`, `apps/examples` and `lab/apps`) run there and on pull requests. On pull requests, `npm run check:component-template` also renders the generator's component template and checks it against the skeleton in `packages/components/CLAUDE.md`. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix). On pull requests, `component-tests.yml` also runs `node lab/scripts/readiness.mjs --check` (the lab reports' generated AI readiness sections: a component change that breaks a lab build's markup, or a validator change, makes them stale; regenerate with `--all`).
+CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run build:tools`, `npm run mcp:smoke`, a `git diff --exit-code` freshness check on the generated skill catalog / plugin files, the slot-styling audit (`scripts/data/slot-styling-audit.json`) and `lab/GAPS.md` (both also checked on pull requests), and deploys `apps/ui/dist/` to GitHub Pages. `npm run check:agent-docs` (paths named in the guidance files exist, every `AGENTS.md` links its `CLAUDE.md`, one copy of each skill) `npm run check:reachability` (every component reachable through MCP and `/llms.txt`) and `npm run check:app-markup` (no `validate` errors in `apps/ui/src`, `apps/examples` and `lab/apps`) run there and on pull requests. On pull requests, `npm run check:component-template` also renders the generator's component template and checks it against the skeleton in `packages/components/CLAUDE.md`. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix), and `pre-push` refuses a branch that still has `fixup!` commits. On pull requests, `component-tests.yml` also runs `node lab/scripts/readiness.mjs --check` (the lab reports' generated AI readiness sections: a component change that breaks a lab build's markup, or a validator change, makes them stale; regenerate with `--all`).
 
 ## Where the rest lives
 
@@ -67,6 +68,8 @@ A `CLAUDE.md` in a subdirectory loads automatically once a session reads or edit
 | `lab/CLAUDE.md`                            | The component lab                                                                                                                                                                                                                                                           |
 | `docs/agents/component-foundation.md`      | Before designing a component or adding a feature: the six foundation rules in full, their scope, companion-element variants                                                                                                                                                 |
 | `docs/agents/adding-a-component.md`        | Scaffolding a component and making it reachable through MCP and `/llms.txt` (what `check:reachability` enforces)                                                                                                                                                            |
+| `docs/agents/removing-a-component.md`      | Removing a component package: wiring, generated files, exception lists, the lockfile leftover                                                                                                                                                                               |
+| `docs/agents/pinned-dependencies.md`       | Upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`: the `@lit-labs/ssr` override and the Linux native binaries in the lockfile                                                                                                                                         |
 | `docs/agents/release-and-changelog.md`     | Release workflow, `lerna version`, changelog generation                                                                                                                                                                                                                     |
 | `docs/planning/`                           | Roadmaps, candidate research and action plans: intent and history, not current rules. Open only for planning (what to build next, a missing component); `docs/planning/README.md` says which are maintained                                                                 |
 
@@ -94,30 +97,9 @@ Wireit drives everything. The root `wireit.examples:build` group is the equivale
 
 Vite lib config per package: single ES output, `minify: false`, and `external: /^lit|@c2n/` — Lit and sibling `@c2n/*` packages are never bundled into a component. Keep cross-package dependencies minimal; import through the published subpath (`@c2n/core/dom-helper.js`), not relative paths across packages.
 
-## Pinned transitive dependency
+## Pinned dependencies
 
-The root `package.json` has `overrides: { "@lit-labs/ssr": "3.2.2" }`. `@astrojs/lit` (unmaintained since mid-2024) hand-builds the `renderInfo` object in its `server.js` with only `customElementInstanceStack`/`customElementHostStack`, but `@lit-labs/ssr` 3.3+ also reads `eventTargetStack`/`slotStack`. Its own `^3.2.2` range floats into those versions, and the UI app build then dies with `Cannot read properties of undefined (reading 'length')` inside `getLast`. Do not remove the override without first checking that `@astrojs/lit` has been updated.
-
-## Linux native binaries in the lockfile
-
-The root `package.json` declares nine Linux `optionalDependencies` that nothing imports directly:
-`@rolldown/binding-linux-x64-gnu`, `@esbuild/linux-x64`, `lightningcss-linux-x64-gnu`,
-`@astrojs/compiler-binding-linux-x64-gnu`, `@parcel/watcher-linux-x64-glibc`, `@img/sharp-linux-x64`,
-`@img/sharp-libvips-linux-x64`, `@xn-sakina/rml-linux-x64-gnu` and `@bruits/satteri-linux-x64-gnu`.
-
-They exist so CI can use `npm ci`. Each of those toolchain packages ships its native binary as a platform-gated
-optional dependency, and npm resolves optional dependencies for the **host** platform only — a lockfile written on
-macOS records `@rolldown/binding-darwin-arm64` and no Linux entry at all ([npm/cli#4828](https://github.com/npm/cli/issues/4828)).
-`npm ci` then installs strictly from that lockfile, the install _succeeds_, and the build dies later with
-`Cannot find native binding` / `Cannot find module '@rolldown/binding-linux-x64-gnu'`.
-
-Regenerating the lockfile does not help (a fresh resolve still writes darwin only), and neither does
-`npm install --os=linux --cpu=x64 --package-lock-only`. Declaring the Linux packages at the root is what puts them
-in the lockfile; they carry `os: ["linux"]` so npm skips downloading them on macOS and Windows.
-
-**Their versions must match their parent package.** After upgrading Vite, Astro, esbuild or sharp, re-read the
-parent's `optionalDependencies` in `package-lock.json` and update these pins, or CI installs a binary that does not
-match its loader.
+The root `package.json` pins `@lit-labs/ssr` to 3.2.2 through `overrides` (for `@astrojs/lit`) and declares nine Linux native binaries as `optionalDependencies` so CI's `npm ci` works from a lockfile written on macOS. Both must move in step with their parents: **read `docs/agents/pinned-dependencies.md` before upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`.**
 
 ## Component foundation
 
@@ -149,7 +131,7 @@ Pull requests target `develop`. Before opening one, review the branch's changes 
 2. Run `/security-review` on the branch and handle its findings the same way.
 3. When the branch changes a component, run the `modern-web-review` skill: `node .claude/skills/modern-web-review/scripts/scan.mjs` must pass (fix each error or justify it with a `modern-web-ignore` comment), then review the diff against its old → new pattern table and the guides for what the component does. Handle its findings the same way. Then have the `component-reviewer` subagent (`.claude/agents/component-reviewer.md`; Codex: follow that file as a checklist) review the diff against the foundation rules and component conventions, and handle its findings the same way.
 4. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `npm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 8 of the `new-component` skill describes. Fix what it shows.
-5. Re-run the checks the fixes touched, then **squash every `fixup!` commit into the commit it corrects before pushing**: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/develop` (the editor override makes it non-interactive), and check that `git log origin/develop..` shows no `fixup!` subject. A branch already pushed is squashed the same way and pushed with `--force-with-lease`. Then open the pull request. Its description lists what each review found (code, security, modern web), what the screenshot review caught, and what was done about it.
+5. Run `npm run check:pr` (CI's gates in one run, one table, logs in `.check-pr/`; it runs the changed component suites in Chromium only, so run `npm run test:all` too when a component's behaviour changed), then **squash every `fixup!` commit into the commit it corrects before pushing**: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/develop` (the editor override makes it non-interactive), and check that `git log origin/develop..` shows no `fixup!` subject. A branch already pushed is squashed the same way and pushed with `--force-with-lease`. The husky `pre-push` hook refuses a push that still carries a `fixup!` commit. Then open the pull request. Its description lists what each review found (code, security, modern web), what the screenshot review caught, and what was done about it.
 
 Do not open a pull request while any review still has an unanswered finding.
 
