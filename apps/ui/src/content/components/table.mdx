@@ -416,7 +416,7 @@ import { useRenderedRows } from '@c2n/components/react'
 
 const tableRef = useRef<Table>(null)
 const rendered = useRenderedRows(tableRef) // TableRenderedRow[]
-// {rendered.map(({ line, key, row }) => <button key={key} slot={`cell:${line}:action`}>Open {row.name}</button>)}
+// {rendered.map(({ line, key, row }) => <c2-button key={key} slot={`cell:${line}:action`}>Open {row.name}</c2-button>)}
 ```
 
 ```ts tag=CodeBlock
@@ -424,7 +424,7 @@ import { useTemplateRef } from 'vue'
 import { useRenderedRows } from '@c2n/components/vue'
 
 const rendered = useRenderedRows(useTemplateRef<Table>('table')) // Ref<TableRenderedRow[]>
-// <button v-for="{ line, key, row } in rendered" :key="key" :slot="`cell:${line}:action`">Open {{ row.name }}</button>
+// <c2-button v-for="{ line, key, row } in rendered" :key="key" :slot="`cell:${line}:action`">Open {{ row.name }}</c2-button>
 ```
 
 Any other framework wraps `subscribeRenderedRows(table, (rows) => …)` from `@c2n/components/table`, the

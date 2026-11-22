@@ -3204,7 +3204,7 @@ Alan Turing,alan@bletchley.org,,Call back"></c2-import-mapper>`,
     ],
   },
   'c2-tooltip': {
-    html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
+    html: `<c2-button>Hover me<c2-tooltip>Save changes</c2-tooltip></c2-button>`,
     presets: [
       {
         name: 'Light',
