@@ -48,7 +48,8 @@ test('the after layer is cut at the divider; the handle is a named slider; each 
   expect(await colorAt(page, host, 0.75)).toBe('after')
   await expect(host.locator('.before-label')).toHaveText('Before')
   const chip = (await host.locator('.before-label').boundingBox())!
-  const middle = { x: chip.x + chip.width / 2, y: chip.y + chip.height / 2 }
+  // In the chip's padding, right of its text: the middle can fall on a glyph, wherever the platform's font puts it.
+  const middle = { x: chip.x + chip.width - 3, y: chip.y + chip.height / 2 }
   expect(await pixel(page, middle.x, middle.y)).toBe('chip')
   // Once the divider passes over it, the before chip is cut with its layer: the after layer shows there.
   await host.evaluate((element) => ((element as HTMLElement & { position: number }).position = 5))
