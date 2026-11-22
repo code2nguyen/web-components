@@ -12,14 +12,16 @@ the rules below come from; its report is the artifact "c2n Platform Audit".
 
 ## Browser support policy
 
-This is the policy in `packages/components/CLAUDE.md`, "Modern web platform". Every recommendation states the Baseline status the guide
-gives:
+This is the policy in the root `CLAUDE.md` ("Browser support") and `packages/components/CLAUDE.md` ("Modern web platform"): the
+components support the **latest two stable versions** of Chrome, Edge, Firefox and Safari (desktop and iOS), and nothing
+older. Every recommendation states the Baseline status the guide gives, then checks it against those versions:
 
-| Status                   | Use it                                                                                                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Widely available**     | Freely, no fallback.                                                                                                                                                                       |
-| **Newly available**      | Yes, with the fallback the guide prescribes (feature-detect with `@supports` / `in` checks). The component must work, maybe less smoothly, without it.                                     |
-| **Limited availability** | Only as progressive enhancement over a path that already works everywhere (e.g. `hidden="until-found"` that behaves as `hidden`, anchor positioning gated over floating-ui). No polyfills. |
+| The feature is…                                    | Use it                                                                                                                                                                               |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| In all of the latest two versions of every browser | Freely, with no fallback and no feature detection. This covers _Widely available_ and most _Newly available_ features.                                                               |
+| Missing from one of them                           | Only as a progressive enhancement over a path that works in all of them, feature-detected (`@supports` / `in` checks), e.g. anchor positioning gated over floating-ui. No polyfills. |
+
+Never recommend a fallback, polyfill or test for a browser older than that window.
 
 ## 1. Before writing code: consult the guides
 
@@ -51,7 +53,8 @@ Guides that map to recurring component shapes in this repo:
 | colour, focus, dark surfaces                    | `color` (forced colors, contrast), `component-specific-light-dark-theme`                                                  |
 
 Write the decision into the design doc next to the six foundation decisions (new-component step 1): the feature
-chosen, its Baseline status, and the fallback.
+chosen, its Baseline status, whether all of the latest two versions of each browser ship it, and only when one does not, the
+fallback.
 
 ## 2. After writing code: scan
 

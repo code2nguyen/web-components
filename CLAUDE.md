@@ -116,6 +116,10 @@ The six rules every component follows. The full text, with scope and references,
 
 Three rules that bite outside a component's own files too: never write an attribute on a component's host or on author light-DOM children (use `ElementInternals` and manual slot assignment); import `customElement` from `@c2n/core/element-helper.js` and `property` from `@c2n/core/lit-helper.js`, not `lit/decorators.js`; every public CSS variable has an `@cssproperty` JSDoc line, or it is missing from the docs.
 
+## Browser support
+
+The components support the **latest two stable versions** of Chrome, Edge, Firefox and Safari (desktop and iOS), and nothing older. A version is what browserslist's `last 2 versions` counts: a Safari point release (26.2, 26.3) is a version of its own, so the window is the newest two releases, not two major lines. A platform feature that every one of those versions has is used freely, with no fallback and no feature detection. A feature that one of them lacks needs a fallback that works there, until that version drops out of the window. Do not add code, polyfills or tests for an older browser, and do not report a missing one in a review. Details: "Modern web platform" in `packages/components/CLAUDE.md`.
+
 ## Code style
 
 Prettier: single quotes, no semicolons, print width 160, 2-space tabs. Astro files use `prettier-plugin-astro`.
@@ -143,6 +147,7 @@ For `/code-review`, `/security-review` and human reviewers alike. Apps we do not
 - **Lifecycle.** No `requestUpdate()` or reactive-property write in `firstUpdated()`, and no slot state that relies only on `slotchange` (`npm run check:lifecycle`). Nothing touches `window`, `document`, `customElements` or layout at module load or in the constructor (it breaks server rendering). What `connectedCallback` adds (listeners, observers, timers, frames), `disconnectedCallback` removes: an element can be moved, removed and re-added.
 - **Packaging.** Lit comes from `lit`, never `lit-html`, `lit-element` or `@lit/reactive-element`. A new runtime dependency ships to every user: question its size, maintenance and licence, and whether it stays external in the umbrella; a raised size budget needs a reason in the PR. Ratchet lists (the dogfooding `KNOWN` list, `apps/ui/gallery-audit.known.json`, `check-reachability.ts`'s `KNOWN`) only shrink.
 - **Security.** Content is untrusted: `unsafeHTML`, `innerHTML` and `unsafeSVG` carry only constants (icons, glyphs) or the highlighter's escaped output (`c2-code-viewer`), never an attribute, slot, paste or data. Editors that parse pasted HTML or markdown (`c2-page-editor`, `c2-notepad`, the code editors) drop `javascript:`/`data:` links, scripts, event handlers and `<style>`. Chart tooltips and labels built as HTML strings escape their data. `@c2n/mcp`'s `validate` and its hook only read the files named; `c2n-skill install` only writes the files it lists, inside the project and its marker blocks, and never runs a downloaded script. Workflows: no `pull_request_target` running PR code, `NPM_TOKEN` only on the release job, actions outside `actions/*` pinned to a SHA.
+- **Browsers.** Judge platform features against the latest two versions of each browser ("Browser support" above). Behaviour in an older browser is not a finding.
 - **Tests.** A behaviour change comes with a Playwright test in the package's `test/` suite, and a bug fix's test fails without the fix. Tests wait on a state, not a fixed timeout, unless the wait is the behaviour.
 - **Commits.** A `feat` or `fix` subject is written for a user of the component (it becomes the changelog line); flag an internal or vague one.
 

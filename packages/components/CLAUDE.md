@@ -171,10 +171,12 @@ Components use the current platform, not the patterns it replaced. The `modern-w
 (`.claude/skills/modern-web-review/`) holds the guide map, the old → new pattern table and the scanner; read it when
 designing, implementing or reviewing a component.
 
-**Browser support policy.** A feature Baseline _Widely available_ is used freely. _Newly available_ is used with the
-fallback its modern-web-guidance guide prescribes, feature-detected. _Limited availability_ is only a progressive
-enhancement over a path that already works everywhere, and never through a polyfill. Say which applies whenever a
-change adopts a platform feature.
+**Browser support policy.** The components support the latest two stable versions of Chrome, Edge, Firefox and Safari
+(desktop and iOS), and nothing older. Check a feature against those versions, not against its Baseline label: a
+_Newly available_ feature that all of them ship is used freely. A feature that one of them lacks (often _Limited
+availability_) is only a progressive enhancement over a path that works in all of them, feature-detected, and never
+through a polyfill. Write no fallback, polyfill or test for an older browser. Say which applies whenever a change
+adopts a platform feature.
 
 **Before choosing an approach**, look the behaviour up: `npx -y modern-web-guidance@latest search "<what it must do>"`,
 then `retrieve` the guide and follow its rules and fallbacks.
