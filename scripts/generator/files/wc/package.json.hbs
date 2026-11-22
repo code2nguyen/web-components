@@ -22,7 +22,7 @@
     "type-check": "wireit"
   },
   "wireit": {
-    "type-check": { "dependencies": ["{{ coreBuildDep }}"], "command": "tsc -p tsconfig.lib.json --composite false" },
+    "type-check": { "dependencies": ["../../core:build"], "command": "tsc -p tsconfig.lib.json --composite false" },
     "build": { "dependencies": ["type-check"], "command": "vite build" }
   },
   "dependencies": {

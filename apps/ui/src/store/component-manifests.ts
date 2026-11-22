@@ -32,7 +32,6 @@ import chart from '@c2n/chart/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
 import chatMessage from '@c2n/chat-message/custom-elements.json'
-import chatbot from '@c2n/chatbot/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
 import chipGroup from '@c2n/chip-group/custom-elements.json'
 import chip from '@c2n/chip/custom-elements.json'
@@ -255,7 +254,6 @@ export const componentManifests = (function () {
     chatInput,
     chatMessage,
     chatMessageList,
-    chatbot,
     checkbox,
     chip,
     chipGroup,

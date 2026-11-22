@@ -5,13 +5,13 @@ import { fileURLToPath } from 'node:url'
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const repositoryRoot = resolve(scriptDirectory, '..')
-const packageRoots = ['packages/components', 'open-packages']
-const componentPackagePattern = /^(packages\/components|open-packages)\/([^/]+)(?:\/|$)/
-const explicitTestPattern = /^(?:(packages\/components|open-packages)\/[^/]+|packages\/umbrella)\/test(?:\/|$)/
+const packageRoots = ['packages/components']
+const componentPackagePattern = /^(packages\/components)\/([^/]+)(?:\/|$)/
+const explicitTestPattern = /^(?:(packages\/components)\/[^/]+|packages\/umbrella)\/test(?:\/|$)/
 // `@c2n/components` loads every component at once, so a change to any of them (a tag defined twice, a module that
 // throws while it is evaluated) can break its barrel without breaking the component's own suite.
 const umbrellaTestDirectory = 'packages/umbrella/test'
-const umbrellaImpactPattern = /^(?:packages\/components|open-packages|packages\/umbrella)\//
+const umbrellaImpactPattern = /^(?:packages\/components|packages\/umbrella)\//
 
 // Inputs every suite reads (the test harness, the Playwright and Vite setup, the Sass and TypeScript toolchain):
 // a change to one of them runs everything.

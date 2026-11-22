@@ -73,7 +73,6 @@
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",
         "../../icons/*/custom-elements.json",
-        "../../../open-packages/*/custom-elements.json",
         "../../../apps/ui/src/content/**/*.mdx",
         "../../../apps/ui/src/data/component-presets.ts",
         "../../../apps/ui/src/data/component-previews.ts",

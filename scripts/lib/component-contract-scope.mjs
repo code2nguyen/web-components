@@ -3,7 +3,7 @@ import { basename, join } from 'node:path'
 
 export function documentedPackageNames(contentRoot) {
   const packages = new Set()
-  for (const directory of ['components', 'oepn-components', 'icons']) {
+  for (const directory of ['components', 'icons']) {
     const root = join(contentRoot, directory)
     for (const file of existsSync(root) ? readdirSync(root).filter((name) => name.endsWith('.mdx')) : []) {
       const source = readFileSync(join(root, file), 'utf8')
@@ -18,7 +18,7 @@ export function documentedPackageNames(contentRoot) {
 export function publishableComponentPackages(repoRoot) {
   const packages = []
   const errors = []
-  for (const root of ['packages/components', 'open-packages']) {
+  for (const root of ['packages/components']) {
     const absolute = join(repoRoot, root)
     for (const directory of existsSync(absolute) ? readdirSync(absolute).sort() : []) {
       const packageFile = join(absolute, directory, 'package.json')

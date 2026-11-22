@@ -12,7 +12,7 @@ import {
   shardCount,
 } from './run-changed-component-tests.mjs'
 
-const suites = ['open-packages/chatbot/test', 'packages/components/button/test', 'packages/components/select/test']
+const suites = ['packages/components/button/test', 'packages/components/chat-input/test', 'packages/components/select/test']
 
 test('selects only directly changed component packages', () => {
   assert.deepEqual(selectComponentTestDirectories(['packages/components/button/src/button.ts', 'apps/ui/src/pages/index.astro'], suites), [
@@ -23,10 +23,10 @@ test('selects only directly changed component packages', () => {
 test('selects every changed component package once', () => {
   assert.deepEqual(
     selectComponentTestDirectories(
-      ['packages/components/select/src/select.ts', 'open-packages/chatbot/test/chatbot.spec.ts', 'packages/components/select/src/select.scss'],
+      ['packages/components/select/src/select.ts', 'packages/components/chat-input/test/chat-input.spec.ts', 'packages/components/select/src/select.scss'],
       suites,
     ),
-    ['open-packages/chatbot/test', 'packages/components/select/test'],
+    ['packages/components/chat-input/test', 'packages/components/select/test'],
   )
 })
 
@@ -56,7 +56,7 @@ const graph = {
   packages: [
     { directory: 'packages/components/button', name: '@c2n/button', specifiers: ['@c2n/core/lit-helper.js', '@c2n/feather-icons/icons/x.js'] },
     { directory: 'packages/components/select', name: '@c2n/select', specifiers: ['@c2n/core/dom-helper.js', '@c2n/button'] },
-    { directory: 'open-packages/chatbot', name: '@c2n/chatbot', specifiers: ['@c2n/core/contexts/field.js', '@c2n/symbols/symbols/empty.js'] },
+    { directory: 'packages/components/chat-input', name: '@c2n/chat-input', specifiers: ['@c2n/core/contexts/field.js', '@c2n/symbols/symbols/empty.js'] },
     { directory: 'packages/icons/feather-icons', name: '@c2n/feather-icons', specifiers: [] },
     { directory: 'packages/icons/symbols', name: '@c2n/symbols', specifiers: ['@c2n/core/element-helper.js'] },
   ],
@@ -75,13 +75,13 @@ test('with an import graph, a core module runs every package loading it, directl
   ])
   // contexts/field imports dom-helper.
   assert.deepEqual(selectComponentTestDirectories(['packages/core/src/dom-helper.ts'], withUmbrella, { graph }), [
-    'open-packages/chatbot/test',
+    'packages/components/chat-input/test',
     'packages/components/select/test',
     'packages/umbrella/test',
   ])
-  // Through an icon set: the chatbot loads symbols, which imports element-helper.
+  // Through an icon set: the chat input loads symbols, which imports element-helper.
   assert.deepEqual(selectComponentTestDirectories(['packages/core/src/element-helper.ts'], withUmbrella, { graph }), [
-    'open-packages/chatbot/test',
+    'packages/components/chat-input/test',
     'packages/umbrella/test',
   ])
   // A module nothing imports yet, and core's unit tests, reach no suite.
