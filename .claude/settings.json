@@ -22,5 +22,31 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(npx prettier --check *)",
+      "Bash(node .claude/skills/modern-web-review/scripts/scan.mjs)",
+      "Bash(node .claude/skills/modern-web-review/scripts/scan.mjs *)",
+      "Bash(npm run test:type-check)",
+      "Bash(npm run check:bundle-size)",
+      "Bash(npm run format:check)",
+      "Bash(npm run lint)",
+      "Bash(npm run check:agent-docs)",
+      "Bash(npm run check:reachability)",
+      "Bash(npm run check:app-markup)",
+      "Bash(npm run check:component-template)",
+      "Bash(npm run check:example-theme)",
+      "Bash(npm run check:dogfood)",
+      "mcp__c2n__get_component",
+      "mcp__c2n__search_components",
+      "mcp__c2n__validate_markup",
+      "mcp__c2n__get_examples",
+      "mcp__c2n__list_components",
+      "mcp__c2n__search_examples",
+      "mcp__c2n__get_theme"
+    ]
   }
 }
