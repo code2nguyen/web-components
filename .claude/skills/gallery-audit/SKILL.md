@@ -42,14 +42,14 @@ Running it is an explicit request to drive a browser: the CLAUDE.md "Browser usa
 
 Each finding is keyed `<gallery>/<slug|*>/<theme>/<kind>`:
 
-| kind           | usual cause and fix                                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `contrast`     | a card colour that does not flip in dark mode, or a weak accent. Route neutrals through the theme (see the gallery rules in CLAUDE.md); pick a stronger hue. |
-| `unregistered` | a `c2-*` tag inside a `client:only` parent whose module does not import it. Register it from the parent's module or the page.                                |
-| `empty`        | the card renders no visible box: a failed island, a zero height, an element waiting for data.                                                                |
-| `overflow`     | content wider than the 274px card frame. Let it wrap or shrink, or give the card a wider layout.                                                             |
-| `console`      | an error or uncaught exception on the gallery page, often a hydration mismatch. Fix the component.                                                           |
-| `mismatch`     | page cards disagree with the registry order: rebuild the registry (`npm run build:tools`).                                                                   |
+| kind           | usual cause and fix                                                                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contrast`     | a card colour that does not flip in dark mode, or a weak accent. Route neutrals through the theme (see the gallery rules in `apps/ui/CLAUDE.md`); pick a stronger hue. |
+| `unregistered` | a `c2-*` tag inside a `client:only` parent whose module does not import it. Register it from the parent's module or the page.                                          |
+| `empty`        | the card renders no visible box: a failed island, a zero height, an element waiting for data.                                                                          |
+| `overflow`     | content wider than the 274px card frame. Let it wrap or shrink, or give the card a wider layout.                                                                       |
+| `console`      | an error or uncaught exception on the gallery page, often a hydration mismatch. Fix the component.                                                                     |
+| `mismatch`     | page cards disagree with the registry order: rebuild the registry (`npm run build:tools`).                                                                             |
 
 Confirm a contrast or layout finding on the screenshot before changing anything (run without `--no-shots`, then
 Read `apps/ui/dist/gallery-shots/<id>/<slug>.<theme>.png`). The report also counts text axe could not measure (over

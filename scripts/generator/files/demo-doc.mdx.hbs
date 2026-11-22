@@ -16,6 +16,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { {{pascalCase name}} } from '@c2n/components/{{ dashCase name}}'
+import { Button } from '@c2n/components/button'
 
 `c2-{{ dashCase name}}` does something useful. Describe the element in a short paragraph: what it is for, the attributes
 that change its behaviour, and the slots a consumer fills.
@@ -30,7 +31,10 @@ import '@c2n/components/{{ dashCase name}}'
 
 ```html tag=UsageBlock,package=@c2n/{{ dashCase name}}
 <div data-label="Default">
-  <c2-{{ dashCase name}}></c2-{{ dashCase name}}>
+  <c2-{{ dashCase name}}>Content</c2-{{ dashCase name}}>
+</div>
+<div data-label="With actions">
+  <c2-{{ dashCase name}}>Content<c2-button slot="actions">Action</c2-button></c2-{{ dashCase name}}>
 </div>
 ```
 

@@ -2,7 +2,10 @@ import '../src/{{ dashCase name}}'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
-main.innerHTML = `<c2-{{ dashCase name}} id="subject"></c2-{{ dashCase name}}>`
+main.innerHTML =
+  scenario === 'actions'
+    ? `<c2-{{ dashCase name}} id="subject">Content<button slot="actions">Act</button></c2-{{ dashCase name}}>`
+    : `<c2-{{ dashCase name}} id="subject">Content</c2-{{ dashCase name}}>`
 
 const subject = document.querySelector('c2-{{ dashCase name}}')!
 // Branch on `scenario` to set up each state the spec drives, rather than mutating the element from the test.

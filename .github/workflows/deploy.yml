@@ -84,11 +84,20 @@ jobs:
       - name: Check the docs site dogfoods c2n components
         run: npm run check:dogfood
 
+      - name: Check the guidance coding agents read (CLAUDE.md, AGENTS.md, skills)
+        run: npm run check:agent-docs
+
       - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 
       - name: Smoke test the MCP server
         run: npm run mcp:smoke
+
+      - name: Every component is reachable through MCP and llms.txt
+        run: npm run check:reachability
+
+      - name: c2 markup in the docs site, example apps and lab builds has no errors
+        run: npm run check:app-markup
 
       - name: Test the cross-agent installer
         run: npm test -w packages/tools/skill

@@ -57,12 +57,15 @@ const components = [
     element('c2-table', 'table', {
       attributes: ['row-key', 'rows', 'selection'],
       properties: ['rows', 'rowKey', 'selection'],
-      slots: ['toolbar', 'cell:{line}:{field}'],
+      slots: ['toolbar', 'cell:{line}:{field}', 'detail-<row>'],
       events: ['selection-change'],
     }),
     element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
   ]),
   component('tabs', [element('c2-tabs', 'tabs'), element('c2-tab', 'tabs')]),
+  component('page-header', [element('c2-page-header', 'page-header', { slots: ['actions'] })]),
+  component('app-shell', [element('c2-app-shell', 'app-shell')]),
+  component('side-nav', [element('c2-side-nav', 'side-nav')]),
   component(
     'feather-icons',
     [{ ...element('c2-feather-{name}', 'feather-icons'), modulePath: '@c2n/feather-icons/icons/{name}.js', className: 'Feather{Name}' }],
@@ -135,8 +138,35 @@ test('reads Lit expressions with quotes and nested templates as one value', () =
   )
 })
 
+test('accepts the attributes a container reads off its descendants, inside that container only', () => {
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" primary overflow-priority="2" menu-label="Export">Go</c2-button></c2-page-header>'), [])
+  assert.deepEqual(rules('<c2-app-shell><div><c2-button app-shell-toggle="aside">Details</c2-button></div></c2-app-shell>'), [])
+  assert.deepEqual(rules('<c2-side-nav><c2-button side-nav-toggle>Menu</c2-button></c2-side-nav>'), [])
+  // Outside its container the attribute does nothing: `primary` is no look of c2-button.
+  assert.deepEqual(rules('<c2-button primary>Save</c2-button>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header></c2-page-header><c2-button menu-label="x">Go</c2-button>'), ['1:unknown-attribute'])
+  // c2-page-header reads its actions only: a direct child in the `actions` slot.
+  assert.deepEqual(rules('<c2-page-header><div slot="actions"><c2-button primary>Go</c2-button></div></c2-page-header>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header><c2-button primary>Go</c2-button></c2-page-header>'), ['1:unknown-attribute'])
+  // A toggle may be rendered inside the shell from another file: a warning, not an error.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button app-shell-toggle="navigation">Menu</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
+  // An action built in another template than its page header: a warning.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button slot="actions" primary>Save</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
+  // Vue's `:primary` falls back to the attribute on an element without that property.
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" :primary="isMain">Go</c2-button></c2-page-header>', 'a.vue'), [])
+  // A property binding is not the attribute the container reads.
+  assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
+})
+
 test('accepts templated slot names and framework directives', () => {
-  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span><span slot="detail-docs"></span><span slot="detail-user:42"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="detail"></span></c2-table>'), ['1:unknown-slot'])
   assert.deepEqual(rules('<c2-text-field v-model="q" :value.prop="v" @input="f" client:load *ngIf="x" [(ngModel)]="m" ngModel></c2-text-field>'), [])
 })
 

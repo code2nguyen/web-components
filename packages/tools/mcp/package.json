@@ -50,6 +50,7 @@
     "presmoke": "npm run build",
     "prepack": "npm run build",
     "smoke": "node scripts/smoke.ts",
+    "check:reachability": "node scripts/check-reachability.ts",
     "theme:examples": "node scripts/theme-examples.ts",
     "test": "node --test scripts/*.test.ts",
     "readiness": "node scripts/readiness.ts",

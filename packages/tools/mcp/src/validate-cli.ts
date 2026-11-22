@@ -32,10 +32,12 @@ const EXTENSIONS = new Set([
 const SKIPPED_DIRECTORIES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', '.git', '.next', '.nuxt', '.svelte-kit', '.astro', '.angular'])
 
 export const VALIDATE_USAGE = `Usage: c2n-mcp validate [paths…] [--strict] [--format json|text]
-       c2n-mcp validate --hook
+       c2n-mcp validate --hook [--errors-only]
 
 Checks markup and CSS against the c2n component API (default path: src). Exits 1 on errors, or on warnings too with
---strict. --hook reads a Claude Code PostToolUse payload from stdin and reports the written file's findings to the agent.`
+--strict. --hook reads a Claude Code PostToolUse payload from stdin and reports the written file's findings to the agent;
+with --errors-only it reports errors and stays quiet about warnings (for code with accepted warnings, such as a site's
+own chrome).`
 
 /** Files under `path`, each once. Links inside the tree are not followed: one pointing back up would never end. */
 function collect(path: string, files: Set<string>, top = true) {
@@ -43,6 +45,26 @@ function collect(path: string, files: Set<string>, top = true) {
   if (stat.isDirectory()) {
     for (const name of readdirSync(path)) if (!SKIPPED_DIRECTORIES.has(name)) collect(join(path, name), files, false)
   } else if ((top || stat.isFile()) && EXTENSIONS.has(extname(path).toLowerCase())) files.add(resolve(path))
+}
+
+/**
+ * In the c2n monorepo (run from its root), a component being built has a package directory but no registry entry until
+ * `build:tools` runs, so its own docs would read as unknown elements on every edit. Hook mode skips an unknown tag that
+ * belongs to such a package: the longest `packages/components/<dir>` or `open-packages/<dir>` whose name starts the
+ * tag (`c2-foo-item` belongs to `foo`), and only while the registry knows no `@c2n/<dir>`. A misspelled or invented tag
+ * is still reported, including one that merely resembles a built package (`c2-chart`: `@c2n/chart` is registered).
+ */
+function underConstruction(finding: Finding): boolean {
+  if (finding.rule !== 'unknown-element' || !existsSync('packages/tools/mcp/src/validate-cli.ts')) return false
+  const id = /`<c2-([a-z0-9-]+)>`/.exec(finding.message)?.[1]
+  if (!id) return false
+  const parts = id.split('-')
+  for (let length = parts.length; length > 0; length--) {
+    const dir = parts.slice(0, length).join('-')
+    if (!['packages/components', 'open-packages'].some((group) => existsSync(join(group, dir, 'package.json')))) continue
+    return !installedRegistry().packageIndex[`@c2n/${dir}`]
+  }
+  return false
 }
 
 let registry: ReturnType<typeof loadRegistry> | undefined
@@ -77,6 +99,8 @@ export async function runValidate(args: string[]): Promise<number> {
     }
     if (!file || !existsSync(file) || !EXTENSIONS.has(extname(file).toLowerCase())) return 0
     const findings = check(file)
+      .filter((finding) => !args.includes('--errors-only') || finding.severity === 'error')
+      .filter((finding) => !underConstruction(finding))
     if (findings.length === 0) return 0
     process.stderr.write(
       `c2n validate: ${relative(process.cwd(), file)} has ${findings.length} problem(s) with the c2n components. Fix them (get_component has the API; a deliberate native element gets a c2n-ignore comment):\n${formatFindings(relative(process.cwd(), file), findings)}\n`,

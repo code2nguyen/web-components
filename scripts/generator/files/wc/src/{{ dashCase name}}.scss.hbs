@@ -2,14 +2,33 @@
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-{{ dashCase name }},
-  $theme: ()
+  $theme: (
+    container--gap: 8px,
+    actions--gap: 8px,
+  )
 );
 
-
+// Every value a designer may change is a variable above, with a matching @cssproperty line in the component's JSDoc.
 :host {
-  display: inline-flex;
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
 }
 
-.c2-{{ dashCase name }} {
-  display: inline-flex;
+:host([hidden]) {
+  display: none;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  gap: css.cssVar(actions--gap);
+}
+
+.actions[hidden] {
+  display: none;
 }

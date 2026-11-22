@@ -2,7 +2,7 @@
 
 A running log of friction hit while **consuming** `c2-*` components from an application — `apps/ui`,
 `apps/examples/*`, or any project using the published packages. It is the feedback loop the dogfooding rule
-(see `CLAUDE.md` / `AGENTS.md`) exists to produce: every hand-rolled workaround in an app is a component that
+(see `apps/ui/CLAUDE.md`) exists to produce: every hand-rolled workaround in an app is a component that
 is missing something, and this is where that gets recorded instead of quietly worked around.
 
 **Who writes here:** anyone — human or agent — who uses a c2n component and has to fight it. Append an entry
@@ -12,7 +12,7 @@ what actually happened, and the smallest change that would have avoided it.
 **Who clears entries:** whoever fixes the component. Move the entry to `## Fixed` with the commit or PR, or
 to `## Won't fix` with the reason. Do not delete an entry without resolving it.
 
-**Components that do not exist yet** are candidates, not feedback: they are listed, with a decision column, in [`COMPONENT-ROADMAP.md`](COMPONENT-ROADMAP.md).
+**Components that do not exist yet** are candidates, not feedback: they are listed, with a decision column, in [`docs/planning/COMPONENT-ROADMAP.md`](docs/planning/COMPONENT-ROADMAP.md).
 
 **What does not belong here:** bugs in the app rather than the component, and anything you fixed in the
 component in the same change (that is what the commit message and the test are for).

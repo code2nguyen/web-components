@@ -63,6 +63,27 @@ const GLOBAL_ATTRIBUTES = new Set(
     ' ',
   ),
 )
+/**
+ * Attributes a container reads off other elements, valid only where it reads them: `c2-app-shell` and `c2-side-nav`
+ * toggle from a click on any descendant carrying theirs; `c2-page-header` folds and labels its actions by theirs, so
+ * those count on a direct child in its `actions` slot only. They are not attributes of the element that carries them,
+ * so its manifest does not list them, and anywhere else (`<c2-button primary>` on its own) they do nothing and stay
+ * errors. Keep in step with the sources (`getAttribute`/`hasAttribute` on another element in `packages/components/*\/src`).
+ */
+const CONTAINER_ATTRIBUTES = new Map<string, { container: string; slot?: string }>([
+  ['app-shell-toggle', { container: 'c2-app-shell' }],
+  ['side-nav-toggle', { container: 'c2-side-nav' }],
+  ['overflow-priority', { container: 'c2-page-header', slot: 'actions' }],
+  ['menu-label', { container: 'c2-page-header', slot: 'actions' }],
+  ['primary', { container: 'c2-page-header', slot: 'actions' }],
+])
+
+/** Where an element sits: what `CONTAINER_ATTRIBUTES` needs to know. */
+interface Placement {
+  ancestors: readonly string[]
+  parent: string | undefined
+  slot: string | undefined
+}
 const DOM_EVENTS = new Set(
   'click dblclick auxclick contextmenu input change submit reset invalid focus blur focusin focusout keydown keyup keypress pointerdown pointerup pointermove pointerenter pointerleave pointerover pointerout pointercancel mousedown mouseup mousemove mouseenter mouseleave mouseover mouseout wheel touchstart touchend touchmove touchcancel dragstart drag dragend dragenter dragleave dragover drop scroll scrollend copy cut paste select toggle beforetoggle load error animationstart animationend animationiteration transitionstart transitionend transitionrun transitioncancel beforeinput compositionstart compositionupdate compositionend gotpointercapture lostpointercapture selectstart selectionchange cancel close resize slotchange formdata animationcancel'.split(
     ' ',
@@ -115,7 +136,7 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
         continue
       }
       const parent = stack.at(-1)
-      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, jsx, svelte, report, used)
+      if (tag.name.startsWith('c2-')) checkElement(registry, tag, parent, stack, jsx, svelte, report, used)
       else {
         checkNative(registry, tag, report)
         const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
@@ -157,7 +178,16 @@ export function validateMarkup(registry: Registry, source: string, filename = 's
 
 type Report = (index: number, severity: Severity, rule: Finding['rule'], message: string) => void
 
-function checkElement(registry: Registry, tag: Tag, parent: string | undefined, jsx: boolean, svelte: boolean, report: Report, used: Map<string, string>) {
+function checkElement(
+  registry: Registry,
+  tag: Tag,
+  parent: string | undefined,
+  ancestors: readonly string[],
+  jsx: boolean,
+  svelte: boolean,
+  report: Report,
+  used: Map<string, string>,
+) {
   const resolved = resolveElement(registry, tag.name)
   if (!resolved || (resolved.tag !== tag.name && !resolved.element.tag.includes('{name}'))) {
     const hint = suggest(Object.keys(registry.tagIndex), tag.name, 3)
@@ -166,12 +196,21 @@ function checkElement(registry: Registry, tag: Tag, parent: string | undefined, 
   }
   used.set(resolved.tag, resolved.modulePath)
   const element = resolved.element
-  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, jsx, svelte, report)
   const slot = tag.attributes.find((a) => a.name.toLowerCase() === 'slot')
+  const placement: Placement = { ancestors, parent, slot: slot?.value }
+  for (const attribute of tag.attributes) checkAttribute(element, resolved.tag, attribute, placement, jsx, svelte, report)
   if (slot && parent?.startsWith('c2-')) checkSlot(registry, parent, slot, report)
 }
 
-function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attributes'][number], jsx: boolean, svelte: boolean, report: Report) {
+function checkAttribute(
+  element: ElementEntry,
+  tag: string,
+  attribute: Tag['attributes'][number],
+  placement: Placement,
+  jsx: boolean,
+  svelte: boolean,
+  report: Report,
+) {
   const binding = readBinding(attribute.name, jsx, svelte)
   if (!binding) return
   const events = element.events.map((e) => e.name)
@@ -216,6 +255,27 @@ function checkAttribute(element: ElementEntry, tag: string, attribute: Tag['attr
   // The HTML parser lowercases a static attribute name, so `PLACEHOLDER` is `placeholder` (and `readOnly` is `readonly`).
   if (binding.kind === 'attribute' && attributes.includes(lower)) return
   if (binding.kind === 'property' && element.properties?.includes(name)) return
+  // A container's attribute, written as an attribute (not `.primary=${…}`) where that container reads it.
+  const read = CONTAINER_ATTRIBUTES.get(lower)
+  // Vue's `:primary` sets the attribute too when the element has no such property (`key in el` is false).
+  const asAttribute = binding.kind === 'attribute' || attribute.name === name || /^(:|v-bind:)/.test(attribute.name)
+  if (read && asAttribute) {
+    const placed = read.slot ? placement.parent === read.container && placement.slot === read.slot : placement.ancestors.includes(read.container)
+    if (placed) return
+    // The shell and the side nav find their toggles at runtime (`composedPath()`), and an action slotted into
+    // `actions` may be built in another template than its page header: when this file does not show the container,
+    // say so as a warning rather than an error.
+    const elsewhere = read.slot ? placement.slot === read.slot && !placement.ancestors.includes(read.container) : true
+    if (elsewhere) {
+      report(
+        attribute.index,
+        'warning',
+        'unknown-attribute',
+        `\`${lower}\` works only on an element inside \`<${read.container}>\`, which this file does not show around it. Fine when the element is rendered inside one from another file.`,
+      )
+      return
+    }
+  }
   // ARIA and data attributes, and Angular directives (`ngModel`, `formControlName`).
   if (GLOBAL_ATTRIBUTES.has(lower) || /^(aria|data-)/.test(lower) || /^(ng[A-Z]|formControl|formGroup)/.test(name)) return
   const flat = (value: string) => value.toLowerCase().replaceAll('-', '')
@@ -273,8 +333,15 @@ function checkSlot(registry: Registry, parent: string, slot: Tag['attributes'][n
   const resolved = resolveElement(registry, parent)
   if (!resolved || !slot.value || /[{}$]/.test(slot.value)) return
   const slots = resolved.element.slots.map((s) => s.name).filter((s) => s && s !== 'default')
-  // Templated slot names (`cell:{line}:{field}`) match any value in their placeholders.
-  const pattern = (name: string) => new RegExp(`^${name.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{[^}]+\}/g, '[^:]+')}$`)
+  // Templated slot names match any value in their placeholders: `{x}` up to the `:` that separates the parts of
+  // `cell:{line}:{field}`, `<x>` anything (`detail-<row>` takes any row key, `detail-user:42` included).
+  const pattern = (name: string) =>
+    new RegExp(
+      `^${name
+        .replace(/[.*+?^$()|[\]\\]/g, '\\$&')
+        .replace(/\{[^}]+\}/g, '[^:]+')
+        .replace(/<[^>]+>/g, '.+')}$`,
+    )
   if (slots.some((name) => pattern(name).test(slot.value ?? ''))) return
   const hint = suggest(slots, slot.value, 2)
   const list = slots.length ? ` Named slots: ${slots.map((s) => `\`${s}\``).join(', ')}.` : ' It has no named slots.'
