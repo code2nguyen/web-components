@@ -15,4 +15,4 @@ c2-color-slider {
 }
 ```
 
-Migration: `--c2-color-slider--borde-leftr` never reached the rendered left border. Replace it with `--c2-color-slider--border-left`; the misspelled name has no alias. The previously documented `--c2-color-slider--border-radius` shorthand was also inert and has been removed; use the four corner variables instead. See the [feature migration record](../../../specs/004-verify-css-contracts/migration.md).
+Migration: `--c2-color-slider--borde-leftr` never reached the rendered left border. Replace it with `--c2-color-slider--border-left`; the misspelled name has no alias. The previously documented `--c2-color-slider--border-radius` shorthand was also inert and has been removed; use the four corner variables instead. See the [feature migration record](https://github.com/code2nguyen/web-components/blob/0900bc1836c9/specs/004-verify-css-contracts/migration.md).

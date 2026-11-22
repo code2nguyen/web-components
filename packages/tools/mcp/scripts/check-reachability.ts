@@ -27,9 +27,7 @@ const registryFile = join(packageRoot, 'data/registry.json')
 const contentRoot = join(repoRoot, 'apps/ui/src/content')
 const MIN_INTENTS = 3
 
-const KNOWN: Record<string, string> = {
-  chatbot: 'docs page is apps/ui/src/content/oepn-components/chatbot.mdx, which no content collection loads, and has no description (2026-11-21)',
-}
+const KNOWN: Record<string, string> = {}
 
 if (!existsSync(registryFile)) {
   console.error(`[reachability] ${registryFile} is missing: run \`npm run build:registry -w packages/tools/mcp\` first`)

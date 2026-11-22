@@ -337,10 +337,6 @@
       "types": "./dist/chat-message-list.d.ts",
       "default": "./dist/chat-message-list.js"
     },
-    "./chatbot": {
-      "types": "./dist/chatbot.d.ts",
-      "default": "./dist/chatbot.js"
-    },
     "./checkbox": {
       "types": "./dist/checkbox.d.ts",
       "default": "./dist/checkbox.js"
@@ -1459,7 +1455,6 @@
     "@c2n/chat-input": "*",
     "@c2n/chat-message": "*",
     "@c2n/chat-message-list": "*",
-    "@c2n/chatbot": "*",
     "@c2n/checkbox": "*",
     "@c2n/chip": "*",
     "@c2n/chip-group": "*",

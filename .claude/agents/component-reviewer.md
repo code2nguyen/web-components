@@ -14,7 +14,7 @@ The caller may name a base, a commit or a range, or components. Otherwise compar
 
 ```bash
 git diff --stat origin/develop...HEAD
-git diff origin/develop...HEAD -- packages/components open-packages apps/ui/src/content
+git diff origin/develop...HEAD -- packages/components apps/ui/src/content
 ```
 
 List the components the diff touches (`packages/components/<name>`). For each, read the changed source, its SCSS, its

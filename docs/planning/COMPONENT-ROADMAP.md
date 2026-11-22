@@ -97,7 +97,7 @@ Nothing left to propose here: the mind map shipped as `@c2n/mind-map`.
 
 ### H. AI interfaces
 
-These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat-message-list`, `c2-chatbot`) and the open working-indicator PR.
+These extend the existing chat set (`c2-chat-input`, `c2-chat-message`, `c2-chat-message-list`; `c2-chatbot` was removed on 2026-11-22) and the open working-indicator PR.
 
 | #   | Component        | What it adds                                                         | Real-world model                                        | Priority | Decision                                                                                                                                                                       |
 | --- | ---------------- | -------------------------------------------------------------------- | ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

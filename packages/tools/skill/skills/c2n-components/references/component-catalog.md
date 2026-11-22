@@ -247,7 +247,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Border Beam** — `c2-border-beam` · `@c2n/components/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/components/card` — Groups related content and actions on a single bordered surface. Also: panel, tile, box, container.
 - **Carousel** — `c2-carousel` · `@c2n/components/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay. Also: slideshow, image carousel.
-- **Chatbot** — `c2-chatbot` · `@c2n/components/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/components/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/components/details` — Collapsible disclosure built on native details and summary. Also: disclosure, collapsible, show more, expand, faq.
 - **Device Frame** — `c2-device-frame` · `@c2n/components/device-frame` — A browser window, phone, tablet or laptop drawn around a screenshot or live content.

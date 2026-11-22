@@ -54,7 +54,6 @@
     },
     "build": {
       "dependencies": [
-        "../../../open-packages/chatbot:build",
         "../../components/accordion:build",
         "../../components/action-bar:build",
         "../../components/address-field:build",

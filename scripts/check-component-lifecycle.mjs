@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 function componentSources(root = ROOT) {
-  const roots = [path.join(root, 'packages/components'), path.join(root, 'open-packages')]
+  const roots = [path.join(root, 'packages/components')]
   const files = []
   for (const sourceRoot of roots) walk(sourceRoot, files)
   return files.filter((file) => file.endsWith('.ts') && file.includes(`${path.sep}src${path.sep}`))

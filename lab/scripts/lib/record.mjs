@@ -20,7 +20,7 @@ function git(root, ...args) {
 /** The library under test: the released version line, the commit, and whether component sources had local edits. */
 export function libraryVersion(root) {
   const lerna = JSON.parse(readFileSync(join(root, 'lerna.json'), 'utf8'))
-  const changed = git(root, 'status', '--porcelain', '--', 'packages', 'open-packages')
+  const changed = git(root, 'status', '--porcelain', '--', 'packages')
   return { version: lerna.version, commit: git(root, 'rev-parse', 'HEAD'), branch: git(root, 'rev-parse', '--abbrev-ref', 'HEAD'), dirty: Boolean(changed) }
 }
 

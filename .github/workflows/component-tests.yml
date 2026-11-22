@@ -71,7 +71,7 @@ jobs:
       - name: Guidance for coding agents (CLAUDE.md, AGENTS.md, skills) is consistent
         run: npm run check:agent-docs
       - name: Verify generated component manifests are committed
-        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
       # The initial full-library audit still has unresolved failures. Collect the complete result on every PR;
       # promote this to a required gate only after the inventory and browser/panel evidence reach zero failures.
       - name: Style-contract static diagnostic
@@ -91,7 +91,7 @@ jobs:
           retention-days: 7
       - name: Pack the build output
         run: |
-          find packages open-packages -name node_modules -prune -o -type d \( -name dist -o -name types \) -print -prune > build-output.txt
+          find packages -name node_modules -prune -o -type d \( -name dist -o -name types \) -print -prune > build-output.txt
           echo packages/umbrella/custom-elements.json >> build-output.txt
           tar -czf build-output.tgz -T build-output.txt
       - uses: actions/upload-artifact@v4

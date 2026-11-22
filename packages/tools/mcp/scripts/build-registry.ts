@@ -1,9 +1,9 @@
 /**
  * Builds `data/registry.json` for `@c2n/mcp` from the repository sources:
  *
- * - every `custom-elements.json` of `packages/components/*`, `packages/icons/*`, `open-packages/*` that is in the
+ * - every `custom-elements.json` of `packages/components/*` and `packages/icons/*` that is in the
  *   root wireit build list (tags, attributes, slots, events, CSS variables, composition)
- * - the docs pages `apps/ui/src/content/{components,icons,oepn-components}/*.mdx` (title, description, category,
+ * - the docs pages `apps/ui/src/content/{components,icons}/*.mdx` (title, description, category,
  *   the UsageBlock rows) and `apps/ui/src/content/gallery/*.mdx` (styled variants). One page is one entry, so a
  *   package documented on several pages (`@c2n/chart`) yields one entry per page over its own elements.
  * - `apps/ui/src/data/component-presets.ts` and `component-previews.ts`
@@ -69,7 +69,7 @@ interface PackageJson {
 
 interface DocPage {
   id: string
-  section: 'components' | 'icons' | 'open'
+  section: 'components' | 'icons'
   frontmatter: Record<string, string>
   body: string
 }
@@ -196,7 +196,6 @@ const docPages: DocPage[] = []
 for (const [dir, section] of [
   ['components', 'components'],
   ['icons', 'icons'],
-  ['oepn-components', 'open'],
 ] as const) {
   const base = join(uiRoot, 'content', dir)
   if (!existsSync(base)) continue
@@ -240,11 +239,7 @@ const tagIndex: Record<string, string> = {}
 const packageIndex: Record<string, string> = {}
 const problems: string[] = []
 
-const packageDirs = [
-  ...listDirs(join(repoRoot, 'packages/components')),
-  ...listDirs(join(repoRoot, 'packages/icons')),
-  ...listDirs(join(repoRoot, 'open-packages')),
-]
+const packageDirs = [...listDirs(join(repoRoot, 'packages/components')), ...listDirs(join(repoRoot, 'packages/icons'))]
 
 for (const dir of packageDirs.sort()) {
   const relDir = dir.slice(repoRoot.length + 1)

@@ -45,7 +45,7 @@ These declare every tag, with props and events typed from the element classes. T
 
 ## Maintaining this package
 
-The component packages (`packages/components/*`, `open-packages/*`) are private workspaces. Everything here except this README, `scripts/` and the hand-written fields of `package.json` (name, description, scripts, …) is generated:
+The component packages (`packages/components/*`) are private workspaces. Everything here except this README, `scripts/` and the hand-written fields of `package.json` (name, description, scripts, …) is generated:
 
 - `npm run build -w packages/tools/framework-types` writes the bundle inputs under `src/` (one entry per component package, the barrel, the React and Vue declarations), the three stylesheets, and the `exports`, `files`, `customElements`, `dependencies`, `peerDependencies` and `devDependencies` of `package.json`. A new component package joins the next time it runs; CI fails when the committed output is stale.
 - `npm run build -w packages/umbrella` (`scripts/bundle.ts`) builds `dist/` from `src/` with Vite, inlining the workspace packages, copies their declarations under `dist/types/` with `@c2n/<name>` specifiers rewritten to relative paths, and merges their manifests into `custom-elements.json`. It fails when the bundle imports a package `package.json` does not list. `prepack` runs it, so `npm pack` and `lerna publish` always ship a fresh build.

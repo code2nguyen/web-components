@@ -854,13 +854,6 @@
       "reason": "The start slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
-      "tag": "c2-chatbot",
-      "slot": "",
-      "decision": "part",
-      "parts": ["messages"],
-      "reason": "The messages part exposes the always-present component-owned conversation container around the default slot while assigned messages remain consumer-owned."
-    },
-    {
       "tag": "c2-checkbox",
       "slot": "",
       "decision": "part",

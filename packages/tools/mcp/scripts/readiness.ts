@@ -36,7 +36,7 @@ const outDir = join(packageRoot, 'readiness')
 
 function packageDirs(): Map<string, string> {
   const dirs = new Map<string, string>()
-  for (const group of ['packages/components', 'packages/icons', 'open-packages']) {
+  for (const group of ['packages/components', 'packages/icons']) {
     const base = join(repoRoot, group)
     if (!existsSync(base)) continue
     for (const name of readdirSync(base)) {
@@ -423,9 +423,9 @@ export function changedComponents(registry: Registry, commit: string, files?: st
   const byDirectory = new Map([...packageDirs()].map(([name, dir]) => [dir.slice(repoRoot.length + 1), name]))
   const ids = new Set<string>()
   for (const file of changed) {
-    const docs = /^apps\/ui\/src\/content\/(?:components|gallery|icons|oepn-components)\/([a-z0-9-]+)\.mdx$/.exec(file)
+    const docs = /^apps\/ui\/src\/content\/(?:components|gallery|icons)\/([a-z0-9-]+)\.mdx$/.exec(file)
     if (docs && registry.components[docs[1]]) ids.add(docs[1])
-    const pkg = /^((?:packages\/(?:components|icons)|open-packages)\/[a-z0-9-]+)\/(.*)$/.exec(file)
+    const pkg = /^(packages\/(?:components|icons)\/[a-z0-9-]+)\/(.*)$/.exec(file)
     if (pkg && !pkg[2].startsWith('test/')) {
       const name = byDirectory.get(pkg[1])
       for (const c of Object.values(registry.components)) if (c.package === name) ids.add(c.id)

@@ -10,7 +10,7 @@ const WRITTEN_VARIABLE = /setProperty\(\s*['"`](--c2-[a-z0-9_-]+)['"`]/g
 
 export function documentedCssVariables(repoRoot) {
   const variables = new Set()
-  for (const root of ['packages/components', 'packages/icons', 'open-packages']) {
+  for (const root of ['packages/components', 'packages/icons']) {
     const directory = join(repoRoot, root)
     if (!existsSync(directory)) continue
     for (const entry of readdirSync(directory)) {
