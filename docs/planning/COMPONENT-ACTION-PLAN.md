@@ -34,7 +34,7 @@ These wave-1 steps depend on nothing and sit on different tracks, so they can al
 ## Rules for every step
 
 1. **Scope.** Build the rows of the step and nothing else. A row marked "example" is first a gallery card (and a docs usage row when useful) that shows the extension doing that job. If writing the card shows the extension lacks a small hook the row's brief names (a computed column, a row rule, a sum constraint), add that hook in the same step, under the same limits.
-2. **Nothing changes for existing users.** Every addition is opt-in. Defaults, rendered output, events and CSS variables of the existing API stay as they are, and the existing tests pass untouched. `REVIEW.md` section 1 applies: anything else is a breaking change and needs sign-off.
+2. **Nothing changes for existing users.** Every addition is opt-in. Defaults, rendered output, events and CSS variables of the existing API stay as they are, and the existing tests pass untouched. The public-API rule in the root `CLAUDE.md` ("What a review looks for") applies: anything else is a breaking change and needs sign-off.
 3. **Put the code where the recommendation says.**
    - _Extend_: in the component, behind an attribute or property.
    - _Extend (lazy)_: in a module the component loads with `import()` the first time the feature is used, as `c2-image` loads `@c2n/modal`. Only the hook stays in the entry.

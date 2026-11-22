@@ -153,6 +153,17 @@ Pull requests target `develop`. Before opening one, review the branch's changes 
 
 Do not open a pull request while any review still has an unanswered finding.
 
+### What a review looks for
+
+For `/code-review`, `/security-review` and human reviewers alike. Apps we do not see depend on `@c2n/components`, `@c2n/mcp` and `@c2n/skill`, so **a change that breaks an app silently is the worst bug there is** (a public API removed, a hydration mismatch under SSR, an element that no longer registers): rank findings by that. Report each with a concrete failure — the markup, framework or state that leads to it and what the user sees. Skip what Prettier or ESLint settle, and skip generated output (the umbrella's `src/` and generated `package.json` keys, the skill catalog, `CHANGELOG.md`/`changelog.json`, `custom-elements.json`, the MCP registry) unless it is stale or hand-edited. The component rules themselves are in `packages/components/CLAUDE.md` and `apps/ui/CLAUDE.md`; on top of them:
+
+- **Public API.** A component's public surface is its tag, attributes and properties, events (with `detail` and bubbling), slots, `--c2-*` variables, `::part()` names, methods and its `@c2n/components/<name>` path. Removing or renaming any of it, or changing a default, is breaking: it needs explicit sign-off and a `!` commit with a `BREAKING CHANGE:` footer. A public change whose `custom-elements.json` was not rebuilt is a finding.
+- **Lifecycle.** No `requestUpdate()` or reactive-property write in `firstUpdated()`, and no slot state that relies only on `slotchange` (`npm run check:lifecycle`). Nothing touches `window`, `document`, `customElements` or layout at module load or in the constructor (it breaks server rendering). What `connectedCallback` adds (listeners, observers, timers, frames), `disconnectedCallback` removes: an element can be moved, removed and re-added.
+- **Packaging.** Lit comes from `lit`, never `lit-html`, `lit-element` or `@lit/reactive-element`. A new runtime dependency ships to every user: question its size, maintenance and licence, and whether it stays external in the umbrella; a raised size budget needs a reason in the PR. Ratchet lists (the dogfooding `KNOWN` list, `apps/ui/gallery-audit.known.json`, `check-reachability.ts`'s `KNOWN`) only shrink.
+- **Security.** Content is untrusted: `unsafeHTML`, `innerHTML` and `unsafeSVG` carry only constants (icons, glyphs) or the highlighter's escaped output (`c2-code-viewer`), never an attribute, slot, paste or data. Editors that parse pasted HTML or markdown (`c2-page-editor`, `c2-notepad`, the code editors) drop `javascript:`/`data:` links, scripts, event handlers and `<style>`. Chart tooltips and labels built as HTML strings escape their data. `@c2n/mcp`'s `validate` and its hook only read the files named; `c2n-skill install` only writes the files it lists, inside the project and its marker blocks, and never runs a downloaded script. Workflows: no `pull_request_target` running PR code, `NPM_TOKEN` only on the release job, actions outside `actions/*` pinned to a SHA.
+- **Tests.** A behaviour change comes with a Playwright test in the package's `test/` suite, and a bug fix's test fails without the fix. Tests wait on a state, not a fixed timeout, unless the wait is the behaviour.
+- **Commits.** A `feat` or `fix` subject is written for a user of the component (it becomes the changelog line); flag an internal or vague one.
+
 ## Browser usage
 
 Do not use Chrome, browser debugging, browser automation, screenshots,
