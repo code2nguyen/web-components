@@ -1,35 +1,8 @@
 # Table variants
 
-`@c2n/table` holds one data grid and the variants built on it. This file says which features belong to the grid and
-which make a variant, audits the features shipped so far against that rule, and classifies the table rows still waiting
-in `docs/planning/COMPONENT-ACTION-PLAN.md`.
-
-## The rule
-
-A request for a table is one of three things.
-
-1. **A grid feature** goes in `c2-table`. Any table might need it: sorting, selection, pinning, a summary row, filters,
-   editing, row detail, paging, a data source, or a column format that draws a value differently (status, running
-   balance, change from a baseline, a range flag). If it is not needed for the first paint, it loads lazily, as
-   editing, filters and realtime updates do.
-2. **A variant** is a companion element in the same package. It extends `c2-table` or `c2-group-table`, has its own
-   source file, Vite entry, `exports` subpath, docs page and gallery, and is listed in `c2n.separateEntries` so the
-   umbrella gives it an entry of its own. A request is a variant when it **fixes what the rows and the columns mean**
-   and brings what a generic grid does not need:
-   - a data shape of its own, such as a flowsheet's observations becoming one row per measure and one column per time;
-   - columns derived from the data rather than declared;
-   - computations specific to the domain, such as a weighted final grade or a capacity per person and week;
-   - chrome specific to the domain, such as a day label over the times or a "now" column.
-
-   The base keeps only generic hooks that a variant overrides: `resolvedColumns` expansion, `sourceRows`,
-   `cellValue`, `renderLine`. It never holds variant code. Code that two variants share lives in a module both import
-   (`table-series.ts`), not in `c2-table`.
-
-3. **An example** is a gallery card. It is a request that a grid feature or an existing variant already covers with
-   markup, a `renderCell` or a preset of CSS variables, such as a goal tree or a requirement tree.
-
-A variant can be removed without touching any other page, and `c2-table` pages never pay for it. This is why a feature
-that only one variant uses moves out of the grid even when it is small.
+How the features of `@c2n/table` were sorted into the grid, its variants and gallery examples, measured on 2026-11-14,
+and how the table rows of `COMPONENT-ACTION-PLAN.md` were classified. The rule itself ("Variants are companion
+elements") is in `docs/agents/component-foundation.md`.
 
 ## Audit of what is shipped
 
@@ -75,12 +48,3 @@ and without its code, comments stripped, on 2026-11-14. `table.ts` + `table.scss
 | MITRE matrix #411     | kanban-2 | **Moved: not a table.** Tactics are columns of techniques of different lengths, with no rows across them. It is a board (`c2-kanban`-like) and should move to that track.                                                                                          |
 | Dose grid #424        | table-10 | Done, example of `c2-flowsheet`: items × time slots with the status format, plus a "now" column, which the flowsheet now offers (`now`).                                                                                                                           |
 | Requirement tree #433 | table-10 | Done, example: tree rows with a status column and a count `renderCell`.                                                                                                                                                                                            |
-
-## Checklist for a new table row
-
-1. Does it fix what the rows and columns mean, or bring its own data shape, derived columns, domain computation or
-   domain chrome? Then it is a variant: a companion element, its own entry, docs page and gallery.
-2. Otherwise, would a table in another domain want it? Then it is a grid feature. It goes lazy unless the first paint
-   needs it.
-3. Otherwise it is an example: a gallery card on the page of the grid or variant that covers it.
-4. Code two variants need goes in a shared module they import, never in `c2-table`.
