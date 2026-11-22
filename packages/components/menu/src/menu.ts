@@ -28,6 +28,9 @@ export interface Menu {
   removeEventListener: TypedRemoveEventListener<Menu, MenuEventMap>
 }
 
+/** c2 elements that are a button themselves, so a menu anchored to one announces itself on its inner button. */
+const BUTTON_HOSTS = 'c2-button, c2-icon-button'
+
 /**
  * A menu of commands anchored to a trigger. The trigger is slotted into `trigger` (a `c2-button`, a `c2-icon-button`,
  * a plain `<button>`, …) or named by `anchor`; the rows are `c2-menu-item` children, with `<hr>` separators and
@@ -230,6 +233,8 @@ export class Menu extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    // Moved back into the page: give a slotted trigger its popup state again (`disconnectedCallback` took it off).
+    if (this.hasUpdated) void this.syncTriggerAria()
     // A declarative shadow root (server rendering). Read it as `shadowRoot`: a menu rendered in another component's
     // shadow root connects with `defer-hydration`, before Lit has set `renderRoot`.
     if (!isServer && this.shadowRoot?.hasChildNodes()) {
@@ -238,6 +243,18 @@ export class Menu extends LitElement {
         this.syncItems()
       })
     }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    // An anchor elsewhere on the page stays when the menu goes: it no longer opens one.
+    this.ariaGeneration++
+    this.hasOpened = false
+    this.clearTriggerAria()
+    // Removed from the page, the popover is hidden without a `toggle` event: follow it, so a reconnected menu neither
+    // reports itself open nor needs two presses to open again.
+    this.open = false
+    this.openBeforePress = undefined
   }
 
   /** Opens the menu. Pass `'last'` to start on the last row, `'none'` to leave focus where it is. */
@@ -288,21 +305,71 @@ export class Menu extends LitElement {
     void this.syncTriggerAria()
   }
 
+  /** The element `syncTriggerAria` last wrote on, so a changed trigger or anchor does not keep a stale popup state. */
+  private ariaTarget: HTMLElement | null = null
+  private ariaGeneration = 0
+  /** `aria-haspopup` / `aria-expanded` the target carried before this menu wrote them, put back when it lets go. */
+  private authoredAria: [string | null, string | null] = [null, null]
+  /** Whether this menu has opened since it was connected; a button named by `anchor` gets its state from then on. */
+  private hasOpened = false
+
   /**
    * `aria-haspopup` / `aria-expanded` belong on the element that carries the button role. For a `c2-*` trigger that is
-   * the control inside its shadow root, not the host, which is a plain generic element.
+   * the control inside its shadow root, not the host, which is a plain generic element. A menu named by `anchor` gets
+   * them on that anchor only when it is a button: an anchor may just be where the menu is placed (a row, a cell, the
+   * pointer), and a submenu's anchor is its row, which states its own `aria-expanded`.
    */
   private async syncTriggerAria() {
-    const trigger = this.triggerElement
-    if (!trigger) return
-    const element = trigger as HTMLElement & { updateComplete?: Promise<unknown> }
-    if (element.updateComplete) await element.updateComplete
-    const inner = trigger.localName.includes('-') ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]') : null
-    const target = inner ?? trigger
+    const slotted = this.triggerElement
+    let trigger = slotted ?? (this.ownerItem ? null : this.anchorElement)
+    // An anchor counts only when it is itself a button: a native one, or a c2 button host. A field, card or chip with a
+    // button inside (a clear or close button) is only where the menu is placed.
+    // It gets its state once the menu first opens, never on upgrade: the button belongs to the page, and an attribute
+    // written before a framework hydrates it is a hydration mismatch.
+    if (!slotted && trigger && (!this.hasOpened || !trigger.matches(`button, a[href], [role="button"], ${BUTTON_HOSTS}`))) trigger = null
+    const generation = ++this.ariaGeneration
+    let target: HTMLElement | null = null
+    if (trigger) {
+      // A c2 button not upgraded yet has no inner button: wait for it, or the state would land on its host.
+      if (trigger.matches(`:not(:defined):is(${BUTTON_HOSTS})`)) await customElements.whenDefined(trigger.localName)
+      const element = trigger as HTMLElement & { updateComplete?: Promise<unknown> }
+      if (element.updateComplete) await element.updateComplete
+      // A later call (a new anchor, a toggle) has written already: this one is stale.
+      if (generation !== this.ariaGeneration) return
+      // The inner control of a slotted custom-element trigger, or of a c2 button host named by `anchor`; any other
+      // anchor (a `role="button"` element with a close button inside) is the button itself.
+      const inner =
+        trigger.localName.includes('-') && (slotted || trigger.matches(BUTTON_HOSTS))
+          ? trigger.shadowRoot?.querySelector<HTMLElement>('button, a, [role="button"]')
+          : null
+      target = inner ?? trigger
+    }
+    this.clearTriggerAria(target)
+    if (!target) return
+    if (this.ariaTarget !== target) {
+      this.ariaTarget = target
+      this.authoredAria = [target.getAttribute('aria-haspopup'), target.getAttribute('aria-expanded')]
+    }
     // modern-web-ignore: aria-attribute-on-other-element the trigger is a separate element the author points at (anchor/for), not a child; its own button role carries the popup state, and aria-haspopup/aria-expanded have no element-reference or internals form for another element (a c2-* trigger gets them inside its shadow root)
     target.setAttribute('aria-haspopup', 'menu')
     // modern-web-ignore: aria-attribute-on-other-element the popup state of the same trigger, as above
     target.setAttribute('aria-expanded', String(this.open))
+  }
+
+  /** Gives the element it last wrote on back its own popup state, unless that element is `keep`. */
+  private clearTriggerAria(keep: HTMLElement | null = null) {
+    const previous = this.ariaTarget
+    if (!previous || previous === keep) return
+    const [haspopup, expanded] = this.authoredAria
+    // modern-web-ignore: aria-attribute-on-other-element restores the popup state its former trigger had before this menu wrote it
+    if (haspopup === null) previous.removeAttribute('aria-haspopup')
+    else previous.setAttribute('aria-haspopup', haspopup)
+    // Not the value read back at the first open, which an app binding it may already have set to "true": an element
+    // that had one gets "false", as nothing opens from it any more.
+    // modern-web-ignore: aria-attribute-on-other-element as above
+    if (expanded === null) previous.removeAttribute('aria-expanded')
+    else previous.setAttribute('aria-expanded', 'false')
+    this.ariaTarget = null
   }
 
   private focusItem(item?: MenuItem) {
@@ -519,6 +586,7 @@ export class Menu extends LitElement {
   private handleOverlayToggle = (event: Event) => {
     const isOpen = (event as ToggleEvent).newState === 'open'
     this.open = isOpen
+    if (isOpen) this.hasOpened = true
 
     if (isOpen) {
       this.syncItems()
@@ -568,7 +636,8 @@ export class Menu extends LitElement {
     // The overlay needs its anchor in the same commit that opens it, so resolve it before rendering, not after.
     // There is no DOM to query under a server render; the anchor is resolved once the element upgrades.
     if (isServer) return
-    if (changed.has('anchor') && this.anchor) this.anchorElement = this.resolveAnchor()
+    // `resolveAnchor` falls back to the slotted trigger, so removing `anchor` drops the former one.
+    if (changed.has('anchor') && (this.anchor || changed.get('anchor'))) this.anchorElement = this.resolveAnchor()
     // A server renderer has no DOM to query; the trigger is found once the element upgrades in the browser.
     else if (!this.anchorElement && !isServer) this.anchorElement = this.querySelector<HTMLElement>(':scope > [slot="trigger"]')
     this.hasTrigger = !!this.anchorElement
@@ -576,6 +645,7 @@ export class Menu extends LitElement {
 
   protected override updated(changed: PropertyValues<this>): void {
     if (changed.has('open') && this.ownerItem) this.ownerItem.expanded = this.open
+    if ((changed as Map<PropertyKey, unknown>).has('anchorElement')) void this.syncTriggerAria()
     if (changed.has('disabled') && this.disabled) this.hide()
   }
 

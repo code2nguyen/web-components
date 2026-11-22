@@ -13,7 +13,7 @@ import { FeatherShieldIcon as FeatherShield } from '@c2n/feather-icons/icons/shi
 import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
 import { Button } from '@c2n/components/button'
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -54,7 +54,7 @@ import { Button } from '@c2n/components/button'
 
 Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--size` controls the icon area and the size of Feather and Material icon components; the icon inherits the toast's icon colour.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Custom SVG
 <style>
@@ -145,7 +145,7 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 
 Set `no-icon` to remove the leading icon and its spacing. Managed notifications accept the equivalent `noIcon: true` option. Action buttons here emit `toast-action`; connect that event to your application's behavior.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Text only
 <style>
@@ -190,7 +190,7 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 
 These cards show static remaining-time previews. The manager animates the bar from its dismissal timer; enable it in the management demo.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Countdown
 <style>

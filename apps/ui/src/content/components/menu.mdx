@@ -21,13 +21,13 @@ import { Kbd } from '@c2n/components/kbd'
 
 <ExampleModules />
 
-`c2-menu` is a trigger plus a popover of commands. The trigger goes in the `trigger` slot — a `c2-button`, a `c2-icon-button`, a plain `<button>` — or stays anywhere on the page and is named by `anchor`. The rows are `c2-menu-item` children: a command, a link (`href`), a checkbox or a radio (`type`), or the parent of a nested menu slotted into `submenu`. `<hr>` draws a separator between them and `<h1>`–`<h6>` a group heading.
+`c2-menu` is a trigger plus a popover of commands. The trigger goes in the `trigger` slot — a `c2-button`, a `c2-icon-button`, a plain `<button>` — or stays anywhere on the page and is named by `anchor`. The rows are `c2-menu-item` children: a command, a link (`href`), a checkbox or a radio (`type`), or the parent of a nested menu slotted into `submenu`. `<hr>` draws a separator between them and `<h1>`–`<h6>` a group heading. {/* c2n-ignore: prose naming a native element in inline code, not markup */}
 
 Activating a row fires `menu-select` and closes the menu, unless the menu (or that single row) is marked `keep-open`, which is what a list of `checkbox` rows wants. The surface is a native popover on the top layer positioned by `c2-overlay`, so it flips near the bottom of the viewport, light-dismisses on Escape and outside clicks, and is never clipped by an `overflow: hidden` parent.
 
 Choose where it opens with `placement`: `top`, `right`, `bottom` or `left`, optionally aligned with `-start` or `-end`. `offset` sets the gap from the trigger and `cross-offset` shifts the menu sideways along the trigger. All offsets are pixel numbers, and floating-ui can still flip the menu when the preferred side has no room.
 
-The menu never writes attributes on its own host or its rows, so server-rendered markup matches the hydrated element. While something is slotted into `trigger` the host is an inline box and matches `c2-menu:state(has-trigger)`; without one it is `display: contents`. Earlier releases wrote a `has-trigger` attribute (replace `c2-menu[has-trigger]` with `c2-menu:state(has-trigger)`), a `placement="right-start"` attribute on submenus (the default is now applied without it), and `reserve-indicator` on the rows (still accepted as an attribute, no longer written). For a plain `<button>` trigger the menu does write `aria-haspopup` and `aria-expanded` on it, since a foreign element has no other way to carry them; render them in your markup (`aria-haspopup="menu" aria-expanded="false"`) and the first write changes nothing.
+The menu never writes attributes on its own host or its rows, so server-rendered markup matches the hydrated element. While something is slotted into `trigger` the host is an inline box and matches `c2-menu:state(has-trigger)`; without one it is `display: contents`. Earlier releases wrote a `has-trigger` attribute (replace `c2-menu[has-trigger]` with `c2-menu:state(has-trigger)`), a `placement="right-start"` attribute on submenus (the default is now applied without it), and `reserve-indicator` on the rows (still accepted as an attribute, no longer written). For a plain `<button>` trigger the menu does write `aria-haspopup` and `aria-expanded` on it, since a foreign element has no other way to carry them; render them in your markup (`aria-haspopup="menu" aria-expanded="false"`) and the first write changes nothing. {/* c2n-ignore: prose naming a native element in inline code, not markup */}
 
 Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
 
@@ -188,7 +188,7 @@ menu.toggle()
 A trigger elsewhere on the page is named by `anchor`, and the menu opens beside it:
 
 ```html tag=CodeBlock
-<button id="row-7">Actions</button>
+<c2-button id="row-7">Actions</c2-button>
 
 <c2-menu anchor="row-7" placement="right-start" offset="12" cross-offset="4">
   <c2-menu-item value="edit">Edit</c2-menu-item>

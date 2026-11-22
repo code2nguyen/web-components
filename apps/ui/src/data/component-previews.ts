@@ -414,7 +414,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'overflow-list': `<c2-overflow-list style="width:250px" aria-label="Actions"><c2-button>Edit</c2-button><c2-button>Share</c2-button><c2-button>Move</c2-button><c2-button>Archive</c2-button></c2-overflow-list>`,
   'overlap-chart': `<c2-overlap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__region-label--font-size:11px;--c2-chart__set-label--font-size:11px" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web"></c2-chart-series><c2-chart-series field="mobile" label="Mobile"></c2-chart-series><c2-chart-series field="api" label="API"></c2-chart-series></c2-overlap-chart>`,
   overlay: `<div>
-  <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
+  <c2-button commandfor="preview-overlay" command="toggle-popover">Open overlay</c2-button>
   <c2-overlay id="preview-overlay" popover="auto" placement="bottom-start">
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
@@ -628,7 +628,7 @@ Type help for commands.</span></c2-terminal>`,
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   toggletip: `<div class="preview-row" style="flex-direction:column;align-items:flex-start;gap:12px"><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">VAT number <c2-toggletip label="About the VAT number">Your EU VAT number, starting with the country code.</c2-toggletip></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">Billing period <c2-toggletip label="About billing periods">Yearly plans cost two months less.</c2-toggletip></span></div>`,
-  tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  tooltip: `<c2-button>Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></c2-button>`,
   'totp-code': `<c2-totp-code label="GitHub" secret="JBSWY3DPEHPK3PXP" revealed hide-reveal style="width:220px"></c2-totp-code>`,
   tour: `<div class="preview-row">
   <c2-button id="preview-tour-target">Share</c2-button>

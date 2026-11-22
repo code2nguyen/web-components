@@ -16,6 +16,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { SideNav } from '@c2n/components/side-nav'
 import { List } from '@c2n/components/list'
 import { ListItem } from '@c2n/components/list-item'
+import { IconButton } from '@c2n/components/icon-button'
 
 `c2-side-nav` is an app-shell layout: the drawer goes in the `side-nav-content` slot, the page in the default slot, and both stretch to the host's height. It has two display modes. In **side** mode the drawer is part of the layout: it collapses to `--c2-side-nav__close--width` (0 by default, or a rail) and pushes the content. In **over** mode it leaves the flow, slides over the content with a backdrop, locks page scrolling, behaves as a dialog for assistive technology and closes on Escape or a click outside. Phones (under 600px) always use over mode; `tablet-mode` (600 to 959px, `over` by default) and `desktop-mode` (960px and up, `side` by default) choose the mode for the larger breakpoints. When the viewport crosses a breakpoint the drawer closes or reopens by itself and remembers your choice; on phones the initial `opened` is ignored so the overlay never covers the page on load.
 
@@ -62,23 +63,14 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     font-size: 14px;
   }
   .menu {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    border-radius: 6px;
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
-  }
-  .menu:hover {
-    background: var(--c2-theme--color-surface-container, #f4f4f5);
-  }
-  .menu svg {
-    width: 16px;
-    height: 16px;
+    --c2-icon-button__state-layer--size: 30px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .muted {
     color: var(--c2-theme--color-on-surface-variant, #71717a);
@@ -144,26 +136,15 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     opacity: 0;
   }
   .icon-rail .collapse {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     flex: none;
-    width: 32px;
-    height: 32px;
     margin-left: auto;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--c2-theme--color-on-surface-variant, #71717a);
-    cursor: pointer;
-  }
-  .icon-rail .collapse:hover {
-    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 7%, var(--c2-theme--color-surface, #ffffff));
-    color: var(--c2-theme--color-on-surface, #18181b);
-  }
-  .icon-rail .collapse svg {
-    width: 16px;
-    height: 16px;
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 7%, var(--c2-theme--color-surface, #ffffff));
   }
   .icon-rail:not([opened]) .rail-header {
     flex-direction: column;
@@ -219,9 +200,9 @@ The frames below are fixed-height containers; in an app the side nav usually fil
       </div>
       <div class="page">
         <div class="bar">
-          <button class="menu" side-nav-toggle aria-label="Toggle navigation">
+          <c2-icon-button class="menu" side-nav-toggle aria-label="Toggle navigation">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
+          </c2-icon-button>
           <strong>Inbox</strong>
         </div>
         <p class="muted">The drawer is part of the layout and pushes this content. Click the menu button to collapse it; the content grows to fill the space.</p>
@@ -242,9 +223,9 @@ The frames below are fixed-height containers; in an app the side nav usually fil
       </div>
       <div class="page">
         <div class="bar">
-          <button class="menu" side-nav-toggle aria-label="Open navigation">
+          <c2-icon-button class="menu" side-nav-toggle aria-label="Open navigation">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
+          </c2-icon-button>
           <strong>Inbox</strong>
         </div>
         <p class="muted">The drawer slides over this content with a backdrop. Press Escape or click the backdrop to close it. This is what every mode becomes on a phone.</p>
@@ -267,9 +248,9 @@ The frames below are fixed-height containers; in an app the side nav usually fil
         <div class="bar">
           <strong>Messages</strong>
           <span style="flex: 1"></span>
-          <button class="menu" side-nav-toggle aria-label="Toggle filters">
+          <c2-icon-button class="menu" side-nav-toggle aria-label="Toggle filters">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-          </button>
+          </c2-icon-button>
         </div>
         <p class="muted">The drawer sits on the end edge; the divider and the slide direction follow.</p>
       </div>
@@ -283,10 +264,10 @@ The frames below are fixed-height containers; in an app the side nav usually fil
         <div class="rail-header">
           <span class="logo" title="Acme">A</span>
           <strong class="label">Acme</strong>
-          <button class="collapse" side-nav-toggle aria-label="Toggle navigation" title="Toggle navigation">
+          <c2-icon-button class="collapse" side-nav-toggle tooltip="Toggle navigation">
             <svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
             <svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
-          </button>
+          </c2-icon-button>
         </div>
         <c2-list client:only="lit" value="inbox" class="nav">
           <c2-list-item value="inbox" title="Inbox"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span><span slot="suffix-icon" class="badge">12</span></c2-list-item>

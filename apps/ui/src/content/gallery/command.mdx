@@ -14,7 +14,7 @@ import { Kbd } from '@c2n/components/kbd'
 
 `--c2-command--*` is the surface (background, a border per side, a radius per corner, shadow), `--c2-command__field--*` the search row and `--c2-command__list--*` the scrolling list. The rows are themed through `--c2-command-item--*`, most visibly `--c2-command-item__active--background` for the highlight.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-command class="default" client:only="lit"><c2-command-group heading="Suggestions"><c2-command-item value="calendar">Calendar</c2-command-item><c2-command-item value="emoji">Search emoji</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Settings"><c2-command-item value="profile">Profile</c2-command-item><c2-command-item value="billing">Billing</c2-command-item></c2-command-group></c2-command>

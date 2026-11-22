@@ -18,7 +18,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { NativeSelect } from '@c2n/components/select/native-select'
 
-`c2-native-select` puts the browser's own `<select>` in a field drawn like [`c2-text-field`](/web-components/components/text-field):
+`c2-native-select` puts the browser's own `<select>` in a field drawn like [`c2-text-field`](/web-components/components/text-field): {/* c2n-ignore: prose naming a native element in inline code, not markup */}
 same height, border, focus and error looks, and the same theme tokens. Opening it shows the operating system's picker
 (the wheel on iOS, the sheet on Android), the keyboard and typeahead are the platform's, and the page loads no popover,
 no listbox and no positioning code: its entry is a few kilobytes, where [`c2-select`](/web-components/components/select)

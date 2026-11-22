@@ -9,7 +9,7 @@ import { Markdown } from '@c2n/components/markdown'
 
 Looks for `c2-markdown`. Typography (`--c2-markdown--font-size`, `--line-height`, `--block-gap`), headings, links, inline code, tables and blockquotes each have their own variables. Code blocks, math and diagrams keep their own components' variables, which also work when set on this element.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-markdown value="## Summary
@@ -111,7 +111,7 @@ The rule holds for components too."></c2-markdown>
 
 The name of the scrolling region around a table is a message token: an app translates it once with `addTranslations`, and each document speaks the language of its nearest `lang`.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=En français,description=The region around the table named in the language of the page,useWhen=The application is translated
 <div lang="fr">
