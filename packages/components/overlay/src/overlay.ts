@@ -18,14 +18,8 @@ export interface Overlay {
   removeEventListener: TypedRemoveEventListener<Overlay, OverlayEventMap>
 }
 
-/** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them this overlay runs its triggers itself. */
-const nativeCommands = typeof HTMLButtonElement === 'undefined' || 'commandForElement' in HTMLButtonElement.prototype
-const POPOVER_COMMANDS = new Set(['show-popover', 'hide-popover', 'toggle-popover'])
-
 /** A native button, or an element that forwards commands to the button in its shadow root (`c2-button`, which has `commandFor`). */
 const isInvoker = (element: Element) => element instanceof HTMLButtonElement || ('commandFor' in element && !!element.shadowRoot?.querySelector('button'))
-/** Built-in commands are ASCII case-insensitive keywords. */
-const commandOf = (element: Element) => (element.getAttribute('command') ?? '').toLowerCase()
 
 const POSITIONING_VARIABLES = ['--c2-overlay--offset-y', '--c2-overlay--offset-x', '--c2-overlay--viewport-padding']
 
@@ -34,12 +28,10 @@ const POSITIONING_VARIABLES = ['--c2-overlay--offset-y', '--c2-overlay--offset-x
  * natively (Escape, click outside) and is positioned next to its anchor with floating-ui. The anchor is found in
  * this order: the `anchor` property (an element), the `anchor` attribute (an element id in the same tree), or the
  * element whose `popovertarget` or `commandfor` points at this overlay's `id`. A `commandfor` trigger (a native button
- * or a `c2-button`) with `command="show-popover"`, `"hide-popover"` or `"toggle-popover"` opens and closes it, also
- * in a browser without invoker commands: the overlay then runs the command on click and keeps a `toggle-popover`
- * trigger's `aria-expanded` in step (from its first open on, never on upgrade, so a server-rendered page hydrates
- * cleanly). There, a trigger inside another open popover closes that popover as it opens this one, unless the browser
- * supports `showPopover({ source })`. The overlay only positions itself; the content brings
- * its own surface (background, border, shadow), so it fits menus, pickers and cards alike.
+ * or a `c2-button`) with `command="show-popover"`, `"hide-popover"` or `"toggle-popover"` opens and closes it through
+ * the browser's invoker commands; the overlay keeps a `c2-button` `toggle-popover` trigger's `aria-expanded` in step
+ * (from its first open on, never on upgrade, so a server-rendered page hydrates cleanly). The overlay only positions
+ * itself; the content brings its own surface (background, border, shadow), so it fits menus, pickers and cards alike.
  *
  * The preferred `placement` may flip or shift to stay in the viewport; the placement actually used is exposed as the
  * `current-placement` attribute, and the space available on that side as `--c2-overlay--available-height` /
@@ -105,82 +97,18 @@ export class Overlay extends LitElement {
     }
   }
 
-  /** The tree whose trigger clicks this overlay listens to, without invoker commands. */
-  private commandRoot: Node | undefined
-  /** Open state at the pointerdown on a trigger, before light dismissal closes the popover, see `handleTriggerClick`. */
-  private openAtPress: boolean | undefined
-
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer && !this.hasAttribute('popover')) this.setAttribute('popover', 'auto')
-    if (!nativeCommands) {
-      this.commandRoot = this.getRootNode()
-      this.commandRoot.addEventListener('pointerdown', this.handleTriggerPointerDown, true)
-      // Capture: a native invoker runs whatever a listener on the way does with propagation; see `handleTriggerClick`.
-      this.commandRoot.addEventListener('click', this.handleTriggerClick, true)
-    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.stopPositioning()
-    this.commandRoot?.removeEventListener('pointerdown', this.handleTriggerPointerDown, true)
-    this.commandRoot?.removeEventListener('click', this.handleTriggerClick, true)
-    this.commandRoot = undefined
     // Removed from the page, the popover is hidden without a `toggle` event: give the triggers back their own state.
     for (const trigger of this.expandedTriggers) this.setExpanded(trigger, this.authoredExpanded.get(trigger) == null ? null : 'false')
     this.expandedTriggers.clear()
     this.authoredExpanded.clear()
-  }
-
-  /** The `commandfor` trigger naming this overlay that `event` went through, if any. */
-  private triggerOf(event: Event): Element | null {
-    if (!this.id) return null
-    const trigger = event.composedPath().find((node): node is Element => node instanceof Element && node.hasAttribute('commandfor'))
-    // As natively, `commandfor` names an element of the trigger's own tree only.
-    return trigger && trigger.getAttribute('commandfor') === this.id && trigger.getRootNode() === this.getRootNode() && isInvoker(trigger) ? trigger : null
-  }
-
-  private handleTriggerPointerDown = (event: Event) => {
-    // A press on the trigger of an open popover light-dismisses it before the click: remember it was open, so
-    // `toggle-popover` closes it instead of opening it again (natively the invoker is exempt from light dismissal).
-    this.openAtPress = this.triggerOf(event) ? this.matches(':popover-open') : undefined
-  }
-
-  /**
-   * Without invoker commands, a click on a trigger naming this overlay runs its popover command. As natively, a
-   * disabled button and a submit or reset button of a form send nothing.
-   */
-  private handleTriggerClick = (event: Event) => {
-    if (!this.id) return
-    // The state remembered at pointerdown applies to a pointer click only (`detail` > 0), never to a keyboard press.
-    const wasOpen = ((event as MouseEvent).detail > 0 ? this.openAtPress : undefined) ?? this.matches(':popover-open')
-    this.openAtPress = undefined
-    const trigger = this.triggerOf(event)
-    const command = trigger ? commandOf(trigger) : ''
-    if (!trigger || !POPOVER_COMMANDS.has(command)) return
-    // The button the click went through: the trigger itself, or the one in its shadow root.
-    const button = event
-      .composedPath()
-      .find((node): node is HTMLButtonElement => node instanceof HTMLButtonElement && (node === trigger || node.getRootNode() === trigger.shadowRoot))
-    const { type, form } = trigger as Element & { type?: string; form?: HTMLFormElement | null }
-    if (!button || button.disabled || trigger.matches(':disabled') || (type !== 'button' && form)) return
-    // Run once the click has been dispatched, as a native invoker does: only `preventDefault` on the way cancels it.
-    setTimeout(() => {
-      if (event.defaultPrevented) return
-      const next = command === 'toggle-popover' ? !wasOpen : command === 'show-popover'
-      // Straight on the popover, not through `open`: a press has light-dismissed it, and the `toggle` that resets
-      // `open` is still queued, so `open = true` would be no change. (Unlike a native invoker, a pointer press on a
-      // `show-popover` trigger of an open overlay closes it first; it opens again here.)
-      try {
-        // `source` tells the popover stack which open popover holds the trigger, so it stays open, as natively; a
-        // browser without invoker commands may also ignore it, and then an unrelated open popover closes.
-        if (next && !this.matches(':popover-open')) this.showPopover({ source: button } as ShowPopoverOptions)
-        else if (!next && this.matches(':popover-open')) this.hidePopover()
-      } catch {
-        // Not a popover (attribute removed) or disconnected meanwhile: nothing to do.
-      }
-    })
   }
 
   /** Triggers `syncTriggers` gave an expanded state, so it can take it back. */
@@ -189,16 +117,16 @@ export class Overlay extends LitElement {
   private authoredExpanded = new Map<HTMLElement, string | null>()
 
   /**
-   * `aria-expanded` of the `toggle-popover` triggers naming this overlay, as a `popovertarget` button gets natively. A
-   * `c2-button` takes it as a property it hands to its inner button, so nothing lands on its host. A native button
-   * needs it only without invoker commands, where the browser maps no popup state for it.
+   * `aria-expanded` of the `c2-button` `toggle-popover` triggers naming this overlay, as a `popovertarget` button gets
+   * natively. It takes it as a property it hands to its inner button, so nothing lands on its host. A native button
+   * gets it from the browser.
    */
   private syncTriggers() {
     const root = this.getRootNode() as ParentNode
     const triggers = new Set<HTMLElement>()
     if (this.id && root.querySelectorAll)
       for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="toggle-popover" i]`))
-        if (isInvoker(trigger) && (trigger instanceof HTMLButtonElement ? !nativeCommands : !!customElements.get(trigger.localName))) triggers.add(trigger)
+        if (!(trigger instanceof HTMLButtonElement) && isInvoker(trigger) && customElements.get(trigger.localName)) triggers.add(trigger)
     for (const trigger of this.expandedTriggers)
       if (!triggers.has(trigger)) {
         this.setExpanded(trigger, this.authoredExpanded.get(trigger) == null ? null : 'false')
@@ -215,7 +143,7 @@ export class Overlay extends LitElement {
 
   private setExpanded(trigger: HTMLElement, expanded: string | null) {
     if (trigger.ariaExpanded === expanded) return
-    // modern-web-ignore: aria-attribute-on-other-element a c2-button takes this as a property; a native button gets it only without invoker commands, where the browser maps no popup state for its trigger
+    // modern-web-ignore: aria-attribute-on-other-element a c2-button takes this as a property it hands to its inner button; nothing lands on its host
     trigger.ariaExpanded = expanded
   }
 
