@@ -96,7 +96,8 @@
         "packages/tools/config/eslint.config.js",
         "!**/dist/**/*",
         "!**/types/**/*",
-        "!node_modules/"
+        "!node_modules/",
+        "!.claude/worktrees/**"
       ],
       "output": [],
       "command": "eslint ."
