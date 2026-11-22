@@ -70,8 +70,8 @@ Compare with the reference component of the same kind ("Reference components by 
 - **Imports** — `customElement` from `@c2n/core/element-helper.js`, `property` from `@c2n/core/lit-helper.js`.
 - **Events** — declared in an exported `<Class>EventMap` matching the `@event` JSDoc; `selection-change` does not bubble.
 - **Form controls** — take part in the field protocol (`FieldContextConsumer`), implement `formStateRestoreCallback`.
-- **Modern platform** — the rules listed under "Modern web platform", and a Baseline status stated for any newly
-  adopted feature.
+- **Modern platform** — the rules listed under "Modern web platform", and for any newly adopted feature a Baseline
+  status plus whether the latest two versions of each browser ship it (a fallback only when one does not).
 - **Public API** — removing or renaming an attribute, slot, part, property or event is a breaking change: flag it. So
   is changing what an existing value does (an attribute value that now hides a control, drops data or fires events it
   did not): flag it for the changelog and explicit sign-off.

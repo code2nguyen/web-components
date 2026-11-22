@@ -56,87 +56,44 @@ const C2_TRIGGERS = `
   <c2-button id="open-filters" commandfor="filters" command="toggle-popover">Filters</c2-button>
   <c2-button commandfor="filters" command="show-popover">Show</c2-button>`
 
-for (const mode of ['invoker commands', 'the click fallback']) {
-  test(`a c2-button commandfor trigger opens, anchors and closes the overlay through ${mode}`, async ({ page, renderScenario }) => {
-    if (mode === 'the click fallback')
-      await page.addInitScript(() => {
-        delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
-        // Cancelled too: Chromium still runs a native button's popover command, which a browser without them never does.
-        window.addEventListener(
-          'command',
-          (event) => {
-            event.preventDefault()
-            event.stopImmediatePropagation()
-          },
-          { capture: true },
-        )
-      })
-    await renderScenario('<c2-overlay id="filters" placement="bottom-start"><button>Status</button></c2-overlay>')
-    const native = await page.evaluate(() => 'commandForElement' in HTMLButtonElement.prototype)
-    if (mode === 'invoker commands') test.skip(!native, 'invoker commands (commandfor) are not supported by this browser')
-    // The scenario page loads c2-overlay only: load c2-button, then put the triggers before the overlay.
-    await page.locator('main').evaluate(
-      async (main, { url, markup }) => {
-        await import(url)
-        main.insertAdjacentHTML('afterbegin', markup)
-        await Promise.all([...main.querySelectorAll('c2-button')].map((button) => (button as Element & { updateComplete: Promise<boolean> }).updateComplete))
-      },
-      { url: BUTTON_MODULE, markup: C2_TRIGGERS },
-    )
-    const host = page.locator('c2-overlay')
-    const trigger = page.getByRole('button', { name: 'Filters' })
-
-    await trigger.click()
-    await expect(host).toHaveJSProperty('open', true)
-    await expect(page.getByRole('button', { name: 'Status' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Filters', expanded: true })).toBeVisible()
-    // Placed under the trigger that names it.
-    const anchor = (await trigger.boundingBox())!
-    const box = (await host.boundingBox())!
-    expect(Math.abs(box.x - anchor.x)).toBeLessThan(2)
-    expect(box.y).toBeGreaterThan(anchor.y)
-
-    // A second press closes it: the trigger's own press does not light-dismiss and reopen it.
-    await trigger.click()
-    await expect(host).toHaveJSProperty('open', false)
-    await expect(page.getByRole('button', { name: 'Filters', expanded: false })).toBeVisible()
-
-    await page.getByRole('button', { name: 'Show' }).click()
-    await expect(host).toHaveJSProperty('open', true)
-    await page.keyboard.press('Escape')
-    await expect(host).toHaveJSProperty('open', false)
-  })
-}
-
-test('without invoker commands, a disabled trigger or one naming another element does nothing', async ({ page, renderScenario }) => {
-  await page.addInitScript(() => {
-    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
-    // Cancelled too: Chromium still runs a native button's popover command, which a browser without them never does.
-    window.addEventListener(
-      'command',
-      (event) => {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-      },
-      { capture: true },
-    )
-  })
-  await renderScenario(`<button commandfor="filters" command="toggle-popover" disabled>Off</button>
-    <button commandfor="other" command="toggle-popover">Other</button>
-    <button commandfor="filters" command="toggle-popover">Native</button>
-    <c2-overlay id="filters"><button>Status</button></c2-overlay>`)
+test('a c2-button commandfor trigger opens, anchors and closes the overlay', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-overlay id="filters" placement="bottom-start"><button>Status</button></c2-overlay>')
+  // The scenario page loads c2-overlay only: load c2-button, then put the triggers before the overlay.
+  await page.locator('main').evaluate(
+    async (main, { url, markup }) => {
+      await import(url)
+      main.insertAdjacentHTML('afterbegin', markup)
+      await Promise.all([...main.querySelectorAll('c2-button')].map((button) => (button as Element & { updateComplete: Promise<boolean> }).updateComplete))
+    },
+    { url: BUTTON_MODULE, markup: C2_TRIGGERS },
+  )
   const host = page.locator('c2-overlay')
-  await page.getByRole('button', { name: 'Other' }).click()
-  await page.getByRole('button', { name: 'Off' }).click({ force: true })
-  await expect(host).toHaveJSProperty('open', false)
-  await page.getByRole('button', { name: 'Native' }).press('Enter')
+  const trigger = page.getByRole('button', { name: 'Filters' })
+
+  await trigger.click()
   await expect(host).toHaveJSProperty('open', true)
+  await expect(page.getByRole('button', { name: 'Status' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Filters', expanded: true })).toBeVisible()
+  // Placed under the trigger that names it.
+  const anchor = (await trigger.boundingBox())!
+  const box = (await host.boundingBox())!
+  expect(Math.abs(box.x - anchor.x)).toBeLessThan(2)
+  expect(box.y).toBeGreaterThan(anchor.y)
+
+  // A second press closes it: the trigger's own press does not light-dismiss and reopen it.
+  await trigger.click()
+  await expect(host).toHaveJSProperty('open', false)
+  await expect(page.getByRole('button', { name: 'Filters', expanded: false })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Show' }).click()
+  await expect(host).toHaveJSProperty('open', true)
+  await page.keyboard.press('Escape')
+  await expect(host).toHaveJSProperty('open', false)
 })
 
 test('with invoker commands a native trigger gets no attribute, and a removed overlay takes back the state it gave', async ({ page, renderScenario }) => {
   await renderScenario(`<button commandfor="filters" command="toggle-popover">Native</button>
     <c2-overlay id="filters"><button>Status</button></c2-overlay>`)
-  test.skip(!(await page.evaluate(() => 'commandForElement' in HTMLButtonElement.prototype)), 'invoker commands (commandfor) are not supported by this browser')
   await page.locator('main').evaluate(async (main, url) => {
     await import(url)
     main.insertAdjacentHTML('afterbegin', '<c2-button commandfor="filters" command="toggle-popover">Filters</c2-button>')
@@ -167,66 +124,10 @@ test('a close button inside the overlay is never its anchor', async ({ page, ren
   expect(box.y).toBeGreaterThan(anchor.y)
 })
 
-test('without invoker commands, a native trigger keeps the markup it was rendered with until the overlay opens', async ({ page, renderScenario }) => {
-  await page.addInitScript(() => {
-    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
-    window.addEventListener(
-      'command',
-      (event) => {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-      },
-      { capture: true },
-    )
-  })
-  await renderScenario(`<button commandfor="filters" command="toggle-popover">Native</button><c2-overlay id="filters"><button>Status</button></c2-overlay>`)
-  const native = page.getByRole('button', { name: 'Native' })
-  await expect.poll(() => page.locator('c2-overlay').evaluate((el) => (el as HTMLElement & { hasUpdated: boolean }).hasUpdated)).toBe(true)
-  expect(await native.evaluate((el) => el.getAttributeNames().sort())).toEqual(['command', 'commandfor'])
-  await native.click()
-  await expect(native).toHaveAttribute('aria-expanded', 'true')
-  await native.click()
-  await expect(native).toHaveAttribute('aria-expanded', 'false')
-})
-
-test('without invoker commands, Show keeps an open overlay open and a parent stopping the click does not block a trigger', async ({ page, renderScenario }) => {
-  await page.addInitScript(() => {
-    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
-    window.addEventListener(
-      'command',
-      (event) => {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-      },
-      { capture: true },
-    )
-  })
-  await renderScenario(`<div onclick="event.stopPropagation()"><button commandfor="filters" command="show-popover">Show</button></div>
-    <c2-overlay id="filters"><button>Status</button></c2-overlay>`)
-  const host = page.locator('c2-overlay')
-  const show = page.getByRole('button', { name: 'Show' })
-  await show.click()
-  await expect(host).toHaveJSProperty('open', true)
-  await show.click()
-  await expect(host).toHaveJSProperty('open', true)
-  await expect(page.getByRole('button', { name: 'Status' })).toBeVisible()
-})
-
 test('an element that does not forward commands is no trigger, and a moved overlay lets go of its trigger until it opens again', async ({
   page,
   renderScenario,
 }) => {
-  await page.addInitScript(() => {
-    delete (HTMLButtonElement.prototype as Partial<HTMLButtonElement>).commandForElement
-    window.addEventListener(
-      'command',
-      (event) => {
-        event.preventDefault()
-        event.stopImmediatePropagation()
-      },
-      { capture: true },
-    )
-  })
   await renderScenario('<section></section><c2-overlay id="filters"><button>Status</button></c2-overlay>')
   await page.locator('main').evaluate(
     async (main, urls) => {
