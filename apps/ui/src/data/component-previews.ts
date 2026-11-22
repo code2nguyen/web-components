@@ -414,7 +414,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'overflow-list': `<c2-overflow-list style="width:250px" aria-label="Actions"><c2-button>Edit</c2-button><c2-button>Share</c2-button><c2-button>Move</c2-button><c2-button>Archive</c2-button></c2-overflow-list>`,
   'overlap-chart': `<c2-overlap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__region-label--font-size:11px;--c2-chart__set-label--font-size:11px" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web"></c2-chart-series><c2-chart-series field="mobile" label="Mobile"></c2-chart-series><c2-chart-series field="api" label="API"></c2-chart-series></c2-overlap-chart>`,
   overlay: `<div>
-  <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
+  <c2-button commandfor="preview-overlay" command="toggle-popover">Open overlay</c2-button>
   <c2-overlay id="preview-overlay" popover="auto" placement="bottom-start">
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
