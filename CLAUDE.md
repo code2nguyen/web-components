@@ -68,6 +68,8 @@ A `CLAUDE.md` in a subdirectory loads automatically once a session reads or edit
 | `lab/CLAUDE.md`                            | The component lab                                                                                                                                                                                                                                                           |
 | `docs/agents/component-foundation.md`      | Before designing a component or adding a feature: the six foundation rules in full, their scope, companion-element variants                                                                                                                                                 |
 | `docs/agents/adding-a-component.md`        | Scaffolding a component and making it reachable through MCP and `/llms.txt` (what `check:reachability` enforces)                                                                                                                                                            |
+| `docs/agents/removing-a-component.md`      | Removing a component package: wiring, generated files, exception lists, the lockfile leftover                                                                                                                                                                               |
+| `docs/agents/pinned-dependencies.md`       | Upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`: the `@lit-labs/ssr` override and the Linux native binaries in the lockfile                                                                                                                                         |
 | `docs/agents/release-and-changelog.md`     | Release workflow, `lerna version`, changelog generation                                                                                                                                                                                                                     |
 | `docs/planning/`                           | Roadmaps, candidate research and action plans: intent and history, not current rules. Open only for planning (what to build next, a missing component); `docs/planning/README.md` says which are maintained                                                                 |
 
@@ -95,30 +97,9 @@ Wireit drives everything. The root `wireit.examples:build` group is the equivale
 
 Vite lib config per package: single ES output, `minify: false`, and `external: /^lit|@c2n/` — Lit and sibling `@c2n/*` packages are never bundled into a component. Keep cross-package dependencies minimal; import through the published subpath (`@c2n/core/dom-helper.js`), not relative paths across packages.
 
-## Pinned transitive dependency
+## Pinned dependencies
 
-The root `package.json` has `overrides: { "@lit-labs/ssr": "3.2.2" }`. `@astrojs/lit` (unmaintained since mid-2024) hand-builds the `renderInfo` object in its `server.js` with only `customElementInstanceStack`/`customElementHostStack`, but `@lit-labs/ssr` 3.3+ also reads `eventTargetStack`/`slotStack`. Its own `^3.2.2` range floats into those versions, and the UI app build then dies with `Cannot read properties of undefined (reading 'length')` inside `getLast`. Do not remove the override without first checking that `@astrojs/lit` has been updated.
-
-## Linux native binaries in the lockfile
-
-The root `package.json` declares nine Linux `optionalDependencies` that nothing imports directly:
-`@rolldown/binding-linux-x64-gnu`, `@esbuild/linux-x64`, `lightningcss-linux-x64-gnu`,
-`@astrojs/compiler-binding-linux-x64-gnu`, `@parcel/watcher-linux-x64-glibc`, `@img/sharp-linux-x64`,
-`@img/sharp-libvips-linux-x64`, `@xn-sakina/rml-linux-x64-gnu` and `@bruits/satteri-linux-x64-gnu`.
-
-They exist so CI can use `npm ci`. Each of those toolchain packages ships its native binary as a platform-gated
-optional dependency, and npm resolves optional dependencies for the **host** platform only — a lockfile written on
-macOS records `@rolldown/binding-darwin-arm64` and no Linux entry at all ([npm/cli#4828](https://github.com/npm/cli/issues/4828)).
-`npm ci` then installs strictly from that lockfile, the install _succeeds_, and the build dies later with
-`Cannot find native binding` / `Cannot find module '@rolldown/binding-linux-x64-gnu'`.
-
-Regenerating the lockfile does not help (a fresh resolve still writes darwin only), and neither does
-`npm install --os=linux --cpu=x64 --package-lock-only`. Declaring the Linux packages at the root is what puts them
-in the lockfile; they carry `os: ["linux"]` so npm skips downloading them on macOS and Windows.
-
-**Their versions must match their parent package.** After upgrading Vite, Astro, esbuild or sharp, re-read the
-parent's `optionalDependencies` in `package-lock.json` and update these pins, or CI installs a binary that does not
-match its loader.
+The root `package.json` pins `@lit-labs/ssr` to 3.2.2 through `overrides` (for `@astrojs/lit`) and declares nine Linux native binaries as `optionalDependencies` so CI's `npm ci` works from a lockfile written on macOS. Both must move in step with their parents: **read `docs/agents/pinned-dependencies.md` before upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`.**
 
 ## Component foundation
 
