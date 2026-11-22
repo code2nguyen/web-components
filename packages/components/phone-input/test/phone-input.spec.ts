@@ -98,7 +98,7 @@ test('the picker searches by name and calling code and keeps the number', async 
 
   await page.keyboard.type('+49')
   await expect(page.getByRole('option')).toHaveText([/Germany/])
-  await page.keyboard.press('Control+a')
+  await page.keyboard.press('ControlOrMeta+a')
   await page.keyboard.type('swit')
   await expect(page.getByRole('option')).toHaveText([/Switzerland\s*\+41/])
   await page.keyboard.press('Enter')

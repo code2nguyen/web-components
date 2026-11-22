@@ -19,7 +19,12 @@ export default defineConfig({
   },
   projects: [
     // `CHROMIUM_PATH` points at a browser installed outside Playwright's cache (a container with a pinned Chromium).
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } },
+    // The browser's own user agent, not the device's Windows one: components pick ⌘ or Ctrl from the platform the page
+    // reports, and Playwright's `ControlOrMeta` from the host's, so on a Mac the two must agree.
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], userAgent: undefined, launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } },
+    },
     {
       name: 'firefox',
       use: {

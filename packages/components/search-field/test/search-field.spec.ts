@@ -159,7 +159,7 @@ test('recent searches open on focus, follow the arrow keys and run on Enter', as
   expect(await events(page)).toEqual([{ value: 'assignee:me', trigger: 'recent' }])
 
   // Escape closes the panel before it clears anything.
-  await page.keyboard.press('Control+a')
+  await page.keyboard.press('ControlOrMeta+a')
   await page.keyboard.press('Backspace')
   await expect(input).toHaveAttribute('aria-expanded', 'true')
   await page.keyboard.press('Escape')
@@ -191,7 +191,7 @@ test('history-key records committed searches, persists them and clears them', as
   for (const query of ['one', 'two', 'three']) {
     await page.keyboard.type(query)
     await page.keyboard.press('Enter')
-    await page.keyboard.press('Control+a')
+    await page.keyboard.press('ControlOrMeta+a')
     await page.keyboard.press('Backspace')
   }
   await expect(page.getByRole('option')).toHaveText(['three', 'two'])
