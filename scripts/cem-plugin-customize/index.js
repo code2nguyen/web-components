@@ -36,10 +36,10 @@ export function customLitCemPlugin() {
           // hand-maintained list. Explicit @csspart descriptions win when present.
           const source = node.getText()
           const names = new Set()
-          for (const match of source.matchAll(/\bpart\s*=\s*"([^"]+)"/g)) {
+          for (const match of source.matchAll(/(?<![\w-])part\s*=\s*"([^"]+)"/g)) {
             for (const name of match[1].split(/\s+/)) if (/^[a-z][a-z0-9-]*$/.test(name)) names.add(name)
           }
-          for (const match of source.matchAll(/\bpart\s*=\s*\$\{([^}]+)\}/g)) {
+          for (const match of source.matchAll(/(?<![\w-])part\s*=\s*\$\{([^}]+)\}/g)) {
             for (const quoted of match[1].matchAll(/['"]([^'"]+)['"]/g)) {
               // A conditional binding can contain quoted comparison values that are not part names, e.g.
               // `part=${state === 'ready' ? 'editor' : nothing}`. Only collect strings that can contribute to the
