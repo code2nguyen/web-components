@@ -46,6 +46,7 @@
     "check:component-template": "node scripts/check-component-template.mjs",
     "check:reachability": "npm run check:reachability -w packages/tools/mcp",
     "check:app-markup": "node packages/tools/mcp/src/cli.ts validate apps/ui/src apps/examples lab/apps",
+    "check:pr": "node scripts/check-pr.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",

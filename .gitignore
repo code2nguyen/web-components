@@ -44,3 +44,6 @@ packages/components/.note-panel/
 
 # Claude Code worktrees (EnterWorktree, isolated agents): each is its own checkout with its own git status and tools
 .claude/worktrees/
+
+# npm run check:pr: one log per step
+.check-pr/
