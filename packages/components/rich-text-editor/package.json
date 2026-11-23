@@ -68,9 +68,9 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
-    "@c2n/menu": "*",
-    "@c2n/page-editor": "*",
+    "@c2n/core": "workspace:*",
+    "@c2n/menu": "workspace:*",
+    "@c2n/page-editor": "workspace:*",
     "lit": "3.3.3",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
@@ -81,7 +81,12 @@
     "prosemirror-view": "^1.42.6"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

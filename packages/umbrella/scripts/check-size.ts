@@ -38,7 +38,7 @@ const budgetFile = join(packageDir, 'size-budget.json')
 const update = process.argv.includes('--update')
 const add = process.argv.includes('--add')
 
-if (!existsSync(distDir)) throw new Error('dist/ is missing: run `npm run build -w packages/umbrella` first')
+if (!existsSync(distDir)) throw new Error('dist/ is missing: run `pnpm --dir packages/umbrella run build` first')
 
 const jsFiles = (readdirSync(distDir, { recursive: true }) as string[]).map((file) => file.split(sep).join('/')).filter((file) => file.endsWith('.js'))
 const entries = jsFiles.filter((file) => !file.startsWith('chunks/') && !file.startsWith('types/')).sort()
@@ -130,7 +130,7 @@ const largest = Object.entries(current.entries)
 console.log(
   `[@c2n/components] ${entries.length} entries, ${kb(total)} gzipped in total, ${kb(current.lazy)} lazy (budget ${kb(budget.lazy)}). Largest: ${largest.join(', ')}`,
 )
-if (added.length > 0) console.log(`New entries without a budget (run \`npm run size:add -w packages/umbrella\` to record them): ${added.join(', ')}`)
+if (added.length > 0) console.log(`New entries without a budget (run \`pnpm --dir packages/umbrella run size:add\` to record them): ${added.join(', ')}`)
 
 if (process.env.GITHUB_STEP_SUMMARY && rows.length > 0) {
   const table = ['### @c2n/components bundle size', '', '| Entry | Budget | Now | Change |', '| --- | ---: | ---: | ---: |', ...rows, ''].join('\n')
@@ -140,6 +140,6 @@ if (process.env.GITHUB_STEP_SUMMARY && rows.length > 0) {
 if (failures.length > 0) {
   console.error(`\nBundle size grew past its budget (+${GROWTH_RATIO * 100}% and ${kb(GROWTH_SLACK)} allowed):\n  ${failures.join('\n  ')}`)
   console.error('\nLook for a dependency that is no longer external or a component that now imports another one.')
-  console.error('If the growth is intended, run `npm run size:update -w packages/umbrella` and commit size-budget.json.')
+  console.error('If the growth is intended, run `pnpm --dir packages/umbrella run size:update` and commit size-budget.json.')
   process.exit(1)
 }

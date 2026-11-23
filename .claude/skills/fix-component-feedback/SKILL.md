@@ -46,8 +46,8 @@ For each entry:
    (`null` in `$theme`) is not mapped by `@c2n/theme`; one with a default gets `:root` values from `base.css` that
    beat any fallback chain, so a shorthand that should win over per-side variables must come first in `cssVar(...)`
    and have no default.
-3. `npm run build -w packages/components/<pkg>` (regenerates `custom-elements.json`), then
-   `npx playwright test packages/components/<pkg> --project=chromium`. When a test fails, check whether it also fails on
+3. `pnpm --dir packages/components/<pkg> run build` (regenerates `custom-elements.json`), then
+   `pnpm exec playwright test packages/components/<pkg> --project=chromium`. When a test fails, check whether it also fails on
    the unchanged source before blaming the change (`git stash push <src path>`), and report a pre-existing failure.
 
 ## 4. Verify in a real browser
@@ -56,7 +56,7 @@ A passing test proves the case it covers, not the page a reader opens. After the
 docs site in a real browser:
 
 ```bash
-LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 npm run ui:build
+LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 pnpm run ui:build
 LC_ALL=en_US.UTF-8 node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…
 ```
 

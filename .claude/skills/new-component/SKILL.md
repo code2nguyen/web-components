@@ -48,7 +48,7 @@ node .claude/skills/new-component/scripts/mock-screenshots.mjs <name> [--mobile]
 
 `design-mocks/` is ignored by Git: the mock is a working drawing, and the component replaces it. The script serves the
 repo with the test Vite server, which resolves every `@c2n/*` import to source, and loads `@c2n/theme`'s
-`theme.css` (build it with `npm run build -w packages/tools/theme` if it is missing).
+`theme.css` (build it with `pnpm --dir packages/tools/theme run build` if it is missing).
 
 - **Draw the new element with plain HTML and CSS**, and use the real `c2-*` elements for the parts it composes (a
   `c2-select` in a toolbar, a `c2-button` in a footer) through a `<script type="module">` import, so the mock shows
@@ -73,8 +73,8 @@ deliberate change.
 Plop accepts the prompt answers as positional bypass args, so never run it interactively:
 
 ```bash
-npm run generate -- "<Name>"
-npm install                    # link the new workspace into node_modules/@c2n
+pnpm run generate "<Name>"
+pnpm install                   # link the new workspace into the packages that declare it
 ```
 
 `pregenerate` recompiles `scripts/generator/plopfile.ts` → `plopfile.js` first. The generator then:
@@ -86,8 +86,8 @@ npm install                    # link the new workspace into node_modules/@c2n
 - creates the doc stub `apps/ui/src/content/components/<name>.mdx`
 - the `custom-elements.json` import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json` and in `packages/umbrella/package.json`'s `devDependencies`, the side-effect import in `component-modules.ts`, a placeholder entry in `component-previews.ts`, and the gallery stub `apps/ui/src/content/gallery/<name>.mdx`
 
-`npm install` afterwards is not optional: it creates the `node_modules/@c2n/<name>` workspace symlink. Without it
-`npm run ui:build` fails with `failed to resolve import "@c2n/<name>/custom-elements.json"`.
+`pnpm install` afterwards is not optional: it links the new package into `apps/ui` and the umbrella, which now declare it. Without it
+`pnpm run ui:build` fails with `failed to resolve import "@c2n/<name>/custom-elements.json"`.
 
 Each registry entry lands at its alphabetical place (`scripts/generator/sorted-lists.ts`), so a component PR does not conflict with another one open at the same time; keep it there if you touch those lists by hand.
 
@@ -104,7 +104,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - **Action zones** (foundation rule 5): give a complex component `toolbar`/`actions`/`footer` slots and the public methods and events an app's own buttons need, instead of built-in buttons behind flags. Build an action in only when the widget's own pattern requires it, and keep it replaceable through a slot.
 - **Text** (foundation rule 6): no string literal in the template. Each label, `aria-label`, announcement and message is a key in `src/messages.ts` rendered with `this.msg.t(…)`; a text property defaults to empty and falls back to its message.
 - **Data** (foundation rule 3, collection components): the declarative form (child elements read on `slotchange`, and/or a `jsonPropertyConverter` attribute) and the in-memory property feed one internal model; `@property({ attribute: false }) dataSource?: <Class>DataSource` (one async `get<Things>(request)` returning the items and `total`) replaces it for remote or paged data, with `loading`/`empty`/`error` slots and superseded responses dropped. Say in the JSDoc which form wins. See `TableDataSource` in `packages/components/table/src/table-types.ts`.
-- Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
+- Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `pnpm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
 - **An API an agent can read** (AI readiness, below): the class JSDoc says what the element is and when to use it; every public member a consumer may set from script (`render<Part>`, `dataSource`, methods, public getters) has a JSDoc description and a type, and an internal that is public only for TypeScript's sake (a `@query` handle, a handler, internal state) gets `/** @internal */` so the manifest and `get_component` leave it out. A `@cssproperty` whose last segment is not a CSS property (`--size`, `--icon-size`, `--visible-rows`) gets a `- description` saying what it sets (`Width and height of the thumb`). A `@slot` description names the components it typically holds (`a c2-list of c2-list-item links`); a child element's JSDoc names its parent.
 - **Modern platform** (`packages/components/CLAUDE.md`, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
@@ -119,7 +119,7 @@ component done — `tests/README.md` has the conventions, and `packages/componen
   real pointer and keyboard input rather than mutating properties.
 - Cover the states and transitions that matter, plus an axe scan of the representative ones.
 - Use the shared `tab` fixture for focus order. No arbitrary sleeps, no synthetic clicks.
-- `npm test` runs the suites of changed packages; `npm run test:all` runs everything on three engines.
+- `pnpm test` runs the suites of changed packages; `pnpm run test:all` runs everything on three engines.
 
 For a component where cost matters more than behaviour — anything virtualized or holding a large dataset — see
 `packages/components/table/test/` for the split between a machine-independent `*.perf.spec.ts` and an opt-in
@@ -139,33 +139,33 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 ## 7. Verify (match CI)
 
 ```bash
-npm run build -w packages/components/<name>   # type-check + vite build; regenerates custom-elements.json (commit it)
-npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
-npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
-npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
-npm run check:reachability                    # served docs page, description, 3+ intents, umbrella entry, tags resolve (docs/agents/adding-a-component.md)
-npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
+pnpm --dir packages/components/<name> run build   # type-check + vite build; regenerates custom-elements.json (commit it)
+pnpm --dir packages/tools/theme run build         # regenerate the base theme; read the coverage table / dist/report.json
+pnpm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
+pnpm install                                  # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
+pnpm run check:reachability                    # served docs page, description, 3+ intents, umbrella entry, tags resolve (docs/agents/adding-a-component.md)
+pnpm --dir packages/umbrella run size:add         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
 node scripts/generate-slot-styling-audit.mjs  # add the new slots to scripts/data/slot-styling-audit.json, then fill in each new entry's decision (docs:check)
 node lab/scripts/gaps.mjs > /dev/null         # lab/GAPS.md lists the new component (after build:tools); CI fails on either file left stale
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
 node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/<name>   # legacy-pattern scan: fix each error or justify it with a modern-web-ignore comment
-npm run lint && npm run format:check          # or: npm run fix
-npm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
-npm test                                      # the new package's Playwright suite
-npm run ui:dev                                # open /components/<name>; check example, gallery, API table, inspector
+pnpm run lint && pnpm run format:check          # or: pnpm run fix
+pnpm run ui:build                              # catches a missing apps/ui dependency, which ui:dev does not
+pnpm test                                      # the new package's Playwright suite
+pnpm run ui:dev                                # open /components/<name>; check example, gallery, API table, inspector
 ```
 
-`build:tools` rewrites the dependency keys of `packages/umbrella/package.json` from what the bundle imports. The generator already added the `@c2n/<name>` devDependency, which the first `npm install` recorded; a third-party library the new package imports lands in the umbrella's `dependencies` only now. Whenever that file changed, run `npm install` again and commit `package-lock.json` with it, or the lockfile disagrees with `package.json` and `npm ci` in CI rejects the install. `build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
+`build:tools` rewrites the dependency keys of `packages/umbrella/package.json` from what the bundle imports. The generator already added the `@c2n/<name>` devDependency, which the first `pnpm install` recorded; a third-party library the new package imports lands in the umbrella's `dependencies` only now. Whenever that file changed, run `pnpm install` again and commit `pnpm-lock.yaml` with it, or the lockfile disagrees with `package.json` and `pnpm install --frozen-lockfile` in CI rejects the install. `build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill catalog and `packages/umbrella` entries. `pnpm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
 
-Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
+Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `pnpm --dir packages/components/<name> run dev` for the standalone Vite harness.
 
 ### AI readiness
 
-The component is done when an agent can find it, read its API and use it correctly. After `npm run build:tools`, score it
+The component is done when an agent can find it, read its API and use it correctly. After `pnpm run build:tools`, score it
 (the `ai-readiness` skill has the details and a fix for every check):
 
 ```bash
-npm run mcp:readiness                         # scores what changed since the committed baseline: the new component shows as "new"
+pnpm run mcp:readiness                         # scores what changed since the committed baseline: the new component shows as "new"
 ```
 
 - **Grade A (≥ 90)**, and no check lost that has an honest fix: read the component's section of
@@ -180,7 +180,7 @@ npm run mcp:readiness                         # scores what changed since the co
   intents should not lower.
 - **No regression elsewhere:** a sibling the new component changed (a shared base class, a parent it slots into) shows
   up in the same run; `--fail-on-regression` makes it an error.
-- Commit `packages/tools/mcp/readiness/` with the component. The agent run (`npm run readiness:agent -w
+- Commit `packages/tools/mcp/readiness/` with the component. The agent run (`pnpm run readiness:agent -w
 packages/tools/mcp`, about $10) is not part of adding a component; offer it, with its cost, for a component agents
   will reach for often.
 
@@ -190,7 +190,7 @@ Passing checks do not show what a reader sees. Before the pull request — and a
 component's look or its docs — build the site and screenshot the component's pages, then look at every image yourself:
 
 ```bash
-npm run ui:build
+pnpm run ui:build
 node .claude/skills/new-component/scripts/doc-screenshots.mjs <name> [--press "<button name>"]…
 ```
 
@@ -218,20 +218,20 @@ that the review was done and what it caught.
 
 - foundation decisions met: presentation only through CSS variables, extension through slots and `render<Part>` functions, declarative + in-memory + `dataSource` data for a collection component, action zones instead of built-in commands, all text through message keys, and a gallery card for every feature (property-only ones through `<Name>ExamplesRuntime.astro`)
 - `packages/components/<name>/` scaffolded, implemented, built, `custom-elements.json` generated
-- the package stays private (`"private": true`): it ships only inside `@c2n/components`; `npm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
+- the package stays private (`"private": true`): it ships only inside `@c2n/components`; `pnpm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
-- `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
-- `npm run build:tools` run (then `npm install` again if it changed `packages/umbrella/package.json`, with `package-lock.json` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
+- `pnpm --dir packages/umbrella run size:add` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
+- `pnpm run build:tools` run (then `pnpm install` again if it changed `packages/umbrella/package.json`, with `pnpm-lock.yaml` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
 - the component's row deleted from `docs/planning/COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
-- `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
-- AI readiness: `npm run mcp:readiness` scores the component A (≥ 90) with no honestly fixable check left, its discovery requirements in `tasks.json` rank it in the top 3, nothing else regressed, and `packages/tools/mcp/readiness/` is committed
+- `pnpm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
+- AI readiness: `pnpm run mcp:readiness` scores the component A (≥ 90) with no honestly fixable check left, its discovery requirements in `tasks.json` rank it in the top 3, nothing else regressed, and `packages/tools/mcp/readiness/` is committed
 - `apps/ui/src/store/component-manifests.ts` import + entry
-- `apps/ui/package.json` dependency on `@c2n/<name>`, and `npm install` run so the workspace is linked
+- `apps/ui/package.json` dependency on `@c2n/<name>`, and `pnpm install` run so the workspace is linked
 - `apps/ui/src/data/component-modules.ts`, `component-previews.ts` (+ `component-presets.ts` if presets)
 - `apps/ui/src/content/components/<name>.mdx` and `gallery/<name>.mdx` filled in (or the gallery deliberately deleted)
 - `<package>/test/` suite written and passing
 - platform decisions recorded (feature, Baseline status, fallback) and `modern-web-review` passed: scanner clean, diff reviewed against its old → new pattern table
-- lint + format clean, `npm run ui:build` green
+- lint + format clean, `pnpm run ui:build` green
 - complex components: design mock drawn and reviewed in both themes, and shared with the design doc before building (step 2)
 - docs app reviewed by screenshot (step 8) in both themes, problems fixed, screenshots shared

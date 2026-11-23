@@ -67,6 +67,6 @@ icon, for your own pickers and search fields; `taskIconTag(name)` gives the elem
 ## Adding an icon
 
 Draw `svg/<name>.svg` on the 24×24 grid (wrapper exactly `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">`),
-add its title, category and keywords to `svg/catalog.json`, then run `npm run generate -w packages/icons/task-icons`.
+add its title, category and keywords to `svg/catalog.json`, then run `pnpm --dir packages/icons/task-icons run generate`.
 An element without a class is an outline; `class="tone"` adds the soft fill, `fill` is the soft fill alone and
 `solid` a small solid mark. The generator rejects hard-coded colours, strokes and styles.

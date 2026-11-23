@@ -5,13 +5,18 @@
  * build: whatever it declares silently becomes `any`. So a generator bug — importing an event map a package does
  * not export, say — is only ever visible here. Only diagnostics inside the generated files count; the component
  * declarations they import are checked by each package's own type-check.
+ *
+ * The component packages do not depend on React or Vue, so `react` and `vue` resolve to this package's own copies.
  */
-import { resolve } from 'node:path'
+import { createRequire } from 'node:module'
+import { dirname, resolve } from 'node:path'
 import ts from 'typescript'
 import { readPackages } from './manifests.ts'
 
 const files = readPackages().flatMap((pkg) => [resolve(pkg.dir, 'react.d.ts'), resolve(pkg.dir, 'vue.d.ts')])
 const generated = new Set(files)
+const require = createRequire(import.meta.url)
+const packageDir = (name: string) => dirname(require.resolve(`${name}/package.json`))
 
 const program = ts.createProgram({
   rootNames: files,
@@ -24,6 +29,7 @@ const program = ts.createProgram({
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'],
     types: [],
+    paths: { react: [packageDir('@types/react')], vue: [packageDir('vue')] },
   },
 })
 

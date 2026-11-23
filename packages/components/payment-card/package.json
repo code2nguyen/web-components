@@ -62,13 +62,18 @@
     }
   },
   "dependencies": {
-    "@c2n/button": "*",
-    "@c2n/copy-button": "*",
-    "@c2n/core": "*",
+    "@c2n/button": "workspace:*",
+    "@c2n/copy-button": "workspace:*",
+    "@c2n/core": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

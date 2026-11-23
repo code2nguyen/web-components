@@ -35,14 +35,17 @@
     }
   },
   "dependencies": {
-    "@c2n/components": "*",
-    "@c2n/feather-icons": "*",
+    "@c2n/components": "workspace:*",
+    "@c2n/feather-icons": "workspace:*",
     "vue": "3.5.42"
   },
   "devDependencies": {
-    "@c2n/config": "*",
-    "@c2n/framework-types": "*",
+    "@c2n/config": "workspace:*",
+    "@c2n/framework-types": "workspace:*",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
     "@vitejs/plugin-vue": "6.0.8",
+    "vite": "catalog:",
     "vue-tsc": "3.3.11"
   }
 }

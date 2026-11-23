@@ -5,7 +5,7 @@ import { test, expect, SMALL, HUGE } from './fixture'
 
 /**
  * Wall-clock benchmark for the table, kept out of the regular suite because the numbers belong to the machine that
- * produced them. Run it with `npm run bench:table`, and `npm run bench:table:baseline` to record the current numbers
+ * produced them. Run it with `pnpm run bench:table`, and `pnpm run bench:table:baseline` to record the current numbers
  * as the new baseline once a change is understood.
  *
  * Each case reports the median of `REPEATS` runs, in milliseconds of table work: from the change through Lit's
@@ -27,7 +27,7 @@ const median = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floo
 test.describe('table benchmark', () => {
   // Timings are meaningless when cases share a machine with each other.
   test.describe.configure({ mode: 'serial' })
-  test.skip(!process.env.C2_BENCH, 'Wall-clock benchmark — run `npm run bench:table`')
+  test.skip(!process.env.C2_BENCH, 'Wall-clock benchmark — run `pnpm run bench:table`')
 
   test(`mounts ${SMALL.toLocaleString('en-US')} rows`, async ({ page, bench }) => {
     await bench()
@@ -170,7 +170,7 @@ test.describe('table benchmark', () => {
       return
     }
 
-    test.skip(!baseline, 'No baseline recorded yet — run `npm run bench:table:baseline`')
+    test.skip(!baseline, 'No baseline recorded yet — run `pnpm run bench:table:baseline`')
     const regressions = rows.filter((row) => row.ratio !== undefined && row.was! >= RESOLUTION && row.ratio > TOLERANCE)
     expect(
       regressions.map((row) => `${row.metric} ${row.ms.toFixed(2)}ms vs ${row.was!.toFixed(2)}ms baseline`),

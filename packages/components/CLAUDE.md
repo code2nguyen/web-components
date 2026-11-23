@@ -36,7 +36,7 @@ Six rules decide the shape of every component's public API. **Read `docs/agents/
 
 ## Reachable through MCP and llms.txt
 
-**Every component is reachable by a coding agent through the `@c2n/mcp` server and the docs site's `/llms.txt`**: a served docs page with a `description` and 3–5 `intents`, a complete manifest, and an `@c2n/components` entry. `npm run check:reachability` enforces it. The details are in `docs/agents/adding-a-component.md`.
+**Every component is reachable by a coding agent through the `@c2n/mcp` server and the docs site's `/llms.txt`**: a served docs page with a `description` and 3–5 `intents`, a complete manifest, and an `@c2n/components` entry. `pnpm run check:reachability` enforces it. The details are in `docs/agents/adding-a-component.md`.
 
 ## Theming convention
 
@@ -73,13 +73,13 @@ then reads values as `css.cssVar(container--width)`, which expands to `var(--c2-
 
 ## Adding a component
 
-Scaffold with `npm run generate` and follow the `new-component` skill; `docs/agents/adding-a-component.md` says what the generator wires, what is left to fill in, and how a new component becomes reachable through MCP and `/llms.txt`.
+Scaffold with `pnpm run generate` and follow the `new-component` skill; `docs/agents/adding-a-component.md` says what the generator wires, what is left to fill in, and how a new component becomes reachable through MCP and `/llms.txt`.
 
 ## Component conventions
 
 ### Skeleton
 
-Every component starts from this shape, which `npm run generate` writes (from `scripts/generator/files/wc/src/`) for a component named "Note Panel" (a made-up name: there is no `c2-note-panel`). `npm run check:component-template` (a `component-tests.yml` gate) renders that template, type-checks, lints and compiles it, and fails if a code line below no longer matches it, so this block and the generator cannot drift apart.
+Every component starts from this shape, which `pnpm run generate` writes (from `scripts/generator/files/wc/src/`) for a component named "Note Panel" (a made-up name: there is no `c2-note-panel`). `pnpm run check:component-template` (a `component-tests.yml` gate) renders that template, type-checks, lints and compiles it, and fails if a code line below no longer matches it, so this block and the generator cannot drift apart.
 
 ```ts
 import { LitElement, html, unsafeCSS } from 'lit'

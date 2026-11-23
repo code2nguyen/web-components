@@ -25,4 +25,4 @@ and `detail.skinTone`; the picker inserts and closes nothing itself.
 keywords, skins }` entries of your own.
 - Themed through `--c2-emoji-picker*` custom properties; see the API page of the docs site.
 
-The default set is generated from `emojibase-data` by `npm run generate -w packages/components/emoji-picker`.
+The default set is generated from `emojibase-data` by `pnpm --dir packages/components/emoji-picker run generate`.

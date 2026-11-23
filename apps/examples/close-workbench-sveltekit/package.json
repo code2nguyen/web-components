@@ -49,17 +49,19 @@
     }
   },
   "dependencies": {
-    "@c2n/components": "*",
-    "@c2n/core": "*",
-    "@c2n/feather-icons": "*",
+    "@c2n/components": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/feather-icons": "workspace:*",
     "uplot": "1.6.32"
   },
   "devDependencies": {
-    "@c2n/config": "*",
+    "@c2n/config": "workspace:*",
+    "@playwright/test": "catalog:",
     "@sveltejs/adapter-static": "4.0.0",
     "@sveltejs/kit": "3.1.0",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "svelte": "5.57.2",
-    "svelte-check": "4.7.7"
+    "svelte-check": "4.7.7",
+    "vite": "catalog:"
   }
 }

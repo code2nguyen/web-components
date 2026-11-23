@@ -5,9 +5,10 @@
  * The same data drives all four outputs, so the JSX types, the Vue declarations and the two editor manifests
  * can never disagree with each other or with the components.
  */
-import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { workspacePackages } from '@c2n/config/workspace.js'
 
 export interface ElementAttribute {
   /** Attribute name as written in markup, e.g. `row-key`. */
@@ -64,16 +65,13 @@ interface PackageJson {
  */
 const EXCLUDED = new Set(['@c2n/design-board', '@c2n/components'])
 
-/** Nearest `node_modules/@c2n` above this package: the workspace symlinks, one per `@c2n` package. */
-export function scopeDir(): string {
-  let dir = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-  for (;;) {
-    const candidate = join(dir, 'node_modules', '@c2n')
-    if (existsSync(candidate)) return candidate
-    const parent = dirname(dir)
-    if (parent === dir) throw new Error('[framework-types] no node_modules/@c2n directory found; run npm install')
-    dir = parent
-  }
+/** Directory of every `@c2n/*` workspace package, by name. */
+export function packageDirs(): Map<string, string> {
+  return new Map(
+    workspacePackages()
+      .filter(({ name }) => name.startsWith('@c2n/'))
+      .map(({ name, dir }) => [name, dir]),
+  )
 }
 
 /**
@@ -126,14 +124,11 @@ function readBindings(name: string, dir: string): Framework[] {
 }
 
 export function readPackages(): DiscoveredPackage[] {
-  const scope = scopeDir()
   const packages: DiscoveredPackage[] = []
 
-  for (const entry of readdirSync(scope)) {
-    const name = `@c2n/${entry}`
+  for (const [name, dir] of packageDirs()) {
     if (EXCLUDED.has(name)) continue
 
-    const dir = realpathSync(join(scope, entry))
     const manifestPath = join(dir, 'custom-elements.json')
     const packagePath = join(dir, 'package.json')
     if (!existsSync(manifestPath) || !existsSync(packagePath)) continue

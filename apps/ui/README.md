@@ -7,9 +7,9 @@ The Astro documentation application for c2n components. It publishes component d
 From the repository root:
 
 ```bash
-npm run ui       # build packages, then start Astro
-npm run ui:dev   # start Astro using existing package builds
-npm run ui:build # build packages and the static site
+pnpm run ui       # build packages, then start Astro
+pnpm run ui:dev   # start Astro using existing package builds
+pnpm run ui:build # build packages and the static site
 ```
 
 ## AI tooling documentation

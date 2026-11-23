@@ -1,4 +1,4 @@
-// Imports @c2n/core from its build output: run `npm run build -w packages/core` first in a fresh clone.
+// Imports @c2n/core from its build output: run `pnpm --dir packages/core run build` first in a fresh clone.
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 

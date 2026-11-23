@@ -5,7 +5,7 @@
   "app": "lab/apps/pricing-page/default",
   "url": "http://127.0.0.1:4194/",
   "server": {
-    "command": "npx vite lab/apps/pricing-page/default --host 127.0.0.1 --port 4194 --strictPort",
+    "command": "pnpm exec vite lab/apps/pricing-page/default --host 127.0.0.1 --port 4194 --strictPort",
     "cwd": "."
   },
   "journeys": [

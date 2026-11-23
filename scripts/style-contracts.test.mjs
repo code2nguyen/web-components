@@ -34,7 +34,7 @@ function fixture(overrides, run) {
     writeFileSync(join(packagePath, 'src/sibling.ts'), '/** @tag c2-sibling */\nexport class Sibling {}')
     writeFileSync(join(packagePath, 'src/sibling.scss'), `.sibling { color: var(${name}, red); }`)
   }
-  writeFileSync(join(root, 'package.json'), JSON.stringify({ workspaces: ['packages/components/*'] }))
+  writeFileSync(join(root, 'pnpm-workspace.yaml'), 'packages:\n  - packages/components/*\n')
   writeFileSync(join(packagePath, 'package.json'), JSON.stringify({ name: '@c2n/example', customElements: 'custom-elements.json' }))
   writeFileSync(join(packagePath, 'src/example.ts'), source)
   writeFileSync(join(packagePath, 'src/example.scss'), overrides.noCss ? '.target { display: block }' : css)

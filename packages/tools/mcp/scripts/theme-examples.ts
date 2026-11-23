@@ -28,7 +28,7 @@ import { themeExampleCss, type ThemeColor } from './gallery.ts'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..')
 const tokensFile = join(repoRoot, 'packages/tools/theme/dist/tokens.json')
-if (!existsSync(tokensFile)) throw new Error('packages/tools/theme/dist/tokens.json is missing: run `npm run build -w packages/tools/theme` first')
+if (!existsSync(tokensFile)) throw new Error('packages/tools/theme/dist/tokens.json is missing: run `pnpm --dir packages/tools/theme run build` first')
 const { tokens } = JSON.parse(readFileSync(tokensFile, 'utf8')) as { tokens: ThemeColor[] }
 const check = process.argv.includes('--check')
 
@@ -59,7 +59,7 @@ for (const dir of ['components', 'gallery'].map((name) => join(repoRoot, 'apps/u
 
 if (check && stale.length > 0) {
   console.error(`Examples with colours that do not follow the theme:\n  ${stale.join('\n  ')}`)
-  console.error('\nRun `npm run theme:examples -w packages/tools/mcp` and commit the result.')
+  console.error('\nRun `pnpm --dir packages/tools/mcp run theme:examples` and commit the result.')
   process.exit(1)
 }
 console.log(`[theme-examples] ${check ? 'all examples follow the theme' : `themed ${rewritten} colours`}`)

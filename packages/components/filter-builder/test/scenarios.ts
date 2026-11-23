@@ -1,4 +1,4 @@
-// Loaded before the filter builder so `npm run test:type-check` reads the number input's source before the declaration
+// Loaded before the filter builder so `pnpm run test:type-check` reads the number input's source before the declaration
 // file that `@c2n/number-input` resolves to; the reverse order reports the tag map declared twice. One module at runtime.
 import '../../number-input/src/number-input'
 import '../src/filter-builder'

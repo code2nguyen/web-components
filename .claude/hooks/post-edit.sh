@@ -8,7 +8,7 @@
 #    variable, or a native control where a c2 element exists. Exit code 2 hands the findings back to the agent.
 #    Errors only: the validator reports a whole file, and these apps carry accepted warnings (native controls the
 #    `check:dogfood` ratchet governs, prose about them), so warnings would hand the agent problems unrelated to its
-#    edit. `npm run check:app-markup` keeps all three trees at 0 errors.
+#    edit. `pnpm run check:app-markup` keeps all three trees at 0 errors.
 #
 # Never fails the edit for its own reasons: a missing prettier, registry or file exits 0.
 set -u

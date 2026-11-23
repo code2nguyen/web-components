@@ -43,7 +43,7 @@ and say so. For each `cssParts` entry of a changed `custom-elements.json`, confi
 by an expression) carries that name in the template: the manifest plugin also derives parts from template text, and a
 look-alike such as `data-part="…"` has slipped through before.
 
-`npm run check:reachability` needs a built registry (`npm run build:registry -w packages/tools/mcp`, which builds every
+`pnpm run check:reachability` needs a built registry (`pnpm --dir packages/tools/mcp run build:registry`, which builds every
 package first and takes minutes): run it only for a new component or a change to its docs frontmatter, and say so if
 you skip it.
 

@@ -3,7 +3,7 @@
   "title": "Support Inbox (Vue 3): a help-desk inbox in the style of Zendesk, Front or Help Scout.",
   "app": "apps/examples/support-inbox-vue",
   "url": "http://127.0.0.1:4176/web-components/demo/support-inbox-vue/",
-  "server": { "command": "npm run dev -- --host 127.0.0.1 --port 4176 --strictPort", "cwd": "apps/examples/support-inbox-vue" },
+  "server": { "command": "pnpm run dev --host 127.0.0.1 --port 4176 --strictPort", "cwd": "apps/examples/support-inbox-vue" },
   "components": [
     "c2-avatar",
     "c2-badge",

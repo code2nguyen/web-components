@@ -22,11 +22,13 @@ const globalImpactPatterns = [
   /^tsconfig(?:\.[^/]+)?\.json$/,
   /^\.github\/workflows\/component-tests\.yml$/,
   /^scripts\/run-changed-component-tests\.mjs$/,
+  // Install settings (which install scripts run, pre/post scripts) that can change node_modules without the lockfile.
+  /^pnpm-workspace\.yaml$/,
   /^packages\/tools\/(?:config|sass)\//,
 ]
 // The root manifest and the lockfile only reach the suites through the installed dependencies; `rootManifestImpact`
 // tells a dependency change from the bookkeeping a new component adds (a wireit entry, new lockfile entries).
-const rootManifestPattern = /^(?:package(?:-lock)?|packages\/core\/package)\.json$/
+const rootManifestPattern = /^(?:package\.json|pnpm-lock\.yaml|packages\/core\/package\.json)$/
 const corePattern = /^packages\/core\//
 const coreSourcePattern = /^packages\/core\/src\/(.+)\.ts$/
 const iconPackagePattern = /^packages\/icons\/([^/]+)(?:\/|$)/
@@ -131,20 +133,73 @@ function coreDependents(module, coreImports) {
 }
 
 /**
- * Whether a change to the root `package.json`, `package-lock.json` or core's `package.json` can reach the suites.
+ * The parts of a `pnpm-lock.yaml` that `rootManifestImpact` compares, read line by line so the script needs no YAML
+ * dependency (CI plans the suites before installing anything): every top-level section as raw text, and every entry of
+ * `packages` and `snapshots` (two-space indented keys) as raw text under `<section>:<key>`, and the version each importer
+ * (workspace package) resolves each of its dependencies to, under `<importer>:<dependencies|devDependencies|…>:<name>`.
+ */
+export function parseLockfile(text) {
+  if (!/^lockfileVersion:/m.test(text)) throw new Error('not a pnpm lockfile')
+  const sections = new Map()
+  const entries = new Map()
+  const resolved = new Map()
+  let section
+  let entry
+  let importer
+  for (const line of text.split('\n')) {
+    const top = /^([A-Za-z]\w*):/.exec(line)
+    if (top) {
+      section = top[1]
+      entry = undefined
+      sections.set(section, line)
+      continue
+    }
+    if (section === undefined) continue
+    sections.set(section, `${sections.get(section)}\n${line}`)
+    if (section === 'importers') {
+      // `  <importer>:` / `    dependencies:` / `      <name>:` / `        version: <resolved>`.
+      const importerKey = /^ {2}(\S.*?):$/.exec(line)
+      const typeKey = /^ {4}(\w+):$/.exec(line)
+      const dependencyKey = /^ {6}(\S.*?):$/.exec(line)
+      const version = /^ {8}version: (.+)$/.exec(line)
+      if (importerKey) importer = { name: importerKey[1] }
+      else if (typeKey && importer) importer.type = typeKey[1]
+      else if (dependencyKey && importer) importer.dependency = dependencyKey[1]
+      else if (version && importer?.dependency) resolved.set(`${importer.name}:${importer.type}:${importer.dependency}`, version[1])
+      continue
+    }
+    if (section !== 'packages' && section !== 'snapshots') continue
+    // `  name@1.0.0:` opens an entry with an indented body; `  name@1.0.0: {}` is a whole one with none.
+    const key = /^ {2}(\S.*?):( \{\})?$/.exec(line)
+    if (key) {
+      entry = `${section}:${key[1]}`
+      entries.set(entry, key[2] ?? '')
+    } else if (entry !== undefined) entries.set(entry, `${entries.get(entry)}\n${line}`)
+  }
+  for (const [key, value] of sections) sections.set(key, value.trimEnd())
+  for (const [key, value] of entries) entries.set(key, value.trimEnd())
+  return { sections, entries, resolved }
+}
+
+/**
+ * Whether a change to the root `package.json`, `pnpm-lock.yaml` or core's `package.json` can reach the suites.
  * The root manifest counts unless only its `wireit.build` dependency list changed; the lockfile counts when an installed package
- * (not a workspace or its link) changed or went away, since packages only added for a new component leave the others
- * alone; core's manifest counts unless it only gained exports.
+ * (an entry of its `packages` or `snapshots`) changed or went away, or a dependency a workspace package already had now
+ * resolves to another version or is gone (an upgrade can add the new version beside the old one). A new component only
+ * adds packages, importers and dependencies, which leaves the others alone; core's manifest counts unless it only
+ * gained exports.
  */
 export function rootManifestImpact(file, before, after) {
   if (before === undefined || after === undefined) return true
   let old, current
   try {
-    old = JSON.parse(before)
-    current = JSON.parse(after)
+    const parse = file.endsWith('.yaml') ? parseLockfile : JSON.parse
+    old = parse(before)
+    current = parse(after)
   } catch {
     return true
   }
+  if (!old || !current) return true
   if (file === 'package.json') {
     delete old.wireit?.build?.dependencies
     delete current.wireit?.build?.dependencies
@@ -158,10 +213,9 @@ export function rootManifestImpact(file, before, after) {
     delete current.exports
     return changed || JSON.stringify(old) !== JSON.stringify(current)
   }
-  const installed = (lock) => Object.entries(lock.packages ?? {}).filter(([path, entry]) => path === '' || (path.includes('node_modules/') && !entry.link))
-  const next = new Map(installed(current))
-  if (JSON.stringify(old.lockfileVersion) !== JSON.stringify(current.lockfileVersion)) return true
-  return installed(old).some(([path, entry]) => !next.has(path) || JSON.stringify(next.get(path)) !== JSON.stringify(entry))
+  for (const key of ['lockfileVersion', 'settings', 'overrides']) if (old.sections.get(key) !== current.sections.get(key)) return true
+  if ([...old.resolved].some(([key, version]) => current.resolved.get(key) !== version)) return true
+  return [...old.entries].some(([key, entry]) => current.entries.get(key) !== entry)
 }
 
 export function hasGlobalTestImpact(changedFiles, options = {}) {

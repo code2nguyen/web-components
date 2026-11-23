@@ -64,16 +64,21 @@
     }
   },
   "dependencies": {
-    "@c2n/code-viewer": "*",
-    "@c2n/core": "*",
-    "@c2n/image": "*",
-    "@c2n/math": "*",
-    "@c2n/mermaid": "*",
+    "@c2n/code-viewer": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/image": "workspace:*",
+    "@c2n/math": "workspace:*",
+    "@c2n/mermaid": "workspace:*",
     "lit": "3.3.3",
     "marked": "18.1.0"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

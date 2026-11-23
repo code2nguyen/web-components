@@ -4,8 +4,8 @@
  * `--<prefix>[__<part>[__<state>]]--<property>`.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
+import { workspacePackages } from '@c2n/config/workspace.js'
 
 export interface CssVar {
   /** Full custom property name. */
@@ -64,18 +64,6 @@ interface Manifest {
   modules?: { declarations?: { cssProperties?: ManifestCssProperty[] }[] }[]
 }
 
-/** Directory holding the `@c2n/*` workspace symlinks: the nearest `node_modules/@c2n` above this package. */
-function scopeDir(): string {
-  let dir = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-  while (true) {
-    const candidate = join(dir, 'node_modules', '@c2n')
-    if (existsSync(candidate)) return candidate
-    const parent = dirname(dir)
-    if (parent === dir) throw new Error('[theme-generator] could not find a node_modules/@c2n directory; run npm install')
-    dir = parent
-  }
-}
-
 export interface DiscoveredPackage {
   name: string
   dir: string
@@ -83,10 +71,9 @@ export interface DiscoveredPackage {
 }
 
 export function discoverPackages(): DiscoveredPackage[] {
-  const scope = scopeDir()
   const result: DiscoveredPackage[] = []
-  for (const entry of readdirSync(scope).sort()) {
-    const dir = join(scope, entry)
+  for (const { name, dir } of workspacePackages()) {
+    if (!name.startsWith('@c2n/')) continue
     const pkgJsonPath = join(dir, 'package.json')
     if (!existsSync(pkgJsonPath)) continue
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { name: string; customElements?: string }

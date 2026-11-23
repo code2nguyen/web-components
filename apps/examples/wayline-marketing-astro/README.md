@@ -3,9 +3,9 @@
 A one-page landing site for a made-up integration platform, built as a static Astro site on `@c2n/components`. It is the "Marketing site" app from the roadmap: the first static, motion-heavy example, and the one that exercises `c2-marquee`, `c2-beam`, `c2-device-frame`, `c2-text-effect`, `c2-backdrop` and `c2-scroll-progress`.
 
 ```bash
-npm run build -w apps/examples/wayline-marketing-astro         # type-check, then astro build into dist/
-npm run dev -w apps/examples/wayline-marketing-astro           # astro dev on 127.0.0.1:4184
-npm run test:browser -w apps/examples/wayline-marketing-astro  # Playwright against `astro preview` of the build
+pnpm --dir apps/examples/wayline-marketing-astro run build         # type-check, then astro build into dist/
+pnpm --dir apps/examples/wayline-marketing-astro run dev           # astro dev on 127.0.0.1:4184
+pnpm --dir apps/examples/wayline-marketing-astro run test:browser  # Playwright against `astro preview` of the build
 ```
 
 ## How it uses the components

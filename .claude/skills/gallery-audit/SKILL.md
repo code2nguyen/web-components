@@ -23,18 +23,18 @@ Running it is an explicit request to drive a browser: the CLAUDE.md "Browser usa
 ## Run locally
 
 1. Build what the audit serves and reads, skipping what is fresh:
-   - components: `npm run build` (wireit-cached);
-   - the site: `npm run ui:build`, or `cd apps/ui && npx astro build` when the example apps are already built or
+   - components: `pnpm run build` (wireit-cached);
+   - the site: `pnpm run ui:build`, or `cd apps/ui && pnpm exec astro build` when the example apps are already built or
      cannot build (Angular needs Node ≥ 22.22.3);
-   - the registry (card order and slugs): `npm run build:tools`.
+   - the registry (card order and slugs): `pnpm run build:tools`.
 2. Audit, limited to the components in question when there are any:
 
    ```bash
-   npm run gallery:audit -- --no-shots button tabs      # drop --no-shots to also write screenshots
+   pnpm run gallery:audit --no-shots button tabs      # drop --no-shots to also write screenshots
    ```
 
    If Playwright reports a missing browser build (a container with a pinned Chromium), point it at the installed one:
-   `CHROMIUM_PATH=/opt/pw-browsers/chromium npm run gallery:audit -- …`. Do not run `playwright install` there.
+   `CHROMIUM_PATH=/opt/pw-browsers/chromium pnpm run gallery:audit …`. Do not run `playwright install` there.
 
 3. Read `test-results/gallery-audit/report.md` (also printed). Exit code 1 means new findings or stale known entries.
 
@@ -49,7 +49,7 @@ Each finding is keyed `<gallery>/<slug|*>/<theme>/<kind>`:
 | `empty`        | the card renders no visible box: a failed island, a zero height, an element waiting for data.                                                                          |
 | `overflow`     | content wider than the 274px card frame. Let it wrap or shrink, or give the card a wider layout.                                                                       |
 | `console`      | an error or uncaught exception on the gallery page, often a hydration mismatch. Fix the component.                                                                     |
-| `mismatch`     | page cards disagree with the registry order: rebuild the registry (`npm run build:tools`).                                                                             |
+| `mismatch`     | page cards disagree with the registry order: rebuild the registry (`pnpm run build:tools`).                                                                            |
 
 Confirm a contrast or layout finding on the screenshot before changing anything (run without `--no-shots`, then
 Read `apps/ui/dist/gallery-shots/<id>/<slug>.<theme>.png`). The report also counts text axe could not measure (over

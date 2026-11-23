@@ -69,6 +69,6 @@ Set `--c2-symbol__backdrop--color: transparent` to drop the disc.
 The components under `src/symbols/` are generated and committed. The sources are `svg/<name>.svg` plus an entry in `svg/catalog.json` (title, category — `empty`, `status`, `error`, `security`, `commerce`, `communication`, `files` or `onboarding` — and description). A source must use the exact wrapper `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">` and take every colour from a class: a fill role (`backdrop`, `surface`, `muted`, `ink`, `primary`, `primary-soft`, `accent`, `success`, `warning`, `error`), the default outline `line`, or a coloured stroke `line-<role>`. The generator rejects `fill`, `stroke`, `style` and any other class. Then run:
 
 ```bash
-npm run generate -w packages/icons/symbols
-npm run build -w packages/icons/symbols
+pnpm --dir packages/icons/symbols run generate
+pnpm --dir packages/icons/symbols run build
 ```

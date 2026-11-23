@@ -9,9 +9,12 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {
-    "custom-elements-manifest": "2.1.0"
+    "custom-elements-manifest": "2.1.0",
+    "lit": "3.3.3"
   },
   "devDependencies": {
-    "@types/json-schema": "7.0.15"
+    "@types/json-schema": "7.0.15",
+    "@types/node": "catalog:",
+    "vite": "catalog:"
   }
 }

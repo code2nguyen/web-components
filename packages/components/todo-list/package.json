@@ -68,16 +68,21 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
-    "@c2n/inline-edit": "*",
-    "@c2n/progress": "*",
-    "@c2n/reorder-list": "*",
-    "@c2n/tabs": "*",
-    "@c2n/task-icons": "*",
+    "@c2n/core": "workspace:*",
+    "@c2n/inline-edit": "workspace:*",
+    "@c2n/progress": "workspace:*",
+    "@c2n/reorder-list": "workspace:*",
+    "@c2n/tabs": "workspace:*",
+    "@c2n/task-icons": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

@@ -69,9 +69,9 @@
     }
   },
   "dependencies": {
-    "@c2n/context-menu": "*",
-    "@c2n/core": "*",
-    "@c2n/spreadsheet": "*",
+    "@c2n/context-menu": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/spreadsheet": "workspace:*",
     "lit": "3.3.3",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",
@@ -84,7 +84,12 @@
     "shiki": "4.4.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

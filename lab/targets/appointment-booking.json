@@ -5,7 +5,7 @@
   "app": "lab/apps/appointment-booking/default",
   "url": "http://127.0.0.1:4196/",
   "server": {
-    "command": "npx vite lab/apps/appointment-booking/default --host 127.0.0.1 --port 4196 --strictPort",
+    "command": "pnpm exec vite lab/apps/appointment-booking/default --host 127.0.0.1 --port 4196 --strictPort",
     "cwd": "."
   },
   "journeys": [

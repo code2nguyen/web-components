@@ -162,7 +162,7 @@ function render(capabilities, specs, reports, registry) {
     for (const [category, ids] of [...byCategory].sort()) lines.push(`- ${category}: ${ids.join(', ')}`)
     lines.push('')
   } else {
-    lines.push('_Component coverage needs the MCP registry: run `npm run build:tools`._', '')
+    lines.push('_Component coverage needs the MCP registry: run `pnpm run build:tools`._', '')
   }
 
   if (warnings.length) lines.push('## Warnings', '', ...warnings.map((warning) => `- ${warning}`), '')

@@ -31,12 +31,12 @@ The in-app **Built with c2n** sheet maps each page region to package documentati
 ## Commands
 
 ```bash
-npm run dev -w apps/examples/observability-nextjs
-npm run build -w apps/examples/observability-nextjs
-npm run test:unit -w apps/examples/observability-nextjs
-npm run test:e2e -w apps/examples/observability-nextjs
-npm run test:e2e:all -w apps/examples/observability-nextjs
-npm run test:a11y -w apps/examples/observability-nextjs
+pnpm --dir apps/examples/observability-nextjs run dev
+pnpm --dir apps/examples/observability-nextjs run build
+pnpm --dir apps/examples/observability-nextjs run test:unit
+pnpm --dir apps/examples/observability-nextjs run test:e2e
+pnpm --dir apps/examples/observability-nextjs run test:e2e:all
+pnpm --dir apps/examples/observability-nextjs run test:a11y
 ```
 
 The preview is served under `/web-components/demo/observability-nextjs/`, matching GitHub Pages. No environment variables, account, database, secret, real address, arbitrary endpoint, or external telemetry service is accepted.

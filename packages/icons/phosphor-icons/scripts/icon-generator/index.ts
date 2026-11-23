@@ -4,7 +4,7 @@
  * Reads the catalog and six SVG weights shipped by `@phosphor-icons/core`, then emits one Lit
  * custom element per icon into `src/icons/<name>.ts`, plus the barrel and icon-name helpers.
  *
- * Run with `npm run generate -w packages/icons/phosphor-icons` (Node 24 type stripping).
+ * Run with `pnpm --dir packages/icons/phosphor-icons run generate` (Node 24 type stripping).
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'

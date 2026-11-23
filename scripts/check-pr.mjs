@@ -1,7 +1,7 @@
 /**
- * `npm run check:pr [-- --fast]`: the gates of `deploy.yml` and `component-tests.yml` in one command, run before
+ * `pnpm run check:pr [--fast]`: the gates of `deploy.yml` and `component-tests.yml` in one command, run before
  * opening or updating a pull request. Two things CI does that it does not: the changed component suites run in Chromium
- * only (CI also runs Firefox and WebKit: `npm run test:all` for those), and the gallery screenshots are not taken.
+ * only (CI also runs Firefox and WebKit: `pnpm run test:all` for those), and the gallery screenshots are not taken.
  *
  * Every step runs even after one fails, its output goes to `.check-pr/<step>.log` (not under `test-results/`, which
  * Playwright empties when the browser step starts), and the run ends with one table of results and timings; the exit
@@ -46,33 +46,33 @@ const generatedChanges = () =>
 
 /** [name, command, { build?, browser?, generated? }]: a build or browser step is skipped under --fast; a generated step is followed by the HEAD comparison. */
 const STEPS = [
-  ['build', 'npm run build', { build: true }],
-  ['build umbrella', 'npm run build -w packages/umbrella', { build: true }],
-  ['ui:build', 'npm run ui:build', { build: true }],
-  ['build:tools', 'npm run build:tools', { build: true }],
-  ['lint', 'npm run lint'],
-  ['format:check', 'npm run format:check'],
-  ['test:type-check', 'npm run test:type-check'],
+  ['build', 'pnpm run build', { build: true }],
+  ['build umbrella', 'pnpm --dir packages/umbrella run build', { build: true }],
+  ['ui:build', 'pnpm run ui:build', { build: true }],
+  ['build:tools', 'pnpm run build:tools', { build: true }],
+  ['lint', 'pnpm run lint'],
+  ['format:check', 'pnpm run format:check'],
+  ['test:type-check', 'pnpm run test:type-check'],
   ['script unit tests', 'node --test scripts/*.test.mjs'],
-  ['check:css-contracts', 'npm run check:css-contracts'],
-  ['check:component-template', 'npm run check:component-template'],
-  ['check:bundle-size', 'npm run check:bundle-size'],
-  ['check:example-theme', 'npm run check:example-theme'],
-  ['docs:check', 'npm run docs:check'],
-  ['check:dogfood', 'npm run check:dogfood'],
-  ['check:agent-docs', 'npm run check:agent-docs'],
+  ['check:css-contracts', 'pnpm run check:css-contracts'],
+  ['check:component-template', 'pnpm run check:component-template'],
+  ['check:bundle-size', 'pnpm run check:bundle-size'],
+  ['check:example-theme', 'pnpm run check:example-theme'],
+  ['docs:check', 'pnpm run docs:check'],
+  ['check:dogfood', 'pnpm run check:dogfood'],
+  ['check:agent-docs', 'pnpm run check:agent-docs'],
   // What reachability, app markup, the lab and the gap matrix read: rebuilt even with --fast, as component-tests.yml does
   // (its wireit graph rebuilds a component package whose sources changed, so --fast is not build-free).
-  ['build:registry', 'npm run build:registry -w packages/tools/mcp'],
-  ['check:reachability', 'npm run check:reachability'],
-  ['check:app-markup', 'npm run check:app-markup'],
+  ['build:registry', 'pnpm --dir packages/tools/mcp run build:registry'],
+  ['check:reachability', 'pnpm run check:reachability'],
+  ['check:app-markup', 'pnpm run check:app-markup'],
   ['lab readiness', 'node lab/scripts/readiness.mjs --check'],
-  ['mcp tests', 'npm test -w packages/tools/mcp'],
-  ['skill installer tests', 'npm test -w packages/tools/skill'],
-  ['theme generator tests', 'npm test -w packages/tools/theme'],
-  ['mcp:smoke', 'npm run mcp:smoke'],
+  ['mcp tests', 'pnpm --dir packages/tools/mcp test'],
+  ['skill installer tests', 'pnpm --dir packages/tools/skill test'],
+  ['theme generator tests', 'pnpm --dir packages/tools/theme test'],
+  ['mcp:smoke', 'pnpm run mcp:smoke'],
   ['generated files', 'node scripts/generate-slot-styling-audit.mjs && node lab/scripts/gaps.mjs > /dev/null', { generated: true }],
-  ['changed component suites', 'npm test', { browser: true }],
+  ['changed component suites', 'pnpm test', { browser: true }],
 ]
 
 const results = []

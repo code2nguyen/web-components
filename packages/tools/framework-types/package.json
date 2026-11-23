@@ -37,8 +37,13 @@
     "check": "node scripts/framework-types/check.ts"
   },
   "devDependencies": {
-    "@c2n/config": "*",
-    "prettier": "3.6.2"
+    "@c2n/config": "workspace:*",
+    "@types/node": "26.4.1",
+    "@types/react": "19.3.0",
+    "@vue/runtime-dom": "3.5.42",
+    "prettier": "3.6.2",
+    "typescript": "6.0.3",
+    "vue": "3.5.42"
   },
   "wireit": {
     "type-check": {

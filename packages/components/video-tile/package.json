@@ -62,13 +62,18 @@
     }
   },
   "dependencies": {
-    "@c2n/audio-visualizer": "*",
-    "@c2n/avatar": "*",
-    "@c2n/core": "*",
+    "@c2n/audio-visualizer": "workspace:*",
+    "@c2n/avatar": "workspace:*",
+    "@c2n/core": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

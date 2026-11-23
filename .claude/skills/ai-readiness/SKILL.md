@@ -35,23 +35,23 @@ Commit them with the change they measure, so the next run compares against it.
 
 ## Run
 
-1. **Build what changed**, so the manifests are fresh: the changed packages (`npm run build -w packages/components/<name>`)
-   or everything (`npm run build`, wireit-cached). Docs-only changes need no build. The script rebuilds the registry
+1. **Build what changed**, so the manifests are fresh: the changed packages (`pnpm --dir packages/components/<name> run build`)
+   or everything (`pnpm run build`, wireit-cached). Docs-only changes need no build. The script rebuilds the registry
    itself.
 2. **Score**:
-   - `npm run mcp:readiness` — **changed-only** (default): the components whose package (outside `test/`), docs page or
+   - `pnpm run mcp:readiness` — **changed-only** (default): the components whose package (outside `test/`), docs page or
      gallery changed since `baseline.json`'s commit, committed or not, plus new components. Each is compared with its
      last score; their new scores go into the baseline and `changes.md`. A change to the scoring itself (the
      readiness scripts, `build-registry.ts`, `packages/tools/mcp/src/`, `component-presets.ts`) can move every score,
      so the run goes full on its own and says why.
-   - `npm run mcp:readiness -- --full` — every component; writes `report.md`. Use it after changing the scoring, before
+   - `pnpm run mcp:readiness --full` — every component; writes `report.md`. Use it after changing the scoring, before
      a release, or when asked for the whole picture.
-   - `npm run mcp:readiness -- <id> <id>` — just those components, compared like a changed run.
+   - `pnpm run mcp:readiness <id> <id>` — just those components, compared like a changed run.
    - `--fail-on-regression` exits 1 when a scored component lost points (for a gate); `--min <score>` when the library
      score is below it.
 3. **Agent run** (only when asked, or before a release — it costs money; say the cost first):
-   `npm run readiness:agent -w packages/tools/mcp` (the fixed `agentSet`, comparable between runs; `--all` for every
-   requirement, ~$30). Then `npm run mcp:readiness` again so the headline includes it. Watch the tool calls per task in
+   `pnpm --dir packages/tools/mcp run readiness:agent` (the fixed `agentSet`, comparable between runs; `--all` for every
+   requirement, ~$30). Then `pnpm run mcp:readiness` again so the headline includes it. Watch the tool calls per task in
    `report.md` as well as the pass rate: an agent that needs more calls found the component the hard way.
 4. **Read the result**: the terminal summary, then `changes.md` (or `report.md`) — "What is still missing" lists each
    failing check with what is missing.
@@ -78,7 +78,7 @@ CSS variables named after a CSS property and for generic slot content.
 | `examples/gallery`, `elements-shown`, `attributes-shown`             | A gallery, every element and most attributes appear in an example                                       | Gallery cards; an `aria-label` on charts and icon buttons (agents copy it)                                                                                                                                                                                                                  |
 | `composition/slots-shown`                                            | Every named slot is used in an example                                                                  | A "Slots" gallery section built from the Default card: custom icons, slotted content, loading / empty / error states                                                                                                                                                                        |
 | `composition/related-documented`, `children-linked`                  | Components the examples nest are named in the docs; a child element names its parent                    | Name the typical children in the `@slot` description; a child's JSDoc names its parent (or any element of its package)                                                                                                                                                                      |
-| `framework/*`                                                        | Install line, React and Vue types, Angular accessor, `HTMLElementTagNameMap`                            | `npm run build:tools` regenerates the framework types; a form control needs `name`, `value`/`checked` and an `input`/`change` event                                                                                                                                                         |
+| `framework/*`                                                        | Install line, React and Vue types, Angular accessor, `HTMLElementTagNameMap`                            | `pnpm run build:tools` regenerates the framework types; a form control needs `name`, `value`/`checked` and an `input`/`change` event                                                                                                                                                        |
 | `validation/examples-valid`, `examples-clean`                        | Examples pass `validate_markup`                                                                         | Fix the markup — or the component, when the markup is right and the API is missing something (a `value` the parent reads)                                                                                                                                                                   |
 
 Rules learned the hard way:
@@ -93,7 +93,7 @@ Rules learned the hard way:
 - **Component bugs found on the way** get a failing test first, then the fix (this is how the chart SSR, tag-input
   slot and chart locale bugs were found).
 
-Check the rows and cards you changed, in both themes, after `npm run ui:build`:
+Check the rows and cards you changed, in both themes, after `pnpm run ui:build`:
 
 ```bash
 node .claude/skills/ai-readiness/scripts/shots.mjs <id> <id>:"<row label>"      # usage rows
@@ -104,8 +104,8 @@ Screenshots go to `test-results/ai-readiness/shots/`; open them with Read. Conso
 
 ## Finish
 
-1. Re-run (`npm run mcp:readiness`) until the changed components no longer lose points you can fix honestly.
-2. Run the checks your changes touched: `node --test packages/tools/mcp/scripts/*.test.ts`, `npm run mcp:smoke`, the
-   component tests, `npm run lint`, `npm run format:check`, `npm run ui:build` for docs changes.
+1. Re-run (`pnpm run mcp:readiness`) until the changed components no longer lose points you can fix honestly.
+2. Run the checks your changes touched: `node --test packages/tools/mcp/scripts/*.test.ts`, `pnpm run mcp:smoke`, the
+   component tests, `pnpm run lint`, `pnpm run format:check`, `pnpm run ui:build` for docs changes.
 3. Commit `packages/tools/mcp/readiness/` with the change. In the summary, give the score before and after, what each
    fix was, and what is left and why (a check that would only be satisfied by filler is not a gap to close).

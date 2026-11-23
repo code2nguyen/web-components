@@ -7,7 +7,7 @@
  * builds it before versioning and this script stamps the new version in place before regenerating the committed
  * skill catalog and plugin manifests.
  *
- * Run with `npm run version -w packages/tools/mcp` (Node 24 type stripping: erasable TypeScript only).
+ * Run with `pnpm --dir packages/tools/mcp run version` (Node 24 type stripping: erasable TypeScript only).
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'

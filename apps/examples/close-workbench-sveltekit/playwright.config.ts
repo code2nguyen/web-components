@@ -10,7 +10,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } }],
   // The prerendered production build, so the suite covers hydration of server-rendered markup; build the app first.
   webServer: {
-    command: 'npx vite preview --host 127.0.0.1 --port 4182 --strictPort',
+    command: 'pnpm exec vite preview --host 127.0.0.1 --port 4182 --strictPort',
     url: base,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

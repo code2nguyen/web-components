@@ -83,7 +83,7 @@ test('the border shorthand reaches every side, with and without @c2n/theme, and 
   await host.evaluate((element) => element.style.setProperty('--c2-details--border', '3px solid rgb(1, 2, 3)'))
   await expectSides({ top: shorthand, right: shorthand, bottom: shorthand, left: shorthand })
 
-  test.skip(!existsSync(THEME_CSS), 'build @c2n/theme first (npm run build -w packages/tools/theme)')
+  test.skip(!existsSync(THEME_CSS), 'build @c2n/theme first (pnpm --dir packages/tools/theme run build)')
   await page.addStyleTag({ path: THEME_CSS })
   await expectSides({ top: shorthand, right: shorthand, bottom: shorthand, left: shorthand })
 

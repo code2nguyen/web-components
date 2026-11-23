@@ -42,7 +42,7 @@ for (const id of ids) {
   const outputDir = typeof config.outputDir === 'string' && /^[a-zA-Z0-9_-]+$/.test(config.outputDir) ? config.outputDir : 'dist'
   const from = join(examplesDir, id, outputDir)
   if (!existsSync(from)) {
-    console.warn(`[sync-examples] ${id} has no ${outputDir}/ — run \`npm run examples:build\` at the root first`)
+    console.warn(`[sync-examples] ${id} has no ${outputDir}/ — run \`pnpm run examples:build\` at the root first`)
     continue
   }
   const to = join(targetRoot, id)

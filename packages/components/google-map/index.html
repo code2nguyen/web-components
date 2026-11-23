@@ -19,7 +19,7 @@
     </style>
     <script type="module">
       import { configureGoogleMaps } from '/src/google-map.ts'
-      // Run with VITE_GOOGLE_MAPS_API_KEY=… npm run dev -w packages/components/google-map
+      // Run with VITE_GOOGLE_MAPS_API_KEY=… pnpm --dir packages/components/google-map run dev
       configureGoogleMaps({ apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY })
       const route = document.querySelector('c2-google-map-route')
       route.addEventListener('route-change', (event) => {

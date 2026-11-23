@@ -61,11 +61,12 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
+    "@c2n/core": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*",
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
     "@codemirror/autocomplete": "^6.0.0",
     "@codemirror/commands": "^6.0.0",
     "@codemirror/lang-css": "^6.0.0",
@@ -76,7 +77,11 @@
     "@codemirror/search": "^6.0.0",
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
-    "@lezer/highlight": "^1.0.0"
+    "@lezer/highlight": "^1.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json",
   "peerDependencies": {

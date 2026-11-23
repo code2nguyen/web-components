@@ -32,4 +32,4 @@ Every spec follows these, plus any rules of its own under its "Builder rules" he
 - Simulated servers live in the page, answer after the delay the spec gives, and never touch the network.
 - Use the sample data exactly as written, so the lab journeys can expect exact values.
 - Any framework, or none, unless the spec says otherwise. Build into `lab/apps/<id>/<direction>/`, served by
-  `npx vite lab/apps/<id>/<direction>` from the repository root.
+  `pnpm exec vite lab/apps/<id>/<direction>` from the repository root.

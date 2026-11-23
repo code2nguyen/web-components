@@ -19,31 +19,36 @@ jobs:
       - name: Checkout your repository using git
         uses: actions/checkout@v7
 
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: pnpm
 
       # Set up GitHub Actions caching for Wireit.
       - uses: google/wireit@setup-github-actions-caching/v2
 
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Check formatting
-        run: npm run format:check
+        run: pnpm run format:check
 
       # Every --c2-* variable apps/ui and apps/examples set or read must be a documented @cssproperty, a theme token
       # or a variable a component writes itself; reads the committed custom-elements.json, so it needs no build.
       - name: Check app CSS variables against the component contracts
-        run: npm run check:css-contracts
+        run: pnpm run check:css-contracts
 
       - name: Build UI app
         shell: 'bash'
-        run: npm run ui:build
+        run: pnpm run ui:build
         env:
           # Browser key for the Google Maps examples, baked into the pages, so it is public either way: restrict it
           # to the site's referrers in the Google Cloud console. The literal is the development key; a
@@ -51,13 +56,17 @@ jobs:
           PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'AIzaSyB9u7tyP1OSxruJJeVvksagghg-3pGHI6Y' }}
 
       - name: Check the @c2n/components bundle size
-        run: npm run check:bundle-size
+        run: pnpm run check:bundle-size
+
+      # Published packages write the toolchain versions out (lerna keeps `catalog:`): they must match the catalog.
+      - name: Published packages pin the catalog's toolchain versions
+        run: node --test scripts/catalog-pins.test.mjs
 
       - name: Check docs examples follow the theme in light and dark
-        run: npm run check:example-theme && npm test -w packages/tools/mcp
+        run: pnpm run check:example-theme && pnpm --dir packages/tools/mcp test
 
       - name: Check component documentation coverage
-        run: npm run docs:check
+        run: pnpm run docs:check
 
       - name: Verify generated component manifests are committed
         run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
@@ -82,28 +91,28 @@ jobs:
           retention-days: 7
 
       - name: Check the docs site dogfoods c2n components
-        run: npm run check:dogfood
+        run: pnpm run check:dogfood
 
       - name: Check the guidance coding agents read (CLAUDE.md, AGENTS.md, skills)
-        run: npm run check:agent-docs
+        run: pnpm run check:agent-docs
 
       - name: Build tools (MCP registry, skill catalog)
-        run: npm run build:tools
+        run: pnpm run build:tools
 
       - name: Smoke test the MCP server
-        run: npm run mcp:smoke
+        run: pnpm run mcp:smoke
 
       - name: Every component is reachable through MCP and llms.txt
-        run: npm run check:reachability
+        run: pnpm run check:reachability
 
       - name: c2 markup in the docs site, example apps and lab builds has no errors
-        run: npm run check:app-markup
+        run: pnpm run check:app-markup
 
       - name: Test the cross-agent installer
-        run: npm test -w packages/tools/skill
+        run: pnpm --dir packages/tools/skill test
 
       - name: Test the theme generator
-        run: npm test -w packages/tools/theme
+        run: pnpm --dir packages/tools/theme test
 
       - name: Generated files are up to date
         # The slot-styling audit and lab/GAPS.md are regenerated here too (GAPS.md reads the registry build:tools wrote),
@@ -117,11 +126,11 @@ jobs:
       # images can see a look before choosing it. Served by Pages only; a failure here must not block the docs.
       - name: Install Chromium for the gallery screenshots
         continue-on-error: true
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Capture gallery screenshots
         continue-on-error: true
-        run: npm run gallery:shots
+        run: pnpm run gallery:shots
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5

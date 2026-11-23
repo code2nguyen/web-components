@@ -65,13 +65,13 @@ Two smaller things:
 - Svelte's a11y checks cannot tell that `<c2-button onclick>` is a real button inside its shadow root. `vite.config.ts` filters those two warnings for `c2-*` tags only.
 - SvelteKit 3 reads its configuration from the `sveltekit()` Vite plugin (there is no `svelte.config.js`), and `#lib` subpath imports in `package.json` replace `$lib`.
 
-The palette lives in `src/app.css` as `--cw-*` tokens, bridged onto `--c2-theme--*`. Components are styled only through their documented `--c2-*` variables and parts; `npm run check:css-contracts` and `c2n-mcp validate` check them.
+The palette lives in `src/app.css` as `--cw-*` tokens, bridged onto `--c2-theme--*`. Components are styled only through their documented `--c2-*` variables and parts; `pnpm run check:css-contracts` and `c2n-mcp validate` check them.
 
 ## Commands
 
 ```bash
-npm run dev -w apps/examples/close-workbench-sveltekit
-npm run build -w apps/examples/close-workbench-sveltekit         # svelte-check, then prerender into dist/
-npm run test:unit -w apps/examples/close-workbench-sveltekit     # matching, exceptions, journal, reconciliation, filter
-npm run test:browser -w apps/examples/close-workbench-sveltekit  # Playwright against the built app (vite preview)
+pnpm --dir apps/examples/close-workbench-sveltekit run dev
+pnpm --dir apps/examples/close-workbench-sveltekit run build         # svelte-check, then prerender into dist/
+pnpm --dir apps/examples/close-workbench-sveltekit run test:unit     # matching, exceptions, journal, reconciliation, filter
+pnpm --dir apps/examples/close-workbench-sveltekit run test:browser  # Playwright against the built app (vite preview)
 ```

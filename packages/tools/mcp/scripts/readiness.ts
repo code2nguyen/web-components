@@ -1,5 +1,5 @@
 /**
- * AI readiness: `npm run readiness -w packages/tools/mcp [-- --full] [--fail-on-regression] [--min <score>] [ids…]`.
+ * AI readiness: `pnpm --dir packages/tools/mcp run readiness [--full] [--fail-on-regression] [--min <score>] [ids…]`.
  *
  * Scores the components in `data/registry.json` (what `@c2n/mcp` serves an agent) on the six dimensions of
  * `readiness/score.ts`, runs the discovery benchmark of `readiness/tasks.json` against `search_components`, and folds

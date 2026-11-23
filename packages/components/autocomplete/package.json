@@ -64,15 +64,20 @@
     }
   },
   "dependencies": {
-    "@c2n/chip": "*",
-    "@c2n/core": "*",
-    "@c2n/list": "*",
-    "@c2n/list-item": "*",
-    "@c2n/overlay": "*",
+    "@c2n/chip": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/list": "workspace:*",
+    "@c2n/list-item": "workspace:*",
+    "@c2n/overlay": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

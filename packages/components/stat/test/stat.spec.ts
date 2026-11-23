@@ -1,7 +1,7 @@
 import { test, expect } from './fixture'
 
 // Cover the states and transitions that matter, with real pointer and keyboard input and observable results.
-// See tests/README.md; `npm test` runs the suites of changed packages.
+// See tests/README.md; `pnpm test` runs the suites of changed packages.
 test('renders value, label, icon and trend', async ({ page, scenario }) => {
   await scenario()
   const host = page.locator('c2-stat')

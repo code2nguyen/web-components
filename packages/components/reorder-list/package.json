@@ -58,12 +58,17 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
+    "@c2n/core": "workspace:*",
     "@lit-labs/motion": "1.1.0",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

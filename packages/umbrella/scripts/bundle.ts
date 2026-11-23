@@ -10,7 +10,7 @@
  * - `custom-elements.json`: the manifests of the inlined packages merged into one, each module path prefixed with
  *   its package's name.
  *
- * Run after the component packages are built (`npm run build -w packages/umbrella` takes care of the order).
+ * Run after the component packages are built (`pnpm --dir packages/umbrella run build` takes care of the order).
  * Plain node on Node 24 type stripping, so keep this to erasable TypeScript syntax only.
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
@@ -42,12 +42,12 @@ const external = Object.keys({ ...umbrella.dependencies, ...umbrella.peerDepende
 // The workspace packages the entries re-export: the generator lists them as devDependencies.
 const inlined = Object.keys(umbrella.devDependencies ?? {}).filter((name) => name.startsWith('@c2n/') && name !== '@c2n/config')
 
-/** The directory of an installed workspace package (`node_modules/@c2n/<name>`, symlinks resolved by Node). */
+/** The directory of a workspace package the umbrella declares (its own `node_modules/@c2n/<name>` link). */
 function packageRoot(name: string): string {
   for (let dir = packageDir; ; dir = dirname(dir)) {
     const candidate = join(dir, 'node_modules', name)
     if (existsSync(join(candidate, 'package.json'))) return candidate
-    if (dirname(dir) === dir) throw new Error(`${name} is not installed; run npm install`)
+    if (dirname(dir) === dir) throw new Error(`${name} is not installed; run pnpm install`)
   }
 }
 

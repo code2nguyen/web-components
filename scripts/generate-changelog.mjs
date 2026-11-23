@@ -10,7 +10,7 @@
  * A commit belongs to the first release whose version commit can reach it.
  *
  * Only released history is written, so the output is a pure function of the history and stays stable between
- * releases. The Release workflow runs `npm run changelog -- --next <version>` before committing the version, which
+ * releases. The Release workflow runs `pnpm run changelog --next <version>` before committing the version, which
  * files everything since the last release under the version being cut.
  *
  * Commits are read as Conventional Commits (`feat(table): …`). Housekeeping types (chore, ci, test, …) are dropped.
@@ -116,7 +116,7 @@ export function renderMarkdown(releases) {
     '# Changelog',
     '',
     'All `@c2n/*` packages are versioned together. This file is generated from the commit history by',
-    '`npm run changelog` — do not edit it by hand.',
+    '`pnpm run changelog` — do not edit it by hand.',
     '',
   ]
   for (const release of releases) {
@@ -212,7 +212,7 @@ async function main() {
     }
     if (current === content) continue
     if (args.check) {
-      console.error(`${path} is out of date: run \`npm run changelog\`.`)
+      console.error(`${path} is out of date: run \`pnpm run changelog\`.`)
       stale = true
     } else {
       writeFileSync(file, content)

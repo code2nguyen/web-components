@@ -64,13 +64,18 @@
     }
   },
   "dependencies": {
-    "@c2n/camera-capture": "*",
-    "@c2n/core": "*",
+    "@c2n/camera-capture": "workspace:*",
+    "@c2n/core": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*",
-    "@zxing/library": "^0.23.0"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "@zxing/library": "^0.23.0",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json",
   "peerDependencies": {

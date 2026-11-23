@@ -77,9 +77,17 @@
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*",
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
     "@phosphor-icons/core": "2.1.1",
-    "prettier": "3.9.6"
+    "@types/node": "26.4.1",
+    "@types/react": "19.3.0",
+    "@vue/runtime-dom": "3.5.42",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vite": "^8.2.2",
+    "vite-plugin-cem": "^0.8.5",
+    "vue": "3.5.42"
   },
   "customElements": "custom-elements.json"
 }

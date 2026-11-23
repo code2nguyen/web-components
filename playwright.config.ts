@@ -45,7 +45,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run test:serve',
+    command: 'pnpm run test:serve',
     url: 'http://127.0.0.1:4175/tests/health.html',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
