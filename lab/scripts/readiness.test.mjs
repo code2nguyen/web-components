@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { test } from 'node:test'
 import { analyse, callsSince } from './readiness.mjs'
 
-// The registry is git-ignored (`npm run build:registry -w packages/tools/mcp`): the tests that read it skip without it.
+// The registry is git-ignored (`pnpm --dir packages/tools/mcp run build:registry`): the tests that read it skip without it.
 const registry = { skip: !existsSync(new URL('../../packages/tools/mcp/data/registry.json', import.meta.url)) && 'no MCP registry built' }
 
 const call = (tool, extra = {}) => ({ time: '2026-11-19T10:00:00Z', pid: 1, tool, args: {}, ...extra })

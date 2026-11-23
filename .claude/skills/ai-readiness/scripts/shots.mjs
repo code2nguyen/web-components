@@ -1,6 +1,6 @@
 // Screenshots single usage rows and gallery cards of the built docs site, in the light and the dark theme, so a fix
 // made for the AI readiness score can be checked by eye: a row that looks like its neighbour, a card cut off, a
-// console error. Run `npm run ui:build` first; this serves `apps/ui/dist` with `astro preview` itself.
+// console error. Run `pnpm run ui:build` first; this serves `apps/ui/dist` with `astro preview` itself.
 //
 //   node .claude/skills/ai-readiness/scripts/shots.mjs <id>[:<label>]… [--gallery] [--port 4394]
 //
@@ -34,7 +34,7 @@ mkdirSync(out, { recursive: true })
 const base = `http://localhost:${port}/web-components`
 
 // Astro 7 backgrounds `astro preview` for an AI agent unless ASTRO_PREVIEW_BACKGROUND is set: keep it in the foreground.
-const preview = spawn('npx', ['astro', 'preview', '--port', String(port)], {
+const preview = spawn('pnpm', ['exec', 'astro', 'preview', '--port', String(port)], {
   cwd: join(root, 'apps/ui'),
   stdio: 'ignore',
   detached: true,

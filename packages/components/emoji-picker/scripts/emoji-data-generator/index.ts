@@ -7,7 +7,7 @@
  * per category rather than an array of objects, which keeps the module about half the size; `src/emoji-data.ts`
  * parses it once, on first use.
  *
- * Run with `npm run generate -w packages/components/emoji-picker` after bumping `emojibase-data`, and commit the
+ * Run with `pnpm --dir packages/components/emoji-picker run generate` after bumping `emojibase-data`, and commit the
  * result. Node 24 type stripping: erasable TypeScript only.
  */
 import { readFileSync, writeFileSync } from 'node:fs'

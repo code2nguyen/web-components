@@ -75,4 +75,4 @@ For Claude Code the installer also adds a `PostToolUse` hook to `.claude/setting
 
 ## Development
 
-`npm run build:tools` at the repository root regenerates the compact catalog and synchronizes every plugin manifest and `@c2n/mcp` pin from `package.json`. `npm test -w packages/tools/skill` verifies idempotent installation in temporary projects.
+`pnpm run build:tools` at the repository root regenerates the compact catalog and synchronizes every plugin manifest and `@c2n/mcp` pin from `package.json`. `pnpm --dir packages/tools/skill test` verifies idempotent installation in temporary projects.

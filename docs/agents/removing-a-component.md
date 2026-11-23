@@ -23,18 +23,17 @@ repository root.
    its import and `normalizedManifests` entry from `apps/ui/src/store/component-manifests.ts`, its side-effect import
    from `apps/ui/src/data/component-modules.ts`, and its entries in `component-previews.ts` and
    `component-presets.ts`.
-4. `npm install`, then check `package-lock.json`: npm can leave the removed workspace's own `"packages/components/<name>"`
-   entry behind (it did for the chatbot). Delete that key by hand and run `npm install` again; it should report
-   "up to date" and `git grep -c '<name>' package-lock.json` should find nothing.
+4. `pnpm install`, which drops the package's `importers` entry from `pnpm-lock.yaml`; `git grep -c 'components/<name>'
+pnpm-lock.yaml` should then find nothing.
 
 ## 2. Regenerate what is generated
 
 Run them in this order (each reads what the one before wrote):
 
 ```bash
-npm run generate -w packages/tools/framework-types   # umbrella src/, exports, react/vue typings
-npm run build && npm run build:tools                 # manifests, MCP registry, skill catalog
-npm run mcp:readiness -- --full                      # packages/tools/mcp/readiness/ drops the component
+pnpm --dir packages/tools/framework-types run generate   # umbrella src/, exports, react/vue typings
+pnpm run build && pnpm run build:tools                 # manifests, MCP registry, skill catalog
+pnpm run mcp:readiness --full                      # packages/tools/mcp/readiness/ drops the component
 node lab/scripts/gaps.mjs                            # lab/GAPS.md
 ```
 
@@ -57,6 +56,6 @@ components' entries, put that drift in a commit of its own.
 
 ## 4. Verify
 
-`npm run check:pr` (the full run, not `--fast`: the builds must regenerate without it), then the final `git grep`.
-The umbrella suite (`npx playwright test packages/umbrella`) proves every remaining tag still registers from the
+`pnpm run check:pr` (the full run, not `--fast`: the builds must regenerate without it), then the final `git grep`.
+The umbrella suite (`pnpm exec playwright test packages/umbrella`) proves every remaining tag still registers from the
 bundle.

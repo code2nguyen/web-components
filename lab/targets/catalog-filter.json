@@ -5,7 +5,7 @@
   "app": "lab/apps/catalog-filter/default",
   "url": "http://127.0.0.1:4192/",
   "server": {
-    "command": "npx vite lab/apps/catalog-filter/default --host 127.0.0.1 --port 4192 --strictPort",
+    "command": "pnpm exec vite lab/apps/catalog-filter/default --host 127.0.0.1 --port 4192 --strictPort",
     "cwd": "."
   },
   "journeys": [

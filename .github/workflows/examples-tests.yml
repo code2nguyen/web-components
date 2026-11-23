@@ -1,7 +1,7 @@
 name: Example app tests
 
 # Runs the browser suite of every example app that has one, against a production build of the app and the
-# component packages it consumes. An example without a suite is still built by `npm run ui:build` in deploy.yml.
+# component packages it consumes. An example without a suite is still built by `pnpm run ui:build` in deploy.yml.
 on:
   pull_request:
     branches: [develop, main]
@@ -26,35 +26,37 @@ jobs:
         include:
           # Angular dev server (`ng serve`) on 127.0.0.1:4177.
           - example: orders-admin-angular
-            test: npm run test:browser -w apps/examples/orders-admin-angular
+            test: pnpm --dir apps/examples/orders-admin-angular run test:browser
           # Static export served by test/serve-static.mjs on 127.0.0.1:4180 (the Playwright webServer).
           - example: observability-nextjs
-            test: npm run test:e2e -w apps/examples/observability-nextjs
+            test: pnpm --dir apps/examples/observability-nextjs run test:e2e
           # Vite dev server on 127.0.0.1:4176; it resolves the components through their built `dist/`.
           - example: support-inbox-vue
-            test: npm run test:browser -w apps/examples/support-inbox-vue
+            test: pnpm --dir apps/examples/support-inbox-vue run test:browser
           # Vite dev server on 127.0.0.1:4178.
           - example: trading-dashboard-react
-            test: npm run test:browser -w apps/examples/trading-dashboard-react
+            test: pnpm --dir apps/examples/trading-dashboard-react run test:browser
           # Domain unit tests (node --test), then the prerendered build served by `vite preview` on 127.0.0.1:4182.
           - example: close-workbench-sveltekit
-            test: npm run test:unit -w apps/examples/close-workbench-sveltekit && npm run test:browser -w apps/examples/close-workbench-sveltekit
+            test: pnpm --dir apps/examples/close-workbench-sveltekit run test:unit && pnpm --dir apps/examples/close-workbench-sveltekit run test:browser
           # Static build served by `astro preview` on 127.0.0.1:4184.
           - example: wayline-marketing-astro
-            test: npm run test:browser -w apps/examples/wayline-marketing-astro
+            test: pnpm --dir apps/examples/wayline-marketing-astro run test:browser
     steps:
       - uses: actions/checkout@v7
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
       # Wireit caches the component builds both jobs share.
       - uses: google/wireit@setup-github-actions-caching/v2
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       # The app's wireit build depends on (and so builds) every component package it imports.
       - name: Build ${{ matrix.example }} and its component packages
-        run: npm run build -w apps/examples/${{ matrix.example }}
-      - run: npx playwright install --with-deps chromium
+        run: pnpm --dir apps/examples/${{ matrix.example }} run build
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Run the ${{ matrix.example }} browser suite
         run: ${{ matrix.test }}
       - name: Upload the Playwright report

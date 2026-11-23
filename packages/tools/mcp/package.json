@@ -42,13 +42,13 @@
     "build": "wireit",
     "build:registry": "wireit",
     "build:tsc": "wireit",
-    "predev": "npm run build:registry",
+    "predev": "pnpm run build:registry",
     "start": "node dist/cli.js",
     "dev": "node src/cli.ts",
-    "preinspect": "npm run build:registry",
-    "inspect": "npx -y @modelcontextprotocol/inspector node src/cli.ts",
-    "presmoke": "npm run build",
-    "prepack": "npm run build",
+    "preinspect": "pnpm run build:registry",
+    "inspect": "pnpm dlx @modelcontextprotocol/inspector node src/cli.ts",
+    "presmoke": "pnpm run build",
+    "prepack": "pnpm run build",
     "smoke": "node scripts/smoke.ts",
     "check:reachability": "node scripts/check-reachability.ts",
     "theme:examples": "node scripts/theme-examples.ts",
@@ -109,7 +109,9 @@
     "zod": "4.5.4"
   },
   "devDependencies": {
-    "@c2n/config": "*",
-    "custom-elements-manifest": "2.1.0"
+    "@c2n/config": "workspace:*",
+    "@types/node": "26.4.1",
+    "custom-elements-manifest": "2.1.0",
+    "typescript": "6.0.3"
   }
 }

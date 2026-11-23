@@ -12,17 +12,14 @@
  * - fails when a code line of the "Skeleton" block in `packages/components/CLAUDE.md` is missing from the rendered
  *   component, so the documented shape and the generated one stay the same.
  *
- * Needs `@c2n/core`'s declarations (`npm run build -w packages/core`, which the root build runs first).
- * Run: `npm run check:component-template`.
+ * Needs `@c2n/core`'s declarations (`pnpm --dir packages/core run build`, which the root build runs first).
+ * Run: `pnpm run check:component-template`.
  */
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-// node-plop and sass resolve through the workspaces that own them (scripts/generator's plop, packages/tools/sass), hoisted
-// to the root. They are deliberately not root devDependencies: declaring sass at the root made npm 11's `npm ci` demand
-// every platform package of its optional @parcel/watcher dependency in the lockfile, which a lockfile written on one
-// platform does not hold (see `docs/agents/pinned-dependencies.md`).
+// node-plop and sass are root devDependencies, at the versions scripts/generator's plop and packages/tools/sass use.
 import nodePlop from 'node-plop'
 import { compile, NodePackageImporter } from 'sass'
 
@@ -58,6 +55,22 @@ try {
       mkdirSync(dirname(target), { recursive: true })
       writeFileSync(target, file.endsWith('.hbs') ? plop.renderString(readFileSync(file, 'utf8'), { name }) : readFileSync(file, 'utf8'))
     }
+  // pnpm links a package's own dependencies into its own node_modules, and this one was never installed: link each
+  // dependency the template's package.json declares from a real component package that has it installed.
+  const manifest = JSON.parse(plop.renderString(readFileSync(join(root, 'scripts/generator/files/wc/package.json.hbs'), 'utf8'), { name, packageVersion: '0.0.0' }))
+  const components = join(root, 'packages/components')
+  for (const dependency of Object.keys({ ...manifest.dependencies, ...manifest.devDependencies })) {
+    const installed = readdirSync(components)
+      .filter((entry) => !entry.startsWith('.'))
+      .map((entry) => join(components, entry, 'node_modules', dependency))
+      .find((candidate) => existsSync(candidate))
+    if (!installed) {
+      problems.push(`the template depends on ${dependency}, which no component package has installed (run pnpm install)`)
+      continue
+    }
+    mkdirSync(dirname(join(outDir, 'node_modules', dependency)), { recursive: true })
+    symlinkSync(realpathSync(installed), join(outDir, 'node_modules', dependency), 'dir')
+  }
   cpSync(join(root, 'scripts/generator/files/wc/tsconfig.lib.json'), join(outDir, 'tsconfig.json'))
   writeFileSync(join(outDir, 'tsconfig.test.json'), JSON.stringify({ extends: '../../../tests/tsconfig.json', include: ['test/**/*.ts'] }))
 

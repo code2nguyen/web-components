@@ -46,13 +46,14 @@
     }
   },
   "dependencies": {
-    "@c2n/components": "*",
-    "@c2n/feather-icons": "*"
+    "@c2n/components": "workspace:*",
+    "@c2n/feather-icons": "workspace:*"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
-    "@c2n/config": "*",
+    "@c2n/config": "workspace:*",
     "@playwright/test": "1.63.0",
-    "astro": "7.3.1"
+    "astro": "7.3.1",
+    "typescript": "catalog:"
   }
 }

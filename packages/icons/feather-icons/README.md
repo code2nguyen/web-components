@@ -43,6 +43,6 @@ All icons share the same CSS custom properties:
 The components under `src/icons/` are generated from the `feather-icons` npm package and committed. After bumping `feather-icons` run:
 
 ```bash
-npm run generate -w packages/icons/feather-icons
-npm run build -w packages/icons/feather-icons
+pnpm --dir packages/icons/feather-icons run generate
+pnpm --dir packages/icons/feather-icons run build
 ```

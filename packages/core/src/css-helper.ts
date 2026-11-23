@@ -1,4 +1,4 @@
-import type { ClassInfo } from 'lit-html/directives/class-map.js'
+import type { ClassInfo } from 'lit/directives/class-map.js'
 
 export function addClasses(target: HTMLElement, cls: ClassInfo) {
   if (!target?.classList) return

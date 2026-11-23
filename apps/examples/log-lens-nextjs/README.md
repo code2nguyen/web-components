@@ -49,13 +49,13 @@ Integration follows the repo's Next.js conventions (see `observability-nextjs`):
 - Object properties (`rows`, `data`, `items`, `steps`, `open`) are assigned through `useElementProperties` once the element is defined.
 - Kebab-case and non-bubbling events go through `useCustomEvent`.
 
-The palette lives in `app/globals.css` as `--ll-*` tokens, bridged onto `--c2-theme--*`. Components are styled only through documented `--c2-*` variables; `npm run check:css-contracts -- apps/examples/log-lens-nextjs` validates them.
+The palette lives in `app/globals.css` as `--ll-*` tokens, bridged onto `--c2-theme--*`. Components are styled only through documented `--c2-*` variables; `pnpm run check:css-contracts apps/examples/log-lens-nextjs` validates them.
 
 ## Commands
 
 ```bash
-npm run dev -w apps/examples/log-lens-nextjs
-npm run build -w apps/examples/log-lens-nextjs      # static export into out/
-npm run test:unit -w apps/examples/log-lens-nextjs  # parser, pattern mining, story, divergence, differences
-npm run preview -w apps/examples/log-lens-nextjs    # serve out/ at /web-components/demo/log-lens-nextjs/
+pnpm --dir apps/examples/log-lens-nextjs run dev
+pnpm --dir apps/examples/log-lens-nextjs run build      # static export into out/
+pnpm --dir apps/examples/log-lens-nextjs run test:unit  # parser, pattern mining, story, divergence, differences
+pnpm --dir apps/examples/log-lens-nextjs run preview    # serve out/ at /web-components/demo/log-lens-nextjs/
 ```

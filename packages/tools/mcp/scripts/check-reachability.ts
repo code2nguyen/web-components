@@ -1,7 +1,7 @@
 /**
  * Every component is reachable by a coding agent through this MCP server and the docs site's `/llms.txt`
  * (`packages/components/CLAUDE.md`, "Reachable through MCP and llms.txt"). Both are generated, so this checks their
- * inputs over the built registry (`npm run build:registry` first):
+ * inputs over the built registry (`pnpm --dir packages/tools/mcp run build:registry` first):
  *
  * - the entry has a docs page (`status: "stable"`) in a collection the site serves (`content/components` or
  *   `content/icons`), which is also what puts it in `/llms.txt`;
@@ -30,7 +30,7 @@ const MIN_INTENTS = 3
 const KNOWN: Record<string, string> = {}
 
 if (!existsSync(registryFile)) {
-  console.error(`[reachability] ${registryFile} is missing: run \`npm run build:registry -w packages/tools/mcp\` first`)
+  console.error(`[reachability] ${registryFile} is missing: run \`pnpm --dir packages/tools/mcp run build:registry\` first`)
   process.exit(1)
 }
 const registry = JSON.parse(readFileSync(registryFile, 'utf8')) as Registry

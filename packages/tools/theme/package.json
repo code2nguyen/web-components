@@ -276,7 +276,24 @@
     }
   },
   "devDependencies": {
-    "@c2n/config": "*",
-    "prettier": "3.9.6"
+    "@c2n/avatar": "workspace:*",
+    "@c2n/button": "workspace:*",
+    "@c2n/card": "workspace:*",
+    "@c2n/checkbox": "workspace:*",
+    "@c2n/config": "workspace:*",
+    "@c2n/details": "workspace:*",
+    "@c2n/icon-button": "workspace:*",
+    "@c2n/label": "workspace:*",
+    "@c2n/list": "workspace:*",
+    "@c2n/list-item": "workspace:*",
+    "@c2n/modal": "workspace:*",
+    "@c2n/select": "workspace:*",
+    "@c2n/tabs": "workspace:*",
+    "@c2n/text-field": "workspace:*",
+    "@c2n/tooltip": "workspace:*",
+    "@types/node": "26.4.1",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vite": "^8.2.2"
   }
 }

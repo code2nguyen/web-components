@@ -10,7 +10,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } }],
   // The static production build, so the suite covers the page as deployed; build the app first.
   webServer: {
-    command: 'npx astro preview --host 127.0.0.1 --port 4184',
+    command: 'pnpm exec astro preview --host 127.0.0.1 --port 4184',
     // Astro 7 moves `preview` to the background when it detects an AI coding agent, and Playwright then sees the
     // command exit. This is the variable Astro sets for its own background server process: it keeps the server here.
     env: { ASTRO_PREVIEW_BACKGROUND: '1' },

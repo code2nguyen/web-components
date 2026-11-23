@@ -14,7 +14,7 @@
  * The two `.d.ts` files live in the package they describe: a single aggregate file would have to import from
  * every `@c2n` package, and a consumer who installed three of them would not be able to compile it.
  *
- * Run with `npm run build -w packages/tools/framework-types` (plain node on Node 24 type stripping, so keep this
+ * Run with `pnpm --dir packages/tools/framework-types run build` (plain node on Node 24 type stripping, so keep this
  * to erasable TypeScript syntax only). Output is formatted with the repo's prettier config, and the per-package
  * files are committed alongside `custom-elements.json`.
  */
@@ -27,7 +27,7 @@ import { emitReact, emitRuntime, emitVue } from './emit-react.ts'
 import { emitAngular } from './emit-angular.ts'
 import { emitUmbrella } from './emit-umbrella.ts'
 import { emitVueTsconfig } from './emit-vue-config.ts'
-import { readPackages, repoRelative, scopeDir } from './manifests.ts'
+import { packageDirs, readPackages, repoRelative } from './manifests.ts'
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const distDir = join(packageDir, 'dist')
@@ -61,4 +61,4 @@ await write(join(distDir, 'web-types.json'), emitWebTypes(packages, version), 'j
 const umbrellaDir = resolve(packageDir, '../../umbrella')
 // `src/` holds nothing but generated entries: clearing it drops the entry of a package that no longer exists.
 rmSync(join(umbrellaDir, 'src'), { recursive: true, force: true })
-for (const file of emitUmbrella(packages, umbrellaDir, scopeDir())) await write(join(umbrellaDir, file.path), file.contents, file.parser)
+for (const file of emitUmbrella(packages, umbrellaDir, packageDirs())) await write(join(umbrellaDir, file.path), file.contents, file.parser)

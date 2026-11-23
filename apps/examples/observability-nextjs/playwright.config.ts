@@ -6,7 +6,7 @@ const launchOptions = { executablePath: process.env.CHROMIUM_PATH || undefined }
 
 export default defineConfig({
   testDir: 'test',
-  // `test/unit/*.test.ts` are node:test suites (`npm run test:unit`); Playwright's default match would import them too.
+  // `test/unit/*.test.ts` are node:test suites (`pnpm run test:unit`); Playwright's default match would import them too.
   testMatch: '**/*.spec.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -20,7 +20,7 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: {
-    command: 'npm run preview',
+    command: 'pnpm run preview',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

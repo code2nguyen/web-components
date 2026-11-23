@@ -11,7 +11,7 @@
  * - a skill present for one agent only, or present for both as two separate copies (`.claude/skills/<name>` and
  *   `.agents/skills/<name>` must resolve to the same folder).
  *
- * Run: `npm run check:agent-docs` (a `deploy.yml` gate).
+ * Run: `pnpm run check:agent-docs` (a `deploy.yml` gate).
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync } from 'node:fs'

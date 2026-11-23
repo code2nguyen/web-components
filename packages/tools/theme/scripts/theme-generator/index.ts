@@ -15,7 +15,7 @@
  * Components are never modified: the base theme only sets `:root`/`:host` values, so any component variable
  * set by the consumer still wins.
  *
- * Run with `npm run generate -w packages/tools/theme` (Node >= 22.18 / 24: native type stripping, so keep the
+ * Run with `pnpm --dir packages/tools/theme run generate` (Node >= 22.18 / 24: native type stripping, so keep the
  * generator to erasable TypeScript syntax only). Component packages must be built first.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'

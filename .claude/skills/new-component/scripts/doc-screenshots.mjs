@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Screenshots one component's pages in the built docs site, in the light and the dark theme, for a visual review
-// before a pull request. Run `npm run ui:build` first; this serves `apps/ui/dist` with `astro preview` itself.
+// before a pull request. Run `pnpm run ui:build` first; this serves `apps/ui/dist` with `astro preview` itself.
 //
 //   node .claude/skills/new-component/scripts/doc-screenshots.mjs <component-id> [--press "<button name>"]… [--port 4321]
 //
@@ -48,11 +48,11 @@ if ((await portTaken('127.0.0.1')) || (await portTaken('::1'))) {
   process.exit(2)
 }
 
-// Its own process group, so stopping it also stops the node process npx starts for astro.
+// Its own process group, so stopping it also stops the node process pnpm starts for astro.
 // Astro 7 moves `preview` to the background when it detects an AI coding agent: the command exits at once and the
 // server outlives this script. `ASTRO_PREVIEW_BACKGROUND` is the variable Astro sets for that background process, so
 // setting it keeps the server in the foreground, where this script can wait on it and stop it.
-const preview = spawn('npx', ['astro', 'preview', '--port', String(port)], {
+const preview = spawn('pnpm', ['exec', 'astro', 'preview', '--port', String(port)], {
   cwd: join(root, 'apps/ui'),
   stdio: 'ignore',
   detached: true,
@@ -92,11 +92,11 @@ async function reachable(url) {
 
 async function waitForServer() {
   for (let attempt = 0; attempt < 60; attempt++) {
-    if (previewExited) throw new Error('astro preview exited before it answered; run npm run ui:build first')
+    if (previewExited) throw new Error('astro preview exited before it answered; run pnpm run ui:build first')
     if (await reachable(`${base}/`)) return
     await new Promise((done) => setTimeout(done, 500))
   }
-  throw new Error(`astro preview did not answer on ${base}; run npm run ui:build first`)
+  throw new Error(`astro preview did not answer on ${base}; run pnpm run ui:build first`)
 }
 
 await waitForServer()

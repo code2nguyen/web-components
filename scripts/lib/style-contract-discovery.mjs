@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { workspacePatterns } from '@c2n/config/workspace.js'
 
 function readJson(path, description) {
   try {
@@ -21,9 +22,7 @@ function workspaceDirectories(repoRoot, pattern) {
 
 /** Discover exact published element identities from the workspace declaration and checked-in manifests. */
 export function discoverPublishableContracts(repoRoot) {
-  const rootPackage = readJson(join(repoRoot, 'package.json'), 'root package metadata')
-  const workspaces = Array.isArray(rootPackage.workspaces) ? rootPackage.workspaces : rootPackage.workspaces?.packages
-  if (!Array.isArray(workspaces)) throw new Error('root package metadata: missing workspaces array')
+  const workspaces = workspacePatterns(repoRoot)
 
   const packageDirectories = new Set()
   for (const workspace of workspaces) {

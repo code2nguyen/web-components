@@ -64,7 +64,7 @@ const graph = {
   coreImports: { 'dom-helper': [], 'lit-helper': [], 'element-helper': [], 'contexts/field': ['dom-helper'], 'pan-zoom': [] },
 }
 const withUmbrella = [...suites, 'packages/umbrella/test']
-const noManifestImpact = { 'package.json': false, 'package-lock.json': false, 'packages/core/package.json': false }
+const noManifestImpact = { 'package.json': false, 'pnpm-lock.yaml': false, 'packages/core/package.json': false }
 
 test('with an import graph, a core module runs every package loading it, directly or through another package', () => {
   // Select loads Button, which imports lit-helper.
@@ -104,7 +104,7 @@ test('a component change runs its own suite, not those of the components built o
 })
 
 test('root manifests run everything unless the change cannot reach the suites', () => {
-  const files = ['package.json', 'package-lock.json', 'packages/core/package.json']
+  const files = ['package.json', 'pnpm-lock.yaml', 'packages/core/package.json']
   for (const file of files) {
     assert.equal(hasGlobalTestImpact([file], { graph }), true)
     assert.equal(hasGlobalTestImpact([file], { graph, manifestImpact: { [file]: true } }), true)
@@ -119,16 +119,49 @@ test('rootManifestImpact: the wireit build list, new lockfile packages, workspac
   assert.equal(rootManifestImpact('package.json', root(), root({ wireit: { build: { dependencies: ['a'], files: ['x'] } } })), true)
   assert.equal(rootManifestImpact('package.json', undefined, root()), true)
 
-  const lock = (packages) => JSON.stringify({ lockfileVersion: 3, packages: { '': { name: 'root' }, 'node_modules/lit': { version: '3.0.0' }, ...packages } })
-  const added = {
-    'packages/components/new': { name: '@c2n/new' },
-    'node_modules/@c2n/new': { resolved: 'packages/components/new', link: true },
-    'node_modules/d3-geo': { version: '3.1.0' },
-  }
-  assert.equal(rootManifestImpact('package-lock.json', lock(), lock(added)), false)
-  assert.equal(rootManifestImpact('package-lock.json', lock(), lock({ 'node_modules/lit': { version: '3.1.0' } })), true)
-  assert.equal(rootManifestImpact('package-lock.json', lock({ 'node_modules/old': { version: '1.0.0' } }), lock()), true)
-  assert.equal(rootManifestImpact('package-lock.json', lock(), '{'), true)
+  // A pnpm-lock.yaml in miniature: the root importer, one `packages` and one `snapshots` entry per resolved package.
+  const lock = ({ snapshots = { 'lit@3.0.0': [] }, importers = [], overrides = '', rootLit = '3.0.0', rootExtra = [] } = {}) =>
+    [
+      "lockfileVersion: '9.0'",
+      '',
+      ...(overrides ? ['overrides:', overrides, ''] : []),
+      'importers:',
+      '  .:',
+      '    devDependencies:',
+      '      lit:',
+      '        specifier: ^3.0.0',
+      `        version: ${rootLit}`,
+      ...rootExtra,
+      ...importers,
+      '',
+      'packages:',
+      ...Object.keys(snapshots).flatMap((key) => [`  ${key}:`, `    resolution: {integrity: sha512-${key}}`, '']),
+      'snapshots:',
+      ...Object.entries(snapshots).flatMap(([key, lines]) => [`  ${key}:${lines.length ? '' : ' {}'}`, ...lines, '']),
+    ].join('\n')
+  const newComponent = [
+    '  packages/components/new:',
+    '    dependencies:',
+    "      '@c2n/core':",
+    '        specifier: workspace:*',
+    '        version: link:../../core',
+  ]
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), lock({ snapshots: { 'lit@3.0.0': [], 'd3-geo@3.1.0': [] }, importers: newComponent })), false)
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), lock({ snapshots: { 'lit@3.1.0': [] } })), true)
+  // An upgrade can add the new version beside the old one, which another package still uses: the importer moved.
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), lock({ snapshots: { 'lit@3.0.0': [], 'lit@3.1.0': [] }, rootLit: '3.1.0' })), true)
+  // A new component's package added to an existing importer (apps/ui, the umbrella) is bookkeeping.
+  const newLink = ["      '@c2n/new':", '        specifier: workspace:*', '        version: link:packages/components/new']
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), lock({ rootExtra: newLink, importers: newComponent })), false)
+  // A dependency an importer had is gone.
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock({ rootExtra: newLink }), lock()), true)
+  assert.equal(
+    rootManifestImpact('pnpm-lock.yaml', lock(), lock({ snapshots: { 'lit@3.0.0': ['    dependencies:', "      '@lit/reactive-element': 2.1.0"] } })),
+    true,
+  )
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock({ snapshots: { 'lit@3.0.0': [], 'old@1.0.0': [] } }), lock()), true)
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), lock({ overrides: '  lit: 3.0.0' })), true)
+  assert.equal(rootManifestImpact('pnpm-lock.yaml', lock(), '{'), true)
 
   const core = (exports, extra) => JSON.stringify({ name: '@c2n/core', exports, ...extra })
   const domHelper = { './dom-helper.js': { types: './dist/dom-helper.d.ts', default: './dist/dom-helper.js' } }

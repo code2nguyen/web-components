@@ -65,16 +65,21 @@
     }
   },
   "dependencies": {
-    "@c2n/avatar": "*",
-    "@c2n/core": "*",
-    "@c2n/popconfirm": "*",
-    "@c2n/reaction-bar": "*",
-    "@c2n/relative-time": "*",
-    "@c2n/textarea": "*",
+    "@c2n/avatar": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/popconfirm": "workspace:*",
+    "@c2n/reaction-bar": "workspace:*",
+    "@c2n/relative-time": "workspace:*",
+    "@c2n/textarea": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

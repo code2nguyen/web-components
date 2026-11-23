@@ -32,7 +32,7 @@ let cachedRegistry
 /** The MCP registry (git-ignored, built by `build:registry`), read on first use so importing this module needs none. */
 function registry() {
   if (!cachedRegistry) {
-    if (!existsSync(registryFile)) throw new Error('No MCP registry: run `npm run build:registry -w packages/tools/mcp` first.')
+    if (!existsSync(registryFile)) throw new Error('No MCP registry: run `pnpm --dir packages/tools/mcp run build:registry` first.')
     cachedRegistry = JSON.parse(readFileSync(registryFile, 'utf8'))
   }
   return cachedRegistry
@@ -403,7 +403,7 @@ async function run(target, { logArg, since, until, pid: pidArg }) {
   const files = sourceFiles(buildDir).map((file) => ({ name: relative(buildDir, file).split(sep).join('/'), source: readFileSync(file, 'utf8') }))
   const result = analyse({ rows: reportRows(frontMatter(markdown).body), calls, files })
   const unformatted = withSection(markdown, section(result, { log: calls.length ? relative(root, logFile) : null }))
-  // Formatted as `npm run format:check` expects, so a fresh section is not a formatting failure.
+  // Formatted as `pnpm run format:check` expects, so a fresh section is not a formatting failure.
   const next = await prettier.format(unformatted, { ...(await prettier.resolveConfig(reportFile)), filepath: reportFile })
   return { reportFile, markdown: raw, next, result, logFile, newLog }
 }

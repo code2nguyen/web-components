@@ -20,7 +20,7 @@ The lab runs about once a week, in one session, when there is budget for it. Ask
 more detail, do this, in order, and stop when the session's budget is spent; whatever is left waits for next week.
 
 1. `git pull` the default branch into a new branch `lab/<yyyy-mm-dd>`; build what the targets serve
-   (`npm run build -w packages/umbrella`, plus `npm run build -w apps/examples/support-inbox-vue`).
+   (`pnpm --dir packages/umbrella run build`, plus `pnpm --dir apps/examples/support-inbox-vue run build`).
 2. **Regressions first:** `node lab/scripts/lab.mjs replay`. It reruns every target in `lab/targets/` twice, writes a
    run record per target to `lab/runs/`, and compares each with the target's previous full run: findings that
    appeared, findings that are gone, journeys now passing or failing. A new reproducible finding is triaged before
@@ -75,7 +75,7 @@ more detail, do this, in order, and stop when the session's budget is spent; wha
 ## 1. Run the scripted journeys
 
 ```bash
-npm run build -w apps/examples/<app>          # wireit-cached; builds the components the app uses
+pnpm --dir apps/examples/<app> run build          # wireit-cached; builds the components the app uses
 node lab/scripts/lab.mjs run <target> --repeat 2
 ```
 

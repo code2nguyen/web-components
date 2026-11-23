@@ -40,6 +40,6 @@ The `weight` attribute accepts `regular`, `thin`, `light`, `bold`, `fill`, or `d
 The components under `src/icons/` are generated and committed. After updating `@phosphor-icons/core`, run:
 
 ```bash
-npm run generate -w packages/icons/phosphor-icons
-npm run build -w packages/icons/phosphor-icons
+pnpm --dir packages/icons/phosphor-icons run generate
+pnpm --dir packages/icons/phosphor-icons run build
 ```

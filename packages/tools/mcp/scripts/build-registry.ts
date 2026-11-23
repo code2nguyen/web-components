@@ -10,7 +10,7 @@
  * - `@c2n/theme` `dist/tokens.json` (tokens + variable → token mapping)
  * - the skill's reference guides (embedded so `npx @c2n/mcp` works offline)
  *
- * Run with `npm run build:registry -w packages/tools/mcp` (Node 24 type stripping: erasable TypeScript only).
+ * Run with `pnpm --dir packages/tools/mcp run build:registry` (Node 24 type stripping: erasable TypeScript only).
  * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
  * remain deterministic.
  */

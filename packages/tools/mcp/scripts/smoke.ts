@@ -1,4 +1,4 @@
-/** Spawns the server over stdio and exercises every tool and resource. `npm run smoke -w packages/tools/mcp`. */
+/** Spawns the server over stdio and exercises every tool and resource. `pnpm --dir packages/tools/mcp run smoke`. */
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'

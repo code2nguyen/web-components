@@ -30,16 +30,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
       - uses: google/wireit@setup-github-actions-caching/v2
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
       # The example's build depends on the umbrella build, which builds every component the lab apps import.
       - name: Build the components and the example app
-        run: npm run build -w apps/examples/support-inbox-vue
-      - run: npx playwright install --with-deps chromium
+        run: pnpm --dir apps/examples/support-inbox-vue run build
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Replay the lab
         env:
           TARGETS: ${{ inputs.targets }}

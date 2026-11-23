@@ -55,8 +55,8 @@ spec ──build (agent + c2n MCP)──▶ lab/apps/<id>/<direction>/ ──▶
 short, the shortfalls filed under each component, and coverage (capabilities no spec requires, components no report
 names: what to write the next spec about). `--check` exits 1 on an unknown tag, a missing report row or a bad outcome.
 
-A lab app is plain files served by Vite from the repository root (`npx vite lab/apps/<id>/<direction>`), importing
-`@c2n/components/*` like any consumer: build the umbrella first (`npm run build -w packages/umbrella`, or any example
+A lab app is plain files served by Vite from the repository root (`pnpm exec vite lab/apps/<id>/<direction>`), importing
+`@c2n/components/*` like any consumer: build the umbrella first (`pnpm --dir packages/umbrella run build`, or any example
 app's build). Pick a port outside the browsers' unsafe-port list (4190 is on it).
 
 ## AI readiness
@@ -129,7 +129,7 @@ merged lab PR shows up with the next deploy. A malformed run record fails the si
 ## Run it
 
 ```bash
-npm run build -w apps/examples/support-inbox-vue       # the app and the components it uses (wireit-cached)
+pnpm --dir apps/examples/support-inbox-vue run build       # the app and the components it uses (wireit-cached)
 node lab/scripts/lab.mjs list                          # targets, journeys, personas
 node lab/scripts/lab.mjs run support-inbox-vue         # every persona × every journey
 node lab/scripts/lab.mjs run support-inbox-vue --personas keyboard --journeys filter --repeat 3

@@ -62,13 +62,18 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
-    "@c2n/overlay": "*",
-    "@c2n/time-input": "*",
+    "@c2n/core": "workspace:*",
+    "@c2n/overlay": "workspace:*",
+    "@c2n/time-input": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

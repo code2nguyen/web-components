@@ -30,20 +30,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
       - uses: google/wireit@setup-github-actions-caching/v2
-      - run: npm ci
-      - run: npm run ui:build
-      - run: npm run build:tools
-      - run: npx playwright install --with-deps chromium
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ui:build
+      - run: pnpm run build:tools
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Audit the gallery
         env:
           COMPONENTS: ${{ inputs.components }}
         # Unquoted on purpose: the input is a space-separated list of ids.
-        run: npm run gallery:audit -- --shots-dir test-results/gallery-audit/shots $COMPONENTS
+        run: pnpm run gallery:audit --shots-dir test-results/gallery-audit/shots $COMPONENTS
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

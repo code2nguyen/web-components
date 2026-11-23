@@ -10,7 +10,7 @@
  *
  * Output is formatted with the repo's prettier config so the committed files pass `format:check`.
  *
- * Run with `npm run generate -w packages/icons/symbols` (Node >= 22.18 / 24: native type stripping, so keep this
+ * Run with `pnpm --dir packages/icons/symbols run generate` (Node >= 22.18 / 24: native type stripping, so keep this
  * file to erasable TypeScript syntax only).
  */
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'

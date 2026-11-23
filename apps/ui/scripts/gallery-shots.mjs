@@ -15,7 +15,7 @@
  * The audit is opt-in (slow: the whole site is built first): `.github/workflows/gallery-audit.yml` runs it from the
  * Actions tab or on a PR labelled `gallery-audit`, and `.claude/skills/gallery-audit` tells an agent how to run it.
  *
- * Runs after `npm run ui:build` (it serves `apps/ui/dist/`) and `npm run build:tools` (the registry lists each
+ * Runs after `pnpm run ui:build` (it serves `apps/ui/dist/`) and `pnpm run build:tools` (the registry lists each
  * component's cards, in page order, with their slugs).
  *
  *   node apps/ui/scripts/gallery-shots.mjs [--audit] [--no-shots] [--shots-dir <dir>] [component-id…]
@@ -44,8 +44,8 @@ const shotsDirIndex = args.indexOf('--shots-dir')
 const shotsDir = shotsDirIndex >= 0 ? resolve(args[shotsDirIndex + 1]) : join(dist, 'gallery-shots')
 const only = new Set(args.filter((arg, index) => !arg.startsWith('--') && args[index - 1] !== '--shots-dir'))
 
-if (!existsSync(join(dist, 'index.html'))) throw new Error('apps/ui/dist is missing: run `npm run ui:build` first')
-if (!existsSync(registryFile)) throw new Error('The MCP registry is missing: run `npm run build:tools` first')
+if (!existsSync(join(dist, 'index.html'))) throw new Error('apps/ui/dist is missing: run `pnpm run ui:build` first')
+if (!existsSync(registryFile)) throw new Error('The MCP registry is missing: run `pnpm run build:tools` first')
 
 const registry = JSON.parse(readFileSync(registryFile, 'utf8'))
 const galleries = Object.values(registry.components)

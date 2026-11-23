@@ -19,5 +19,8 @@
   "dependencies": {
     "typescript": "6.0.3",
     "plop": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
   }
 }

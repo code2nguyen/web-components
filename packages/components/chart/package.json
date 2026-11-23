@@ -250,7 +250,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "*",
+    "@c2n/core": "workspace:*",
     "@types/geojson": "7946.0.16",
     "@types/topojson-specification": "1.0.5",
     "@upsetjs/venn.js": "2.0.0",
@@ -259,12 +259,17 @@
     "topojson-client": "3.1.0"
   },
   "devDependencies": {
-    "@c2n/config": "*",
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
     "@types/d3-geo": "3.1.0",
+    "@types/node": "catalog:",
     "@types/topojson-client": "3.1.5",
     "echarts": "^6.1.0",
+    "typescript": "catalog:",
     "uplot": "^1.6.32",
     "us-atlas": "3.0.1",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:",
     "world-atlas": "2.0.2"
   },
   "customElements": "custom-elements.json",

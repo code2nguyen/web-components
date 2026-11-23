@@ -4,50 +4,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own **private** workspace package (`@c2n/<name>`, `"private": true`, sibling `@c2n` dependencies as `"*"`); the one published component package is `@c2n/components` (`packages/umbrella`), which bundles them all. The public packages (`@c2n/components`, `@c2n/core`, `@c2n/theme`, the icon sets, the tools and `@c2n/angular`) are versioned together by Lerna at the root `lerna.json` version. Work-in-progress packages are marked `"c2n": { "status": "wip" }` — `private` no longer means WIP, and the discovery scripts read that field. Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`.
+`@c2n/web-components` is a pnpm-workspace monorepo of Lit 3 web components. Each component is its own **private** workspace package (`@c2n/<name>`, `"private": true`, sibling `@c2n` dependencies as `"workspace:*"`); the one published component package is `@c2n/components` (`packages/umbrella`), which bundles them all. The public packages (`@c2n/components`, `@c2n/core`, `@c2n/theme`, the icon sets, the tools and `@c2n/angular`) are versioned together by Lerna at the root `lerna.json` version. Work-in-progress packages are marked `"c2n": { "status": "wip" }` — `private` no longer means WIP, and the discovery scripts read that field. Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`.
 
 ## Commands
 
 ```bash
-npm install                       # root install wires all workspaces
+pnpm install                      # root install wires all workspaces (pnpm version: `packageManager` in package.json)
 
-npm test                         # changed component browser tests in Chromium
-npm run test:all                  # all components in Chromium, Firefox and WebKit
-npm run test:type-check           # type-check test infrastructure and scenarios
+pnpm test                         # changed component browser tests in Chromium
+pnpm run test:all                  # all components in Chromium, Firefox and WebKit
+pnpm run test:type-check           # type-check test infrastructure and scenarios
 
-npm run build                     # wireit: type-check + vite build for every component package
-npm run build -w packages/components/checkbox  # build one package
-npm run dev -w packages/components/checkbox    # vite dev server against that package's index.html harness
-npm run type-check -w packages/components/checkbox
+pnpm run build                     # wireit: type-check + vite build for every component package
+pnpm --dir packages/components/checkbox run build  # build one package
+pnpm --dir packages/components/checkbox run dev    # vite dev server against that package's index.html harness
+pnpm --dir packages/components/checkbox run type-check
 
-npm run ui                        # build all components, then astro dev (apps/ui)
-npm run ui:dev                    # astro dev only (uses previously built dist/)
-npm run ui:build                  # build components + astro build
+pnpm run ui                        # build all components, then astro dev (apps/ui)
+pnpm run ui:dev                    # astro dev only (uses previously built dist/)
+pnpm run ui:build                  # build components + astro build
 
-npm run lint                      # eslint (wireit-cached)
-npm run lint:fix
-npm run format:check              # prettier
-npm run format:fix
-npm run fix                       # lint:fix + format:fix
-npm run check:pr                  # CI's gates in one run, one summary table; component suites in Chromium only (-- --fast: skip builds and browser suites)
+pnpm run lint                      # eslint (wireit-cached)
+pnpm run lint:fix
+pnpm run format:check              # prettier
+pnpm run format:fix
+pnpm run fix                       # lint:fix + format:fix
+pnpm run check:pr                  # CI's gates in one run, one summary table; component suites in Chromium only (--fast: skip builds and browser suites)
 
-npm run build -w packages/tools/theme     # regenerate @c2n/theme (tokens.css, base.css, tokens.json, report.json) from the component manifests
-npm run build:tools               # after the root build: @c2n/mcp registry (packages/tools/mcp/data/registry.json) + @c2n/skill catalog/version sync
-npm run mcp:smoke                 # spawn the MCP server over stdio and exercise every tool
-npm run mcp:readiness             # AI readiness: components changed since the last run vs their last score (-- --full for all) → packages/tools/mcp/readiness/ (committed); skill: ai-readiness
-npm run mcp:inspect               # MCP Inspector against packages/tools/mcp/src/cli.ts
-npm run generate                  # scaffold a new component (plop)
-npm run changelog                 # regenerate CHANGELOG.md + apps/ui/src/data/changelog.json from git history (--next <version> files unreleased commits under it)
-npm run clean                     # nuke node_modules, dist, types, custom-elements.json, package-lock
+pnpm --dir packages/tools/theme run build     # regenerate @c2n/theme (tokens.css, base.css, tokens.json, report.json) from the component manifests
+pnpm run build:tools               # after the root build: @c2n/mcp registry (packages/tools/mcp/data/registry.json) + @c2n/skill catalog/version sync
+pnpm run mcp:smoke                 # spawn the MCP server over stdio and exercise every tool
+pnpm run mcp:readiness             # AI readiness: components changed since the last run vs their last score (--full for all) → packages/tools/mcp/readiness/ (committed); skill: ai-readiness
+pnpm run mcp:inspect               # MCP Inspector against packages/tools/mcp/src/cli.ts
+pnpm run generate                  # scaffold a new component (plop)
+pnpm run changelog                 # regenerate CHANGELOG.md + apps/ui/src/data/changelog.json from git history (--next <version> files unreleased commits under it)
+pnpm run clean                     # nuke node_modules, dist, types, custom-elements.json, pnpm-lock.yaml
 ```
 
 Release, `lerna version` and the changelog generator: `docs/agents/release-and-changelog.md`. Write commit subjects as Conventional Commits with the package as scope (`feat(table): …`) — that subject is the changelog line.
 
-Claude Code on the web: `.claude/hooks/session-start.sh` (registered in `.claude/settings.json`, remote sessions only) runs `npm install` and `build:registry` for `@c2n/mcp`, so the `c2n` server in `.mcp.json` can start in a fresh clone (it needs `node_modules` and the ignored `data/registry.json`), and exports `CHROMIUM_PATH` for the container's preinstalled Chromium, which `playwright.config.ts` launches when set.
+Claude Code on the web: `.claude/hooks/session-start.sh` (registered in `.claude/settings.json`, remote sessions only) runs `pnpm install` and `build:registry` for `@c2n/mcp`, so the `c2n` server in `.mcp.json` can start in a fresh clone (it needs `node_modules` and the ignored `data/registry.json`), and exports `CHROMIUM_PATH` for the container's preinstalled Chromium, which `playwright.config.ts` launches when set.
 
 After every file Claude Code writes, `.claude/hooks/post-edit.sh` (a `PostToolUse` hook, local and remote) formats it with prettier and checks its c2 markup with `c2n-mcp validate --hook`, handing its errors back to the agent under `apps/ui/src/`, `apps/examples/` and `lab/apps/` (warnings stay quiet: those trees carry accepted ones).
 
-CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run build:tools`, `npm run mcp:smoke`, a `git diff --exit-code` freshness check on the generated skill catalog / plugin files, the slot-styling audit (`scripts/data/slot-styling-audit.json`) and `lab/GAPS.md` (both also checked on pull requests), and deploys `apps/ui/dist/` to GitHub Pages. `npm run check:agent-docs` (paths named in the guidance files exist, every `AGENTS.md` links its `CLAUDE.md`, one copy of each skill) `npm run check:reachability` (every component reachable through MCP and `/llms.txt`) and `npm run check:app-markup` (no `validate` errors in `apps/ui/src`, `apps/examples` and `lab/apps`) run there and on pull requests. On pull requests, `npm run check:component-template` also renders the generator's component template and checks it against the skeleton in `packages/components/CLAUDE.md`. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix), and `pre-push` refuses a branch that still has `fixup!` commits. On pull requests, `component-tests.yml` also runs `node lab/scripts/readiness.mjs --check` (the lab reports' generated AI readiness sections: a component change that breaks a lab build's markup, or a validator change, makes them stale; regenerate with `--all`).
+CI (`.github/workflows/deploy.yml`, Node 24) runs `pnpm install --frozen-lockfile`, `pnpm run lint`, `pnpm run format:check`, `pnpm run ui:build`, `pnpm run build:tools`, `pnpm run mcp:smoke`, a `git diff --exit-code` freshness check on the generated skill catalog / plugin files, the slot-styling audit (`scripts/data/slot-styling-audit.json`) and `lab/GAPS.md` (both also checked on pull requests), and deploys `apps/ui/dist/` to GitHub Pages. `pnpm run check:agent-docs` (paths named in the guidance files exist, every `AGENTS.md` links its `CLAUDE.md`, one copy of each skill) `pnpm run check:reachability` (every component reachable through MCP and `/llms.txt`) and `pnpm run check:app-markup` (no `validate` errors in `apps/ui/src`, `apps/examples` and `lab/apps`) run there and on pull requests. On pull requests, `pnpm run check:component-template` also renders the generator's component template and checks it against the skeleton in `packages/components/CLAUDE.md`. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix), and `pre-push` refuses a branch that still has `fixup!` commits. On pull requests, `component-tests.yml` also runs `node lab/scripts/readiness.mjs --check` (the lab reports' generated AI readiness sections: a component change that breaks a lab build's markup, or a validator change, makes them stale; regenerate with `--all`).
 
 ## Where the rest lives
 
@@ -69,7 +69,7 @@ A `CLAUDE.md` in a subdirectory loads automatically once a session reads or edit
 | `docs/agents/component-foundation.md`      | Before designing a component or adding a feature: the six foundation rules in full, their scope, companion-element variants                                                                                                                                                 |
 | `docs/agents/adding-a-component.md`        | Scaffolding a component and making it reachable through MCP and `/llms.txt` (what `check:reachability` enforces)                                                                                                                                                            |
 | `docs/agents/removing-a-component.md`      | Removing a component package: wiring, generated files, exception lists, the lockfile leftover                                                                                                                                                                               |
-| `docs/agents/pinned-dependencies.md`       | Upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`: the `@lit-labs/ssr` override and the Linux native binaries in the lockfile                                                                                                                                         |
+| `docs/agents/pinned-dependencies.md`       | Upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`: the `@lit-labs/ssr` override and the install-script allowlist                                                                                                                                                      |
 | `docs/agents/release-and-changelog.md`     | Release workflow, `lerna version`, changelog generation                                                                                                                                                                                                                     |
 | `docs/planning/`                           | Roadmaps, candidate research and action plans: intent and history, not current rules. Open only for planning (what to build next, a missing component); `docs/planning/README.md` says which are maintained                                                                 |
 
@@ -78,12 +78,12 @@ A `CLAUDE.md` in a subdirectory loads automatically once a session reads or edit
 - `packages/components/*` — the component packages (private workspaces, `@c2n/<name>`).
 - `packages/icons/*` — icon-set packages (`@c2n/feather-icons`, `@c2n/phosphor-icons`, `@c2n/symbols`, `@c2n/task-icons`).
 - `packages/umbrella` — published `@c2n/components`, which bundles every component. User-facing docs and the docs site import `@c2n/components/<name>`, never a workspace package.
-- `packages/tools/mcp` (`@c2n/mcp`), `packages/tools/skill` (`@c2n/skill`), `packages/tools/theme` (`@c2n/theme`), `packages/tools/framework-types` (`@c2n/framework-types`) — published tooling, built by `npm run build:tools`, not the root `build`.
+- `packages/tools/mcp` (`@c2n/mcp`), `packages/tools/skill` (`@c2n/skill`), `packages/tools/theme` (`@c2n/theme`), `packages/tools/framework-types` (`@c2n/framework-types`) — published tooling, built by `pnpm run build:tools`, not the root `build`.
 - `packages/adapters/*` — framework adapters (`@c2n/angular`).
 - `packages/tools/config` — private (`type: module`); holds the shared `tsconfig.lib.json`, `tsconfig.node.json`, `eslint.config.js`, and pins the toolchain (typescript, vite, eslint, typescript-eslint, lit-analyzer). Every package lists it as a devDependency. ESLint uses flat config: the root `eslint.config.js` just re-exports `@c2n/config/eslint.config.js` (resolved by package name, so the move did not touch it), and `eslint .` lints the whole monorepo (ignores live in the config, not in CLI flags). Node globals are enabled for `**/*.config.*`, `scripts/**` and any package-local `**/scripts/**` (e.g. the icon generators).
 - `packages/tools/sass` — shared SCSS: `css-variable.scss` (the theming engine), `variables.scss`, `animation.scss`.
 - `packages/tools/playground` — Vite sandbox app with an older, unrelated `json-form` experiment (a `json-form` element, not `c2-json-form`); no build script.
-- `packages/core` — **is itself a package** (`@c2n/core`), not a directory of packages: shared TS helpers (`dom-helper`, `css-helper`, `lit-helper`, controllers). Plain `tsc` build, subpath exports only (`@c2n/core/dom-helper.js`) — no barrel index. It is listed in `workspaces` as the bare path `packages/core`, unlike the `components/*` and `tools/*` globs.
+- `packages/core` — **is itself a package** (`@c2n/core`), not a directory of packages: shared TS helpers (`dom-helper`, `css-helper`, `lit-helper`, controllers). Plain `tsc` build, subpath exports only (`@c2n/core/dom-helper.js`) — no barrel index. It is listed in `pnpm-workspace.yaml` as the bare path `packages/core`, unlike the `components/*` and `tools/*` globs.
 - `apps/ui/` — the Astro docs site (`@c2n/ui`); anything app-level belongs under `apps/`, not `packages/`.
 - `apps/examples/*` — complete example apps per framework, embedded in the docs site under `/demo/<id>/`.
 - `lab/` — the component lab (not a workspace package).
@@ -93,13 +93,15 @@ A `CLAUDE.md` in a subdirectory loads automatically once a session reads or edit
 
 ## Build orchestration
 
-Wireit drives everything. The root `wireit.examples:build` group is the equivalent explicit list for `apps/examples/*`, and `ui:build` depends on both it and `build`, so `npm run ui:build` (what CI runs) still builds the whole site. The root `package.json` `wireit.build.dependencies` is the **explicit list** of every buildable package — a new package is not built until it is added there (the plop generator appends it for you). Per-package, `build` depends on `type-check`, which depends on `../../core:build` (so `@c2n/core` types are always fresh first). A package that imports a sibling component must list that sibling's `:build` there too (`../list:build`), or a clean build type-checks it before the sibling's declarations exist. Component `vite.config.ts` files import the CEM plugin as `../../../scripts/cem-plugin-customize/index`.
+Wireit drives everything. The root `wireit.examples:build` group is the equivalent explicit list for `apps/examples/*`, and `ui:build` depends on both it and `build`, so `pnpm run ui:build` (what CI runs) still builds the whole site. The root `package.json` `wireit.build.dependencies` is the **explicit list** of every buildable package — a new package is not built until it is added there (the plop generator appends it for you). Per-package, `build` depends on `type-check`, which depends on `../../core:build` (so `@c2n/core` types are always fresh first). A package that imports a sibling component must list that sibling's `:build` there too (`../list:build`), or a clean build type-checks it before the sibling's declarations exist. Component `vite.config.ts` files import the CEM plugin as `../../../scripts/cem-plugin-customize/index`.
+
+pnpm's `node_modules` is strict: a package resolves only what its own `package.json` declares, and only its own dependencies' binaries are on its scripts' `PATH`. So every package that runs `tsc` or `vite`, imports `vite-plugin-cem` or `@use`s `@c2n/sass` declares them (the toolchain as `"catalog:"`, pinned once in `pnpm-workspace.yaml`; published packages write the version out, because `lerna publish` does not rewrite `catalog:`), and every `@c2n/*` dependency is `"workspace:*"`. Root-level scripts, `tests/` and `lab/` resolve from the root `package.json`. A script that needs every workspace package lists them with `workspacePackages()` from `@c2n/config/workspace.js`, not by reading `node_modules/@c2n`.
 
 Vite lib config per package: single ES output, `minify: false`, and `external: /^lit|@c2n/` — Lit and sibling `@c2n/*` packages are never bundled into a component. Keep cross-package dependencies minimal; import through the published subpath (`@c2n/core/dom-helper.js`), not relative paths across packages.
 
 ## Pinned dependencies
 
-The root `package.json` pins `@lit-labs/ssr` to 3.2.2 through `overrides` (for `@astrojs/lit`) and declares nine Linux native binaries as `optionalDependencies` so CI's `npm ci` works from a lockfile written on macOS. Both must move in step with their parents: **read `docs/agents/pinned-dependencies.md` before upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`.**
+`pnpm-workspace.yaml` pins `@lit-labs/ssr` to 3.2.2 through `overrides` (for `@astrojs/lit`), and lists the dependencies whose install scripts pnpm may run (`onlyBuiltDependencies`). **Read `docs/agents/pinned-dependencies.md` before upgrading Vite, Astro, esbuild, sharp or `@astrojs/lit`.**
 
 ## Component foundation
 
@@ -134,8 +136,8 @@ Pull requests target `develop`. Before opening one, review the branch's changes 
    **Then review again: one round is not enough.** Fixes are new, unreviewed code, and a second pass routinely finds bugs the fixes introduced (on the AI readiness lab work, pass 2 found three `important` bugs in pass 1's fixes). Repeat review → fix until a pass reports no `important` finding. Do not wait for an empty list: the reviewer always returns a few nits, so past that point fix the cheap nits and name the rest, with the reason, in the pull request. Commit each fix as a fix-up of the commit it corrects (`git commit --fixup=<sha>`), so review rounds do not become changelog lines; step 5 squashes them before the push.
 2. Run `/security-review` on the branch and handle its findings the same way.
 3. When the branch changes a component, run the `modern-web-review` skill: `node .claude/skills/modern-web-review/scripts/scan.mjs` must pass (fix each error or justify it with a `modern-web-ignore` comment), then review the diff against its old → new pattern table and the guides for what the component does. Handle its findings the same way. Then have the `component-reviewer` subagent (`.claude/agents/component-reviewer.md`; Codex: follow that file as a checklist) review the diff against the foundation rules and component conventions, and handle its findings the same way.
-4. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `npm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 8 of the `new-component` skill describes. Fix what it shows.
-5. Run `npm run check:pr` (CI's gates in one run, one table, logs in `.check-pr/`; it runs the changed component suites in Chromium only, so run `npm run test:all` too when a component's behaviour changed), then **squash every `fixup!` commit into the commit it corrects before pushing**: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/develop` (the editor override makes it non-interactive), and check that `git log origin/develop..` shows no `fixup!` subject. A branch already pushed is squashed the same way and pushed with `--force-with-lease`. The husky `pre-push` hook refuses a push that still carries a `fixup!` commit. Then open the pull request. Its description lists what each review found (code, security, modern web), what the screenshot review caught, and what was done about it.
+4. When the branch changes a component (new or updated) or its docs, review it in the docs app by screenshot: `pnpm run ui:build`, then `node .claude/skills/new-component/scripts/doc-screenshots.mjs <id> [--press "<button name>"]…`, and look at every image (both themes, every gallery card, interactive states, `aria.txt`) as step 8 of the `new-component` skill describes. Fix what it shows.
+5. Run `pnpm run check:pr` (CI's gates in one run, one table, logs in `.check-pr/`; it runs the changed component suites in Chromium only, so run `pnpm run test:all` too when a component's behaviour changed), then **squash every `fixup!` commit into the commit it corrects before pushing**: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/develop` (the editor override makes it non-interactive), and check that `git log origin/develop..` shows no `fixup!` subject. A branch already pushed is squashed the same way and pushed with `--force-with-lease`. The husky `pre-push` hook refuses a push that still carries a `fixup!` commit. Then open the pull request. Its description lists what each review found (code, security, modern web), what the screenshot review caught, and what was done about it.
 
 Do not open a pull request while any review still has an unanswered finding.
 
@@ -144,7 +146,7 @@ Do not open a pull request while any review still has an unanswered finding.
 For `/code-review`, `/security-review` and human reviewers alike. Apps we do not see depend on `@c2n/components`, `@c2n/mcp` and `@c2n/skill`, so **a change that breaks an app silently is the worst bug there is** (a public API removed, a hydration mismatch under SSR, an element that no longer registers): rank findings by that. Report each with a concrete failure — the markup, framework or state that leads to it and what the user sees. Skip what Prettier or ESLint settle, and skip generated output (the umbrella's `src/` and generated `package.json` keys, the skill catalog, `CHANGELOG.md`/`changelog.json`, `custom-elements.json`, the MCP registry) unless it is stale or hand-edited. The component rules themselves are in `packages/components/CLAUDE.md` and `apps/ui/CLAUDE.md`; on top of them:
 
 - **Public API.** A component's public surface is its tag, attributes and properties, events (with `detail` and bubbling), slots, `--c2-*` variables, `::part()` names, methods and its `@c2n/components/<name>` path. Removing or renaming any of it, or changing a default, is breaking: it needs explicit sign-off and a `!` commit with a `BREAKING CHANGE:` footer. A public change whose `custom-elements.json` was not rebuilt is a finding.
-- **Lifecycle.** No `requestUpdate()` or reactive-property write in `firstUpdated()`, and no slot state that relies only on `slotchange` (`npm run check:lifecycle`). Nothing touches `window`, `document`, `customElements` or layout at module load or in the constructor (it breaks server rendering). What `connectedCallback` adds (listeners, observers, timers, frames), `disconnectedCallback` removes: an element can be moved, removed and re-added.
+- **Lifecycle.** No `requestUpdate()` or reactive-property write in `firstUpdated()`, and no slot state that relies only on `slotchange` (`pnpm run check:lifecycle`). Nothing touches `window`, `document`, `customElements` or layout at module load or in the constructor (it breaks server rendering). What `connectedCallback` adds (listeners, observers, timers, frames), `disconnectedCallback` removes: an element can be moved, removed and re-added.
 - **Packaging.** Lit comes from `lit`, never `lit-html`, `lit-element` or `@lit/reactive-element`. A new runtime dependency ships to every user: question its size, maintenance and licence, and whether it stays external in the umbrella; a raised size budget needs a reason in the PR. Ratchet lists (the dogfooding `KNOWN` list, `apps/ui/gallery-audit.known.json`, `check-reachability.ts`'s `KNOWN`) only shrink.
 - **Security.** Content is untrusted: `unsafeHTML`, `innerHTML` and `unsafeSVG` carry only constants (icons, glyphs) or the highlighter's escaped output (`c2-code-viewer`), never an attribute, slot, paste or data. Editors that parse pasted HTML or markdown (`c2-page-editor`, `c2-notepad`, the code editors) drop `javascript:`/`data:` links, scripts, event handlers and `<style>`. Chart tooltips and labels built as HTML strings escape their data. `@c2n/mcp`'s `validate` and its hook only read the files named; `c2n-skill install` only writes the files it lists, inside the project and its marker blocks, and never runs a downloaded script. Workflows: no `pull_request_target` running PR code, `NPM_TOKEN` only on the release job, actions outside `actions/*` pinned to a SHA.
 - **Browsers.** Judge platform features against the latest two versions of each browser ("Browser support" above). Behaviour in an older browser is not a finding.

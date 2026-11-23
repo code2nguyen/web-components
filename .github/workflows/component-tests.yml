@@ -50,26 +50,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - name: The scaffolded component matches the documented skeleton and conventions
-        run: npm run check:component-template
-      - run: npm run build -w packages/umbrella
-      - run: npm run docs:check
+        run: pnpm run check:component-template
+      - name: Published packages pin the catalog's toolchain versions
+        run: node --test scripts/catalog-pins.test.mjs
+      - run: pnpm --dir packages/umbrella run build
+      - run: pnpm run docs:check
       # A component or validator change that breaks a lab build's markup makes its report's generated section stale:
       # caught here, on the pull request, not after the merge (`node lab/scripts/readiness.mjs --all` regenerates them).
       - name: Lab reports' AI readiness sections are up to date
-        run: npm run build:registry -w packages/tools/mcp && node lab/scripts/readiness.mjs --check
+        run: pnpm --dir packages/tools/mcp run build:registry && node lab/scripts/readiness.mjs --check
       - name: Every component is reachable through MCP and llms.txt
-        run: npm run check:reachability
+        run: pnpm run check:reachability
       - name: c2 markup in the docs site, example apps and lab builds has no errors
-        run: npm run check:app-markup
+        run: pnpm run check:app-markup
       - name: Guidance for coding agents (CLAUDE.md, AGENTS.md, skills) is consistent
-        run: npm run check:agent-docs
+        run: pnpm run check:agent-docs
       - name: Verify generated component manifests are committed
         run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
       # Also in deploy.yml as a backstop; here so a stale file fails the pull request, not the deploy after the merge.
@@ -118,26 +122,28 @@ jobs:
         shard: ${{ fromJSON(needs.plan.outputs.shards) }}
     steps:
       - uses: actions/checkout@v7
+      # pnpm itself, at the version of the root `packageManager` field; setup-node then caches its store.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - uses: actions/download-artifact@v4
         with:
           name: build-output
       - run: tar -xzf build-output.tgz && rm build-output.tgz
-      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
       - if: matrix.shard == 1
-        run: npm run test:type-check
+        run: pnpm run test:type-check
       - name: Style-contract browser diagnostic
         if: matrix.shard == 1
         continue-on-error: true
-        run: npm run test:style-contracts -- --project=${{ matrix.browser }} --output=test-results/style-contracts-${{ matrix.browser }} --reporter=list
+        run: pnpm run test:style-contracts --project=${{ matrix.browser }} --output=test-results/style-contracts-${{ matrix.browser }} --reporter=list
       - name: Configuration-panel diagnostic
         if: matrix.browser == 'chromium' && matrix.shard == 1
         continue-on-error: true
-        run: npx playwright test --config apps/ui/playwright.config.ts apps/ui/test/style-panel.spec.ts --project=chromium --output=apps/ui/test-results/style-panel --reporter=list
+        run: pnpm exec playwright test --config apps/ui/playwright.config.ts apps/ui/test/style-panel.spec.ts --project=chromium --output=apps/ui/test-results/style-panel --reporter=list
       # scripts/style-contract-ci.test.mjs checks this step by name.
       - name: Test changed component packages
         if: needs.plan.outputs.directories != ''
@@ -145,7 +151,7 @@ jobs:
           DIRECTORIES: ${{ needs.plan.outputs.directories }}
           SHARD: ${{ matrix.shard }}/${{ needs.plan.outputs.shard_total }}
         # The directories are word-split on purpose: one argument per suite.
-        run: npx playwright test $DIRECTORIES --project=${{ matrix.browser }} --shard=$SHARD --pass-with-no-tests
+        run: pnpm exec playwright test $DIRECTORIES --project=${{ matrix.browser }} --shard=$SHARD --pass-with-no-tests
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

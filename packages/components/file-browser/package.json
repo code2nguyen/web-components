@@ -69,20 +69,25 @@
     }
   },
   "dependencies": {
-    "@c2n/breadcrumb": "*",
-    "@c2n/button": "*",
-    "@c2n/button-group": "*",
-    "@c2n/core": "*",
-    "@c2n/link-button": "*",
-    "@c2n/menu": "*",
-    "@c2n/search-field": "*",
-    "@c2n/skeleton": "*",
-    "@c2n/status-panel": "*",
-    "@c2n/tree": "*",
+    "@c2n/breadcrumb": "workspace:*",
+    "@c2n/button": "workspace:*",
+    "@c2n/button-group": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/link-button": "workspace:*",
+    "@c2n/menu": "workspace:*",
+    "@c2n/search-field": "workspace:*",
+    "@c2n/skeleton": "workspace:*",
+    "@c2n/status-panel": "workspace:*",
+    "@c2n/tree": "workspace:*",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

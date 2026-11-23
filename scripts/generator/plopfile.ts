@@ -64,12 +64,12 @@ export default function (plop: NodePlopAPI) {
       const actions = [
         register({ registry: 'manifestImports', template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json'" }),
         register({ registry: 'normalizedManifests', template: '    {{ camelCase name }},' }),
-        // Without this the app resolves the package only by workspace hoisting, and `npm run ui:build`
+        // pnpm links only declared dependencies: without this `pnpm run ui:build`
         // fails on a clean install with "failed to resolve import @c2n/<name>/custom-elements.json".
-        register({ registry: 'uiDependencies', key: '@c2n/{{ dashCase name }}', value: '*' }),
-        // `build:tools` writes the same entry when it regenerates the umbrella, but only after the `npm install`
-        // that follows this generator, which left the committed lockfile without it and `npm ci` rejecting it.
-        register({ registry: 'umbrellaDevDependencies', key: '@c2n/{{ dashCase name }}', value: '*' }),
+        register({ registry: 'uiDependencies', key: '@c2n/{{ dashCase name }}', value: 'workspace:*' }),
+        // `build:tools` writes the same entry when it regenerates the umbrella, but only after the `pnpm install`
+        // that follows this generator, which left the committed lockfile without it and `pnpm install --frozen-lockfile` rejecting it.
+        register({ registry: 'umbrellaDevDependencies', key: '@c2n/{{ dashCase name }}', value: 'workspace:*' }),
         // Registers the element for pages that render markup as plain HTML instead of hydrating islands.
         register({ registry: 'componentModules', template: "import '@c2n/components/{{ dashCase name }}'" }),
         // Quoted because a dash-cased id is not a bare identifier; prettier drops the quotes when it can.

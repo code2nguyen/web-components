@@ -44,7 +44,7 @@ if (!existsSync(mock)) {
 }
 if (!existsSync(join(root, 'packages/tools/theme/dist/theme.css'))) {
   console.warn(
-    '[mock-screenshots] packages/tools/theme/dist/theme.css is missing (npm run build -w packages/tools/theme): the tokens fall back to their light literals',
+    '[mock-screenshots] packages/tools/theme/dist/theme.css is missing (pnpm --dir packages/tools/theme run build): the tokens fall back to their light literals',
   )
 }
 
@@ -60,7 +60,7 @@ async function reachable(url) {
   }
 }
 
-// Reuse a running test server (npm run test:serve); otherwise start one and stop it at the end.
+// Reuse a running test server (pnpm run test:serve); otherwise start one and stop it at the end.
 let server
 if (!(await reachable(`${base}/tests/health.html`))) {
   // The Vite binary itself, not npx: killing npx would leave its Vite child holding the port.

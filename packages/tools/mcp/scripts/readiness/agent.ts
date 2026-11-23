@@ -1,10 +1,10 @@
 /**
- * Agent run of the AI readiness benchmark: `npm run readiness:agent -w packages/tools/mcp [-- options]`.
+ * Agent run of the AI readiness benchmark: `pnpm --dir packages/tools/mcp run readiness:agent [options]`.
  *
  * For each requirement of `tasks.json`, starts Claude Code headless (`claude -p`) in an empty directory with the c2n
  * MCP server as its only MCP server and no project instructions, asks it to build the requirement, and grades what it
  * wrote: did it pick an expected component, does `validate_markup` find no error, and does it use the attributes and
- * slots the task needs. Results go to `packages/tools/mcp/readiness/agent.json` (committed), which `npm run readiness` folds into the
+ * slots the task needs. Results go to `packages/tools/mcp/readiness/agent.json` (committed), which `pnpm run readiness` folds into the
  * report.
  *
  * Opt-in and not part of CI: it calls a model (costs money and takes minutes) and its result varies between runs.
@@ -171,7 +171,7 @@ async function main() {
 // Run as a script: paths compared as paths (a URL would percent-encode a space), and a missing registry said out loud.
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (!existsSync(join(packageRoot, 'data/registry.json'))) {
-    console.error('No data/registry.json: run `npm run build:registry -w packages/tools/mcp` first.')
+    console.error('No data/registry.json: run `pnpm --dir packages/tools/mcp run build:registry` first.')
     process.exit(1)
   }
   await main()

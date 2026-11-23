@@ -1,0 +1,45 @@
+packages:
+  - packages/adapters/*
+  - packages/components/*
+  - packages/icons/*
+  - packages/core
+  - packages/umbrella
+  - packages/tools/*
+  - apps/ui
+  - apps/examples/*
+  - scripts/generator
+
+# @astrojs/lit hand-builds the renderInfo that @lit-labs/ssr 3.3+ reads more fields from: see
+# docs/agents/pinned-dependencies.md before removing this.
+overrides:
+  '@lit-labs/ssr': 3.2.2
+
+# pnpm runs no dependency install scripts unless they are listed here.
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - esbuild
+  - lmdb
+  - msgpackr-extract
+  - nx
+  - rs-module-lexer
+ignoredBuiltDependencies:
+  - core-js
+
+# Run `pre<name>`/`post<name>` scripts around `pnpm run <name>`, as npm does (apps/ui and @c2n/mcp rely on them).
+enablePrePostScripts: true
+
+# The shared toolchain, pinned once. A package that runs one of these tools lists it as `"<name>": "catalog:"`:
+# pnpm only puts a package's own dependencies' binaries on its PATH. Published packages (not `private`) write the
+# version out instead: `lerna publish` replaces `workspace:*` but not `catalog:`, which would reach the registry.
+# Bump those with the catalog.
+catalog:
+  '@eslint/js': 10.0.1
+  '@playwright/test': 1.63.0
+  '@types/node': 26.4.1
+  eslint: 10.9.1
+  globals: 17.12.0
+  lit-analyzer: 2.0.3
+  typescript: 6.0.3
+  typescript-eslint: 8.69.0
+  vite: ^8.2.2
+  vite-plugin-cem: ^0.8.5

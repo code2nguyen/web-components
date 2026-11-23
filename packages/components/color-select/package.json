@@ -51,6 +51,7 @@
         "../color-area:build",
         "../text-field:build",
         "../select:build",
+        "../list:build",
         "../overlay:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
@@ -63,17 +64,23 @@
     }
   },
   "dependencies": {
-    "@c2n/color-area": "*",
-    "@c2n/color-slider": "*",
-    "@c2n/core": "*",
-    "@c2n/overlay": "*",
-    "@c2n/select": "*",
-    "@c2n/text-field": "*",
+    "@c2n/color-area": "workspace:*",
+    "@c2n/color-slider": "workspace:*",
+    "@c2n/core": "workspace:*",
+    "@c2n/list": "workspace:*",
+    "@c2n/overlay": "workspace:*",
+    "@c2n/select": "workspace:*",
+    "@c2n/text-field": "workspace:*",
     "@ctrl/tinycolor": "4.2.0",
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "workspace:*",
+    "@c2n/sass": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-cem": "catalog:"
   },
   "customElements": "custom-elements.json"
 }

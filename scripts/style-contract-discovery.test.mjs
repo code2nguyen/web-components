@@ -7,7 +7,7 @@ import { discoverPublishableContracts } from './lib/style-contract-discovery.mjs
 
 function fixture(run) {
   const root = mkdtempSync(join(tmpdir(), 'c2-style-discovery-'))
-  writeFileSync(join(root, 'package.json'), JSON.stringify({ workspaces: ['packages/components/*', 'packages/icons/*'] }))
+  writeFileSync(join(root, 'pnpm-workspace.yaml'), 'packages:\n  - packages/components/*\n  - packages/icons/*\n')
   const addPackage = (directory, name, tags, options = {}) => {
     const path = join(root, directory)
     mkdirSync(path, { recursive: true })

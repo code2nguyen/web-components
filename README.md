@@ -87,11 +87,11 @@ Or install the Claude Code plugin: `/plugin marketplace add code2nguyen/web-comp
 ## Contributing
 
 ```bash
-npm install
-npm run ui                                    # build everything, start the docs site
-npm run dev -w packages/components/button     # work on one component
-npm test                                      # browser tests for changed components
-npm run generate                              # scaffold a new component
+pnpm install
+pnpm run ui                                    # build everything, start the docs site
+pnpm --dir packages/components/button run dev     # work on one component
+pnpm test                                      # browser tests for changed components
+pnpm run generate                              # scaffold a new component
 ```
 
 More in [`tests/README.md`](tests/README.md) and [`CLAUDE.md`](CLAUDE.md).
