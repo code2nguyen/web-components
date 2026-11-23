@@ -18,14 +18,20 @@ export interface Overlay {
   removeEventListener: TypedRemoveEventListener<Overlay, OverlayEventMap>
 }
 
+/** A native button, or an element that forwards commands to the button in its shadow root (`c2-button`, which has `commandFor`). */
+const isInvoker = (element: Element) => element instanceof HTMLButtonElement || ('commandFor' in element && !!element.shadowRoot?.querySelector('button'))
+
 const POSITIONING_VARIABLES = ['--c2-overlay--offset-y', '--c2-overlay--offset-x', '--c2-overlay--viewport-padding']
 
 /**
  * Anchored popup built on the browser Popover API: the element sits in the top layer, opens and light-dismisses
  * natively (Escape, click outside) and is positioned next to its anchor with floating-ui. The anchor is found in
  * this order: the `anchor` property (an element), the `anchor` attribute (an element id in the same tree), or the
- * element whose `popovertarget` points at this overlay's `id`. The overlay only positions itself; the content brings
- * its own surface (background, border, shadow), so it fits menus, pickers and cards alike.
+ * element whose `popovertarget` or `commandfor` points at this overlay's `id`. A `commandfor` trigger (a native button
+ * or a `c2-button`) with `command="show-popover"`, `"hide-popover"` or `"toggle-popover"` opens and closes it through
+ * the browser's invoker commands; the overlay keeps a `c2-button` `toggle-popover` trigger's `aria-expanded` in step
+ * (from its first open on, never on upgrade, so a server-rendered page hydrates cleanly). The overlay only positions
+ * itself; the content brings its own surface (background, border, shadow), so it fits menus, pickers and cards alike.
  *
  * The preferred `placement` may flip or shift to stay in the viewport; the placement actually used is exposed as the
  * `current-placement` attribute, and the space available on that side as `--c2-overlay--available-height` /
@@ -72,7 +78,7 @@ export class Overlay extends LitElement {
   /** By default the overlay is at least as wide as its anchor; set this to size it by its content only. */
   @property({ type: Boolean, attribute: 'free-width' }) freeWidth = false
 
-  /** Anchor element, or (attribute) the id of the anchor. Falls back to the element whose `popovertarget` is this overlay's id. */
+  /** Anchor element, or (attribute) the id of the anchor. Falls back to the element that opens it: a `popovertarget` or `commandfor` (`toggle-popover`/`show-popover`) trigger naming this overlay's id, outside the overlay. */
   @property() anchor: string | HTMLElement | undefined = undefined
 
   private cleanupPosition: (() => void) | null = null
@@ -99,6 +105,46 @@ export class Overlay extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.stopPositioning()
+    // Removed from the page, the popover is hidden without a `toggle` event: give the triggers back their own state.
+    for (const trigger of this.expandedTriggers) this.setExpanded(trigger, this.authoredExpanded.get(trigger) == null ? null : 'false')
+    this.expandedTriggers.clear()
+    this.authoredExpanded.clear()
+  }
+
+  /** Triggers `syncTriggers` gave an expanded state, so it can take it back. */
+  private expandedTriggers = new Set<HTMLElement>()
+  /** Whether each of those triggers had an `ariaExpanded` before; when the overlay lets go, it gets "false" or none. */
+  private authoredExpanded = new Map<HTMLElement, string | null>()
+
+  /**
+   * `aria-expanded` of the `c2-button` `toggle-popover` triggers naming this overlay, as a `popovertarget` button gets
+   * natively. It takes it as a property it hands to its inner button, so nothing lands on its host. A native button
+   * gets it from the browser.
+   */
+  private syncTriggers() {
+    const root = this.getRootNode() as ParentNode
+    const triggers = new Set<HTMLElement>()
+    if (this.id && root.querySelectorAll)
+      for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="toggle-popover" i]`))
+        if (!(trigger instanceof HTMLButtonElement) && isInvoker(trigger) && customElements.get(trigger.localName)) triggers.add(trigger)
+    for (const trigger of this.expandedTriggers)
+      if (!triggers.has(trigger)) {
+        this.setExpanded(trigger, this.authoredExpanded.get(trigger) == null ? null : 'false')
+        this.authoredExpanded.delete(trigger)
+      }
+    // The popover's own state, which `open` may not have caught up with yet.
+    const expanded = String(this.matches(':popover-open'))
+    for (const trigger of triggers) {
+      if (!this.authoredExpanded.has(trigger)) this.authoredExpanded.set(trigger, trigger.ariaExpanded)
+      this.setExpanded(trigger, expanded)
+    }
+    this.expandedTriggers = triggers
+  }
+
+  private setExpanded(trigger: HTMLElement, expanded: string | null) {
+    if (trigger.ariaExpanded === expanded) return
+    // modern-web-ignore: aria-attribute-on-other-element a c2-button takes this as a property it hands to its inner button; nothing lands on its host
+    trigger.ariaExpanded = expanded
   }
 
   /** The resolved anchor element, if any. */
@@ -109,14 +155,22 @@ export class Overlay extends LitElement {
       return (root.querySelector?.(`#${CSS.escape(this.anchor)}`) as HTMLElement | null) ?? null
     }
     if (!this.id) return null
+    const id = CSS.escape(this.id)
+    // A trigger that opens it: not a `hide-popover` button, and never one inside the overlay (its own Close button).
+    const invoker = `[popovertarget="${id}"]:not([popovertargetaction="hide" i]), [commandfor="${id}"]:is([command="toggle-popover" i], [command="show-popover" i])`
+    // Only an element that can open it: a `commandfor` element must be an invoker (`c2-icon-button` forwards no command).
+    const outside = (scope: ParentNode) =>
+      [...scope.querySelectorAll<HTMLElement>(invoker)].find(
+        (element) => !this.contains(element) && (!element.hasAttribute('commandfor') || isInvoker(element)),
+      ) ?? null
     // The element that opens this popover, searched upwards so a control inside a sibling subtree is found too.
     let parent: HTMLElement | null = this.parentElement
     while (parent) {
-      const found = parent.querySelector<HTMLElement>(`[popovertarget="${CSS.escape(this.id)}"]`)
+      const found = outside(parent)
       if (found) return found
       parent = parent.parentElement
     }
-    return (root.querySelector?.(`[popovertarget="${CSS.escape(this.id)}"]`) as HTMLElement | null) ?? null
+    return outside(root)
   }
 
   private handleBeforeToggle = (event: Event) => {
@@ -126,6 +180,7 @@ export class Overlay extends LitElement {
 
   private handleToggle = (event: Event) => {
     this.open = (event as ToggleEvent).newState === 'open'
+    this.syncTriggers()
   }
 
   private readPixels(name: string, fallback: number): number {

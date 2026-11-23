@@ -60,7 +60,7 @@ jobs:
         run: npm run docs:check
 
       - name: Verify generated component manifests are committed
-        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
 
       # Diagnostic until the initial audit reaches zero; deployment keeps its existing gates meanwhile.
       - name: Style-contract static diagnostic
@@ -84,11 +84,20 @@ jobs:
       - name: Check the docs site dogfoods c2n components
         run: npm run check:dogfood
 
+      - name: Check the guidance coding agents read (CLAUDE.md, AGENTS.md, skills)
+        run: npm run check:agent-docs
+
       - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 
       - name: Smoke test the MCP server
         run: npm run mcp:smoke
+
+      - name: Every component is reachable through MCP and llms.txt
+        run: npm run check:reachability
+
+      - name: c2 markup in the docs site, example apps and lab builds has no errors
+        run: npm run check:app-markup
 
       - name: Test the cross-agent installer
         run: npm test -w packages/tools/skill
@@ -97,7 +106,12 @@ jobs:
         run: npm test -w packages/tools/theme
 
       - name: Generated files are up to date
-        run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json packages/tools/framework-types/tsconfig.vue.json 'packages/*/*/react.d.ts' 'packages/*/*/vue.d.ts' 'open-packages/*/react.d.ts' 'open-packages/*/vue.d.ts' packages/umbrella
+        # The slot-styling audit and lab/GAPS.md are regenerated here too (GAPS.md reads the registry build:tools wrote),
+        # so a change that leaves either stale fails now instead of handing the drift to the next person to regenerate.
+        run: |
+          node scripts/generate-slot-styling-audit.mjs
+          node lab/scripts/gaps.mjs > /dev/null
+          git diff --exit-code -- scripts/data/slot-styling-audit.json lab/GAPS.md packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json packages/tools/framework-types/tsconfig.vue.json 'packages/*/*/react.d.ts' 'packages/*/*/vue.d.ts' packages/umbrella
 
       # PNGs of every gallery card, light and dark, at the URLs the @c2n/mcp registry lists, so agents that read
       # images can see a look before choosing it. Served by Pages only; a failure here must not block the docs.

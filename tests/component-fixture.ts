@@ -97,6 +97,16 @@ export const expect = baseExpect.extend({
   },
 })
 
+/**
+ * Whether the page reports an Apple platform, as `isApplePlatform` in `@c2n/core/shortcut-helper.js` reads it: the
+ * components' ⌘/Ctrl shortcuts and their labels follow it, and so does Playwright's `ControlOrMeta`.
+ */
+export async function isApple(page: Page): Promise<boolean> {
+  return page.evaluate(() =>
+    /mac|iphone|ipad|ipod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform),
+  )
+}
+
 export async function props(locator: Locator, values: Record<string, unknown>) {
   await locator.evaluate(async (element, data) => {
     Object.assign(element, data)

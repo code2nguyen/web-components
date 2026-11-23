@@ -6,7 +6,7 @@ import { defineConfig } from 'vite'
 const root = fileURLToPath(new URL('..', import.meta.url))
 
 // Resolve sibling component imports to source so tests never depend on stale dist files.
-const components = ['packages/components', 'packages/icons', 'open-packages'].flatMap((directory) =>
+const components = ['packages/components', 'packages/icons'].flatMap((directory) =>
   readdirSync(resolve(root, directory), { withFileTypes: true })
     // A directory left with only build output after a branch switch has no package.json; it is not a package.
     .filter((entry) => entry.isDirectory() && existsSync(resolve(root, directory, entry.name, 'package.json')))
@@ -41,7 +41,7 @@ export default defineConfig({
     dedupe: ['lit', 'lit-html', 'lit-element'],
   },
   optimizeDeps: {
-    entries: ['packages/components/*/test/*.html', 'packages/icons/*/test/*.html', 'open-packages/*/test/*.html', 'tests/style-contracts/*.html'],
+    entries: ['packages/components/*/test/*.html', 'packages/icons/*/test/*.html', 'tests/style-contracts/*.html'],
   },
   server: { host: '127.0.0.1', port: 4175, strictPort: true },
 })

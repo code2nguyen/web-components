@@ -6,6 +6,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Tooltip } from '@c2n/components/tooltip'
+import { Button } from '@c2n/components/button'
 
 ## Presets
 
@@ -14,19 +15,7 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<style>
-  .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
-  }
-</style>
-<button class="trigger default">Hover me<c2-tooltip delay="100" client:only="lit">Save changes</c2-tooltip></button>
+<c2-button>Hover me<c2-tooltip delay="100" client:only="lit">Save changes</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Light
@@ -38,17 +27,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger light">Hover me<c2-tooltip delay="100" client:only="lit">Light bubble with border</c2-tooltip></button>
+<c2-button class="trigger light">Hover me<c2-tooltip delay="100" client:only="lit">Light bubble with border</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Brand pill
@@ -62,17 +54,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger brand">Hover me<c2-tooltip delay="100" hide-arrow client:only="lit">Brand coloured pill</c2-tooltip></button>
+<c2-button class="trigger brand">Hover me<c2-tooltip delay="100" hide-arrow client:only="lit">Brand coloured pill</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Compact
@@ -88,17 +83,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--offset: 6px;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger compact">Hover me<c2-tooltip delay="100" client:only="lit">Compact</c2-tooltip></button>
+<c2-button class="trigger compact">Hover me<c2-tooltip delay="100" client:only="lit">Compact</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Spacious
@@ -115,17 +113,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--line-height: 1.5;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger spacious">Hover me<c2-tooltip delay="100" client:only="lit">A longer explanation with more room to breathe, wrapping onto a second line when needed.</c2-tooltip></button>
+<c2-button class="trigger spacious">Hover me<c2-tooltip delay="100" client:only="lit">A longer explanation with more room to breathe, wrapping onto a second line when needed.</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Success
@@ -136,17 +137,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--box-shadow: none;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger success">Hover me<c2-tooltip delay="100" placement="bottom" client:only="lit">Copied to clipboard</c2-tooltip></button>
+<c2-button class="trigger success">Hover me<c2-tooltip delay="100" placement="bottom" client:only="lit">Copied to clipboard</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Warning
@@ -158,17 +162,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--box-shadow: none;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger warning">Hover me<c2-tooltip delay="100" placement="right" client:only="lit">Unsaved changes</c2-tooltip></button>
+<c2-button class="trigger warning">Hover me<c2-tooltip delay="100" placement="right" client:only="lit">Unsaved changes</c2-tooltip></c2-button>
 ```
 
 ```html tag=MdxCodeBlock,label=Slide in
@@ -180,17 +187,20 @@ Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubbl
     --c2-tooltip--color: #e0e7ff;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<button class="trigger slide">Hover me<c2-tooltip delay="100" client:only="lit">Slides up instead of scaling</c2-tooltip></button>
+<c2-button class="trigger slide">Hover me<c2-tooltip delay="100" client:only="lit">Slides up instead of scaling</c2-tooltip></c2-button>
 ```
 
 </GalleryGrid>

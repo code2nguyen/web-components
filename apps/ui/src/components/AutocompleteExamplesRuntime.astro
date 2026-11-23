@@ -101,8 +101,8 @@
       `
     }
     onSelection(field, ({ item }) => setStatus(field, `Mentioned ${(item as TeamMember).name}`))
-    field.querySelector<HTMLButtonElement>('[data-invite-person]')?.addEventListener('click', () => setStatus(field, 'Invite flow opened'))
-    field.querySelector<HTMLButtonElement>('[data-view-team]')?.addEventListener('click', () => setStatus(field, 'Opening the full team directory…'))
+    field.querySelector<HTMLElement>('[data-invite-person]')?.addEventListener('click', () => setStatus(field, 'Invite flow opened'))
+    field.querySelector<HTMLElement>('[data-view-team]')?.addEventListener('click', () => setStatus(field, 'Opening the full team directory…'))
   }
 
   function setupProductSearch(field: Autocomplete) {
@@ -173,7 +173,9 @@
     document.querySelectorAll<Autocomplete>('[data-autocomplete-example]').forEach((field) => {
       if (initialized.has(field)) return
       initialized.add(field)
-      field.querySelectorAll<HTMLButtonElement>('button').forEach((button) => button.addEventListener('pointerdown', (event) => event.preventDefault()))
+      field
+        .querySelectorAll<HTMLElement>('button, c2-button, c2-link-button')
+        .forEach((button) => button.addEventListener('pointerdown', (event) => event.preventDefault()))
       switch (field.dataset.autocompleteExample) {
         case 'team':
           setupTeamPicker(field)

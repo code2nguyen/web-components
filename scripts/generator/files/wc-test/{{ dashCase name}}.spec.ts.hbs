@@ -6,3 +6,19 @@ test('renders its default state', async ({ page, scenario }) => {
   await scenario()
   await expect(page.locator('c2-{{ dashCase name}}')).toBeVisible()
 })
+
+test('names itself from the label message, and from label once set', async ({ page, scenario }) => {
+  await scenario()
+  const host = page.locator('c2-{{ dashCase name}}')
+  await expect(host).toHaveHostAria('role', 'group')
+  await expect(host).toHaveHostAria('aria-label', '{{ sentenceCase name }}')
+  await host.evaluate((element) => element.setAttribute('label', 'Custom name'))
+  await expect(host).toHaveHostAria('aria-label', 'Custom name')
+})
+
+test('shows the actions zone only while something is slotted there', async ({ page, scenario }) => {
+  await scenario()
+  await expect(page.locator('c2-{{ dashCase name}}').locator('[part="actions"]')).toBeHidden()
+  await scenario('actions')
+  await expect(page.locator('c2-{{ dashCase name}}').locator('[part="actions"]')).toBeVisible()
+})

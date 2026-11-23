@@ -56,14 +56,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: The scaffolded component matches the documented skeleton and conventions
+        run: npm run check:component-template
       - run: npm run build -w packages/umbrella
       - run: npm run docs:check
       # A component or validator change that breaks a lab build's markup makes its report's generated section stale:
       # caught here, on the pull request, not after the merge (`node lab/scripts/readiness.mjs --all` regenerates them).
       - name: Lab reports' AI readiness sections are up to date
         run: npm run build:registry -w packages/tools/mcp && node lab/scripts/readiness.mjs --check
+      - name: Every component is reachable through MCP and llms.txt
+        run: npm run check:reachability
+      - name: c2 markup in the docs site, example apps and lab builds has no errors
+        run: npm run check:app-markup
+      - name: Guidance for coding agents (CLAUDE.md, AGENTS.md, skills) is consistent
+        run: npm run check:agent-docs
       - name: Verify generated component manifests are committed
-        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+      # Also in deploy.yml as a backstop; here so a stale file fails the pull request, not the deploy after the merge.
+      - name: Slot-styling audit and lab/GAPS.md are up to date
+        run: |
+          node scripts/generate-slot-styling-audit.mjs
+          node lab/scripts/gaps.mjs > /dev/null
+          git diff --exit-code -- scripts/data/slot-styling-audit.json lab/GAPS.md
       # The initial full-library audit still has unresolved failures. Collect the complete result on every PR;
       # promote this to a required gate only after the inventory and browser/panel evidence reach zero failures.
       - name: Style-contract static diagnostic
@@ -83,7 +97,7 @@ jobs:
           retention-days: 7
       - name: Pack the build output
         run: |
-          find packages open-packages -name node_modules -prune -o -type d \( -name dist -o -name types \) -print -prune > build-output.txt
+          find packages -name node_modules -prune -o -type d \( -name dist -o -name types \) -print -prune > build-output.txt
           echo packages/umbrella/custom-elements.json >> build-output.txt
           tar -czf build-output.tgz -T build-output.txt
       - uses: actions/upload-artifact@v4

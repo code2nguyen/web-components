@@ -1,7 +1,7 @@
 # c2n Evaluation: Signal Forge Observability
 
 - **Evaluation date:** 2026-09-21
-- **Feature:** [`specs/003-nextjs-observability/spec.md`](../../../specs/003-nextjs-observability/spec.md)
+- **Feature:** [`specs/003-nextjs-observability/spec.md`](https://github.com/code2nguyen/web-components/blob/0900bc1836c9/specs/003-nextjs-observability/spec.md)
 - **Runtime:** Node 24.15.0, Next.js 16.3.3, React 19.3.0, TypeScript 6.0.3, c2n 0.0.14
 - **Deployment:** Next.js App Router static export at `/web-components/demo/observability-nextjs/`
 - **Coverage:** Node unit tests; Playwright Chromium routine and Chromium/Firefox/WebKit portability sources; axe WCAG A/AA; keyboard, focus return, 200% zoom, 1280/768 px, reduced motion, themes, malformed URL/storage, bounded DOM, and offline requests

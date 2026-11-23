@@ -1,30 +1,62 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
+import { LocalizeController } from '@c2n/core/localize.js'
+import { {{ camelCase name }}Messages } from './messages'
 import styles from './{{ dashCase name}}.scss?inline'
+
+// A component that fires events declares them here and merges them into the class (see packages/components/CLAUDE.md,
+// "Component conventions"), with one `@event` JSDoc line per entry:
+//
+//   export interface {{ pascalCase name }}EventMap extends HTMLElementEventMap {
+//     'value-change': CustomEvent<{ value: string }>
+//   }
+//   export interface {{ pascalCase name }} {
+//     addEventListener: TypedAddEventListener<{{ pascalCase name }}, {{ pascalCase name }}EventMap>
+//     removeEventListener: TypedRemoveEventListener<{{ pascalCase name }}, {{ pascalCase name }}EventMap>
+//   }
+
 /**
+ * Describe the element in one sentence a developer's need would match: it becomes the API docs, the MCP registry
+ * entry and the IDE hover text.
+ *
  * @tag c2-{{ dashCase name }}
  *
- * @slot default - This is a default/unnamed slot
+ * @slot - The content.
+ * @slot actions - Commands the application adds (an action zone); hidden while empty.
  *
- * @event
- * @cssproperty
+ * @csspart content - The wrapper of the default slot.
+ * @csspart actions - The wrapper of the `actions` slot.
+ *
+ * @cssproperty {length} [--c2-{{ dashCase name }}__container--gap=8px] - Space between the content and the actions.
+ * @cssproperty {length} [--c2-{{ dashCase name }}__actions--gap=8px] - Space between the actions.
  */
 @customElement('c2-{{ dashCase name }}')
 export class {{ pascalCase name }} extends LitElement {
-
   static override styles = unsafeCSS(styles)
 
-  @property({ type: String }) name = 'Example property'
+  /** Host semantics go through ElementInternals: the component never writes an attribute on its host. */
+  private readonly internals = this.attachInternals()
+  private readonly msg = new LocalizeController(this, {{ camelCase name }}Messages)
+  private readonly slots = new SlotPresenceController(this, ['actions'])
+
+  /** The accessible name of the component. Empty falls back to the `label` message. */
+  @property() label = ''
+
+  protected override updated(): void {
+    this.internals.role = 'group'
+    this.internals.ariaLabel = this.label || this.msg.t('label')
+  }
 
   override render() {
     return html`
-      <div class="c2-{{ dashCase name }}">
-        ${this.name}
+      <div class="content" part="content"><slot></slot></div>
+      <div class="actions" part="actions" ?hidden=${!this.slots.has('actions')}>
+        <slot name="actions" @slotchange=${this.slots.handleSlotChange}></slot>
       </div>
     `
   }
-
 }
 
 declare global {

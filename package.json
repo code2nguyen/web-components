@@ -42,6 +42,11 @@
     "docs:check": "node scripts/check-component-docs.mjs",
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
+    "check:agent-docs": "node scripts/check-agent-docs.mjs",
+    "check:component-template": "node scripts/check-component-template.mjs",
+    "check:reachability": "npm run check:reachability -w packages/tools/mcp",
+    "check:app-markup": "node packages/tools/mcp/src/cli.ts validate apps/ui/src apps/examples lab/apps",
+    "check:pr": "node scripts/check-pr.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
@@ -66,7 +71,6 @@
     "wireit": "^0.14.13"
   },
   "workspaces": [
-    "open-packages/*",
     "packages/adapters/*",
     "packages/components/*",
     "packages/icons/*",
@@ -93,14 +97,14 @@
         "packages/tools/config/eslint.config.js",
         "!**/dist/**/*",
         "!**/types/**/*",
-        "!node_modules/"
+        "!node_modules/",
+        "!.claude/worktrees/**"
       ],
       "output": [],
       "command": "eslint ."
     },
     "build": {
       "dependencies": [
-        "./open-packages/chatbot:build",
         "./packages/adapters/angular:build",
         "./packages/components/accordion:build",
         "./packages/components/action-bar:build",

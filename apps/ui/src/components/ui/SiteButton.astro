@@ -124,7 +124,7 @@ const raw =
       // link-button has no border variable: draw it on the host.
       &:where(c2-link-button) {
         border-radius: var(--site-radius-sm);
-        box-shadow: inset 0 0 0 1px var(--site-color-outline-variant);
+        box-shadow: inset 0 0 0 1px var(--site-color-outline-variant); // c2n-ignore: deliberate, link-button has no border variable
       }
     }
     &--subtle {

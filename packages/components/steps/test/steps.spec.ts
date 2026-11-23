@@ -228,7 +228,7 @@ test('current derives the statuses of a wizard and an authored one still wins', 
   const status = (label: string) => page.locator(`c2-step[label="${label}"]`)
   await expect(status('Account')).toHaveJSProperty('status', 'success')
   await expect(status('Plan')).toHaveJSProperty('status', 'current')
-  // `pending` is the default, so deriving it writes no attribute (see `reflected defaults` in CLAUDE.md).
+  // `pending` is the default, so deriving it writes no attribute (see "A reflected property's default is not reflected" in packages/components/CLAUDE.md).
   await expect(status('Payment')).toHaveJSProperty('status', 'pending')
 })
 

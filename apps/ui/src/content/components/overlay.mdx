@@ -13,8 +13,9 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Overlay } from '@c2n/components/overlay'
+import { Button } from '@c2n/components/button'
 
-`c2-overlay` is a positioning shell around the browser Popover API. It lives in the top layer, opens and light-dismisses natively (Escape, click outside, `popover="manual"` to opt out), and floating-ui keeps it next to its anchor: the element whose `popovertarget` is the overlay's `id`, or whatever the `anchor` attribute (an id) or property (an element) points at. The preferred `placement` flips and shifts to stay on screen; the one in use is reflected as `current-placement`, and `--c2-overlay--available-height` / `--available-width` tell the content how much room it has. The overlay is at least as wide as its anchor unless `free-width` is set, and exactly as wide with `fit-anchor`. The slotted content brings its own surface. `c2-select` and `c2-color-select` are built on it.
+`c2-overlay` is a positioning shell around the browser Popover API. It lives in the top layer, opens and light-dismisses natively (Escape, click outside, `popover="manual"` to opt out), and floating-ui keeps it next to its anchor: the trigger whose `commandfor` (or `popovertarget`) is the overlay's `id`, or whatever the `anchor` attribute (an id) or property (an element) points at. The preferred `placement` flips and shifts to stay on screen; the one in use is reflected as `current-placement`, and `--c2-overlay--available-height` / `--available-width` tell the content how much room it has. The overlay is at least as wide as its anchor unless `free-width` is set, and exactly as wide with `fit-anchor`. The slotted content brings its own surface. A `c2-button` opens it with `commandfor="<id>"` and `command="toggle-popover"` (or `show-popover`, `hide-popover`): the browser's own invoker commands run it, in Safari 26.2, Firefox 144 and Chrome 135 or later. `c2-select` and `c2-color-select` are built on it.
 
 ## Import
 
@@ -40,31 +41,34 @@ import '@c2n/components/overlay'
     gap: 2px;
     padding: 4px;
   }
-  .menu button {
-    text-align: left;
-    border: none;
-    background: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font: inherit;
-    cursor: pointer;
-    color: inherit;
+  .menu c2-button {
+    --c2-button__container--justify-content: flex-start;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--font-weight: 400;
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
-  .menu button:hover {
-    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  .menu c2-button.danger {
+    --c2-button__container--color: #dc2626;
   }
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
-  .trigger:hover {
-    background: var(--c2-theme--color-surface-container, #f4f4f5);
+  .trigger.wide {
+    --c2-button__container--width: 200px;
   }
   .anchor {
     padding: 6px 10px;
@@ -74,34 +78,34 @@ import '@c2n/components/overlay'
   }
 </style>
 <div data-label="Placements">
-  <button class="trigger" popovertarget="ov-bs">bottom-start</button>
+  <c2-button class="trigger" commandfor="ov-bs" command="toggle-popover">bottom-start</c2-button>
   <c2-overlay id="ov-bs" client:only="lit"><div class="surface">Default placement</div></c2-overlay>
-  <button class="trigger" popovertarget="ov-top">top</button>
+  <c2-button class="trigger" commandfor="ov-top" command="toggle-popover">top</c2-button>
   <c2-overlay id="ov-top" placement="top" client:only="lit"><div class="surface">Above the button</div></c2-overlay>
-  <button class="trigger" popovertarget="ov-right">right-start</button>
+  <c2-button class="trigger" commandfor="ov-right" command="toggle-popover">right-start</c2-button>
   <c2-overlay id="ov-right" placement="right-start" free-width client:only="lit"><div class="surface">To the right, sized by content</div></c2-overlay>
 </div>
 <div data-label="Menu, fit-anchor">
-  <button class="trigger" popovertarget="ov-menu" style="width: 200px">Actions ▾</button>
+  <c2-button class="trigger wide" commandfor="ov-menu" command="toggle-popover">Actions ▾</c2-button>
   <c2-overlay id="ov-menu" fit-anchor client:only="lit">
     <div class="surface menu">
-      <button>Rename</button>
-      <button>Duplicate</button>
-      <button style="color: #dc2626">Delete</button>
+      <c2-button>Rename</c2-button>
+      <c2-button>Duplicate</c2-button>
+      <c2-button class="danger">Delete</c2-button>
     </div>
   </c2-overlay>
 </div>
 <div data-label="Anchor by id, open property">
   <span class="anchor" id="ov-target">anchor</span>
-  <button class="trigger" onclick="document.getElementById('ov-anchored').open = true">Open</button>
+  <c2-button class="trigger" onclick="document.getElementById('ov-anchored').open = true">Open</c2-button>
   <c2-overlay id="ov-anchored" anchor="ov-target" placement="bottom" free-width client:only="lit"><div class="surface">Anchored to the span</div></c2-overlay>
 </div>
 <div data-label="Offsets and manual">
-  <button class="trigger" popovertarget="ov-offset">Offset 16 / 24</button>
+  <c2-button class="trigger" commandfor="ov-offset" command="toggle-popover">Offset 16 / 24</c2-button>
   <c2-overlay id="ov-offset" free-width style="--c2-overlay--offset-y: 16px; --c2-overlay--offset-x: 24px" client:only="lit"><div class="surface">offset-y 16px, offset-x 24px</div></c2-overlay>
-  <button class="trigger" popovertarget="ov-manual">Manual + backdrop</button>
+  <c2-button class="trigger" commandfor="ov-manual" command="toggle-popover">Manual + backdrop</c2-button>
   <c2-overlay id="ov-manual" popover="manual" free-width style="--c2-overlay__backdrop--background: rgba(0, 0, 0, 0.3)" client:only="lit">
-    <div class="surface">No light dismiss. <button popovertarget="ov-manual" popovertargetaction="hide">Close</button></div>
+    <div class="surface">No light dismiss. <c2-button class="trigger" commandfor="ov-manual" command="hide-popover">Close</c2-button></div>
   </c2-overlay>
 </div>
 ```

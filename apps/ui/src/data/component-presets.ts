@@ -1105,7 +1105,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     ],
   },
   'c2-split-panel': {
-    html: `<c2-split-panel style="width: 260px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><div slot="start" style="padding: 10px; font-size: 12px">Start</div><div slot="end" style="padding: 10px; font-size: 12px">End</div></c2-split-panel>`,
+    html: `<div style="width: 260px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><c2-split-panel style="height: 100%"><div slot="start" style="padding: 10px; font-size: 12px">Start</div><div slot="end" style="padding: 10px; font-size: 12px">End</div></c2-split-panel></div>`,
     presets: [
       {
         name: 'Bare line',
@@ -2844,7 +2844,7 @@ Alan Turing,alan@bletchley.org,,Call back"></c2-import-mapper>`,
     ],
   },
   'c2-master-detail': {
-    html: `<c2-master-detail open breakpoint="0" style="width: 300px; height: 140px; border: 1px solid #e4e4e7; border-radius: 8px"><div slot="master" style="padding: 10px; font-size: 12px">Ana Ruiz<br>Kenji Watanabe</div><div slot="detail" style="padding: 10px; font-size: 12px">Invoice 2041 charged twice</div></c2-master-detail>`,
+    html: `<div style="width: 300px; height: 140px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><c2-master-detail open breakpoint="0" style="height: 100%"><div slot="master" style="padding: 10px; font-size: 12px">Ana Ruiz<br>Kenji Watanabe</div><div slot="detail" style="padding: 10px; font-size: 12px">Invoice 2041 charged twice</div></c2-master-detail></div>`,
     presets: [
       {
         name: 'Narrow master',
@@ -3204,7 +3204,7 @@ Alan Turing,alan@bletchley.org,,Call back"></c2-import-mapper>`,
     ],
   },
   'c2-tooltip': {
-    html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
+    html: `<c2-button>Hover me<c2-tooltip>Save changes</c2-tooltip></c2-button>`,
     presets: [
       {
         name: 'Light',

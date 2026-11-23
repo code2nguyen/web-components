@@ -1,0 +1,18 @@
+# A branch is pushed with its fix-ups squashed (CLAUDE.md, "Before opening a pull request", step 5): refuse a push that
+# would publish a `fixup!`, `squash!` or `amend!` commit not yet on origin/develop. Skip it once with `git push --no-verify`.
+# Husky runs this with `sh -e`, so every command that may fail on the happy path ends in `|| true`.
+base=$(git rev-parse --verify --quiet origin/develop || true)
+[ -n "$base" ] || exit 0
+zero=0000000000000000000000000000000000000000
+status=0
+# Git passes one line per ref being pushed: <local ref> <local sha> <remote ref> <remote sha>.
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # a branch deletion
+  pending=$(git log --format='%h %s' "$base..$local_sha" | grep -E '^[0-9a-f]+ (fixup|squash|amend)! ' || true)
+  if [ -n "$pending" ]; then
+    echo "pre-push: $local_ref still has fix-up commits; squash them first: GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash origin/develop" >&2
+    echo "$pending" >&2
+    status=1
+  fi
+done
+exit $status

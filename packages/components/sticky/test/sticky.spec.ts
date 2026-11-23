@@ -155,6 +155,8 @@ test.describe('show-when-hidden', () => {
     await scenario('cta')
     await scrollTo(page, 400)
     await expect.poll(() => hasState(page, 'concealed')).toBe(false)
+    // Slid in and focusable: pressed earlier, Shift+Tab skips the bar and scrolls the main button into view instead.
+    await expect(barButton(page)).toBeVisible()
     // Shift+Tab from the document reaches the bar, the last control, without scrolling the main button into view.
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
     await page.keyboard.press('Shift+Tab')

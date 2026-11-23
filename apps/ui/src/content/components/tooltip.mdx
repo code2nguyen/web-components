@@ -14,6 +14,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Tooltip } from '@c2n/components/tooltip'
+import { Button } from '@c2n/components/button'
 import { IconButton } from '@c2n/components/icon-button'
 import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
 
@@ -32,17 +33,17 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
 ```html tag=UsageBlock,package=@c2n/tooltip
 <style>
   .trigger {
-    font: inherit;
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    background: var(--c2-theme--color-surface, #ffffff);
-    color: var(--c2-theme--color-on-surface, #18181b);
-    cursor: pointer;
-  }
-  .trigger:hover {
-    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--font-weight: 400;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .clip {
     overflow: hidden;
@@ -74,29 +75,29 @@ The examples use icons from the separate `@c2n/feather-icons` package: `npm inst
   }
 </style>
 <div data-label="Placements">
-  <button class="trigger">top<c2-tooltip client:only="lit">Default placement</c2-tooltip></button>
-  <button class="trigger">bottom<c2-tooltip placement="bottom" client:only="lit">Below the button</c2-tooltip></button>
-  <button class="trigger">left<c2-tooltip placement="left" client:only="lit">To the left</c2-tooltip></button>
-  <button class="trigger">right<c2-tooltip placement="right" client:only="lit">To the right</c2-tooltip></button>
+  <c2-button class="trigger">top<c2-tooltip client:only="lit">Default placement</c2-tooltip></c2-button>
+  <c2-button class="trigger">bottom<c2-tooltip placement="bottom" client:only="lit">Below the button</c2-tooltip></c2-button>
+  <c2-button class="trigger">left<c2-tooltip placement="left" client:only="lit">To the left</c2-tooltip></c2-button>
+  <c2-button class="trigger">right<c2-tooltip placement="right" client:only="lit">To the right</c2-tooltip></c2-button>
 </div>
 <div data-label="Never clipped">
-  <div class="clip"><button class="trigger">Hover me<c2-tooltip client:only="lit">Escapes the overflow: hidden box</c2-tooltip></button></div>
+  <div class="clip"><c2-button class="trigger">Hover me<c2-tooltip client:only="lit">Escapes the overflow: hidden box</c2-tooltip></c2-button></div>
 </div>
 <div data-label="Rich content and delays">
-  <button class="trigger">Save<c2-tooltip client:only="lit">Save changes <kbd>⌘S</kbd></c2-tooltip></button>
-  <button class="trigger">Instant<c2-tooltip delay="0" hide-delay="400" client:only="lit">No delay, lingers 400 ms</c2-tooltip></button>
-  <button class="trigger">No arrow<c2-tooltip hide-arrow client:only="lit">Arrow hidden</c2-tooltip></button>
+  <c2-button class="trigger">Save<c2-tooltip client:only="lit">Save changes <kbd>⌘S</kbd></c2-tooltip></c2-button>
+  <c2-button class="trigger">Instant<c2-tooltip delay="0" hide-delay="400" client:only="lit">No delay, lingers 400 ms</c2-tooltip></c2-button>
+  <c2-button class="trigger">No arrow<c2-tooltip hide-arrow client:only="lit">Arrow hidden</c2-tooltip></c2-button>
 </div>
 <div data-label="Target by id and data-tooltip">
   <span class="term" id="tt-term" tabindex="0">HTTP</span>
   <c2-tooltip for="tt-term" placement="bottom" client:only="lit">Hypertext Transfer Protocol</c2-tooltip>
-  <button class="trigger" data-tooltip="Read from data-tooltip">data-tooltip<c2-tooltip client:only="lit"></c2-tooltip></button>
+  <c2-button class="trigger" data-tooltip="Read from data-tooltip">data-tooltip<c2-tooltip client:only="lit"></c2-tooltip></c2-button>
 </div>
 <div data-label="On an icon button">
   <c2-icon-button tooltip="Delete" client:load><c2-feather-trash></c2-feather-trash></c2-icon-button>
 </div>
 <div data-label="Light theme">
-  <button class="trigger light">Light<c2-tooltip client:only="lit">Light bubble with a border and shadow</c2-tooltip></button>
+  <c2-button class="trigger light">Light<c2-tooltip client:only="lit">Light bubble with a border and shadow</c2-tooltip></c2-button>
 </div>
 ```
 

@@ -7,7 +7,7 @@ export interface Registry {
   /** lerna.json version of the published packages. */
   c2nVersion: string
   categories: string[]
-  /** Keyed by component id (the docs page id: `button`, `feather-icons`, `chatbot`). */
+  /** Keyed by component id (the docs page id: `button`, `feather-icons`, `line-chart`). */
   components: Record<string, ComponentEntry>
   /** Tag → component id (`c2-tab` → `tabs`). Icon tags resolve through `tagPattern`. */
   tagIndex: Record<string, string>

@@ -7,7 +7,7 @@ import { discoverPublishableContracts } from './lib/style-contract-discovery.mjs
 
 function fixture(run) {
   const root = mkdtempSync(join(tmpdir(), 'c2-style-discovery-'))
-  writeFileSync(join(root, 'package.json'), JSON.stringify({ workspaces: ['packages/components/*', 'packages/icons/*', 'open-packages/*'] }))
+  writeFileSync(join(root, 'package.json'), JSON.stringify({ workspaces: ['packages/components/*', 'packages/icons/*'] }))
   const addPackage = (directory, name, tags, options = {}) => {
     const path = join(root, directory)
     mkdirSync(path, { recursive: true })
@@ -29,16 +29,16 @@ function fixture(run) {
   }
 }
 
-test('discovers publishable component, open, and generated icon tags from workspace metadata', () => {
+test('discovers publishable component and generated icon tags from workspace metadata', () => {
   fixture(({ root, addPackage }) => {
     addPackage('packages/components/button', '@c2n/button', ['c2-button'])
-    addPackage('open-packages/chatbot', '@c2n/chatbot', ['c2-chatbot'])
+    addPackage('packages/components/chip', '@c2n/chip', ['c2-chip'])
     addPackage('packages/icons/feather-icons', '@c2n/feather-icons', ['c2-feather-icon', 'c2-feather-activity'])
     addPackage('packages/components/private', '@c2n/private', ['c2-private'], { wip: true })
     let inventory = discoverPublishableContracts(root)
     assert.deepEqual(
       inventory.tags.map(({ tag }) => tag),
-      ['c2-button', 'c2-chatbot', 'c2-feather-activity', 'c2-feather-icon'],
+      ['c2-button', 'c2-chip', 'c2-feather-activity', 'c2-feather-icon'],
     )
     assert.equal(inventory.packages.length, 3)
     addPackage('packages/icons/feather-icons', '@c2n/feather-icons', ['c2-feather-icon', 'c2-feather-activity', 'c2-feather-new-icon'])
@@ -57,7 +57,7 @@ test('missing manifest is an input error rather than silently skipped', () => {
 test('duplicate tag names across publishable packages are rejected', () => {
   fixture(({ root, addPackage }) => {
     addPackage('packages/components/one', '@c2n/one', ['c2-duplicate'])
-    addPackage('open-packages/two', '@c2n/two', ['c2-duplicate'])
+    addPackage('packages/icons/two', '@c2n/two', ['c2-duplicate'])
     assert.throws(() => discoverPublishableContracts(root), /duplicate.*c2-duplicate/i)
   })
 })

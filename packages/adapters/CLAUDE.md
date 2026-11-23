@@ -1,0 +1,5 @@
+# Framework adapters
+
+Guidance for `packages/adapters/*`. Claude Code loads this file when it works in this directory; the repo-wide rules are in the root `CLAUDE.md`. Paths are relative to the repository root.
+
+`packages/adapters/*` — framework adapters, a workspace group of their own (currently `angular` → `@c2n/angular`). `@c2n/angular` is the one package built by `ngc` rather than Vite or `tsc` (`compilationMode: "partial"`, Angular Package Format), with `@angular/core` and `@angular/forms` as peer dependencies; its only source file besides `index.ts` is the generated `value-accessors.ts`. It exists because Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` or `formControlName` on a form-associated custom element finds no accessor: Angular throws `NG01203: No value accessor for form control` in development and fails on `writeValue` in a production build — `C2_FORM_ACCESSORS` supplies the missing `ControlValueAccessor` pair. It **is** in the root `wireit.build` list (it depends on nothing in the component graph).

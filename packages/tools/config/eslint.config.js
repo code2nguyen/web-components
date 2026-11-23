@@ -23,6 +23,8 @@ export default tseslint.config(
       'apps/ui/public/demo/**',
       'playwright-report/**',
       'test-results/**',
+      // Claude Code worktrees: separate checkouts, linted from inside themselves.
+      '.claude/worktrees/**',
       '**/*.min.js',
     ],
   },

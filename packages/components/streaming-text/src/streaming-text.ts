@@ -78,6 +78,10 @@ export class StreamingText extends LitElement {
   private entering: HTMLSpanElement[] = []
   private shown = 0
   private shownEpoch = -1
+  /** The container of the server-rendered text, until the live container takes over (see `updated`). */
+  private serverText: Element | null = null
+  /** The text was cleared, possibly before `firstUpdated` found the server's copy: drop it when it does. */
+  private clearedServerText = false
   private fadeDuration = 0
   private reducedMotion: MediaQueryList | null = null
 
@@ -89,6 +93,12 @@ export class StreamingText extends LitElement {
 
   set value(next: string | null | undefined) {
     const old = this.controller.text
+    // Cleared: the server's text goes too, even when the client never had any (then nothing below changes), and even
+    // before the first update has found it (a parent's binding can clear it first).
+    if (!next) {
+      this.clearedServerText = true
+      this.dropServerText()
+    }
     this.controller.set(next ?? '')
     this.requestUpdate('value', old)
   }
@@ -143,12 +153,27 @@ export class StreamingText extends LitElement {
 
   protected override firstUpdated(): void {
     this.live = this.renderRoot.querySelector('.live')
+    this.serverText = this.renderRoot.querySelector('.ssr')
     this.live?.addEventListener('animationend', this.handleAnimationEnd)
     this.readTimings()
   }
 
   protected override updated(): void {
+    // A hydrated element keeps the text the server wrote: Lit adopts that markup as it is. The live container redraws
+    // the text hidden behind it (no fade; from the `value` attribute, or a property a framework sets later, possibly
+    // paced from the start) and takes over once it has caught up, or once the client's text is not the server's
+    // (shorter, or other words). So the text shows once and the element is never blank in between. A cleared text
+    // drops the server's copy in the `value` setter.
+    if (this.serverText && this.live) this.live.hidden = true
     this.syncText()
+    if (this.serverText) {
+      const server = this.serverText.textContent ?? ''
+      const { text, revealed } = this.controller
+      // The page's parser turned the server's line breaks into `\n`: compare the client's text the same way.
+      const normalize = (value: string) => value.replace(/\r\n?/g, '\n')
+      if (this.clearedServerText || normalize(text.slice(0, revealed)).length >= server.length || (text && !normalize(text).startsWith(server)))
+        this.dropServerText()
+    }
     this.internals.ariaBusy = this.streaming || this.controller.pending ? 'true' : null
   }
 
@@ -179,7 +204,7 @@ export class StreamingText extends LitElement {
     if (revealed === this.shown) return
     const chunk = text.slice(this.shown, revealed)
     this.shown = revealed
-    if (this.fadeDuration > 0 && this.controller.smooth) {
+    if (this.fadeDuration > 0 && this.controller.smooth && !live.hidden) {
       const span = document.createElement('span')
       span.className = 'enter'
       span.textContent = chunk
@@ -190,6 +215,17 @@ export class StreamingText extends LitElement {
       this.settle(this.entering.length)
       this.settled.appendData(chunk)
     }
+  }
+
+  /** Removes the server-rendered text, leaving Lit's part markers, and shows the live container in its place. */
+  private dropServerText(): void {
+    if (!this.serverText) return
+    for (const node of [...this.serverText.childNodes]) if (node.nodeType === Node.TEXT_NODE) node.remove()
+    this.serverText = null
+    if (!this.live) return
+    // Segments drawn while it was hidden never ran their fade, so they would all fade in now: settle them.
+    this.settle(this.entering.length)
+    this.live.hidden = false
   }
 
   /** Moves the first `count` fading segments into the settled text node, in order. */

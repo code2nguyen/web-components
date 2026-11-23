@@ -25,3 +25,9 @@ lab/runs/
 
 # AI readiness results: written by scripts/readiness.ts in their own layout (one line per component).
 packages/tools/mcp/readiness/
+
+# Plop templates: prettier reads .hbs as Handlebars HTML and joins the TypeScript inside onto one line.
+scripts/generator/files/**/*.hbs
+
+# Claude Code worktrees: separate checkouts, formatted from inside themselves
+.claude/worktrees/

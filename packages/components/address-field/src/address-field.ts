@@ -123,7 +123,7 @@ export class AddressField extends LitElement {
   /** The form field name: the form receives `name[part]` for each part. */
   @property({ reflect: true }) name = ''
 
-  /** The group's accessible name; "Address" by default, or "Address (France)" in a field fixed to one country. */
+  /** The group's accessible name; "Address" by default, or "Address (France)" in a field fixed to one country (with a `label`, or the label of a `c2-form-field` around it, the country is announced as the group's description instead). */
   @property() label = ''
 
   /** The address must be given; otherwise it may be left empty, but once started, the country's required parts are. */
@@ -518,17 +518,21 @@ export class AddressField extends LitElement {
   override render() {
     const format = addressFormat(this.value.country)
     const disabled = this.disabled || this.formDisabled
+    const fixed = this.fixedCountry
+    const named = this.label || this.field.label
+    // An author's name replaces "Address (France)": the country then describes the group, so it is still announced.
+    const describeCountry = !!fixed && !!named
     return html`<div
         class="address"
         part="address"
         role="group"
-        aria-label=${this.label || this.field.label || (this.fixedCountry ? this.msg.t('addressIn', this.countryName(this.fixedCountry)) : this.msg.t('addressGroup'))}
-        aria-describedby=${this.field.describedBy()}
+        aria-label=${named || (fixed ? this.msg.t('addressIn', this.countryName(fixed)) : this.msg.t('addressGroup'))}
+        aria-describedby=${this.field.describedBy(describeCountry && 'fixed-country')}
       >
-        ${this.fixedCountry ? nothing : this.renderCountry(disabled)}
+        ${fixed ? nothing : this.renderCountry(disabled)}
         ${format.rows.map((row) => html`<div class="row" part="row" style="--_parts: ${row.length}">${row.map((part) => this.renderPart(part))}</div>`)}
       </div>
-      ${this.field.renderDescription()}
+      ${describeCountry ? html`<span id="fixed-country" hidden>${this.countryName(fixed)}</span>` : nothing}${this.field.renderDescription()}
       <div class="announcement" role="status">${this.announcement || nothing}</div>`
   }
 }

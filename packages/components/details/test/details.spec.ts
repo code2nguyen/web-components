@@ -429,7 +429,6 @@ const expandedStates = (page: Page) => page.locator('c2-details').evaluateAll((p
 
 test('opening a named panel closes the other panels of its name, each firing toggle', async ({ page, renderScenario }) => {
   await renderScenario(FAQ)
-  // Instant, so every close has finished (and fired its toggle) before the next step.
   await page.addStyleTag({ content: 'c2-details { --c2-details--transition-duration: 0ms }' })
   await page.locator('c2-details').evaluateAll((panels) => {
     const log: Record<string, string[]> = {}
@@ -440,30 +439,35 @@ test('opening a named panel closes the other panels of its name, each firing tog
       panel.addEventListener('toggle', (event) => log[label].push((event as ToggleEvent).newState))
     }
   })
+  // `toggle` is a queued task, and the browser merges an open and a close made before it runs into one event with no
+  // change, which the panel does not re-emit. So each step waits for its events, not only for `expanded`.
+  const toggles = () => page.evaluate(() => (window as unknown as { toggles: Record<string, string[]> }).toggles)
   const summaries = page.locator('summary')
   await summaries.nth(0).click()
   await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  await expect.poll(toggles).toEqual({ Cancel: ['open'], Refunds: [], Discount: [] })
   await summaries.nth(1).click()
   await expect.poll(() => expandedStates(page)).toEqual([false, true, false])
+  await expect.poll(toggles).toEqual({ Cancel: ['open', 'closed'], Refunds: ['open'], Discount: [] })
   await shown(page.getByText('Cancel answer')).toBe(false)
   await expect(page.getByText('Refunds answer')).toBeVisible()
   // From the keyboard, and from code: `expanded` and `toggle()`.
   await summaries.nth(2).press('Enter')
   await expect.poll(() => expandedStates(page)).toEqual([false, false, true])
+  await expect.poll(toggles).toEqual({ Cancel: ['open', 'closed'], Refunds: ['open', 'closed'], Discount: ['open'] })
   await page
     .locator('c2-details')
     .nth(0)
     .evaluate((panel: Details) => (panel.expanded = true))
   await expect.poll(() => expandedStates(page)).toEqual([true, false, false])
+  await expect.poll(toggles).toEqual({ Cancel: ['open', 'closed', 'open'], Refunds: ['open', 'closed'], Discount: ['open', 'closed'] })
   await page
     .locator('c2-details')
     .nth(1)
     .evaluate((panel: Details) => panel.toggle(true))
   await expect.poll(() => expandedStates(page)).toEqual([false, true, false])
   // Each closed panel re-emits its own toggle.
-  await expect
-    .poll(() => page.evaluate(() => (window as unknown as { toggles: Record<string, string[]> }).toggles))
-    .toEqual({ Cancel: ['open', 'closed', 'open', 'closed'], Refunds: ['open', 'closed', 'open'], Discount: ['open', 'closed'] })
+  await expect.poll(toggles).toEqual({ Cancel: ['open', 'closed', 'open', 'closed'], Refunds: ['open', 'closed', 'open'], Discount: ['open', 'closed'] })
   // Closing the open one leaves every panel closed, as native `<details name>` allows.
   await summaries.nth(1).click()
   await expect.poll(() => expandedStates(page)).toEqual([false, false, false])

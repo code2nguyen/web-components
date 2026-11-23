@@ -349,6 +349,111 @@ test('an element elsewhere on the page can be the anchor', async ({ page, render
   expect(surface.y).toBeGreaterThan(anchor.y)
 })
 
+test('a button named by anchor reports the popup and its open state', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-button id="row-7">Actions</c2-button>
+    <div id="cell">Cell</div>
+    <c2-menu anchor="row-7" aria-label="Row"><c2-menu-item value="edit">Edit</c2-menu-item></c2-menu>
+    <c2-menu anchor="cell" aria-label="Cell"><c2-menu-item value="copy">Copy</c2-menu-item></c2-menu>`)
+  const button = page.getByRole('button', { name: 'Actions' })
+  // Nothing is written on the page's button on upgrade (a framework hydrating it would see a mismatch).
+  await expect.poll(() => page.locator('c2-menu[aria-label="Row"]').evaluate((el) => (el as HTMLElement & { hasUpdated: boolean }).hasUpdated)).toBe(true)
+  await expect(button).not.toHaveAttribute('aria-haspopup')
+
+  await page.locator('c2-menu[aria-label="Row"]').evaluate((element) => (element as unknown as { show: () => void }).show())
+  await expect(page.getByRole('menu', { name: 'Row' })).toBeVisible()
+  await expect(button).toHaveAttribute('aria-haspopup', 'menu')
+  await expect(button).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
+
+  // An anchor that is only where the menu is placed is not a button, and gets no popup state.
+  expect(await page.locator('#cell').evaluate((el) => el.getAttributeNames())).toEqual(['id'])
+
+  // Pointing the menu elsewhere takes the popup state off the former anchor.
+  await page.locator('c2-menu[aria-label="Row"]').evaluate((element) => ((element as unknown as { anchor: string }).anchor = 'cell'))
+  await expect(button).not.toHaveAttribute('aria-haspopup')
+  await expect(button).not.toHaveAttribute('aria-expanded')
+})
+
+test('an anchor with a button inside is not a trigger, and a removed menu takes back the popup state', async ({ page, renderScenario }) => {
+  await renderScenario(`<x-field id="field"></x-field><button id="actions">Actions</button>
+    <c2-menu anchor="field" aria-label="Suggestions"><c2-menu-item value="a">A</c2-menu-item></c2-menu>
+    <c2-menu anchor="actions" aria-label="Actions menu"><c2-menu-item value="b">B</c2-menu-item></c2-menu>`)
+  // A field-like element whose shadow root holds a clear button, defined after the menus resolved their anchors.
+  await page.evaluate(() => {
+    customElements.define(
+      'x-field',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          this.attachShadow({ mode: 'open' }).innerHTML = '<input aria-label="Query"><button>Clear</button>'
+        }
+      },
+    )
+  })
+  await page.locator('c2-menu[aria-label="Suggestions"]').evaluate((element) => (element as unknown as { show: () => void }).show())
+  await expect(page.getByRole('menu', { name: 'Suggestions' })).toBeVisible()
+  const clear = page.getByRole('button', { name: 'Clear' })
+  expect(await clear.evaluate((el) => el.getAttributeNames())).toEqual([])
+
+  // A role="button" element is the button itself, not the control inside it.
+  await page.evaluate(() => {
+    const card = document.createElement('x-card')
+    card.id = 'card'
+    card.setAttribute('role', 'button')
+    card.setAttribute('aria-label', 'Card')
+    card.attachShadow({ mode: 'open' }).innerHTML = '<button>Dismiss</button>'
+    document.querySelector('main')!.prepend(card)
+    const menu = document.querySelector('c2-menu[aria-label="Suggestions"]') as HTMLElement & { anchor: string; hide(): void; show(): void }
+    menu.hide()
+    menu.anchor = 'card'
+    menu.show()
+  })
+  await expect(page.getByRole('button', { name: 'Card' })).toHaveAttribute('aria-haspopup', 'menu')
+  expect(await page.getByRole('button', { name: 'Dismiss' }).evaluate((el) => el.getAttributeNames())).toEqual([])
+
+  const actions = page.getByRole('button', { name: 'Actions', exact: true })
+  await page.locator('c2-menu[aria-label="Actions menu"]').evaluate((element) => (element as unknown as { show: () => void }).show())
+  await expect(actions).toHaveAttribute('aria-haspopup', 'menu')
+  // Removing `anchor` takes the state off the former anchor too.
+  await page.locator('c2-menu[aria-label="Actions menu"]').evaluate((el) => el.removeAttribute('anchor'))
+  await expect(actions).not.toHaveAttribute('aria-haspopup')
+  await page.locator('c2-menu[aria-label="Actions menu"]').evaluate((el) => {
+    el.setAttribute('anchor', 'actions')
+    ;(el as unknown as { show: () => void }).show()
+  })
+  await expect(actions).toHaveAttribute('aria-haspopup', 'menu')
+  await page.locator('c2-menu[aria-label="Actions menu"]').evaluate((el) => el.remove())
+  await expect(actions).not.toHaveAttribute('aria-haspopup')
+  await expect(actions).not.toHaveAttribute('aria-expanded')
+})
+
+test('a menu that lets go of its trigger puts back the popup state the author wrote', async ({ page, renderScenario }) => {
+  await renderScenario(`<button id="more" aria-haspopup="true">More</button>
+    <c2-menu anchor="more" aria-label="More"><c2-menu-item value="a">A</c2-menu-item></c2-menu>`)
+  const more = page.getByRole('button', { name: 'More' })
+  await page.locator('c2-menu').evaluate((element) => (element as unknown as { show: () => void }).show())
+  await expect(more).toHaveAttribute('aria-haspopup', 'menu')
+  await page.locator('c2-menu').evaluate((el) => el.remove())
+  await expect(more).toHaveAttribute('aria-haspopup', 'true')
+  await expect(more).not.toHaveAttribute('aria-expanded')
+})
+
+test('an anchor whose app binds aria-expanded is left collapsed, not with the value it had while open', async ({ page, renderScenario }) => {
+  await renderScenario(`<button id="caret" aria-haspopup="menu" aria-expanded="false">Bulk</button>
+    <c2-menu anchor="caret" aria-label="Bulk"><c2-menu-item value="a">A</c2-menu-item></c2-menu>`)
+  const caret = page.getByRole('button', { name: 'Bulk' })
+  // The app writes its own state as it opens the menu, before the menu's toggle.
+  await page.locator('c2-menu').evaluate((element) => {
+    document.getElementById('caret')!.setAttribute('aria-expanded', 'true')
+    ;(element as unknown as { show: () => void }).show()
+  })
+  await expect(page.getByRole('menu', { name: 'Bulk' })).toBeVisible()
+  await page.locator('c2-menu').evaluate((el) => el.remove())
+  await expect(caret).toHaveAttribute('aria-expanded', 'false')
+  await expect(caret).toHaveAttribute('aria-haspopup', 'menu')
+})
+
 test('a link row navigates and still reports its value', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-menu aria-label="Help">
     ${trigger}
@@ -568,4 +673,16 @@ test('a choice row is drawn and announced as a radio without writing type or che
   await expect(row(page, 'a')).toHaveHostAria('aria-checked', 'false')
   for (const value of ['a', 'b'])
     expect(await row(page, value).evaluate((element) => [element.hasAttribute('type'), element.hasAttribute('checked')])).toEqual([false, false])
+})
+
+test('a menu moved while open comes back closed, and its trigger opens it on the first press', async ({ page, renderScenario }) => {
+  await renderScenario(`<section></section><c2-menu aria-label="Share">${trigger}<c2-menu-item value="a">A</c2-menu-item></c2-menu>`)
+  const button = page.getByRole('button', { name: 'Actions' })
+  await button.click()
+  await expect(page.getByRole('menu', { name: 'Share' })).toBeVisible()
+  await page.locator('c2-menu').evaluate((el) => el.ownerDocument.querySelector('section')!.append(el))
+  await expect(page.getByRole('menu', { name: 'Share' })).not.toBeVisible()
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
+  await button.click()
+  await expect(page.getByRole('menu', { name: 'Share' })).toBeVisible()
 })

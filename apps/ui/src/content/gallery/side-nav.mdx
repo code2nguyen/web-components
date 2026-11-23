@@ -6,12 +6,13 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { SideNav } from '@c2n/components/side-nav'
+import { IconButton } from '@c2n/components/icon-button'
 
 ## Drawer styles
 
 Every card is a fixed-height frame with a narrow drawer; the look is a handful of `--c2-side-nav--*` variables on a class. The rows inside are plain links styled by the card.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -215,7 +216,7 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
 
 The overlay is kept inside its frame with `--c2-side-nav__over--position: absolute`; leave it `fixed` in an app so it covers the viewport. The rail cards put the toggle in the drawer header and hide labels with a rule on `:not([opened])`.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Overlay
 <style>
@@ -325,25 +326,15 @@ The overlay is kept inside its frame with `--c2-side-nav__over--position: absolu
     margin-left: 0;
   }
   .icon-rail .collapse {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
+    flex: none;
     margin-left: auto;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--c2-theme--color-on-surface-variant, #71717a);
-    cursor: pointer;
-  }
-  .icon-rail .collapse:hover {
-    background: var(--c2-theme--color-outline-variant, #e4e4e7);
-    color: var(--c2-theme--color-on-surface, #18181b);
-  }
-  .icon-rail .collapse svg {
-    width: 14px;
-    height: 14px;
+    --c2-icon-button__state-layer--size: 28px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .icon-rail .when-closed {
     display: none;
@@ -382,7 +373,7 @@ The overlay is kept inside its frame with `--c2-side-nav__over--position: absolu
     color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
-<c2-side-nav class="icon-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Icon mode: a 44px rail with the collapse button in the drawer header.</div></c2-side-nav>
+<c2-side-nav class="icon-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><c2-icon-button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></c2-icon-button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Icon mode: a 44px rail with the collapse button in the drawer header.</div></c2-side-nav>
 ```
 
 ```html tag=MdxCodeBlock,label=Expanded rail
@@ -417,25 +408,15 @@ The overlay is kept inside its frame with `--c2-side-nav__over--position: absolu
     margin-left: 0;
   }
   .expanded-rail .collapse {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
+    flex: none;
     margin-left: auto;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--c2-theme--color-on-surface-variant, #71717a);
-    cursor: pointer;
-  }
-  .expanded-rail .collapse:hover {
-    background: var(--c2-theme--color-outline-variant, #e4e4e7);
-    color: var(--c2-theme--color-on-surface, #18181b);
-  }
-  .expanded-rail .collapse svg {
-    width: 14px;
-    height: 14px;
+    --c2-icon-button__state-layer--size: 28px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .expanded-rail .when-closed {
     display: none;
@@ -474,7 +455,7 @@ The overlay is kept inside its frame with `--c2-side-nav__over--position: absolu
     color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
-<c2-side-nav opened class="expanded-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Expanded mode: the same rows with icon and label; the header chevrons collapse it.</div></c2-side-nav>
+<c2-side-nav opened class="expanded-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><c2-icon-button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></c2-icon-button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Expanded mode: the same rows with icon and label; the header chevrons collapse it.</div></c2-side-nav>
 ```
 
 </GalleryGrid>

@@ -78,6 +78,9 @@ test('starting while the bar fades out begins a new run from the start', async (
   await renderScenario('<c2-navigation-progress style="--c2-navigation-progress--fade-duration: 2s"></c2-navigation-progress>')
   await call(page, 'start')
   await expect(page.getByRole('progressbar')).toBeVisible()
+  // Faded in first: a `done()` during the fade-in reverses it (a CSS transition reversed is shortened to the time it
+  // ran), so the bar would be gone before this test could start a run during the 2s fade-out.
+  await expect(bar(page).locator('[part="track"]')).toHaveCSS('opacity', '1')
   await call(page, 'done')
   await expect.poll(() => fill(page)).toBe(1)
   await call(page, 'start')

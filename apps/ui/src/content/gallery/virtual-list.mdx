@@ -7,7 +7,7 @@ import { VirtualList } from '@c2n/components/virtual-list'
 
 <VirtualListExamplesRuntime />
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default,description=Baseline virtual list without component CSS-variable overrides,useWhen=Start here before selecting a styled preset,accessibility=Provide an aria-label that describes the collection
 <style>
@@ -35,7 +35,7 @@ and the border and radius group shape the box; the search-field variables theme 
 everything inside a row — padding, type, hover and selected colours, dividers — comes from `c2-list-item`'s own
 variables. A run of adjacent selected rows squares the corners between them on its own.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Bordered
 <style>
@@ -200,7 +200,7 @@ variables. A run of adjacent selected rows squares the corners between them on i
 
 `has-more` says more items can follow the last one. As the end of the list comes within `load-more-distance` of the view, the list fires `load-more` and shows a loading row; append the page to `items` and clear `has-more` after the last one. A page that fails sets `load-more-error`, which shows the message and a Retry button. These cards answer from the page after a short delay; the second fails its second page once.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Infinite feed
 <style>

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -54,7 +54,6 @@
     },
     "build": {
       "dependencies": [
-        "../../../open-packages/chatbot:build",
         "../../components/accordion:build",
         "../../components/action-bar:build",
         "../../components/address-field:build",

@@ -16,7 +16,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Switch } from '@c2n/components/switch'
 import { Separator } from '@c2n/components/separator'
 
-`c2-switch` toggles a setting on or off. It wraps a native `<input type="checkbox" role="switch">`, so Space toggles it, the form receives `name` and `value` while on, and assistive technology announces a switch. The thumb can be clicked or dragged: it follows the pointer and settles on the side it is released. The whole row is the label: text in the default slot and an optional `description` sit beside the track and clicking them toggles it too. Small icons can ride inside the thumb for either state, and every part of the track, thumb and text is a variable. Use it for settings that apply immediately; use `c2-checkbox` for choices that are submitted later.
+`c2-switch` toggles a setting on or off. It wraps a native `<input type="checkbox" role="switch">`, so Space toggles it, the form receives `name` and `value` while on, and assistive technology announces a switch. The thumb can be clicked or dragged: it follows the pointer and settles on the side it is released. The whole row is the label: text in the default slot and an optional `description` sit beside the track and clicking them toggles it too. Small icons can ride inside the thumb for either state, and every part of the track, thumb and text is a variable. Use it for settings that apply immediately; use `c2-checkbox` for choices that are submitted later. {/* c2n-ignore: prose naming a native element in inline code, not markup */}
 
 ## Import
 
@@ -32,14 +32,14 @@ import '@c2n/components/switch'
     display: grid;
     width: 300px;
     max-width: 100%;
-    padding: 4px 16px;
+    gap: 10px;
+    padding: 14px 16px;
     border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
     font-size: 14px;
     color: var(--c2-theme--color-on-surface, #18181b);
   }
   .settings c2-switch {
-    padding: 10px 0;
     --c2-switch__container--flex-direction: row-reverse;
     --c2-switch__container--justify-content: space-between;
     --c2-switch__container--gap: 16px;

@@ -7,7 +7,7 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import { FormField } from '@c2n/components/form-field'
 import { TextField } from '@c2n/components/text-field'
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -27,6 +27,10 @@ import { TextField } from '@c2n/components/text-field'
 </c2-form-field>
 ```
 
+</GalleryGrid>
+
+<GalleryGrid columns="1">
+
 ```html tag=MdxCodeBlock,label=Side label
 <style>
   .side-field {
@@ -40,6 +44,10 @@ import { TextField } from '@c2n/components/text-field'
   <c2-text-field name="workspace" value="Analytical Engines"></c2-text-field>
 </c2-form-field>
 ```
+
+</GalleryGrid>
+
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Quiet label
 <style>

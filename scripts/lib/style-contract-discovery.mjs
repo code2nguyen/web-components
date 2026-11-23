@@ -27,7 +27,7 @@ export function discoverPublishableContracts(repoRoot) {
 
   const packageDirectories = new Set()
   for (const workspace of workspaces) {
-    if (!['packages/components/*', 'packages/icons/*', 'open-packages/*'].includes(workspace)) continue
+    if (!['packages/components/*', 'packages/icons/*'].includes(workspace)) continue
     for (const directory of workspaceDirectories(repoRoot, workspace)) packageDirectories.add(directory)
   }
 

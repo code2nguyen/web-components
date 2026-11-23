@@ -7,21 +7,6 @@
   flex-wrap: wrap;
   justify-content: center;
 }
-.preview-button {
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 7px 14px;
-  border-radius: var(--site-radius-sm);
-  border: 1px solid var(--site-color-outline);
-  background: var(--site-color-surface);
-  color: var(--site-color-on-surface);
-  cursor: pointer;
-  position: relative;
-  &:hover {
-    background: var(--site-color-surface-container-2);
-  }
-}
 .preview-popover {
   padding: 12px 16px;
   font-size: 13px;

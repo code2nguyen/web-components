@@ -4,8 +4,8 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
 
-/** Invoker commands (`commandfor`/`command`) are Baseline newly available; without them the target's own fallback runs. */
-const nativeCommands = !isServer && 'commandForElement' in HTMLButtonElement.prototype
+/** Invoker commands (`commandfor`/`command`): every supported browser has them, so only server rendering, with no button to wire, goes without. */
+const nativeCommands = !isServer
 /** ARIA element reflection (`ariaControlsElements`): the only way an id outside the shadow root reaches the inner button. */
 const elementReflection = !isServer && 'ariaControlsElements' in Element.prototype
 

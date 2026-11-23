@@ -14,7 +14,7 @@ import FindBarExamplesRuntime from '../../components/FindBarExamplesRuntime.astr
 
 Every match is one `<mark>`, styled by the `--c2-highlight__mark--*` variables; the match at `active-index` adds the `--c2-highlight__mark__active--*` ones on top.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-highlight query="apple">Apple pie, apple tart and pineapple crumble.</c2-highlight>
@@ -103,7 +103,7 @@ return formatUser(user)</c2-highlight>
 
 `c2-find-bar` drives the highlights inside the element its `for` names. Type in a card's field: Enter and Shift+Enter step through the matches, Alt+C and Alt+W toggle match case and whole word, Escape clears.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Find in a list
 <style>
@@ -142,8 +142,8 @@ return formatUser(user)</c2-highlight>
     gap: 10px;
     max-width: 460px;
   }
-  .find-replace c2-highlight {
-    display: block;
+  /* c2-highlight is inline text with no box of its own: the code frame is a plain wrapper. */
+  .find-replace-code {
     padding: 10px 12px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px;
@@ -156,9 +156,9 @@ return formatUser(user)</c2-highlight>
 </style>
 <div class="find-replace">
   <c2-find-bar for="find-replace-code" value="user" replace replacement="account" data-find-bar-example="replace"></c2-find-bar>
-  <c2-highlight id="find-replace-code">const user = await getUser(id)
+  <div class="find-replace-code"><c2-highlight id="find-replace-code">const user = await getUser(id)
 if (!user.active) return null
-return formatUser(user)</c2-highlight>
+return formatUser(user)</c2-highlight></div>
 </div>
 ```
 

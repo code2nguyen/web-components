@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: '.',
-  testMatch: ['packages/components/*/test/*.spec.ts', 'open-packages/*/test/*.spec.ts', 'packages/umbrella/test/*.spec.ts', 'tests/style-contracts/*.spec.ts'],
+  testMatch: ['packages/components/*/test/*.spec.ts', 'packages/umbrella/test/*.spec.ts', 'tests/style-contracts/*.spec.ts'],
   // Agent worktrees live inside the repo and carry their own copy of every suite and of @playwright/test. Anchored to
   // this checkout: a bare `**/.claude/worktrees/**` would also match every file of a run started inside a worktree.
   testIgnore: [`${fileURLToPath(new URL('./.claude/worktrees/', import.meta.url))}**`],
@@ -19,7 +19,12 @@ export default defineConfig({
   },
   projects: [
     // `CHROMIUM_PATH` points at a browser installed outside Playwright's cache (a container with a pinned Chromium).
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } } },
+    // The browser's own user agent, not the device's Windows one: components pick ⌘ or Ctrl from the platform the page
+    // reports, and Playwright's `ControlOrMeta` from the host's, so on a Mac the two must agree.
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], userAgent: undefined, launchOptions: { executablePath: process.env.CHROMIUM_PATH || undefined } },
+    },
     {
       name: 'firefox',
       use: {

@@ -14,7 +14,7 @@ import { Button } from '@c2n/components/button'
 
 The key and value columns share one grid with the headers, so `--c2-key-value-editor--key-width` and `--value-width` resize both. The `__field` variables style every input and `__header--display: none` drops the column headers.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-key-value-editor label="Environment variables" entries='[{"key":"API_URL","value":"https://api.example.com"},{"key":"LOG_LEVEL","value":"info"}]'></c2-key-value-editor>

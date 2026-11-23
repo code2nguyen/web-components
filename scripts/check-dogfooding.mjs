@@ -1,7 +1,7 @@
 /**
  * The docs site is the shop window for `@c2n/*`: its own chrome has to be built from `c2-*` elements, themed
- * through their CSS variables, not hand-rolled from bare HTML controls. That rule is written in CLAUDE.md and
- * AGENTS.md, but an instruction is only as good as the gate behind it — this is the gate.
+ * through their CSS variables, not hand-rolled from bare HTML controls. That rule is written in apps/ui/CLAUDE.md (indexed from
+ * the root CLAUDE.md), but an instruction is only as good as the gate behind it — this is the gate.
  *
  * It scans the site's chrome for native interactive elements that have a c2n equivalent and fails on anything
  * that is not in `KNOWN`, the list of places that predate the rule. Shrink that list; never grow it.
@@ -95,7 +95,7 @@ for (const id of stale) console.error(`[dogfood] ${id} is in KNOWN but no longer
 
 if (findings.length > 0 || stale.length > 0) {
   console.error(
-    `\n[dogfood] The docs site builds its chrome from c2n components (see CLAUDE.md / AGENTS.md).\n` +
+    `\n[dogfood] The docs site builds its chrome from c2n components (see apps/ui/CLAUDE.md).\n` +
       `          Use the c2 element, or mark the line \`<!-- dogfood-exempt: why -->\` when plain HTML is the point —\n` +
       `          and log what the component was missing in COMPONENT-FEEDBACK.md.`,
   )

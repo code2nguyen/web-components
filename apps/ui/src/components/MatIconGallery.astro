@@ -19,7 +19,7 @@ const studioCode = '<c2-mat-icon>home</c2-mat-icon>'
   {
     items.map(({ name, markup }) => (
       <div class="mat-icon-gallery__item" data-name={name}>
-        {/* dogfood-exempt: one cell per icon — a c2-icon-button here is thousands of shadow roots on one page. */}
+        {/* dogfood-exempt, c2n-ignore: one cell per icon — a c2-icon-button here is thousands of shadow roots on one page. */}
         <button type="button" class="mat-icon-gallery__configure" title={`Customize ${name}`}>
           <Fragment set:html={markup} />
           <span class="mat-icon-gallery__label">{name}</span>

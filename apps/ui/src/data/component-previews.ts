@@ -115,11 +115,11 @@ export const componentPreviews: Record<string, string> = {
   <time slot="header-time">Now</time>
   <div>I found three ways to simplify this flow.</div>
 </c2-chat-message>`,
-  'chat-message-list': `<c2-chat-message-list style="width:260px;height:170px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;--c2-chat-message-list__content--padding:10px;--c2-chat-message-list__content--gap:10px">
+  'chat-message-list': `<div style="width:260px;height:170px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden"><c2-chat-message-list style="height:100%;--c2-chat-message-list__content--padding:10px;--c2-chat-message-list__content--gap:10px">
   <c2-chat-message style="--c2-chat-message--font-size:13px"><c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--size:24px"></c2-avatar><div>How can I help today?</div></c2-chat-message>
   <c2-chat-message align="right" style="--c2-chat-message--font-size:13px"><div>Summarize my inbox.</div></c2-chat-message>
   <c2-chat-message style="--c2-chat-message--font-size:13px"><c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--size:24px"></c2-avatar><div>You have three threads waiting.</div></c2-chat-message>
-</c2-chat-message-list>`,
+</c2-chat-message-list></div>`,
   checkbox: `<div class="preview-row">
   <c2-checkbox checked></c2-checkbox>
   <c2-checkbox indeterminate></c2-checkbox>
@@ -348,14 +348,14 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
-  'master-detail': `<c2-master-detail open breakpoint="0" style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;font-size:12px;--c2-master-detail__master--width:110px">
+  'master-detail': `<div style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden"><c2-master-detail open breakpoint="0" style="height:100%;font-size:12px;--c2-master-detail__master--width:110px">
   <div slot="master" style="display:grid">
     <span style="padding:8px 10px;background:var(--c2-theme--color-primary-container, #edf1fe);font-weight:600">Ana Ruiz</span>
     <span style="padding:8px 10px">Kenji W.</span>
     <span style="padding:8px 10px">Priya N.</span>
   </div>
   <div slot="detail" style="padding:10px"><strong>Invoice 2041</strong><br>Charged twice for March.</div>
-</c2-master-detail>`,
+</c2-master-detail></div>`,
   'mat-icon': `<div class="preview-row" style="gap:18px;font-size:26px">
   <c2-mat-icon>home</c2-mat-icon>
   <c2-mat-icon>favorite</c2-mat-icon>
@@ -414,7 +414,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   'overflow-list': `<c2-overflow-list style="width:250px" aria-label="Actions"><c2-button>Edit</c2-button><c2-button>Share</c2-button><c2-button>Move</c2-button><c2-button>Archive</c2-button></c2-overflow-list>`,
   'overlap-chart': `<c2-overlap-chart style="width:280px;height:132px;--c2-chart--padding:4px;--c2-chart__region-label--font-size:11px;--c2-chart__set-label--font-size:11px" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web"></c2-chart-series><c2-chart-series field="mobile" label="Mobile"></c2-chart-series><c2-chart-series field="api" label="API"></c2-chart-series></c2-overlap-chart>`,
   overlay: `<div>
-  <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
+  <c2-button commandfor="preview-overlay" command="toggle-popover">Open overlay</c2-button>
   <c2-overlay id="preview-overlay" popover="auto" placement="bottom-start">
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
@@ -539,10 +539,10 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
   <c2-menu-item slot="menu" value="schedule">Schedule send</c2-menu-item>
   <c2-menu-item slot="menu" value="archive">Send and archive</c2-menu-item>
 </c2-split-button>`,
-  'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
+  'split-panel': `<div style="width:260px;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden"><c2-split-panel position="35" style="height:100%;--c2-split-panel__divider--opacity:1;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
-</c2-split-panel>`,
+</c2-split-panel></div>`,
   spreadsheet: `<c2-spreadsheet style="width: 100%" label="Quote" rows="4" columns='[{"label":"Item","width":110},{"label":"Qty","width":56,"format":"number"},{"label":"Total","width":96,"format":"currency"}]' data='[["Design",8,"=B1*120"],["Build",24,"=B2*95"],["Total","=SUM(B1:B2)","=SUM(C1:C2)"]]'></c2-spreadsheet>`,
   stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
   <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
@@ -572,7 +572,7 @@ Grace Hopper,grace(at)navy"></c2-import-mapper>`,
 </div>`,
   'streaming-text': `<c2-streaming-text style="width:260px;font-size:14px;line-height:1.5" data-streaming-text-demo="summary"></c2-streaming-text>`,
   'sunburst-chart': `<c2-sunburst-chart style="width:180px;height:150px;--c2-chart--padding:4px;--c2-chart--font-size:10px" aria-label="Budget by department" label-field="n" value-prefix="$" value-suffix="M" labels="none" data='[{"n":"Engineering","children":[{"n":"Platform","v":2.1},{"n":"Product","v":2},{"n":"Data","v":1}]},{"n":"Sales","children":[{"n":"Field","v":1.6},{"n":"Inside","v":0.9}]},{"n":"Marketing","children":[{"n":"Brand","v":0.9},{"n":"Demand","v":1},{"n":"Events","v":0.3}]},{"n":"Operations","children":[{"n":"Finance","v":0.8},{"n":"People","v":0.7},{"n":"Legal","v":0.4}]}]'><c2-chart-series field="v" label="Budget"></c2-chart-series></c2-sunburst-chart>`,
-  'swipe-action': `<c2-swipe-action open="end" style="width:280px;border:1px solid #e4e4e7;border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
+  'swipe-action': `<c2-swipe-action open="end" style="width:280px;--c2-swipe-action__container--border:1px solid #e4e4e7;--c2-swipe-action__container--border-radius:8px;--c2-swipe-action__actions--padding:0;--c2-swipe-action__actions--gap:0px;--c2-swipe-action__actions--align-items:stretch;--c2-button__container--height:100%;--c2-button__container--border-radius:0px">Quarterly report<c2-button slot="end" style="--c2-button__container--background-color:#d97706">Flag</c2-button><c2-button slot="end" style="--c2-button__container--background-color:#dc2626">Delete</c2-button></c2-swipe-action>`,
   switch: `<div class="preview-row">
   <c2-switch checked></c2-switch>
   <c2-switch></c2-switch>
@@ -628,7 +628,7 @@ Type help for commands.</span></c2-terminal>`,
   toast: `<c2-toast variant="success" heading="Changes saved" message="Your work is up to date." style="width:250px"></c2-toast>`,
   'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   toggletip: `<div class="preview-row" style="flex-direction:column;align-items:flex-start;gap:12px"><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">VAT number <c2-toggletip label="About the VAT number">Your EU VAT number, starting with the country code.</c2-toggletip></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:500">Billing period <c2-toggletip label="About billing periods">Yearly plans cost two months less.</c2-toggletip></span></div>`,
-  tooltip: `<button class="preview-button">Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></button>`,
+  tooltip: `<c2-button>Hover me<c2-tooltip>Helpful tooltip</c2-tooltip></c2-button>`,
   'totp-code': `<c2-totp-code label="GitHub" secret="JBSWY3DPEHPK3PXP" revealed hide-reveal style="width:220px"></c2-totp-code>`,
   tour: `<div class="preview-row">
   <c2-button id="preview-tour-target">Share</c2-button>

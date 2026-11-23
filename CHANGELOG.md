@@ -3,6 +3,38 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [1.0.32](https://github.com/code2nguyen/web-components/releases/tag/v1.0.32) — 2026-11-23
+
+### Breaking changes
+
+- **components:** Remove c2-chatbot and the open-packages directory ([53d4708](https://github.com/code2nguyen/web-components/commit/53d4708))
+
+### Features
+
+- **generator:** Scaffold the documented component skeleton, and check it ([a5fbfa0](https://github.com/code2nguyen/web-components/commit/a5fbfa0))
+- **address-field:** Fix the field to one country when countries lists a single code ([887acee](https://github.com/code2nguyen/web-components/commit/887acee))
+
+### Fixes
+
+- **overlay:** Open from commandfor triggers through the browser's invoker commands (Safari 26.2+, Firefox 144+) ([9787acb](https://github.com/code2nguyen/web-components/commit/9787acb))
+- **keypad:** Fit a long amount completely, not to within a pixel ([49f0fe7](https://github.com/code2nguyen/web-components/commit/49f0fe7))
+- **streaming-text:** Show server-rendered text once after hydration ([ae9b20c](https://github.com/code2nguyen/web-components/commit/ae9b20c))
+- **overlay:** Open from a commandfor trigger in every browser ([2faf7b3](https://github.com/code2nguyen/web-components/commit/2faf7b3))
+- **menu:** Announce the popup on a button named by anchor ([4c55a04](https://github.com/code2nguyen/web-components/commit/4c55a04))
+- **mcp:** Stop validate flagging :not() lists, placeholders, test fixtures and published variables ([310fe6b](https://github.com/code2nguyen/web-components/commit/310fe6b))
+- **address-field:** Still announce the fixed country when a label names the field ([8450746](https://github.com/code2nguyen/web-components/commit/8450746))
+- **cem:** Stop reading data-part attributes as CSS parts ([f397f3a](https://github.com/code2nguyen/web-components/commit/f397f3a))
+- **mcp:** Clear the docs site's validator errors and gate app markup in CI ([4682bf9](https://github.com/code2nguyen/web-components/commit/4682bf9))
+
+### Docs site & examples
+
+- **ui:** Use c2 components instead of native buttons in the docs examples ([f5739cc](https://github.com/code2nguyen/web-components/commit/f5739cc))
+- **ui:** Mark the deliberate native elements for the markup validator ([0434c22](https://github.com/code2nguyen/web-components/commit/0434c22))
+- **ui:** Give gallery cards the row width their component needs ([c46a485](https://github.com/code2nguyen/web-components/commit/c46a485))
+- **ui:** Move preview and preset demo frames off the component hosts ([6c58133](https://github.com/code2nguyen/web-components/commit/6c58133))
+- **ui:** Frame the find-and-replace highlight card with a wrapper ([5551afb](https://github.com/code2nguyen/web-components/commit/5551afb))
+- **ui:** Space the swipe-action and switch usage rows without host box styles ([92283b3](https://github.com/code2nguyen/web-components/commit/92283b3))
+
 ## [1.0.31](https://github.com/code2nguyen/web-components/releases/tag/v1.0.31) — 2026-11-21
 
 ### Features

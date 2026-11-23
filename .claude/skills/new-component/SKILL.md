@@ -6,7 +6,7 @@ argument-hint: <Component Name> [npm|open] [category] [one-line description]
 
 # New component
 
-Create a new `@c2n/<name>` package with the repo's plop generator, implement the element, and wire everything the generator does not touch. Follow CLAUDE.md conventions throughout (theming, JSDoc manifest tags, `override`, `redispatchEvent`, code style).
+Create a new `@c2n/<name>` package with the repo's plop generator, implement the element, and wire everything the generator does not touch. Follow the conventions in `packages/components/CLAUDE.md` throughout (theming, JSDoc manifest tags, `override`, `redispatchEvent`, code style).
 
 ## 1. Collect inputs
 
@@ -15,13 +15,12 @@ From `$ARGUMENTS` and the conversation, determine:
 | Input                       | Notes                                                                                                                                                                                                                                           |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Name**                    | Title Case words, e.g. `Dropdown List`. Plop derives `dashCase` (`dropdown-list`, tag `c2-dropdown-list`, package `@c2n/dropdown-list`), `pascalCase` (`DropdownList`), `camelCase` (`dropdownList`).                                           |
-| **Package type**            | `npm package` → `packages/components/<name>` (default). `open package` → `open-packages/<name>` (MIT "open" components composed from `packages/components/*`, e.g. `chatbot`).                                                                  |
 | **Category**                | One of the enum in `apps/ui/src/schemas/index.ts` (`Inputs`, `Buttons`, `Navigation`, `Layout`, `Data display`, `Table`, `Editors & viewers`, `Chart`, `Planning`, `Feedback`, `Chat`). Drives sidebar grouping, landing gallery and ⌘K search. |
 | **Description + behaviour** | One sentence for the doc frontmatter, plus what the element does: attributes, slots, events, states, which existing components it composes.                                                                                                     |
 
-If only the name is given, default to `npm package`, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components open-packages`.
+If only the name is given, pick the most fitting category yourself, and ask a single question only if the behaviour is genuinely unclear. Check the name is not already taken: `ls packages/components`.
 
-Then settle the six foundation decisions (CLAUDE.md, "Component foundation") before writing code, and state them in the design doc or the first message about the component:
+Then settle the six foundation decisions (`docs/agents/component-foundation.md`) before writing code, and state them in the design doc or the first message about the component:
 
 | Decision         | Write down                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -32,7 +31,7 @@ Then settle the six foundation decisions (CLAUDE.md, "Component foundation") bef
 | **Text**         | Every string the component draws or announces, as a key in `src/messages.ts`.                                                                                                              |
 | **Gallery**      | The list of cards: one per feature above, and which of them need an `<Name>ExamplesRuntime.astro` because the feature is property-only.                                                    |
 
-Then settle the **platform decisions** the same way (CLAUDE.md, "Modern web platform"; step 1 of the `modern-web-review` skill): for each behaviour the component needs (a popup, a dialog, a collapsible region, a growing field, Enter to submit, a long list, drag, a canvas, motion), search the modern-web-guidance guides, read the matching one, and write down the feature you will use, its Baseline status and its fallback. Prefer the platform feature over hand-written JavaScript, and an existing `@c2n/core` helper (`isComposingKey`, `lockPageScroll`, the overlay) over a new copy.
+Then settle the **platform decisions** the same way (`packages/components/CLAUDE.md`, "Modern web platform"; step 1 of the `modern-web-review` skill): for each behaviour the component needs (a popup, a dialog, a collapsible region, a growing field, Enter to submit, a long list, drag, a canvas, motion), search the modern-web-guidance guides, read the matching one, and write down the feature you will use, its Baseline status and its fallback. Prefer the platform feature over hand-written JavaScript, and an existing `@c2n/core` helper (`isComposingKey`, `lockPageScroll`, the overlay) over a new copy.
 
 ## 2. Design mock screen (complex components)
 
@@ -74,18 +73,18 @@ deliberate change.
 Plop accepts the prompt answers as positional bypass args, so never run it interactively:
 
 ```bash
-npm run generate -- "<Name>" "npm package"     # or "open package"
-npm install                                     # link the new workspace into node_modules/@c2n
+npm run generate -- "<Name>"
+npm install                    # link the new workspace into node_modules/@c2n
 ```
 
 `pregenerate` recompiles `scripts/generator/plopfile.ts` → `plopfile.js` first. The generator then:
 
-- copies `scripts/generator/files/wc/**` to the package dir (`package.json`, `vite.config.ts`, tsconfigs, `index.html` harness, `README.md`, `src/<name>.ts`, `src/<name>.scss`, `src/vite-env.d.ts`)
-- adds `"./<packages>/<name>:build"` to the root `package.json` `wireit.build.dependencies`
+- copies `scripts/generator/files/wc/**` to `packages/components/<name>` (`package.json`, `vite.config.ts`, tsconfigs, `index.html` harness, `README.md`, `src/<name>.ts`, `src/<name>.scss`, `src/vite-env.d.ts`)
+- adds `"./packages/components/<name>:build"` to the root `package.json` `wireit.build.dependencies`
 - adds the component's `:build` to `packages/tools/theme/package.json` `wireit.build.dependencies` (the theme generator reads its manifest)
 - scaffolds the Playwright suite `<package>/test/` (`scenarios.html`, `scenarios.ts`, `fixture.ts`, `<name>.spec.ts`)
-- creates the doc stub `apps/ui/src/content/components/<name>.mdx` (open packages: `apps/ui/src/content/oepn-components/<name>.mdx`, see caveat below)
-- **npm packages only:** the `custom-elements.json` import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json` and in `packages/umbrella/package.json`'s `devDependencies`, the side-effect import in `component-modules.ts`, a placeholder entry in `component-previews.ts`, and the gallery stub `apps/ui/src/content/gallery/<name>.mdx`
+- creates the doc stub `apps/ui/src/content/components/<name>.mdx`
+- the `custom-elements.json` import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json` and in `packages/umbrella/package.json`'s `devDependencies`, the side-effect import in `component-modules.ts`, a placeholder entry in `component-previews.ts`, and the gallery stub `apps/ui/src/content/gallery/<name>.mdx`
 
 `npm install` afterwards is not optional: it creates the `node_modules/@c2n/<name>` workspace symlink. Without it
 `npm run ui:build` fails with `failed to resolve import "@c2n/<name>/custom-elements.json"`.
@@ -108,7 +107,7 @@ Edit `src/<name>.ts` and `src/<name>.scss` in the new package. Use `packages/com
 - Re-emit native events with `redispatchEvent` from `@c2n/core/dom-helper.js`. Import sibling components by package name (`@c2n/list-item`), never by relative path, and add them to `dependencies` in the package's `package.json` as `"*"` **and** to its `wireit.type-check.dependencies` as `../<sibling>:build` (see `select`). Without the wireit entry a clean `npm run build` type-checks this package before the sibling has emitted its declarations and fails with `Cannot find module '@c2n/<sibling>'` - and it only shows up on a fresh checkout, never on a warm one.
 - `override` is mandatory on `render`/`update`/etc.; no `any`; prefix unused params with `_`.
 - **An API an agent can read** (AI readiness, below): the class JSDoc says what the element is and when to use it; every public member a consumer may set from script (`render<Part>`, `dataSource`, methods, public getters) has a JSDoc description and a type, and an internal that is public only for TypeScript's sake (a `@query` handle, a handler, internal state) gets `/** @internal */` so the manifest and `get_component` leave it out. A `@cssproperty` whose last segment is not a CSS property (`--size`, `--icon-size`, `--visible-rows`) gets a `- description` saying what it sets (`Width and height of the thumb`). A `@slot` description names the components it typically holds (`a c2-list of c2-list-item links`); a child element's JSDoc names its parent.
-- **Modern platform** (CLAUDE.md, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
+- **Modern platform** (`packages/components/CLAUDE.md`, "Modern web platform"): the platform decisions from step 1, with their fallbacks. In particular: Enter on a text field guarded by `isComposingKey(event)`; focus that has no outline gets `@include focus.forced-colors-ring` (`@use '@c2n/sass/focus'`) and keys on `:focus-visible`; collapsed content stays findable (`::details-content`, `hidden="until-found"`); popups and anything above a modal in the top layer (`popover`, `<dialog>`); no `innerHTML` strings; cross-shadow ARIA through element references; form controls implement `formDisabledCallback` with the fieldset check, `formStateRestoreCallback` and an anchored `setValidity`; a reduced-motion path for every animation.
 - Replace the scaffold's `<c2-<name>>` in `index.html` with a few hand-written usage examples (states, slots, themed variant).
 
 ## 5. Write the test suite
@@ -131,13 +130,11 @@ wall-clock `*.bench.spec.ts` with a committed baseline.
 - `apps/ui/src/data/component-previews.ts` — replace the placeholder with real markup keyed by doc id (use `<div class="preview-row">` for several elements).
 - `apps/ui/src/content/gallery/<name>.mdx` — replace the two stub cards with styled variants worth drawing from; delete the file if the component has no meaningful variants and the Gallery tab should not appear.
 - `apps/ui/src/content/components/<name>.mdx` — fill frontmatter (`title`, `description`, `category`), one intro sentence, `## Import` (` ```typescript tag=CodeBlock ` with `import '@c2n/components/<name>'`; no install section, `@c2n/components` is installed once from Getting started; when the Usage or Gallery markup uses icon tags, add a one-line note installing that icon-set package, e.g. `npm install @c2n/feather-icons`), and a single `## Usage` card: one ` ```html tag=UsageBlock,package=@c2n/<name> ` fence whose body is an optional `<style>` block plus one `<div data-label="Row name">…</div>` per row of live elements. No `# Title`, no `<ApiTable>` (the API tab renders it), no `PresetGallery`.
-  Gallery fences are ` ```html tag=MdxCodeBlock,label=<Card name> ` inside `<GalleryGrid>` (blank lines around each), each a fence-local `<style>` class plus the element — never an inline `style` attribute, which the studio would read as the authored state.
+  Gallery fences are ` ```html tag=MdxCodeBlock,label=<Card name> ` inside `<GalleryGrid>` (blank lines around each), each a fence-local `<style>` class plus the element — never an inline `style` attribute, which the studio would read as the authored state. Pick the cards per row from the component's size (`columns="2"` or `columns="1"` for anything wider than a small control), as "Gallery cards" in `apps/ui/CLAUDE.md` says.
 - **Every feature gets a gallery card** (foundation rule 4): each slot, each renderer, each data form and each variable group worth restyling. Markup-reachable features are plain fences. For a property-only feature (`renderItem`, `dataSource`), put `data-<name>-example="<case>"` on the element in the fence, assign the property from a new `apps/ui/src/components/<Name>ExamplesRuntime.astro` (copy `KanbanExamplesRuntime.astro`), render `<<Name>ExamplesRuntime />` once in the gallery MDX, and add a ` ```ts tag=CodeBlock ` fence with the consumer's code. A `dataSource` card uses a delayed in-page source, never the network.
 - Optional but encouraged: 2–3 curated presets under `'c2-<name>'` in `apps/ui/src/data/component-presets.ts` (they feed the inspector's Presets tab and the MCP `get_presets` tool).
 - Landing gallery, sidebar and search pick the page up automatically from the collection.
 - **For agents** (AI readiness, below): the frontmatter `description` says what the component is in one sentence a developer's need would match; `keywords: ['…']` lists the other names developers use for it (`snackbar`, `segmented control`, `kebab menu`), which `search_components` weighs like its name; `intents:` (a block list of 3–5 sentences) says what a developer is trying to achieve when this component is the right choice, worded as a requirement without naming the widget (`- 'Let users turn a setting on or off with immediate effect.'`), and where a sibling serves a nearby need says what sets this one apart — search reads them and `get_component` prints them. The usage card has at least three rows, each showing a state or option a reader can see (copy the first row and change one attribute; a row that looks like its neighbour misleads). Name canvas-like elements and icon-only buttons with `aria-label` in the examples: agents copy them. Use every named slot in a gallery card.
-
-**Open-package caveat:** `apps/ui/src/content/oepn-components/` is not an Astro collection, so that stub is not served. To document an open package, move the mdx into `apps/ui/src/content/components/`, set `package: '@c2n/<name>'` in its frontmatter, and add the manifest import + `normalizedManifests` entry to `component-manifests.ts` by hand.
 
 ## 7. Verify (match CI)
 
@@ -146,7 +143,10 @@ npm run build -w packages/components/<name>   # type-check + vite build; regener
 npm run build -w packages/tools/theme         # regenerate the base theme; read the coverage table / dist/report.json
 npm run build:tools                           # regenerate the MCP registry (ignored), the skill catalog and the @c2n/components entries (commit those)
 npm install                                   # again if build:tools changed packages/umbrella/package.json (e.g. a third-party dependency the package imports)
+npm run check:reachability                    # served docs page, description, 3+ intents, umbrella entry, tags resolve (docs/agents/adding-a-component.md)
 npm run size:add -w packages/umbrella         # record the new entry's bundle-size budget (only missing entries; commit size-budget.json)
+node scripts/generate-slot-styling-audit.mjs  # add the new slots to scripts/data/slot-styling-audit.json, then fill in each new entry's decision (docs:check)
+node lab/scripts/gaps.mjs > /dev/null         # lab/GAPS.md lists the new component (after build:tools); CI fails on either file left stale
 node packages/tools/mcp/src/cli.ts validate apps/ui/src/content/components/<name>.mdx apps/ui/src/content/gallery/<name>.mdx  # plus any example-app file you touched: catches an attribute or slot a c2-* element does not have
 node .claude/skills/modern-web-review/scripts/scan.mjs packages/components/<name>   # legacy-pattern scan: fix each error or justify it with a modern-web-ignore comment
 npm run lint && npm run format:check          # or: npm run fix
@@ -217,13 +217,13 @@ that the review was done and what it caught.
 ## Checklist to report
 
 - foundation decisions met: presentation only through CSS variables, extension through slots and `render<Part>` functions, declarative + in-memory + `dataSource` data for a collection component, action zones instead of built-in commands, all text through message keys, and a gallery card for every feature (property-only ones through `<Name>ExamplesRuntime.astro`)
-- `packages/components/<name>/` (or `open-packages/<name>/`) scaffolded, implemented, built, `custom-elements.json` generated
+- `packages/components/<name>/` scaffolded, implemented, built, `custom-elements.json` generated
 - the package stays private (`"private": true`): it ships only inside `@c2n/components`; `npm run build:tools` regenerates the umbrella's `src/**` entries (the runtime `.js` and its `.d.ts` declaration, per package and per element module) and its `package.json` exports; commit all of them, and write the README's install and import lines as `npm install @c2n/components` / `import '@c2n/components/<name>'`
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
 - `npm run size:add -w packages/umbrella` run and `packages/umbrella/size-budget.json` committed (one new line, nothing else changed)
 - `npm run build:tools` run (then `npm install` again if it changed `packages/umbrella/package.json`, with `package-lock.json` committed); generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/component-catalog.md` committed
-- the component's row deleted from `COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
+- the component's row deleted from `docs/planning/COMPONENT-ROADMAP.md` when it has one (the roadmap lists only what is still to build)
 - `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - AI readiness: `npm run mcp:readiness` scores the component A (≥ 90) with no honestly fixable check left, its discovery requirements in `tasks.json` rank it in the top 3, nothing else regressed, and `packages/tools/mcp/readiness/` is committed
 - `apps/ui/src/store/component-manifests.ts` import + entry

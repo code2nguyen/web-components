@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
-import { test, expect, accessible, hostAria } from '../../../../tests/component-fixture'
+import { test, expect, accessible, hostAria, isApple } from '../../../../tests/component-fixture'
 import type { MindMapLayout, MindMapNode } from '../src/mind-map-types'
 
 /**
@@ -470,11 +470,11 @@ test.describe('navigation', () => {
     const zoom = () => host(page).evaluate((map: MindMap) => map.panZoom!.zoom)
     const start = await zoom()
     await focusTopic(page, 'Q3 launch')
-    await page.keyboard.press('Control+=')
+    await page.keyboard.press('ControlOrMeta+=')
     await expect.poll(zoom).toBeGreaterThan(start)
-    await page.keyboard.press('Control+0')
+    await page.keyboard.press('ControlOrMeta+0')
     await expect.poll(zoom).toBeCloseTo(start, 3)
-    await page.keyboard.press('Control+-')
+    await page.keyboard.press('ControlOrMeta+-')
     await expect.poll(zoom).toBeLessThan(start)
   })
 })
@@ -557,7 +557,7 @@ test.describe('editing', () => {
     await expect(status(page)).toHaveText('Renamed to Xray two')
 
     await page.keyboard.press('F2')
-    await page.keyboard.press('Control+a')
+    await page.keyboard.press('ControlOrMeta+a')
     await page.keyboard.type('Blurred')
     await page.locator('#after').focus()
     expect(await host(page).evaluate((map: MindMap) => map.getNode('a1')?.label)).toBe('Blurred')
@@ -565,7 +565,7 @@ test.describe('editing', () => {
     // A blank label is not saved.
     await focusTopic(page, 'Blurred')
     await page.keyboard.press('F2')
-    await page.keyboard.press('Control+a')
+    await page.keyboard.press('ControlOrMeta+a')
     await page.keyboard.press('Backspace')
     await page.keyboard.press('Enter')
     expect(await host(page).evaluate((map: MindMap) => map.getNode('a1')?.label)).toBe('Blurred')
@@ -602,7 +602,8 @@ test.describe('editing', () => {
     await expect(topic(page, 'Launch event')).toHaveCount(0)
     await expect(topic(page, 'Venue')).toHaveCount(0)
     expect(await focusedId(page)).toBe('seo')
-    await expect(status(page)).toHaveText('Deleted Launch event and 2 subtopics. Ctrl+Z to undo')
+    const undo = (await isApple(page)) ? '⌘+Z' : 'Ctrl+Z'
+    await expect(status(page)).toHaveText(`Deleted Launch event and 2 subtopics. ${undo} to undo`)
     const change = (await events(page)).find((event) => event.type === 'change')!
     expect(change.detail.action).toMatchObject({ type: 'delete', index: 2 })
     expect(change.detail.action!.node.id).toBe('event')
@@ -611,7 +612,7 @@ test.describe('editing', () => {
     await focusTopic(page, 'Search')
     await page.keyboard.press('Backspace')
     expect(await focusedId(page)).toBe('ads')
-    await expect(status(page)).toHaveText('Deleted Search. Ctrl+Z to undo')
+    await expect(status(page)).toHaveText(`Deleted Search. ${undo} to undo`)
     await page.keyboard.press('Backspace')
     expect(await focusedId(page)).toBe('mkt')
 
@@ -691,17 +692,17 @@ test.describe('editing', () => {
     await page.keyboard.press('Delete')
     await focusTopic(page, 'Bravo')
     await page.keyboard.press(' ')
-    await page.keyboard.press('Control+z')
+    await page.keyboard.press('ControlOrMeta+z')
     await expect(topic(page, 'Four')).toBeVisible()
     await expect(status(page)).toHaveText('Undone')
-    await page.keyboard.press('Control+z')
+    await page.keyboard.press('ControlOrMeta+z')
     await expect(topic(page, 'Two')).toBeVisible()
     expect(await childLabels(page, 'a')).toEqual(['One', 'Two', 'Three'])
     // The selection comes back with the step.
     expect(await focusedId(page)).toBe('a2')
-    await page.keyboard.press('Control+z')
+    await page.keyboard.press('ControlOrMeta+z')
     await expect(status(page)).toHaveText('Nothing to undo')
-    await page.keyboard.press('Control+Shift+z')
+    await page.keyboard.press('ControlOrMeta+Shift+z')
     expect(await childLabels(page, 'a')).toEqual(['One', 'Three'])
     await expect(status(page)).toHaveText('Redone')
     expect(await host(page).evaluate((map: MindMap) => map.redo())).toBe(true)
@@ -883,7 +884,7 @@ test.describe('tab and focus', () => {
   test('read-only: Tab leaves, and the editing keys do nothing', async ({ page, renderScenario }) => {
     await render(page, renderScenario, mindMap(small))
     await focusTopic(page, 'Alpha')
-    for (const key of ['Delete', 'F2', 'x', 'Insert', 'Alt+ArrowDown', 'Control+z']) await page.keyboard.press(key)
+    for (const key of ['Delete', 'F2', 'x', 'Insert', 'Alt+ArrowDown', 'ControlOrMeta+z']) await page.keyboard.press(key)
     await expect(host(page).getByRole('textbox')).toHaveCount(0)
     expect(await childLabels(page, 'root')).toEqual(['Alpha', 'Bravo'])
     expect(await childLabels(page, 'a')).toEqual(['One', 'Two', 'Three'])

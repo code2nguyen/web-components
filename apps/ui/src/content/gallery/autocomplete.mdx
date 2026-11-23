@@ -28,17 +28,9 @@ These examples exercise different capabilities instead of repeating the same dat
     gap: 12px;
     font-size: 12px;
   }
-  .mention-header button,
-  .mention-footer button {
+  .mention-header c2-link-button,
+  .mention-footer c2-link-button {
     flex: none;
-    white-space: nowrap;
-    border: 0;
-    padding: 0;
-    color: #7c3aed;
-    background: none;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
   }
 </style>
 <c2-autocomplete
@@ -54,8 +46,8 @@ These examples exercise different capabilities instead of repeating the same dat
   search-fields="name;role;location"
   suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer","location":"London","status":"online"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead","location":"New York","status":"busy"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist","location":"Hampton","status":"away"}]'
 >
-  <div slot="header" class="mention-header"><strong>People in this workspace</strong><button type="button" data-invite-person>Invite person</button></div>
-  <div slot="footer" class="mention-footer"><span data-example-status>Selection keeps the @ query</span><button type="button" data-view-team>View team</button></div>
+  <div slot="header" class="mention-header"><strong>People in this workspace</strong><c2-link-button data-invite-person>Invite person</c2-link-button></div>
+  <div slot="footer" class="mention-footer"><span data-example-status>Selection keeps the @ query</span><c2-link-button data-view-team>View team</c2-link-button></div>
 </c2-autocomplete>
 ```
 
@@ -278,17 +270,18 @@ autocomplete.renderItem = ({ item }) => html`
     gap: 12px;
     font-size: 12px;
   }
-  .mention-header button,
-  .mention-footer button {
+  .mention-header c2-link-button,
+  .mention-footer c2-link-button {
     flex: none;
-    white-space: nowrap;
-    border: 0;
-    padding: 0;
-    color: #7c3aed;
-    background: none;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
+    --c2-link-button__container--padding-top: 0;
+    --c2-link-button__container--padding-right: 0;
+    --c2-link-button__container--padding-bottom: 0;
+    --c2-link-button__container--padding-left: 0;
+    --c2-link-button__container--color: #7c3aed;
+    --c2-link-button__container__hover--color: #7c3aed;
+    --c2-link-button__container--text-decoration-color: #7c3aed;
+    --c2-link-button__container--font-size: 12px;
+    --c2-link-button__container--font-weight: 600;
   }
 </style>
 <c2-autocomplete
@@ -304,8 +297,8 @@ autocomplete.renderItem = ({ item }) => html`
   search-fields="name;role;location"
   suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer","location":"London","status":"online"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead","location":"New York","status":"busy"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist","location":"Hampton","status":"away"}]'
 >
-  <div slot="header" class="mention-header"><strong>People in this workspace</strong><button type="button" data-invite-person>Invite person</button></div>
-  <div slot="footer" class="mention-footer"><span data-example-status>Selection keeps the @ query</span><button type="button" data-view-team>View team</button></div>
+  <div slot="header" class="mention-header"><strong>People in this workspace</strong><c2-link-button data-invite-person>Invite person</c2-link-button></div>
+  <div slot="footer" class="mention-footer"><span data-example-status>Selection keeps the @ query</span><c2-link-button data-view-team>View team</c2-link-button></div>
   <svg slot="prefix-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.9 7.9"/></svg>
   <svg slot="suffix-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1"/></svg>
   <svg slot="clear-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>

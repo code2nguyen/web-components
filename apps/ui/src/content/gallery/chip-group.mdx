@@ -15,7 +15,7 @@ import { Badge } from '@c2n/components/badge'
 
 The group itself only owns the gap and the `+N` indicator: `--c2-chip-group__overflow--*` sets its pill (height, padding, border, background, colour, type) and the `__hover`/`__focus` states apply when it is an `expandable` button. Style the items through their own `c2-chip` and `c2-badge` variables.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
@@ -82,7 +82,7 @@ The group itself only owns the gap and the `+N` indicator: `--c2-chip-group__ove
 
 The name of the `+N` indicator and the collapse button are message tokens: an app translates them once with `addTranslations`, and each group speaks the language of its nearest `lang`. `more-label` and `collapse-label` still override one instance.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=En français,description=The collapse button and the indicator in the language of the page,useWhen=The application is translated
 <style>

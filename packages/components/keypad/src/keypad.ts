@@ -238,10 +238,17 @@ export class Keypad extends LitElement {
     const display = this.renderRoot?.querySelector<HTMLElement>('.display--amount')
     if (!display) return
     display.style.removeProperty('font-size')
-    const { scrollWidth, clientWidth } = display
-    if (scrollWidth <= clientWidth || !clientWidth) return
-    const size = parseFloat(getComputedStyle(display).fontSize)
-    display.style.fontSize = `${Math.floor(size * (clientWidth / scrollWidth) * 100) / 100}px`
+    // Text does not scale exactly with its size (glyph widths round, hinting differs by font), so one proportional step
+    // can leave a pixel over: shrink again, a few times at most.
+    for (let pass = 0; pass < 4; pass++) {
+      const { scrollWidth, clientWidth } = display
+      if (scrollWidth <= clientWidth || !clientWidth) return
+      const size = parseFloat(getComputedStyle(display).fontSize)
+      const next = Math.max(1, Math.floor(size * (clientWidth / scrollWidth) * 100) / 100 - (pass ? 0.5 : 0))
+      // A display too narrow for any size: stop rather than measure the same overflow again.
+      if (next >= size) return
+      display.style.fontSize = `${next}px`
+    }
   }
 
   /** The value the keys could have typed: digits, one point with an amount, within the lengths. */

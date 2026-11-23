@@ -6,8 +6,8 @@ argument-hint: '[component or issue number…]'
 
 # Fix component feedback
 
-The feedback log is where apps record friction with `c2-*` components (see "Report back what you hit" in CLAUDE.md).
-This skill clears it. Follow CLAUDE.md throughout: the component foundation rules, theming grammar, message tokens,
+The feedback log is where apps record friction with `c2-*` components (see "Report back what you hit" in `apps/ui/CLAUDE.md`).
+This skill clears it. Follow `packages/components/CLAUDE.md` and `docs/agents/component-foundation.md` throughout: the component foundation rules, theming grammar, message tokens,
 and "never write an attribute on the host".
 
 ## 1. Collect the open entries

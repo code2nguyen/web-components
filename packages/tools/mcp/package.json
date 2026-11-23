@@ -1,6 +1,6 @@
 {
   "name": "@c2n/mcp",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
   "mcpName": "io.github.code2nguyen/c2n",
   "type": "module",
@@ -50,6 +50,7 @@
     "presmoke": "npm run build",
     "prepack": "npm run build",
     "smoke": "node scripts/smoke.ts",
+    "check:reachability": "node scripts/check-reachability.ts",
     "theme:examples": "node scripts/theme-examples.ts",
     "test": "node --test scripts/*.test.ts",
     "readiness": "node scripts/readiness.ts",
@@ -72,7 +73,6 @@
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",
         "../../icons/*/custom-elements.json",
-        "../../../open-packages/*/custom-elements.json",
         "../../../apps/ui/src/content/**/*.mdx",
         "../../../apps/ui/src/data/component-presets.ts",
         "../../../apps/ui/src/data/component-previews.ts",

@@ -57,12 +57,15 @@ const components = [
     element('c2-table', 'table', {
       attributes: ['row-key', 'rows', 'selection'],
       properties: ['rows', 'rowKey', 'selection'],
-      slots: ['toolbar', 'cell:{line}:{field}'],
+      slots: ['toolbar', 'cell:{line}:{field}', 'detail-<row>'],
       events: ['selection-change'],
     }),
     element('c2-table-column', 'table', { attributes: ['field', 'header', 'cell-slot'], properties: ['field', 'header', 'cellSlot', 'renderCell'] }),
   ]),
   component('tabs', [element('c2-tabs', 'tabs'), element('c2-tab', 'tabs')]),
+  component('page-header', [element('c2-page-header', 'page-header', { slots: ['actions'] })]),
+  component('app-shell', [element('c2-app-shell', 'app-shell')]),
+  component('side-nav', [element('c2-side-nav', 'side-nav')]),
   component(
     'feather-icons',
     [{ ...element('c2-feather-{name}', 'feather-icons'), modulePath: '@c2n/feather-icons/icons/{name}.js', className: 'Feather{Name}' }],
@@ -135,8 +138,35 @@ test('reads Lit expressions with quotes and nested templates as one value', () =
   )
 })
 
+test('accepts the attributes a container reads off its descendants, inside that container only', () => {
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" primary overflow-priority="2" menu-label="Export">Go</c2-button></c2-page-header>'), [])
+  assert.deepEqual(rules('<c2-app-shell><div><c2-button app-shell-toggle="aside">Details</c2-button></div></c2-app-shell>'), [])
+  assert.deepEqual(rules('<c2-side-nav><c2-button side-nav-toggle>Menu</c2-button></c2-side-nav>'), [])
+  // Outside its container the attribute does nothing: `primary` is no look of c2-button.
+  assert.deepEqual(rules('<c2-button primary>Save</c2-button>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header></c2-page-header><c2-button menu-label="x">Go</c2-button>'), ['1:unknown-attribute'])
+  // c2-page-header reads its actions only: a direct child in the `actions` slot.
+  assert.deepEqual(rules('<c2-page-header><div slot="actions"><c2-button primary>Go</c2-button></div></c2-page-header>'), ['1:unknown-attribute'])
+  assert.deepEqual(rules('<c2-page-header><c2-button primary>Go</c2-button></c2-page-header>'), ['1:unknown-attribute'])
+  // A toggle may be rendered inside the shell from another file: a warning, not an error.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button app-shell-toggle="navigation">Menu</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
+  // An action built in another template than its page header: a warning.
+  assert.deepEqual(
+    validateMarkup(registry, '<c2-button slot="actions" primary>Save</c2-button>').findings.map((f) => `${f.rule}:${f.severity}`),
+    ['unknown-attribute:warning'],
+  )
+  // Vue's `:primary` falls back to the attribute on an element without that property.
+  assert.deepEqual(rules('<c2-page-header><c2-button slot="actions" :primary="isMain">Go</c2-button></c2-page-header>', 'a.vue'), [])
+  // A property binding is not the attribute the container reads.
+  assert.deepEqual(rules('<c2-page-header><c2-button .primary=${true}>Go</c2-button></c2-page-header>', 'a.ts'), ['1:unknown-attribute'])
+})
+
 test('accepts templated slot names and framework directives', () => {
-  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="cell:3:change"></span><span slot="detail-docs"></span><span slot="detail-user:42"></span></c2-table>'), [])
+  assert.deepEqual(rules('<c2-table><span slot="detail"></span></c2-table>'), ['1:unknown-slot'])
   assert.deepEqual(rules('<c2-text-field v-model="q" :value.prop="v" @input="f" client:load *ngIf="x" [(ngModel)]="m" ngModel></c2-text-field>'), [])
 })
 
@@ -182,6 +212,57 @@ test('reports a variable family prefix used in code, not in prose', () => {
     '1:unknown-css-variable',
   ])
   assert.deepEqual(rules('<p>The --c2-button__container… variables</p>'), [])
+  // A placeholder after the prefix names the family, also inside var().
+  assert.deepEqual(rules('<p>Map it to `var(--c2-theme--…, x)` or `var(--c2-theme--<token>, x)`.</p>'), [])
+})
+
+test('accepts reading a variable an element publishes in its description, not setting it', () => {
+  const overlay = element('c2-overlay', 'overlay')
+  overlay.description = 'Exposes the room left as `--c2-overlay--available-height` and the `--c2-button__container` family.'
+  const withOverlay: Registry = {
+    ...registry,
+    components: { ...registry.components, overlay: component('overlay', [overlay]) },
+    tagIndex: { ...registry.tagIndex, 'c2-overlay': 'overlay' },
+  }
+  const found = (source: string) => validateMarkup(withOverlay, source, 'a.css').findings.map((f) => `${f.line}:${f.severity}`)
+  assert.deepEqual(found('.list { max-height: var(--c2-overlay--available-height) }'), [])
+  assert.deepEqual(found('.list { --c2-overlay--available-height: 10px }'), ['1:error'])
+  const inTsx = (source: string) => validateMarkup(withOverlay, source, 'A.tsx').findings.map((f) => `${f.line}:${f.rule}`)
+  assert.deepEqual(inTsx(`<div style={{ '--c2-overlay--available-height': '10px' }} />`), ['1:unknown-css-variable'])
+  assert.deepEqual(inTsx(`el.style.setProperty('--c2-overlay--available-height', '10px')`), ['1:unknown-css-variable'])
+  assert.deepEqual(inTsx(`el.style.setProperty(\n  '--c2-overlay--available-height', h)`), ['2:unknown-css-variable'])
+  assert.deepEqual(inTsx(`<div style={{ ['--c2-overlay--available-height' as string]: h }} />`), ['1:unknown-css-variable'])
+  const inFile = (source: string, file: string) => validateMarkup(withOverlay, source, file).findings.map((f) => `${f.line}:${f.severity}`)
+  assert.deepEqual(inFile(`<div style:--c2-overlay--available-height={h}></div>`, 'A.svelte'), ['1:warning'])
+  assert.deepEqual(inFile(`<div [style.--c2-overlay--available-height]="h"></div>`, 'a.component.html'), ['1:warning'])
+  // Naming it is reading it: a list, a ternary, a case label, prose.
+  assert.deepEqual(
+    inTsx(`const n = ['--c2-overlay--available-width', '--c2-overlay--available-height']`).filter((f) => f.includes('height')),
+    [],
+  )
+  assert.deepEqual(inTsx(`const v = tall ? '--c2-overlay--available-height' : 'x'`), [])
+  assert.deepEqual(inFile('- `--c2-overlay--available-height`: the room left below', 'a.mdx'), [])
+})
+
+test('reads the subject of a selector, not a group inside :not() or :has(), as the host', () => {
+  assert.deepEqual(rules(':not(c2-button, c2-select) > hr { border: none; border-top: 1px solid }', 'a.css'), [])
+  assert.deepEqual(rules('hr:not(c2-button, c2-select) { border: 1px solid }', 'a.css'), [])
+  assert.deepEqual(rules('.a:has(> c2-button) { padding: 4px }', 'a.css'), [])
+  assert.deepEqual(rules('c2-list-item { outline: none }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules('c2-x:is(.a, :not(.b)) { padding: 4px }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules(':is(c2-button, c2-select) { padding: 4px }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules('.bar > :where(c2-button) { border: 1px solid }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules('.bar > :is(.x, c2-button) { padding: 4px }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules(':is(c2-button:nth-child(2), .b) { padding: 4px }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules('c2-button {\n  padding: 0\n    16px;\n}', 'a.css'), ['2:host-box-style'])
+  assert.deepEqual(rules('.card :is(c2-button .label) { padding: 4px }', 'a.css'), [])
+  assert.deepEqual(rules('.toolbar:is(c2-button) { padding: 4px }', 'a.css'), ['1:host-box-style'])
+  assert.deepEqual(rules(':where(.a, :not(.b)) hr, .c { padding: 4px }', 'a.css'), [])
+  assert.deepEqual(rules('c2-button { padding: 0 4px }', 'a.css'), ['1:host-box-style'])
+  // A reset is still box styling: some components draw their own box on the host, so `c2-command { box-shadow: none }`
+  // goes around `--c2-command--box-shadow`. A deliberate one takes a c2n-ignore comment.
+  assert.deepEqual(rules('c2-button.flat { padding: 0; border: none }', 'a.css'), ['1:host-box-style', '1:host-box-style'])
+  assert.deepEqual(rules('<c2-button style={{ padding: 0, borderTop: "1px solid" }}>Go</c2-button>', 'A.tsx'), ['1:host-box-style', '1:host-box-style'])
 })
 
 test('reads Vue dynamic arguments, Svelte bind:this, Angular key filters and bound input types', () => {

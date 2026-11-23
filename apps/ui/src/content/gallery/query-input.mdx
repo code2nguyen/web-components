@@ -13,7 +13,7 @@ import { QueryInput } from '@c2n/components/query-input'
 
 The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--background`, `--c2-query-input--border-radius`, `--c2-query-input--font-family`), with `__hover--*` and `__focus--*` states on top. The syntax colours are `--c2-query-input__key--*`, `__value--*`, `__comparator--color`, `__operator--color`, `__negation--color` and `__invalid--color`; the `key:value` chips are styled by `--c2-query-input__filter--*` (background, border, radius, and the `__negated`, `__inactive` and `__invalid` states), and a term still being typed by `--c2-query-input__term--*`. The suggestions list follows `--c2-query-input__panel--*` and `--c2-query-input__option--*`.
 
-<GalleryGrid>
+<GalleryGrid columns="1">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-query-input value="service:web -status:>=500 env:prod" aria-label="Query"></c2-query-input>
@@ -106,7 +106,7 @@ The box is one set of variables (`--c2-query-input--border`, `--c2-query-input--
 
 The heading of the field suggestions and the names of the field, the clear button and each filter's remove button are message tokens: an app translates them once with `addTranslations`, and each query input speaks the language of its nearest `lang`.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=En français,description=The suggestions heading and the remove and clear buttons in the language of the page,useWhen=The application is translated
 <div lang="fr">

@@ -288,11 +288,12 @@ c2-flow.schema {
 ```ts tag=CodeBlock
 import { html } from 'lit'
 import '@c2n/components/flow'
+import '@c2n/components/progress'
 
 const flow = document.querySelector('c2-flow')!
 flow.renderNode = ({ node, status }) => html`
   <strong>${node.label}</strong>
-  <progress max="100" value=${node.data.progress}></progress>
+  <c2-progress label=${`${node.label} progress`} value=${node.data.progress}></c2-progress>
   <small>${status} · ${node.data.metric}</small>
 `
 flow.addEventListener('node-click', ({ detail }) => openDetails(detail.node))
