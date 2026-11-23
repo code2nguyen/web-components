@@ -2,6 +2,126 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "1.0.32",
+      "date": "2026-11-23",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["components"],
+              "text": "Remove c2-chatbot and the open-packages directory",
+              "hash": "53d4708"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["generator"],
+              "text": "Scaffold the documented component skeleton, and check it",
+              "hash": "a5fbfa0"
+            },
+            {
+              "scopes": ["address-field"],
+              "text": "Fix the field to one country when countries lists a single code",
+              "hash": "887acee"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["overlay"],
+              "text": "Open from commandfor triggers through the browser's invoker commands (Safari 26.2+, Firefox 144+)",
+              "hash": "9787acb"
+            },
+            {
+              "scopes": ["keypad"],
+              "text": "Fit a long amount completely, not to within a pixel",
+              "hash": "49f0fe7"
+            },
+            {
+              "scopes": ["streaming-text"],
+              "text": "Show server-rendered text once after hydration",
+              "hash": "ae9b20c"
+            },
+            {
+              "scopes": ["overlay"],
+              "text": "Open from a commandfor trigger in every browser",
+              "hash": "2faf7b3"
+            },
+            {
+              "scopes": ["menu"],
+              "text": "Announce the popup on a button named by anchor",
+              "hash": "4c55a04"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Stop validate flagging :not() lists, placeholders, test fixtures and published variables",
+              "hash": "310fe6b"
+            },
+            {
+              "scopes": ["address-field"],
+              "text": "Still announce the fixed country when a label names the field",
+              "hash": "8450746"
+            },
+            {
+              "scopes": ["cem"],
+              "text": "Stop reading data-part attributes as CSS parts",
+              "hash": "f397f3a"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Clear the docs site's validator errors and gate app markup in CI",
+              "hash": "4682bf9"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Use c2 components instead of native buttons in the docs examples",
+              "hash": "f5739cc"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Mark the deliberate native elements for the markup validator",
+              "hash": "0434c22"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Give gallery cards the row width their component needs",
+              "hash": "c46a485"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Move preview and preset demo frames off the component hosts",
+              "hash": "6c58133"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Frame the find-and-replace highlight card with a wrapper",
+              "hash": "5551afb"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Space the swipe-action and switch usage rows without host box styles",
+              "hash": "92283b3"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.0.31",
       "date": "2026-11-21",
       "sections": [
