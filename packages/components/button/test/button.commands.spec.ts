@@ -2,8 +2,6 @@ import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import { test, expect } from './fixture'
 
-const supportsCommands = (page: Page) => page.evaluate(() => 'commandForElement' in HTMLButtonElement.prototype)
-
 /** Replaces the scenario with `html` once the button module is loaded, and records the `command` events of `#panel`. */
 const render = async (page: Page, html: string) => {
   await page.locator('main').evaluate((main, markup) => {
@@ -34,7 +32,6 @@ test('is opt-in: a plain button renders no command and no expanded state', async
 for (const input of ['mouse', 'Enter', 'Space']) {
   test(`a custom command reaches its target as a command event with ${input}`, async ({ page, scenario }) => {
     await scenario()
-    test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
     await render(page, '<c2-button commandfor="panel" command="--refresh">Refresh</c2-button><div id="panel">Panel</div>')
     const button = page.getByRole('button', { name: 'Refresh' })
     if (input === 'mouse') await button.click()
@@ -48,7 +45,6 @@ for (const input of ['mouse', 'Enter', 'Space']) {
 
 test('a built-in command opens a popover, and the target may be added after the button', async ({ page, scenario }) => {
   await scenario()
-  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
   await render(page, '<c2-button commandfor="tip" command="toggle-popover">Help</c2-button>')
   await page
     .locator('main')
@@ -63,7 +59,6 @@ test('a built-in command opens a popover, and the target may be added after the 
 
 test('a disabled button or a submit button of a form sends no command', async ({ page, scenario }) => {
   await scenario()
-  test.skip(!(await supportsCommands(page)), 'invoker commands (commandfor) are not supported by this browser')
   await render(
     page,
     `<c2-button commandfor="panel" command="--off" disabled>Off</c2-button>

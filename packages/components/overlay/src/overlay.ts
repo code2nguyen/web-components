@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS, isServer, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { isCommandInvoker } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { computePosition, autoUpdate, flip, offset, shift, size, type Placement } from '@floating-ui/dom'
 import styles from './overlay.scss?inline'
@@ -17,9 +18,6 @@ export interface Overlay {
   addEventListener: TypedAddEventListener<Overlay, OverlayEventMap>
   removeEventListener: TypedRemoveEventListener<Overlay, OverlayEventMap>
 }
-
-/** A native button, or an element that forwards commands to the button in its shadow root (`c2-button`, which has `commandFor`). */
-const isInvoker = (element: Element) => element instanceof HTMLButtonElement || ('commandFor' in element && !!element.shadowRoot?.querySelector('button'))
 
 const POSITIONING_VARIABLES = ['--c2-overlay--offset-y', '--c2-overlay--offset-x', '--c2-overlay--viewport-padding']
 
@@ -126,7 +124,7 @@ export class Overlay extends LitElement {
     const triggers = new Set<HTMLElement>()
     if (this.id && root.querySelectorAll)
       for (const trigger of root.querySelectorAll<HTMLElement>(`[commandfor="${CSS.escape(this.id)}"][command="toggle-popover" i]`))
-        if (!(trigger instanceof HTMLButtonElement) && isInvoker(trigger) && customElements.get(trigger.localName)) triggers.add(trigger)
+        if (!(trigger instanceof HTMLButtonElement) && isCommandInvoker(trigger) && customElements.get(trigger.localName)) triggers.add(trigger)
     for (const trigger of this.expandedTriggers)
       if (!triggers.has(trigger)) {
         this.setExpanded(trigger, this.authoredExpanded.get(trigger) == null ? null : 'false')
@@ -157,12 +155,12 @@ export class Overlay extends LitElement {
     if (!this.id) return null
     const id = CSS.escape(this.id)
     // A trigger that opens it: not a `hide-popover` button, and never one inside the overlay (its own Close button).
-    const invoker = `[popovertarget="${id}"]:not([popovertargetaction="hide" i]), [commandfor="${id}"]:is([command="toggle-popover" i], [command="show-popover" i])`
-    // Only an element that can open it: a `commandfor` element must be an invoker (`c2-icon-button` forwards no command).
+    const popoverTarget = `[popovertarget="${id}"]:not([popovertargetaction="hide" i])`
+    const invoker = `${popoverTarget}, [commandfor="${id}"]:is([command="toggle-popover" i], [command="show-popover" i])`
+    // Only an element that can open it: `c2-icon-button` forwards no command, and a submit button of a form submits it.
+    const opens = (element: Element) => isCommandInvoker(element, element.matches(popoverTarget) ? 'popovertarget' : 'commandfor')
     const outside = (scope: ParentNode) =>
-      [...scope.querySelectorAll<HTMLElement>(invoker)].find(
-        (element) => !this.contains(element) && (!element.hasAttribute('commandfor') || isInvoker(element)),
-      ) ?? null
+      [...scope.querySelectorAll<HTMLElement>(invoker)].find((element) => !this.contains(element) && opens(element)) ?? null
     // The element that opens this popover, searched upwards so a control inside a sibling subtree is found too.
     let parent: HTMLElement | null = this.parentElement
     while (parent) {

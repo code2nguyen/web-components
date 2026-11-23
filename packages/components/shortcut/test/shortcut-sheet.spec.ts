@@ -86,21 +86,6 @@ test('a command button toggles it, and methods open and close it', async ({ page
   await expect(dialog(page)).toBeVisible()
 })
 
-test('without invoker commands, a click on the `commandfor` button runs the command', async ({ page, sheetScenario }) => {
-  // A browser without invoker commands: no `commandForElement`, and no `command` event reaches the sheet.
-  await page.addInitScript(() => {
-    delete (HTMLButtonElement.prototype as { commandForElement?: unknown }).commandForElement
-    window.addEventListener('command', (event) => event.stopImmediatePropagation(), true)
-  })
-  await sheetScenario()
-  await page.getByRole('button', { name: 'Toggle shortcuts' }).click()
-  await expect(dialog(page)).toBeVisible()
-  await page.keyboard.press('Escape')
-  await expect(dialog(page)).toBeHidden()
-  await page.getByRole('button', { name: 'Show shortcuts' }).click()
-  await expect(dialog(page)).toBeVisible()
-})
-
 test('inline, it lists the `for` sources in the page without a dialog', async ({ page, sheetScenario }) => {
   await sheetScenario('inline')
   await expect(dialog(page)).toHaveCount(0)

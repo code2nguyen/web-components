@@ -930,34 +930,47 @@ test.describe('localization', () => {
 })
 
 test.describe('motion and extras', () => {
-  /** Adds a sibling of One, which pushes Three down; `close` then leaves the new topic's editor. */
-  async function moves(page: Page, close = true) {
+  /** Adds a sibling of One, which pushes Three down, and leaves its editor open. */
+  async function moves(page: Page) {
     await page.locator('c2-mind-map').evaluate((map: HTMLElement) => map.style.setProperty('--c2-mind-map--transition-duration', '1500ms'))
     await focusTopic(page, 'One')
     const before = await box(topic(page, 'Three'))
     await host(page).evaluate((map: MindMap) => map.addSibling('a1'))
     await settle(page)
     const during = await box(topic(page, 'Three'))
-    if (close) await page.keyboard.press('Escape')
     return { before, during }
   }
 
   test('after an edit, topics glide to their new place', async ({ page, renderScenario }) => {
     await render(page, renderScenario, mindMap(small, 'editable'))
-    const { during } = await moves(page)
-    // Still on its way after a few frames of a 1.5 s glide: not yet where it ends up.
-    const final = await host(page).evaluate(
-      (map: MindMap) =>
-        new Promise<number>((resolve) => setTimeout(() => resolve(map.shadowRoot!.querySelector('[aria-label="Three"]')!.getBoundingClientRect().y), 1700)),
-    )
-    expect(Math.abs(final - during.y)).toBeGreaterThan(2)
+    await page.locator('c2-mind-map').evaluate((map: HTMLElement) => map.style.setProperty('--c2-mind-map--transition-duration', '1500ms'))
+    await focusTopic(page, 'One')
+    // Three's place on every frame of the 1.5 s glide, recorded in the page: round trips from the test runner take
+    // most of the glide on a slow CI machine, so a position read from the test can already be the last one.
+    const ys = await host(page).evaluate(async (map: MindMap) => {
+      const three = () => map.shadowRoot!.querySelector('[aria-label="Three"]')!.getBoundingClientRect().y
+      const ys = [three()]
+      map.addSibling('a1')
+      const end = performance.now() + 1700
+      while (performance.now() < end) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        ys.push(three())
+      }
+      return ys
+    })
+    // The editor stays open: closing it changes the new topic's height (by 10px in WebKit) and moves Three again.
+    const before = ys[0]
+    const final = ys.at(-1)!
+    expect(final).toBeGreaterThan(before + 2)
+    // On its way, Three passes places between where it was and where it ends up: it glides rather than jumps.
+    expect(ys.some((y) => y > before + 1 && y < final - 1)).toBe(true)
   })
 
   test('under reduced motion, topics jump', async ({ page, renderScenario }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await render(page, renderScenario, mindMap(small, 'editable'))
     // The editor stays open: closing it changes the new topic's height (by 10px in WebKit) and moves Three again.
-    const { before, during } = await moves(page, false)
+    const { before, during } = await moves(page)
     expect(during.y).toBeGreaterThan(before.y)
     await page.waitForTimeout(300)
     expect((await box(topic(page, 'Three'))).y).toBeCloseTo(during.y, 1)

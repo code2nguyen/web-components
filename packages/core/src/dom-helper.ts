@@ -292,6 +292,24 @@ export function findWrapped(element: Element, match: (element: Element) => boole
   return search(element, 0)
 }
 
+/**
+ * Whether a click on `element` sends the command its `commandfor` (`via`, the default) or `popovertarget` names. A
+ * `commandfor` command comes from a native button, or from an element that forwards it to the button in its shadow
+ * root (`c2-button`, which has `commandFor`); a `popovertarget` one from a native button or button-type input, or from
+ * a custom element, which may run it itself. As natively, a control of a form sends one only as `type="button"`: any
+ * other submits or resets the form instead (a native button with no `type` too, though its `type` property reads
+ * "button" when it carries `commandfor`).
+ */
+export function isCommandInvoker(element: Element, via: 'commandfor' | 'popovertarget' = 'commandfor'): boolean {
+  if (element instanceof HTMLButtonElement) return !element.form || element.getAttribute('type')?.toLowerCase() === 'button'
+  if (element instanceof HTMLInputElement)
+    return via === 'popovertarget' && (element.type === 'button' || (!element.form && ['submit', 'reset', 'image'].includes(element.type)))
+  if (via === 'popovertarget') return element.localName.includes('-')
+  if (!('commandFor' in element && element.shadowRoot?.querySelector('button'))) return false
+  const { type, form } = element as Element & { type?: string; form?: HTMLFormElement | null }
+  return type === 'button' || !form
+}
+
 export interface FormControlOptions {
   /**
    * Only a control a person enters a value in: no `<input type="hidden">`, no button-like input (`submit`, `reset`,

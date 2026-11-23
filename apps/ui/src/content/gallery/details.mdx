@@ -424,7 +424,7 @@ Classes style assigned content directly; `summary`, `title`, `icon`, `header-con
 
 ## Collapse
 
-`headless` draws the content alone, with no summary row and no frame, so the panel becomes a collapse that a control elsewhere on the page opens. A `c2-button` (or a native button) needs no script: `commandfor` names the panel and `command` is `--toggle`, `--open` or `--close`; the panel keeps that button's `aria-expanded` in step, and `c2-button` hands it to its inner button. Invoker commands are Baseline since December 2025 (Chrome 135, Firefox 144, Safari 26.2); in an older browser the panel runs the button's command on click itself. Any other control drives `expanded` or `toggle()` and listens for `toggle`, as the switch card does:
+`headless` draws the content alone, with no summary row and no frame, so the panel becomes a collapse that a control elsewhere on the page opens. A `c2-button` (or a native button) needs no script: `commandfor` names the panel and `command` is `--toggle`, `--open` or `--close`; the panel keeps that button's `aria-expanded` in step, and `c2-button` hands it to its inner button. The browser's own invoker commands run them, in Chrome 135, Firefox 144 and Safari 26.2 or later. Any other control drives `expanded` or `toggle()` and listens for `toggle`, as the switch card does:
 
 ```ts tag=CodeBlock
 import type { Details } from '@c2n/components/details'

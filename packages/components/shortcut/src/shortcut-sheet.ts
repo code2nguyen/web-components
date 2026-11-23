@@ -62,9 +62,6 @@ const loadView = () =>
     throw error
   }))
 
-/** Invoker commands are Baseline newly available; without them a click on a `commandfor` button runs the command. */
-const nativeCommands = isServer || 'commandForElement' in HTMLButtonElement.prototype
-
 /**
  * The keyboard-shortcuts sheet, the dialog a "?" key opens on GitHub or Gmail: every shortcut of the page grouped
  * by section, each key drawn with `c2-kbd`, and a search field that filters them.
@@ -160,7 +157,6 @@ export class ShortcutSheet extends LitElement {
 
   private readonly msg = new LocalizeController(this, shortcutMessages)
   private unregister: (() => void) | undefined
-  private commandRoot: Node | undefined
 
   constructor() {
     super()
@@ -195,18 +191,12 @@ export class ShortcutSheet extends LitElement {
       () => (this.keys && !this.inline ? [{ keys: this.keys }] : []),
       () => this.toggle(),
     )
-    if (!nativeCommands) {
-      this.commandRoot = this.getRootNode()
-      this.commandRoot.addEventListener('click', this.handleTriggerClick)
-    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.unregister?.()
     this.unregister = undefined
-    this.commandRoot?.removeEventListener('click', this.handleTriggerClick)
-    this.commandRoot = undefined
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
@@ -234,18 +224,6 @@ export class ShortcutSheet extends LitElement {
     if (command === '--show') this.show()
     else if (command === '--hide') this.hide()
     else if (command === '--toggle') this.toggle()
-  }
-
-  /** Without invoker commands, a click on a button naming this sheet with `commandfor` runs its command. */
-  private readonly handleTriggerClick = (event: Event) => {
-    const path = event.composedPath()
-    const trigger = path.find((node): node is Element => node instanceof Element && node.hasAttribute('commandfor'))
-    if (!trigger || !this.id || trigger.getAttribute('commandfor') !== this.id) return
-    const button = path.find(
-      (node): node is HTMLButtonElement => node instanceof HTMLButtonElement && (node === trigger || node.getRootNode() === trigger.shadowRoot),
-    )
-    if (!button || button.disabled) return
-    this.runCommand(event, trigger.getAttribute('command'))
   }
 }
 
