@@ -93,6 +93,9 @@ jobs:
       - name: Check the docs site dogfoods c2n components
         run: pnpm run check:dogfood
 
+      - name: Lifecycle rules (no reactive writes in firstUpdated, no slotchange-only slot state); known violations only shrink
+        run: pnpm run check:lifecycle
+
       - name: Check the guidance coding agents read (CLAUDE.md, AGENTS.md, skills)
         run: pnpm run check:agent-docs
 

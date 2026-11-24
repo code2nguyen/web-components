@@ -72,6 +72,8 @@ jobs:
         run: pnpm run check:reachability
       - name: c2 markup in the docs site, example apps and lab builds has no errors
         run: pnpm run check:app-markup
+      - name: Lifecycle rules (no reactive writes in firstUpdated, no slotchange-only slot state); known violations only shrink
+        run: pnpm run check:lifecycle
       - name: Guidance for coding agents (CLAUDE.md, AGENTS.md, skills) is consistent
         run: pnpm run check:agent-docs
       - name: Verify generated component manifests are committed

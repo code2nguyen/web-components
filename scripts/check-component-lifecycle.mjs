@@ -94,12 +94,41 @@ export function checkComponentLifecycles(root = ROOT) {
   })
 }
 
+/** Today's violations, each `<file> <reason>` without its line number (lines move). A ratchet: it only shrinks. */
+const KNOWN_FILE = path.join(ROOT, 'scripts/data/lifecycle-known.json')
+
+const key = (finding) => `${finding.file} ${finding.reason}`
+
+/**
+ * Compares findings with the known list as multisets (one file can break a rule twice): `added` are violations the list
+ * does not cover, `stale` are listed ones that no longer occur, which must leave the list so it cannot hide them again.
+ */
+export function compareWithKnown(findings, known) {
+  const remaining = new Map()
+  for (const entry of known) remaining.set(entry, (remaining.get(entry) ?? 0) + 1)
+  const added = []
+  for (const finding of findings) {
+    const count = remaining.get(key(finding)) ?? 0
+    if (count) remaining.set(key(finding), count - 1)
+    else added.push(finding)
+  }
+  const stale = [...remaining].flatMap(([entry, count]) => Array(count).fill(entry))
+  return { added, stale }
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const findings = checkComponentLifecycles()
-  if (findings.length) {
-    console.error(findings.map((finding) => `${finding.file}:${finding.line} ${finding.reason}`).join('\n'))
-    process.exitCode = 1
-  } else {
-    console.log('[lifecycle] first-update and slot-presence policies are clean')
+  const known = JSON.parse(fs.readFileSync(KNOWN_FILE, 'utf8'))
+  const { added, stale } = compareWithKnown(findings, known)
+  if (added.length) {
+    console.error(`[lifecycle] ${added.length} new violation(s) ("Lifecycle" in the root CLAUDE.md):`)
+    console.error(added.map((finding) => `  ${finding.file}:${finding.line} ${finding.reason}`).join('\n'))
   }
+  if (stale.length) {
+    console.error(`[lifecycle] ${stale.length} entry(ies) no longer occur: remove them from scripts/data/lifecycle-known.json`)
+    console.error(stale.map((entry) => `  ${entry}`).join('\n'))
+  }
+  if (added.length || stale.length) process.exitCode = 1
+  else if (known.length) console.log(`[lifecycle] no new first-update or slot-presence violations; ${known.length} known one(s) left to fix`)
+  else console.log('[lifecycle] first-update and slot-presence policies are clean')
 }

@@ -34,6 +34,7 @@
       "Bash(pnpm run format:check)",
       "Bash(pnpm run lint)",
       "Bash(pnpm run check:agent-docs)",
+      "Bash(pnpm run check:lifecycle)",
       "Bash(pnpm run check:reachability)",
       "Bash(pnpm run check:app-markup)",
       "Bash(pnpm run check:component-template)",
