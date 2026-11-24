@@ -10,6 +10,7 @@
  */
 import { PLACEHOLDER_INTENT } from '../frontmatter.ts'
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { searchComponents } from '../../src/search.ts'
 import { validateMarkup } from '../../src/lib/validate.ts'
 import { COMPONENT_MAX_CHARS, COMPONENT_SECTIONS, renderComponentFitted } from '../../src/render.ts'
@@ -98,17 +99,13 @@ function check(id: string, label: string, weight: number, score: number, detail?
  * content hidden once the element upgrades. Its description tells an agent all it needs; a gallery card cannot show it.
  */
 /**
- * Standard CSS property names, from the `mdn-data` the CSS tooling installs. Without it every variable counts as one
- * that needs a description.
+ * Standard CSS property names, from `mdn-data` (a devDependency of this package), resolved through the package because
+ * pnpm does not hoist it to the root `node_modules`. Loading it is not optional: an empty set would count every variable
+ * as one that needs a description and report a `css-described` regression for every component.
  */
-const STANDARD_PROPERTIES: Set<string> = (() => {
-  try {
-    const file = new URL('../../../../../node_modules/mdn-data/css/properties.json', import.meta.url)
-    return new Set(Object.keys(JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>))
-  } catch {
-    return new Set()
-  }
-})()
+const STANDARD_PROPERTIES: Set<string> = new Set(
+  Object.keys(JSON.parse(readFileSync(createRequire(import.meta.url).resolve('mdn-data/css/properties.json'), 'utf8')) as Record<string, unknown>),
+)
 
 const UNWRITTEN = /no `slot` attribute needed|retained for compatibility|server-rendered/i
 

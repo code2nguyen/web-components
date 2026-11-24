@@ -1,4 +1,4 @@
-# AI readiness — c2n 1.0.31
+# AI readiness — c2n 1.0.32
 
 > Given a user requirement, can an AI independently find the correct c2n component, understand its API, generate valid code and use it correctly?
 
@@ -17,7 +17,7 @@ Component readiness 50% · discovery 20% · agent run 30%.
 | Usage examples — Are there valid, realistic code examples covering the API? | 20% | 95 | `███████████████████░` |
 | Composition knowledge — Does the AI understand compatible children, slots and related components? | 15% | 96.4 | `███████████████████░` |
 | Framework integration — Does it know how to import, configure and use the component in each framework? | 15% | 100 | `████████████████████` |
-| Validation — Can generated usage be checked against the real API and compiled? | 10% | 99.5 | `████████████████████` |
+| Validation — Can generated usage be checked against the real API and compiled? | 10% | 99.8 | `████████████████████` |
 
 Grades: A 261 · B 6 · C 1 · D 0 · F 0
 
@@ -185,16 +185,13 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | tree-table | 96.9 A | 100 | 96 | 90 | 100 | 100 | 100 |
 | overlap-chart | 97 A | 100 | 95 | 91 | 100 | 100 | 100 |
 | depth-chart | 97.1 A | 100 | 95 | 92 | 100 | 100 | 100 |
-| overlay | 97.2 A | 100 | 100 | 96 | 100 | 100 | 80 |
 | radar-chart | 97.2 A | 100 | 95 | 92 | 100 | 100 | 100 |
 | scroll-progress | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | skip-link | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
-| switch | 97.2 A | 100 | 98 | 94 | 100 | 100 | 91 |
 | tree | 97.2 A | 100 | 96 | 99 | 90 | 100 | 100 |
 | video-player | 97.2 A | 100 | 100 | 86 | 100 | 100 | 100 |
 | gauge-chart | 97.3 A | 100 | 95 | 93 | 100 | 100 | 100 |
 | overflow-list | 97.3 A | 100 | 100 | 86 | 100 | 100 | 100 |
-| tooltip | 97.3 A | 100 | 97 | 100 | 100 | 100 | 81 |
 | checkbox-group | 97.4 A | 100 | 99 | 99 | 86 | 100 | 100 |
 | navigation-menu | 97.4 A | 100 | 94 | 94 | 100 | 100 | 100 |
 | emoji-picker | 97.5 A | 100 | 100 | 88 | 100 | 100 | 100 |
@@ -206,7 +203,6 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | attachment | 97.7 A | 100 | 98 | 100 | 88 | 100 | 100 |
 | carousel | 97.7 A | 100 | 100 | 89 | 100 | 100 | 100 |
 | image-cropper | 97.7 A | 100 | 94 | 96 | 100 | 100 | 100 |
-| autocomplete | 97.8 A | 100 | 99 | 100 | 91 | 100 | 95 |
 | form | 97.8 A | 100 | 100 | 98 | 88 | 100 | 100 |
 | line-chart | 97.8 A | 100 | 95 | 95 | 100 | 100 | 100 |
 | audio-player | 97.9 A | 100 | 94 | 100 | 96 | 100 | 100 |
@@ -220,6 +216,8 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | kbd | 98 A | 100 | 100 | 100 | 100 | 100 | 80 |
 | date-strip | 98.1 A | 100 | 100 | 100 | 88 | 100 | 100 |
 | barcode-scanner | 98.2 A | 100 | 100 | 91 | 100 | 100 | 100 |
+| switch | 98.2 A | 100 | 98 | 94 | 100 | 100 | 100 |
+| autocomplete | 98.3 A | 100 | 99 | 100 | 91 | 100 | 100 |
 | bar-list | 98.3 A | 100 | 100 | 100 | 89 | 100 | 100 |
 | checkbox | 98.3 A | 100 | 98 | 94 | 100 | 100 | 100 |
 | input-matrix | 98.3 A | 100 | 100 | 100 | 89 | 100 | 100 |
@@ -251,7 +249,6 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | notepad | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | sheet | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | steps | 98.9 A | 100 | 96 | 100 | 100 | 100 | 100 |
-| swipe-action | 98.9 A | 100 | 100 | 100 | 100 | 100 | 89 |
 | breadcrumb | 99 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | card | 99 A | 100 | 96 | 100 | 100 | 100 | 100 |
 | comment-thread | 99 A | 100 | 100 | 100 | 93 | 100 | 100 |
@@ -262,11 +259,12 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | tag-input | 99 A | 100 | 99 | 100 | 96 | 100 | 100 |
 | tree-select | 99 A | 100 | 100 | 95 | 100 | 100 | 100 |
 | schema-tree | 99.1 A | 100 | 96 | 100 | 100 | 100 | 100 |
-| side-nav | 99.1 A | 100 | 100 | 100 | 100 | 100 | 91 |
 | cascader | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
 | image-uploader | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
 | mermaid | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
+| overlay | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
 | promo-code-field | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
+| tooltip | 99.2 A | 100 | 97 | 100 | 100 | 100 | 100 |
 | totp-code | 99.2 A | 100 | 100 | 96 | 100 | 100 | 100 |
 | chip | 99.3 A | 100 | 97 | 100 | 100 | 100 | 100 |
 | confirm-dialog | 99.3 A | 100 | 97 | 100 | 100 | 100 | 100 |
@@ -301,7 +299,6 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | slider | 99.8 A | 100 | 99 | 100 | 100 | 100 | 100 |
 | floating-panel | 99.9 A | 100 | 100 | 99 | 100 | 100 | 100 |
 | google-map | 99.9 A | 100 | 100 | 100 | 100 | 100 | 100 |
-| highlight | 99.9 A | 100 | 100 | 100 | 100 | 100 | 99 |
 | accordion | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | action-bar | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | address-field | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -335,6 +332,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | format-number | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | fx-converter | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | header | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
+| highlight | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | image-compare | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | indicator | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | list | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -364,6 +362,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | secret-field | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | separator | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | shortcut-sheet | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
+| side-nav | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | signature-pad | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | skeleton | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | spinner | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
@@ -372,6 +371,7 @@ default model, 2026-11-19. A task passes when the code uses an expected tag and 
 | status-light | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | status-panel | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | sticky | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
+| swipe-action | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | table-of-contents | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | terminal | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
 | text-effect | 100 A | 100 | 100 | 100 | 100 | 100 | 100 |
