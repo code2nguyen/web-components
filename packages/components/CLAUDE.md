@@ -4,7 +4,7 @@ Guidance for `packages/components/*`. Claude Code loads this file when it works 
 
 ## Layout
 
-`packages/components/*` — published components. Each has `src/<name>.ts`, `src/<name>.scss`, `index.html` (standalone dev harness with hand-written usage examples), and a Vite lib build. `design-board` lives here too but is WIP and excluded from the root build graph. `json-form` (`c2-json-form` + `c2-json-field`) renders a form from a JSON Schema, laid out by a JSON Forms-style `ui-schema` or by author markup; its controls are pluggable renderers (`registerRenderer`, ranked testers) and render inside its shadow root.
+`packages/components/*` — the component packages: private workspaces, published only through the `@c2n/components` bundle (`packages/umbrella`). Each has `src/<name>.ts`, `src/<name>.scss`, `index.html` (standalone dev harness with hand-written usage examples), and a Vite lib build. `design-board` lives here too but is WIP and excluded from the root build graph. `json-form` (`c2-json-form` + `c2-json-field`) renders a form from a JSON Schema, laid out by a JSON Forms-style `ui-schema` or by author markup; its controls are pluggable renderers (`registerRenderer`, ranked testers) and render inside its shadow root.
 
 `packages/components/google-map` → `@c2n/google-map` wraps the Google Maps JavaScript API: `c2-google-map` (the map; `.map` is the `google.maps.Map`), the child overlays `c2-google-map-marker` (an Advanced Marker whose `PinElement` colours are read from its `--c2-google-map-marker__*` variables when drawn) and `c2-google-map-route` (`Route.computeRoutes` + a `google.maps.Polyline`, colours read from `--c2-google-map-route__*`), and `c2-google-street-view` (a `StreetViewPanorama`, optionally the map's own through `for`). Children find their map with `closest('c2-google-map')` and await its `ready` promise, so they never import the map module. The API is loaded once per page by `src/google-maps-loader.ts` from `configureGoogleMaps({ apiKey })` or an element's `api-key`; a key configured after an element rendered makes it retry. The key is a browser key — there is nothing to hide server-side; it is restricted by referrer in the Google Cloud console. Google types come from `@types/google.maps` (a runtime dependency, so consumers' declarations resolve). The suite runs against `test/fake-google.ts`, a DOM-drawing stand-in for the API, so it needs no key or network. The docs site reads `PUBLIC_GOOGLE_MAPS_API_KEY` at build time (`apps/ui/src/data/google-maps-config.ts`, loaded by `Main.astro`); `deploy.yml` passes the `GOOGLE_MAPS_API_KEY` secret, falling back to a development key written in the workflow. Without any key the map examples say a key is needed.
 
@@ -19,7 +19,7 @@ Consequences:
 - The customize plugin drops an event whose name is an unresolved constant (`dispatchEvent(new CustomEvent(COLUMN_CHANGE_EVENT))` is recorded as `COLUMN_CHANGE_EVENT`): those are undocumented parent/child protocol events, not public API. A public event needs an `@event` line with its real name.
 - The custom plugin adds two non-standard tags: `@internalcomponent` and `@slotcomponent`, used by the demo to document composed/slotted children.
 - After changing a component's public surface, rebuild that package so its `custom-elements.json` is regenerated; committed manifests are checked in.
-- A new published component must be added by hand (or by plop) to `apps/ui/src/store/component-manifests.ts` in both the import list and the `normalizedManifests` array.
+- A new component must be added by hand (or by plop) to `apps/ui/src/store/component-manifests.ts` in both the import list and the `normalizedManifests` array.
 
 ## Component foundation
 
@@ -70,6 +70,10 @@ then reads values as `css.cssVar(container--width)`, which expands to `var(--c2-
 `__` separates the component prefix / element part / state (`__selected`, `__hover`); `--` separates the final CSS property name. Nested-state names like `container__selected--background-color` group into the demo's configuration panel automatically. Defaults live in the `$theme` map (not in the rule bodies) and must be mirrored in the `@cssproperty` JSDoc default.
 
 **Design tokens (`@c2n/theme`).** On top of the component variables, `packages/tools/theme` defines ~35 shared tokens named `--c2-theme--<name>` (same grammar, pseudo-component prefix `c2-theme`, no part segment: `--c2-theme--color-primary`, `--c2-theme--radius-md`, `--c2-theme--border`, `--c2-theme--focus-ring`, …). The generated `base.css` sets every mapped component variable to `var(--c2-theme--<token>, <component default>)` at `:root`/`:host`, so an app themes everything by setting the tokens while any component variable set explicitly still wins. Component SCSS stays untouched. The generator maps by property name + default literal (colour ramp, border shorthands, radii 4/6/8/14/999px, font sizes 12/14px, weights 500/600, focus outlines, disabled opacity, durations, shadows); use the existing literals/scales in new components so they get mapped, and add an entry to `overrides.ts` for deliberate exceptions. Dark mode: `tokens.css` puts light values on `:root`, dark under `[data-theme='dark']` / `.c2-dark` and the `prefers-color-scheme` fallback.
+
+## Changing a component
+
+Before changing an existing one, open `docs/agents/changing-a-component.md`: one checklist per kind of change (attribute, CSS variable, slot, event, built-in text, bug fix), with what each needs beyond the source (manifest, framework glue, style-contract case, slot audit, gallery proof, readiness) and the commands that verify it.
 
 ## Adding a component
 
