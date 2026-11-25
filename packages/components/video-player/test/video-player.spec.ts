@@ -325,3 +325,23 @@ test('inside a centring flex frame the player keeps its width instead of shrinki
   expect(box.width).toBeCloseTo(frame.width, 0)
   expect(box.height).toBeCloseTo((frame.width * 9) / 16, 0)
 })
+
+test('every control icon is drawn: its shapes are SVG elements with a size, also the buttons added after the first render', async ({
+  page,
+  renderScenario,
+}) => {
+  await renderScenario(`<c2-video-player label="Product tour">${VIDEO}</c2-video-player>`)
+  await ready(page)
+  // The buttons a browser supports appear once the player knows it: wait for them before reading the icons.
+  const fullscreen = await page.evaluate(() => !!document.fullscreenEnabled)
+  await expect(page.getByRole('button', { name: 'Full screen' })).toHaveCount(fullscreen ? 1 : 0)
+  const icons = await player(page).evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll('button svg')].map((svg) => ({
+      button: svg.closest('button')!.getAttribute('aria-label'),
+      svgShapes: [...svg.children].every((shape) => shape.namespaceURI === 'http://www.w3.org/2000/svg'),
+      drawn: (svg as SVGSVGElement).getBBox().width > 0,
+    })),
+  )
+  expect(icons.length).toBeGreaterThan(3)
+  expect(icons.filter((icon) => !icon.svgShapes || !icon.drawn)).toEqual([])
+})

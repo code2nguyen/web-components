@@ -1,4 +1,4 @@
-import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, isServer, nothing, svg, unsafeCSS, type PropertyValues, type SVGTemplateResult, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -729,19 +729,21 @@ export class VideoPlayer extends LitElement {
   // ------------------------------------------------------------------------------------------------- rendering
 
   private icon(name: string): TemplateResult {
-    const paths: Record<string, TemplateResult> = {
-      play: html`<path d="M7 4.5v15l12-7.5z" class="fill" />`,
-      pause: html`<path d="M6 4h4v16H6zM14 4h4v16h-4z" class="fill" />`,
-      volume: html`<path d="M4 9h4l5-4v14l-5-4H4z" class="fill" /><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />`,
-      muted: html`<path d="M4 9h4l5-4v14l-5-4H4z" class="fill" /><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" />`,
-      cc: html`<rect x="3" y="5" width="18" height="14" rx="2" /><path d="M10.5 10.2a2 2 0 1 0 0 3.6M17 10.2a2 2 0 1 0 0 3.6" />`,
-      gear: html`<circle cx="12" cy="12" r="3" /><path
+    // `svg`, not `html`: a fragment made with `html` is created in the HTML namespace, where `<path>` draws nothing once
+    // the client renders it (the server's markup is parsed into the SVG namespace, which hid this).
+    const paths: Record<string, SVGTemplateResult> = {
+      play: svg`<path d="M7 4.5v15l12-7.5z" class="fill" />`,
+      pause: svg`<path d="M6 4h4v16H6zM14 4h4v16h-4z" class="fill" />`,
+      volume: svg`<path d="M4 9h4l5-4v14l-5-4H4z" class="fill" /><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />`,
+      muted: svg`<path d="M4 9h4l5-4v14l-5-4H4z" class="fill" /><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" />`,
+      cc: svg`<rect x="3" y="5" width="18" height="14" rx="2" /><path d="M10.5 10.2a2 2 0 1 0 0 3.6M17 10.2a2 2 0 1 0 0 3.6" />`,
+      gear: svg`<circle cx="12" cy="12" r="3" /><path
           d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1A2 2 0 1 1 4.3 17l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1A2 2 0 1 1 7 4.3l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 19.7 7l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
         />`,
-      pip: html`<rect x="3" y="5" width="18" height="14" rx="2" /><rect x="12" y="11" width="7" height="6" rx="1" class="fill" />`,
-      full: html`<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />`,
-      exitFull: html`<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />`,
-      alert: html`<circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5h.01" />`,
+      pip: svg`<rect x="3" y="5" width="18" height="14" rx="2" /><rect x="12" y="11" width="7" height="6" rx="1" class="fill" />`,
+      full: svg`<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />`,
+      exitFull: svg`<path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" />`,
+      alert: svg`<circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5h.01" />`,
     }
     return html`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${paths[name]}</svg>`
   }
