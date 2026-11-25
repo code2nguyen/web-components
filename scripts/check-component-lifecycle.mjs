@@ -22,7 +22,8 @@ function walk(directory, files) {
 }
 
 function memberName(node) {
-  return node.name && ts.isIdentifier(node.name) ? node.name.text : undefined
+  // `#helper` too: the components use ECMAScript-private methods as much as `private` ones.
+  return node.name && (ts.isIdentifier(node.name) || ts.isPrivateIdentifier(node.name)) ? node.name.text : undefined
 }
 
 function hasDecoratorNamed(node, name, source) {
@@ -53,42 +54,123 @@ export function analyzeLifecycleSource(text, file = 'component.ts') {
     )
     const firstUpdated = statement.members.find((member) => ts.isMethodDeclaration(member) && memberName(member) === 'firstUpdated')
     if (!firstUpdated?.body) continue
-
-    const visit = (node) => {
-      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'requestUpdate') {
-        findings.push({ file, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, reason: '`requestUpdate()` inside `firstUpdated()`' })
-      }
-      if (
-        ts.isBinaryExpression(node) &&
-        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
-        ts.isPropertyAccessExpression(node.left) &&
-        node.left.expression.kind === ts.SyntaxKind.ThisKeyword &&
-        reactive.has(node.left.name.text)
-      ) {
-        findings.push({
-          file,
-          line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1,
-          reason: `reactive property \`${node.left.name.text}\` is written inside \`firstUpdated()\``,
-        })
-      }
-      ts.forEachChild(node, visit)
+    // Helpers `firstUpdated()` calls synchronously run inside it too: a write moved into one is still a write in it.
+    // A helper is a method or a field holding an arrow or function (`private onChange = () => …`). An `async` one is not
+    // followed (its writes after the first `await` land after the update; the part before it is a known gap), nor a call
+    // made inside a deferred callback (an event handler or a frame runs later).
+    const isAsync = (node) => !!node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword)
+    const helpers = new Map()
+    for (const member of statement.members) {
+      const name = memberName(member)
+      if (!name) continue
+      if (ts.isMethodDeclaration(member) && member.body && !isAsync(member)) helpers.set(name, member.body)
+      const init = ts.isPropertyDeclaration(member) ? member.initializer : undefined
+      if (init && (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) && !isAsync(init)) helpers.set(name, init.body)
     }
-    visit(firstUpdated.body)
+    const followed = new Set(['firstUpdated'])
+    // A callback runs later (an event, a frame, `updateComplete.then`), except one an array method calls on the spot.
+    const SYNC_CALLERS = new Set([
+      ...['forEach', 'map', 'filter', 'flatMap', 'some', 'every', 'find', 'findIndex', 'findLast', 'findLastIndex'],
+      ...['reduce', 'reduceRight', 'sort', 'toSorted'],
+    ])
+    // Called on the spot: invoked where it is written, a `new Promise` executor, `Array.from`'s mapper, an array method's callback.
+    const runsOnTheSpot = (fn) => {
+      let outer = fn
+      while (ts.isParenthesizedExpression(outer.parent)) outer = outer.parent
+      const call = outer.parent
+      if (ts.isCallExpression(call) && call.expression === outer) return true
+      if (ts.isNewExpression(call) && ts.isIdentifier(call.expression) && call.expression.text === 'Promise') return call.arguments?.[0] === outer
+      if (!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression)) return false
+      const method = call.expression.name.text
+      if (method === 'from' && ts.isIdentifier(call.expression.expression) && call.expression.expression.text === 'Array') return call.arguments[1] === outer
+      return SYNC_CALLERS.has(method) && call.arguments.includes(outer)
+    }
+    // A function written here that runs later: a callback, or a method of an object literal (an editor's handlers).
+    const isDeferred = (child) =>
+      ((ts.isArrowFunction(child) || ts.isFunctionExpression(child)) && (isAsync(child) || !runsOnTheSpot(child))) ||
+      ((ts.isMethodDeclaration(child) || ts.isGetAccessor(child) || ts.isSetAccessor(child)) && ts.isObjectLiteralExpression(child.parent))
+
+    const push = (node, what, via) =>
+      findings.push({
+        file,
+        line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1,
+        reason: `${what} inside \`firstUpdated()\``,
+        // Printed, not part of the known-list key: which path reaches a helper first depends on call order.
+        via: via.length ? `through ${via.map((name) => `\`${name}()\``).join(' → ')}` : undefined,
+      })
+
+    const visit = (node, via, inCallback) => {
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.expression.kind === ts.SyntaxKind.ThisKeyword) {
+        const name = node.expression.name.text
+        if (name === 'requestUpdate' && !inCallback) push(node, '`requestUpdate()`', via)
+        const helper = helpers.get(name)
+        // A `requestUpdate()` override is the call reported just above, not a helper to walk into.
+        if (helper && name !== 'requestUpdate' && !inCallback && !followed.has(name)) {
+          followed.add(name)
+          visit(helper, [...via, name], false)
+        }
+      } else if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'requestUpdate' && !inCallback) {
+        push(node, '`requestUpdate()`', via)
+      }
+      // `this.x = …`, `this.x += …` and `this.x++` / `--this.x` all write `x`.
+      const target =
+        ts.isBinaryExpression(node) && node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+          ? node.left
+          : (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+              (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)
+            ? node.operand
+            : undefined
+      if (
+        target &&
+        !inCallback &&
+        ts.isPropertyAccessExpression(target) &&
+        target.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        reactive.has(target.name.text)
+      ) {
+        push(node, `reactive property \`${target.name.text}\` is written`, via)
+      }
+      ts.forEachChild(node, (child) => visit(child, via, inCallback || isDeferred(child)))
+    }
+    visit(firstUpdated.body, [], false)
   }
 
   return findings
 }
 
+/** The body of the class method `name`, by brace matching from its declaration, or undefined. */
+function methodBody(text, name) {
+  const declaration = new RegExp(`(?:^|[\\s;{}])(?:(?:private|protected|public|override)\\s+)*${name}\\s*\\([^)]*\\)[^{;]*\\{`).exec(text)
+  if (!declaration) return undefined
+  let depth = 1
+  let index = declaration.index + declaration[0].length
+  for (; index < text.length && depth; index++) depth += text[index] === '{' ? 1 : text[index] === '}' ? -1 : 0
+  return text.slice(declaration.index + declaration[0].length, index)
+}
+
+/**
+ * A `SlotReplayController` counts as the slot-presence policy only when it replays slot state: its handler calls a
+ * method bound to `@slotchange`, or one that writes a `has…` state. The controller also serves other hydration work
+ * (`c2-video-player` reads what the browser supports with it), which says nothing about the slots.
+ */
+function replaysSlotState(text) {
+  const slotHandlers = new Set([...text.matchAll(/@slotchange=\$\{this\.(#?\w+)\}/g)].map((match) => match[1]))
+  const replayed = [...text.matchAll(/new SlotReplayController\(\s*this,\s*\(\)\s*=>\s*\{?\s*(?:if \([^)]*\)\s*)?(?:void\s+)?this\.(#?\w+)\(/g)].map(
+    (match) => match[1],
+  )
+  return replayed.some((name) => slotHandlers.has(name) || /this\.has[A-Z]\w*\s*(?:\?\?|\|\||&&)?=(?!=)/.test(methodBody(text, name) ?? ''))
+}
+
 export function analyzeSlotPresenceSource(text, file = 'component.ts') {
   if (!/@slotchange=/.test(text) || !/@state\(\)\s+(?:private\s+|protected\s+)?has[A-Z]/.test(text)) return []
   if (/SlotPresenceController|hasSlottedContent|updateComplete\.then|slot-presence-policy:|initial slot presence|hydration reconciliation/.test(text)) return []
+  if (replaysSlotState(text)) return []
   return [{ file, line: 1, reason: 'reactive slot-presence state relies only on `slotchange` and has no explicit initial/hydration policy' }]
 }
 
 export function checkComponentLifecycles(root = ROOT) {
   return componentSources(root).flatMap((absolute) => {
-    const file = path.relative(root, absolute)
+    // Forward slashes on every platform: the known list is written with them.
+    const file = path.relative(root, absolute).split(path.sep).join('/')
     const text = fs.readFileSync(absolute, 'utf8')
     return [...analyzeLifecycleSource(text, file), ...analyzeSlotPresenceSource(text, file)]
   })
@@ -122,7 +204,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const { added, stale } = compareWithKnown(findings, known)
   if (added.length) {
     console.error(`[lifecycle] ${added.length} new violation(s) ("Lifecycle" in the root CLAUDE.md):`)
-    console.error(added.map((finding) => `  ${finding.file}:${finding.line} ${finding.reason}`).join('\n'))
+    console.error(added.map((finding) => `  ${finding.file}:${finding.line} ${finding.reason}${finding.via ? ` (${finding.via})` : ''}`).join('\n'))
   }
   if (stale.length) {
     console.error(`[lifecycle] ${stale.length} entry(ies) no longer occur: remove them from scripts/data/lifecycle-known.json`)
