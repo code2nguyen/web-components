@@ -1,0 +1,20 @@
+# Generated files that ripgrep-based search (rg, coding agents' search tools) skips by default. They stay in git;
+# this only keeps them out of search results: a component manifest is one JSON line of up to 2 MB, so a single hit in
+# one floods a result. Read them directly, or through the c2n MCP server (`get_component`), when they are what you need.
+# `rg --no-ignore-dot` searches them too.
+
+# Component manifests (vite-plugin-cem, one line each) and what is merged or built from them
+**/custom-elements.json
+packages/tools/mcp/readiness/baseline.json
+
+# The umbrella's generated bundle inputs (@c2n/framework-types)
+packages/umbrella/src/
+
+# The generated component catalog of the c2n-components skill (the rest of the skill is hand-written)
+packages/tools/skill/skills/c2n-components/references/component-catalog.md
+
+# Changelog generated from git history
+CHANGELOG.md
+apps/ui/src/data/changelog.json
+
+pnpm-lock.yaml
