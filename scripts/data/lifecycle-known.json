@@ -33,7 +33,5 @@
   "packages/components/text-effect/src/text-effect.ts reactive property `ready` is written inside `firstUpdated()`",
   "packages/components/text-effect/src/text-effect.ts reactive property `shown` is written inside `firstUpdated()`",
   "packages/components/toast/src/toast.ts reactive slot-presence state relies only on `slotchange` and has no explicit initial/hydration policy",
-  "packages/components/video-grid/src/video-grid.ts reactive property `ready` is written inside `firstUpdated()`",
-  "packages/components/video-player/src/video-player.ts reactive property `fullscreenSupported` is written inside `firstUpdated()`",
-  "packages/components/video-player/src/video-player.ts reactive property `pipSupported` is written inside `firstUpdated()`"
+  "packages/components/video-grid/src/video-grid.ts reactive property `ready` is written inside `firstUpdated()`"
 ]

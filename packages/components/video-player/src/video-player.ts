@@ -1,11 +1,11 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { live } from 'lit/directives/live.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter, SlotReplayController } from '@c2n/core/lit-helper.js'
 import { LocalizeController } from '@c2n/core/localize.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/menu'
@@ -177,7 +177,10 @@ export class VideoPlayer extends LitElement {
   @state() private activeCaption = -1
   @state() private thumbnailCues: ThumbnailCue[] = []
   @state() private announcement = ''
-  /** Set from the first client update: what the browser supports is unknown on the server. */
+  /**
+   * What the browser supports, unknown on the server: read before the first update of a client-rendered player, and
+   * once a server-rendered one has hydrated (its hydrating render must draw what the server drew, without the buttons).
+   */
   @state() private pipSupported = false
   @state() private fullscreenSupported = false
 
@@ -185,6 +188,7 @@ export class VideoPlayer extends LitElement {
   @query('.settings-menu') private settingsMenu?: Menu
 
   private readonly internals = this.attachInternals()
+  private readonly hydration = new SlotReplayController(this, () => this.detectSupport())
   private readonly msg = new LocalizeController(this, videoPlayerMessages)
   private video: HTMLVideoElement | null = null
   private lastCaption = -1
@@ -681,7 +685,15 @@ export class VideoPlayer extends LitElement {
 
   // -------------------------------------------------------------------------------------------------- lifecycle
 
+  private detectSupport(): void {
+    // `isServer` is false where a server runtime resolves lit's browser build (worker or edge conditions): check the DOM too.
+    if (isServer || typeof document === 'undefined') return
+    this.pipSupported = !!document.pictureInPictureEnabled && 'requestPictureInPicture' in HTMLVideoElement.prototype
+    this.fullscreenSupported = !!document.fullscreenEnabled
+  }
+
   protected override willUpdate(changed: PropertyValues<this>): void {
+    if (!this.hasUpdated && !this.hydration.hydrating) this.detectSupport()
     // A new `src` starts over, paused: the old video's `pause` may never come.
     if (changed.has('src') && this.hasUpdated) this.stopPlaying()
     if (changed.has('thumbnails') && typeof this.thumbnails === 'string' && this.hasUpdated) void this.loadThumbnails(this.thumbnails)
@@ -693,8 +705,6 @@ export class VideoPlayer extends LitElement {
   }
 
   protected override firstUpdated(): void {
-    this.pipSupported = typeof document !== 'undefined' && !!document.pictureInPictureEnabled && 'requestPictureInPicture' in HTMLVideoElement.prototype
-    this.fullscreenSupported = typeof document !== 'undefined' && !!document.fullscreenEnabled
     if (typeof this.thumbnails === 'string') void this.loadThumbnails(this.thumbnails)
     this.attachMedia()
   }
