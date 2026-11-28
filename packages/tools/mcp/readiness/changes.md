@@ -1,78 +1,38 @@
-# AI readiness — changes since 7461b31
+# AI readiness — changes since 53d4708
 
-Full run: every component scored; the 10 whose result moved are listed. Full report: [report.md](report.md).
+Full run: every component scored; the 7 whose result moved are listed. Full report: [report.md](report.md).
 
-**AI readiness 97.9/100** (+0.1) · component readiness 97.9 (+0.1) · discovery 94.5 · held-out 67 (0) · agent 100 · lab requirements 61.4 (+1.1, 23 requirements)
+**AI readiness 97.9/100** (0) · component readiness 97.9 (0) · discovery 94.5 · held-out 67 (0) · agent 100 · lab requirements 61.4 (0, 23 requirements)
 
 | Component | Score | Change | Got better | Got worse |
 | --- | ---: | ---: | --- | --- |
-| description-list | 98.6 A | +0.3 | validation/examples-valid, validation/examples-clean | — |
-| time-slot-picker | 97.9 A | +0.3 | examples/attributes-shown | — |
-| choice-matrix | 99.5 A | +0.7 | validation/examples-valid, validation/examples-clean | — |
-| gauge-chart | 97.3 A | +0.7 | validation/examples-valid, validation/examples-clean | — |
-| depth-chart | 97.1 A | +0.8 | validation/examples-valid, validation/examples-clean | — |
-| scorecard | 99.7 A | +0.9 | validation/examples-valid, validation/examples-clean | — |
-| app-shell | 98.6 A | +1 | validation/examples-valid, validation/examples-clean | — |
-| candlestick-chart | 94.6 A | +1 | validation/examples-valid, validation/examples-clean | — |
-| scatter-chart | 96.3 A | +1 | validation/examples-valid, validation/examples-clean | — |
-| page-header | 98.4 A | +1.4 | validation/examples-valid, validation/examples-clean | — |
+| highlight | 100 A | +0.1 | validation/examples-clean | — |
+| autocomplete | 98.3 A | +0.5 | validation/examples-clean | — |
+| side-nav | 100 A | +0.9 | validation/examples-clean | — |
+| switch | 98.2 A | +1 | validation/examples-clean | — |
+| swipe-action | 100 A | +1.1 | validation/examples-clean | — |
+| tooltip | 99.2 A | +1.9 | validation/examples-clean | — |
+| overlay | 99.2 A | +2 | validation/examples-clean | — |
 
 ## What is still missing
 
-### description-list — 98.6 (A)
+### autocomplete — 98.3 (A)
 
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
+- **API documentation · Property-only API typed** (80%): 1/5 missing: selectedItem
+- **Composition knowledge · Named slots used in an example** (88%): 1/8 missing: c2-autocomplete[error]
 
-### time-slot-picker — 97.9 (A)
+### switch — 98.2 (A)
 
-- **Usage examples · Attributes demonstrated in examples** (95%): 57% shown; not: min, max, name, required, disabled, label
-- **Composition knowledge · CSS parts described** (88%): 1/8 missing: slot
+- **API documentation · Attribute defaults stated** (67%): 3/9 missing: aria-label, aria-labelledby, aria-describedby
+- **Usage examples · Attributes demonstrated in examples** (74%): 44% shown; not: name, value, required, aria-labelledby, aria-describedby
 
-### choice-matrix — 99.5 (A)
+### tooltip — 99.2 (A)
 
-- **Composition knowledge · CSS parts described** (90%): 1/10 missing: table
+- **API documentation · Property-only API typed** (50%): 1/2 missing: showing
 
-### gauge-chart — 97.3 (A)
+### overlay — 99.2 (A)
 
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (98%): 1/42 missing: aria-label
-- **API documentation · Attribute defaults stated** (98%): 1/42 missing: aria-label
-- **Usage examples · Attributes demonstrated in examples** (69%): 41% shown; not: start-angle, end-angle, progress, renderer, revision, series
-
-### depth-chart — 97.1 (A)
-
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (97%): 1/36 missing: aria-label
-- **API documentation · Attribute defaults stated** (97%): 1/36 missing: aria-label
-- **Usage examples · Attributes demonstrated in examples** (65%): 39% shown; not: mid, mirror, price-precision, size-precision, y-min, y-max
-
-### scorecard — 99.7 (A)
-
-- **Composition knowledge · CSS parts described** (94%): 1/17 missing: table
-
-### app-shell — 98.6 (A)
-
-- **Usage examples · Attributes demonstrated in examples** (83%): 50% shown; not: navigation-opened, desktop-mode, aside-opened, navigation-label, storage-key, label
-- **Composition knowledge · Named slots used in an example** (89%): 1/9 missing: c2-app-shell[skip-link]
-
-### candlestick-chart — 94.6 (A)
-
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (97%): 1/37 missing: aria-label
-- **API documentation · Attribute defaults stated** (97%): 1/37 missing: aria-label
-- **Usage examples · Every element appears in an example** (75%): 1/4 missing: c2-chart-series
-- **Usage examples · Attributes demonstrated in examples** (37%): 22% shown; not: open-field, close-field, low-field, high-field, renderer, revision
-
-### scatter-chart — 96.3 (A)
-
-- **API documentation · get_component answers in full in one response** (50%): shortened to fit: descriptions or CSS tables left out
-- **API documentation · Attributes typed** (97%): 1/36 missing: aria-label
-- **API documentation · Attribute defaults stated** (97%): 1/36 missing: aria-label
-- **Usage examples · Attributes demonstrated in examples** (48%): 29% shown; not: large, large-threshold, renderer, revision, series, label-field
-
-### page-header — 98.4 (A)
-
-- **Usage examples · Attributes demonstrated in examples** (67%): 40% shown; not: parent-href, parent-label, more-actions-label
+- **Usage examples · Attributes demonstrated in examples** (83%): 50% shown; not: open, offset, cross-offset, disabled-cross-axis
 
 ## Lab requirements
 

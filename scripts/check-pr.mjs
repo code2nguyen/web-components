@@ -61,6 +61,7 @@ const STEPS = [
   ['docs:check', 'pnpm run docs:check'],
   ['check:dogfood', 'pnpm run check:dogfood'],
   ['check:agent-docs', 'pnpm run check:agent-docs'],
+  ['check:lifecycle', 'pnpm run check:lifecycle'],
   // What reachability, app markup, the lab and the gap matrix read: rebuilt even with --fast, as component-tests.yml does
   // (its wireit graph rebuilds a component package whose sources changed, so --fast is not build-free).
   ['build:registry', 'pnpm --dir packages/tools/mcp run build:registry'],

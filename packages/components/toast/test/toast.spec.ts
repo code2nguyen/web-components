@@ -170,3 +170,23 @@ test('showing toasts schedules no update after an update completed', async ({ pa
   await page.mouse.move(0, 0)
   expect(warnings).toEqual([])
 })
+
+test('every variant icon is drawn: its mark is an SVG element with a size', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ['neutral', 'info', 'success', 'warning', 'error'].map((variant) => `<c2-toast message="${variant}" variant="${variant}"></c2-toast>`).join(''),
+  )
+  const icons = await page.locator('c2-toast').evaluateAll((toasts) =>
+    toasts.flatMap((toast) =>
+      [...toast.shadowRoot!.querySelectorAll('svg')].map((svg) => ({
+        variant: toast.getAttribute('variant'),
+        svgShapes: [...svg.children].every((shape) => shape.namespaceURI === 'http://www.w3.org/2000/svg'),
+        drawn: [...svg.children].every((shape) => {
+          const box = (shape as SVGGraphicsElement).getBBox?.()
+          return !!box && (box.width > 0 || box.height > 0)
+        }),
+      })),
+    ),
+  )
+  expect(icons.length).toBeGreaterThan(3)
+  expect(icons.filter((icon) => !icon.svgShapes || !icon.drawn)).toEqual([])
+})

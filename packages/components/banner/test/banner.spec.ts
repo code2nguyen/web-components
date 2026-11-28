@@ -179,3 +179,21 @@ test('the callout dismiss button is reachable by keyboard', async ({ page, scena
   await page.keyboard.press('Enter')
   await expect(page.locator('c2-banner').first()).toBeHidden()
 })
+
+test('every variant icon is drawn: its mark is an SVG element with a size', async ({ page, scenario }) => {
+  await scenario('variants')
+  const icons = await page.locator('c2-banner').evaluateAll((banners) =>
+    banners.flatMap((banner) =>
+      [...banner.shadowRoot!.querySelectorAll('svg')].map((svg) => ({
+        variant: banner.getAttribute('variant'),
+        svgShapes: [...svg.children].every((shape) => shape.namespaceURI === 'http://www.w3.org/2000/svg'),
+        drawn: [...svg.children].every((shape) => {
+          const box = (shape as SVGGraphicsElement).getBBox?.()
+          return !!box && (box.width > 0 || box.height > 0)
+        }),
+      })),
+    ),
+  )
+  expect(icons.length).toBeGreaterThan(3)
+  expect(icons.filter((icon) => !icon.svgShapes || !icon.drawn)).toEqual([])
+})

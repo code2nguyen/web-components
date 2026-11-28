@@ -1,4 +1,4 @@
-import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, isServer, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -130,12 +130,14 @@ export class Toast extends LitElement {
   }
 
   private renderIcon() {
+    // `svg`, not `html`: a fragment made with `html` is created in the HTML namespace, where `<path>` draws nothing once
+    // the client renders it.
     const mark =
       this.variant === 'success'
-        ? html`<path d="m7 12 3 3 7-7"></path>`
+        ? svg`<path d="m7 12 3 3 7-7"></path>`
         : this.variant === 'error'
-          ? html`<path d="m9 9 6 6m0-6-6 6"></path>`
-          : html`<path d="M12 11v5m0-9v1"></path>`
+          ? svg`<path d="m9 9 6 6m0-6-6 6"></path>`
+          : svg`<path d="M12 11v5m0-9v1"></path>`
     return html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="9"></circle>
       ${mark}

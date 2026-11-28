@@ -112,6 +112,7 @@
     "@c2n/config": "workspace:*",
     "@types/node": "26.4.1",
     "custom-elements-manifest": "2.1.0",
+    "mdn-data": "2.27.1",
     "typescript": "6.0.3"
   }
 }
